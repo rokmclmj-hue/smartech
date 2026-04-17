@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weekly Plan — 2026년 4월 13일 ~ 19일</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 24px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #1a1a2e;
+      letter-spacing: -0.5px;
+    }
+
+    header p {
+      margin-top: 6px;
+      font-size: 0.95rem;
+      color: #6b7280;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      overflow: hidden;
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead tr {
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    }
+
+    thead th {
+      padding: 16px 14px;
+      color: #ffffff;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-align: center;
+      letter-spacing: 0.4px;
+    }
+
+    thead th:first-child {
+      text-align: left;
+      padding-left: 24px;
+      width: 110px;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid #f3f4f6;
+      transition: background 0.15s;
+    }
+
+    tbody tr:last-child { border-bottom: none; }
+
+    tbody tr:hover { background: #f9fafb; }
+
+    tbody td {
+      padding: 14px 14px;
+      font-size: 0.875rem;
+      color: #374151;
+      text-align: center;
+      vertical-align: top;
+    }
+
+    tbody td:first-child {
+      text-align: left;
+      padding-left: 24px;
+      font-weight: 600;
+      color: #6b7280;
+      font-size: 0.8rem;
+      white-space: nowrap;
+    }
+
+    .task {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      margin: 2px 1px;
+      line-height: 1.4;
+    }
+
+    .task-work    { background: #ede9fe; color: #5b21b6; }
+    .task-meeting { background: #dbeafe; color: #1e40af; }
+    .task-personal{ background: #d1fae5; color: #065f46; }
+    .task-health  { background: #fef3c7; color: #92400e; }
+    .task-rest    { background: #f3f4f6; color: #6b7280; }
+
+    .day-label {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+
+    .day-date {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 400;
+      color: #9ca3af;
+      margin-top: 2px;
+    }
+
+    thead th .day-date-head {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 400;
+      opacity: 0.8;
+      margin-top: 2px;
+    }
+
+    .today-col { background: #faf5ff; }
+    .today-col td { background: #faf5ff; }
+
+    .weekend-col td:first-child { color: #ef4444 !important; }
+    .weekend-head { color: #fca5a5 !important; }
+
+    .legend {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 24px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      color: #6b7280;
+    }
+
+    .legend-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+    }
+
+    footer {
+      margin-top: 32px;
+      font-size: 0.78rem;
+      color: #9ca3af;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>📅 Weekly Plan</h1>
+    <p>2026년 4월 13일 (월) — 4월 19일 (일)</p>
+  </header>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>시간대</th>
+          <th>월<span class="day-date-head">Apr 13</span></th>
+          <th>화<span class="day-date-head">Apr 14</span></th>
+          <th>수<span class="day-date-head">Apr 15</span></th>
+          <th class="today-col">목<span class="day-date-head">Apr 16 ★</span></th>
+          <th>금<span class="day-date-head">Apr 17</span></th>
+          <th class="weekend-head">토<span class="day-date-head">Apr 18</span></th>
+          <th class="weekend-head">일<span class="day-date-head">Apr 19</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>오전<br/><span style="font-size:0.72rem;color:#aaa;">~12:00</span></td>
+          <td><span class="task task-work">주간 목표 설정</span><br/><span class="task task-meeting">팀 스탠드업</span></td>
+          <td><span class="task task-work">개발 작업</span><br/><span class="task task-work">코드 리뷰</span></td>
+          <td><span class="task task-meeting">주간 미팅</span><br/><span class="task task-work">문서 정리</span></td>
+          <td class="today-col"><span class="task task-work">기능 개발</span><br/><span class="task task-meeting">1:1 미팅</span></td>
+          <td><span class="task task-work">QA / 테스트</span><br/><span class="task task-work">버그 수정</span></td>
+          <td><span class="task task-personal">개인 공부</span><br/><span class="task task-health">운동</span></td>
+          <td><span class="task task-rest">휴식</span><br/><span class="task task-personal">독서</span></td>
+        </tr>
+        <tr>
+          <td>오후<br/><span style="font-size:0.72rem;color:#aaa;">12~18:00</span></td>
+          <td><span class="task task-work">기획 검토</span><br/><span class="task task-personal">점심 산책</span></td>
+          <td><span class="task task-work">기능 구현</span><br/><span class="task task-meeting">디자인 리뷰</span></td>
+          <td><span class="task task-work">PR 작업</span><br/><span class="task task-work">배포 준비</span></td>
+          <td class="today-col"><span class="task task-work">이슈 처리</span><br/><span class="task task-work">테스트 작성</span></td>
+          <td><span class="task task-meeting">스프린트 회고</span><br/><span class="task task-work">다음주 준비</span></td>
+          <td><span class="task task-personal">외출 / 취미</span><br/><span class="task task-personal">쇼핑</span></td>
+          <td><span class="task task-personal">가족 시간</span><br/><span class="task task-health">산책</span></td>
+        </tr>
+        <tr>
+          <td>저녁<br/><span style="font-size:0.72rem;color:#aaa;">18:00~</span></td>
+          <td><span class="task task-personal">개인 프로젝트</span></td>
+          <td><span class="task task-health">운동</span></td>
+          <td><span class="task task-personal">공부 / 독서</span></td>
+          <td class="today-col"><span class="task task-health">운동</span></td>
+          <td><span class="task task-personal">여가 / 모임</span></td>
+          <td><span class="task task-rest">충분한 휴식</span></td>
+          <td><span class="task task-work">주간 회고<br/>다음주 계획</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#5b21b6"></div>업무</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#1e40af"></div>미팅</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#065f46"></div>개인</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#92400e"></div>건강</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#6b7280"></div>휴식</div>
+  </div>
+
+  <footer>Generated by Claude Code · smartech</footer>
+
+</body>
+</html>
