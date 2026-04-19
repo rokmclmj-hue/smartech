@@ -1,26 +1,168 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-ink: #0B0B0C;
+  --color-paper: #F6F4EF;
+  --color-edred: #c00020;
+  --color-edred2: #E46F75;
+  --color-edred3: #621318;
+  --color-line: #E3DFD6;
+  --color-dim: #6A6660;
+
+  --font-sans: Inter, 'Pretendard Variable', Pretendard, ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html, body {
+  background: #F6F4EF;
+  color: #0B0B0C;
+  -webkit-font-smoothing: antialiased;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: Inter, 'Pretendard Variable', Pretendard, system-ui, sans-serif;
+  font-feature-settings: "ss01","cv11","cv02","cv03","cv04";
+  letter-spacing: -0.005em;
+}
+
+/* ── Typography utilities ── */
+.display {
+  font-family: Inter, 'Pretendard Variable', Pretendard, system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  font-style: normal;
+}
+.display .italic, .display.italic, .italic {
+  font-family: Inter, 'Pretendard Variable', Pretendard, system-ui, sans-serif;
+  font-style: normal !important;
+  font-weight: 500;
+  color: #6A6660;
+  letter-spacing: -0.035em;
+}
+.mono {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  letter-spacing: 0;
+}
+.dim { color: #6A6660; }
+.hair { border-color: #E3DFD6; }
+.tabular { font-variant-numeric: tabular-nums; }
+
+/* ── Responsive headline sizes ── */
+.hero-h1 {
+  font-size: clamp(44px, 8.4vw, 132px);
+  line-height: 0.94;
+  letter-spacing: -0.045em;
+  font-weight: 800;
+}
+.section-title {
+  font-size: clamp(32px, 4.8vw, 76px);
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+  font-weight: 700;
+}
+
+/* ── Backgrounds ── */
+.noisebg {
+  background-image:
+    radial-gradient(1200px 600px at 20% -10%, rgba(192,0,32,0.08), transparent 60%),
+    radial-gradient(900px 500px at 110% 10%, rgba(192,0,32,0.05), transparent 60%);
+}
+.red-tape { background: #c00020; color: #F6F4EF; }
+
+/* ── Marquee ── */
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.marquee-track { animation: marquee 45s linear infinite; }
+.mrqw { overflow: hidden; white-space: nowrap; }
+
+/* ── Vacuum dot animation ── */
+@keyframes vacuum-pull {
+  0%   { transform: translate(var(--x), var(--y)) scale(1); opacity: .9; }
+  70%  { opacity: .9; }
+  100% { transform: translate(0,0) scale(0.2); opacity: 0; }
+}
+.vacuum-dot {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 9999px;
+  background: #c00020;
+  animation: vacuum-pull var(--dur,3s) cubic-bezier(.2,.7,.2,1) infinite;
+  animation-delay: var(--d, 0s);
+}
+
+/* ── Rotor spinner ── */
+@keyframes rotor-spin { to { transform: rotate(360deg); } }
+.rotor { animation: rotor-spin 14s linear infinite; transform-origin: 50% 50%; }
+.rotor-fast { animation: rotor-spin 4s linear infinite; transform-origin: 50% 50%; }
+
+/* ── Industry cards ── */
+.ind-card {
+  transition: background-color .35s ease, color .35s ease, border-color .35s ease;
+}
+.ind-card:hover, .ind-card.open {
+  background: #0B0B0C;
+  color: #F6F4EF;
+  border-color: #0B0B0C;
+}
+.ind-card:hover .ind-num, .ind-card.open .ind-num { color: #c00020; }
+.ind-card .ind-body { display: none; }
+.ind-card.open .ind-body { display: block; }
+
+/* ── Scroll reveal ── */
+.reveal { opacity: 0; transform: translateY(14px); transition: opacity .7s ease, transform .7s ease; }
+.reveal.in { opacity: 1; transform: translateY(0); }
+
+/* ── Underline red ── */
+.underline-red {
+  background-image: linear-gradient(#c00020,#c00020);
+  background-size: 100% 1px;
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+}
+
+/* ── Text stroke ── */
+.stroke-ink { -webkit-text-stroke: 1px #0B0B0C; color: transparent; }
+
+/* ── Marching ants border ── */
+@keyframes march { to { background-position: 12px 0, -12px 0, 0 12px, 0 -12px; } }
+.march-border {
+  background:
+    linear-gradient(90deg,#0B0B0C 50%, transparent 0) 0 0/12px 1px repeat-x,
+    linear-gradient(90deg,#0B0B0C 50%, transparent 0) 0 100%/12px 1px repeat-x,
+    linear-gradient(0deg,#0B0B0C 50%, transparent 0) 0 0/1px 12px repeat-y,
+    linear-gradient(0deg,#0B0B0C 50%, transparent 0) 100% 0/1px 12px repeat-y;
+  animation: march 1.2s linear infinite;
+}
+
+/* ── Chip ── */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #0B0B0C;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: background .2s, color .2s;
+}
+.chip:hover { background: #0B0B0C; color: #F6F4EF; }
+.chip.active { background: #0B0B0C; color: #F6F4EF; }
+
+/* ── Counter tick ── */
+.tick { display: inline-block; min-width: 1ch; }
+
+/* ── Pump ring ── */
+.pump-ring { box-shadow: inset 0 0 0 1px #0B0B0C; }
+
+/* ── Grain overlay ── */
+.grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(0,0,0,.05) 1px, transparent 1px);
+  background-size: 3px 3px;
+  opacity: .35;
+  mix-blend-mode: multiply;
 }
