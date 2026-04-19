@@ -275,29 +275,62 @@ export default function Home() {
       <section className="border-b hair">
         <div className="grid grid-cols-1 lg:grid-cols-2 divide-x hair">
           {/* B2B */}
-          <div className="bg-ink text-paper p-10 md:p-16">
-            <div className="mono text-[11px] opacity-70">— 04a · B2B</div>
-            <h3 className="display text-[56px] md:text-[72px] leading-[0.95] mt-4">
-              딜러 · OEM · 법인<br />
-              <span className="italic text-edred">전용 견적</span>
-            </h3>
-            <p className="mt-8 text-[14.5px] leading-[1.75] opacity-90 max-w-[44ch]">
-              발주 규모와 거래 이력에 따라 가격 조건이 달라집니다. <span className="text-edred font-semibold">Edwards</span> 코리아에서
-              5년을 재직한 대표가 기술 컨설팅부터 납기 조율까지 직접 받습니다.
-              소모품과 메이저 파트는 국내 재고로 상시 확보합니다.
-            </p>
-            <ul className="mt-8 space-y-2 text-[13px] opacity-90">
-              <li className="flex gap-3"><span className="text-edred">→</span> 정품 공식 유통 경로</li>
-              <li className="flex gap-3"><span className="text-edred">→</span> 등급별 가격표 (승인 후 노출)</li>
-              <li className="flex gap-3"><span className="text-edred">→</span> 사양서 기반 모델 제안</li>
-            </ul>
-            <div className="mt-10 flex flex-wrap gap-3">
-              <Link href="/auth/register" className="bg-edred text-paper px-6 py-4 text-sm hover:bg-edred2 transition-colors">
-                B2B 회원가입 → 가격 확인
-              </Link>
-              <Link href="#contact" className="border border-paper/30 px-6 py-4 text-sm hover:bg-paper hover:text-ink transition-colors">
-                견적 직접 문의 →
-              </Link>
+          <div className="bg-ink text-paper p-10 md:p-16 relative overflow-hidden">
+            {/* ghost index — adds right-side visual weight */}
+            <div aria-hidden className="hidden lg:block absolute -top-6 -right-6 display text-[220px] leading-none tracking-[-0.05em] opacity-[0.04] select-none pointer-events-none">
+              04a
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 relative">
+              {/* Left — headline + body + CTAs */}
+              <div className="lg:col-span-7">
+                <div className="mono text-[11px] opacity-70">— 04a · B2B</div>
+                <h3 className="display text-[56px] md:text-[72px] leading-[0.95] mt-4">
+                  딜러 · OEM · 법인<br />
+                  <span className="italic text-edred">전용 견적</span>
+                </h3>
+                <p className="mt-8 text-[14.5px] leading-[1.75] opacity-90">
+                  발주 규모와 거래 이력에 따라 가격 조건이 달라집니다. <span className="text-edred font-semibold">Edwards</span> 코리아에서
+                  5년을 재직한 대표가 기술 컨설팅부터 납기 조율까지 직접 받습니다.
+                  소모품과 메이저 파트는 국내 재고로 상시 확보합니다.
+                </p>
+                <div className="mt-10 flex flex-wrap gap-3">
+                  <Link href="/auth/register" className="bg-edred text-paper px-6 py-4 text-sm hover:bg-edred2 transition-colors">
+                    B2B 회원가입 → 가격 확인
+                  </Link>
+                  <Link href="#contact" className="border border-paper/30 px-6 py-4 text-sm hover:bg-paper hover:text-ink transition-colors">
+                    견적 직접 문의 →
+                  </Link>
+                </div>
+              </div>
+
+              {/* Right — feature panel */}
+              <div className="lg:col-span-5 lg:border-l lg:border-paper/15 lg:pl-8 flex flex-col justify-center">
+                <div className="mono text-[10px] opacity-60 tracking-[0.18em] uppercase mb-5">What You Get</div>
+                <ul className="space-y-5 text-[13.5px]">
+                  <li className="flex gap-3 items-start">
+                    <span className="text-edred shrink-0 mt-0.5">→</span>
+                    <div>
+                      <div>정품 공식 유통 경로</div>
+                      <div className="text-[11px] opacity-55 mt-1"><span className="text-edred font-semibold">Edwards</span> 코리아 인증 대리점</div>
+                    </div>
+                  </li>
+                  <li className="flex gap-3 items-start">
+                    <span className="text-edred shrink-0 mt-0.5">→</span>
+                    <div>
+                      <div>등급별 가격표</div>
+                      <div className="text-[11px] opacity-55 mt-1">승인 완료 후 자동 노출</div>
+                    </div>
+                  </li>
+                  <li className="flex gap-3 items-start">
+                    <span className="text-edred shrink-0 mt-0.5">→</span>
+                    <div>
+                      <div>사양서 기반 모델 제안</div>
+                      <div className="text-[11px] opacity-55 mt-1">공정 요건에 맞춘 구성</div>
+                    </div>
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
 
