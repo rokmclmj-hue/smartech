@@ -1,0 +1,100 @@
+"use client";
+import { useState } from "react";
+import Link from "next/link";
+
+const ITEMS = [
+  { category: "오일펌프(소형 RV)",        code: "RV 시리즈",           title: "오일 로터리 베인 펌프 (소형)",       image: "/images/products/rv.jpeg" },
+  { category: "오일펌프(소형 E2M)",        code: "E2M 소형",            title: "오일 로터리 베인 펌프 (E2M 소형)",   image: "/images/products/e2m.png" },
+  { category: "오일펌프(중대형 E2M)",      code: "E2M 중대형",          title: "오일 로터리 베인 펌프 (E2M 중대형)", image: "/images/products/e2m.png" },
+  { category: "오일펌프(중대형 E2S)",      code: "E2S 시리즈",          title: "오일 로터리 베인 펌프 (E2S)",        image: "/images/products/e2s.png" },
+  { category: "오일펌프(nES)",             code: "nES 시리즈",           title: "오일 로터리 베인 펌프 (nES)",        image: "/images/products/nes.jpeg" },
+  { category: "부스터펌프(EH)",            code: "EH 시리즈",            title: "루츠 부스터 펌프",                   image: "/images/products/eh.jpeg" },
+  { category: "스크롤펌프(소형 nXDS)",     code: "nXDS 시리즈",          title: "드라이 스크롤 펌프 (소형 nXDS)",    image: "/images/products/xds.jpeg" },
+  { category: "스크롤펌프(중형 XDS)",      code: "XDS 시리즈",           title: "드라이 스크롤 펌프 (중형 XDS)",     image: "/images/products/xds.jpeg" },
+  { category: "산업용드라이펌프(GXS)",     code: "GXS 시리즈",           title: "산업용 드라이 스크류",               image: "/images/products/gxs.jpeg" },
+  { category: "산업용드라이펌프(EXS)",     code: "EXS 시리즈",           title: "부식성 환경 드라이 스크류",          image: "/images/products/exs.jpeg" },
+  { category: "반도체드라이펌프(iXH)",     code: "iXH 시리즈",           title: "반도체 드라이 펌프 (iXH)",           image: "/images/products/ixh-ixl.jpeg" },
+  { category: "반도체드라이펌프(nXRi)",    code: "nXRi 시리즈",          title: "반도체 드라이 펌프 (nXRi)",          image: "/images/products/nxri.jpeg" },
+  { category: "반도체드라이펌프(iXL)",     code: "iXL 시리즈",           title: "반도체 드라이 펌프 (iXL)",           image: "/images/products/ixh-ixl.jpeg" },
+  { category: "터보펌프(nEXT)",            code: "nEXT 시리즈",          title: "터보분자 펌프 (nEXT)",               image: "/images/products/next.png" },
+  { category: "터보펌프(nEXT Station)",    code: "nEXT Station",         title: "터보 펌핑 스테이션",                 image: "/images/products/t-station.jpeg" },
+  { category: "터보펌프(STP)",             code: "STP Maglev",           title: "터보분자 펌프 (STP Maglev)",         image: "/images/products/stp.png" },
+  { category: "헬륨리크디텍터(ELD500)",    code: "ELD500",               title: "헬륨 리크 디텍터",                   image: "/images/products/eld500.jpeg" },
+  { category: "저진공게이지(APG200)",      code: "APG200",               title: "저진공 피라니 게이지",               image: "/images/products/gauges-indirect.png" },
+  { category: "고진공게이지(AIM200)",      code: "AIM200",               title: "고진공 이온화 게이지",               image: "/images/products/gauges-indirect.png" },
+  { category: "복합진공게이지(WRG200)",    code: "WRG200",               title: "복합 진공 게이지",                   image: "/images/products/gauges-indirect.png" },
+  { category: "디스플레이게이지(P4/P5)",   code: "P4 · P5",              title: "디스플레이 게이지",                  image: "/images/products/gauges-mechanical.png" },
+  { category: "컨트롤러(TIC)",             code: "TIC 시리즈",           title: "터보 인터페이스 컨트롤러",           image: "/images/products/controllers.png" },
+  { category: "컨트롤러(ADC)",             code: "ADC 시리즈",           title: "액티브 디지털 컨트롤러",             image: "/images/products/controllers.png" },
+  { category: "미스트필터(EMF)",           code: "EMF 시리즈",           title: "오일 미스트 필터",                   image: "/images/products/hardware.png" },
+  { category: "진공펌프오일(Ultra19)",     code: "Ultra 19",             title: "진공 펌프 전용 오일",                image: "/images/products/hardware.png" },
+  { category: "피팅/액세서리",             code: "KF · ISO · NW",        title: "피팅 & 액세서리",                    image: "/images/products/hardware.png" },
+];
+
+const INITIAL = 16;
+
+export default function ProductCategories() {
+  const [expanded, setExpanded] = useState(false);
+  const visible = expanded ? ITEMS : ITEMS.slice(0, INITIAL);
+
+  return (
+    <div>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+        {visible.map((item, i) => (
+          <Link
+            key={item.category}
+            href={`/products?category=${encodeURIComponent(item.category)}`}
+            className="group border hair bg-white p-5 hover:bg-ink hover:text-paper transition-colors overflow-hidden"
+          >
+            <div className="flex justify-between text-[10.5px] mono opacity-60">
+              <span>{String(i + 1).padStart(2, "0")} / {ITEMS.length}</span>
+              <span>{item.code}</span>
+            </div>
+
+            <div className="mt-4 mb-4 aspect-[4/3] relative overflow-hidden border hair bg-[#F6F4EF]">
+              <img
+                src={item.image}
+                alt={item.title}
+                className="absolute inset-0 w-full h-full object-contain group-hover:scale-105 transition-transform"
+                loading="lazy"
+              />
+            </div>
+
+            <div className="display text-[18px] leading-[1.2] line-clamp-2">{item.title}</div>
+            <div className="mono text-[11px] opacity-60 mt-1">{item.category}</div>
+
+            <div className="mt-3 text-[11px] opacity-70 group-hover:opacity-100">제품 보기 →</div>
+          </Link>
+        ))}
+      </div>
+
+      {!expanded && (
+        <div className="mt-8 flex items-center gap-4">
+          <button
+            onClick={() => setExpanded(true)}
+            className="inline-flex items-center gap-2 border hair px-6 py-3 text-sm hover:bg-ink hover:text-paper transition-colors"
+          >
+            전체 보기 ({ITEMS.length - INITIAL}개 더)
+          </button>
+          <Link href="/products" className="text-[12.5px] underline-red pb-0.5">
+            전체 카탈로그 →
+          </Link>
+        </div>
+      )}
+
+      {expanded && (
+        <div className="mt-8 flex items-center gap-4">
+          <button
+            onClick={() => setExpanded(false)}
+            className="inline-flex items-center gap-2 border hair px-6 py-3 text-sm hover:bg-ink hover:text-paper transition-colors"
+          >
+            접기 ↑
+          </button>
+          <Link href="/products" className="text-[12.5px] underline-red pb-0.5">
+            전체 카탈로그 →
+          </Link>
+        </div>
+      )}
+    </div>
+  );
+}

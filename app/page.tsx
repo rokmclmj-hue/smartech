@@ -1,17 +1,17 @@
 import Link from "next/link";
 import HeroChat from "@/components/HeroChat";
-import FeaturedProducts from "@/components/FeaturedProducts";
 import Industries from "@/components/Industries";
 import Counter from "@/components/Counter";
 import Reveal from "@/components/Reveal";
 import HeroParticles from "@/components/HeroParticles";
 import RotatingHero from "@/components/RotatingHero";
 import ProductShowcase from "@/components/ProductShowcase";
+import ProductCategories from "@/components/ProductCategories";
 
-function hiEd(text: string) {
+function hiEd(text: string, white = false) {
   return text.split(/(\bEdwards\b)/).map((p, i) =>
     p === "Edwards"
-      ? <span key={i} className="text-edred font-semibold">Edwards</span>
+      ? <span key={i} className={white ? "text-white font-semibold" : "text-edred font-semibold"}>Edwards</span>
       : p
   );
 }
@@ -188,7 +188,7 @@ export default function Home() {
               <div
                 key={i}
                 className={`border-r border-b hair p-8 group hover:bg-ink hover:text-paper transition-colors ${
-                  i === STEPS.length - 1 ? "bg-edred text-paper hover:bg-ink" : ""
+                  i === 2 ? "bg-edred text-paper hover:bg-ink" : ""
                 }`}
               >
                 <div className="flex items-start justify-between">
@@ -196,7 +196,7 @@ export default function Home() {
                   <div className="mono text-[11px] opacity-70">{i === STEPS.length - 1 ? "∞" : "→"}</div>
                 </div>
                 <div className="display text-[44px] leading-none mt-4">{step.title}</div>
-                <p className="mt-6 text-[13.5px] leading-[1.7] opacity-90 max-w-[32ch]">{hiEd(step.desc)}</p>
+                <p className="mt-6 text-[13.5px] leading-[1.7] opacity-90 max-w-[32ch]">{hiEd(step.desc, i === 2)}</p>
               </div>
             ))}
           </div>
@@ -208,13 +208,91 @@ export default function Home() {
 
       {/* ═══════════════ PRODUCT CATEGORIES ═══════════════ */}
       <section id="products" className="py-28 border-b hair">
+        {/* Analog vacuum gauge — instrument panel style */}
+        <div className="border-b hair bg-[#0a0a0a] text-paper overflow-hidden" style={{ height: 88 }}>
+          <div className="max-w-[1400px] mx-auto px-6 h-full flex items-center gap-6">
+
+            {/* Left endpoint label */}
+            <div className="shrink-0 text-right leading-none">
+              <div className="mono text-[8px] tracking-[0.22em] opacity-30 uppercase mb-0.5">ATM</div>
+              <div className="mono text-[11px] opacity-45 tabular">10³ mbar</div>
+            </div>
+
+            {/* Scale track */}
+            <div className="relative flex-1" style={{ height: 88 }}>
+
+              {/* ── Zone labels — top row ── */}
+              {([
+                { pct: 20, label: "LOW",        red: false },
+                { pct: 45, label: "MEDIUM",     red: false },
+                { pct: 68, label: "HIGH",        red: false },
+                { pct: 88, label: "ULTRA HIGH",  red: true  },
+              ] as { pct: number; label: string; red: boolean }[]).map(({ pct, label, red }) => (
+                <span
+                  key={label}
+                  className={`absolute top-[10px] -translate-x-1/2 mono text-[9px] tracking-[0.14em] select-none ${red ? "text-edred font-bold" : "text-paper/35"}`}
+                  style={{ left: `${pct}%` }}
+                >
+                  {label}
+                </span>
+              ))}
+
+              {/* ── Major tick marks at label positions ── */}
+              {[20, 45, 68, 88].map((pct) => (
+                <div
+                  key={pct}
+                  className="absolute w-px bg-paper/25"
+                  style={{ left: `${pct}%`, top: "26px", height: "20px", transform: "translateX(-50%)" }}
+                />
+              ))}
+
+              {/* ── Minor tick marks (CSS repeating) ── */}
+              <div
+                className="gauge-minor-ticks absolute left-0 right-0"
+                style={{ top: "34px", height: "8px" }}
+              />
+
+              {/* ── Zone color strip ── */}
+              <div
+                className="gauge-zone-strip absolute left-0 right-0"
+                style={{ top: "46px", height: "5px" }}
+              />
+
+              {/* ── Main rail line ── */}
+              <div
+                className="absolute left-0 right-0 h-px bg-paper/12"
+                style={{ top: "48px" }}
+              />
+
+              {/* ── Animated glow track ── */}
+              <div
+                className="gauge-track-fill gauge-track-fill--lg"
+                style={{ top: "48px" }}
+              />
+
+              {/* ── Animated needle ── */}
+              <div
+                className="gauge-needle gauge-needle--lg"
+                style={{ top: "16px", height: "56px" }}
+              />
+
+            </div>
+
+            {/* Right endpoint label */}
+            <div className="shrink-0 leading-none">
+              <div className="mono text-[8px] tracking-[0.22em] opacity-30 uppercase mb-0.5">UHV</div>
+              <div className="mono text-[11px] opacity-45 tabular">10⁻¹⁰ mbar</div>
+            </div>
+
+          </div>
+        </div>
+
         <div className="max-w-[1400px] mx-auto px-6">
           <div className="grid grid-cols-12 gap-6 mb-14">
             <div className="col-span-12 lg:col-span-6">
               <div className="mono text-[11px] dim mb-4">— 03 · PRODUCT LINEUP</div>
               <h2 className="section-title display">
-                <span className="whitespace-nowrap"><span className="text-edred">Edwards</span> 전 라인업,</span><br />
-                <span className="italic text-edred">한 지붕 아래</span>.
+                주요 제품<span className="text-edred">.</span>
               </h2>
             </div>
             <div className="col-span-12 lg:col-span-5 lg:col-start-8 mt-4">
@@ -225,49 +303,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {CATS.map((c, i) => (
-              <Link
-                key={i}
-                href="/products"
-                className="group relative border hair bg-white p-6 hover:bg-ink hover:text-paper transition-colors overflow-hidden"
-              >
-                <div className="flex justify-between items-start">
-                  <div className="mono text-[10.5px] opacity-60">{String(i + 1).padStart(2, "0")} / {CATS.length}</div>
-                  <div className="mono text-[10.5px] opacity-60">{c.code}</div>
-                </div>
-                <div className="mt-5 mb-6 aspect-[4/3] relative overflow-hidden border hair bg-[#F6F4EF]">
-                  <img
-                    src={c.image}
-                    alt={c.title}
-                    className="absolute inset-0 w-full h-full object-contain"
-                    loading="lazy"
-                  />
-                </div>
-                <div className="display text-[26px] leading-[1.1]">{c.title}</div>
-                <div className="mt-2 text-[13.5px] leading-[1.5] opacity-90">{c.hl}</div>
-                <div className="mt-3 mono text-[11px] opacity-70">{c.sub}</div>
-                <p className="mt-3 text-[12.5px] leading-[1.6] opacity-80">{hiEd(c.body)}</p>
-                <div className="mt-4 pt-3 border-t border-dashed hair text-[11px] opacity-70">
-                  <span className="mono">APPS — </span>{c.apps}
-                </div>
-              </Link>
-            ))}
-          </div>
-
-          {/* Featured products */}
-          <div className="mt-20">
-            <div className="flex items-end justify-between mb-6 border-b hair pb-4">
-              <div>
-                <div className="mono text-[11px] dim">— FEATURED</div>
-                <div className="display text-[32px] leading-none mt-1">주요 제품</div>
-              </div>
-              <Link href="/products" className="text-[12.5px] underline-red pb-0.5">
-                전체 카탈로그 →
-              </Link>
-            </div>
-            <FeaturedProducts />
-          </div>
+          <ProductCategories />
         </div>
       </section>
 
@@ -545,15 +581,15 @@ function HeroClock() {
 const STEPS = [
   {
     title: "기술 컨설팅",
-    desc: "어떤 공정에 어느 진공 영역이 필요한지부터 함께 분석합니다. Edwards 코리아 5년의 기술영업 경험으로 쌓은 현장 감각으로 최적 사양을 정의합니다.",
+    desc: "어떤 공정에 어느 진공 영역이 필요한지부터 함께 분석합니다. 축적된 기술 노하우와 다양한 산업 현장 경험을 바탕으로, 고객의 공정 조건에 가장 알맞은 최적의 솔루션을 제안합니다.",
   },
   {
     title: "제품 선정",
-    desc: "오일·드라이·터보·부스터 전 라인업 중 공정 요건에 맞는 구성을 제안합니다. 과사양과 과소사양 모두 피합니다.",
+    desc: "오일·드라이·터보·부스터 전 라인업 중 공정 요건에 정확히 부합하는 최적 구성을 제안합니다. 불필요한 비용 없이, 공정 신뢰성을 충족하는 사양을 찾습니다.",
   },
   {
-    title: "공식 공급",
-    desc: "Edwards 한국 공식 대리점으로서 정품을 정상 유통 경로로 공급합니다. 정품 여부가 걱정되지 않습니다.",
+    title: "정품제품공급",
+    desc: "스마텍은 Edwards 정품만을 공식 유통 경로를 통해 공급합니다. 제품의 출처와 품질, 보증까지 책임집니다.",
   },
   {
     title: "설치 & 시운전",
@@ -564,110 +600,8 @@ const STEPS = [
     desc: "PM 스케줄 수립부터 현장 서비스 투입까지. 장비가 멈추기 전에 스마텍이 먼저 움직입니다.",
   },
   {
-    title: "정품 부품 즉시 조달",
-    desc: "소모품과 메이저 파트는 국내 재고로 상시 보유해, 해외 발주 대기 없이 바로 나갑니다. 그 외 부품도 최단 납기로 직접 챙겨 드립니다.",
-  },
-];
-
-const CATS = [
-  {
-    code: "RV · E2M · E2S · nES",
-    title: "오일 로터리 베인 펌프",
-    hl: "전 세계 40만 대. 오일 로터리 진공의 기준점.",
-    sub: "3–12 m³/h · 48 dB(A) · 수증기 220 g/hr",
-    body: "듀얼 모드 선택과 0.4초 안티 석백 보호로 공정 재현성과 장비 수명을 동시에 잡습니다.",
-    apps: "분석 장비 · 진공 오븐 · 코팅 · 화학·제약",
-    image: "/images/products/rv.jpeg",
-  },
-  {
-    code: "nXDS · XDS",
-    title: "드라이 스크롤 펌프",
-    hl: "오일 없이, 오염 없이.",
-    sub: "6–20 m³/h · 52 dB(A) 미만 · 팁씰 ×2",
-    body: "52 dB(A) 미만 정숙 운전 — 교수님 방 옆 실험실에 두어도 괜찮습니다. Edwards 독자 팁씰 설계.",
-    apps: "질량분석기 · 광학 코팅 · 반도체 연구 · 동결건조",
-    image: "/images/products/xds.jpeg",
-  },
-  {
-    code: "EH 시리즈",
-    title: "루츠 부스터 펌프",
-    hl: "주펌프가 닿지 못하는 곳까지.",
-    sub: "중진공 1–100 mbar · 처리량 ×수십",
-    body: "주펌프와 조합하면 중진공 영역에서 처리량이 수십 배 향상됩니다.",
-    apps: "화학 반응기 · 금속 열처리 · 대형 진공 챔버",
-    image: "/images/products/eh.jpeg",
-  },
-  {
-    code: "GXS",
-    title: "산업용 드라이 스크류",
-    hl: "소음이 없고, 이물이 없고, 멈추지 않습니다.",
-    sub: "비접촉 장수명 씰 · 온보드 자동 제어",
-    body: "자동 시작·정지·세척·절전 기능이 내장되어 별도 외부 제어 시스템이 필요 없습니다.",
-    apps: "화학 공정 · 제약·바이오 · 식품 진공 포장",
-    image: "/images/products/gxs.jpeg",
-  },
-  {
-    code: "EXS",
-    title: "부식성 환경 드라이 스크류",
-    hl: "소음이 없고, 이물질이 없고, 멈추지 않습니다.",
-    sub: "EXS160–750 · 반응성 가스 환경 특화",
-    body: "GXS와 동일 기술 기반. 화학적 침식이 빈번한 공정에서도 장기간 안정 성능.",
-    apps: "석유화학 · 에칭·세정 · 합성 반응기",
-    image: "/images/products/exs.jpeg",
-  },
-  {
-    code: "iXH · nXRi · iXL",
-    title: "반도체 드라이 펌프",
-    hl: "공정이 멈추면 라인 전체가 멈춥니다.",
-    sub: "CVD · Etch · 이온주입 · 예지보전 내장",
-    body: "각 공정의 요구 조건을 개별 최적화한 전용 라인업. 비계획 다운타임을 사전 차단.",
-    apps: "반도체 · OLED 증착 · 확산·산화",
-    image: "/images/products/ixh-ixl.jpeg",
-  },
-  {
-    code: "nEXT",
-    title: "터보분자펌프 — nEXT",
-    hl: "ITER 핵융합실험로가 선택했습니다.",
-    sub: "완전 자기부상 · 방사선 내성",
-    body: "회전체가 접촉하지 않아 탄화수소 오염 원천 차단. 초저진동으로 정밀 분석 보호.",
-    apps: "핵융합 · XPS · 전자빔 · 우주 시뮬레이션",
-    image: "/images/products/next.png",
-  },
-  {
-    code: "STP Maglev",
-    title: "터보분자펌프 — STP Maglev",
-    hl: "10⁻¹⁰ mbar 세계. 챔버 위에 바로 올립니다.",
-    sub: "300–4,500 l/s · 컨트롤러+전원 통합",
-    body: "온-챔버 솔루션. 별도 전장 랙 불필요, 설계 자유도 ↑, 고유량 에너지 32% 절감.",
-    apps: "이온주입 · 전자빔 용접 · 가속기 · 우주부품 인증",
-    image: "/images/products/next-m.jpeg",
-  },
-  {
-    code: "APG · AIM · WRG · P4/P5",
-    title: "게이지",
-    hl: "대기압부터 극한 고진공까지 읽습니다.",
-    sub: "피라니 · 이온화 · 복합 · 디스플레이",
-    body: "APG200 피라니, AIM200 이온화, WRG200 복합 센서, P4/P5 디스플레이 — 공정의 전 구간 커버.",
-    apps: "공정 인터록 · 펌프 검증 · 연구 측정",
-    image: "/images/products/gauges-indirect.png",
-  },
-  {
-    code: "ELD500",
-    title: "헬륨 리크 디텍터",
-    hl: "10⁻¹² mbar·l/s. 사람이 못 찾는 누설을 잡습니다.",
-    sub: "스니퍼 + 챔버 리크 · 교육 + 캘리브 기본",
-    body: "현장 사용법 교육과 정기 캘리브레이션 서비스를 기본 제공합니다.",
-    apps: "자동차 · 의료기기 · 냉매 · 항공우주 · 반도체",
-    image: "/images/products/eld500.jpeg",
-  },
-  {
-    code: "EMF · Ultra 19 · KF/ISO",
-    title: "소모품 & 액세서리",
-    hl: "정품이 아니면, 성능을 보장할 수 없습니다.",
-    sub: "EMF 오일 미스트 · 전용 오일 · KF/ISO 피팅",
-    body: "Edwards 정품 소모품을 국내 재고로 보유. 정품 사용이 보증의 전제 조건입니다.",
-    apps: "전 라인 공통 유지보수",
-    image: "/images/products/hardware.png",
+    title: "정품수리부품공급",
+    desc: "소모품과 메이저 파트는 국내 재고를 보유하고 있어 최단 납기로 공급 가능합니다. 그 외 부품도 직접 챙겨 드립니다.",
   },
 ];
 

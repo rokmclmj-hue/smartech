@@ -223,6 +223,94 @@ body {
   background: linear-gradient(to right, rgba(246,244,239,0.85) 0%, rgba(246,244,239,0) 100%);
 }
 
+/* ── Analog gauge — minor tick marks (repeating, every 2%) ── */
+.gauge-minor-ticks {
+  background-image: repeating-linear-gradient(
+    to right,
+    rgba(255,255,255,0.22) 0px, rgba(255,255,255,0.22) 1px,
+    transparent 1px, transparent 2%
+  );
+}
+/* ── Analog gauge — zone color arc ── */
+.gauge-zone-strip {
+  background: linear-gradient(
+    to right,
+    rgba(0,210,90,0.55)   0%,
+    rgba(130,210,0,0.45) 22%,
+    rgba(230,140,0,0.50) 50%,
+    rgba(200,0,30,0.70)  75%,
+    rgba(255,0,40,0.90) 100%
+  );
+  border-radius: 1px;
+}
+
+/* ── Analog sweep — gentle slowdown at LOW (20%) and MEDIUM (45%), no backtrack ── */
+@keyframes gauge-sweep-analog {
+  0%   { left: -3%;   opacity: 0; }
+  2%   { left: -1%;   opacity: 1; }
+  17%  { left: 16%;   }   /* approaching LOW, normal pace */
+  22%  { left: 20%;   }   /* slow in */
+  27%  { left: 22%;   }   /* brief hold — barely moves */
+  31%  { left: 25%;   }   /* resume */
+  43%  { left: 41%;   }   /* approaching MEDIUM */
+  48%  { left: 45%;   }   /* slow in */
+  53%  { left: 47%;   }   /* brief hold */
+  57%  { left: 50%;   }   /* resume */
+  88%  { left: 102%;  opacity: 1; }
+  93%  { opacity: 0;  }
+  100% { left: 102%;  opacity: 0; }
+}
+@keyframes gauge-track-analog {
+  0%   { width: 0%;   opacity: 0.9; }
+  17%  { width: 16%;  }
+  22%  { width: 20%;  }
+  27%  { width: 22%;  }
+  31%  { width: 25%;  }
+  43%  { width: 41%;  }
+  48%  { width: 45%;  }
+  53%  { width: 47%;  }
+  57%  { width: 50%;  }
+  88%  { width: 100%; opacity: 0; }
+  100% { width: 100%; opacity: 0; }
+}
+
+/* ── Large-section gauge needle (top/height set via inline style in JSX) ── */
+.gauge-needle--lg {
+  width: 2px;
+  background: linear-gradient(
+    to bottom,
+    transparent  0%,
+    rgba(255,40,80,0.5) 18%,
+    #ff0028      38%,
+    #ffffff      50%,
+    #ff0028      62%,
+    rgba(255,40,80,0.5) 82%,
+    transparent 100%
+  );
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.15),
+    0 0 20px rgba(255,0,40,1),
+    0 0 45px rgba(255,0,40,0.7),
+    0 0  8px #fff;
+  animation-name: gauge-sweep-analog;
+  animation-duration: 6s;
+  animation-timing-function: linear;
+}
+/* ── Large-section gauge track fill (top set via inline style in JSX) ── */
+.gauge-track-fill--lg {
+  height: 3px;
+  background: linear-gradient(
+    to right,
+    #ff2040     0%,
+    rgba(255,0,40,0.55) 60%,
+    transparent 100%
+  );
+  box-shadow: 0 0 10px rgba(255,0,40,0.9), 0 0 24px rgba(255,0,40,0.4);
+  animation-name: gauge-track-analog;
+  animation-duration: 6s;
+  animation-timing-function: linear;
+}
+
 /* ── Edwards brand mark — inline wordmark (tight-cropped image via public/edwards-wordmark.png) ── */
 .ed-mark {
   display: inline-block;
