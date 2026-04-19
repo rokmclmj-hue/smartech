@@ -43,3 +43,8 @@ next-env.d.ts
 # database
 *.db
 *.db-journal
+
+# large archives / local-only junk
+*.zip
+app/unnamed.png
+진공펌프활용분야/

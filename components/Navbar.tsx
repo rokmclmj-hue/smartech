@@ -3,21 +3,6 @@ import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { useState } from "react";
 
-const TAPE_ITEMS = [
-  "● OFFICIAL DISTRIBUTOR — EDWARDS VACUUM KR",
-  "│",
-  "2006 — SINCE HQ EDWARDS VACUUM",
-  "│",
-  "40만 대+ GLOBAL RV PUMP SHIPPED",
-  "│",
-  "10⁻¹⁰ mbar STP MAGLEV",
-  "│",
-  "RV · E2M · GXS · EXS · nXDS · STP · nEXT",
-  "│",
-  "서울 · 화성 · 평택 · 이천 · 청주 · 울산",
-  "│",
-];
-
 export default function Navbar() {
   const { data: session } = useSession();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -25,31 +10,45 @@ export default function Navbar() {
 
   return (
     <>
-      {/* TOP TAPE */}
-      <div className="red-tape text-[11px] mono tracking-wider">
-        <div className="mrqw">
-          <div className="marquee-track inline-flex gap-12 py-2.5 whitespace-nowrap will-change-transform">
-            {[...TAPE_ITEMS, ...TAPE_ITEMS].map((item, i) => (
-              <span key={i}>{item}</span>
-            ))}
+      {/* TOP TAPE — vacuum pressure gauge sweep */}
+      <div className="red-tape relative overflow-hidden" style={{ height: 36 }}>
+        <div className="max-w-[1400px] mx-auto px-4 md:px-6 h-full flex items-center gap-2 md:gap-3 text-[10px] mono tracking-[0.18em] uppercase">
+          <span className="shrink-0 text-paper/85 whitespace-nowrap">
+            <span className="text-paper/55">ATM</span> · 10³ mbar
+          </span>
+          <span className="hidden sm:inline text-paper/25">│</span>
+          <div className="relative flex-1 h-full">
+            <div className="absolute left-0 right-0 top-1/2 h-px bg-paper/20 -translate-y-1/2" />
+            <div className="gauge-track-fill gauge-track-fill--light" />
+            <div className="gauge-needle gauge-needle--light" />
+            <div className="absolute inset-0 hidden sm:flex items-center justify-between px-1">
+              <span className="bg-edred px-2 text-paper/60">LOW</span>
+              <span className="bg-edred px-2 text-paper/60">MEDIUM</span>
+              <span className="bg-edred px-2 text-paper/60">HIGH</span>
+              <span className="bg-edred px-2 text-paper font-bold">ULTRA HIGH</span>
+            </div>
           </div>
+          <span className="hidden sm:inline text-paper/25">│</span>
+          <span className="shrink-0 text-paper/85 whitespace-nowrap">
+            <span className="text-paper/55">UHV</span> · 10⁻¹⁰ mbar
+          </span>
         </div>
       </div>
 
       {/* STICKY HEADER */}
       <header className="sticky top-0 z-40 border-b hair bg-paper/90 backdrop-blur">
-        <div className="max-w-[1400px] mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-4 leading-none">
-            <div className="display text-[22px] tracking-[-0.045em]">
+        <div className="max-w-[1400px] mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-3 md:gap-4 leading-none">
+            <div className="display text-[22px] md:text-[25.3px] tracking-[-0.045em]">
               Smartech<span style={{ color: "#c00020" }}>.</span>
             </div>
-            <span className="block w-px h-6 bg-ink/60" aria-hidden />
-            <div className="text-[10px] mono tracking-[0.22em] dim uppercase">
+            <span className="hidden sm:block w-px h-6 bg-ink/60" aria-hidden />
+            <div className="hidden sm:block text-[10px] mono tracking-[0.22em] dim uppercase">
               Vacuum · Since 2011
             </div>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-8 text-[13.5px]">
+          <nav className="hidden md:flex items-center gap-8 text-[16px] font-medium">
             <Link href="/#industries" className="hover:text-edred transition-colors">산업 활용</Link>
             <Link href="/#products" className="hover:text-edred transition-colors">제품 라인업</Link>
             <Link href="/#solution" className="hover:text-edred transition-colors">토탈 솔루션</Link>

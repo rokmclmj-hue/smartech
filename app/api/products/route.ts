@@ -8,8 +8,9 @@ export async function GET(req: NextRequest) {
   const q = searchParams.get("q") ?? "";
   const category = searchParams.get("category") ?? "";
   const importantOnly = searchParams.get("important") === "true";
+  const diverse = searchParams.get("diverse") === "true";
   const page = parseInt(searchParams.get("page") ?? "1");
-  const limit = parseInt(searchParams.get("limit") ?? "24");
+  const limit = Math.min(parseInt(searchParams.get("limit") ?? "24"), 2000);
 
   const where: any = {};
   if (q) {
@@ -21,15 +22,35 @@ export async function GET(req: NextRequest) {
   if (category) where.category = category;
   if (importantOnly) where.isImportant = true;
 
-  const [products, total] = await Promise.all([
-    prisma.product.findMany({
+  let products: any[];
+  let total: number;
+
+  if (diverse) {
+    const all = await prisma.product.findMany({
       where,
-      skip: (page - 1) * limit,
-      take: limit,
       orderBy: [{ isImportant: "desc" }, { partNo: "asc" }],
-    }),
-    prisma.product.count({ where }),
-  ]);
+    });
+    const seen = new Set<string>();
+    products = [];
+    for (const p of all) {
+      const key = p.category ?? "기타";
+      if (seen.has(key)) continue;
+      seen.add(key);
+      products.push(p);
+      if (products.length >= limit) break;
+    }
+    total = products.length;
+  } else {
+    [products, total] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: [{ isImportant: "desc" }, { partNo: "asc" }],
+      }),
+      prisma.product.count({ where }),
+    ]);
+  }
 
   const session = await auth();
   const tier = (session?.user as any)?.tier ?? "GUEST";
