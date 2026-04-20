@@ -43,22 +43,26 @@ export default function Home() {
                 스마텍은 <span className="text-edred font-semibold">Edwards</span> 코리아의 공식 파트너로서,
                 20대 핵심 진공 산업 전반에 걸쳐 고객사별 맞춤형 하이엔드 진공 솔루션을 제공합니다.
               </p>
-              <div className="mt-9 flex flex-wrap items-center gap-3 hero-rise" style={{ ["--rd" as never]: ".75s" }}>
+              <div className="mt-9 grid grid-cols-2 gap-3 max-w-lg hero-rise" style={{ ["--rd" as never]: ".75s" }}>
                 <Link
-                  href="#contact"
-                  className="inline-flex items-center gap-3 bg-ink text-paper px-6 py-4 text-sm hover:bg-edred transition-colors"
+                  href="#b2b"
+                  className="group border border-ink p-6 flex flex-col justify-between min-h-[120px] hover:bg-ink hover:text-paper transition-all"
                 >
-                  <span className="w-2 h-2 rounded-full bg-edred inline-block" />
-                  상담 신청 — 1일 내 회신 →
+                  <div className="text-[10px] mono tracking-widest opacity-50">DIRECT QUOTE</div>
+                  <div>
+                    <div className="mt-3 text-[24px] display leading-tight tracking-tight">견적 문의</div>
+                    <div className="mt-2 text-[12px] opacity-60 group-hover:opacity-80">신규제품구매 →</div>
+                  </div>
                 </Link>
                 <Link
-                  href="/products"
-                  className="inline-flex items-center gap-2 border border-ink px-6 py-4 text-sm hover:bg-ink hover:text-paper transition-colors"
+                  href="#b2b"
+                  className="group border border-ink bg-ink text-paper p-6 flex flex-col justify-between min-h-[120px] hover:bg-edred hover:border-edred transition-all"
                 >
-                  제품 라인업 보기
-                </Link>
-                <Link href="#ai" className="inline-flex items-center gap-2 text-sm underline-red pb-0.5 ml-2 hover:text-edred">
-                  또는 AI로 펌프 추천받기
+                  <div className="text-[10px] mono tracking-widest opacity-50">AI ASSISTANT</div>
+                  <div>
+                    <div className="mt-3 text-[24px] display leading-tight tracking-tight">AI 견적문의</div>
+                    <div className="mt-2 text-[12px] opacity-60 group-hover:opacity-80">모델 자동 추천 →</div>
+                  </div>
                 </Link>
               </div>
               <div className="mt-10 hidden md:flex flex-wrap items-center gap-x-6 gap-y-2 text-[12px] mono dim hero-rise" style={{ ["--rd" as never]: ".9s" }}>
@@ -257,7 +261,7 @@ export default function Home() {
       </section>
 
       {/* ═══════════════ B2B / B2C ═══════════════ */}
-      <section className="border-b hair">
+      <section id="b2b" className="border-b hair">
         <div className="grid grid-cols-1 lg:grid-cols-2 divide-x hair">
           {/* B2B */}
           <div className="bg-ink text-paper p-10 md:p-16 relative overflow-hidden">
@@ -304,15 +308,36 @@ export default function Home() {
                   <li className="flex gap-3 items-start">
                     <span className="text-edred shrink-0 mt-0.5">→</span>
                     <div>
-                      <div>등급별 가격표</div>
-                      <div className="text-[11px] opacity-55 mt-1">승인 완료 후 자동 노출</div>
+                      <div>사양서 기반 모델 제안</div>
+                      <div className="text-[11px] opacity-55 mt-1">공정 요건에 맞춘 최적 구성</div>
                     </div>
                   </li>
                   <li className="flex gap-3 items-start">
                     <span className="text-edred shrink-0 mt-0.5">→</span>
                     <div>
-                      <div>사양서 기반 모델 제안</div>
-                      <div className="text-[11px] opacity-55 mt-1">공정 요건에 맞춘 구성</div>
+                      <div>국내 상시 재고 운용</div>
+                      <div className="text-[11px] opacity-55 mt-1">소모품 · 주요 품목 즉시 출고 가능</div>
+                    </div>
+                  </li>
+                  <li className="flex gap-3 items-start">
+                    <span className="text-edred shrink-0 mt-0.5">→</span>
+                    <div>
+                      <div>신속 납기 대응</div>
+                      <div className="text-[11px] opacity-55 mt-1">긴급 발주 시 당일·익일 출고 지원</div>
+                    </div>
+                  </li>
+                  <li className="flex gap-3 items-start">
+                    <span className="text-edred shrink-0 mt-0.5">→</span>
+                    <div>
+                      <div>전담 기술 지원</div>
+                      <div className="text-[11px] opacity-55 mt-1">설치·시운전·유지보수 전 과정 동행</div>
+                    </div>
+                  </li>
+                  <li className="flex gap-3 items-start">
+                    <span className="text-edred shrink-0 mt-0.5">→</span>
+                    <div>
+                      <div>A/S · 오버홀 서비스</div>
+                      <div className="text-[11px] opacity-55 mt-1">공장 가동 중단 최소화를 위한 신속 처리</div>
                     </div>
                   </li>
                 </ul>

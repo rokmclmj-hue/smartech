@@ -826,5 +826,131 @@
       "desc": "EMF3 Oil Mist Filter NW10",
       "price": 240000
     }
+  ],
+  "E2M_small": [
+    {
+      "partNo": "A37141919",
+      "desc": "E2M0.7 200-230V 50/60HZ IEC",
+      "price": 1600000
+    },
+    {
+      "partNo": "A37132919",
+      "desc": "E2M1.5 200-230V 50/60HZ IEC",
+      "price": 1700000
+    },
+    {
+      "partNo": "A36317984",
+      "desc": "E2M18 115V/200-230V 1PH 50/60Hz",
+      "price": 3600000
+    },
+    {
+      "partNo": "A36310905",
+      "desc": "E2M18 3PH IE2 HI VOLT",
+      "price": 3600000
+    },
+    {
+      "partNo": "A36310925",
+      "desc": "E2M18 3PH IE2 LO VOLT",
+      "price": 3600000
+    },
+    {
+      "partNo": "A36321905",
+      "desc": "E2M18FX 3PH IE2 HI VOLT",
+      "price": 3700000
+    },
+    {
+      "partNo": "A36321925",
+      "desc": "E2M18FX 3PH IE2 LO VOLT",
+      "price": 3700000
+    },
+    {
+      "partNo": "A37317984",
+      "desc": "E2M28 115V/200-230V 1PH 50/60Hz",
+      "price": 3800000
+    },
+    {
+      "partNo": "A37325984",
+      "desc": "E2M28FX 115/200-230V 1PH 50/60Hz",
+      "price": 3900000
+    },
+    {
+      "partNo": "A37333934",
+      "desc": "E2M28 HC 3PH IE3 ASIA 50/60HZ",
+      "price": 3800000
+    },
+    {
+      "partNo": "A37333940",
+      "desc": "E2M28 HC 3PH IE3 EU/US 50/60HZ 380-400V",
+      "price": 3800000
+    },
+    {
+      "partNo": "A37343934",
+      "desc": "E2M28 FX 3PH IE3 ASIA 50/60HZ",
+      "price": 3900000
+    },
+    {
+      "partNo": "A37343940",
+      "desc": "E2M28 FX 3PH IE3 EU/US 50/60HZ",
+      "price": 3900000
+    }
+  ],
+  "E2M_large": [
+    {
+      "partNo": "A36417934",
+      "desc": "E2M40 FX IE3 ASIA 50/60HZ",
+      "price": 5100000
+    },
+    {
+      "partNo": "A36404934",
+      "desc": "E2M40 HC IE3 ASIA 50/60HZ",
+      "price": 5000000
+    },
+    {
+      "partNo": "A36517934",
+      "desc": "E2M80 FX IE3 ASIA 50/60HZ",
+      "price": 5800000
+    },
+    {
+      "partNo": "A36504934",
+      "desc": "E2M80 HC IE3 ASIA 50/60HZ",
+      "price": 5700000
+    },
+    {
+      "partNo": "A36604934",
+      "desc": "E2M175 HC IE3 ASIA 50/60HZ",
+      "price": 10500000
+    },
+    {
+      "partNo": "A36704934",
+      "desc": "E2M275 HC IE3 ASIA 50/60HZ",
+      "price": 11500000
+    }
+  ],
+  "nES": [
+    {
+      "partNo": "A35124940",
+      "desc": "nES40 ASIA, AIR COOLED",
+      "price": 2800000
+    },
+    {
+      "partNo": "A35324940",
+      "desc": "nES65 ASIA, AIR COOLED",
+      "price": 3000000
+    },
+    {
+      "partNo": "A35424940",
+      "desc": "nES100 ASIA, AIR COOLED",
+      "price": 3900000
+    },
+    {
+      "partNo": "A35624950",
+      "desc": "nES300 EU/US/ASIA, AIR COOLED",
+      "price": 6200000
+    },
+    {
+      "partNo": "A35924950",
+      "desc": "nES630 EU/US/ASIA, AIR COOLED",
+      "price": 17000000
+    }
   ]
 }
