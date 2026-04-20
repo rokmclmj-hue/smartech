@@ -29,6 +29,13 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+dev.log
+tunnel.log
+*.log
+
+# local dev helpers (not committed)
+/tools/
+/scripts/counter-*.png
 
 # env files (can opt-in for committing if needed)
 .env*

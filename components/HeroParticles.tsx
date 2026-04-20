@@ -1,34 +1,92 @@
 "use client";
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 
 type Dot = {
   top: string;
   left: string;
-  fx: string;
-  fy: string;
-  dur: number;
+  size: number; // px, varied 5~16
+  fx: string;   // ambient drift offset x
+  fy: string;   // ambient drift offset y
+  tx: string;   // collection target x (toward logo)
+  ty: string;   // collection target y (toward logo)
   delay: number;
 };
 
 export default function HeroParticles({ count = 16 }: { count?: number }) {
   const [dots, setDots] = useState<Dot[]>([]);
+  const containerRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    setDots(
-      Array.from({ length: count }).map(() => ({
-        top: `${5 + Math.random() * 85}%`,
-        left: `${3 + Math.random() * 92}%`,
-        fx: `${(Math.random() - 0.5) * 110}px`,
-        fy: `${(Math.random() - 0.5) * 110}px`,
-        dur: 6 + Math.random() * 9,
-        delay: Math.random() * 5,
-      }))
-    );
+    const container = containerRef.current;
+    if (!container) return;
+
+    // Find the impeller logo's screen position (sticky in navbar)
+    const measure = () => {
+      const heroBox = container.getBoundingClientRect();
+      const logoEl = document.querySelector(".impeller-svg");
+      // Fallback target if logo not found: top-left area
+      let logoCx = heroBox.left + 60;
+      let logoCy = heroBox.top - 30;
+      if (logoEl) {
+        const logoBox = logoEl.getBoundingClientRect();
+        logoCx = logoBox.left + logoBox.width / 2;
+        logoCy = logoBox.top + logoBox.height / 2;
+      }
+
+      // Constrain particles to area ABOVE the product strip (the rectangular box at hero bottom)
+      const stripEl = document.querySelector(".mrqw");
+      let maxTopPct = 88;
+      if (stripEl) {
+        const stripBox = stripEl.getBoundingClientRect();
+        const availableHeight = Math.max(60, stripBox.top - heroBox.top - 24);
+        maxTopPct = Math.max(20, (availableHeight / heroBox.height) * 100);
+      }
+
+      // Mobile: smaller dots + fewer particles
+      const isMobile = window.innerWidth < 768;
+      const effectiveCount = isMobile ? Math.round(count * 0.7) : count;
+      const sizeScale = isMobile ? 0.5 : 1;
+
+      setDots(
+        Array.from({ length: effectiveCount }).map(() => {
+          const topPct = 4 + Math.random() * (maxTopPct - 4);
+          const leftPct = 3 + Math.random() * 92;
+          const xPx = (leftPct / 100) * heroBox.width;
+          const yPx = (topPct / 100) * heroBox.height;
+          const xScreen = heroBox.left + xPx;
+          const yScreen = heroBox.top + yPx;
+          // ambient float drift: random ±50px in any direction
+          const fx = (Math.random() - 0.5) * 100;
+          const fy = (Math.random() - 0.5) * 100;
+          // varied size: 5px (small) ~ 16px (large), weighted toward smaller; mobile halves
+          const sizeRand = Math.random();
+          const size = Math.max(3, Math.round((5 + Math.pow(sizeRand, 1.5) * 11) * sizeScale));
+          return {
+            top: `${topPct}%`,
+            left: `${leftPct}%`,
+            size,
+            fx: `${fx.toFixed(0)}px`,
+            fy: `${fy.toFixed(0)}px`,
+            tx: `${(logoCx - xScreen).toFixed(0)}px`,
+            ty: `${(logoCy - yScreen).toFixed(0)}px`,
+            // very tight stagger — all particles start within 0.8s
+            delay: Math.random() * 0.8,
+          };
+        })
+      );
+    };
+
+    // Defer measurement until layout is stable
+    const raf = requestAnimationFrame(measure);
+    return () => cancelAnimationFrame(raf);
   }, [count]);
 
-  if (dots.length === 0) return null;
-
   return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden>
+    <div
+      ref={containerRef}
+      className="absolute inset-0 pointer-events-none overflow-visible z-0"
+      aria-hidden
+    >
       {dots.map((d, i) => (
         <span
           key={i}
@@ -36,9 +94,12 @@ export default function HeroParticles({ count = 16 }: { count?: number }) {
           style={{
             top: d.top,
             left: d.left,
+            width: `${d.size}px`,
+            height: `${d.size}px`,
             ["--fx" as keyof CSSProperties]: d.fx,
             ["--fy" as keyof CSSProperties]: d.fy,
-            ["--fdur" as keyof CSSProperties]: `${d.dur}s`,
+            ["--tx" as keyof CSSProperties]: d.tx,
+            ["--ty" as keyof CSSProperties]: d.ty,
             ["--fd" as keyof CSSProperties]: `${d.delay}s`,
           } as CSSProperties}
         />

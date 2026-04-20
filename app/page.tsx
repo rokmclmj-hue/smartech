@@ -16,15 +16,18 @@ function hiEd(text: string, white = false) {
   );
 }
 
+// Server-side evaluated at request time — auto-updates each new year
+const CURRENT_YEAR = new Date().getFullYear();
+
 export default function Home() {
   return (
     <>
       {/* ═══════════════ HERO ═══════════════ */}
       <section className="relative overflow-hidden noisebg">
-        <HeroParticles count={18} />
+        <HeroParticles count={27} />
         <div className="max-w-[1400px] mx-auto px-4 md:px-6 pt-8 md:pt-16 pb-10 relative">
-          {/* Corner meta */}
-          <div className="flex justify-between text-[11px] mono dim mb-5 hero-rise" style={{ ["--rd" as never]: "0s" }}>
+          {/* Corner meta — desktop only */}
+          <div className="hidden md:flex justify-between text-[11px] mono dim mb-5 hero-rise" style={{ ["--rd" as never]: "0s" }}>
             <div>EDWARDS VACUUM · KOREA OFFICIAL</div>
             <div className="hidden md:block">N37.5° · E127.0° / SEOUL, KR</div>
             <HeroClock />
@@ -56,7 +59,7 @@ export default function Home() {
                   또는 AI로 펌프 추천받기
                 </Link>
               </div>
-              <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-2 text-[12px] mono dim hero-rise" style={{ ["--rd" as never]: ".9s" }}>
+              <div className="mt-10 hidden md:flex flex-wrap items-center gap-x-6 gap-y-2 text-[12px] mono dim hero-rise" style={{ ["--rd" as never]: ".9s" }}>
                 <span>CALL  031–204–7170</span>
                 <span>·</span>
                 <span>MAIL  rokmclmj@gmail.com</span>
@@ -65,8 +68,8 @@ export default function Home() {
 
             {/* Trust bento — asymmetric, 2006 as hero, red certification anchor */}
             <div className="col-span-12 lg:col-span-5 hero-rise" style={{ ["--rd" as never]: ".4s" }}>
-              {/* eyebrow */}
-              <div className="flex items-center gap-2.5 text-[10px] mono dim mb-3">
+              {/* eyebrow — desktop only */}
+              <div className="hidden md:flex items-center gap-2.5 text-[10px] mono dim mb-3">
                 <span className="kpi-status" />
                 <span className="uppercase tracking-[0.18em]">Trust Profile</span>
                 <span className="opacity-30">·</span>
@@ -74,34 +77,57 @@ export default function Home() {
               </div>
 
               <div className="grid grid-cols-3 gap-2.5">
-                {/* Hero cell — 2006 (col-span-2, row-span-2) */}
-                <div className="bento-hero col-span-2 row-span-2 relative bg-white border hair p-4 md:p-5 flex flex-col justify-between min-h-[180px] md:min-h-[210px] overflow-hidden">
-                  <div className="flex items-baseline justify-between">
-                    <div className="kpi-eyebrow">HQ Entry</div>
-                    <div className="kpi-meta">since</div>
+                {/* Hero cell — Editorial typography (col-span-2, row-span-2) */}
+                <div className="bento-hero col-span-2 row-span-2 relative bg-white border hair p-5 md:p-6 flex flex-col justify-between overflow-hidden">
+                  {/* Top kicker — brand and origin */}
+                  <div className="flex items-baseline justify-between text-[10.5px] mono dim tracking-[0.18em] uppercase">
+                    <span>Smartech</span>
+                    <span>Since 2006</span>
                   </div>
-                  <div>
-                    <div className="display text-[56px] md:text-[78px] leading-[0.9] tracking-[-0.04em] tabular">
-                      <Counter to={2006} duration={2400} decimals={0} />
+
+                  {/* Giant years + "years / in vacuum." */}
+                  <div className="mt-6 md:mt-8">
+                    <div className="display leading-[0.9] tracking-[-0.045em] tabular text-[72px] md:text-[104px]">
+                      <Counter to={CURRENT_YEAR - 2006} duration={2400} delay={900} decimals={0} />
                     </div>
-                    <div className="mt-3 text-[11.5px] dim leading-snug">
-                      Since 2006 Joined <span className="text-edred font-semibold">Edwards</span> Korea
+                    <div className="display text-[22px] md:text-[28px] leading-[1.1] tracking-[-0.02em] text-ink/70 font-medium mt-1.5">
+                      years <span className="italic text-edred">in vacuum.</span>
                     </div>
                   </div>
-                  <span className="absolute top-3 right-3 text-[9px] mono dim opacity-40 tracking-[0.14em]">01 / 04</span>
-                  {/* subtle bottom-right glow */}
-                  <span className="absolute -right-12 -bottom-12 w-40 h-40 rounded-full bg-edred/5 blur-2xl pointer-events-none" />
+
+                  {/* Range bar — 2006 ────── {CURRENT_YEAR}. Current year emphasized as editorial anchor. */}
+                  <div className="mt-6 md:mt-8">
+                    <div className="flex items-end gap-3">
+                      <span className="text-[10.5px] mono tabular dim tracking-wider pb-1">2006</span>
+                      <div className="flex-1 relative h-px bg-ink/20 mb-1.5 overflow-visible">
+                        <div className="editorial-range-fill absolute left-0 top-0 h-full bg-edred">
+                          <span className="editorial-range-dot absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-2 h-2 rounded-full bg-edred" />
+                        </div>
+                      </div>
+                      <span className="display text-[22px] md:text-[28px] leading-none tracking-[-0.02em] tabular text-edred font-bold">
+                        {CURRENT_YEAR}
+                      </span>
+                    </div>
+                    <div className="mt-2.5 text-[11px] dim leading-snug">
+                      still operating · <span className="text-edred font-semibold">Edwards</span> 코리아 공식 대리점
+                    </div>
+                  </div>
+
+                  {/* very subtle glow */}
+                  <span className="absolute -right-16 -bottom-16 w-48 h-48 rounded-full bg-edred/5 blur-3xl pointer-events-none" />
                 </div>
 
-                {/* Small cell — Field Years */}
+                {/* Small cell — Edwards global RV shipped */}
                 <div className="bento-cell relative bg-white border hair p-4 flex flex-col justify-between min-h-[100px]">
-                  <div className="kpi-eyebrow">Years</div>
+                  <div className="kpi-eyebrow">RV Shipped</div>
                   <div>
                     <div className="display text-[32px] leading-none tabular">
-                      <Counter to={15} duration={1300} />
-                      <span className="text-[20px] opacity-50">+</span>
+                      <Counter to={40} duration={2200} />
+                      <span className="text-[20px] opacity-60">만+</span>
                     </div>
-                    <div className="text-[10px] mt-1.5 dim leading-snug">진공 기술 업력</div>
+                    <div className="text-[10px] mt-1.5 dim leading-snug">
+                      <span className="text-edred font-semibold">Edwards</span> 글로벌 누적
+                    </div>
                   </div>
                 </div>
 
@@ -110,14 +136,14 @@ export default function Home() {
                   <div className="kpi-eyebrow">Product Lineup</div>
                   <div>
                     <div className="display text-[32px] leading-none tabular">
-                      <Counter to={498} duration={1800} />
+                      <Counter to={498} duration={3600} />
                       <span className="text-[20px] opacity-60">+</span>
                     </div>
-                    <div className="text-[10px] mt-1.5 dim leading-snug">취급품목</div>
+                    <div className="text-[10px] mt-1.5 dim leading-snug">취급 품목</div>
                   </div>
                 </div>
 
-                {/* Wide bottom — Authorization (col-span-3, Edwards red) */}
+                {/* Wide bottom — Authorization (Edwards red) */}
                 <div className="bento-auth col-span-3 relative bg-edred text-paper p-3 md:p-4 flex items-center gap-3 md:gap-4 overflow-hidden">
                   <div className="shrink-0 relative">
                     <div className="w-10 h-10 md:w-12 md:h-12 bg-white/95 flex items-center justify-center p-1.5">

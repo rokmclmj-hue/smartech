@@ -1,18 +1,8 @@
-"use client";
-import { useEffect, useState } from "react";
 import Link from "next/link";
-
-type Product = {
-  id: number;
-  partNo: string;
-  description: string;
-  displayPrice: number | null;
-  priceStatus: "login" | "pending" | "visible";
-  category: string;
-};
+import { prisma } from "@/lib/db";
 
 function imageForCategory(category: string): string {
-  const c = category.toLowerCase();
+  const c = (category ?? "").toLowerCase();
   if (c.includes("rv") || c.includes("소형rv")) return "/images/products/rv.jpeg";
   if (c.includes("e2s")) return "/images/products/e2s.png";
   if (c.includes("e2m")) return "/images/products/e2m.png";
@@ -34,24 +24,23 @@ function imageForCategory(category: string): string {
   return "/images/products/rv.jpeg";
 }
 
-export default function FeaturedProducts() {
-  const [products, setProducts] = useState<Product[]>([]);
-
-  useEffect(() => {
-    fetch("/api/products?important=true&diverse=true&limit=8")
-      .then((r) => r.json())
-      .then((d) => setProducts(d.products ?? []));
-  }, []);
-
-  if (!products.length) {
-    return (
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="border hair aspect-[3/4] animate-pulse bg-line/30" />
-        ))}
-      </div>
-    );
+export default async function FeaturedProducts() {
+  // Pick 8 diverse "important" products server-side so images render in initial HTML
+  const all = await prisma.product.findMany({
+    where: { isImportant: true },
+    orderBy: [{ partNo: "asc" }],
+  });
+  const seen = new Set<string>();
+  const products: typeof all = [];
+  for (const p of all) {
+    const key = p.category ?? "기타";
+    if (seen.has(key)) continue;
+    seen.add(key);
+    products.push(p);
+    if (products.length >= 8) break;
   }
+
+  if (!products.length) return null;
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
@@ -68,8 +57,8 @@ export default function FeaturedProducts() {
 
           <div className="mt-4 mb-4 aspect-[4/3] relative border hair overflow-hidden bg-[#F6F4EF]">
             <img
-              src={imageForCategory(p.category)}
-              alt={p.description}
+              src={imageForCategory(p.category ?? "")}
+              alt={p.description ?? ""}
               className="absolute inset-0 w-full h-full object-contain group-hover:scale-105 transition-transform"
               loading="lazy"
             />
@@ -77,18 +66,6 @@ export default function FeaturedProducts() {
 
           <div className="display text-[18px] leading-[1.2] line-clamp-2">{p.description}</div>
           <div className="text-[11px] mono opacity-70 mt-1">{p.category}</div>
-
-          <div className="mt-2">
-            {p.priceStatus === "visible" && p.displayPrice ? (
-              <span className="text-[12px] font-semibold">
-                {new Intl.NumberFormat("ko-KR", { style: "currency", currency: "KRW", maximumFractionDigits: 0 }).format(p.displayPrice)}
-              </span>
-            ) : p.priceStatus === "pending" ? (
-              <span className="text-[11px] opacity-70">승인 대기 중</span>
-            ) : (
-              <span className="text-[11px] opacity-50">로그인 후 가격 확인</span>
-            )}
-          </div>
 
           <div className="mt-3 text-[11px] underline-red pb-0.5 inline-block">사양 보기 →</div>
         </Link>

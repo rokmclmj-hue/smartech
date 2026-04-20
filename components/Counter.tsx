@@ -1,46 +1,47 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import CountUp from "react-countup";
 
 type Props = {
   to: number;
+  /** starting value (default 0). For count-down, set from > to. */
+  from?: number;
+  /** duration — ms if >= 100, otherwise treated as seconds. Default 3.6s. */
   duration?: number;
+  /** delay — ms if >= 100, otherwise treated as seconds. Default 0.9s. */
+  delay?: number;
   decimals?: number;
   format?: (n: number) => string;
+  /** thousands separator — default ",". Set "" for years/IDs. */
+  separator?: string;
   className?: string;
 };
 
-export default function Counter({ to, duration = 1500, decimals, format, className = "" }: Props) {
-  const [val, setVal] = useState(0);
-  const ref = useRef<HTMLSpanElement>(null);
-  const started = useRef(false);
+function toSeconds(v: number) {
+  return v >= 100 ? v / 1000 : v;
+}
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const start = () => {
-      if (started.current) return;
-      started.current = true;
-      const t0 = performance.now();
-      const tick = (now: number) => {
-        const t = Math.min(1, (now - t0) / duration);
-        const eased = 1 - Math.pow(1 - t, 3);
-        setVal(to * eased);
-        if (t < 1) requestAnimationFrame(tick);
-      };
-      requestAnimationFrame(tick);
-    };
-    const io = new IntersectionObserver(
-      (entries) => entries.forEach((e) => { if (e.isIntersecting) start(); }),
-      { threshold: 0.3 }
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, [to, duration]);
-
-  const text = format
-    ? format(val)
-    : typeof decimals === "number"
-      ? val.toFixed(decimals)
-      : Math.round(val).toLocaleString();
-  return <span ref={ref} className={`tabular ${className}`}>{text}</span>;
+export default function Counter({
+  to,
+  from = 0,
+  duration = 3.6,
+  delay = 0.9,
+  decimals,
+  format,
+  separator = ",",
+  className = "",
+}: Props) {
+  return (
+    <CountUp
+      start={from}
+      end={to}
+      duration={toSeconds(duration)}
+      delay={toSeconds(delay)}
+      decimals={decimals ?? 0}
+      formattingFn={format}
+      preserveValue
+      useEasing
+      separator={separator}
+      className={`tabular ${className}`}
+    />
+  );
 }

@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { useState } from "react";
+import ImpellerLogo from "@/components/ImpellerLogo";
 
 export default function Navbar() {
   const { data: session } = useSession();
@@ -38,8 +39,9 @@ export default function Navbar() {
       {/* STICKY HEADER */}
       <header className="sticky top-0 z-40 border-b hair bg-paper/90 backdrop-blur">
         <div className="max-w-[1400px] mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3 md:gap-4 leading-none">
-            <div className="display text-[22px] md:text-[25.3px] tracking-[-0.045em]">
+          <Link href="/" className="flex items-center gap-2.5 md:gap-3 leading-none text-ink">
+            <ImpellerLogo className="w-8 h-8 md:w-9 md:h-9 text-ink" />
+            <div className="wordmark-settle-target display text-[22px] md:text-[25.3px] tracking-[-0.045em]">
               Smartech<span style={{ color: "#c00020" }}>.</span>
             </div>
             <span className="hidden sm:block w-px h-6 bg-ink/60" aria-hidden />
