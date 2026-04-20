@@ -24,7 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           crossOrigin=""
         />
       </head>
-      <body className="min-h-screen bg-paper text-ink antialiased">
+      <body className="min-h-screen bg-paper text-ink antialiased" suppressHydrationWarning>
         <SessionProvider>
           <Navbar />
           <main>{children}</main>
