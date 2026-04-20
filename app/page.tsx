@@ -7,13 +7,15 @@ import HeroParticles from "@/components/HeroParticles";
 import RotatingHero from "@/components/RotatingHero";
 import ProductShowcase from "@/components/ProductShowcase";
 import ProductCategories from "@/components/ProductCategories";
+import ImpellerLogo from "@/components/ImpellerLogo";
+import PumpSelector from "@/components/PumpSelector";
 
 function hiEd(text: string, white = false) {
-  return text.split(/(\bEdwards\b)/).map((p, i) =>
-    p === "Edwards"
-      ? <span key={i} className={white ? "text-white font-semibold" : "text-edred font-semibold"}>Edwards</span>
-      : p
-  );
+  return text.split(/(\bEdwards\b|\bSmartech\b)/).map((p, i) => {
+    if (p === "Edwards") return <span key={i} className={white ? "text-white font-semibold" : "text-edred font-semibold"}>Edwards</span>;
+    if (p === "Smartech") return <span key={i} className="display tracking-[-0.045em] text-ink" style={{ fontWeight: 600 }}>Smartech<span style={{ color: "#c00020" }}>.</span></span>;
+    return p;
+  });
 }
 
 // Server-side evaluated at request time — auto-updates each new year
@@ -269,13 +271,14 @@ export default function Home() {
               <div className="lg:col-span-7">
                 <div className="mono text-[11px] opacity-70">— 04a · B2B</div>
                 <h3 className="display text-[56px] md:text-[72px] leading-[0.95] mt-4">
-                  딜러 · OEM · 법인<br />
-                  <span className="italic text-edred">전용 견적</span>
+                  <span className="italic text-edred">전용견적</span>
                 </h3>
-                <p className="mt-8 text-[14.5px] leading-[1.75] opacity-90">
-                  발주 규모와 거래 이력에 따라 가격 조건이 달라집니다. <span className="text-edred font-semibold">Edwards</span> 코리아에서
-                  5년을 재직한 대표가 기술 컨설팅부터 납기 조율까지 직접 받습니다.
-                  소모품과 메이저 파트는 국내 재고로 상시 확보합니다.
+                <div className="mt-5 mono text-[11px] tracking-[0.18em] opacity-60 uppercase">
+                  Expert Consulting &amp; Fast Delivery
+                </div>
+                <p className="mt-6 text-[14.5px] leading-[1.75] opacity-90">
+                  고객사 공정의 중단 없는 운영을 위해 소모품 및 주요 메이저 품목들은 국내 상시 재고로 운용하고 있습니다.
+                  스마텍은 가장 필요한 순간, 가장 빠른 대응을 약속드립니다.
                 </p>
                 <div className="mt-10 flex flex-wrap gap-3">
                   <Link href="/auth/register" className="bg-edred text-paper px-6 py-4 text-sm hover:bg-edred2 transition-colors">
@@ -320,31 +323,12 @@ export default function Home() {
           {/* B2C */}
           <div className="p-10 md:p-16 relative overflow-hidden">
             <div className="mono text-[11px] dim">— 04b · B2C · RESEARCHER</div>
-            <h3 className="display text-[56px] md:text-[72px] leading-[0.95] mt-4">
+            <h3 className="display text-[38px] md:text-[52px] leading-[1.05] mt-4">
               어떤 펌프를 골라야 할지<br />
               <span className="italic">모르겠다면,</span><br />
-              <span className="text-edred">그냥 물어보세요.</span>
+              <span className="text-edred">아래 옵션에서 선택하세요.</span>
             </h3>
-            <p className="mt-8 text-[14.5px] leading-[1.75] max-w-[44ch]">
-              실험 목적, 도달 진공도, 설치 환경, 예산 — 이 네 가지면 됩니다.
-              사양서 숫자가 낯설어도 괜찮습니다. 쉬운 말로 다시 풀어 드립니다.
-            </p>
-            <div className="mt-10 grid grid-cols-2 gap-3 max-w-[500px]">
-              {["실험 목적","도달 진공도","설치 환경","예산"].map((label, i) => (
-                <div key={i} className="border hair p-4">
-                  <div className="mono text-[10px] dim">0{i + 1} / 4</div>
-                  <div className="text-[13px] mt-2">{label}</div>
-                </div>
-              ))}
-            </div>
-            <div className="mt-10 flex flex-wrap gap-3">
-              <Link href="#ai" className="bg-ink text-paper px-6 py-4 text-sm hover:bg-edred transition-colors">
-                AI로 최적 펌프 추천 →
-              </Link>
-              <Link href="#contact" className="border border-ink px-6 py-4 text-sm hover:bg-ink hover:text-paper transition-colors">
-                전문가에게 직접 묻기
-              </Link>
-            </div>
+            <PumpSelector />
           </div>
         </div>
       </section>
@@ -354,14 +338,17 @@ export default function Home() {
         <div className="max-w-[1400px] mx-auto px-6 grid grid-cols-12 gap-6">
           <div className="col-span-12 lg:col-span-5">
             <div className="mono text-[11px] dim mb-4">— 05 · AI CONSULT</div>
-            <h2 className="section-title display">
-              공정 조건을 입력하면<br />
-              <span className="italic text-edred">최적 펌프</span>를 추천합니다.
+            <h2 className="display leading-[1.12] tracking-[-0.03em]" style={{ fontSize: "clamp(24px,2.8vw,44px)" }}>
+              복잡한 공정 조건만 입력해 주세요.<br />
+              <span className="italic text-edred">스마텍 AI</span>가 최적의{" "}
+              <span className="text-edred font-semibold">Edwards</span><br />
+              라인업을 제안합니다.
             </h2>
             <p className="mt-6 text-[15px] leading-[1.75] text-[#2a2823] max-w-[48ch]">
-              진공도, 배기량, 가스 종류, 오일프리 여부 — 공정 조건을 알려주시면
-              <span className="text-edred font-semibold">Edwards</span> 라인업 중 후보 모델을 AI가 먼저 좁혀 드립니다.{" "}
-              <span className="dim">최종 사양은 스마텍 담당자가 한 번 더 확인한 뒤 제안합니다.</span>
+              진공펌프의 종류부터 사용 가스, 도달 시간까지 — 까다로운 공정 변수를 입력하시면
+              스마텍의 데이터로 학습된 AI가 가장 적합한{" "}
+              <span className="text-edred font-semibold">Edwards</span> 모델을 정밀하게 선별해 드립니다.
+              전문가의 검토 전, 가장 스마트한 가이드를 먼저 만나보세요.
             </p>
             <div className="mt-6 mono text-[11px] dim">
               ※ 이 추천은 AI 1차 분석 결과이며, 실제 공정 적용 전 담당 기술자 검토를 권장합니다.
@@ -379,17 +366,16 @@ export default function Home() {
           <div className="col-span-12 lg:col-span-5">
             <div className="mono text-[11px] dim mb-4">— 06 · ABOUT</div>
             <h2 className="section-title display">
-              기록이<br />
+              신뢰와 전문성이<br />
               <span className="italic text-edred">먼저</span>입니다.
             </h2>
             <p className="mt-8 text-[15px] leading-[1.75] text-[#2a2823] max-w-[44ch]">
-              스마텍의 이야기는 2006년에 시작됩니다. 그 해 대표는 <span className="text-edred font-semibold">Edwards</span> 코리아에 합류해
-              5년을 재직하며 기술영업으로 일했습니다. 사무실 책상이 아니라 고객사 현장에서, 카탈로그가 아니라 실제 공정 앞에서요.
+              "2006년부터 이어진 스마텍의 여정, 성장의 중심에는 늘 '신뢰'가 있었습니다."
             </p>
             <p className="mt-5 text-[15px] leading-[1.75] text-[#2a2823] max-w-[44ch]">
-              2011년 창업. 2018년 법인 전환. 그 사이에 바뀐 것은 규모뿐입니다.
-              스마텍이 지금도 가장 소중하게 여기는 건 한 가지입니다 — 한 번 맺은 거래처와의 신뢰를
-              끝까지 지켜내는 것.
+              스마텍은 2011년 창업과 2018년 법인화를 통해 전문성을 확장해 왔습니다.
+              단순히 제품을 공급하는 공급사를 넘어, 변함없는 신뢰를 바탕으로 고객의 공정 현장에서
+              끝까지 함께하는 가장 든든한 파트너가 되겠습니다.
             </p>
           </div>
           <div className="col-span-12 lg:col-span-6 lg:col-start-7">
@@ -398,7 +384,16 @@ export default function Home() {
                 <div key={i} className="relative">
                   <div className={`absolute -left-10 top-1 w-3 h-3 rounded-full ${i === 0 || i === TIMELINE.length - 1 ? "bg-edred animate-pulse" : "bg-ink"}`} />
                   <div className="mono text-[11px] dim">{item.year}</div>
-                  <div className="display text-[30px] leading-[1.1] mt-1">{hiEd(item.title)}</div>
+                  <div className="display text-[30px] leading-[1.1] mt-1">
+                    {item.title.includes("Smartech") ? (
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="display text-[25.3px] tracking-[-0.045em]">
+                          Smartech<span style={{ color: "#c00020" }}>.</span>
+                        </span>
+                        <span>{item.title.replace("Smartech", "").trim()}</span>
+                      </span>
+                    ) : hiEd(item.title)}
+                  </div>
                   <p className="mt-2 text-[13.5px] dim">{hiEd(item.desc)}</p>
                 </div>
               ))}
@@ -464,9 +459,11 @@ export default function Home() {
       {/* ═══════════════ FOOTER ═══════════════ */}
       <footer className="bg-paper text-ink">
         <div className="max-w-[1400px] mx-auto px-6 pt-16 pb-10">
-          <div className="display text-[clamp(31px,4.25vw,68px)] leading-[1.05]">
-            기술은 <span className="text-edred font-semibold">Edwards</span>가 만들었습니다.<br />
-            신뢰는 <span className="text-edred italic">스마텍</span>이 쌓았습니다.
+          <div className="display text-[clamp(31px,4.25vw,68px)] leading-[1.15]" style={{ display: "grid", gridTemplateColumns: "auto 1fr" }}>
+            <span className="pr-[0.25em]">기술은</span>
+            <span><span className="text-edred font-semibold">Edwards</span>가 만들었습니다.</span>
+            <span className="pr-[0.25em]">신뢰는</span>
+            <span><span className="text-ink font-semibold">Smartech<span style={{ color: "#c00020" }}>.</span></span>이 쌓았습니다.</span>
           </div>
 
           <div className="grid grid-cols-12 gap-6 mt-12 border-t hair pt-8 text-[12.5px]">
@@ -554,7 +551,7 @@ const STEPS = [
 
 const TIMELINE = [
   { year: "2006", title: "Edwards 코리아 합류", desc: "기술영업으로 5년, 수많은 고객 현장과 공정 앞에서 진공을 읽는 감각을 쌓은 시간." },
-  { year: "2011", title: "스마텍 창업", desc: "Edwards 공식 대리점으로, '기술하는 파트너'로 출발했습니다." },
+  { year: "2011", title: "Smartech 창업", desc: "Edwards 공식 대리점으로, '기술하는 파트너'로 출발했습니다." },
   { year: "2018", title: "(주)스마텍 법인 전환", desc: "규모보다 신뢰를 먼저 키우자 — 그렇게 커진 이름입니다." },
   { year: "NOW", title: "거래처의 신뢰를 지켜가는 중", desc: "오래된 거래처가 지금도 먼저 전화해 오는 것, 그게 스마텍의 가장 큰 자랑입니다." },
 ];

@@ -1,0 +1,830 @@
+{
+  "RV": [
+    {
+      "partNo": "A65201903",
+      "desc": "RV3 115/230V 1Ph 50/60Hz Set 230V",
+      "price": 2500000
+    },
+    {
+      "partNo": "A65301903",
+      "desc": "RV5 115/230V 1PH 50/60Hz Set 230V",
+      "price": 2570000
+    },
+    {
+      "partNo": "A65401903",
+      "desc": "RV8 115/230V 1PH 50/60Hz Set 230V",
+      "price": 2640000
+    },
+    {
+      "partNo": "A65501903",
+      "desc": "RV12 115/230V 1PH 50/60Hz Set 230V",
+      "price": 2700000
+    },
+    {
+      "partNo": "A65422905",
+      "desc": "RV8 3PH IE2 HI VOLT",
+      "price": 2640000
+    },
+    {
+      "partNo": "A65422925",
+      "desc": "RV8 3PH IE2 LO VOLT",
+      "price": 2640000
+    },
+    {
+      "partNo": "A65522905",
+      "desc": "RV12 3PH IE2 HI VOLT",
+      "price": 2700000
+    },
+    {
+      "partNo": "A65522925",
+      "desc": "RV12 3PH IE2 LO VOLT",
+      "price": 2700000
+    },
+    {
+      "partNo": "A65209903",
+      "desc": "RV3FX 115/230V 1PH 50/60Hz Set 230V",
+      "price": 3380000
+    },
+    {
+      "partNo": "A65309904",
+      "desc": "RV5FX 100/200V 1PH 50/60Hz Set 200V",
+      "price": 3450000
+    },
+    {
+      "partNo": "A65409903",
+      "desc": "RV8FX 115/230V 1PH 50/60Hz Set 230V",
+      "price": 3510000
+    },
+    {
+      "partNo": "A65429905",
+      "desc": "RV8FX 3PH IE2 HI VOLT",
+      "price": 3510000
+    },
+    {
+      "partNo": "A65429925",
+      "desc": "RV8FX 3PH IE2 LO VOLT",
+      "price": 3510000
+    },
+    {
+      "partNo": "A65509903",
+      "desc": "RV12FX 115/230V 1PH 50/60Hz Set 230V",
+      "price": 3650000
+    },
+    {
+      "partNo": "A65529905",
+      "desc": "RV12FX 3PH IE2 HI VOLT",
+      "price": 3650000
+    },
+    {
+      "partNo": "A65529925",
+      "desc": "RV12FX 3PH IE2 LO VOLT",
+      "price": 3650000
+    },
+    {
+      "partNo": "A65299500",
+      "desc": "RV3/5/8 & 12 PUMP MOTOR KIT EUR/USA",
+      "price": 1240000
+    }
+  ],
+  "nXDS": [
+    {
+      "partNo": "A73501983",
+      "desc": "nXDS6i 100-127/200-240V 1ph 50/60Hz",
+      "price": 5850000
+    },
+    {
+      "partNo": "A73601983",
+      "desc": "nXDS10i 100-127/200-240V 1ph 50/60Hz",
+      "price": 5990000
+    },
+    {
+      "partNo": "A73701983",
+      "desc": "nXDS15i 100-127/200-240V 1ph 50/60Hz",
+      "price": 6130000
+    },
+    {
+      "partNo": "A73801983",
+      "desc": "nXDS20i 100-127/200-240V 1ph 50/60Hz",
+      "price": 6270000
+    },
+    {
+      "partNo": "A73502983",
+      "desc": "nXDS6iC 100-127/200-240V 1ph 50/60Hz",
+      "price": 6400000
+    },
+    {
+      "partNo": "A73602983",
+      "desc": "nXDS10iC 100-127/200-240V 1ph 50/60Hz",
+      "price": 6690000
+    },
+    {
+      "partNo": "A73702983",
+      "desc": "nXDS15iC 100-127/200-240V 1ph 50/60Hz",
+      "price": 6960000
+    },
+    {
+      "partNo": "A73802983",
+      "desc": "nXDS20iC 100-127/200-240V 1ph 50/60Hz",
+      "price": 7300000
+    },
+    {
+      "partNo": "A73503983",
+      "desc": "nXDS6iR 100-127/200-240V 1ph 50/60Hz",
+      "price": 5850000
+    },
+    {
+      "partNo": "A73603983",
+      "desc": "nXDS10iR 100-127/200-240V 1ph 50/60Hz",
+      "price": 5990000
+    },
+    {
+      "partNo": "A73703983",
+      "desc": "nXDS15iR 100-127/200-240V 1ph 50/60Hz",
+      "price": 6130000
+    },
+    {
+      "partNo": "A73803983",
+      "desc": "nXDS20iR 100-127/200-240V 1ph 50/60Hz",
+      "price": 6270000
+    },
+    {
+      "partNo": "TSB5D0003",
+      "desc": "NXDS6I/NEXT240D/CF100/200V JP",
+      "price": 22680000
+    },
+    {
+      "partNo": "D39801800",
+      "desc": "NXDS Controler PK1",
+      "price": 990000
+    },
+    {
+      "partNo": "A73501803",
+      "desc": "NXDS EXHAUST & GAS BALLAST KIT",
+      "price": 50000
+    },
+    {
+      "partNo": "A73501802",
+      "desc": "nXDS Bearing Replacement Kit",
+      "price": 870000
+    },
+    {
+      "partNo": "A73501801",
+      "desc": "nXDS Tip Seal Service Kit",
+      "price": 380000
+    },
+    {
+      "partNo": "A73501799",
+      "desc": "NXDS Fan Cowl Beta Oval PK1",
+      "price": 100000
+    },
+    {
+      "partNo": "A73501710",
+      "desc": "NXDS HOUSING-STATOR ASSY KIT",
+      "price": 1690000
+    },
+    {
+      "partNo": "A24801441",
+      "desc": "nXDS Vibration Isolator Kit (PK4)",
+      "price": 140000
+    }
+  ],
+  "XDS": [
+    {
+      "partNo": "A73001983",
+      "desc": "XDS35i 100-120/200-230V 1PH 50/60Hz",
+      "price": 11610000
+    },
+    {
+      "partNo": "A73006983",
+      "desc": "XDS35IC 100-120/200-230V 1PH 50/60Hz",
+      "price": 11880000
+    },
+    {
+      "partNo": "A73003983",
+      "desc": "XDS35IE 100-120/200-230V 1PH 50/60Hz Enhanced",
+      "price": 11750000
+    },
+    {
+      "partNo": "A73101983",
+      "desc": "XDS46i 100/230V 1Ph 50/60Hz",
+      "price": 11750000
+    },
+    {
+      "partNo": "A73106983",
+      "desc": "XDS46iC 100-120/200-230V50/60HZ",
+      "price": 11880000
+    },
+    {
+      "partNo": "A73101801",
+      "desc": "XDS46i Tip Seal and Exhaust Service Kit",
+      "price": 560000
+    }
+  ],
+  "nXL": [
+    {
+      "partNo": "A77012320",
+      "desc": "nXL110i HV NW40/NW25",
+      "price": 22280000
+    },
+    {
+      "partNo": "A77012420",
+      "desc": "nXL110i HV NW50/NW25",
+      "price": 22280000
+    },
+    {
+      "partNo": "A77022320",
+      "desc": "nXL200i HV NW40/NW25",
+      "price": 23630000
+    },
+    {
+      "partNo": "A77022420",
+      "desc": "nXL200i HV NW50/NW25",
+      "price": 23630000
+    }
+  ],
+  "GXS": [
+    {
+      "partNo": "GS2150350000",
+      "desc": "GXS160F HV MD RE CA",
+      "price": 25380000
+    },
+    {
+      "partNo": "GS2120050000",
+      "desc": "GXS160F LV LD RE CA",
+      "price": 24570000
+    },
+    {
+      "partNo": "GS2120350000",
+      "desc": "GXS160F LV MD RE CA",
+      "price": 25380000
+    },
+    {
+      "partNo": "GS5150350000",
+      "desc": "GXS160/1750F HV MD RE CA",
+      "price": 39690000
+    },
+    {
+      "partNo": "GS5120050000",
+      "desc": "GXS160/1750F LV LD RE CA",
+      "price": 38340000
+    },
+    {
+      "partNo": "GS5120350000",
+      "desc": "GXS160/1750F LV MD RE CA",
+      "price": 39690000
+    },
+    {
+      "partNo": "GS7150050000",
+      "desc": "GXS250F HV LD RE CA",
+      "price": 25110000
+    },
+    {
+      "partNo": "GS7150350000",
+      "desc": "GXS250F HV MD RE CA",
+      "price": 26460000
+    },
+    {
+      "partNo": "GS7120350000",
+      "desc": "GXS250F LV MD RE CA",
+      "price": 26460000
+    },
+    {
+      "partNo": "GSB150050000",
+      "desc": "GXS250/2600F HV LD RE CA",
+      "price": 39560000
+    },
+    {
+      "partNo": "GSB150350000",
+      "desc": "GXS250/2600F HV MD RE CA",
+      "price": 40910000
+    },
+    {
+      "partNo": "GSB120350000",
+      "desc": "GXS250/2600F LV MD RE CA",
+      "price": 40910000
+    },
+    {
+      "partNo": "GSD152350000",
+      "desc": "GXS450F HV MD RE CA",
+      "price": 37530000
+    },
+    {
+      "partNo": "GSD122350000",
+      "desc": "GXS450F LV MD RE CA",
+      "price": 37530000
+    },
+    {
+      "partNo": "GSF152350000",
+      "desc": "GXS450/2600F HV MD RE CA",
+      "price": 53190000
+    },
+    {
+      "partNo": "GSF122050000",
+      "desc": "GXS450/2600F LV LD RE CA",
+      "price": 51300000
+    },
+    {
+      "partNo": "GSF122350000",
+      "desc": "GXS450/2600F LV MD RE CA",
+      "price": 53190000
+    },
+    {
+      "partNo": "GSG152350000",
+      "desc": "GXS450/4200F HV MD RE CA",
+      "price": 59410000
+    },
+    {
+      "partNo": "GSG122050000",
+      "desc": "GXS450/4200F LV LD RE CA",
+      "price": 57790000
+    },
+    {
+      "partNo": "GSG122350000",
+      "desc": "GXS450/4200F LV MD RE CA",
+      "price": 59410000
+    },
+    {
+      "partNo": "GSL152350000",
+      "desc": "GXS750F HV MD RE CA",
+      "price": 48060000
+    },
+    {
+      "partNo": "GSL152450000",
+      "desc": "GXS750F HV MD+ RE CA",
+      "price": 51980000
+    },
+    {
+      "partNo": "GSL122050000",
+      "desc": "GXS750F LV LD RE CA",
+      "price": 56430000
+    },
+    {
+      "partNo": "GSL122350000",
+      "desc": "GXS750F LV MD RE CA",
+      "price": 59140000
+    },
+    {
+      "partNo": "GSL122450000",
+      "desc": "GXS750F LV MD+ RE CA",
+      "price": 63860000
+    },
+    {
+      "partNo": "GSN152050000",
+      "desc": "GXS750/2600F HV LD RE CA",
+      "price": 65480000
+    },
+    {
+      "partNo": "GSN152350000",
+      "desc": "GXS750/2600F HV MD RE CA",
+      "price": 67370000
+    },
+    {
+      "partNo": "GSN122350000",
+      "desc": "GXS750/2600F LV MD RE CA",
+      "price": 67370000
+    },
+    {
+      "partNo": "GSP152350000",
+      "desc": "GXS750/4200F HV MD RE CA",
+      "price": 68720000
+    },
+    {
+      "partNo": "GSP122350000",
+      "desc": "GXS750/4200F LV MD RE CA",
+      "price": 68720000
+    }
+  ],
+  "EXS": [
+    {
+      "partNo": "A41860904",
+      "desc": "EXS160 HV MD RE CA",
+      "price": 21870000
+    },
+    {
+      "partNo": "A41860905",
+      "desc": "EXS160 LV MD RE CA",
+      "price": 21870000
+    },
+    {
+      "partNo": "A41860914",
+      "desc": "EXS160/1750 HV MD RE CA",
+      "price": 35780000
+    },
+    {
+      "partNo": "A41860915",
+      "desc": "EXS160/1750 LV MD RE CA",
+      "price": 35780000
+    },
+    {
+      "partNo": "A41850904",
+      "desc": "EXS250 HV MD RE CA",
+      "price": 23360000
+    },
+    {
+      "partNo": "A41850905",
+      "desc": "EXS250 LV MD RE CA",
+      "price": 23360000
+    },
+    {
+      "partNo": "A41850914",
+      "desc": "EXS250/2600 HV MD RE CA",
+      "price": 38210000
+    },
+    {
+      "partNo": "A41850915",
+      "desc": "EXS250/2600 LV MD RE CA",
+      "price": 38210000
+    },
+    {
+      "partNo": "A41840900",
+      "desc": "EXS450 HV MD SI",
+      "price": 31600000
+    },
+    {
+      "partNo": "A41840904",
+      "desc": "EXS450 HV MD RE CA",
+      "price": 31870000
+    },
+    {
+      "partNo": "A41840905",
+      "desc": "EXS450 LV MD RE CA",
+      "price": 33620000
+    },
+    {
+      "partNo": "A41840914",
+      "desc": "EXS450/2600 HV MD RE CA",
+      "price": 48600000
+    },
+    {
+      "partNo": "A41840915",
+      "desc": "EXS450/2600 LV MD RE CA",
+      "price": 48600000
+    },
+    {
+      "partNo": "A41840910",
+      "desc": "EXS450/4200 HV MD RE CA",
+      "price": 54140000
+    },
+    {
+      "partNo": "A41840911",
+      "desc": "EXS450/4200 LV MD RE CA",
+      "price": 54140000
+    },
+    {
+      "partNo": "A41870900",
+      "desc": "EXS750 HV MD SI",
+      "price": 39560000
+    },
+    {
+      "partNo": "A41870904",
+      "desc": "EXS750 HV MD RE CA",
+      "price": 40230000
+    },
+    {
+      "partNo": "A41870914",
+      "desc": "EXS750/2600 HV MD RE CA",
+      "price": 59680000
+    },
+    {
+      "partNo": "A41870910",
+      "desc": "EXS750/4200 HV MD RE CA",
+      "price": 62510000
+    }
+  ],
+  "EDS": [
+    {
+      "partNo": "A41821945",
+      "desc": "EDS200 Air Blast EU/CN 50Hz",
+      "price": 33220000
+    },
+    {
+      "partNo": "A41821946",
+      "desc": "EDS200 Air Blast US 60Hz",
+      "price": 33220000
+    },
+    {
+      "partNo": "A41821934",
+      "desc": "EDS200 Air Blast Asia 50Hz",
+      "price": 33220000
+    },
+    {
+      "partNo": "A41821936",
+      "desc": "EDS200 Air Blast Asia 60Hz",
+      "price": 33220000
+    },
+    {
+      "partNo": "A41821957",
+      "desc": "EDS200 Air Blast Canada 60Hz",
+      "price": 33220000
+    },
+    {
+      "partNo": "A41820945",
+      "desc": "EDS200 EU/CN 50Hz DC",
+      "price": 28630000
+    },
+    {
+      "partNo": "A41820946",
+      "desc": "EDS200 US 60Hz DC",
+      "price": 28630000
+    },
+    {
+      "partNo": "A41820934",
+      "desc": "EDS200 Asia 50Hz DC",
+      "price": 28630000
+    },
+    {
+      "partNo": "A41820936",
+      "desc": "EDS200 Asia 60Hz DC",
+      "price": 28630000
+    },
+    {
+      "partNo": "A41820957",
+      "desc": "EDS200 Canada 60Hz DC",
+      "price": 28630000
+    },
+    {
+      "partNo": "A41831945",
+      "desc": "EDS300 Air Blast EU/CN 50Hz",
+      "price": 34290000
+    },
+    {
+      "partNo": "A41831946",
+      "desc": "EDS300 Air Blast US 60Hz",
+      "price": 34290000
+    },
+    {
+      "partNo": "A41831934",
+      "desc": "EDS300 Air Blast Asia 50Hz",
+      "price": 34290000
+    },
+    {
+      "partNo": "A41831936",
+      "desc": "EDS300 Air Blast Asia 60Hz",
+      "price": 34290000
+    },
+    {
+      "partNo": "A41831957",
+      "desc": "EDS300 Air Blast Canada 60Hz",
+      "price": 34290000
+    },
+    {
+      "partNo": "A41830945",
+      "desc": "EDS300 EU/CN 50Hz DC",
+      "price": 30110000
+    },
+    {
+      "partNo": "A41830946",
+      "desc": "EDS300 US 60Hz DC",
+      "price": 30110000
+    },
+    {
+      "partNo": "A41830934",
+      "desc": "EDS300 Asia 50Hz DC",
+      "price": 30110000
+    },
+    {
+      "partNo": "A41830936",
+      "desc": "EDS300 Asia 60Hz DC",
+      "price": 30380000
+    },
+    {
+      "partNo": "A41830957",
+      "desc": "EDS300 Canada 60Hz DC",
+      "price": 30110000
+    },
+    {
+      "partNo": "A41840945",
+      "desc": "EDS480 EU/CN 50Hz DC",
+      "price": 37260000
+    },
+    {
+      "partNo": "A41840946",
+      "desc": "EDS480 US 60Hz DC",
+      "price": 37260000
+    },
+    {
+      "partNo": "A41840934",
+      "desc": "EDS480 Asia 50Hz DC",
+      "price": 37260000
+    },
+    {
+      "partNo": "A41840936",
+      "desc": "EDS480 Asia 60Hz DC",
+      "price": 37260000
+    },
+    {
+      "partNo": "A41840957",
+      "desc": "EDS480 Canada 60Hz DC",
+      "price": 37260000
+    }
+  ],
+  "nEXT": [
+    {
+      "partNo": "B8SM-A0G-60",
+      "desc": "nEXT2807M-DN 250 ISO-F; Profibus",
+      "price": 26330000
+    },
+    {
+      "partNo": "B8SM-A0G-61",
+      "desc": "nEXT2807MDN 250 ISO-F; RS485",
+      "price": 25650000
+    },
+    {
+      "partNo": "B8TM-A0M-60",
+      "desc": "nEXT3207M-DN 320 ISO-F; Profibus",
+      "price": 27680000
+    },
+    {
+      "partNo": "B8TM-A0M-61",
+      "desc": "nEXT3207M-DN 320 ISO-F; RS485",
+      "price": 27000000
+    },
+    {
+      "partNo": "B82200100",
+      "desc": "nEXT300D ISO100 160W",
+      "price": 6350000
+    },
+    {
+      "partNo": "B83200300",
+      "desc": "nEXT400D ISO160 160W",
+      "price": 6620000
+    },
+    {
+      "partNo": "B81200200",
+      "desc": "nEXT240D CF100 160W",
+      "price": 6620000
+    },
+    {
+      "partNo": "B82200200",
+      "desc": "nEXT300D CF100 160W",
+      "price": 6890000
+    },
+    {
+      "partNo": "B83200400",
+      "desc": "nEXT400D CF160 160W",
+      "price": 7230000
+    },
+    {
+      "partNo": "B8G210101",
+      "desc": "NEXT85D ISO100 NW16 80W",
+      "price": 6110000
+    },
+    {
+      "partNo": "B8G210A01",
+      "desc": "NEXT85D NW40 NW16 80W",
+      "price": 6110000
+    },
+    {
+      "partNo": "B8G210B01",
+      "desc": "NEXT85D ISO63 NW16 80W",
+      "price": 6110000
+    },
+    {
+      "partNo": "B8G210C01",
+      "desc": "nEXT85D CF63 NW16 80W",
+      "price": 6240000
+    },
+    {
+      "partNo": "B8G410101",
+      "desc": "nEXT85H ISO100 NW16 80W",
+      "price": 6110000
+    },
+    {
+      "partNo": "B8G410A01",
+      "desc": "nEXT85H NW40 NW16 80W",
+      "price": 6110000
+    },
+    {
+      "partNo": "B8G410B01",
+      "desc": "NEXT85H ISO63 NW16 80W",
+      "price": 6110000
+    },
+    {
+      "partNo": "B8G410C01",
+      "desc": "nEXT85H CF63 NW16 80W",
+      "price": 6240000
+    },
+    {
+      "partNo": "TSB4E1002",
+      "desc": "NEXT240D/NXDS10ISO100/TAV/115V",
+      "price": 22680000
+    },
+    {
+      "partNo": "TSB5E0004",
+      "desc": "NEXT240D/NXDS10I/CF100/240V",
+      "price": 22680000
+    },
+    {
+      "partNo": "TSB5E1001",
+      "desc": "nEXT240D/CF100/nXDS10i/220V EU",
+      "price": 23400000
+    },
+    {
+      "partNo": "TSC431001",
+      "desc": "NEXT300D/ISO100/TAV5/220V (EU)",
+      "price": 20310000
+    },
+    {
+      "partNo": "TSC431004",
+      "desc": "NEXT300D/ISO100/TAV5/240V (UK)",
+      "price": 20160000
+    },
+    {
+      "partNo": "TSC4D1001",
+      "desc": "NEXT300D/NXDS6I/ISO100/240V",
+      "price": 23400000
+    },
+    {
+      "partNo": "TSC4E1001",
+      "desc": "NEXT300D/NXDS10I/ISO100/220V",
+      "price": 24100000
+    },
+    {
+      "partNo": "TSC4G1001",
+      "desc": "NEXT300/NXDS20/SO100/TAV5/220V",
+      "price": 24440000
+    },
+    {
+      "partNo": "TSC531002",
+      "desc": "NEXT300D/CF100/TAV5/115V (USA)",
+      "price": 20570000
+    },
+    {
+      "partNo": "TSC5D1001",
+      "desc": "NEXT300D/NXDS6/CF100/TAV5/220V",
+      "price": 24100000
+    },
+    {
+      "partNo": "TSC5F1001",
+      "desc": "NEXT300D-CF/NXDS151/220V",
+      "price": 24100000
+    },
+    {
+      "partNo": "TSD631001",
+      "desc": "NEXT400D/RV12/ISO160/TAV5/220V",
+      "price": 20310000
+    },
+    {
+      "partNo": "TSD6E1001",
+      "desc": "NEXT400D/ISO160/TAV5/220V (EU)",
+      "price": 24440000
+    },
+    {
+      "partNo": "TSD6G1002",
+      "desc": "NEXT400D/NXDS201/ISO160/115V",
+      "price": 24950000
+    },
+    {
+      "partNo": "B8G200845",
+      "desc": "nEXT85 Bearing Exchange Tooling",
+      "price": 930000
+    },
+    {
+      "partNo": "B8G200827",
+      "desc": "nEXT85/nEXT55 Bearing Assembly",
+      "price": 1020000
+    }
+  ],
+  "EM": [
+    {
+      "partNo": "A46220000",
+      "desc": "EMF3 Oil Mist Filter NW10",
+      "price": 210000
+    },
+    {
+      "partNo": "A46226000",
+      "desc": "EMF10 Oil Mist Filter NW25",
+      "price": 260000
+    },
+    {
+      "partNo": "A46229000",
+      "desc": "EMF20 Oil Mist Filter NW25",
+      "price": 320000
+    },
+    {
+      "partNo": "A50420000",
+      "desc": "EM18 + 28/EMF Oil Return Kit",
+      "price": 240000
+    },
+    {
+      "partNo": "A50005000",
+      "desc": "EM175+275/MF Oil Return",
+      "price": 1450000
+    },
+    {
+      "partNo": "A46229000",
+      "desc": "EMF20 Oil Mist Filter NW25",
+      "price": 370000
+    },
+    {
+      "partNo": "A46226000",
+      "desc": "EMF10 Oil Mist Filter NW25",
+      "price": 260000
+    },
+    {
+      "partNo": "A46220000",
+      "desc": "EMF3 Oil Mist Filter NW10",
+      "price": 240000
+    }
+  ]
+}
