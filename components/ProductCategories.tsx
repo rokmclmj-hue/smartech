@@ -11,10 +11,10 @@ const ITEMS = [
   { category: "부스터펌프(EH)",            code: "EH 시리즈",            title: "루츠 부스터 펌프",                   image: "/images/products/eh.jpeg" },
   { category: "스크롤펌프(소형 nXDS)",     code: "nXDS 시리즈",          title: "드라이 스크롤 펌프 (소형 nXDS)",    image: "/images/products/xds.jpeg" },
   { category: "스크롤펌프(중형 XDS)",      code: "XDS 시리즈",           title: "드라이 스크롤 펌프 (중형 XDS)",     image: "/images/products/xds.jpeg" },
-  { category: "산업용드라이펌프(GXS)",     code: "GXS 시리즈",           title: "산업용 드라이 스크류",               image: "/images/products/gxs.jpeg" },
-  { category: "산업용드라이펌프(EXS)",     code: "EXS 시리즈",           title: "부식성 환경 드라이 스크류",          image: "/images/products/exs.jpeg" },
+  { category: "산업용드라이펌프(GXS)",     code: "GXS 시리즈",           title: "산업용 드라이 펌프",                 image: "/images/products/gxs.jpeg",         label: "산업용스크루펌프(GXS)" },
+  { category: "산업용드라이펌프(EXS)",     code: "EXS 시리즈",           title: "산업용 드라이 펌프",                 image: "/images/products/exs.jpeg",         label: "산업용스크루펌프(EXS)" },
   { category: "반도체드라이펌프(iXH)",     code: "iXH 시리즈",           title: "반도체 드라이 펌프 (iXH)",           image: "/images/products/ixh-ixl.jpeg" },
-  { category: "반도체드라이펌프(nXRi)",    code: "nXRi 시리즈",          title: "반도체 드라이 펌프 (nXRi)",          image: "/images/products/nxri.jpeg" },
+  { category: "반도체드라이펌프(nXRi)",    code: "nXRi 시리즈",          title: "연구소용 드라이 펌프",               image: "/images/products/nxri.jpeg",        label: "멀티루츠드라이펌프(nXRi)" },
   { category: "반도체드라이펌프(iXL)",     code: "iXL 시리즈",           title: "반도체 드라이 펌프 (iXL)",           image: "/images/products/ixh-ixl.jpeg" },
   { category: "터보펌프(nEXT)",            code: "nEXT 시리즈",          title: "터보분자 펌프 (nEXT)",               image: "/images/products/next.png" },
   { category: "터보펌프(nEXT Station)",    code: "nEXT Station",         title: "터보 펌핑 스테이션",                 image: "/images/products/t-station.jpeg" },
@@ -61,7 +61,7 @@ export default function ProductCategories() {
             </div>
 
             <div className="display text-[18px] leading-[1.2] line-clamp-2">{item.title}</div>
-            <div className="mono text-[11px] opacity-60 mt-1">{item.category}</div>
+            <div className="mono text-[11px] opacity-60 mt-1">{(item as any).label ?? item.category}</div>
 
             <div className="mt-3 text-[11px] opacity-70 group-hover:opacity-100">제품 보기 →</div>
           </Link>

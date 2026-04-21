@@ -25,7 +25,7 @@ const CATALOG_ITEMS: CatalogItem[] = [
   { category: "산업용드라이펌프(GXS)",      desc: "산업용 드라이 스크류",               seriesKey: "GXS"  },
   { category: "산업용드라이펌프(EXS)",      desc: "부식성 환경 드라이 스크류",          seriesKey: "EXS"  },
   { category: "반도체드라이펌프(iXH)",      desc: "반도체 드라이 펌프 (iXH)"                             },
-  { category: "반도체드라이펌프(nXRi)",     desc: "반도체 드라이 펌프 (nXRi)"                            },
+  { category: "반도체드라이펌프(nXRi)",     desc: "멀티루츠드라이펌프(nXRi)"                             },
   { category: "반도체드라이펌프(iXL)",      desc: "반도체 드라이 펌프 (iXL)"                             },
   { category: "터보펌프(nEXT)",             desc: "터보분자 펌프 (nEXT)",               seriesKey: "nEXT" },
   { category: "터보펌프(nEXT Station)",     desc: "터보 펌핑 스테이션",                 seriesKey: "nEXT" },

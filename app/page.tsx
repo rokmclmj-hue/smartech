@@ -65,7 +65,7 @@ export default function Home() {
                   </div>
                 </Link>
               </div>
-              <div className="mt-10 hidden md:flex flex-wrap items-center gap-x-6 gap-y-2 text-[12px] mono dim hero-rise" style={{ ["--rd" as never]: ".9s" }}>
+              <div className="mt-10 hidden md:flex flex-wrap items-center gap-x-6 gap-y-2 text-[12px] mono text-black hero-rise" style={{ ["--rd" as never]: ".9s" }}>
                 <span>CALL  031–204–7170</span>
                 <span>·</span>
                 <span>MAIL  rokmclmj@gmail.com</span>
@@ -557,7 +557,7 @@ const STEPS = [
     desc: "오일·드라이·터보·부스터 전 라인업 중 공정 요건에 정확히 부합하는 최적 구성을 제안합니다. 불필요한 비용 없이, 공정 신뢰성을 충족하는 사양을 찾습니다.",
   },
   {
-    title: "정품제품공급",
+    title: "정품 공급",
     desc: "스마텍은 Edwards 정품만을 공식 유통 경로를 통해 공급합니다. 제품의 출처와 품질, 보증까지 책임집니다.",
   },
   {
@@ -569,8 +569,8 @@ const STEPS = [
     desc: "PM 스케줄 수립부터 현장 서비스 투입까지. 장비가 멈추기 전에 스마텍이 먼저 움직입니다.",
   },
   {
-    title: "정품수리부품공급",
-    desc: "소모품과 메이저 파트는 국내 재고를 보유하고 있어 최단 납기로 공급 가능합니다. 그 외 부품도 직접 챙겨 드립니다.",
+    title: "30년경력수리전문",
+    desc: "30년 이상 Edwards 펌프를 다뤄온 전문가가 직접 분해·점검·조립합니다. 소모품·주요 파트 국내 재고 보유로 수리 후 빠른 복귀까지 — 가동 중단 시간을 최소화 합니다.",
   },
 ];
 
