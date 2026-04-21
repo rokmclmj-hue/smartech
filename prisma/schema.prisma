@@ -15,8 +15,8 @@ model Product {
   isImportant Boolean     @default(false)
   category    String?
   pdfFile     String?
-  quoteItems  QuoteItem[]
   createdAt   DateTime    @default(now())
+  quoteItems  QuoteItem[]
 }
 
 model User {
@@ -26,8 +26,8 @@ model User {
   company      String
   passwordHash String
   tier         String   @default("PENDING")
-  quotes       Quote[]
   createdAt    DateTime @default(now())
+  quotes       Quote[]
 }
 
 model PriceRule {
@@ -37,20 +37,20 @@ model PriceRule {
 
 model Quote {
   id        Int         @id @default(autoincrement())
-  user      User        @relation(fields: [userId], references: [id])
   userId    Int
   status    String      @default("DRAFT")
   note      String?
-  items     QuoteItem[]
   createdAt DateTime    @default(now())
+  user      User        @relation(fields: [userId], references: [id])
+  items     QuoteItem[]
 }
 
 model QuoteItem {
   id        Int     @id @default(autoincrement())
-  quote     Quote   @relation(fields: [quoteId], references: [id], onDelete: Cascade)
   quoteId   Int
-  product   Product @relation(fields: [productId], references: [id])
   productId Int
   quantity  Int
   unitPrice Float
+  product   Product @relation(fields: [productId], references: [id])
+  quote     Quote   @relation(fields: [quoteId], references: [id], onDelete: Cascade)
 }
