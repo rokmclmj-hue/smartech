@@ -32,10 +32,10 @@ SECTIONS = [
     (FILE1,  867,  1262, "iXH1210H",  1, 5),
     (FILE1, 1269,  1667, "iXH1220H",  1, 5),
     (FILE1, 1674,  2071, "iXH1820H",  1, 5),
-    (FILE2,   20,   425, "iXH3030",   2, 5),
-    (FILE2,  432,   823, "iXH3045H",  2, 5),
-    (FILE2,  830,  1235, "iXH4550HT", 2, 5),
-    (FILE2, 1242,  1639, "iXH6050H",  2, 5),
+    (FILE2,   20,   425, "iXH3030",   2, 5),  # col1=gearbox, col2=inlet
+    (FILE2,  432,   823, "iXH3045H",  1, 5),  # col1=inlet, col2=gearbox (swapped vs 3030)
+    (FILE2,  830,  1235, "iXH4550HT", 1, 5),  # col1=inlet, col2=gearbox
+    (FILE2, 1242,  1639, "iXH6050H",  1, 5),  # col1=inlet, col2=gearbox
 ]
 
 def logspace(p_start, p_end, n):

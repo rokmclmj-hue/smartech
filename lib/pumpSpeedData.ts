@@ -72,7 +72,7 @@ const RV: PumpModel[] = [
 // ─────────────────────────────────────────────────────
 const E2M_small: PumpModel[] = [
   {
-    model:"E2M0.7", series:"E2M_small", type:"oil_vane", speed50Hz:0.75, speed60Hz:0.90, ultimate:3.0e-3, motorKW_50Hz:0.09,
+    model:"E2M0.7", series:"E2M_small", type:"oil_vane", speed50Hz:0.75, speed60Hz:0.90, ultimate:3.0e-3, motorKW_50Hz:0.09, inletFlange:"NW10",
     speedCurve: [
       [935.5385,0.89],[527.2201,0.97],[287.8181,1.02],[163.7076,1.05],[93.1127,1.07],[52.9748,1.07],
       [28.7072,1.06],[16.4321,1.04],[9.4331,1.03],[5.1542,1.02],[2.8276,1.01],[1.6416,0.99],
@@ -81,7 +81,7 @@ const E2M_small: PumpModel[] = [
     ],
   },
   {
-    model:"E2M1.5", series:"E2M_small", type:"oil_vane", speed50Hz:1.6,  speed60Hz:1.9,  ultimate:3.0e-3, motorKW_50Hz:0.16,
+    model:"E2M1.5", series:"E2M_small", type:"oil_vane", speed50Hz:1.6,  speed60Hz:1.9,  ultimate:3.0e-3, motorKW_50Hz:0.16, inletFlange:"NW16",
     speedCurve: [
       [922.1388,1.95],[523.4618,1.97],[289.7466,2.0],[164.9129,2.01],[93.8011,2.02],[53.3532,2.02],
       [28.8492,2.01],[16.4538,2.01],[9.4176,1.99],[5.1444,1.97],[2.9716,1.94],[1.6587,1.82],
@@ -114,10 +114,45 @@ const E2M_small: PumpModel[] = [
 // Source: 2.오일펌프_중대형E2M.pdf
 // ─────────────────────────────────────────────────────
 const E2M_large: PumpModel[] = [
-  { model:"E2M40",  series:"E2M_large", type:"oil_vane", speed50Hz:37,  speed60Hz:44,  ultimate:3.0e-3, motorKW_50Hz:1.1,  inletFlange:"NW40"  },
-  { model:"E2M80",  series:"E2M_large", type:"oil_vane", speed50Hz:74,  speed60Hz:90,  ultimate:3.0e-3, motorKW_50Hz:2.2,  inletFlange:"NW50"  },
-  { model:"E2M175", series:"E2M_large", type:"oil_vane", speed50Hz:160, speed60Hz:196, ultimate:3.0e-3, motorKW_50Hz:5.5,  inletFlange:"ISO100" },
-  { model:"E2M275", series:"E2M_large", type:"oil_vane", speed50Hz:255, speed60Hz:306, ultimate:3.0e-3, motorKW_50Hz:7.5,  inletFlange:"ISO100" },
+  // speedCurve: Edwards PumpCalc CSV (2026-04-23), 100L SUS+Viton, NW40, Air, GB off, 60Hz
+  // E2M40: 1m 3-bend (300s) → BPP min 0.019 mbar; 끝점은 카탈로그 얼티밋(3e-3 mbar)
+  {
+    model:"E2M40",  series:"E2M_large", type:"oil_vane", speed50Hz:37,  speed60Hz:44,  ultimate:3.0e-3, motorKW_50Hz:1.1,  inletFlange:"NW40",
+    speedCurve: [
+      [957.7591,44.0],[535.1411,44.0],[309.0488,44.0],[173.4066,44.0],[99.902,44.0],[54.0128,44.0],
+      [30.8377,44.0],[17.5335,44.0],[9.9565,44.0],[5.6466,44.01],[3.1995,43.44],[1.8184,42.42],
+      [1.0388,40.69],[0.5656,38.55],[0.3257,35.9],[0.1808,32.47],[0.103,28.84],[0.058,25.88],
+      [0.0334,22.95],[0.0188,19.8],[0.003,0.0],
+    ],
+  },
+  // E2M80: PD2 2m 3-bend (300s) → sim min 0.014 mbar; 끝점 카탈로그 얼티밋(3e-3 mbar)
+  {
+    model:"E2M80",  series:"E2M_large", type:"oil_vane", speed50Hz:74,  speed60Hz:90,  ultimate:3.0e-3, motorKW_50Hz:2.2,  inletFlange:"NW40",
+    speedCurve: [
+      [933.3417,80.0],[520.2911,80.0],[287.0475,80.2],[161.1738,80.13],[88.4053,80.19],[50.3422,81.59],
+      [28.5785,81.62],[15.4307,81.69],[8.7503,81.28],[4.9234,80.37],[2.7466,80.31],[1.5218,79.52],
+      [0.8378,77.61],[0.4719,68.58],[0.2659,61.16],[0.1436,53.0],[0.0809,44.92],[0.0454,35.31],
+      [0.0251,28.9],[0.0143,24.37],[0.003,0.0],
+    ],
+  },
+  {
+    model:"E2M175", series:"E2M_large", type:"oil_vane", speed50Hz:160, speed60Hz:196, ultimate:3.0e-3, motorKW_50Hz:5.5,  inletFlange:"ISO63",
+    speedCurve: [
+      [685.9231,186.0],[456.1912,186.0],[316.6529,186.01],[206.9638,186.0],[140.4162,185.99],[94.4259,186.02],
+      [63.0302,185.99],[41.8636,185.99],[29.2348,186.0],[19.413,186.02],[12.9259,186.02],[8.6651,185.64],
+      [5.8824,184.71],[3.9715,182.56],[2.6978,179.66],[1.7815,174.76],[1.2015,168.04],[0.8249,158.61],
+      [0.5525,143.38],[0.3679,123.52],[0.003,0.0],
+    ],
+  },
+  {
+    model:"E2M275", series:"E2M_large", type:"oil_vane", speed50Hz:255, speed60Hz:306, ultimate:3.0e-3, motorKW_50Hz:7.5,  inletFlange:"ISO63",
+    speedCurve: [
+      [610.784,288.07],[414.2005,288.0],[273.444,288.0],[187.1679,288.0],[127.0429,287.99],[81.3485,287.99],
+      [57.1641,288.0],[38.0275,287.99],[25.2355,288.0],[16.7481,288.02],[11.2016,287.89],[7.5513,287.09],
+      [5.1901,285.05],[3.4004,280.94],[2.3448,273.91],[1.5748,261.79],[1.0352,242.27],[0.6923,218.16],
+      [0.4691,191.26],[0.3148,163.0],[0.003,0.0],
+    ],
+  },
 ];
 
 // ─────────────────────────────────────────────────────
@@ -126,7 +161,7 @@ const E2M_large: PumpModel[] = [
 // ─────────────────────────────────────────────────────
 const nES: PumpModel[] = [
   {
-    model:"nES40",   series:"nES", type:"oil_vane", speed50Hz:38.5, speed60Hz:47.0,  ultimate:0.5,  motorKW_50Hz:1.3,
+    model:"nES40",   series:"nES", type:"oil_vane", speed50Hz:38.5, speed60Hz:47.0,  ultimate:0.5,  motorKW_50Hz:1.3,  inletFlange:"NW40",
     speedCurve: [
       [600.5769,46.6],[405.8589,46.12],[281.0746,45.3],[192.5521,44.82],[136.4251,45.51],[90.9759,45.98],
       [63.7121,45.82],[44.457,46.04],[30.9667,46.13],[20.4624,45.85],[14.2749,44.92],[10.0213,44.2],
@@ -135,7 +170,7 @@ const nES: PumpModel[] = [
     ],
   },
   {
-    model:"nES65",   series:"nES", type:"oil_vane", speed50Hz:54.0, speed60Hz:64.0,  ultimate:0.5,  motorKW_50Hz:1.8,
+    model:"nES65",   series:"nES", type:"oil_vane", speed50Hz:54.0, speed60Hz:64.0,  ultimate:0.5,  motorKW_50Hz:1.8,  inletFlange:"NW40",
     speedCurve: [
       [515.3837,64.13],[360.56,63.08],[248.6853,62.54],[169.616,62.35],[120.266,62.31],[84.6472,62.34],
       [56.2536,62.32],[39.2849,61.4],[27.4535,60.31],[19.2093,59.04],[13.4733,57.29],[9.0895,55.13],
@@ -144,7 +179,7 @@ const nES: PumpModel[] = [
     ],
   },
   {
-    model:"nES100",  series:"nES", type:"oil_vane", speed50Hz:87.5, speed60Hz:105.0, ultimate:0.5,  motorKW_50Hz:3.0,
+    model:"nES100",  series:"nES", type:"oil_vane", speed50Hz:87.5, speed60Hz:105.0, ultimate:0.5,  motorKW_50Hz:3.0,  inletFlange:"NW40",
     speedCurve: [
       [385.3551,105.41],[265.9203,105.17],[190.8058,104.86],[136.0682,104.08],[96.4081,103.34],[67.8665,102.77],
       [47.5273,102.26],[33.1915,101.59],[23.1796,100.58],[16.205,98.89],[11.3665,96.32],[8.4084,93.92],
@@ -153,7 +188,7 @@ const nES: PumpModel[] = [
     ],
   },
   {
-    model:"nES200",  series:"nES", type:"oil_vane", speed50Hz:170,  speed60Hz:200,   ultimate:0.08, motorKW_50Hz:4.5,
+    model:"nES200",  series:"nES", type:"oil_vane", speed50Hz:170,  speed60Hz:200,   ultimate:0.08, motorKW_50Hz:4.5,  inletFlange:"ISO63",
     speedCurve: [
       [242.3528,197.74],[158.3111,194.91],[102.3024,193.93],[68.7015,194.02],[45.7906,194.43],[28.8695,193.16],
       [19.1526,189.96],[12.7327,185.07],[8.5346,175.97],[5.5034,163.29],[3.6182,150.2],[2.3827,131.14],
@@ -162,7 +197,7 @@ const nES: PumpModel[] = [
     ],
   },
   {
-    model:"nES300",  series:"nES", type:"oil_vane", speed50Hz:240,  speed60Hz:290,   ultimate:0.08, motorKW_50Hz:5.5,
+    model:"nES300",  series:"nES", type:"oil_vane", speed50Hz:240,  speed60Hz:290,   ultimate:0.08, motorKW_50Hz:5.5,  inletFlange:"ISO63",
     speedCurve: [
       [192.6178,273.43],[131.75,266.59],[89.3756,260.8],[63.2196,255.88],[42.2866,251.06],[29.6249,246.88],
       [19.6682,241.93],[13.735,237.26],[9.6438,231.03],[6.4894,222.26],[4.4033,211.63],[3.0509,198.57],
@@ -170,11 +205,11 @@ const nES: PumpModel[] = [
       [0.2197,12.72],[0.1504,0.06],[0.1504,0.0],
     ],
   },
-  { model:"nES300S", series:"nES", type:"oil_vane", speed50Hz:284,  speed60Hz:330,   ultimate:0.08, motorKW_50Hz:6.0  },
-  { model:"nES470",  series:"nES", type:"oil_vane", speed50Hz:400,  speed60Hz:470,   ultimate:0.08, motorKW_50Hz:11.0 },
-  { model:"nES570",  series:"nES", type:"oil_vane", speed50Hz:470,  speed60Hz:0,     ultimate:0.08, motorKW_50Hz:11.0 },
+  { model:"nES300S", series:"nES", type:"oil_vane", speed50Hz:284,  speed60Hz:330,   ultimate:0.08, motorKW_50Hz:6.0,  inletFlange:"ISO63"  },
+  { model:"nES470",  series:"nES", type:"oil_vane", speed50Hz:400,  speed60Hz:470,   ultimate:0.08, motorKW_50Hz:11.0, inletFlange:"ISO100" },
+  { model:"nES570",  series:"nES", type:"oil_vane", speed50Hz:470,  speed60Hz:0,     ultimate:0.08, motorKW_50Hz:11.0, inletFlange:"ISO100" },
   {
-    model:"nES630",  series:"nES", type:"oil_vane", speed50Hz:640,  speed60Hz:755,   ultimate:0.08, motorKW_50Hz:18.5,
+    model:"nES630",  series:"nES", type:"oil_vane", speed50Hz:640,  speed60Hz:755,   ultimate:0.08, motorKW_50Hz:18.5, inletFlange:"ISO100",
     speedCurve: [
       [152.4263,719.6],[103.6341,712.31],[69.9129,702.53],[46.8284,688.98],[31.2003,673.22],[20.7282,652.3],
       [13.7514,633.15],[9.6148,613.5],[6.4733,582.58],[4.2033,532.16],[2.9188,481.65],[1.9526,408.16],
@@ -182,7 +217,7 @@ const nES: PumpModel[] = [
       [0.1198,8.65],[0.0806,0.12],[0.0806,0.0],
     ],
   },
-  { model:"nES750",  series:"nES", type:"oil_vane", speed50Hz:755,  speed60Hz:0,     ultimate:0.08, motorKW_50Hz:18.5 },
+  { model:"nES750",  series:"nES", type:"oil_vane", speed50Hz:755,  speed60Hz:0,     ultimate:0.08, motorKW_50Hz:18.5, inletFlange:"ISO100" },
 ];
 
 // ─────────────────────────────────────────────────────
@@ -203,8 +238,8 @@ const EH: PumpModel[] = [
 // Source: 7-1.산업용드라이_EXS.pdf
 // ─────────────────────────────────────────────────────
 const EXS: PumpModel[] = [
-  { model:"EXS160",  series:"EXS", type:"dry_screw", speed50Hz:160, speed60Hz:192, ultimate:1.0e-2, motorKW_50Hz:0 },
-  { model:"EXS250",  series:"EXS", type:"dry_screw", speed50Hz:250, speed60Hz:300, ultimate:1.0e-2, motorKW_50Hz:0 },
+  { model:"EXS160",  series:"EXS", type:"dry_screw", speed50Hz:160, speed60Hz:192, ultimate:1.0e-2, motorKW_50Hz:0, inletFlange:"ISO63"  },
+  { model:"EXS250",  series:"EXS", type:"dry_screw", speed50Hz:250, speed60Hz:300, ultimate:1.0e-2, motorKW_50Hz:0, inletFlange:"ISO63"  },
 ];
 
 // ─────────────────────────────────────────────────────
@@ -398,7 +433,7 @@ const GXS_GXB: PumpModel[] = [
 const iXH: PumpModel[] = [
   {
     model:"iXH100", series:"iXH", type:"dry_screw",
-    speed50Hz:0, speed60Hz:97.8, ultimate:0.031, motorKW_50Hz:0,
+    speed50Hz:0, speed60Hz:97.8, ultimate:0.031, motorKW_50Hz:0, inletFlange:"ISO63",
     speedCurve: [
       [916.7974,53.29],[525.7093,55.84],[313.2807,58.66],[181.8397,62.39],[102.823,69.41],
       [61.0606,75.9],[34.6274,83.35],[20.5095,89.5],[12.0813,93.3],[7.0129,96.54],
@@ -408,7 +443,7 @@ const iXH: PumpModel[] = [
   },
   {
     model:"iXH200H", series:"iXH", type:"dry_screw",
-    speed50Hz:0, speed60Hz:217.6, ultimate:0.069, motorKW_50Hz:0,
+    speed50Hz:0, speed60Hz:217.6, ultimate:0.069, motorKW_50Hz:0, inletFlange:"ISO63",
     speedCurve: [
       [895.0872,72.9],[536.3537,81.68],[326.1404,92.97],[203.1053,107.11],[123.4611,133.55],
       [74.1637,162.36],[44.6565,184.76],[27.2386,196.75],[16.2068,205.21],[10.15,209.89],
@@ -418,7 +453,7 @@ const iXH: PumpModel[] = [
   },
   {
     model:"iXH610", series:"iXH", type:"dry_screw",
-    speed50Hz:0, speed60Hz:645.8, ultimate:0.0017, motorKW_50Hz:0,
+    speed50Hz:0, speed60Hz:645.8, ultimate:0.0017, motorKW_50Hz:0, inletFlange:"ISO100",
     speedCurve: [
       [869.6297,64.45],[431.7764,68.03],[224.1734,83.5],[111.2405,112.04],[55.854,159.0],
       [28.2241,218.11],[13.3606,301.86],[6.7977,398.25],[3.416,488.2],[1.7484,554.9],
@@ -428,7 +463,7 @@ const iXH: PumpModel[] = [
   },
   {
     model:"iXH1210H", series:"iXH", type:"dry_screw",
-    speed50Hz:0, speed60Hz:714.1, ultimate:0.0054, motorKW_50Hz:0,
+    speed50Hz:0, speed60Hz:714.1, ultimate:0.0054, motorKW_50Hz:0, inletFlange:"ISO100",
     speedCurve: [
       [781.8352,109.34],[411.2925,81.92],[218.8318,94.3],[121.3432,114.88],[64.9854,153.75],
       [34.9048,210.34],[18.552,287.04],[9.6409,381.59],[5.2208,478.95],[2.7474,569.34],
@@ -438,7 +473,7 @@ const iXH: PumpModel[] = [
   },
   {
     model:"iXH1220H", series:"iXH", type:"dry_screw",
-    speed50Hz:0, speed60Hz:857.0, ultimate:0.0036, motorKW_50Hz:0,
+    speed50Hz:0, speed60Hz:857.0, ultimate:0.0036, motorKW_50Hz:0, inletFlange:"ISO100",
     speedCurve: [
       [755.693,125.99],[404.3269,101.77],[205.6876,132.24],[108.764,177.64],[56.3595,252.12],
       [30.6418,344.47],[15.9053,458.76],[8.316,579.07],[4.244,708.08],[2.313,797.91],
@@ -448,7 +483,7 @@ const iXH: PumpModel[] = [
   },
   {
     model:"iXH1820H", series:"iXH", type:"dry_screw",
-    speed50Hz:0, speed60Hz:1021.1, ultimate:0.0035, motorKW_50Hz:0,
+    speed50Hz:0, speed60Hz:1021.1, ultimate:0.0035, motorKW_50Hz:0, inletFlange:"ISO160",
     speedCurve: [
       [778.0078,107.95],[412.7174,96.74],[212.5796,121.91],[114.3427,158.66],[57.7146,222.79],
       [30.4806,305.11],[15.3423,405.16],[8.0903,517.1],[4.2492,656.15],[2.2576,787.0],
@@ -458,7 +493,7 @@ const iXH: PumpModel[] = [
   },
   {
     model:"iXH3030", series:"iXH", type:"dry_screw",
-    speed50Hz:0, speed60Hz:879.5, ultimate:0.0047, motorKW_50Hz:0,
+    speed50Hz:0, speed60Hz:879.5, ultimate:0.0047, motorKW_50Hz:0, inletFlange:"ISO160",
     speedCurve: [
       [745.0502,92.47],[405.2139,72.42],[208.3366,99.99],[112.5308,138.53],[60.5474,200.25],
       [32.6503,300.72],[16.9485,412.56],[8.7815,531.76],[4.7344,649.57],[2.5245,753.47],
@@ -468,32 +503,32 @@ const iXH: PumpModel[] = [
   },
   {
     model:"iXH3045H", series:"iXH", type:"dry_screw",
-    speed50Hz:0, speed60Hz:1168.7, ultimate:0.0079, motorKW_50Hz:0,
+    speed50Hz:0, speed60Hz:1168.7, ultimate:0.0079, motorKW_50Hz:0, inletFlange:"ISO160",
     speedCurve: [
-      [241.5533,183.4],[140.0096,156.75],[81.5702,1168.65],[47.1897,808.53],[27.6565,646.9],
-      [16.218,608.74],[9.3707,583.3],[5.2651,538.8],[3.1744,468.5],[1.8483,362.54],
-      [1.0676,259.26],[0.6079,179.17],[0.3554,127.38],[0.204,92.57],[0.1207,71.13],
-      [0.0705,56.39],[0.0407,46.07],[0.0234,38.65],[0.0134,33.15],[0.0079,28.96],[0.0079,0.0],
+      [530.1143,192.95],[270.8319,173.7],[137.7179,241.67],[70.7188,341.67],[36.3798,465.22],
+      [17.6104,605.28],[9.3943,738.89],[4.5612,896.12],[2.3549,1042.23],[1.1862,1126.55],
+      [0.6177,1168.03],[0.3024,1122.12],[0.155,985.58],[0.0784,808.53],[0.0416,688.98],
+      [0.0211,631.86],[0.0107,599.97],[0.0052,566.38],[0.0027,461.2],[0.0014,28.96],[0.0014,0.0],
     ],
   },
   {
     model:"iXH4550HT", series:"iXH", type:"dry_screw",
-    speed50Hz:0, speed60Hz:1326.5, ultimate:0.0083, motorKW_50Hz:0,
+    speed50Hz:0, speed60Hz:1326.5, ultimate:0.0083, motorKW_50Hz:0, inletFlange:"ISO160",
     speedCurve: [
-      [344.2063,120.4],[196.213,736.49],[112.9083,1326.46],[64.3479,897.08],[36.0092,666.64],
-      [21.0146,652.36],[12.0169,644.38],[6.987,599.41],[3.9294,495.1],[2.1962,363.74],
-      [1.2727,252.91],[0.7284,169.9],[0.4096,114.48],[0.2363,81.5],[0.1338,60.14],
-      [0.0784,47.12],[0.0454,38.12],[0.0249,31.23],[0.0143,26.63],[0.0083,23.05],[0.0083,0.0],
+      [687.2652,135.38],[342.6889,124.31],[174.1821,199.92],[91.945,291.2],[44.9173,440.88],
+      [23.3263,600.31],[12.1219,755.08],[6.1126,923.38],[3.0865,1112.39],[1.5421,1263.64],
+      [0.8004,1324.65],[0.4044,1295.05],[0.1985,1122.73],[0.1032,897.08],[0.0503,714.56],
+      [0.0254,654.0],[0.0129,653.91],[0.0069,637.21],[0.0034,521.58],[0.0017,23.05],[0.0017,0.0],
     ],
   },
   {
     model:"iXH6050H", series:"iXH", type:"dry_screw",
-    speed50Hz:0, speed60Hz:1280.8, ultimate:0.0072, motorKW_50Hz:0,
+    speed50Hz:0, speed60Hz:1300.1, ultimate:0.0072, motorKW_50Hz:0, inletFlange:"ISO160",
     speedCurve: [
-      [328.6481,126.13],[187.479,110.6],[105.8745,1280.82],[60.2956,207.92],[33.8654,847.79],
-      [19.6475,793.88],[11.2085,744.75],[6.287,694.26],[3.5895,612.88],[2.0059,505.54],
-      [1.1604,400.01],[0.6624,302.56],[0.3711,223.93],[0.2133,170.24],[0.1204,131.96],
-      [0.0702,106.99],[0.0385,87.52],[0.022,74.59],[0.0126,64.86],[0.0072,57.33],[0.0072,0.0],
+      [665.4745,132.93],[323.347,130.1],[154.2984,210.11],[73.9461,321.72],[35.5486,480.54],
+      [18.3383,617.02],[8.5264,777.19],[4.1401,949.89],[2.0747,1123.95],[0.9593,1245.25],
+      [0.4603,1300.1],[0.2236,1237.61],[0.1138,1089.39],[0.0553,931.18],[0.0257,851.89],
+      [0.0128,803.25],[0.0063,744.75],[0.0029,658.45],[0.0014,464.94],[0.0007,57.33],[0.0007,0.0],
     ],
   },
 ];
@@ -516,6 +551,96 @@ export const ALL_PUMPS: PumpModel[] = [
 export const PUMPS_BY_SERIES: Record<string, PumpModel[]> = {
   RV, E2M_small, E2M_large, nES, EH, EXS, nXDS, GXS, GXS_GXB, iXH,
 };
+
+// ─────────────────────────────────────────────────────
+// 표준 플랜지 규격 및 배관 최적화 추천
+// ─────────────────────────────────────────────────────
+
+/** KF(NW) / ISO 표준 플랜지: 이름, 내경(mm) */
+export const STANDARD_FLANGES = [
+  { name: "NW10",   id_mm: 10  },
+  { name: "NW16",   id_mm: 16  },
+  { name: "NW25",   id_mm: 25  },
+  { name: "NW40",   id_mm: 40  },
+  { name: "NW50",   id_mm: 50  },
+  { name: "ISO63",  id_mm: 63  },
+  { name: "ISO100", id_mm: 100 },
+  { name: "ISO160", id_mm: 160 },
+  { name: "ISO200", id_mm: 200 },
+] as const;
+
+export type FlangeEntry = typeof STANDARD_FLANGES[number];
+
+export type PipeRecommendation = {
+  /** 추천 플랜지 규격 */
+  recommended: { name: string; id_mm: number; conductance_m3h: number; efficiencyPct: number };
+  /** 한 단계 작은 규격 (비교용) */
+  smaller:     { name: string; id_mm: number; conductance_m3h: number; efficiencyPct: number } | null;
+  /** 한 단계 큰 규격 (비교용) */
+  larger:      { name: string; id_mm: number; conductance_m3h: number; efficiencyPct: number } | null;
+  note?: string;
+};
+
+/**
+ * AI 상담용 최적 배관 플랜지 추천
+ *
+ * 분자류 컨덕턴스(저압 한계, p→0)를 기준으로 사용.
+ * → 러프/미디엄 진공 전 구간에서 보수적으로 안전한 규격 산출.
+ *
+ * 목표 효율(기본 95%): S_eff / S_pump ≥ targetEfficiency
+ * 수학적으로 C_pipe ≥ S_pump × ratio / (1 - ratio) 를 만족하는 최소 규격 선택.
+ * 펌프 자체 흡입구 플랜지보다 큰 규격은 추천하지 않음.
+ */
+export function recommendPipe(
+  pump: PumpModel,
+  pipeLength_m: number,
+  pipeBends = 0,
+  hz: 50 | 60 = 60,
+  targetEfficiency = 0.95,
+): PipeRecommendation {
+  const S_pump = hz === 50 ? pump.speed50Hz : pump.speed60Hz;
+
+  // 펌프 흡입구 플랜지 내경 파악 (상한 캡용)
+  const inletID = pump.inletFlange
+    ? (STANDARD_FLANGES.find(f => f.name === pump.inletFlange)?.id_mm ?? Infinity)
+    : Infinity;
+
+  // 분자류 컨덕턴스만 사용 (p=0 극한)
+  const molC = (id_mm: number) => {
+    const d = id_mm / 1000;
+    const L = Math.max(pipeLength_m + pipeBends * (d * 15), 0.01);
+    return 4.356e5 * Math.pow(d, 3) / L; // m³/h
+  };
+
+  const effPct = (id_mm: number) => {
+    const C = molC(id_mm);
+    if (S_pump <= 0 || C <= 0) return 100;
+    return Math.round((C / (S_pump + C)) * 1000) / 10; // %
+  };
+
+  // 대상 후보: 펌프 흡입구 이하 규격만
+  const candidates = STANDARD_FLANGES.filter(f => f.id_mm <= inletID);
+
+  let recIdx = candidates.findIndex(f => effPct(f.id_mm) >= targetEfficiency * 100);
+  if (recIdx === -1) recIdx = candidates.length - 1; // 전부 미달이면 최대 규격
+
+  const make = (f: typeof STANDARD_FLANGES[number]) => {
+    const C = molC(f.id_mm);
+    return { name: f.name, id_mm: f.id_mm, conductance_m3h: Math.round(C * 10) / 10, efficiencyPct: effPct(f.id_mm) };
+  };
+
+  const rec = candidates[recIdx];
+  const recEff = effPct(rec.id_mm);
+
+  return {
+    recommended: make(rec),
+    smaller:     recIdx > 0 ? make(candidates[recIdx - 1]) : null,
+    larger:      recIdx < candidates.length - 1 ? make(candidates[recIdx + 1]) : null,
+    note: recEff < targetEfficiency * 100
+      ? `최대 규격(${rec.name})에서도 ${recEff}% — 배관 길이 단축 또는 병렬 배관 검토 필요`
+      : undefined,
+  };
+}
 
 // ─────────────────────────────────────────────────────
 // Pump-Down Time 계산 엔진
