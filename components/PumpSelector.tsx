@@ -1,8 +1,8 @@
 "use client";
 import { useState } from "react";
 import productData from "@/lib/productCatalog.json";
-import { recommendPumps } from "@/lib/pumpSpeedData";
-import type { PumpDownResult } from "@/lib/pumpSpeedData";
+import { recommendPumps, TURBO_PUMPS, ALL_PUMPS, calcTurboPumpDown } from "@/lib/pumpSpeedData";
+import type { PumpDownResult, TurboPumpDownResult, PumpModel } from "@/lib/pumpSpeedData";
 
 type SeriesKey = keyof typeof productData;
 type Tab = "repurchase" | "new" | "selection";
@@ -73,6 +73,51 @@ const PIPE_ID_MM: Record<string, number> = {
   ISO63: 63, ISO100: 100, ISO160: 160,
 };
 
+// TMP 인렛 플랜지 → 내경(mm) — ISO200F/250F 등 CF 변형 포함
+const HV_FLANGE_ID: Record<string, number> = {
+  NW40: 40, ISO63: 63, CF63: 63,
+  ISO100: 100, CF100: 100, ISO160: 160, CF160: 160,
+  ISO200: 200, ISO200F: 200,
+  ISO250: 250, ISO250F: 250,
+  ISO320: 320, ISO320F: 320,
+  ISO400: 400, ISO400F: 400,
+};
+
+const TMP_SERIES_ORDER = ["iS", "iXA", "nEXT", "T-Station"];
+const TMP_SERIES_LABELS: Record<string, string> = {
+  "iS":         "iS (대형 TMP)",
+  "iXA":        "iXA (초대형 TMP)",
+  "nEXT":       "nEXT 시리즈",
+  "T-Station":  "T-Station 일체형",
+};
+
+// 일체형 T-Station 내장 백킹펌프 모델명 (ALL_PUMPS에서 조회)
+const T_STATION_BACKING: Record<string, string> = {
+  "T-Station 85W (NW40)":      "E2M1.5",
+  "T-Station 85W (ISO63)":     "E2M1.5",
+  "T-Station 85D (NW40)":      "XDD1",
+  "T-Station 85D (ISO63)":     "XDD1",
+  "nEXT Station 85 (ISO63)":   "nXDS6i",
+  "nEXT Station 240 (ISO100)": "nXDS15i",
+  "nEXT Station 300 (ISO100)": "nXDS15i",
+  "nEXT Station 400 (ISO160)": "nXDS20i",
+};
+
+// XDD1 드라이 다이어프램 펌프 — ALL_PUMPS 미등재, 로컬 프록시
+const XDD1_PROXY: PumpModel = {
+  model: "XDD1", series: "XDD", type: "dry_scroll",
+  speed50Hz: 1.2, speed60Hz: 1.5, ultimate: 3.5, motorKW_50Hz: 0.1,
+};
+
+const TMP_TARGET_P_OPTIONS = [
+  { label: "1×10⁻³ mbar",  value: "0.001"     },
+  { label: "1×10⁻⁴ mbar",  value: "0.0001"    },
+  { label: "1×10⁻⁵ mbar",  value: "0.00001"   },
+  { label: "1×10⁻⁶ mbar",  value: "0.000001"  },
+  { label: "1×10⁻⁷ mbar",  value: "0.0000001" },
+  { label: "기타",           value: "기타"      },
+];
+
 // 목표 압력 선택지
 const TARGET_P_OPTIONS = [
   { label: "100 mbar",      value: "100"     },
@@ -82,8 +127,10 @@ const TARGET_P_OPTIONS = [
   { label: "0.01 mbar",     value: "0.01"    },
   { label: "1×10⁻³ mbar",  value: "0.001"   },
   { label: "1×10⁻⁴ mbar",  value: "0.0001"  },
-  { label: "1×10⁻⁵ mbar",  value: "0.00001" },
-  { label: "기타",           value: "기타"    },
+  { label: "1×10⁻⁵ mbar",  value: "0.00001"   },
+  { label: "1×10⁻⁶ mbar",  value: "0.000001"  },
+  { label: "1×10⁻⁷ mbar",  value: "0.0000001" },
+  { label: "기타",           value: "기타"      },
 ];
 
 function fmtTime(sec: number): string {
@@ -98,22 +145,31 @@ function fmtTime(sec: number): string {
 /** L1/L2/L3 펌프 종류 선택 → 허용 시리즈 목록 (null = 전체) */
 function resolveSeriesFilter(l1: string, l2: string, l3: string): string[] | undefined {
   if (!l1) return undefined;
-  if (l1 === "오일펌프")   return ["RV", "E2M_small", "E2M_large", "nES"];
+  if (l1 === "오일펌프") {
+    if (l3 === "오일 단독 + 부스터펌프") {
+      if (l2 === "2단펌프") return ["E2M+EH"];
+      if (l2 === "1단펌프") return ["nES+EH"];
+      return [];
+    }
+    if (l2 === "1단펌프") return ["RV", "nES"];
+    if (l2 === "2단펌프") return ["E2M_small", "E2M_large"];
+    return ["RV", "E2M_small", "E2M_large", "nES", "E2M+EH"];
+  }
   if (l1 === "부스터펌프") return [];   // 단독 사용 불가 → 빈 배열로 "결과없음" 표시
   if (l1 === "터보펌프")   return [];   // 데이터 미확보
   if (l1 === "드라이펌프") {
-    if (l2 === "스크롤펌프") return ["nXDS"];
+    if (l2 === "스크롤펌프") return ["nXDS", "XDS"];
     if (l2 === "산업용 드라이") {
-      if (l3 === "드라이 단독")          return ["GXS", "EXS"];
+      if (l3 === "드라이 단독")          return ["GXS", "EXS", "EDS", "EDC"];
       if (l3 === "드라이 + 부스터 조합") return ["GXS+GXB"];
-      return ["GXS", "EXS", "GXS+GXB"];
+      return ["GXS", "EXS", "EDS", "EDC", "GXS+GXB"];
     }
     if (l2 === "반도체 드라이") {
-      if (l3 === "드라이 단독")          return ["iXH"];
-      if (l3 === "드라이 + 부스터 조합") return ["iXH"]; // iXH+부스터 조합 데이터 미확보, 단독으로 대체
-      return ["iXH"];
+      if (l3 === "드라이 단독")          return ["iXH", "nXRi"];
+      if (l3 === "드라이 + 부스터 조합") return ["iXH", "nXRi"];
+      return ["iXH", "nXRi"];
     }
-    return ["nXDS", "GXS", "EXS", "GXS+GXB"];
+    return ["nXDS", "XDS", "GXS", "EXS", "EDS", "EDC", "GXS+GXB", "iXH", "nXRi"];
   }
   return undefined;
 }
@@ -147,6 +203,26 @@ export default function PumpSelector() {
   const [results, setResults] = useState<PumpDownResult[] | null>(null);
   const [calcError, setCalcError] = useState("");
   const [isCalc, setIsCalc] = useState(false);
+
+  // ── 터보펌프 2단 계산 state ───────────────────────────────
+  const [turboSeries, setTurboSeries] = useState("");
+  const [turboTMP, setTurboTMP] = useState("");
+  const [turboBacking, setTurboBacking] = useState("");
+  const [turboHvLen, setTurboHvLen] = useState("1");
+  const [turboHvBends, setTurboHvBends] = useState("0");
+  const [turboRoughLen, setTurboRoughLen] = useState("1");
+  const [turboResult, setTurboResult] = useState<TurboPumpDownResult | null>(null);
+  const [turboError, setTurboError] = useState("");
+  const [turboIsCalc, setTurboIsCalc] = useState(false);
+
+  // 선택된 TMP 객체 + 호환 백킹펌프 목록
+  const selectedTMPObj = TURBO_PUMPS.find(t => t.model === turboTMP) ?? null;
+  const compatiblePumps = selectedTMPObj && !selectedTMPObj.integrated
+    ? ALL_PUMPS.filter(p =>
+        p.type !== "booster" && p.speed60Hz > 0 && p.ultimate > 0 &&
+        p.ultimate < selectedTMPObj.maxFVPressure_mbar * 0.5
+      )
+    : [];
 
   // ── 계산 로직 ─────────────────────────────────────────────
   function handleCalculate() {
@@ -192,6 +268,70 @@ export default function PumpSelector() {
         setCalcError("계산 중 오류가 발생했습니다.");
       } finally {
         setIsCalc(false);
+      }
+    }, 20);
+  }
+
+  // ── 터보펌프 2단 계산 ────────────────────────────────────
+  function getTurboBackingPump(): PumpModel | null {
+    if (!selectedTMPObj) return null;
+    if (selectedTMPObj.integrated) {
+      const name = T_STATION_BACKING[selectedTMPObj.model];
+      if (!name) return null;
+      if (name === "XDD1") return XDD1_PROXY;
+      return ALL_PUMPS.find(p => p.model === name) ?? null;
+    }
+    return ALL_PUMPS.find(p => p.model === turboBacking) ?? null;
+  }
+
+  function handleTurboCalc() {
+    const tmp = selectedTMPObj;
+    if (!tmp) { setTurboError("터보펌프 모델을 선택하세요."); return; }
+    const backing = getTurboBackingPump();
+    if (!backing) {
+      setTurboError(tmp.integrated
+        ? `내장 백킹펌프(${T_STATION_BACKING[tmp.model] ?? "?"}) 데이터를 찾을 수 없습니다.`
+        : "백킹펌프를 선택하세요.");
+      return;
+    }
+    const rawVol = form.chamberVol === "기타" ? chamberVolCustom : form.chamberVol;
+    const rawP   = targetP === "기타" ? targetPCustom : targetP;
+    const vol = parseFloat(rawVol);
+    const tP  = parseFloat(rawP);
+    if (!vol || vol <= 0) { setTurboError("챔버 볼륨을 입력하세요."); return; }
+    if (!tP  || tP  <= 0) { setTurboError("목표 압력을 입력하세요."); return; }
+    if (tP > tmp.maxFVPressure_mbar) {
+      setTurboError(`목표 압력(${tP} mbar)이 TMP 시동 압력(${tmp.maxFVPressure_mbar} mbar)보다 높습니다. 목표를 낮춰주세요.`);
+      return;
+    }
+
+    const hvID    = HV_FLANGE_ID[tmp.inletFlange] ?? 100;
+    const hvLen   = parseFloat(turboHvLen) || 1;
+    const hvBends = parseInt(turboHvBends) || 0;
+    const roughLen = parseFloat(turboRoughLen) || 1;
+
+    setTurboError("");
+    setTurboIsCalc(true);
+    setTimeout(() => {
+      try {
+        const r = calcTurboPumpDown(
+          {
+            chamberVol_L: vol,
+            targetPressure_mbar: tP,
+            hvPipeID_mm: hvID,
+            hvPipeLength_m: hvLen,
+            hvPipeBends: hvBends,
+            roughPipeID_mm: 40,
+            roughPipeLength_m: roughLen,
+          },
+          tmp,
+          backing,
+        );
+        setTurboResult(r);
+      } catch {
+        setTurboError("계산 중 오류가 발생했습니다.");
+      } finally {
+        setTurboIsCalc(false);
       }
     }, 20);
   }
@@ -403,7 +543,7 @@ export default function PumpSelector() {
                     {pumpL2 && <><span>›</span><span className="font-medium text-ink">{pumpL2}</span></>}
                     {pumpL3 && <><span>›</span><span className="font-medium text-ink">{pumpL3}</span></>}
                     <button
-                      onClick={() => { setPumpL1(""); setPumpL2(""); setPumpL3(""); }}
+                      onClick={() => { setPumpL1(""); setPumpL2(""); setPumpL3(""); setTurboSeries(""); setTurboTMP(""); setTurboBacking(""); setTurboResult(null); }}
                       className="ml-1 text-[10px] text-[#6A6660] hover:text-[#c00020] underline"
                     >초기화</button>
                   </div>
@@ -413,7 +553,7 @@ export default function PumpSelector() {
                   <div className="flex flex-wrap gap-1.5">
                     {PUMP_L1.map((opt) => (
                       <button key={opt}
-                        onClick={() => { setPumpL1(opt); setPumpL2(""); setPumpL3(""); }}
+                        onClick={() => { setPumpL1(opt); setPumpL2(""); setPumpL3(""); setTurboSeries(""); setTurboTMP(""); setTurboBacking(""); setTurboResult(null); }}
                         className={`px-3 py-1.5 text-[12px] border transition-colors ${pumpL1 === opt ? "bg-ink text-paper border-ink" : "border-[#E3DFD6] text-[#3A3630] hover:border-ink"}`}
                       >{opt}</button>
                     ))}
@@ -447,7 +587,72 @@ export default function PumpSelector() {
                     </div>
                   </div>
                 )}
+                {/* TMP 시리즈 / 모델 선택 (터보펌프 선택 시) */}
+                {pumpL1 === "터보펌프" && (
+                  <>
+                    <div>
+                      <div className="text-[10px] text-[#6A6660] mb-1.5">TMP 시리즈</div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {TMP_SERIES_ORDER.map(s => (
+                          <button key={s}
+                            onClick={() => { setTurboSeries(s); setTurboTMP(""); setTurboBacking(""); setTurboResult(null); }}
+                            className={`px-3 py-1.5 text-[12px] border transition-colors ${turboSeries === s ? "bg-ink text-paper border-ink" : "border-[#E3DFD6] text-[#3A3630] hover:border-ink"}`}
+                          >{TMP_SERIES_LABELS[s]}</button>
+                        ))}
+                      </div>
+                    </div>
+                    {turboSeries && (
+                      <div>
+                        <div className="text-[10px] text-[#6A6660] mb-1.5">TMP 모델</div>
+                        <div className="grid grid-cols-2 gap-2">
+                          {TURBO_PUMPS.filter(t => t.series === turboSeries).map(t => (
+                            <button key={t.model}
+                              onClick={() => { setTurboTMP(t.model); setTurboBacking(""); setTurboResult(null); }}
+                              className={`p-2.5 text-left border transition-all ${
+                                turboTMP === t.model
+                                  ? "bg-ink text-paper border-ink"
+                                  : "border-[#E3DFD6] hover:border-ink hover:bg-[#f0ede8]"
+                              }`}
+                            >
+                              <div className="text-[12px] font-semibold leading-snug">{t.model}</div>
+                              <div className={`text-[10px] mt-0.5 ${turboTMP === t.model ? "text-paper/80" : "text-[#6A6660]"}`}>
+                                N₂: {t.speedN2_Ls} L/s · {t.inletFlange}
+                              </div>
+                              <div className={`text-[10px] ${turboTMP === t.model ? "text-paper/70" : "text-[#6A6660]"}`}>
+                                {t.integrated ? `일체형 · ${t.backingPump}` : `최대 FV: ${t.maxFVPressure_mbar} mbar`}
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
+
+              {/* 백킹펌프 선택 (터보펌프 standalone) */}
+              {pumpL1 === "터보펌프" && selectedTMPObj && !selectedTMPObj.integrated && (
+                <div>
+                  <label className="text-[10px] mono text-[#6A6660] uppercase tracking-wider">
+                    백킹펌프 선택 <span className="text-[#c00020]">*</span>
+                    <span className="ml-1 normal-case text-[9px]">
+                      (ultimate &lt; {(selectedTMPObj.maxFVPressure_mbar * 0.5).toFixed(2)} mbar 자동 필터)
+                    </span>
+                  </label>
+                  <select
+                    value={turboBacking}
+                    onChange={e => { setTurboBacking(e.target.value); setTurboResult(null); }}
+                    className="mt-1 w-full border border-[#E3DFD6] px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-transparent"
+                  >
+                    <option value="">선택</option>
+                    {compatiblePumps.map(p => (
+                      <option key={p.model} value={p.model}>
+                        {p.model} ({p.series}) — {p.speed60Hz} m³/h · ult {p.ultimate} mbar
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               {/* 챔버볼륨 + 목표압력 (같은 행) */}
               <div className="grid grid-cols-2 gap-3">
@@ -497,87 +702,209 @@ export default function PumpSelector() {
                 </div>
               </div>
 
-              {/* 배관 */}
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="text-[10px] mono text-[#6A6660] uppercase tracking-wider">
-                    배관규격 <span className="text-[#c00020]">*</span>
-                  </label>
-                  <select
-                    value={form.pipeSpec}
-                    onChange={(e) => { setForm({ ...form, pipeSpec: e.target.value }); if (e.target.value !== "기타") setPipeSpecCustom(""); }}
-                    className="mt-1 w-full border border-[#E3DFD6] px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-transparent"
-                  >
-                    <option value="">선택</option>
-                    {PIPE_SPEC_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
-                  </select>
-                  {form.pipeSpec === "기타" && (
-                    <input type="text" placeholder="내경 mm"
-                      value={pipeSpecCustom} onChange={(e) => setPipeSpecCustom(e.target.value)}
-                      className="mt-1.5 w-full border border-[#E3DFD6] px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-transparent"
-                    />
+              {/* 배관 — 러핑(기존) / HV(터보) */}
+              {pumpL1 !== "터보펌프" ? (
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <label className="text-[10px] mono text-[#6A6660] uppercase tracking-wider">
+                      배관규격 <span className="text-[#c00020]">*</span>
+                    </label>
+                    <select
+                      value={form.pipeSpec}
+                      onChange={(e) => { setForm({ ...form, pipeSpec: e.target.value }); if (e.target.value !== "기타") setPipeSpecCustom(""); }}
+                      className="mt-1 w-full border border-[#E3DFD6] px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-transparent"
+                    >
+                      <option value="">선택</option>
+                      {PIPE_SPEC_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
+                    </select>
+                    {form.pipeSpec === "기타" && (
+                      <input type="text" placeholder="내경 mm"
+                        value={pipeSpecCustom} onChange={(e) => setPipeSpecCustom(e.target.value)}
+                        className="mt-1.5 w-full border border-[#E3DFD6] px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-transparent"
+                      />
+                    )}
+                  </div>
+                  <div>
+                    <label className="text-[10px] mono text-[#6A6660] uppercase tracking-wider">
+                      배관길이 (m) <span className="text-[#c00020]">*</span>
+                    </label>
+                    <select
+                      value={form.pipeLen}
+                      onChange={(e) => { setForm({ ...form, pipeLen: e.target.value }); if (e.target.value !== "기타") setPipeLenCustom(""); }}
+                      className="mt-1 w-full border border-[#E3DFD6] px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-transparent"
+                    >
+                      <option value="">선택</option>
+                      {["1","2","3","4","5","6","7","8","9","10"].map((v) => (
+                        <option key={v} value={v}>{v}m</option>
+                      ))}
+                      <option value="기타">기타</option>
+                    </select>
+                    {form.pipeLen === "기타" && (
+                      <input type="text" placeholder="직접 입력 (m)"
+                        value={pipeLenCustom} onChange={(e) => setPipeLenCustom(e.target.value)}
+                        className="mt-1.5 w-full border border-[#E3DFD6] px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-transparent"
+                      />
+                    )}
+                  </div>
+                  <div>
+                    <label className="text-[10px] mono text-[#6A6660] uppercase tracking-wider">꺾임 (회)</label>
+                    <select
+                      value={form.bends}
+                      onChange={(e) => { setForm({ ...form, bends: e.target.value }); if (e.target.value !== "기타") setBendsCustom(""); }}
+                      className="mt-1 w-full border border-[#E3DFD6] px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-transparent"
+                    >
+                      <option value="">0회</option>
+                      {["1","2","3","4","5"].map((v) => (
+                        <option key={v} value={v}>{v}회</option>
+                      ))}
+                      <option value="기타">기타</option>
+                    </select>
+                    {form.bends === "기타" && (
+                      <input type="text" placeholder="직접 입력"
+                        value={bendsCustom} onChange={(e) => setBendsCustom(e.target.value)}
+                        className="mt-1.5 w-full border border-[#E3DFD6] px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-transparent"
+                      />
+                    )}
+                  </div>
+                </div>
+              ) : selectedTMPObj && (
+                <div className="space-y-3">
+                  <div>
+                    <div className="text-[10px] mono text-[#6A6660] uppercase tracking-wider mb-2">
+                      HV 배관 (챔버 ↔ TMP 인렛)
+                    </div>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div>
+                        <label className="text-[10px] text-[#6A6660]">배관 규격 (자동)</label>
+                        <div className="mt-1 border border-[#E3DFD6] px-3 py-2 text-[13px] bg-[#F6F4EF] text-[#6A6660]">
+                          {selectedTMPObj.inletFlange}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-[#6A6660]">배관 길이 (m)</label>
+                        <select value={turboHvLen} onChange={e => { setTurboHvLen(e.target.value); setTurboResult(null); }}
+                          className="mt-1 w-full border border-[#E3DFD6] px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-transparent">
+                          {["0.3","0.5","1","1.5","2","3"].map(v => <option key={v} value={v}>{v}m</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-[#6A6660]">꺾임 (회)</label>
+                        <select value={turboHvBends} onChange={e => { setTurboHvBends(e.target.value); setTurboResult(null); }}
+                          className="mt-1 w-full border border-[#E3DFD6] px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-transparent">
+                          {["0","1","2","3"].map(v => <option key={v} value={v}>{v}회</option>)}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                  {!selectedTMPObj.integrated && (
+                    <div>
+                      <div className="text-[10px] mono text-[#6A6660] uppercase tracking-wider mb-2">
+                        러핑 배관 (백킹펌프 ↔ 챔버, Stage 1)
+                      </div>
+                      <div className="grid grid-cols-3 gap-3">
+                        <div>
+                          <label className="text-[10px] text-[#6A6660]">규격 (기본)</label>
+                          <div className="mt-1 border border-[#E3DFD6] px-3 py-2 text-[13px] bg-[#F6F4EF] text-[#6A6660]">NW40</div>
+                        </div>
+                        <div>
+                          <label className="text-[10px] text-[#6A6660]">길이 (m)</label>
+                          <select value={turboRoughLen} onChange={e => { setTurboRoughLen(e.target.value); setTurboResult(null); }}
+                            className="mt-1 w-full border border-[#E3DFD6] px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-transparent">
+                            {["0.5","1","1.5","2","3"].map(v => <option key={v} value={v}>{v}m</option>)}
+                          </select>
+                        </div>
+                        <div className="flex items-end pb-0.5">
+                          <span className="text-[10px] text-[#6A6660]">꺾임 없음 (기본)</span>
+                        </div>
+                      </div>
+                    </div>
                   )}
                 </div>
-                <div>
-                  <label className="text-[10px] mono text-[#6A6660] uppercase tracking-wider">
-                    배관길이 (m) <span className="text-[#c00020]">*</span>
-                  </label>
-                  <select
-                    value={form.pipeLen}
-                    onChange={(e) => { setForm({ ...form, pipeLen: e.target.value }); if (e.target.value !== "기타") setPipeLenCustom(""); }}
-                    className="mt-1 w-full border border-[#E3DFD6] px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-transparent"
-                  >
-                    <option value="">선택</option>
-                    {["1","2","3","4","5","6","7","8","9","10"].map((v) => (
-                      <option key={v} value={v}>{v}m</option>
-                    ))}
-                    <option value="기타">기타</option>
-                  </select>
-                  {form.pipeLen === "기타" && (
-                    <input type="text" placeholder="직접 입력 (m)"
-                      value={pipeLenCustom} onChange={(e) => setPipeLenCustom(e.target.value)}
-                      className="mt-1.5 w-full border border-[#E3DFD6] px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-transparent"
-                    />
-                  )}
-                </div>
-                <div>
-                  <label className="text-[10px] mono text-[#6A6660] uppercase tracking-wider">꺾임 (회)</label>
-                  <select
-                    value={form.bends}
-                    onChange={(e) => { setForm({ ...form, bends: e.target.value }); if (e.target.value !== "기타") setBendsCustom(""); }}
-                    className="mt-1 w-full border border-[#E3DFD6] px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-transparent"
-                  >
-                    <option value="">0회</option>
-                    {["1","2","3","4","5"].map((v) => (
-                      <option key={v} value={v}>{v}회</option>
-                    ))}
-                    <option value="기타">기타</option>
-                  </select>
-                  {form.bends === "기타" && (
-                    <input type="text" placeholder="직접 입력"
-                      value={bendsCustom} onChange={(e) => setBendsCustom(e.target.value)}
-                      className="mt-1.5 w-full border border-[#E3DFD6] px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-transparent"
-                    />
-                  )}
-                </div>
-              </div>
+              )}
 
               {/* 오류 메시지 */}
-              {calcError && (
-                <p className="text-[11px] text-[#c00020]">{calcError}</p>
+              {(pumpL1 === "터보펌프" ? turboError : calcError) && (
+                <p className="text-[11px] text-[#c00020]">
+                  {pumpL1 === "터보펌프" ? turboError : calcError}
+                </p>
               )}
 
               {/* 계산 버튼 */}
               <button
-                onClick={handleCalculate}
-                disabled={isCalc}
+                onClick={pumpL1 === "터보펌프" ? handleTurboCalc : handleCalculate}
+                disabled={pumpL1 === "터보펌프" ? turboIsCalc : isCalc}
                 className="w-full bg-ink text-paper py-3 text-[13px] hover:bg-[#c00020] transition-colors disabled:opacity-50"
               >
-                {isCalc ? "계산 중…" : "펌프 자동 선정 계산 →"}
+                {(pumpL1 === "터보펌프" ? turboIsCalc : isCalc)
+                  ? "계산 중…"
+                  : pumpL1 === "터보펌프" ? "2단 펌프다운 계산 →" : "펌프 자동 선정 계산 →"
+                }
               </button>
 
-              {/* ── 계산 결과 ───────────────────────────────── */}
-              {results !== null && (
+              {/* ── 계산 결과 (터보) ─────────────────────────── */}
+              {pumpL1 === "터보펌프" && turboResult !== null && (
+                <div className="border border-[#E3DFD6] mt-2">
+                  <div className="px-4 py-2.5 bg-[#F6F4EF] border-b border-[#E3DFD6] flex items-baseline justify-between">
+                    <span className="text-[11px] font-semibold mono uppercase tracking-wider">계산 결과</span>
+                    <span className="text-[10px] text-[#6A6660]">
+                      {turboResult.turboModel} · {turboResult.backingModel}
+                    </span>
+                  </div>
+                  {!turboResult.reachable ? (
+                    <div className="px-4 py-4 text-[12px] text-[#6A6660] leading-relaxed">
+                      목표 압력에 도달할 수 없습니다.
+                      아웃게싱 한계: {fmtP(turboResult.ultimateSystem_mbar)} — 목표 압력을 높이거나 챔버 면적 조건을 확인하세요.
+                    </div>
+                  ) : (
+                    <div>
+                      <div className="flex items-center px-4 py-3 border-b border-[#E3DFD6] gap-3">
+                        <div className="shrink-0 w-5 h-5 flex items-center justify-center text-[9px] font-bold border border-[#E3DFD6] text-[#6A6660]">1</div>
+                        <div className="flex-1">
+                          <div className="text-[12px] font-medium">Stage 1 — 러핑</div>
+                          <div className="text-[10px] text-[#6A6660] mono mt-0.5">
+                            대기압 → {turboResult.tmpStartPressure_mbar} mbar (TMP 시동)
+                          </div>
+                        </div>
+                        <div className="shrink-0 text-right">
+                          <div className="text-[13px] font-semibold mono">{fmtTime(turboResult.stage1_s)}</div>
+                          <div className="text-[10px] text-[#6A6660]">{turboResult.backingModel}</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center px-4 py-3 border-b border-[#E3DFD6] gap-3">
+                        <div className="shrink-0 w-5 h-5 flex items-center justify-center text-[9px] font-bold border border-[#E3DFD6] text-[#6A6660]">2</div>
+                        <div className="flex-1">
+                          <div className="text-[12px] font-medium">Stage 2 — TMP 고진공</div>
+                          <div className="text-[10px] text-[#6A6660] mono mt-0.5">
+                            유효속도 {turboResult.tmpEffSpeed_Ls} L/s · 한계 {fmtP(turboResult.ultimateSystem_mbar)}
+                          </div>
+                        </div>
+                        <div className="shrink-0 text-right">
+                          <div className="text-[13px] font-semibold mono">{fmtTime(turboResult.stage2_s)}</div>
+                          <div className="text-[10px] text-[#6A6660]">{turboResult.turboModel}</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center px-4 py-3 bg-[#F6F4EF] gap-3">
+                        <div className="shrink-0 w-5 h-5 flex items-center justify-center text-[9px] font-bold bg-ink text-paper">∑</div>
+                        <div className="flex-1">
+                          <div className="text-[12px] font-semibold">총 펌프다운 시간</div>
+                        </div>
+                        <div className="shrink-0 text-right">
+                          <div className="text-[15px] font-bold mono text-ink">{fmtTime(turboResult.totalTime_s)}</div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  <div className="px-4 py-2.5 border-t border-[#E3DFD6] bg-[#F6F4EF]">
+                    <p className="text-[10px] text-[#6A6660] leading-relaxed">
+                      ※ TMP 스핀업 시간(1~3분)은 포함되지 않습니다. SUS+Nitrile, 아웃게싱 1.3×10⁻⁷ mbar·L/s·cm² 기준.
+                      최종 선정은 스마텍 전문가 검토를 권장합니다.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* ── 계산 결과 (일반) ─────────────────────────── */}
+              {pumpL1 !== "터보펌프" && results !== null && (
                 <div className="border border-[#E3DFD6] mt-2">
                   {/* 결과 헤더 */}
                   <div className="px-4 py-2.5 bg-[#F6F4EF] border-b border-[#E3DFD6] flex items-baseline justify-between">
@@ -653,6 +980,7 @@ export default function PumpSelector() {
             </div>
           </div>
         )}
+
       </div>
     </div>
   );

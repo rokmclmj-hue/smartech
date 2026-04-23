@@ -8,7 +8,7 @@
  *   - speedCurve 있으면 수치 ODE 적분, 없으면 ln 근사식 사용
  */
 
-export type PumpType = "oil_vane" | "dry_scroll" | "dry_screw" | "booster" | "turbo";
+export type PumpType = "oil_vane" | "dry_scroll" | "dry_screw" | "dry_roots" | "dry_claw" | "booster" | "turbo";
 
 export type PumpModel = {
   model: string;
@@ -21,6 +21,18 @@ export type PumpModel = {
   inletFlange?: string;
   /** [pressure_mbar, speed_m3h][] — Edwards로부터 수치 확보 시 채움 */
   speedCurve?: [number, number][];
+};
+
+export type TurboModel = {
+  model: string;                  // 표시 모델명 (인렛 플랜지 포함)
+  series: string;                 // 시리즈 ("iS" | "iXA" | "nEXT" | "T-Station")
+  inletFlange: string;            // 인렛 플랜지 (ISO200F, ISO100 등)
+  fvFlange: string;               // 포어라인 플랜지 (KF40, NW25 등); 일체형은 "내장"
+  speedN2_Ls: number;             // N2 배기속도 [L/s] at inlet
+  maxFVPressure_mbar: number;     // 최대 허용 포어라인 압력 [mbar]; 일체형은 0
+  ultimate_mbar: number;          // 얼티밋 압력 [mbar] (inlet)
+  integrated?: true;              // 일체형 펌핑 스테이션 (백킹펌프 내장)
+  backingPump?: string;           // 내장 백킹펌프 설명 (일체형용)
 };
 
 // ─────────────────────────────────────────────────────
@@ -199,25 +211,68 @@ const nES: PumpModel[] = [
   {
     model:"nES300",  series:"nES", type:"oil_vane", speed50Hz:240,  speed60Hz:290,   ultimate:0.08, motorKW_50Hz:5.5,  inletFlange:"ISO63",
     speedCurve: [
-      [192.6178,273.43],[131.75,266.59],[89.3756,260.8],[63.2196,255.88],[42.2866,251.06],[29.6249,246.88],
-      [19.6682,241.93],[13.735,237.26],[9.6438,231.03],[6.4894,222.26],[4.4033,211.63],[3.0509,198.57],
-      [2.1078,181.53],[1.463,160.19],[0.9942,135.68],[0.6713,101.69],[0.461,64.83],[0.3157,33.17],
-      [0.2197,12.72],[0.1504,0.06],[0.1504,0.0],
+      [892.4592,303.86],[537.6946,301.16],[344.4353,293.47],[207.1998,281.64],[128.922,271.89],
+      [79.1115,263.67],[47.9356,256.46],[28.8029,250.34],[18.1542,244.8],[10.8726,237.8],
+      [6.8668,230.36],[4.1757,220.14],[2.5166,207.44],[1.5922,192.48],[0.9724,172.38],
+      [0.6061,148.23],[0.3679,120.72],[0.2227,73.26],[0.138,38.4],[0.0849,4.13],[0.08487,0.0],
     ],
   },
-  { model:"nES300S", series:"nES", type:"oil_vane", speed50Hz:284,  speed60Hz:330,   ultimate:0.08, motorKW_50Hz:6.0,  inletFlange:"ISO63"  },
-  { model:"nES470",  series:"nES", type:"oil_vane", speed50Hz:400,  speed60Hz:470,   ultimate:0.08, motorKW_50Hz:11.0, inletFlange:"ISO100" },
+  {
+    model:"nES300S", series:"nES", type:"oil_vane", speed50Hz:284,  speed60Hz:330,   ultimate:0.08, motorKW_50Hz:6.0,  inletFlange:"ISO63",
+    speedCurve: [
+      [890.3409,340.45],[554.8669,338.94],[339.8092,332.46],[203.4674,326.98],[125.6988,324.6],
+      [76.6056,322.74],[46.2643,313.93],[29.351,303.39],[17.6456,291.53],[11.128,286.88],
+      [6.6609,282.13],[4.0089,275.94],[2.5609,259.37],[1.5447,236.27],[0.9451,207.64],
+      [0.588,179.96],[0.3584,144.09],[0.2171,106.69],[0.1348,70.37],[0.0814,3.87],[0.08136,0.0],
+    ],
+  },
+  {
+    model:"nES470",  series:"nES", type:"oil_vane", speed50Hz:400,  speed60Hz:470,   ultimate:0.08, motorKW_50Hz:11.0, inletFlange:"ISO100",
+    speedCurve: [
+      [880.8933,492.44],[535.2855,482.37],[326.6447,473.33],[205.7094,458.53],[127.6582,453.31],
+      [77.6296,470.58],[46.4838,479.46],[29.309,475.0],[17.5519,468.34],[11.0592,466.07],
+      [6.618,463.87],[4.1674,462.22],[2.5025,455.01],[1.5081,445.9],[0.9476,433.83],
+      [0.5684,407.16],[0.3573,323.08],[0.2137,196.14],[0.1324,99.47],[0.0818,4.31],[0.08177,0.0],
+    ],
+  },
   { model:"nES570",  series:"nES", type:"oil_vane", speed50Hz:470,  speed60Hz:0,     ultimate:0.08, motorKW_50Hz:11.0, inletFlange:"ISO100" },
   {
     model:"nES630",  series:"nES", type:"oil_vane", speed50Hz:640,  speed60Hz:755,   ultimate:0.08, motorKW_50Hz:18.5, inletFlange:"ISO100",
     speedCurve: [
-      [152.4263,719.6],[103.6341,712.31],[69.9129,702.53],[46.8284,688.98],[31.2003,673.22],[20.7282,652.3],
-      [13.7514,633.15],[9.6148,613.5],[6.4733,582.58],[4.2033,532.16],[2.9188,481.65],[1.9526,408.16],
-      [1.307,319.56],[0.8638,217.35],[0.593,150.24],[0.3983,93.2],[0.2661,51.31],[0.1806,25.0],
-      [0.1198,8.65],[0.0806,0.12],[0.0806,0.0],
+      [860.6285,764.9],[527.6622,749.96],[322.1909,737.21],[201.8319,732.75],[124.9611,731.44],
+      [76.5141,726.79],[46.3822,718.31],[27.8704,707.71],[17.583,694.15],[10.5349,674.42],
+      [6.6498,650.74],[4.0,621.5],[2.5389,591.62],[1.5595,545.05],[0.9526,487.56],
+      [0.5864,411.63],[0.358,309.02],[0.2176,184.45],[0.132,90.33],[0.082,4.32],[0.08195,0.0],
     ],
   },
   { model:"nES750",  series:"nES", type:"oil_vane", speed50Hz:755,  speed60Hz:0,     ultimate:0.08, motorKW_50Hz:18.5, inletFlange:"ISO100" },
+];
+
+// ─────────────────────────────────────────────────────
+// nES + EH 부스터 조합
+// Source: Edwards PumpCalc CSV (2026-04-23)
+// 조건: 100L SUS+Viton, NW40 10m 3-bend, Air, GB OFF, 60Hz, t=300s
+// X = EH inlet pressure [mbar], Y = system effective speed [m3/h]
+// ─────────────────────────────────────────────────────
+const nES_EH: PumpModel[] = [
+  {
+    model:"nES630/EH2600", series:"nES+EH", type:"oil_vane", speed50Hz:0, speed60Hz:2290, ultimate:4.43e-3, motorKW_50Hz:0, inletFlange:"ISO100",
+    speedCurve: [
+      [694.7197,2289.82],[377.661,1614.26],[197.0879,1417.67],[106.8351,1405.09],[55.6408,1466.96],
+      [29.7685,1563.86],[15.8796,1677.43],[8.4735,1790.31],[4.5304,1890.2],[2.409,1971.97],
+      [1.2795,2013.29],[0.6751,2026.81],[0.3567,2027.04],[0.1921,2007.49],[0.1024,1954.6],
+      [0.0553,1850.61],[0.0287,1642.64],[0.0157,1360.21],[0.0084,825.89],[0.0044,68.38],[0.00443,0.0],
+    ],
+  },
+  {
+    model:"nES630/EH4200", series:"nES+EH", type:"oil_vane", speed50Hz:0, speed60Hz:2909, ultimate:4.37e-3, motorKW_50Hz:0, inletFlange:"ISO100",
+    speedCurve: [
+      [598.1199,2908.8],[321.6376,1983.7],[171.1199,1662.63],[94.5133,1565.18],[49.5793,1598.43],
+      [26.5308,1692.21],[14.1124,1823.54],[7.5006,1965.58],[4.2082,2085.08],[2.227,2193.44],
+      [1.1777,2251.8],[0.619,2269.06],[0.3441,2268.72],[0.1849,2246.55],[0.0977,2193.65],
+      [0.052,2093.1],[0.0277,1906.15],[0.0154,1694.86],[0.0083,1173.44],[0.0044,66.89],[0.00437,0.0],
+    ],
+  },
 ];
 
 // ─────────────────────────────────────────────────────
@@ -238,8 +293,49 @@ const EH: PumpModel[] = [
 // Source: 7-1.산업용드라이_EXS.pdf
 // ─────────────────────────────────────────────────────
 const EXS: PumpModel[] = [
-  { model:"EXS160",  series:"EXS", type:"dry_screw", speed50Hz:160, speed60Hz:192, ultimate:1.0e-2, motorKW_50Hz:0, inletFlange:"ISO63"  },
-  { model:"EXS250",  series:"EXS", type:"dry_screw", speed50Hz:250, speed60Hz:300, ultimate:1.0e-2, motorKW_50Hz:0, inletFlange:"ISO63"  },
+  {
+    model:"EXS160", series:"EXS", type:"dry_screw", speed50Hz:133, speed60Hz:160, ultimate:1e-2, motorKW_50Hz:7.5, inletFlange:"ISO63",
+    // GXS160 동일 100ctr 스크류 모듈, BoV 없음 → GXS160 speedCurve 적용 (Manual_EXS all.pdf 확인)
+    speedCurve: [
+      [825.4436,113.87],[461.9472,112.04],[252.3638,111.84],[140.4333,114.42],
+      [75.3984,120.31],[42.3127,125.46],[22.8128,132.21],[12.7431,137.1],
+      [6.9513,142.83],[3.8714,148.35],[2.2017,152.76],[1.2274,154.62],
+      [0.6748,153.8],[0.369,150.25],[0.2037,144.4],[0.1098,133.93],
+      [0.0622,121.63],[0.0346,101.44],[0.019,64.99],[0.0104,4.05],[0.01,0.0],
+    ],
+  },
+  {
+    model:"EXS250", series:"EXS", type:"dry_screw", speed50Hz:208, speed60Hz:250, ultimate:1e-2, motorKW_50Hz:7.5, inletFlange:"ISO63",
+    // GXS250 동일 100ctr 스크류 모듈, BoV 없음 → GXS250 speedCurve 적용 (Manual_EXS all.pdf 확인)
+    speedCurve: [
+      [753.8408,149.87],[418.357,167.62],[229.2082,182.39],[129.5366,196.8],
+      [71.8804,210.25],[39.595,220.77],[21.7869,229.2],[11.8542,237.95],
+      [6.789,244.17],[3.8224,244.39],[2.0911,240.46],[1.161,236.47],
+      [0.6303,232.33],[0.3437,223.57],[0.1922,209.12],[0.108,196.89],
+      [0.06,179.11],[0.0329,148.62],[0.0186,101.01],[0.0102,4.05],[0.01,0.0],
+    ],
+  },
+  {
+    model:"EXS450", series:"EXS", type:"dry_screw", speed50Hz:375, speed60Hz:450, ultimate:1e-2, motorKW_50Hz:11.0, inletFlange:"ISO100",
+    // 고압(>100mbar): EXS750 BoV 비율 스케일(peak 450기준), 저압: GXS450 동일 모듈 패턴 적용
+    // 출처: EXS450_Brochure.pdf + Manual_EXS all.pdf (CSV 없음, 추정 커브)
+    speedCurve: [
+      [800.0,401.0],[472.0,387.0],[250.0,374.0],[140.0,383.0],[77.0,401.0],
+      [42.0,405.0],[22.0,423.0],[12.0,441.0],[6.5,450.0],[5.6,445.0],
+      [3.1,441.0],[1.8,437.0],[1.0,428.0],[0.54,415.0],[0.32,398.0],
+      [0.18,370.0],[0.10,313.0],[0.056,259.0],[0.032,202.0],[0.018,129.0],
+      [0.010,4.0],[0.01,0.0],
+    ],
+  },
+  {
+    model:"EXS750",  series:"EXS", type:"dry_screw", speed50Hz:625, speed60Hz:750, ultimate:7.89e-3, motorKW_50Hz:0, inletFlange:"ISO100",
+    speedCurve: [
+      [867.9913,672.14],[472.0016,650.14],[250.2151,622.64],[140.5909,640.83],[77.0784,673.97],
+      [41.7459,677.93],[22.5293,706.68],[12.1543,742.34],[6.5566,754.07],[3.5367,749.15],
+      [1.9079,733.49],[1.035,730.08],[0.5831,711.34],[0.3129,677.41],[0.1636,609.09],
+      [0.0918,484.82],[0.049,378.21],[0.0271,244.19],[0.0145,125.92],[0.0079,38.09],[0.00789,0.0],
+    ],
+  },
 ];
 
 // ─────────────────────────────────────────────────────
@@ -292,6 +388,151 @@ const nXDS: PumpModel[] = [
       [5.27083, 21.6747], [2.97447, 21.1576], [1.69403, 20.0484], [0.93268, 18.0819],
       [0.52724, 15.8808], [0.29903, 13.4963], [0.16683, 10.9989], [0.09668, 8.1128],
       [0.0531, 4.6854], [0.03025, 0.0765], [0.005, 0.0],
+    ],
+  },
+];
+
+// ─────────────────────────────────────────────────────
+// XDS 드라이 스크롤 펌프 (중형) — 터보펌프 백킹펌프 전용
+// Source: XDS35_100L.csv (100L, NW40 1m 1-bend, Air, 60Hz)
+// 피크 속도 35 m³/h @ 5~11 mbar, 얼티밋 ~0.003 mbar
+// ─────────────────────────────────────────────────────
+const XDS: PumpModel[] = [
+  {
+    model:"XDS35i", series:"XDS", type:"dry_scroll",
+    speed50Hz:29, speed60Hz:35, ultimate:3e-3, motorKW_50Hz:2.2, inletFlange:"NW40",
+    speedCurve: [
+      [978.34636, 20.0808], [523.68954, 22.4275], [265.5788, 25.4654],
+      [143.75545, 28.3658], [73.76867, 31.4837],  [39.84194, 33.6114],
+      [20.43512, 34.9852],  [11.02813, 35.0199],  [5.65022, 34.2938],
+      [3.06053, 33.0585],   [1.58928, 31.0749],   [0.83668, 28.0789],
+      [0.44529, 24.8863],   [0.23117, 20.8954],   [0.12008, 16.7],
+      [0.06311, 12.4885],   [0.03383, 8.6183],    [0.01759, 4.6575],
+      [0.003, 0.0],
+    ],
+  },
+];
+
+// ─────────────────────────────────────────────────────
+// nXRi 멀티 스테이지 루츠 드라이 펌프 (소형 고진공)
+// Source: nXRi_30_60_90.pdf / PumpCalc CSV (nXRi.csv, N2, 100L NW40 1m 3-bend, 60Hz)
+// 컨트롤러 내장으로 50/60Hz 공용 — speed50Hz=speed60Hz=정격속도
+// nXR120i: 최대 연속 흡입압력 20 mbar (고압 연속 운전 불가 — 펌프다운 사용 가능)
+// ─────────────────────────────────────────────────────
+const nXRi: PumpModel[] = [
+  {
+    model:"nXR30i", series:"nXRi", type:"dry_roots", speed50Hz:30, speed60Hz:30, ultimate:0.03, motorKW_50Hz:0.45, inletFlange:"NW25",
+    speedCurve: [
+      [984.9763,11.29],[608.1589,11.8],[369.9643,17.25],[221.4421,22.0],[132.5551,24.66],
+      [83.5201,26.65],[49.9875,28.55],[29.9161,29.46],[18.8436,30.0],[11.2719,29.88],
+      [6.7468,29.12],[4.0601,27.94],[2.4702,25.69],[1.5261,22.61],[0.9507,19.89],
+      [0.5694,17.01],[0.3465,14.13],[0.2056,11.54],[0.1257,9.3],[0.0774,6.58],[0.07743,0.0],
+    ],
+  },
+  {
+    model:"nXR40i", series:"nXRi", type:"dry_roots", speed50Hz:40, speed60Hz:40, ultimate:0.03, motorKW_50Hz:0.45, inletFlange:"NW25",
+    speedCurve: [
+      [985.5326,11.99],[599.5076,13.28],[345.0628,18.49],[206.599,22.54],[123.697,25.69],
+      [74.0611,28.95],[44.3426,31.76],[26.5492,34.71],[15.8958,37.01],[9.5174,38.97],
+      [5.6983,39.1],[3.4119,39.01],[2.0455,39.07],[1.2379,37.52],[0.7299,33.5],
+      [0.4394,29.24],[0.2572,25.04],[0.1561,20.54],[0.0932,15.48],[0.0552,9.08],[0.05523,0.0],
+    ],
+  },
+  {
+    model:"nXR60i", series:"nXRi", type:"dry_roots", speed50Hz:60, speed60Hz:60, ultimate:0.03, motorKW_50Hz:0.45, inletFlange:"NW40",
+    speedCurve: [
+      [985.6716,11.8],[572.0305,13.38],[348.1704,18.02],[198.0381,29.32],[118.5718,40.37],
+      [70.9926,47.31],[42.5056,51.2],[24.1791,54.68],[14.4768,56.84],[8.6677,58.78],
+      [5.1897,59.96],[2.9518,60.15],[1.7715,59.87],[1.0208,58.17],[0.6267,55.53],
+      [0.3555,51.63],[0.2163,47.29],[0.1273,38.49],[0.0738,27.13],[0.0441,10.77],[0.04409,0.0],
+    ],
+  },
+  {
+    model:"nXR90i", series:"nXRi", type:"dry_roots", speed50Hz:90, speed60Hz:90, ultimate:0.03, motorKW_50Hz:0.45, inletFlange:"NW40",
+    speedCurve: [
+      [987.2828,9.6],[590.2197,10.89],[337.6568,17.53],[202.166,26.89],[121.0433,37.35],
+      [72.4724,46.92],[41.2218,58.15],[24.6808,68.15],[14.7771,78.23],[8.4052,83.33],
+      [5.0324,86.43],[3.0131,88.83],[1.8045,90.13],[1.0393,86.88],[0.6124,79.79],
+      [0.3691,71.36],[0.2182,61.84],[0.127,45.19],[0.076,28.75],[0.0444,10.83],[0.04438,0.0],
+    ],
+  },
+  {
+    model:"nXR120i", series:"nXRi", type:"dry_roots", speed50Hz:120, speed60Hz:120, ultimate:0.03, motorKW_50Hz:0.45, inletFlange:"NW40",
+    // 최대 연속 흡입압력 20 mbar — 고압 구간(>20mbar)은 펌프다운 과도 구간만 허용
+    speedCurve: [
+      [986.2644,10.99],[590.5592,10.64],[342.3673,10.4],[197.924,10.42],[118.5218,10.78],
+      [70.975,11.07],[40.3767,16.18],[24.6905,71.25],[14.0439,92.41],[8.4085,105.77],
+      [4.7827,115.79],[2.8636,119.82],[1.7151,120.35],[0.9836,119.4],[0.5763,112.36],
+      [0.3455,103.84],[0.204,91.44],[0.1219,72.28],[0.0701,47.71],[0.0415,16.63],[0.04147,0.0],
+    ],
+  },
+];
+
+// ─────────────────────────────────────────────────────
+// EDC 드라이 클로 펌프 (저진공 산업용)
+// Source: edwards-EDC-dry-claw-pumps-brochure.pdf
+// PumpCalc CSV: EDC_EDS.csv (100L NW63 1m 3-bend, 60Hz)
+// ultimate: EDC65/150=50 mbar, EDC300=140 mbar
+// ─────────────────────────────────────────────────────
+const EDC: PumpModel[] = [
+  {
+    model:"EDC65", series:"EDC", type:"dry_claw", speed50Hz:65, speed60Hz:78, ultimate:50, motorKW_50Hz:1.8, inletFlange:"NW40",
+    speedCurve: [
+      [949.4998,80.49],[704.1183,78.1],[507.4178,75.83],[372.4925,73.18],[271.9843,69.03],
+      [206.3287,66.35],[171.2477,63.75],[123.8387,57.02],[94.0858,50.34],[78.8523,43.38],
+      [67.0718,33.36],[50.0027,0.01],[50.00271,0.0],
+    ],
+  },
+  {
+    model:"EDC150", series:"EDC", type:"dry_claw", speed50Hz:150, speed60Hz:180, ultimate:50, motorKW_50Hz:3.7, inletFlange:"NW40",
+    speedCurve: [
+      [961.1561,183.03],[713.4809,180.47],[513.7173,175.7],[376.6451,170.68],[274.5622,162.69],
+      [199.2286,154.74],[150.8318,146.5],[125.153,140.12],[94.4887,129.48],[78.5375,117.92],
+      [58.0578,53.51],[50.00086,0.0],
+    ],
+  },
+  {
+    model:"EDC300", series:"EDC", type:"dry_claw", speed50Hz:300, speed60Hz:360, ultimate:140, motorKW_50Hz:6.2, inletFlange:"ISO63",
+    speedCurve: [
+      [961.2899,344.83],[782.3442,343.25],[646.4533,339.84],[522.5606,336.56],[418.217,332.49],
+      [349.4622,320.12],[279.5893,305.55],[232.9741,300.75],[186.8637,253.87],[154.5178,104.46],
+      [140.00001,0.0],
+    ],
+  },
+];
+
+// ─────────────────────────────────────────────────────
+// EDS 드라이 스크류 (산업용 중형)
+// Source: EDS Series Dry Screw Vacuum Pumps.pdf
+// PumpCalc CSV: EDC_EDS.csv (100L NW63 1m 3-bend, No Gas Ballast, 60Hz)
+// EDS200 inlet ISO63, EDS300 inlet DIN80(≈ISO100), EDS480 inlet ISO100
+// ─────────────────────────────────────────────────────
+const EDS: PumpModel[] = [
+  {
+    model:"EDS200", series:"EDS", type:"dry_screw", speed50Hz:210, speed60Hz:230, ultimate:0.05, motorKW_50Hz:6.4, inletFlange:"ISO63",
+    speedCurve: [
+      [961.0834,211.54],[564.0362,204.08],[347.3073,195.58],[208.45,193.06],[120.932,207.08],
+      [72.4051,213.96],[43.3509,216.74],[25.9557,219.07],[15.5406,221.42],[9.3047,223.93],
+      [5.5758,227.85],[3.3554,229.79],[2.009,227.04],[1.2052,218.0],[0.7006,198.67],
+      [0.4178,172.29],[0.2572,139.78],[0.154,98.09],[0.0914,51.68],[0.0542,6.44],[0.05419,0.0],
+    ],
+  },
+  {
+    model:"EDS300", series:"EDS", type:"dry_screw", speed50Hz:280, speed60Hz:312, ultimate:0.01, motorKW_50Hz:8.2, inletFlange:"ISO100",
+    speedCurve: [
+      [961.0832,249.85],[532.4972,245.49],[295.8188,241.65],[167.002,245.86],[95.9834,269.49],
+      [51.8649,280.23],[29.5006,285.95],[15.9409,290.89],[9.0671,298.32],[5.1574,306.41],
+      [2.8057,311.57],[1.5959,312.04],[0.8662,297.77],[0.5015,285.96],[0.2832,265.81],
+      [0.153,222.19],[0.0864,172.63],[0.0486,119.42],[0.0266,66.52],[0.0151,24.12],[0.01508,0.0],
+    ],
+  },
+  {
+    model:"EDS480", series:"EDS", type:"dry_screw", speed50Hz:400, speed60Hz:459, ultimate:0.013, motorKW_50Hz:11.0, inletFlange:"ISO100",
+    speedCurve: [
+      [961.0836,386.27],[534.6795,385.01],[295.3697,387.28],[166.8273,393.63],[92.0565,407.94],
+      [49.8586,422.88],[28.3595,433.15],[15.3242,442.85],[8.7164,449.99],[4.71,456.43],
+      [2.6857,459.35],[1.4666,451.66],[0.7942,433.83],[0.4394,408.1],[0.2502,379.33],
+      [0.1359,341.7],[0.0774,284.6],[0.042,210.67],[0.0234,125.54],[0.0131,28.93],[0.01306,0.0],
     ],
   },
 ];
@@ -425,6 +666,125 @@ const GXS_GXB: PumpModel[] = [
 ];
 
 // ─────────────────────────────────────────────────────
+// E2M + EH 루츠 부스터 조합 시스템
+// speedCurve: Edwards PumpCalc CSV (2026-04-23)
+// 조건: 100L SUS+Viton, NW40 10m 3-bend, Air, GB OFF, 60Hz, t=600s
+// X = EH 흡입구 압력 [mbar], Y = 시스템 유효 배기속도 [m³/h]
+// ─────────────────────────────────────────────────────
+const E2M_EH: PumpModel[] = [
+  {
+    model:"E2M40/EH250", series:"E2M+EH", type:"oil_vane",
+    speed50Hz:226, speed60Hz:271, ultimate:1.5e-3, motorKW_50Hz:0, inletFlange:"NW40",
+    speedCurve: [
+      [828.6554,61.32],[408.2978,52.74],[203.6057,62.23],[103.3378,81.27],[51.6688,120.36],
+      [25.7313,165.61],[12.3115,197.65],[6.2621,224.27],[3.25,244.55],[1.5625,261.21],
+      [0.7763,270.26],[0.3855,271.34],[0.195,266.16],[0.0943,255.05],[0.0478,237.31],
+      [0.0241,212.71],[0.0121,184.46],[0.006,158.2],[0.003,135.91],[0.0015,116.5],[0.00147,0.0],
+    ],
+  },
+  {
+    model:"E2M40/EH500", series:"E2M+EH", type:"oil_vane",
+    speed50Hz:331, speed60Hz:397, ultimate:1.2e-3, motorKW_50Hz:0, inletFlange:"ISO63",
+    speedCurve: [
+      [827.6176,57.84],[409.8448,48.92],[197.0559,54.59],[99.0516,348.84],[48.6737,88.29],
+      [24.0974,130.93],[11.8054,201.47],[5.951,276.19],[2.8678,325.46],[1.402,361.82],
+      [0.7144,386.13],[0.3403,397.16],[0.1689,392.5],[0.0814,374.12],[0.0413,345.43],
+      [0.0197,301.32],[0.0095,253.3],[0.0047,213.46],[0.0024,179.73],[0.0012,149.89],[0.00115,0.0],
+    ],
+  },
+  {
+    model:"E2M80/EH250", series:"E2M+EH", type:"oil_vane",
+    speed50Hz:251, speed60Hz:301, ultimate:1.4e-3, motorKW_50Hz:0, inletFlange:"NW40",
+    speedCurve: [
+      [793.234,110.78],[385.5741,97.52],[200.3423,115.28],[99.3872,152.46],[47.8775,204.1],
+      [23.725,237.6],[11.6384,265.62],[5.8654,285.64],[2.8753,297.16],[1.4178,300.71],
+      [0.7186,300.32],[0.3615,296.43],[0.1837,289.04],[0.0895,274.82],[0.0453,256.21],
+      [0.0227,230.44],[0.0108,196.68],[0.0055,167.58],[0.0027,144.71],[0.0014,124.83],[0.00135,0.0],
+    ],
+  },
+  {
+    model:"E2M80/EH500", series:"E2M+EH", type:"oil_vane",
+    speed50Hz:378, speed60Hz:454, ultimate:1.0e-3, motorKW_50Hz:0, inletFlange:"ISO63",
+    speedCurve: [
+      [789.7216,108.86],[390.8305,89.65],[187.0011,100.94],[94.2285,121.81],[46.2451,163.12],
+      [22.0352,240.05],[11.1748,331.63],[5.2314,392.08],[2.5446,428.69],[1.3071,446.06],
+      [0.6399,454.5],[0.3139,452.09],[0.1577,441.79],[0.0767,416.83],[0.0365,380.62],
+      [0.0174,332.96],[0.0089,283.29],[0.0043,233.13],[0.0021,196.73],[0.001,163.55],[0.00104,0.0],
+    ],
+  },
+  {
+    model:"E2M175/EH500", series:"E2M+EH", type:"oil_vane",
+    speed50Hz:427, speed60Hz:512, ultimate:7e-4, motorKW_50Hz:0, inletFlange:"ISO63",
+    speedCurve: [
+      [650.0528,287.15],[313.4334,215.37],[156.0609,245.59],[75.0614,304.02],[35.6332,392.55],
+      [17.2294,448.24],[8.5805,483.71],[4.1303,508.13],[1.9448,512.44],[0.9797,507.15],
+      [0.465,498.13],[0.2283,487.48],[0.111,472.95],[0.0517,450.05],[0.0258,418.85],
+      [0.0122,376.9],[0.0059,335.4],[0.0029,298.26],[0.0014,262.74],[0.0007,229.15],[0.00067,0.0],
+    ],
+  },
+  {
+    model:"E2M175/EH1200", series:"E2M+EH", type:"oil_vane",
+    speed50Hz:893, speed60Hz:1071, ultimate:5e-4, motorKW_50Hz:0, inletFlange:"ISO100",
+    speedCurve: [
+      [475.2656,469.04],[233.1521,217.59],[110.3456,251.2],[53.7448,312.03],[26.1432,410.23],
+      [12.6557,547.35],[6.071,716.74],[3.0183,884.1],[1.4603,1002.58],[0.7168,1060.17],
+      [0.3375,1071.25],[0.1634,1047.84],[0.0827,1002.61],[0.0396,929.03],[0.0184,819.17],
+      [0.0093,701.49],[0.0045,577.45],[0.0021,470.33],[0.001,376.77],[0.0005,295.07],[0.00051,0.0],
+    ],
+  },
+  {
+    model:"E2M175/EH2600", series:"E2M+EH", type:"oil_vane",
+    speed50Hz:1233, speed60Hz:1479, ultimate:5e-4, motorKW_50Hz:0, inletFlange:"ISO160",
+    speedCurve: [
+      [447.4153,830.78],[215.2402,233.28],[105.1489,261.85],[51.2071,326.56],[24.9035,427.86],
+      [12.0496,566.46],[5.7747,735.37],[2.8644,908.02],[1.3685,1078.65],[0.6513,1223.66],
+      [0.3287,1325.97],[0.1563,1408.41],[0.0769,1459.58],[0.0379,1479.0],[0.0177,1408.4],
+      [0.0089,1162.95],[0.0043,856.71],[0.0021,617.51],[0.001,444.01],[0.0005,308.5],[0.00049,0.0],
+    ],
+  },
+  {
+    model:"E2M275/EH500", series:"E2M+EH", type:"oil_vane",
+    speed50Hz:449, speed60Hz:539, ultimate:6e-4, motorKW_50Hz:0, inletFlange:"ISO63",
+    speedCurve: [
+      [483.826,418.98],[237.7503,353.68],[117.1633,408.44],[57.0102,455.21],[27.7896,492.52],
+      [13.5075,518.74],[6.5392,534.65],[3.1533,538.84],[1.5924,529.82],[0.7848,518.98],
+      [0.3797,508.08],[0.1882,496.56],[0.0897,480.4],[0.0448,458.17],[0.0211,424.31],
+      [0.0104,385.82],[0.0052,348.66],[0.0026,313.62],[0.0012,279.78],[0.0006,248.96],[0.0006,0.0],
+    ],
+  },
+  {
+    model:"E2M275/EH1200", series:"E2M+EH", type:"oil_vane",
+    speed50Hz:958, speed60Hz:1149, ultimate:4e-4, motorKW_50Hz:0, inletFlange:"ISO100",
+    speedCurve: [
+      [466.1222,656.85],[220.6917,346.31],[110.4637,385.62],[50.9927,473.53],[24.7664,596.51],
+      [11.9649,753.59],[5.7093,929.2],[2.8249,1058.21],[1.3659,1129.45],[0.6373,1148.81],
+      [0.32,1136.05],[0.1547,1102.11],[0.0729,1048.0],[0.0351,971.18],[0.0166,862.55],
+      [0.0082,746.97],[0.0038,626.06],[0.0019,525.22],[0.0009,428.14],[0.0004,339.67],[0.00044,0.0],
+    ],
+  },
+  {
+    model:"E2M275/EH2600", series:"E2M+EH", type:"oil_vane",
+    speed50Hz:1342, speed60Hz:1610, ultimate:4e-4, motorKW_50Hz:0, inletFlange:"ISO160",
+    speedCurve: [
+      [428.6043,1146.76],[206.478,438.96],[99.5631,428.96],[48.4053,504.93],[23.5069,626.91],
+      [11.3504,782.83],[5.4078,960.35],[2.6589,1126.51],[1.2591,1272.01],[0.5939,1390.4],
+      [0.2975,1474.94],[0.1404,1545.93],[0.0689,1593.37],[0.0316,1610.18],[0.0154,1512.07],
+      [0.0075,1233.78],[0.0036,939.35],[0.0018,706.16],[0.0009,515.99],[0.0004,365.29],[0.00041,0.0],
+    ],
+  },
+  {
+    model:"E2M275/EH4200", series:"E2M+EH", type:"oil_vane",
+    speed50Hz:1365, speed60Hz:1638, ultimate:4e-4, motorKW_50Hz:0, inletFlange:"ISO160",
+    speedCurve: [
+      [409.5133,1370.68],[196.4816,394.63],[92.3895,380.81],[44.991,437.4],[21.8858,535.25],
+      [10.5682,671.71],[5.0451,838.23],[2.4862,1002.13],[1.1738,1156.41],[0.549,1285.52],
+      [0.2728,1380.21],[0.1273,1465.25],[0.0614,1533.8],[0.0297,1591.66],[0.0141,1638.34],
+      [0.0068,1624.62],[0.0034,1261.88],[0.0016,880.06],[0.0008,610.13],[0.0004,406.53],[0.00037,0.0],
+    ],
+  },
+];
+
+// ─────────────────────────────────────────────────────
 // iXH 반도체 드라이펌프
 // Source: Edwards PumpCalc CSV (2026-04-21)
 // 조건: 100L SUS+Nitrile, NW25 1.1m, Air, 60Hz
@@ -534,23 +894,67 @@ const iXH: PumpModel[] = [
 ];
 
 // ─────────────────────────────────────────────────────
-// nXRi / iXL / nEXT / STP — PumpCalc CSV 미확보
+// iXL / nEXT / STP — PumpCalc CSV 미확보
 // ─────────────────────────────────────────────────────
-const PENDING: PumpModel[] = [
-  { model:"nXRi200", series:"nXRi", type:"dry_screw", speed50Hz:0, speed60Hz:0, ultimate:0, motorKW_50Hz:0 },
-];
+const PENDING: PumpModel[] = [];
 
 // ─────────────────────────────────────────────────────
 // 전체 펌프 목록
 // ─────────────────────────────────────────────────────
 export const ALL_PUMPS: PumpModel[] = [
-  ...RV, ...E2M_small, ...E2M_large, ...nES, ...EH, ...EXS,
-  ...nXDS, ...GXS, ...GXS_GXB, ...iXH, ...PENDING,
+  ...RV, ...E2M_small, ...E2M_large, ...nES, ...nES_EH, ...EH, ...EXS,
+  ...nXDS, ...XDS, ...nXRi, ...EDC, ...EDS, ...GXS, ...GXS_GXB, ...E2M_EH, ...iXH,
 ];
 
 export const PUMPS_BY_SERIES: Record<string, PumpModel[]> = {
-  RV, E2M_small, E2M_large, nES, EH, EXS, nXDS, GXS, GXS_GXB, iXH,
+  RV, E2M_small, E2M_large, nES, "nES+EH": nES_EH, EH, EXS, nXDS, XDS, nXRi, EDC, EDS, GXS, GXS_GXB, "E2M+EH": E2M_EH, iXH,
 };
+
+// ─────────────────────────────────────────────────────
+// 터보분자펌프 (TMP) 모델 데이터
+// Source: Edwards iS2207/iXA3306/iXA4506 매뉴얼+카탈로그,
+//         nEXT 매뉴얼+브로셔, nEXT2807M/3207M 카탈로그 (2026-04-23)
+// speedN2_Ls: 인렛 플랜지에서의 N2 배기속도
+// maxFVPressure_mbar: 백킹펌프 조건 선택 기준 (이 값 이하 얼티밋 필요)
+// ─────────────────────────────────────────────────────
+export const TURBO_PUMPS: TurboModel[] = [
+  // ── iS 시리즈 ──────────────────────────────────────
+  { model:"iS2207C (ISO200F)", series:"iS",  inletFlange:"ISO200F", fvFlange:"KF40", speedN2_Ls:1850, maxFVPressure_mbar:2.0,  ultimate_mbar:1e-8 },
+  { model:"iS2207C (ISO250F)", series:"iS",  inletFlange:"ISO250F", fvFlange:"KF40", speedN2_Ls:2200, maxFVPressure_mbar:2.0,  ultimate_mbar:1e-8 },
+  // ── iXA 시리즈 ─────────────────────────────────────
+  { model:"iXA3306C (ISO250F)", series:"iXA", inletFlange:"ISO250F", fvFlange:"KF40", speedN2_Ls:2650, maxFVPressure_mbar:2.66, ultimate_mbar:1e-8 },
+  { model:"iXA3306C (ISO320F)", series:"iXA", inletFlange:"ISO320F", fvFlange:"KF40", speedN2_Ls:3200, maxFVPressure_mbar:2.66, ultimate_mbar:1e-8 },
+  { model:"iXA4506C (ISO320F)", series:"iXA", inletFlange:"ISO320F", fvFlange:"KF40", speedN2_Ls:3800, maxFVPressure_mbar:2.66, ultimate_mbar:1e-8 },
+  { model:"iXA4506C (ISO400F)", series:"iXA", inletFlange:"ISO400F", fvFlange:"KF40", speedN2_Ls:4000, maxFVPressure_mbar:2.66, ultimate_mbar:1e-8 },
+  // ── nEXT 시리즈 ────────────────────────────────────
+  { model:"nEXT240D",  series:"nEXT", inletFlange:"ISO100",  fvFlange:"NW25", speedN2_Ls:240,  maxFVPressure_mbar:9.5,  ultimate_mbar:5e-10 },
+  { model:"nEXT300D",  series:"nEXT", inletFlange:"ISO100",  fvFlange:"NW25", speedN2_Ls:300,  maxFVPressure_mbar:9.5,  ultimate_mbar:5e-10 },
+  { model:"nEXT400D",  series:"nEXT", inletFlange:"ISO160",  fvFlange:"NW25", speedN2_Ls:400,  maxFVPressure_mbar:10.0, ultimate_mbar:5e-10 },
+  { model:"nEXT730D",  series:"nEXT", inletFlange:"ISO160",  fvFlange:"NW25", speedN2_Ls:730,  maxFVPressure_mbar:15.0, ultimate_mbar:5e-10 },
+  { model:"nEXT930D",  series:"nEXT", inletFlange:"ISO200",  fvFlange:"NW25", speedN2_Ls:925,  maxFVPressure_mbar:15.0, ultimate_mbar:5e-10 },
+  { model:"nEXT1230H", series:"nEXT", inletFlange:"ISO200",  fvFlange:"NW40", speedN2_Ls:1250, maxFVPressure_mbar:15.0, ultimate_mbar:5e-10 },
+  // 마그레브 베어링 — FV 제한 엄격 (1.4 mbar), GXS/EXS/iXH 필수
+  { model:"nEXT2807M", series:"nEXT", inletFlange:"ISO250F", fvFlange:"NW40", speedN2_Ls:2350, maxFVPressure_mbar:1.4,  ultimate_mbar:5e-10 },
+  { model:"nEXT3207M", series:"nEXT", inletFlange:"ISO320F", fvFlange:"NW40", speedN2_Ls:3200, maxFVPressure_mbar:1.4,  ultimate_mbar:5e-10 },
+
+  // ── T-Station 85W (nEXT85H + E2M1.5 오일 백킹 일체형) ──────────────
+  // Source: T-Station 85 데이터시트 TS8500895 A + 매뉴얼 D395-94-880A
+  // maxFVPressure: 매뉴얼 각주 "backing pressure < 5 mbar (500 Pa)" 기준
+  // 얼티밋: CF63 > ISO63 > NW40 (플랜지 기밀도 차이)
+  { model:"T-Station 85W (NW40)",  series:"T-Station", inletFlange:"NW40",  fvFlange:"내장", speedN2_Ls:47,  maxFVPressure_mbar:5.0, ultimate_mbar:5e-8,  integrated:true, backingPump:"E2M1.5 1.6 m³/h (오일)" },
+  { model:"T-Station 85W (ISO63)", series:"T-Station", inletFlange:"ISO63", fvFlange:"내장", speedN2_Ls:84,  maxFVPressure_mbar:5.0, ultimate_mbar:5e-9,  integrated:true, backingPump:"E2M1.5 1.6 m³/h (오일)" },
+  // ── T-Station 85D (nEXT85H + XDD1 드라이 다이어프램 백킹 일체형) ──────
+  { model:"T-Station 85D (NW40)",  series:"T-Station", inletFlange:"NW40",  fvFlange:"내장", speedN2_Ls:47,  maxFVPressure_mbar:5.0, ultimate_mbar:5e-8,  integrated:true, backingPump:"XDD1 1.2 m³/h (드라이)" },
+  { model:"T-Station 85D (ISO63)", series:"T-Station", inletFlange:"ISO63", fvFlange:"내장", speedN2_Ls:84,  maxFVPressure_mbar:5.0, ultimate_mbar:5e-8,  integrated:true, backingPump:"XDD1 1.2 m³/h (드라이)" },
+  // ── nEXT Pumping Station (TIC 컨트롤러 + nXDS/RV 드라이/웻 백킹, 선택형) ─
+  // Source: nEXT Pumping Station 데이터시트 3601 0448 01 + 브로셔
+  // maxFVPressure: 내장 nEXT TMP 스펙 기준 (nEXT85→5, 240/300→9.5, 400→10 mbar)
+  // 얼티밋 <5×10⁻¹⁰ mbar (nXDS 드라이 백킹 기준)
+  { model:"nEXT Station 85 (ISO63)",   series:"T-Station", inletFlange:"ISO63",  fvFlange:"내장", speedN2_Ls:84,  maxFVPressure_mbar:5.0,  ultimate_mbar:5e-10, integrated:true, backingPump:"nXDS/RV/XDD 선택 (1.2~22 m³/h)" },
+  { model:"nEXT Station 240 (ISO100)", series:"T-Station", inletFlange:"ISO100", fvFlange:"내장", speedN2_Ls:240, maxFVPressure_mbar:9.5,  ultimate_mbar:5e-10, integrated:true, backingPump:"nXDS/RV 선택 (5~22 m³/h)" },
+  { model:"nEXT Station 300 (ISO100)", series:"T-Station", inletFlange:"ISO100", fvFlange:"내장", speedN2_Ls:300, maxFVPressure_mbar:9.5,  ultimate_mbar:5e-10, integrated:true, backingPump:"nXDS/RV 선택 (5~22 m³/h)" },
+  { model:"nEXT Station 400 (ISO160)", series:"T-Station", inletFlange:"ISO160", fvFlange:"내장", speedN2_Ls:400, maxFVPressure_mbar:10.0, ultimate_mbar:5e-10, integrated:true, backingPump:"nXDS/RV 선택 (5~22 m³/h)" },
+];
 
 // ─────────────────────────────────────────────────────
 // 표준 플랜지 규격 및 배관 최적화 추천
@@ -864,4 +1268,137 @@ export function recommendPumps(
     .filter((r) => r.reachable && r.pumpDownTime_s < 86400)
     .sort((a, b) => a.pumpDownTime_s - b.pumpDownTime_s)
     .slice(0, maxResults);
+}
+
+// ─────────────────────────────────────────────────────
+// 2단 TMP 펌프다운 계산 엔진
+//
+// Stage 1 (러핑): 대기압 → tmp.maxFVPressure_mbar
+//   백킹펌프 단독 동작. calcPumpDown 재사용 (roughing 배관 조건)
+//
+// Stage 2 (TMP 고진공): tmp.maxFVPressure_mbar → 목표 압력
+//   TMP 유효 배기속도: Seff = 1/(1/S_TMP + 1/C_pipe)  [분자류]
+//   지수 감쇠: t = (V/Seff) × ln((P0-P_ult)/(Pt-P_ult))
+//   아웃게싱 한계: P_ult_sys = max(tmp.ultimate, Q_out/Seff)
+//
+// 주의: TMP 스핀업 시간(1~3분)은 포함되지 않음
+// ─────────────────────────────────────────────────────
+
+export type TurboPumpDownInput = {
+  chamberVol_L: number;
+  outgassingRate?: number;       // mbar·L/s·cm² (SUS 기본값: 1.3e-7)
+  chamberSurface_cm2?: number;   // 미입력 시 챔버 구형 근사
+  startPressure_mbar?: number;   // 기본: 1013 mbar
+  targetPressure_mbar: number;   // 목표 고진공 압력 (예: 1e-5 mbar)
+  // 챔버 ↔ TMP 인렛 HV 배관
+  hvPipeID_mm: number;
+  hvPipeLength_m: number;
+  hvPipeBends?: number;
+  // 백킹펌프 ↔ 챔버 러핑 배관 (Stage 1)
+  roughPipeID_mm?: number;       // 기본: 40mm
+  roughPipeLength_m?: number;    // 기본: 1.0m
+  roughPipeBends?: number;       // 기본: 0
+  hz?: 50 | 60;
+};
+
+export type TurboPumpDownResult = {
+  turboModel: string;
+  backingModel: string;
+  // Stage 1
+  stage1_s: number;
+  stage1_min: number;
+  tmpStartPressure_mbar: number;
+  // Stage 2
+  stage2_s: number;
+  stage2_min: number;
+  tmpEffSpeed_Ls: number;        // 챔버 기준 유효 TMP 배기속도 [L/s]
+  ultimateSystem_mbar: number;   // 아웃게싱 한계 얼티밋
+  // 합계
+  totalTime_s: number;
+  totalTime_min: number;
+  reachable: boolean;
+};
+
+/**
+ * 2단 TMP 펌프다운 계산
+ * @param backing  Stage 1 러핑용 백킹펌프.
+ *                 일체형 T-Station: 내장 백킹펌프에 해당하는 PumpModel 전달
+ *                 (예: E2M1.5→E2M_small에서 검색, nXDS6i→nXDS에서 검색)
+ */
+export function calcTurboPumpDown(
+  input: TurboPumpDownInput,
+  tmp: TurboModel,
+  backing: PumpModel,
+): TurboPumpDownResult {
+  const {
+    chamberVol_L,
+    outgassingRate = 1.3e-7,
+    chamberSurface_cm2,
+    startPressure_mbar = 1013,
+    targetPressure_mbar,
+    hvPipeID_mm,
+    hvPipeLength_m,
+    hvPipeBends = 0,
+    roughPipeID_mm = 40,
+    roughPipeLength_m = 1.0,
+    roughPipeBends = 0,
+    hz = 60,
+  } = input;
+
+  const V       = chamberVol_L * 1e-3;
+  const surface = chamberSurface_cm2 ?? Math.pow(chamberVol_L * 1e-3, 2 / 3) * 6 * 1e4;
+  const Q_out   = outgassingRate * surface * 1e-3; // mbar·m³/s
+
+  // ── Stage 1: 러핑 ───────────────────────────────────────────────
+  const tmpStart = tmp.maxFVPressure_mbar;
+
+  const s1 = calcPumpDown(
+    {
+      chamberVol_L,
+      outgassingRate,
+      chamberSurface_cm2: surface,
+      startPressure_mbar,
+      targetPressure_mbar: tmpStart,
+      pipeID_mm: roughPipeID_mm,
+      pipeLength_m: roughPipeLength_m,
+      pipeBends: roughPipeBends,
+      hz,
+    },
+    backing,
+  );
+
+  // ── Stage 2: TMP 고진공 ─────────────────────────────────────────
+  // 분자류 컨덕턴스 (고진공 지배 영역, p→0)
+  const S_tmp_m3h = tmp.speedN2_Ls * 3.6;
+  const C_hv      = pipeConductance_m3h(hvPipeID_mm, hvPipeLength_m, hvPipeBends, 0);
+  const Seff_m3h  = S_tmp_m3h > 0 && C_hv > 0
+    ? 1 / (1 / S_tmp_m3h + 1 / C_hv)
+    : S_tmp_m3h;
+  const Seff_s = Seff_m3h / 3600;
+
+  const P_ult_sys = Math.max(tmp.ultimate_mbar, Q_out / Seff_s);
+  const reachable = s1.reachable && targetPressure_mbar > P_ult_sys;
+
+  const P0 = tmpStart;
+  const Pt = Math.max(targetPressure_mbar, P_ult_sys * 1.001);
+  const stage2_s = reachable
+    ? Math.max(0, Math.round((V / Seff_s) * Math.log((P0 - P_ult_sys) / (Pt - P_ult_sys))))
+    : Infinity;
+
+  const total_s = reachable ? s1.pumpDownTime_s + stage2_s : Infinity;
+
+  return {
+    turboModel:            tmp.model,
+    backingModel:          backing.model,
+    stage1_s:              s1.pumpDownTime_s,
+    stage1_min:            s1.pumpDownTime_min,
+    tmpStartPressure_mbar: tmpStart,
+    stage2_s:              reachable ? stage2_s : Infinity,
+    stage2_min:            reachable ? Math.round(stage2_s / 60 * 10) / 10 : Infinity,
+    tmpEffSpeed_Ls:        Math.round(Seff_m3h / 3.6 * 10) / 10,
+    ultimateSystem_mbar:   P_ult_sys,
+    totalTime_s:           reachable ? total_s : Infinity,
+    totalTime_min:         reachable ? Math.round(total_s / 60 * 10) / 10 : Infinity,
+    reachable,
+  };
 }
