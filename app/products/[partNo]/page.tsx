@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { getMultiplier, formatKRW } from "@/lib/pricing";
