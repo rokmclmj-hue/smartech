@@ -43,7 +43,7 @@ const CATEGORY_GROUPS: { label: string; items: string[] }[] = [
     label: "터보 / 리크",
     items: [
       "터보펌프(nEXT)",
-      "터보펌프(nEXT Station)",
+      "터보펌핑스테이션(T-Station)",
       "터보펌프(STP)",
       "헬륨리크디텍터(ELD500)",
     ],

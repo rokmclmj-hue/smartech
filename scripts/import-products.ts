@@ -21,7 +21,7 @@ const CATEGORY_MAP: Record<number, string> = {
   13: "반도체드라이펌프(iXL)",
   14: "헬륨리크디텍터(ELD500)",
   15: "터보펌프(nEXT)",
-  16: "터보펌프(nEXT Station)",
+  16: "터보펌핑스테이션(T-Station)",
   17: "터보펌프(STP)",
   18: "저진공게이지(APG200)",
   19: "고진공게이지(AIM200)",
@@ -68,87 +68,67 @@ function inferCategory(partNo: string, description: string): { category: string;
   const part = partNo.toLowerCase();
   const both = `${desc} ${part}`;
 
-  // ── Specific model matches first (most specific wins)
-
-  // Turbopumps / Stations / STP
   if (/t-?station|tstation|pumping station/.test(desc)) return { category: CATEGORY_MAP[16], pdfFile: PDF_MAP[16] };
   if (/\bstp[- ]?\w*|stp\d/.test(both)) return { category: CATEGORY_MAP[17], pdfFile: PDF_MAP[17] };
   if (/\bnext\b|nexta|next\d|next turbo/.test(both)) return { category: CATEGORY_MAP[15], pdfFile: PDF_MAP[15] };
 
-  // Turbo-related spares (stator/rotor/p0xx turbo column etc.)
-  if (/\bp0\d{2}\b|stator|rotor assy|turbo/.test(both)) return { category: CATEGORY_MAP[15], pdfFile: PDF_MAP[15] };
+  // TIC/ADC: nEXT 모델명 다음, turbo 일반어 이전 (TIC Turbo Controller 오분류 방지)
+  if (/\btic\b|tic \d|turbo.*controller|instrument controller/.test(both)) return { category: CATEGORY_MAP[22], pdfFile: PDF_MAP[22] };
+  if (/\badc\b|adc \d|analog display|analogue display/.test(both)) return { category: CATEGORY_MAP[23], pdfFile: PDF_MAP[23] };
 
-  // Leak detectors
+  if (/\bp0\d{2}\b|stator|rotor assy|turbo/.test(both)) return { category: CATEGORY_MAP[15], pdfFile: PDF_MAP[15] };
   if (/eld\d|leak detect|helium leak/.test(both)) return { category: CATEGORY_MAP[14], pdfFile: PDF_MAP[14] };
 
-  // Dry pumps — semiconductor
-  if (/ixh\d|ixh /.test(both)) return { category: CATEGORY_MAP[11], pdfFile: PDF_MAP[11] };
+  // AIGX 게이지: igx 패턴보다 먼저 (AIM 계열 오분류 방지)
+  if (/\baigx/.test(both)) return { category: CATEGORY_MAP[19], pdfFile: PDF_MAP[19] };
+
+  if (/ixh\d|ixh |ixm\d|\bixm\b/.test(both)) return { category: CATEGORY_MAP[11], pdfFile: PDF_MAP[11] };
   if (/nxri|nxr\d|nxr /.test(both)) return { category: CATEGORY_MAP[12], pdfFile: PDF_MAP[12] };
   if (/ixl\d|ixl |nxl\d|nxl /.test(both)) return { category: CATEGORY_MAP[13], pdfFile: PDF_MAP[13] };
   if (/igx|ipx|ih\d|iq\d/.test(both)) return { category: CATEGORY_MAP[11], pdfFile: PDF_MAP[11] };
 
-  // Dry pumps — industrial
-  if (/gxs|\bgx\d/.test(both)) return { category: CATEGORY_MAP[9], pdfFile: PDF_MAP[9] };
-  if (/\bexs|\beos|\beds|\bedc|\bngx|\bnedc/.test(both)) return { category: CATEGORY_MAP[10], pdfFile: PDF_MAP[10] };
+  // nGX는 GXS 계열
+  if (/gxs|\bgx\d|\bngx/.test(both)) return { category: CATEGORY_MAP[9], pdfFile: PDF_MAP[9] };
+  if (/\bexs|\beos|\beds|\bedc|\bnedc|\binedc|\bedo\d/.test(both)) return { category: CATEGORY_MAP[10], pdfFile: PDF_MAP[10] };
 
-  // Boosters
+  // 오일/소모품은 booster 이전 (Vapour Booster Pump Fluid 오분류 방지)
+  if (/ultra\s?\d|ultragrade|pfpe|fomblin|krytox|vacuum oil|apiezon|wax/.test(desc)) return { category: CATEGORY_MAP[25], pdfFile: PDF_MAP[25] };
+  if (/silicone oil|lube|v lube|vapour.*fluid|diffusion.*fluid|booster.*fluid|pump fluid|\bfluid\b|grease|carbon pack|alumina|xtragrade|edwards 45|edwards 70\d/.test(desc)) return { category: CATEGORY_MAP[25], pdfFile: PDF_MAP[25] };
+
   if (/\beh\d|\beh\s|booster|qmb/.test(both)) return { category: CATEGORY_MAP[8], pdfFile: PDF_MAP[8] };
-
-  // Scroll pumps
   if (/nxds|nxd\d/.test(both)) return { category: CATEGORY_MAP[6], pdfFile: PDF_MAP[6] };
   if (/\bxds\b|xds\d|scroll/.test(both)) return { category: CATEGORY_MAP[7], pdfFile: PDF_MAP[7] };
-
-  // Oil rotary pumps
   if (/\bnes\b|nes\d/.test(both)) return { category: CATEGORY_MAP[5], pdfFile: PDF_MAP[5] };
   if (/e2s\d|\be2s\b/.test(both)) return { category: CATEGORY_MAP[4], pdfFile: PDF_MAP[4] };
-  // Small E2M: 1.5/2/5 series; Large E2M: 18/28/40/80/...
-  if (/e2m(1\.5|2\b|5\b|-1|-2|-5)/.test(both) || /e2m0[125]/.test(both)) return { category: CATEGORY_MAP[2], pdfFile: PDF_MAP[2] };
+  // 미스트필터: E2M 패턴 이전 (MF30 Fits E2M28 오분류 방지)
+  if (/\bemf\d|\bemf\b|mist filter|oil mist/.test(both)) return { category: CATEGORY_MAP[24], pdfFile: PDF_MAP[24] };
+  if (/e2m(0\.\d+|1[.\/]|1\.5|18|28|2\b|5\b|-1|-2|-5)/.test(both)) return { category: CATEGORY_MAP[2], pdfFile: PDF_MAP[2] };
+
   if (/\be2m\d|\be2m\b/.test(both)) return { category: CATEGORY_MAP[3], pdfFile: PDF_MAP[3] };
   if (/\brv\d|\brv\b/.test(both)) return { category: CATEGORY_MAP[1], pdfFile: PDF_MAP[1] };
 
-  // Gauges
   if (/apg\d|\bapg/.test(both)) return { category: CATEGORY_MAP[18], pdfFile: PDF_MAP[18] };
-  if (/aim\d|\baim/.test(both) || /active ion gauge|aigx/.test(desc)) return { category: CATEGORY_MAP[19], pdfFile: PDF_MAP[19] };
+  if (/aim\d|\baim/.test(both) || /active ion gauge/.test(desc)) return { category: CATEGORY_MAP[19], pdfFile: PDF_MAP[19] };
   if (/wrg\d|\bwrg|wrh|wra/.test(both)) return { category: CATEGORY_MAP[20], pdfFile: PDF_MAP[20] };
   if (/\bp[45] gauge|p4-p5|p4\/p5|\bp[45]\b|\bp4\b|\bp5\b/.test(desc)) return { category: CATEGORY_MAP[21], pdfFile: PDF_MAP[21] };
-  if (/capsule gauge|cg\d+k|pirani|penning|ion gauge|ionization gauge|tag controller|barocel/.test(desc)) return { category: CATEGORY_MAP[20], pdfFile: PDF_MAP[20] };
-  if (/\bgauge\b/.test(desc)) return { category: CATEGORY_MAP[20], pdfFile: PDF_MAP[20] };
+  if (/capsule gauge|cg\d+k|pirani|penning|ion gauge|ionization gauge|tag controller|barocel|prg\d+|\bpra\d|\bpra-\d/.test(desc)) return { category: CATEGORY_MAP[20], pdfFile: PDF_MAP[20] };
+  if (/\bgauge\b|vacuum.*switch|interlock switch|adjustable.*switch/.test(desc)) return { category: CATEGORY_MAP[20], pdfFile: PDF_MAP[20] };
 
-  // Controllers
-  if (/\btic\b|tic \d|turbo.*controller|instrument controller/.test(both)) return { category: CATEGORY_MAP[22], pdfFile: PDF_MAP[22] };
-  if (/\badc\b|adc \d|analog display|analogue display/.test(both)) return { category: CATEGORY_MAP[23], pdfFile: PDF_MAP[23] };
-
-  // Mist filter
-  if (/\bemf\d|\bemf\b|mist filter|oil mist/.test(both)) return { category: CATEGORY_MAP[24], pdfFile: PDF_MAP[24] };
-
-  // Oil / consumables
-  if (/ultra\s?\d|ultragrade|pfpe|fomblin|krytox|vacuum oil|apiezon|wax/.test(desc)) return { category: CATEGORY_MAP[25], pdfFile: PDF_MAP[25] };
-
-  // Fittings / valves / accessories
   if (/valve|speedivalve|solenoid|pipeline valve|fitting|elbow|clamp|centering|nw\d+|kf\d+|iso\d+|dn\d+cf|tee |tee-|cross|flange|hose|gasket|o[- ]ring|o-ring\b|bellow|adapter|centring|spare tube|silencer|catchpot|trap|dust filter|chemical trap|cable|coupling|vibration pad/.test(desc)) return { category: CATEGORY_MAP[26], pdfFile: PDF_MAP[26] };
+  if (/spare|service kit|overhaul kit|blade kit|rotor|stator|shaft|bearing|oil seal|sight glass|gear|cooling|fan\b|heater|heatsink|impeller|o\/s|core plug|washer|dowty|bonded seal|back shell|terminal|connector|plug|strainer|cartridge|regulator|sensor|interface|module|display|itim|mcm|sim|controller|holster|bracket|head ?plate|manifold|pump display|filter element|pair of gears|vibration|micro.?tim|\btim\b|bus.?bar|conn.?kit|hook.?up.?kit|pipe.?assy|quick.?connect|\bqc[- ]sock|\bqc[- ]skt|\bmale.?conn|nozzle.?kit|torque.?limit|after.?cool|microswitch|flow.?indicat|dowel|locking.?ring|spring|dust.?thrower|oil.?thrower|swing.?prv|gas.?ballast|oil.?filter|taper.?lock|inner.?ring|oil.?pump.?blade|banjo.?bolt|ethercat|blanking|blnkn|drain.?end|end.?cap|side.?panel|panel.*e2m|oil.?tube|tube.?assy|\bassy\b|service.*box/.test(desc)) return { category: CATEGORY_MAP[26], pdfFile: PDF_MAP[26] };
 
-  // Silicone / generic lubrication fluids
-  if (/silicone oil|lube|v lube|fluid|grease|carbon pack|alumina|xtragrade|edwards 45|edwards 70\d/.test(desc)) return { category: CATEGORY_MAP[25], pdfFile: PDF_MAP[25] };
-
-  // Spare parts / service kits / assemblies  → group under accessories
-  if (/spare|service kit|overhaul kit|blade kit|rotor|stator|shaft|bearing|oil seal|sight glass|gear|cooling|fan\b|heater|heatsink|impeller|o\/s|core plug|washer|dowty|bonded seal|back shell|terminal|connector|plug|strainer|cartridge|regulator|sensor|interface|module|display|itim|mcm|sim|controller|holster|bracket|head ?plate|manifold|pump display|filter element|pair of gears|vibration/.test(desc)) return { category: CATEGORY_MAP[26], pdfFile: PDF_MAP[26] };
-
-  // Legacy pumps that still map to RV-like oil pumps
-  if (/\bgv\d+|microvac|em\d+|dp\d+|edp|stokes|xdd|diaphragm pump/.test(desc)) return { category: CATEGORY_MAP[1], pdfFile: PDF_MAP[1] };
-
-  // Boosters catch — second chance
+  if (/\bgv\d+/.test(both)) return { category: CATEGORY_MAP[3], pdfFile: PDF_MAP[3] };
+  if (/\bem\d{2,}/.test(both)) return { category: CATEGORY_MAP[3], pdfFile: PDF_MAP[3] };
   if (/\beh\b/.test(both)) return { category: CATEGORY_MAP[8], pdfFile: PDF_MAP[8] };
-
-  // Leak detector consumables
   if (/calibrated leak|cl-cal|cl-int/.test(desc)) return { category: CATEGORY_MAP[14], pdfFile: PDF_MAP[14] };
 
-  return { category: "기타", pdfFile: "" };
+  return { category: "피팅/액세서리", pdfFile: PDF_MAP[26] };
 }
 
 async function main() {
   const excelPath = path.resolve(
     __dirname,
-    "../제품아이템번호 및 단가/원본_2026_Price_IV_SV_VTS_통합.xlsx"
+    "../../제품아이템번호 및 단가/원본_2026_Price_IV_SV_VTS_통합.xlsx"
   );
 
   console.log("📂 Excel 파일 읽는 중...");

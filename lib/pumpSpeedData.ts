@@ -235,7 +235,17 @@ const nES: PumpModel[] = [
       [0.5684,407.16],[0.3573,323.08],[0.2137,196.14],[0.1324,99.47],[0.0818,4.31],[0.08177,0.0],
     ],
   },
-  { model:"nES570",  series:"nES", type:"oil_vane", speed50Hz:470,  speed60Hz:0,     ultimate:0.08, motorKW_50Hz:11.0, inletFlange:"ISO100" },
+  {
+    model:"nES570",  series:"nES", type:"oil_vane", speed50Hz:470,  speed60Hz:0,     ultimate:0.08, motorKW_50Hz:11.0, inletFlange:"ISO100",
+    // Source: nES470 60Hz 커브(492.44 m³/h)를 nES570 50Hz 정격속도(470 m³/h)로 스케일링 (×0.9544)
+    // nES570 50Hz 정격 = nES470 60Hz 정격이므로 동일 압축비/슬립 특성 적용
+    speedCurve: [
+      [880.8933,470.0],[535.2855,460.39],[326.6447,451.76],[205.7094,437.64],[127.6582,432.65],
+      [77.6296,449.14],[46.4838,457.61],[29.309,453.35],[17.5519,447.0],[11.0592,444.83],
+      [6.618,442.73],[4.1674,441.16],[2.5025,434.28],[1.5081,425.58],[0.9476,414.06],
+      [0.5684,388.61],[0.3573,308.36],[0.2137,187.2],[0.1324,94.94],[0.0818,4.11],[0.08177,0.0],
+    ],
+  },
   {
     model:"nES630",  series:"nES", type:"oil_vane", speed50Hz:640,  speed60Hz:755,   ultimate:0.08, motorKW_50Hz:18.5, inletFlange:"ISO100",
     speedCurve: [
@@ -245,7 +255,17 @@ const nES: PumpModel[] = [
       [0.5864,411.63],[0.358,309.02],[0.2176,184.45],[0.132,90.33],[0.082,4.32],[0.08195,0.0],
     ],
   },
-  { model:"nES750",  series:"nES", type:"oil_vane", speed50Hz:755,  speed60Hz:0,     ultimate:0.08, motorKW_50Hz:18.5, inletFlange:"ISO100" },
+  {
+    model:"nES750",  series:"nES", type:"oil_vane", speed50Hz:755,  speed60Hz:0,     ultimate:0.08, motorKW_50Hz:18.5, inletFlange:"ISO100",
+    // Source: nES630 60Hz 커브(764.9 m³/h)를 nES750 50Hz 정격속도(755 m³/h)로 스케일링 (×0.9871)
+    // nES750 50Hz 정격 ≈ nES630 60Hz 정격이므로 동일 압축비/슬립 특성 적용
+    speedCurve: [
+      [860.6285,755.0],[527.6622,740.25],[322.1909,727.67],[201.8319,723.27],[124.9611,721.97],
+      [76.5141,717.38],[46.3822,709.01],[27.8704,698.55],[17.583,685.17],[10.5349,665.69],
+      [6.6498,642.32],[4.0,613.46],[2.5389,583.96],[1.5595,538.0],[0.9526,481.25],
+      [0.5864,406.3],[0.358,305.02],[0.2176,182.06],[0.132,89.16],[0.082,4.26],[0.08195,0.0],
+    ],
+  },
 ];
 
 // ─────────────────────────────────────────────────────
@@ -397,18 +417,21 @@ const nXDS: PumpModel[] = [
 // Source: XDS35_100L.csv (100L, NW40 1m 1-bend, Air, 60Hz)
 // 피크 속도 35 m³/h @ 5~11 mbar, 얼티밋 ~0.003 mbar
 // ─────────────────────────────────────────────────────
+// XDS 드라이 스크롤 (중형)
+// Source: PumpCalc CSV XDS35_100L.csv — 100L SUS+Viton, NW40 1m 1-bend, Air, 60Hz
+// 끝점 [0.003, 0.0]: 카탈로그 얼티밋 (3×10⁻³ mbar)
+// ─────────────────────────────────────────────────────
 const XDS: PumpModel[] = [
   {
     model:"XDS35i", series:"XDS", type:"dry_scroll",
     speed50Hz:29, speed60Hz:35, ultimate:3e-3, motorKW_50Hz:2.2, inletFlange:"NW40",
     speedCurve: [
-      [978.34636, 20.0808], [523.68954, 22.4275], [265.5788, 25.4654],
-      [143.75545, 28.3658], [73.76867, 31.4837],  [39.84194, 33.6114],
-      [20.43512, 34.9852],  [11.02813, 35.0199],  [5.65022, 34.2938],
-      [3.06053, 33.0585],   [1.58928, 31.0749],   [0.83668, 28.0789],
-      [0.44529, 24.8863],   [0.23117, 20.8954],   [0.12008, 16.7],
-      [0.06311, 12.4885],   [0.03383, 8.6183],    [0.01759, 4.6575],
-      [0.003, 0.0],
+      [979.67253,20.08],[548.28613,22.25],[308.84984,24.75],[176.64813,27.38],
+      [100.47669,30.03],[57.15063,32.59],[32.50698,34.17],[18.4898,35.02],
+      [10.51694,35.01],[5.98413,34.38],[3.25201,33.19],[1.87617,31.66],
+      [1.04405,28.98],[0.61785,26.39],[0.33896,22.93],[0.19229,19.22],
+      [0.11017,15.38],[0.06334,11.6],[0.03549,7.99],[0.02,4.66],
+      [0.003,0.0],
     ],
   },
 ];
@@ -954,6 +977,16 @@ export const TURBO_PUMPS: TurboModel[] = [
   { model:"nEXT Station 240 (ISO100)", series:"T-Station", inletFlange:"ISO100", fvFlange:"내장", speedN2_Ls:240, maxFVPressure_mbar:9.5,  ultimate_mbar:5e-10, integrated:true, backingPump:"nXDS/RV 선택 (5~22 m³/h)" },
   { model:"nEXT Station 300 (ISO100)", series:"T-Station", inletFlange:"ISO100", fvFlange:"내장", speedN2_Ls:300, maxFVPressure_mbar:9.5,  ultimate_mbar:5e-10, integrated:true, backingPump:"nXDS/RV 선택 (5~22 m³/h)" },
   { model:"nEXT Station 400 (ISO160)", series:"T-Station", inletFlange:"ISO160", fvFlange:"내장", speedN2_Ls:400, maxFVPressure_mbar:10.0, ultimate_mbar:5e-10, integrated:true, backingPump:"nXDS/RV 선택 (5~22 m³/h)" },
+
+  // ── nEXPT Turbopumping Station (TIC 컨트롤러 일체형, 백킹펌프 선택형) ──────
+  // Source: 카다로그 3601 0444 01 + 매뉴얼 B72301880_D
+  // 얼티밋: nEXT85D ISO63 → <5×10⁻⁹, nEXT240/300D ISO100 → <6×10⁻⁸, nEXT400 ISO160 → <1×10⁻⁸ mbar
+  // 계산용 백킹펌프: nXDS6i(85) / nXDS15i(240·300) / nXDS20i(400) — 드라이 기준
+  { model:"TPS85 (NW40)",    series:"TPS", inletFlange:"NW40",   fvFlange:"내장", speedN2_Ls:47,  maxFVPressure_mbar:5.0,  ultimate_mbar:5e-9, integrated:true, backingPump:"선택형 (E2M1.5/XDD1/mXDS3s/nXDS6i)" },
+  { model:"TPS85 (ISO63)",   series:"TPS", inletFlange:"ISO63",  fvFlange:"내장", speedN2_Ls:84,  maxFVPressure_mbar:5.0,  ultimate_mbar:5e-9, integrated:true, backingPump:"선택형 (E2M1.5/XDD1/nXDS6i 등)" },
+  { model:"TPS240 (ISO100)", series:"TPS", inletFlange:"ISO100", fvFlange:"내장", speedN2_Ls:240, maxFVPressure_mbar:9.5,  ultimate_mbar:6e-8, integrated:true, backingPump:"선택형 (RV5/RV12/nXDS6i~15i)" },
+  { model:"TPS300 (ISO100)", series:"TPS", inletFlange:"ISO100", fvFlange:"내장", speedN2_Ls:300, maxFVPressure_mbar:9.5,  ultimate_mbar:6e-8, integrated:true, backingPump:"선택형 (RV5/RV12/nXDS15i)" },
+  { model:"TPS400 (ISO160)", series:"TPS", inletFlange:"ISO160", fvFlange:"내장", speedN2_Ls:400, maxFVPressure_mbar:10.0, ultimate_mbar:1e-8, integrated:true, backingPump:"선택형 (RV12/nXDS15i/nXDS20i)" },
 ];
 
 // ─────────────────────────────────────────────────────

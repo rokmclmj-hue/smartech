@@ -19,27 +19,27 @@ const CATALOG_ITEMS: CatalogItem[] = [
   { category: "오일펌프(중대형 E2M)",       desc: "오일 로터리 베인 펌프 (E2M 중대형)", seriesKey: "E2M_large" },
   { category: "오일펌프(중대형 E2S)",       desc: "오일 로터리 베인 펌프 (E2S)"                                    },
   { category: "오일펌프(nES)",              desc: "오일 로터리 베인 펌프 (nES)",         seriesKey: "nES"       },
-  { category: "부스터펌프(EH)",             desc: "루츠 부스터 펌프"                                      },
+  { category: "부스터펌프(EH)",             desc: "루츠 부스터 펌프",                   seriesKey: "EH"   },
   { category: "스크롤펌프(소형 nXDS)",      desc: "드라이 스크롤 펌프 (소형)",          seriesKey: "nXDS" },
   { category: "스크롤펌프(중형 XDS)",       desc: "드라이 스크롤 펌프 (중형)",          seriesKey: "XDS"  },
   { category: "산업용드라이펌프(GXS)",      desc: "산업용 드라이 스크류",               seriesKey: "GXS"  },
   { category: "산업용드라이펌프(EXS)",      desc: "부식성 환경 드라이 스크류",          seriesKey: "EXS"  },
-  { category: "반도체드라이펌프(iXH)",      desc: "반도체 드라이 펌프 (iXH)"                             },
-  { category: "반도체드라이펌프(nXRi)",     desc: "멀티루츠드라이펌프(nXRi)"                             },
-  { category: "반도체드라이펌프(iXL)",      desc: "반도체 드라이 펌프 (iXL)"                             },
+  { category: "반도체드라이펌프(iXH)",      desc: "반도체 드라이 펌프 (iXH)",           seriesKey: "iXH"  },
+  { category: "반도체드라이펌프(nXRi)",     desc: "멀티루츠드라이펌프(nXRi)",           seriesKey: "nXRi" },
+  { category: "반도체드라이펌프(iXL)",      desc: "반도체 드라이 펌프 (iXL)",           seriesKey: "nXL"  },
   { category: "터보펌프(nEXT)",             desc: "터보분자 펌프 (nEXT)",               seriesKey: "nEXT" },
   { category: "터보펌프(nEXT Station)",     desc: "터보 펌핑 스테이션",                 seriesKey: "nEXT" },
   { category: "터보펌프(STP)",              desc: "터보분자 펌프 Maglev (STP)"                           },
-  { category: "헬륨리크디텍터(ELD500)",     desc: "헬륨 리크 디텍터"                                     },
-  { category: "저진공게이지(APG200)",       desc: "저진공 피라니 게이지"                                  },
-  { category: "고진공게이지(AIM200)",       desc: "고진공 이온화 게이지"                                  },
-  { category: "복합진공게이지(WRG200)",     desc: "복합 진공 게이지"                                      },
-  { category: "디스플레이게이지(P4/P5)",    desc: "디스플레이 게이지"                                     },
-  { category: "컨트롤러(TIC)",              desc: "터보 인터페이스 컨트롤러"                              },
-  { category: "컨트롤러(ADC)",              desc: "액티브 디지털 컨트롤러"                                },
+  { category: "헬륨리크디텍터(ELD500)",     desc: "헬륨 리크 디텍터",                   seriesKey: "ELD"  },
+  { category: "저진공게이지(APG200)",       desc: "저진공 피라니 게이지",               seriesKey: "APG"  },
+  { category: "고진공게이지(AIM200)",       desc: "고진공 이온화 게이지",               seriesKey: "AIM"  },
+  { category: "복합진공게이지(WRG200)",     desc: "복합 진공 게이지",                   seriesKey: "WRG"  },
+  { category: "디스플레이게이지(P4/P5)",    desc: "디스플레이 게이지",                  seriesKey: "P4P5" },
+  { category: "컨트롤러(TIC)",              desc: "터보 인터페이스 컨트롤러",           seriesKey: "TIC"  },
+  { category: "컨트롤러(ADC)",              desc: "액티브 디지털 컨트롤러",             seriesKey: "ADC"  },
   { category: "미스트필터(EMF)",            desc: "오일 미스트 필터",                   seriesKey: "EM"   },
-  { category: "진공펌프오일(Ultra19)",      desc: "진공 펌프 전용 오일"                                   },
-  { category: "피팅/액세서리",              desc: "피팅 & 액세서리"                                       },
+  { category: "진공펌프오일(Ultra19)",      desc: "진공 펌프 전용 오일",                seriesKey: "OIL"  },
+  { category: "피팅/액세서리",              desc: "피팅 & 액세서리",                    seriesKey: "FITTING" },
 ];
 
 const PROCESS_OPTIONS = [
@@ -83,15 +83,16 @@ const HV_FLANGE_ID: Record<string, number> = {
   ISO400: 400, ISO400F: 400,
 };
 
-const TMP_SERIES_ORDER = ["iS", "iXA", "nEXT", "T-Station"];
+const TMP_SERIES_ORDER = ["iS", "iXA", "nEXT", "T-Station", "TPS"];
 const TMP_SERIES_LABELS: Record<string, string> = {
   "iS":         "iS (대형 TMP)",
   "iXA":        "iXA (초대형 TMP)",
   "nEXT":       "nEXT 시리즈",
   "T-Station":  "T-Station 일체형",
+  "TPS":        "Turbo pumping Station 일체형",
 };
 
-// 일체형 T-Station 내장 백킹펌프 모델명 (ALL_PUMPS에서 조회)
+// 일체형 T-Station / TPS 내장 백킹펌프 모델명 (ALL_PUMPS에서 조회)
 const T_STATION_BACKING: Record<string, string> = {
   "T-Station 85W (NW40)":      "E2M1.5",
   "T-Station 85W (ISO63)":     "E2M1.5",
@@ -101,6 +102,12 @@ const T_STATION_BACKING: Record<string, string> = {
   "nEXT Station 240 (ISO100)": "nXDS15i",
   "nEXT Station 300 (ISO100)": "nXDS15i",
   "nEXT Station 400 (ISO160)": "nXDS20i",
+  // TPS — Turbo pumping Station (계산용 드라이 백킹펌프 기본값)
+  "TPS85 (NW40)":    "nXDS6i",
+  "TPS85 (ISO63)":   "nXDS6i",
+  "TPS240 (ISO100)": "nXDS15i",
+  "TPS300 (ISO100)": "nXDS15i",
+  "TPS400 (ISO160)": "nXDS20i",
 };
 
 // XDD1 드라이 다이어프램 펌프 — ALL_PUMPS 미등재, 로컬 프록시
@@ -347,13 +354,24 @@ export default function PumpSelector() {
     : [];
 
   type FlatItem = { partNo: string; desc: string; price: number; series: string };
-  const allItems: FlatItem[] = (
-    Object.entries(productData) as [string, { partNo: string; desc: string; price: number }[]][]
-  ).flatMap(([series, items]) => items.map((item) => ({ ...item, series })));
+
+  // 재구매·신규 전체검색 공용: SPARE 키(전체 품목)에서 검색
+  const spareItems: FlatItem[] = (productData["SPARE"] as { partNo: string; desc: string; price: number }[]).map(
+    (item) => ({ ...item, series: "" })
+  );
 
   const repurchaseResults: FlatItem[] =
     search.trim().length >= 1
-      ? allItems.filter(
+      ? spareItems.filter(
+          (item) =>
+            item.desc.toLowerCase().includes(search.toLowerCase()) ||
+            item.partNo.toLowerCase().includes(search.toLowerCase())
+        )
+      : [];
+
+  const newGlobalResults: FlatItem[] =
+    !selectedCategory && search.trim().length >= 1
+      ? spareItems.filter(
           (item) =>
             item.desc.toLowerCase().includes(search.toLowerCase()) ||
             item.partNo.toLowerCase().includes(search.toLowerCase())
@@ -432,21 +450,51 @@ export default function PumpSelector() {
           <div>
             {!selectedCategory ? (
               <>
-                <p className="text-[12px] text-[#6A6660] mb-4">신규 도입할 제품을 선택하세요.</p>
-                <div className="grid grid-cols-3 gap-2">
-                  {CATALOG_ITEMS.map((item) => (
-                    <button
-                      key={item.category}
-                      onClick={() => setSelectedCategory(item)}
-                      className="border border-[#E3DFD6] p-3 text-left hover:border-ink hover:bg-ink hover:text-paper transition-all group"
-                    >
-                      <div className="text-[12px] font-semibold leading-snug">{item.category}</div>
-                      <div className="text-[10px] text-[#6A6660] mt-0.5 group-hover:text-paper/70 leading-snug">
-                        {item.desc}
-                      </div>
-                    </button>
-                  ))}
-                </div>
+                <p className="text-[12px] text-[#6A6660] mb-3">신규 도입할 제품을 선택하거나 파트번호·모델명으로 검색하세요.</p>
+                <input
+                  type="text"
+                  placeholder="파트번호 또는 모델명 검색 (예: A65301903, EH250)"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full border border-[#E3DFD6] px-3 py-2.5 text-[13px] focus:outline-none focus:border-ink bg-transparent mb-3"
+                />
+                {newGlobalResults.length > 0 ? (
+                  <>
+                    <div className="border border-[#E3DFD6] divide-y divide-[#E3DFD6] max-h-[360px] overflow-y-auto">
+                      {newGlobalResults.map((item, i) => (
+                        <div key={i} className="flex items-center justify-between px-3 py-2.5 hover:bg-[#f0ede8] transition-colors">
+                          <div>
+                            <div className="text-[12px] font-medium leading-snug">{item.desc}</div>
+                            <div className="text-[10px] text-[#6A6660] mono mt-0.5">{item.partNo}</div>
+                          </div>
+                          <div className="shrink-0 ml-4 text-right">
+                            <div className="text-[12px] font-semibold text-[#c00020]">
+                              {item.price.toLocaleString()}원
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-1.5 text-[10px] text-[#6A6660]">총 {newGlobalResults.length}개 · 가격은 부가세 미포함 기준입니다.</div>
+                  </>
+                ) : search.trim().length >= 1 ? (
+                  <div className="border border-[#E3DFD6] p-4 text-[12px] text-[#6A6660]">일치하는 항목이 없습니다.</div>
+                ) : (
+                  <div className="grid grid-cols-3 gap-2">
+                    {CATALOG_ITEMS.map((item) => (
+                      <button
+                        key={item.category}
+                        onClick={() => { setSelectedCategory(item); setSearch(""); }}
+                        className="border border-[#E3DFD6] p-3 text-left hover:border-ink hover:bg-ink hover:text-paper transition-all group"
+                      >
+                        <div className="text-[12px] font-semibold leading-snug">{item.category}</div>
+                        <div className="text-[10px] text-[#6A6660] mt-0.5 group-hover:text-paper/70 leading-snug">
+                          {item.desc}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </>
             ) : (
               <>
@@ -466,14 +514,19 @@ export default function PumpSelector() {
 
                 {selectedCategory.seriesKey ? (
                   <>
-                    <input
-                      type="text"
-                      placeholder="모델명 또는 파트번호 검색..."
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                      className="w-full border border-[#E3DFD6] px-3 py-2 text-[13px] mb-3 focus:outline-none focus:border-ink bg-transparent"
-                    />
-                    <div className="max-h-[280px] overflow-y-auto border border-[#E3DFD6] divide-y divide-[#E3DFD6]">
+                    <div className="flex items-center gap-2 mb-2">
+                      <input
+                        type="text"
+                        placeholder="모델명 또는 파트번호 검색..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="flex-1 border border-[#E3DFD6] px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-transparent"
+                      />
+                      <span className="shrink-0 text-[11px] text-[#6A6660] mono whitespace-nowrap">
+                        총 {productItems.length}개
+                      </span>
+                    </div>
+                    <div className="max-h-[420px] overflow-y-auto border border-[#E3DFD6] divide-y divide-[#E3DFD6]">
                       {productItems.length === 0 ? (
                         <div className="p-4 text-[12px] text-[#6A6660]">검색 결과가 없습니다.</div>
                       ) : (
@@ -492,9 +545,7 @@ export default function PumpSelector() {
                         ))
                       )}
                     </div>
-                    <div className="mt-2 text-[10px] text-[#6A6660]">
-                      총 {productItems.length}개 항목 · 가격은 부가세 미포함 기준입니다.
-                    </div>
+                    <div className="mt-1.5 text-[10px] text-[#6A6660]">가격은 부가세 미포함 기준입니다.</div>
                   </>
                 ) : (
                   <div className="border border-[#E3DFD6] p-4 text-[12px] text-[#6A6660] bg-[#F6F4EF]">
