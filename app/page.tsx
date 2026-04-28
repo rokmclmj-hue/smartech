@@ -9,6 +9,7 @@ import ProductShowcase from "@/components/ProductShowcase";
 import ProductCategories from "@/components/ProductCategories";
 import ImpellerLogo from "@/components/ImpellerLogo";
 import PumpSelector from "@/components/PumpSelector";
+import HeroVideoIntro from "@/components/HeroVideoIntro";
 
 function hiEd(text: string, white = false) {
   return text.split(/(\bEdwards\b|\bSmartech\b)/).map((p, i) => {
@@ -82,6 +83,7 @@ export default function Home() {
                 <span className="opacity-60">smartech ↔ <span className="text-edred font-semibold">Edwards</span></span>
               </div>
 
+              <HeroVideoIntro duration={7000}>
               <div className="grid grid-cols-3 gap-2.5">
                 {/* Hero cell — Editorial typography (col-span-2, row-span-2) */}
                 <div className="bento-hero col-span-2 row-span-2 relative bg-white border hair p-5 md:p-6 flex flex-col justify-between overflow-hidden">
@@ -172,6 +174,7 @@ export default function Home() {
                   <div className="hidden sm:block shrink-0 text-[9px] mono opacity-35 tracking-[0.14em] self-start">04 / 04</div>
                 </div>
               </div>
+              </HeroVideoIntro>
             </div>
           </div>
 
