@@ -7,8 +7,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import AddToQuoteButton from "./AddToQuoteButton";
 
-export default async function ProductDetailPage({ params }: { params: { partNo: string } }) {
-  const partNo = decodeURIComponent(params.partNo);
+export default async function ProductDetailPage({ params }: { params: Promise<{ partNo: string }> }) {
+  const { partNo: rawPartNo } = await params;
+  const partNo = decodeURIComponent(rawPartNo);
   const product = await prisma.product.findUnique({ where: { partNo } });
   if (!product) return notFound();
 
