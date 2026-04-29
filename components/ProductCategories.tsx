@@ -5,8 +5,8 @@ import Link from "next/link";
 const ITEMS = [
   { category: "오일펌프(소형 RV)",        code: "RV 시리즈",           title: "오일 로터리 베인 펌프 (소형)",       image: "/images/products/rv.jpeg" },
   { category: "오일펌프(소형 E2M)",        code: "E2M 소형",            title: "오일 로터리 베인 펌프 (E2M 소형)",   image: "/images/products/e2m-small-new.png" },
+  { category: "오일펌프(중대형 E2S)",      code: "E2S 시리즈",          title: "오일 로터리 베인 펌프 (E2S중형)",        image: "/images/products/e2s-65.png" },
   { category: "오일펌프(중대형 E2M)",      code: "E2M 중대형",          title: "오일 로터리 베인 펌프 (E2M 중대형)", image: "/images/products/e2m-large-new.png" },
-  { category: "오일펌프(중대형 E2S)",      code: "E2S 시리즈",          title: "오일 로터리 베인 펌프 (E2S)",        image: "/images/products/e2s-65.png" },
   { category: "오일펌프(nES)",             code: "nES 시리즈",           title: "오일 로터리 베인 펌프 (nES)",        image: "/images/products/nes.jpeg" },
   { category: "부스터펌프(EH)",            code: "EH 시리즈",            title: "루츠 부스터 펌프",                   image: "/images/products/eh.jpeg" },
   { category: "스크롤펌프(소형 nXDS)",     code: "nXDS 시리즈",          title: "드라이 스크롤 펌프 (소형 nXDS)",    image: "/images/products/xds.jpeg" },
@@ -55,7 +55,7 @@ export default function ProductCategories() {
               <img
                 src={item.image}
                 alt={item.title}
-                className={`absolute inset-0 w-full h-full object-contain group-hover:scale-105 transition-transform ${i === 3 ? "p-6" : ""}`}
+                className={`absolute inset-0 w-full h-full object-contain group-hover:scale-105 transition-transform ${item.category === "오일펌프(중대형 E2S)" ? "p-6" : ""}`}
                 loading="lazy"
               />
             </div>
