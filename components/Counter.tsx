@@ -1,13 +1,12 @@
 "use client";
-import CountUp from "react-countup";
 
 type Props = {
   to: number;
-  /** starting value (default 0). For count-down, set from > to. */
+  /** starting value — kept for API compatibility, no longer used (no count-up). */
   from?: number;
-  /** duration — ms if >= 100, otherwise treated as seconds. Default 3.6s. */
+  /** duration — kept for API compatibility, no longer used. */
   duration?: number;
-  /** delay — ms if >= 100, otherwise treated as seconds. Default 0.9s. */
+  /** delay — kept for API compatibility, no longer used. */
   delay?: number;
   decimals?: number;
   format?: (n: number) => string;
@@ -16,32 +15,20 @@ type Props = {
   className?: string;
 };
 
-function toSeconds(v: number) {
-  return v >= 100 ? v / 1000 : v;
+function formatValue(n: number, decimals: number, separator: string, format?: (n: number) => string) {
+  if (format) return format(n);
+  const fixed = n.toFixed(decimals);
+  const [intPart, decPart] = fixed.split(".");
+  const grouped = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, separator);
+  return decPart !== undefined ? `${grouped}.${decPart}` : grouped;
 }
 
 export default function Counter({
   to,
-  from = 0,
-  duration = 3.6,
-  delay = 0.9,
-  decimals,
+  decimals = 0,
   format,
   separator = ",",
   className = "",
 }: Props) {
-  return (
-    <CountUp
-      start={from}
-      end={to}
-      duration={toSeconds(duration)}
-      delay={toSeconds(delay)}
-      decimals={decimals ?? 0}
-      formattingFn={format}
-      preserveValue
-      useEasing
-      separator={separator}
-      className={`tabular ${className}`}
-    />
-  );
+  return <span className={`tabular ${className}`}>{formatValue(to, decimals, separator, format)}</span>;
 }

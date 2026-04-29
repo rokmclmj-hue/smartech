@@ -55,12 +55,14 @@ export default function HeroParticles({ count = 16 }: { count?: number }) {
           const yPx = (topPct / 100) * heroBox.height;
           const xScreen = heroBox.left + xPx;
           const yScreen = heroBox.top + yPx;
-          // ambient float drift: random ±50px in any direction
-          const fx = (Math.random() - 0.5) * 100;
-          const fy = (Math.random() - 0.5) * 100;
+          // ambient float drift: random ±75px in any direction (bigger drift)
+          const fx = (Math.random() - 0.5) * 150;
+          const fy = (Math.random() - 0.5) * 150;
           // varied size: 5px (small) ~ 16px (large), weighted toward smaller; mobile halves
+          // 10% of particles get a 1.3× size boost (larger accent dots)
           const sizeRand = Math.random();
-          const size = Math.max(3, Math.round((5 + Math.pow(sizeRand, 1.5) * 11) * sizeScale));
+          const sizeBoost = Math.random() < 0.1 ? 1.3 : 1;
+          const size = Math.max(3, Math.round((5 + Math.pow(sizeRand, 1.5) * 11) * sizeScale * sizeBoost));
           return {
             top: `${topPct}%`,
             left: `${leftPct}%`,

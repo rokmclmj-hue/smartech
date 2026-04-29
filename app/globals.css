@@ -80,6 +80,35 @@ body {
   .hero-rise { margin-top: 0; }
 }
 
+/* ── Intro: skip entrance animations (text/cards already in final state) ── */
+html.intro-mounted .hero-rise,
+html.intro-mounted .mask-line > span {
+  opacity: 1 !important;
+  transform: none !important;
+  animation: none !important;
+}
+
+/* ── Intro: pause every other animation while intro video plays ── */
+html.intro-playing *,
+html.intro-playing *::before,
+html.intro-playing *::after {
+  animation-play-state: paused !important;
+}
+
+/* ── Particles: gentle ambient drift (always running, before/during/after intro) ── */
+@keyframes particle-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 0.6; }
+}
+@keyframes particle-float {
+  0%   { transform: translate(0, 0)                              scale(0.95); }
+  50%  { transform: translate(var(--fx, 0), var(--fy, 0))        scale(1.00); }
+  100% { transform: translate(0, 0)                              scale(0.95); }
+}
+html.intro-playing .float-dot {
+  animation-play-state: running, running, paused !important;
+}
+
 /* ── Backgrounds ── */
 .noisebg {
   position: relative;
@@ -208,27 +237,27 @@ body {
   animation-delay: var(--rd, 0s);
 }
 
-/* ── Particle one-shot vacuum — monotonic accelerating pull toward logo (no backward drift) ── */
+/* ── Particle one-shot vacuum — composes additively with particle-float (no position jump) ── */
 @keyframes particle-collect {
-  /* WAKE — small breath beat, no movement yet (signals "vacuum activated, particle reacting") */
-  0%   { transform: translate(0, 0)                                       scale(0.85);  opacity: 0.45; }
-  4%   { transform: translate(0, 0)                                       scale(1.10);  opacity: 0.75; }
+  /* WAKE — brief grow signaling "vacuum activated" */
+  0%   { transform: translate(0, 0)                                                  scale(1.00); }
+  4%   { transform: translate(0, 0)                                                  scale(1.20); }
 
-  /* SLOW PULL — barely moving, just starting to feel the suction */
-  15%  { transform: translate(calc(var(--tx, 0) * 0.03), calc(var(--ty, 0) * 0.03)) scale(1.05); opacity: 0.75; }
-  30%  { transform: translate(calc(var(--tx, 0) * 0.08), calc(var(--ty, 0) * 0.08)) scale(1.0);  opacity: 0.70; }
+  /* SLOW PULL — starting to feel the suction */
+  15%  { transform: translate(calc(var(--tx, 0) * 0.03), calc(var(--ty, 0) * 0.03))  scale(1.15); }
+  30%  { transform: translate(calc(var(--tx, 0) * 0.08), calc(var(--ty, 0) * 0.08))  scale(1.05); }
 
   /* PICKING UP — visible drift toward logo */
-  45%  { transform: translate(calc(var(--tx, 0) * 0.16), calc(var(--ty, 0) * 0.16)) scale(0.95); opacity: 0.65; }
-  60%  { transform: translate(calc(var(--tx, 0) * 0.28), calc(var(--ty, 0) * 0.28)) scale(0.85); opacity: 0.55; }
+  45%  { transform: translate(calc(var(--tx, 0) * 0.16), calc(var(--ty, 0) * 0.16))  scale(0.90); }
+  60%  { transform: translate(calc(var(--tx, 0) * 0.28), calc(var(--ty, 0) * 0.28))  scale(0.75); }
 
   /* ACCELERATING — clearly being sucked in */
-  75%  { transform: translate(calc(var(--tx, 0) * 0.48), calc(var(--ty, 0) * 0.48)) scale(0.65); opacity: 0.45; }
-  87%  { transform: translate(calc(var(--tx, 0) * 0.72), calc(var(--ty, 0) * 0.72)) scale(0.40); opacity: 0.30; }
-  95%  { transform: translate(calc(var(--tx, 0) * 0.90), calc(var(--ty, 0) * 0.90)) scale(0.20); opacity: 0.15; }
+  75%  { transform: translate(calc(var(--tx, 0) * 0.48), calc(var(--ty, 0) * 0.48))  scale(0.50); }
+  87%  { transform: translate(calc(var(--tx, 0) * 0.72), calc(var(--ty, 0) * 0.72))  scale(0.25); }
+  95%  { transform: translate(calc(var(--tx, 0) * 0.90), calc(var(--ty, 0) * 0.90))  scale(0.10); }
 
-  /* CONSUMED — into the rotor */
-  100% { transform: translate(var(--tx, 0),               var(--ty, 0))               scale(0.04); opacity: 0; }
+  /* CONSUMED — at logo, scaled to 0 (invisible) */
+  100% { transform: translate(var(--tx, 0),               var(--ty, 0))              scale(0); }
 }
 .float-dot {
   position: absolute;
@@ -239,11 +268,22 @@ body {
   box-shadow:
     0 0 4px rgba(192,0,32,0.30),
     0 0 10px rgba(192,0,32,0.15);
-  animation: particle-collect 6s linear var(--fd, 0s) 1 forwards;
-  animation-fill-mode: both;
+  opacity: 0;
+  animation:
+    particle-fade-in 1.5s ease-out forwards,
+    particle-float 6s ease-in-out infinite,
+    particle-collect 6s linear 1 forwards;
+  animation-delay: var(--fd, 0s);
+  animation-composition: replace, replace, add;
+  animation-play-state: running, running, paused;
   pointer-events: none;
   will-change: transform, opacity;
   z-index: 0;
+}
+
+/* When intro has mounted but is no longer playing — start the suck-in */
+html.intro-mounted:not(.intro-playing) .float-dot {
+  animation-play-state: running, running, running !important;
 }
 
 /* ── Pressure gauge needle (sweeps low → ultra-high) ── */

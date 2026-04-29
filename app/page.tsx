@@ -27,7 +27,7 @@ export default function Home() {
     <>
       {/* ═══════════════ HERO ═══════════════ */}
       <section className="relative overflow-hidden noisebg">
-        <HeroParticles count={27} />
+        <HeroParticles count={35} />
         <div className="max-w-[1400px] mx-auto px-4 md:px-6 pt-8 md:pt-16 pb-10 relative">
           {/* Corner meta — desktop only */}
           <div className="hidden md:flex justify-between text-[11px] mono dim mb-5 hero-rise" style={{ ["--rd" as never]: "0s" }}>
@@ -75,6 +75,7 @@ export default function Home() {
 
             {/* Trust bento — asymmetric, 2006 as hero, red certification anchor */}
             <div className="col-span-12 lg:col-span-5 hero-rise" style={{ ["--rd" as never]: ".4s" }}>
+              <HeroVideoIntro>
               {/* eyebrow — desktop only */}
               <div className="hidden md:flex items-center gap-2.5 text-[10px] mono dim mb-3">
                 <span className="kpi-status" />
@@ -83,7 +84,6 @@ export default function Home() {
                 <span className="opacity-60">smartech ↔ <span className="text-edred font-semibold">Edwards</span></span>
               </div>
 
-              <HeroVideoIntro duration={7000}>
               <div className="grid grid-cols-3 gap-2.5">
                 {/* Hero cell — Editorial typography (col-span-2, row-span-2) */}
                 <div className="bento-hero col-span-2 row-span-2 relative bg-white border hair p-5 md:p-6 flex flex-col justify-between overflow-hidden">

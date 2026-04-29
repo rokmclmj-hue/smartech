@@ -13,25 +13,35 @@ const SLIDES: Slide[] = [
     line1: "세계 1등 진공을,",
     line2: "한국의 속도로.",
     accent: 2,
-    durationMs: 8571,
+    durationMs: 7000,
   },
   {
     line1: "Trusted Partner,",
     line2: "Advanced Solution.",
     accent: 2,
-    durationMs: 2857,
+    durationMs: 4000,
   },
 ];
 
 export default function RotatingHero() {
   const [idx, setIdx] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [introDone, setIntroDone] = useState(true);
 
   useEffect(() => {
-    if (paused) return;
+    const html = document.documentElement;
+    const update = () => setIntroDone(!html.classList.contains("intro-playing"));
+    update();
+    const observer = new MutationObserver(update);
+    observer.observe(html, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (paused || !introDone) return;
     const t = setTimeout(() => setIdx((i) => (i + 1) % SLIDES.length), SLIDES[idx].durationMs);
     return () => clearTimeout(t);
-  }, [idx, paused]);
+  }, [idx, paused, introDone]);
 
   const s = SLIDES[idx];
   const cls1 = s.accent === 1 ? "italic text-edred" : "";
