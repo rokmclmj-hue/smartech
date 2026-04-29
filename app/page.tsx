@@ -198,24 +198,17 @@ export default function Home() {
       </section>
 
       {/* ═══════════════ TOTAL SOLUTION ═══════════════ */}
-      <section id="solution" className="py-28 border-b hair">
+      <section id="solution" className="pt-14 pb-28 border-b hair">
         <div className="max-w-[1400px] mx-auto px-6">
-          <div className="grid grid-cols-12 gap-6 items-end mb-16">
-            <div className="col-span-12 lg:col-span-7">
-              <div className="mono text-[11px] dim mb-4">— 01 · TOTAL SOLUTION</div>
-              <h2 className="section-title display">
-                판매로 시작해,<br />
-                <span className="italic text-edred">운전 수명 내내</span><br />
-                함께합니다.
-              </h2>
-            </div>
-            <div className="col-span-12 lg:col-span-5 lg:pl-6 lg:border-l hair">
-              <p className="text-[15px] leading-[1.75] text-[#2a2823]">
-                처음 전화하신 고객이 몇 년 뒤에 또 전화를 주십니다. 장비를 바꿀 때, 문제가 생겼을 때,
-                자리에서 물러나며 후임자를 소개할 때. 그게 스마텍이 붙잡고 싶은 관계입니다.
-                펌프 선정에서 설치, 유지보수, 부품 조달까지 — 판매로 시작해 운전 수명 내내 같은 전화번호로 이어집니다.
-              </p>
-            </div>
+          <div className="mb-16 text-center">
+            <div className="mono text-[11px] dim mb-4">— 01 · TOTAL SOLUTION</div>
+            <h2 className="section-title display">
+              판매로 시작해, <span className="italic text-edred">운전 수명 내내</span> 함께합니다.
+            </h2>
+            <p className="mt-6 text-[15px] leading-[1.75] text-[#2a2823]">
+              펌프 선정에서 유지보수, 부품 조달에 이르기까지 제품의 전 생애 주기를 스마텍이 통합 관리합니다.
+              재구매와 추천으로 검증된 스마텍만의 차별화된 서비스를 경험하십시오.
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 border-t border-l hair">
@@ -231,7 +224,7 @@ export default function Home() {
                   <div className="mono text-[11px] opacity-70">{i === STEPS.length - 1 ? "∞" : "→"}</div>
                 </div>
                 <div className="display text-[44px] leading-none mt-4">{step.title}</div>
-                <p className="mt-6 text-[13.5px] leading-[1.7] opacity-90 max-w-[32ch]">{hiEd(step.desc, i === 2)}</p>
+                <p className="mt-6 text-[13.5px] leading-[1.7] opacity-90">{hiEd(step.desc, i === 2)}</p>
               </div>
             ))}
           </div>
@@ -553,27 +546,27 @@ function HeroClock() {
 const STEPS = [
   {
     title: "기술 컨설팅",
-    desc: "어떤 공정에 어느 진공 영역이 필요한지부터 함께 분석합니다. 축적된 기술 노하우와 다양한 산업 현장 경험을 바탕으로, 고객의 공정 조건에 가장 알맞은 최적의 솔루션을 제안합니다.",
+    desc: "공정 분석과 기술 노하우를 바탕으로 현장 조건에 최적화된 맞춤 솔루션을 제안합니다.",
   },
   {
     title: "제품 선정",
-    desc: "오일·드라이·터보·부스터 전 라인업 중 공정 요건에 정확히 부합하는 최적 구성을 제안합니다. 불필요한 비용 없이, 공정 신뢰성을 충족하는 사양을 찾습니다.",
+    desc: "오일 · 드라이 · 터보 · 부스터 전 라인업 중 공정 요건에 정확히 부합하는 최적 구성을 제안합니다.",
   },
   {
     title: "정품 공급",
-    desc: "스마텍은 Edwards 정품만을 공식 유통 경로를 통해 공급합니다. 제품의 출처와 품질, 보증까지 책임집니다.",
+    desc: "Edwards 정품을 공식 경로로 공급하며 제품의 출처와 품질, 보증까지 책임집니다.",
   },
   {
     title: "설치 & 시운전",
-    desc: "납품으로 끝나지 않습니다. 현장 설치, 배관 구성, 초기 시운전 및 성능 확인까지 책임집니다.",
+    desc: "단순 납품을 넘어 현장 설치, 배관 구성, 초기 성능 확인까지 완벽하게 마무리합니다.",
   },
   {
     title: "정기 유지보수",
-    desc: "PM 스케줄 수립부터 현장 서비스 투입까지. 장비가 멈추기 전에 스마텍이 먼저 움직입니다.",
+    desc: "PM 스케줄 수립부터 현장 서비스까지 모든 과정을 스마텍이 책임집니다.",
   },
   {
     title: "30년경력수리전문",
-    desc: "30년 이상 Edwards 펌프를 다뤄온 전문가가 직접 분해·점검·조립합니다. 소모품·주요 파트 국내 재고 보유로 수리 후 빠른 복귀까지 — 가동 중단 시간을 최소화 합니다.",
+    desc: "30년 이상 Edwards 펌프를 다뤄온 전문가가 직접 분해·점검·조립하며 가동 중단 시간을 최소화 합니다.",
   },
 ];
 
