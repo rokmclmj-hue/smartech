@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useState, type ReactNode } from "react";
 
 type Props = {
   children: ReactNode;
@@ -12,7 +12,7 @@ export default function HeroVideoIntro({ children, src = "/smartech_main.mp4" }:
   const [cardsIn, setCardsIn] = useState(false);
   const [progress, setProgress] = useState(0);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     document.documentElement.classList.add("intro-playing");
     document.documentElement.classList.add("intro-mounted");
     return () => {

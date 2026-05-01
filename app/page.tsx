@@ -44,25 +44,35 @@ export default function Home() {
                 스마텍은 <span className="text-edred font-semibold">Edwards</span> 코리아의 공식 파트너로서,
                 20대 핵심 진공 산업 전반에 걸쳐 고객사별 맞춤형 하이엔드 진공 솔루션을 제공합니다.
               </p>
-              <div className="mt-9 grid grid-cols-2 gap-3 max-w-lg hero-rise" style={{ ["--rd" as never]: ".75s" }}>
+              <div className="mt-9 grid grid-cols-3 gap-2.5 max-w-xl hero-rise" style={{ ["--rd" as never]: ".75s" }}>
                 <Link
                   href="#b2b"
-                  className="group border border-ink p-6 flex flex-col justify-between min-h-[120px] hover:bg-ink hover:text-paper transition-all"
+                  className="group border border-ink p-4 flex flex-col justify-between min-h-[108px] hover:bg-ink hover:text-paper transition-all"
                 >
-                  <div className="text-[10px] mono tracking-widest opacity-50">DIRECT QUOTE</div>
+                  <div className="text-[9px] mono tracking-widest opacity-50">DIRECT QUOTE</div>
                   <div>
-                    <div className="mt-3 text-[24px] display leading-tight tracking-tight">견적 문의</div>
-                    <div className="mt-2 text-[12px] opacity-60 group-hover:opacity-80">신규제품구매 →</div>
+                    <div className="mt-2 text-[20px] display leading-tight tracking-tight">견적 문의</div>
+                    <div className="mt-1.5 text-[11px] opacity-60 group-hover:opacity-80">신규제품구매 →</div>
                   </div>
                 </Link>
                 <Link
                   href="#b2b"
-                  className="group border border-ink bg-ink text-paper p-6 flex flex-col justify-between min-h-[120px] hover:bg-edred hover:border-edred transition-all"
+                  className="group border border-ink bg-ink text-paper p-4 flex flex-col justify-between min-h-[108px] hover:bg-edred hover:border-edred transition-all"
                 >
-                  <div className="text-[10px] mono tracking-widest opacity-50">AI ASSISTANT</div>
+                  <div className="text-[9px] mono tracking-widest opacity-50">AI ASSISTANT</div>
                   <div>
-                    <div className="mt-3 text-[24px] display leading-tight tracking-tight">AI 견적문의</div>
-                    <div className="mt-2 text-[12px] opacity-60 group-hover:opacity-80">모델 자동 추천 →</div>
+                    <div className="mt-2 text-[20px] display leading-tight tracking-tight">AI 견적문의</div>
+                    <div className="mt-1.5 text-[11px] opacity-60 group-hover:opacity-80">모델 자동 추천 →</div>
+                  </div>
+                </Link>
+                <Link
+                  href="#contact"
+                  className="group border border-ink p-4 flex flex-col justify-between min-h-[108px] hover:bg-ink hover:text-paper transition-all"
+                >
+                  <div className="text-[9px] mono tracking-widest opacity-50">REPAIR</div>
+                  <div>
+                    <div className="mt-2 text-[20px] display leading-tight tracking-tight">수리 문의</div>
+                    <div className="mt-1.5 text-[11px] opacity-60 group-hover:opacity-80">A/S · 오버홀 →</div>
                   </div>
                 </Link>
               </div>
@@ -144,7 +154,7 @@ export default function Home() {
                   <div className="kpi-eyebrow">Product Lineup</div>
                   <div>
                     <div className="display text-[32px] leading-none tabular">
-                      <Counter to={498} duration={3600} />
+                      <Counter to={1014} duration={3600} />
                       <span className="text-[20px] opacity-60">+</span>
                     </div>
                     <div className="text-[10px] mt-1.5 dim leading-snug">취급 품목</div>

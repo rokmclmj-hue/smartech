@@ -60,3 +60,4 @@ lib/productData.json
 # local-only source files (not needed for web server)
 제품아이템번호 및 단가/
 제품카다로그/
+.env*.local

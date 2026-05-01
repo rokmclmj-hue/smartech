@@ -1,34 +1,60 @@
 "use client";
+import { useEffect, useState } from "react";
+import CountUp from "react-countup";
 
 type Props = {
   to: number;
-  /** starting value — kept for API compatibility, no longer used (no count-up). */
   from?: number;
-  /** duration — kept for API compatibility, no longer used. */
   duration?: number;
-  /** delay — kept for API compatibility, no longer used. */
   delay?: number;
   decimals?: number;
   format?: (n: number) => string;
-  /** thousands separator — default ",". Set "" for years/IDs. */
   separator?: string;
   className?: string;
 };
 
-function formatValue(n: number, decimals: number, separator: string, format?: (n: number) => string) {
-  if (format) return format(n);
-  const fixed = n.toFixed(decimals);
-  const [intPart, decPart] = fixed.split(".");
-  const grouped = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, separator);
-  return decPart !== undefined ? `${grouped}.${decPart}` : grouped;
+function toSeconds(v: number) {
+  return v >= 100 ? v / 1000 : v;
 }
 
 export default function Counter({
   to,
-  decimals = 0,
+  from = 0,
+  duration = 3.6,
+  delay = 0.9,
+  decimals,
   format,
   separator = ",",
   className = "",
 }: Props) {
-  return <span className={`tabular ${className}`}>{formatValue(to, decimals, separator, format)}</span>;
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    if (document.documentElement.classList.contains("intro-playing")) {
+      const handler = () => setReady(true);
+      window.addEventListener("intro:done", handler, { once: true });
+      return () => window.removeEventListener("intro:done", handler);
+    } else {
+      setReady(true);
+    }
+  }, []);
+
+  if (!ready) {
+    return <span className={`tabular ${className}`}>0</span>;
+  }
+
+  return (
+    <CountUp
+      start={from}
+      end={to}
+      duration={toSeconds(duration)}
+      delay={toSeconds(delay)}
+      decimals={decimals ?? 0}
+      formattingFn={format}
+      preserveValue
+      useEasing
+      separator={separator}
+      className={`tabular ${className}`}
+    />
+  );
 }
