@@ -7,7 +7,6 @@ import HeroParticles from "@/components/HeroParticles";
 import RotatingHero from "@/components/RotatingHero";
 import ProductShowcase from "@/components/ProductShowcase";
 import ProductCategories from "@/components/ProductCategories";
-import ImpellerLogo from "@/components/ImpellerLogo";
 import PumpSelector from "@/components/PumpSelector";
 import HeroVideoIntro from "@/components/HeroVideoIntro";
 

@@ -23,7 +23,7 @@ export default function HeroParticles({ count = 16 }: { count?: number }) {
     // Find the impeller logo's screen position (sticky in navbar)
     const measure = () => {
       const heroBox = container.getBoundingClientRect();
-      const logoEl = document.querySelector(".impeller-svg");
+      const logoEl = document.querySelector(".dot-settle");
       // Fallback target if logo not found: top-left area
       let logoCx = heroBox.left + 60;
       let logoCy = heroBox.top - 30;
