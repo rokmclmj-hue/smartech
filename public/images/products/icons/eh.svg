@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" stroke="#111111" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+  <!-- 루츠 부스터 - 8자형 로터 2개가 맞물리는 구조 -->
+  <!-- 외부 하우징 -->
+  <rect x="30" y="45" width="140" height="110" rx="10"/>
+  <!-- 좌측 8자 로터 (타원 2개) -->
+  <ellipse cx="75" cy="78" rx="22" ry="14"/>
+  <ellipse cx="75" cy="122" rx="22" ry="14"/>
+  <!-- 우측 8자 로터 (타원 2개) -->
+  <ellipse cx="125" cy="78" rx="22" ry="14"/>
+  <ellipse cx="125" cy="122" rx="22" ry="14"/>
+  <!-- 좌우 로터 축 -->
+  <line x1="75" y1="45" x2="75" y2="45"/>
+  <circle cx="75" cy="100" r="4"/>
+  <circle cx="125" cy="100" r="4"/>
+  <!-- 흡입구 상단 -->
+  <line x1="90" y1="30" x2="110" y2="30"/>
+  <line x1="90" y1="30" x2="90" y2="45"/>
+  <line x1="110" y1="30" x2="110" y2="45"/>
+  <!-- 배출구 하단 -->
+  <line x1="90" y1="155" x2="90" y2="170"/>
+  <line x1="110" y1="155" x2="110" y2="170"/>
+  <line x1="90" y1="170" x2="110" y2="170"/>
+</svg>

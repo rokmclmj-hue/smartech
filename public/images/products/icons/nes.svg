@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" stroke="#111111" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+  <!-- nES 날개형 펌프 - 날개(베인) 구조 강조 -->
+  <!-- 펌프 외통 -->
+  <circle cx="100" cy="100" r="55"/>
+  <circle cx="100" cy="100" r="12"/>
+  <!-- 베인(날개) 4개 - 회전하는 날개판 -->
+  <line x1="100" y1="88" x2="100" y2="50"/>
+  <line x1="112" y1="100" x2="150" y2="100"/>
+  <line x1="100" y1="112" x2="100" y2="145"/>
+  <line x1="88" y1="100" x2="55" y2="100"/>
+  <!-- 베인 날개판 -->
+  <rect x="94" y="50" width="12" height="38" rx="2"/>
+  <rect x="112" y="94" width="38" height="12" rx="2"/>
+  <rect x="94" y="112" width="12" height="33" rx="2"/>
+  <rect x="50" y="94" width="38" height="12" rx="2"/>
+  <!-- 흡입구/배출구 포트 -->
+  <line x1="145" y1="72" x2="160" y2="57"/>
+  <circle cx="163" cy="54" r="7"/>
+  <line x1="155" y1="128" x2="168" y2="142"/>
+  <line x1="163" y1="142" x2="173" y2="142"/>
+</svg>

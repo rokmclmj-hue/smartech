@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" stroke="#111111" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+  <!-- 소형 원통 펌프 본체 -->
+  <rect x="50" y="75" width="80" height="50" rx="6"/>
+  <!-- 좌측 흡입구 -->
+  <line x1="30" y1="100" x2="50" y2="100"/>
+  <circle cx="25" cy="100" r="8"/>
+  <!-- 우측 배출구 -->
+  <line x1="130" y1="100" x2="155" y2="100"/>
+  <line x1="155" y1="93" x2="155" y2="107"/>
+  <!-- 내부 임펠러 표시 -->
+  <circle cx="90" cy="100" r="18"/>
+  <line x1="90" y1="82" x2="90" y2="118"/>
+  <line x1="72" y1="100" x2="108" y2="100"/>
+  <!-- 상단 오일 캡 -->
+  <rect x="78" y="60" width="24" height="15" rx="3"/>
+  <!-- 받침대 -->
+  <rect x="45" y="125" width="90" height="12" rx="3"/>
+  <line x1="60" y1="137" x2="60" y2="150"/>
+  <line x1="120" y1="137" x2="120" y2="150"/>
+  <line x1="45" y1="150" x2="135" y2="150"/>
+</svg>

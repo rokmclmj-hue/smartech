@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" stroke="#111111" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+  <!-- T-Station 터보 펌핑 스테이션 - 박스형 통합 시스템 -->
+  <!-- 메인 캐비닛 박스 -->
+  <rect x="25" y="30" width="130" height="140" rx="8"/>
+  <!-- 상단 터보펌프 섹션 -->
+  <rect x="35" y="40" width="60" height="55" rx="5"/>
+  <!-- 터보 날개 심볼 (내부) -->
+  <circle cx="65" cy="67" r="20"/>
+  <circle cx="65" cy="67" r="8"/>
+  <line x1="65" y1="47" x2="65" y2="87"/>
+  <line x1="45" y1="67" x2="85" y2="67"/>
+  <!-- 하단 제어부 -->
+  <rect x="35" y="103" width="110" height="55" rx="5"/>
+  <!-- 제어 패널 버튼/디스플레이 -->
+  <rect x="45" y="112" width="45" height="20" rx="3"/>
+  <circle cx="112" cy="118" r="8"/>
+  <circle cx="132" cy="118" r="8"/>
+  <line x1="45" y1="140" x2="135" y2="140"/>
+  <!-- 연결 튜브 (우측) -->
+  <line x1="155" y1="55" x2="175" y2="55"/>
+  <line x1="175" y1="50" x2="175" y2="60"/>
+  <!-- 전원/케이블 (하단) -->
+  <line x1="80" y1="170" x2="80" y2="185"/>
+  <line x1="100" y1="170" x2="100" y2="185"/>
+  <line x1="120" y1="170" x2="120" y2="185"/>
+</svg>

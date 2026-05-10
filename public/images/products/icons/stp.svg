@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" stroke="#111111" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+  <!-- STP Maglev 터보펌프 - 자기부상 터보 -->
+  <!-- 원통형 하우징 -->
+  <rect x="55" y="25" width="85" height="145" rx="10"/>
+  <!-- 자기부상(Maglev) 베어링 표시 - 자석 기호 -->
+  <rect x="65" y="38" width="65" height="18" rx="4"/>
+  <!-- 자기장 곡선 -->
+  <path d="M72 56 Q 97 70 122 56" stroke-dasharray="4,3"/>
+  <!-- 터빈 블레이드 (측면에서 본 모양) -->
+  <ellipse cx="97" cy="110" rx="30" ry="8"/>
+  <line x1="97" y1="85" x2="97" y2="135"/>
+  <!-- 스테이터 링 -->
+  <ellipse cx="97" cy="95" rx="30" ry="8"/>
+  <ellipse cx="97" cy="125" rx="30" ry="8"/>
+  <!-- 상단 흡입 플랜지 -->
+  <rect x="77" y="12" width="40" height="13" rx="3"/>
+  <!-- 하단 배출구 -->
+  <rect x="77" y="170" width="40" height="13" rx="3"/>
+  <!-- 자기부상 표시 (소형 자석 기호 양쪽) -->
+  <line x1="55" y1="80" x2="42" y2="80"/>
+  <line x1="42" y1="75" x2="42" y2="85"/>
+  <line x1="140" y1="80" x2="153" y2="80"/>
+  <line x1="153" y1="75" x2="153" y2="85"/>
+</svg>

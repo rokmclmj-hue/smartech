@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" stroke="#111111" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+  <!-- nEXT 터보펌프 - 위에서 본 터빈 날개 모양 -->
+  <!-- 외부 링 -->
+  <circle cx="100" cy="100" r="75"/>
+  <!-- 내부 허브 -->
+  <circle cx="100" cy="100" r="20"/>
+  <!-- 터빈 날개 8개 (위에서 본 모양 - 곡선 블레이드) -->
+  <path d="M100 80 Q 115 70 130 55"/>
+  <path d="M120 100 Q 130 85 145 72"/>
+  <path d="M120 100 Q 130 115 143 130"/>
+  <path d="M100 120 Q 115 130 128 148"/>
+  <path d="M100 120 Q 85 130 70 148"/>
+  <path d="M80 100 Q 70 115 55 128"/>
+  <path d="M80 100 Q 70 85 55 72"/>
+  <path d="M100 80 Q 85 70 70 55"/>
+  <!-- 고정 스테이터 링 -->
+  <circle cx="100" cy="100" r="50"/>
+</svg>

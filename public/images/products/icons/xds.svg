@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" stroke="#111111" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+  <!-- 중형 스크롤 펌프 -->
+  <!-- 사각형 하우징 (중형은 박스형) -->
+  <rect x="30" y="35" width="130" height="120" rx="10"/>
+  <!-- 스크롤 나선 (더 큰 스크롤) -->
+  <path d="M 95 95 Q 95 72 112 62 Q 132 50 145 68 Q 155 85 145 105 Q 133 125 112 128 Q 85 132 68 115 Q 52 96 60 72 Q 68 50 90 44"/>
+  <!-- 중심 축 -->
+  <circle cx="95" cy="95" r="9"/>
+  <!-- 상단 흡입 플랜지 -->
+  <rect x="80" y="22" width="30" height="13" rx="3"/>
+  <line x1="85" y1="35" x2="85" y2="35"/>
+  <!-- 하단 배출 플랜지 -->
+  <rect x="80" y="155" width="30" height="13" rx="3"/>
+  <!-- 우측 모터 연결부 -->
+  <rect x="160" y="60" width="12" height="70" rx="4"/>
+</svg>
