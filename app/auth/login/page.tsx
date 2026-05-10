@@ -1,15 +1,28 @@
 "use client";
 import { signIn } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [remember, setRemember] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    const saved = localStorage.getItem("smartech_login");
+    if (saved) {
+      try {
+        const { email: e, password: p } = JSON.parse(saved);
+        setEmail(e ?? "");
+        setPassword(p ?? "");
+        setRemember(true);
+      } catch {}
+    }
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -20,6 +33,11 @@ export default function LoginPage() {
     if (res?.error) {
       setError("이메일 또는 비밀번호가 올바르지 않습니다.");
     } else {
+      if (remember) {
+        localStorage.setItem("smartech_login", JSON.stringify({ email, password }));
+      } else {
+        localStorage.removeItem("smartech_login");
+      }
       router.push("/");
       router.refresh();
     }
@@ -52,6 +70,18 @@ export default function LoginPage() {
               required
               className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="remember"
+              checked={remember}
+              onChange={(e) => setRemember(e.target.checked)}
+              className="w-4 h-4 rounded border-gray-300 text-blue-600 cursor-pointer"
+            />
+            <label htmlFor="remember" className="text-sm text-gray-600 cursor-pointer">
+              아이디·비밀번호 저장
+            </label>
           </div>
           {error && <p className="text-red-500 text-sm">{error}</p>}
           <button
