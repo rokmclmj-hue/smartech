@@ -137,6 +137,6 @@ function PriceBlock({ displayPrice, tier }: { displayPrice: number | null; tier:
 }
 
 function tierText(tier: string) {
-  const map: Record<string, string> = { CONSUMER: "최종소비자", OEM: "OEM", DEALER: "딜러", ADMIN: "원가" };
+  const map: Record<string, string> = { ENDUSER: "Enduser", OEM: "OEM", DEALER: "딜러", KEY_DEALER: "Key딜러", ADMIN: "원가" };
   return map[tier] ?? tier;
 }

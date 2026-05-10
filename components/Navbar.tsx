@@ -5,7 +5,6 @@ import { useState, useEffect } from "react";
 
 const TIER_LABELS: Record<string, string> = {
   PENDING: "승인대기",
-  CONSUMER: "소비자",
   OEM: "OEM",
   DEALER: "딜러",
   ADMIN: "관리자",

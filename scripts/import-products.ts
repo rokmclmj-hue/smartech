@@ -171,9 +171,10 @@ async function main() {
 
   // Seed default price rules
   const rules = [
-    { tier: "CONSUMER", multiplier: 1.5 },
+    { tier: "ENDUSER", multiplier: 1.35 },
     { tier: "OEM", multiplier: 1.35 },
-    { tier: "DEALER", multiplier: 1.2 },
+    { tier: "DEALER", multiplier: 1.20 },
+    { tier: "KEY_DEALER", multiplier: 1.15 },
     { tier: "ADMIN", multiplier: 1.0 },
   ];
 

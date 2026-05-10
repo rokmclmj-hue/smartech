@@ -4,7 +4,7 @@ export type Tier = "PENDING" | "ENDUSER" | "OEM" | "DEALER" | "KEY_DEALER" | "AD
 
 const DEFAULT_MULTIPLIERS: Record<string, number> = {
   ENDUSER:    1.35,
-  OEM:        1.25,
+  OEM:        1.35,
   DEALER:     1.20,
   KEY_DEALER: 1.15,
   ADMIN:      1.00,

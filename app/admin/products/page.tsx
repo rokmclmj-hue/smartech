@@ -50,7 +50,6 @@ type EditProductForm = {
 
 const TIER_LABELS: Record<string, string> = {
   ENDUSER: "Enduser",
-  CONSUMER: "일반소비자",
   OEM: "OEM",
   DEALER: "딜러",
   KEY_DEALER: "Key딜러",

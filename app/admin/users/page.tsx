@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { useToast } from "@/lib/toast";
+import { matchPartner } from "@/lib/partners";
 
 type UserItem = {
   id: number;
@@ -24,14 +25,13 @@ type ApiResponse = {
   limit: number;
 };
 
-const TIER_OPTIONS = ["ENDUSER", "CONSUMER", "OEM", "DEALER", "KEY_DEALER"] as const;
+const TIER_OPTIONS = ["ENDUSER", "OEM", "DEALER", "KEY_DEALER"] as const;
 type TierOption = (typeof TIER_OPTIONS)[number];
 
 const TIER_LABELS: Record<string, string> = {
   PENDING: "승인대기",
   REJECTED: "거절됨",
   ENDUSER: "Enduser",
-  CONSUMER: "일반소비자",
   OEM: "OEM",
   DEALER: "딜러",
   KEY_DEALER: "Key딜러",
@@ -42,7 +42,6 @@ const TIER_COLOR: Record<string, string> = {
   PENDING: "border-edred text-edred",
   REJECTED: "border-edred/40 text-edred/60",
   ENDUSER: "border-line text-dim",
-  CONSUMER: "border-line text-dim",
   OEM: "border-ink/40 text-ink",
   DEALER: "border-ink text-ink",
   KEY_DEALER: "border-ink bg-ink text-paper",
@@ -52,7 +51,7 @@ const TIER_COLOR: Record<string, string> = {
 const HIGH_TIERS = new Set(["KEY_DEALER", "DEALER", "ADMIN"]);
 
 function isDowngrade(from: string, to: string): boolean {
-  const order = ["PENDING", "REJECTED", "ENDUSER", "CONSUMER", "OEM", "DEALER", "KEY_DEALER", "ADMIN"];
+  const order = ["PENDING", "REJECTED", "ENDUSER", "OEM", "DEALER", "KEY_DEALER", "ADMIN"];
   return HIGH_TIERS.has(from) && order.indexOf(to) < order.indexOf(from);
 }
 
@@ -299,6 +298,12 @@ export default function AdminUsersPage() {
 
   const allTotalPages = Math.max(1, Math.ceil(allTotal / PAGE_LIMIT));
 
+  // ── 거래처 매칭 — 승인 대기 중 신규(미등록 거래처) 후보 카운트 ──────────────
+  const unregisteredCount = useMemo(
+    () => pending.filter((u) => matchPartner(u.company) === null).length,
+    [pending]
+  );
+
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
@@ -326,6 +331,14 @@ export default function AdminUsersPage() {
             </span>
           )}
         </button>
+        {unregisteredCount > 0 && (
+          <span
+            className="mono text-[10px] tracking-[0.12em] uppercase border border-edred bg-edred/5 text-edred px-2.5 py-1"
+            title="기존 거래처 분류 리스트(81개사)에 없는 신규 회사명으로 가입한 사용자 수"
+          >
+            ✦ 신규 거래처 후보 {unregisteredCount}건
+          </span>
+        )}
         <button
           onClick={() => setTab("all")}
           className={`chip ${tab === "all" ? "active" : ""}`}
@@ -396,7 +409,32 @@ export default function AdminUsersPage() {
                             대기
                           </span>
                         </div>
-                        <div className="text-[14px] text-ink font-medium">{u.company}</div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <div className="text-[14px] text-ink font-medium">{u.company}</div>
+                          {(() => {
+                            const m = matchPartner(u.company);
+                            if (m) {
+                              return (
+                                <span
+                                  className="mono text-[9px] tracking-[0.08em] uppercase border border-ink/30 text-ink/70 bg-ink/5 px-1.5 py-0.5"
+                                  title={`기존 거래처(${TIER_LABELS[m.type]})${
+                                    m.matchType === "partial" ? " · 부분매칭" : ""
+                                  }`}
+                                >
+                                  기존 {TIER_LABELS[m.type]}
+                                </span>
+                              );
+                            }
+                            return (
+                              <span
+                                className="mono text-[9px] tracking-[0.08em] uppercase border border-edred bg-edred/5 text-edred px-1.5 py-0.5 font-semibold"
+                                title="기존 거래처 분류 리스트(81개사)에 없는 신규 회사"
+                              >
+                                ✦ 신규 후보
+                              </span>
+                            );
+                          })()}
+                        </div>
                         <div className="mono text-[11px] dim mt-1">{u.email}</div>
                         {u.phone && (
                           <div className="mono text-[11px] dim">{u.phone}</div>

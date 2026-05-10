@@ -7,7 +7,6 @@ const VALID_TIERS = [
   "PENDING",
   "REJECTED",
   "ENDUSER",
-  "CONSUMER",
   "OEM",
   "DEALER",
   "KEY_DEALER",
