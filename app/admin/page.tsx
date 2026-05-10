@@ -32,10 +32,10 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 const STATUS_COLOR: Record<string, string> = {
-  PENDING: "bg-amber-100 text-amber-700",
-  CONFIRMED: "bg-green-100 text-green-700",
-  CANCELLED: "bg-red-100 text-red-700",
-  DELIVERY_INQUIRY: "bg-blue-100 text-blue-700",
+  PENDING: "border-ink/40 text-ink",
+  CONFIRMED: "border-edred text-edred",
+  CANCELLED: "border-line text-dim",
+  DELIVERY_INQUIRY: "border-ink text-ink bg-ink text-paper",
 };
 
 export default function AdminDashboard() {
@@ -54,9 +54,9 @@ export default function AdminDashboard() {
 
   if (error) {
     return (
-      <div className="p-8">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 text-sm">
-          오류: {error}
+      <div className="px-6 py-10 max-w-[1400px] mx-auto">
+        <div className="border border-edred/30 bg-edred/5 px-5 py-4 text-edred text-sm">
+          {error}
         </div>
       </div>
     );
@@ -64,13 +64,13 @@ export default function AdminDashboard() {
 
   if (!data) {
     return (
-      <div className="p-8 space-y-6">
+      <div className="px-6 py-10 max-w-[1400px] mx-auto space-y-8">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="bg-white rounded-xl border border-gray-200 p-5 animate-pulse">
-              <div className="h-3 bg-gray-200 rounded w-24 mb-3" />
-              <div className="h-8 bg-gray-200 rounded w-16" />
-            </div>
+            <div
+              key={i}
+              className="kpi-panel p-5 animate-pulse h-[110px]"
+            />
           ))}
         </div>
       </div>
@@ -79,105 +79,123 @@ export default function AdminDashboard() {
 
   const kpis = [
     {
-      label: "오늘 견적 요청",
-      value: data.todayQuotes,
-      unit: "건",
-      icon: "📝",
-      color: "text-blue-600",
-      bg: "bg-blue-50",
+      eyebrow: "TODAY · 견적",
+      value: data.todayQuotes.toLocaleString("ko-KR"),
+      meta: "오늘 들어온 요청",
+      urgent: false,
     },
     {
-      label: "이번 달 주문 확정",
-      value: data.monthOrders,
-      unit: "건",
-      icon: "🛒",
-      color: "text-green-600",
-      bg: "bg-green-50",
+      eyebrow: "MTD · 주문확정",
+      value: data.monthOrders.toLocaleString("ko-KR"),
+      meta: "이번 달 누적",
+      urgent: false,
     },
     {
-      label: "이번 달 매출",
-      value: data.monthRevenue.toLocaleString("ko-KR"),
-      unit: "원",
-      icon: "💰",
-      color: "text-purple-600",
-      bg: "bg-purple-50",
+      eyebrow: "MTD · 매출",
+      value: "₩" + data.monthRevenue.toLocaleString("ko-KR"),
+      meta: "이번 달 누적 (VAT 별도)",
+      urgent: false,
     },
     {
-      label: "승인 대기 회원",
-      value: data.pendingUsers,
-      unit: "명",
-      icon: "👥",
-      color: "text-amber-600",
-      bg: "bg-amber-50",
+      eyebrow: "PENDING · 회원",
+      value: data.pendingUsers.toLocaleString("ko-KR"),
+      meta: "승인 대기 중",
       urgent: data.pendingUsers > 0,
     },
   ];
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">관리자 대시보드</h1>
+    <div className="px-6 py-10 max-w-[1400px] mx-auto space-y-10">
+      {/* 헤더 */}
+      <div>
+        <div className="mono text-[11px] dim tracking-[0.15em] uppercase mb-3">
+          — 01 · DASHBOARD
+        </div>
+        <h1 className="display text-[40px] leading-none text-ink">
+          관리자 <span className="italic text-edred">대시보드</span>
+        </h1>
+        <p className="dim text-[13px] mt-3">
+          오늘의 운영 현황과 주요 지표
+        </p>
+      </div>
 
-      {/* KPI 카드 */}
+      {/* KPI 패널 */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {kpis.map((kpi) => (
           <div
-            key={kpi.label}
-            className={`bg-white rounded-xl border ${kpi.urgent ? "border-amber-300 ring-1 ring-amber-300" : "border-gray-200"} p-5`}
+            key={kpi.eyebrow}
+            className={`kpi-panel kpi-cell px-5 py-5 relative ${
+              kpi.urgent ? "ring-1 ring-edred/40" : ""
+            }`}
           >
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm text-gray-500">{kpi.label}</span>
-              <span className={`text-xl ${kpi.bg} rounded-lg p-1.5`}>{kpi.icon}</span>
-            </div>
-            <div className={`text-2xl font-bold ${kpi.color}`}>
-              {kpi.value}
-              <span className="text-sm font-normal text-gray-400 ml-1">{kpi.unit}</span>
-            </div>
+            <div className="kpi-eyebrow mb-3">{kpi.eyebrow}</div>
+            <div className="kpi-num text-[32px] leading-none">{kpi.value}</div>
+            <div className="kpi-meta mt-3">{kpi.meta}</div>
+            <span className="kpi-accent" />
           </div>
         ))}
       </div>
 
+      {/* 하단 2단 */}
       <div className="grid lg:grid-cols-2 gap-6">
-        {/* 최근 주문 5건 */}
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-            <h2 className="font-semibold text-gray-800">최근 주문</h2>
-            <Link href="/admin/orders" className="text-xs text-blue-600 hover:underline">
-              전체 보기
+        {/* 최근 주문 */}
+        <section className="border hair bg-paper">
+          <div className="flex items-baseline justify-between px-5 py-4 border-b hair">
+            <div>
+              <div className="mono text-[10px] dim tracking-[0.15em] uppercase mb-1">
+                — Recent Orders
+              </div>
+              <h2 className="text-[15px] font-semibold tracking-tight text-ink">
+                최근 주문
+              </h2>
+            </div>
+            <Link
+              href="/admin/orders"
+              className="mono text-[10px] tracking-[0.12em] uppercase text-edred hover:underline"
+            >
+              View All →
             </Link>
           </div>
           {data.recentOrders.length === 0 ? (
-            <div className="px-5 py-8 text-center text-gray-400 text-sm">주문이 없습니다</div>
+            <div className="px-5 py-12 text-center dim text-[13px]">
+              주문이 없습니다
+            </div>
           ) : (
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50">
-                <tr>
+            <table className="w-full text-[13px]">
+              <thead>
+                <tr className="border-b hair">
                   {["고객사", "금액", "상태", "날짜"].map((h) => (
                     <th
                       key={h}
-                      className="px-4 py-2.5 text-left text-xs font-semibold text-gray-500"
+                      className="px-4 py-2.5 text-left mono text-[10px] dim tracking-[0.12em] uppercase font-normal"
                     >
                       {h}
                     </th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody>
                 {data.recentOrders.map((o) => (
-                  <tr key={o.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 font-medium text-gray-800 truncate max-w-[120px]">
+                  <tr
+                    key={o.id}
+                    className="border-b hair hover:bg-ink/[0.02] transition-colors"
+                  >
+                    <td className="px-4 py-3 text-ink truncate max-w-[140px]">
                       {o.company}
                     </td>
-                    <td className="px-4 py-3 text-gray-700 font-mono text-xs">
-                      {o.amount > 0 ? `₩${o.amount.toLocaleString("ko-KR")}` : "-"}
+                    <td className="px-4 py-3 mono text-[12px] tabular text-ink">
+                      {o.amount > 0 ? `₩${o.amount.toLocaleString("ko-KR")}` : "—"}
                     </td>
                     <td className="px-4 py-3">
                       <span
-                        className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLOR[o.status] ?? "bg-gray-100 text-gray-600"}`}
+                        className={`mono text-[10px] tracking-[0.08em] uppercase border px-2 py-0.5 ${
+                          STATUS_COLOR[o.status] ?? "border-line text-dim"
+                        }`}
                       >
                         {STATUS_LABEL[o.status] ?? o.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-gray-400 text-xs">
+                    <td className="px-4 py-3 mono text-[11px] dim">
                       {new Date(o.createdAt).toLocaleDateString("ko-KR")}
                     </td>
                   </tr>
@@ -185,49 +203,61 @@ export default function AdminDashboard() {
               </tbody>
             </table>
           )}
-        </div>
+        </section>
 
-        {/* 재고 부족 경고 */}
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-            <h2 className="font-semibold text-gray-800">
-              재고 부족 제품
-              {data.lowStockProducts.length > 0 && (
-                <span className="ml-2 text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full font-semibold">
-                  {data.lowStockProducts.length}
-                </span>
-              )}
-            </h2>
-            <Link href="/admin/products" className="text-xs text-blue-600 hover:underline">
-              재고 관리
+        {/* 재고 부족 */}
+        <section className="border hair bg-paper">
+          <div className="flex items-baseline justify-between px-5 py-4 border-b hair">
+            <div>
+              <div className="mono text-[10px] dim tracking-[0.15em] uppercase mb-1">
+                — Low Stock
+              </div>
+              <h2 className="text-[15px] font-semibold tracking-tight text-ink">
+                재고 부족 제품
+                {data.lowStockProducts.length > 0 && (
+                  <span className="ml-2 mono text-[10px] text-edred tracking-[0.1em]">
+                    {data.lowStockProducts.length}건
+                  </span>
+                )}
+              </h2>
+            </div>
+            <Link
+              href="/admin/products"
+              className="mono text-[10px] tracking-[0.12em] uppercase text-edred hover:underline"
+            >
+              Manage →
             </Link>
           </div>
           {data.lowStockProducts.length === 0 ? (
-            <div className="px-5 py-8 text-center text-gray-400 text-sm">
+            <div className="px-5 py-12 text-center dim text-[13px]">
               재고 부족 제품이 없습니다
             </div>
           ) : (
-            <div className="divide-y divide-gray-100">
+            <ul>
               {data.lowStockProducts.map((p) => (
-                <div key={p.id} className="flex items-center gap-3 px-5 py-3">
+                <li
+                  key={p.id}
+                  className="flex items-center gap-3 px-5 py-3 border-b hair last:border-b-0"
+                >
+                  <span className="text-edred shrink-0">→</span>
                   <div className="flex-1 min-w-0">
-                    <div className="font-mono text-xs text-gray-500">{p.partNo}</div>
-                    <div className="text-sm text-gray-800 truncate">{p.description}</div>
+                    <div className="mono text-[11px] dim">{p.partNo}</div>
+                    <div className="text-[13px] text-ink truncate">
+                      {p.description}
+                    </div>
                   </div>
                   <div
-                    className={`text-xs font-bold px-2 py-1 rounded-full ${
-                      p.stock === 0
-                        ? "bg-red-100 text-red-700"
-                        : "bg-amber-100 text-amber-700"
+                    className={`mono text-[11px] tabular tracking-[0.1em] uppercase ${
+                      p.stock === 0 ? "text-edred" : "text-ink"
                     }`}
                   >
                     {p.stock === 0 ? "품절" : `재고 ${p.stock}`}
                   </div>
-                </div>
+                </li>
               ))}
-            </div>
+            </ul>
           )}
-        </div>
+        </section>
       </div>
     </div>
   );

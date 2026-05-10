@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
   const [error, setError] = useState("");
@@ -16,9 +16,9 @@ export default function LoginPage() {
     const saved = localStorage.getItem("smartech_login");
     if (saved) {
       try {
-        const { email: e, password: p } = JSON.parse(saved);
-        setEmail(e ?? "");
-        setPassword(p ?? "");
+        const { phone: p, password: pw } = JSON.parse(saved);
+        setPhone(p ?? "");
+        setPassword(pw ?? "");
         setRemember(true);
       } catch {}
     }
@@ -28,13 +28,13 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
     setLoading(true);
-    const res = await signIn("credentials", { email, password, redirect: false });
+    const res = await signIn("credentials", { phone, password, redirect: false });
     setLoading(false);
     if (res?.error) {
-      setError("이메일 또는 비밀번호가 올바르지 않습니다.");
+      setError("전화번호 또는 비밀번호가 올바르지 않습니다.");
     } else {
       if (remember) {
-        localStorage.setItem("smartech_login", JSON.stringify({ email, password }));
+        localStorage.setItem("smartech_login", JSON.stringify({ phone, password }));
       } else {
         localStorage.removeItem("smartech_login");
       }
@@ -51,14 +51,15 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">이메일</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">전화번호</label>
             <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
               required
+              autoComplete="tel"
               className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="your@company.com"
+              placeholder="010-1234-5678"
             />
           </div>
           <div>
@@ -80,7 +81,7 @@ export default function LoginPage() {
               className="w-4 h-4 rounded border-gray-300 text-blue-600 cursor-pointer"
             />
             <label htmlFor="remember" className="text-sm text-gray-600 cursor-pointer">
-              아이디·비밀번호 저장
+              전화번호·비밀번호 저장
             </label>
           </div>
           {error && <p className="text-red-500 text-sm">{error}</p>}

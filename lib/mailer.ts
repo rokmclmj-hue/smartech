@@ -14,13 +14,17 @@ const transporter = nodemailer.createTransport({
 export async function sendQuotePdf(
   to: string,
   pdfBuffer: Buffer,
-  quoteNo: string
+  quoteNo: string,
+  opts?: { html?: string; text?: string }
 ): Promise<void> {
   await transporter.sendMail({
     from: `"스마텍" <${process.env.GMAIL_USER}>`,
     to,
     subject: `[스마텍] 견적서 #${quoteNo} 입니다.`,
-    text: `안녕하세요, 스마텍입니다.\n\n요청하신 견적서(#${quoteNo})를 첨부하여 드립니다.\n궁금한 사항이 있으시면 언제든 연락 주세요.\n\n감사합니다.`,
+    text:
+      opts?.text ??
+      `안녕하세요, 스마텍입니다.\n\n요청하신 견적서(#${quoteNo})를 첨부하여 드립니다.\n궁금한 사항이 있으시면 언제든 연락 주세요.\n\n감사합니다.`,
+    html: opts?.html,
     attachments: [
       {
         filename: `견적서_${quoteNo}.pdf`,

@@ -3,8 +3,40 @@ import { useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
+// ─── 이미지 리사이즈 (OCR 호출 전 비용·속도 최적화) ─────────────────────────
+// EXIF 회전 정보 자동 보정 + 긴 변 1568px로 축소. 이미 작은 이미지는 원본 유지.
+async function resizeForOcr(file: File, maxDim = 1568): Promise<Blob> {
+  try {
+    const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+    const ratio = Math.min(maxDim / bitmap.width, maxDim / bitmap.height, 1);
+    if (ratio === 1) {
+      bitmap.close();
+      return file;
+    }
+    const w = Math.round(bitmap.width * ratio);
+    const h = Math.round(bitmap.height * ratio);
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      bitmap.close();
+      return file;
+    }
+    ctx.drawImage(bitmap, 0, 0, w, h);
+    bitmap.close();
+    const blob: Blob | null = await new Promise((resolve) =>
+      canvas.toBlob((b) => resolve(b), "image/jpeg", 0.92)
+    );
+    return blob ?? file;
+  } catch {
+    return file;
+  }
+}
+
 // ─── 타입 정의 ───────────────────────────────────────────────────────────────
 type CustomerType = "ENDUSER" | "DEALER" | "OEM";
+type EstimatedType = CustomerType | "";
 
 interface CardInfo {
   name: string;
@@ -12,6 +44,11 @@ interface CardInfo {
   phone: string;
   email: string;
   position: string;
+  homepage: string;
+  estimatedType: EstimatedType;
+  typeReason: string;
+  estimatedSize: string;
+  estimatedIndustry: string;
 }
 
 interface FormData {
@@ -20,11 +57,25 @@ interface FormData {
   phone: string;
   email: string;
   position: string;
+  homepage: string;
   customerType: CustomerType;
   password: string;
   passwordConfirm: string;
   businessNo: string;
 }
+
+interface AiEstimate {
+  type: EstimatedType;
+  reason: string;
+  size: string;
+  industry: string;
+}
+
+const TYPE_LABEL: Record<CustomerType, string> = {
+  ENDUSER: "일반 고객",
+  DEALER: "딜러",
+  OEM: "OEM",
+};
 
 // ─── 스텝 표시 컴포넌트 ──────────────────────────────────────────────────────
 function StepBar({ current }: { current: 1 | 2 | 3 }) {
@@ -93,11 +144,15 @@ export default function RegisterPage() {
     phone: "",
     email: "",
     position: "",
+    homepage: "",
     customerType: "ENDUSER",
     password: "",
     passwordConfirm: "",
     businessNo: "",
   });
+
+  // AI 추정 결과 (Step 2에서 안내문으로 표시)
+  const [aiEstimate, setAiEstimate] = useState<AiEstimate | null>(null);
 
   // 사업자등록증 파일
   const [businessFile, setBusinessFile] = useState<File | null>(null);
@@ -119,11 +174,14 @@ export default function RegisterPage() {
     setError("");
 
     try {
+      // OCR 전 이미지 축소 (원본은 cardImageFile에 이미 보관됨 → 가입시 원본 업로드)
+      const resized = await resizeForOcr(file);
       const fd = new FormData();
-      fd.append("image", file);
+      fd.append("image", resized, "card.jpg");
       const res = await fetch("/api/ocr/card", { method: "POST", body: fd });
       if (res.ok) {
         const data = (await res.json()) as Partial<CardInfo>;
+        const estType = (data.estimatedType ?? "") as EstimatedType;
         setForm((f) => ({
           ...f,
           name: data.name || f.name,
@@ -131,7 +189,22 @@ export default function RegisterPage() {
           phone: data.phone || f.phone,
           email: data.email || f.email,
           position: data.position || f.position,
+          homepage: data.homepage || f.homepage,
+          customerType:
+            estType === "OEM" || estType === "DEALER" || estType === "ENDUSER"
+              ? estType
+              : f.customerType,
         }));
+        if (estType || data.estimatedSize || data.estimatedIndustry) {
+          setAiEstimate({
+            type: estType,
+            reason: data.typeReason ?? "",
+            size: data.estimatedSize ?? "",
+            industry: data.estimatedIndustry ?? "",
+          });
+        } else {
+          setAiEstimate(null);
+        }
       }
     } catch {
       // OCR 실패해도 Step 2로 이동
@@ -224,6 +297,7 @@ export default function RegisterPage() {
           company: form.company,
           phone: form.phone,
           position: form.position,
+          homepage: form.homepage,
           customerType: form.customerType,
           businessNo: form.businessNo,
           businessFileUrl,
@@ -326,22 +400,29 @@ export default function RegisterPage() {
               className="hidden"
               onChange={handleFileChange}
             />
-
-            <div className="mt-6 text-center">
-              <button
-                type="button"
-                onClick={() => setStep(2)}
-                className="text-sm text-blue-600 hover:underline"
-              >
-                명함 없이 직접 입력하기
-              </button>
-            </div>
           </div>
         )}
 
         {/* ── STEP 2: 정보 확인 및 수정 ──────────────────────────────────── */}
         {step === 2 && (
           <div>
+            {aiEstimate && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 mb-4 text-sm">
+                <p className="font-medium text-blue-800 mb-1">AI 추정 결과</p>
+                <ul className="text-blue-700 space-y-0.5">
+                  {aiEstimate.type && (
+                    <li>
+                      • 고객 유형: <strong>{TYPE_LABEL[aiEstimate.type as CustomerType]}</strong>
+                      {aiEstimate.reason && <span className="text-blue-600"> — {aiEstimate.reason}</span>}
+                    </li>
+                  )}
+                  {aiEstimate.size && <li>• 회사 규모: {aiEstimate.size}</li>}
+                  {aiEstimate.industry && <li>• 업종: {aiEstimate.industry}</li>}
+                </ul>
+                <p className="text-xs text-blue-500 mt-2">※ 추정값입니다. 아래에서 직접 수정하실 수 있습니다.</p>
+              </div>
+            )}
+
             <div className="space-y-4">
               {[
                 { field: "name" as const, label: "이름", type: "text", placeholder: "홍길동", required: true },
@@ -349,6 +430,7 @@ export default function RegisterPage() {
                 { field: "position" as const, label: "직함", type: "text", placeholder: "영업팀장", required: false },
                 { field: "phone" as const, label: "전화번호", type: "tel", placeholder: "010-1234-5678", required: true },
                 { field: "email" as const, label: "이메일", type: "email", placeholder: "your@company.com", required: true },
+                { field: "homepage" as const, label: "홈페이지", type: "url", placeholder: "https://www.example.com", required: false },
               ].map(({ field, label, type, placeholder, required }) => (
                 <div key={field}>
                   <label className="block text-sm font-medium text-gray-700 mb-1">

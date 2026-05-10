@@ -22,19 +22,22 @@ model Product {
 }
 
 model User {
-  id               Int      @id @default(autoincrement())
-  email            String   @unique
+  id               Int        @id @default(autoincrement())
+  email            String     @unique
   name             String
   company          String
   passwordHash     String
-  tier             String   @default("PENDING")
-  createdAt        DateTime @default(now())
-  phone            String?
+  tier             String     @default("PENDING")
+  createdAt        DateTime   @default(now())
+  phone            String?    @unique
   businessNo       String?
   businessFileUrl  String?
   cardImageUrl     String?
+  rejectedAt       DateTime?
   quotes           Quote[]
   orders           Order[]
+  createdQuotes    Quote[]    @relation("QuoteCreatedBy")
+  auditLogs        AuditLog[]
 }
 
 model PriceRule {
@@ -51,7 +54,11 @@ model Quote {
   expiresAt           DateTime?
   taxInvoiceRequested Boolean     @default(false)
   totalAmount         Float?
+  sentAt              DateTime?
+  sendCount           Int         @default(0)
+  createdByAdminId    Int?
   user                User        @relation(fields: [userId], references: [id])
+  createdByAdmin      User?       @relation("QuoteCreatedBy", fields: [createdByAdminId], references: [id])
   items               QuoteItem[]
   order               Order?
 }
@@ -67,15 +74,31 @@ model QuoteItem {
 }
 
 model Order {
-  id             Int       @id @default(autoincrement())
-  quoteId        Int       @unique
-  userId         Int
-  status         String    @default("PENDING")
-  contactName    String?
-  contactPhone   String?
-  deliveryIssue  Boolean   @default(false)
-  confirmedAt    DateTime?
-  createdAt      DateTime  @default(now())
-  quote          Quote     @relation(fields: [quoteId], references: [id])
-  user           User      @relation(fields: [userId], references: [id])
+  id                   Int       @id @default(autoincrement())
+  quoteId              Int       @unique
+  userId               Int
+  status               String    @default("PENDING")
+  contactName          String?
+  contactPhone         String?
+  deliveryIssue        Boolean   @default(false)
+  confirmedAt          DateTime?
+  createdAt            DateTime  @default(now())
+  deliveryNoteIssuedAt DateTime?
+  deliveryNoteCount    Int       @default(0)
+  quote                Quote     @relation(fields: [quoteId], references: [id])
+  user                 User      @relation(fields: [userId], references: [id])
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  action    String
+  target    String
+  targetId  Int?
+  payload   Json?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([target, targetId])
+  @@index([userId, createdAt])
 }

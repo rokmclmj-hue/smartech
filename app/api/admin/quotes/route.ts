@@ -1,36 +1,60 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAdminSession } from "@/lib/admin-auth";
 import { prisma } from "@/lib/db";
 
-async function requireAdmin() {
-  const session = await auth();
-  return (session?.user as any)?.tier === "ADMIN";
-}
-
 export async function GET(req: NextRequest) {
-  if (!(await requireAdmin())) {
+  const admin = await getAdminSession();
+  if (!admin) {
     return NextResponse.json({ error: "권한 없음" }, { status: 403 });
   }
 
   const { searchParams } = new URL(req.url);
   const status = searchParams.get("status");
+  const search = searchParams.get("search")?.trim() ?? "";
+  const page = Math.max(1, parseInt(searchParams.get("page") ?? "1") || 1);
+  const limit = Math.min(
+    200,
+    Math.max(1, parseInt(searchParams.get("limit") ?? "50") || 50)
+  );
+  const skip = (page - 1) * limit;
 
-  const where: Record<string, unknown> = {};
-  if (status && status !== "ALL") {
-    where.status = status;
-  }
+  // status 필터
+  const statusFilter: Record<string, unknown> =
+    status && status !== "ALL" ? { status } : {};
 
-  const quotes = await prisma.quote.findMany({
-    where,
-    orderBy: { createdAt: "desc" },
-    include: {
-      user: { select: { name: true, company: true, email: true } },
-      items: { select: { unitPrice: true, quantity: true } },
-    },
-  });
+  // search 필터: 숫자면 id 직접 매칭, 아니면 회사명/담당자/이메일 부분 검색
+  const searchNum = search !== "" ? parseInt(search) : NaN;
+  const searchFilter =
+    search === ""
+      ? {}
+      : Number.isFinite(searchNum)
+        ? { id: searchNum }
+        : {
+            OR: [
+              { user: { company: { contains: search } } },
+              { user: { name: { contains: search } } },
+              { user: { email: { contains: search } } },
+            ],
+          };
+
+  const where = { ...statusFilter, ...searchFilter };
+
+  const [total, quotes] = await Promise.all([
+    prisma.quote.count({ where }),
+    prisma.quote.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+      include: {
+        user: { select: { name: true, company: true, email: true } },
+        items: { select: { unitPrice: true, quantity: true } },
+      },
+    }),
+  ]);
 
   const now = new Date();
-  const formatted = quotes.map((q) => {
+  const items = quotes.map((q) => {
     const amount = q.totalAmount
       ? q.totalAmount
       : q.items.reduce((s, item) => s + item.unitPrice * item.quantity, 0);
@@ -46,14 +70,17 @@ export async function GET(req: NextRequest) {
       isExpired,
       createdAt: q.createdAt.toISOString(),
       itemCount: q.items.length,
+      sentAt: q.sentAt?.toISOString() ?? null,
+      sendCount: q.sendCount,
     };
   });
 
-  return NextResponse.json(formatted);
+  return NextResponse.json({ items, total, page, limit });
 }
 
 export async function PATCH(req: NextRequest) {
-  if (!(await requireAdmin())) {
+  const admin = await getAdminSession();
+  if (!admin) {
     return NextResponse.json({ error: "권한 없음" }, { status: 403 });
   }
 

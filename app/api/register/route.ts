@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { hash } from "bcryptjs";
 import { prisma } from "@/lib/db";
 import { notifyNewMember } from "@/lib/solapi";
+import { normalizePhone } from "@/lib/phone";
 
 type CustomerType = "ENDUSER" | "DEALER" | "OEM";
 
@@ -38,13 +39,23 @@ export async function POST(req: NextRequest) {
     cardImageUrl,
   } = body;
 
-  if (!email || !password || !name || !company) {
+  if (!email || !password || !name || !company || !phone) {
     return NextResponse.json({ error: "모든 필드를 입력해주세요" }, { status: 400 });
   }
 
-  const existing = await prisma.user.findUnique({ where: { email } });
-  if (existing) {
+  const normalizedPhone = normalizePhone(phone);
+  if (!normalizedPhone) {
+    return NextResponse.json({ error: "전화번호 형식이 올바르지 않습니다" }, { status: 400 });
+  }
+
+  const existingEmail = await prisma.user.findUnique({ where: { email } });
+  if (existingEmail) {
     return NextResponse.json({ error: "이미 등록된 이메일입니다" }, { status: 409 });
+  }
+
+  const existingPhone = await prisma.user.findFirst({ where: { phone: normalizedPhone } });
+  if (existingPhone) {
+    return NextResponse.json({ error: "이미 등록된 전화번호입니다" }, { status: 409 });
   }
 
   const passwordHash = await hash(password, 12);
@@ -57,7 +68,7 @@ export async function POST(req: NextRequest) {
       company,
       passwordHash,
       tier,
-      phone: phone ?? null,
+      phone: normalizedPhone,
       businessNo: businessNo ?? null,
       businessFileUrl: businessFileUrl ?? null,
       cardImageUrl: cardImageUrl ?? null,
