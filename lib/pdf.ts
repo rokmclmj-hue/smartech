@@ -1,7 +1,3 @@
-/**
- * react-pdf (@react-pdf/renderer) 를 사용하여 견적서 PDF를 생성합니다.
- * Next.js Edge/서버 환경에서 renderToBuffer로 Buffer를 반환합니다.
- */
 import React from "react";
 import {
   Document,
@@ -12,8 +8,6 @@ import {
   renderToBuffer,
   type DocumentProps,
 } from "@react-pdf/renderer";
-
-// ─── 타입 정의 ───────────────────────────────────────────────────────────────
 
 export interface QuoteForPdf {
   id: number;
@@ -26,6 +20,7 @@ export interface QuoteForPdf {
     name: string;
     company: string;
     email: string;
+    phone?: string | null;
   };
   items: {
     quantity: number;
@@ -33,395 +28,586 @@ export interface QuoteForPdf {
     product: {
       partNo: string;
       description: string;
+      category?: string | null;
     };
   }[];
 }
 
-// ─── 스타일 ───────────────────────────────────────────────────────────────────
-
 const S = StyleSheet.create({
   page: {
     fontFamily: "Helvetica",
-    fontSize: 10,
-    paddingTop: 40,
-    paddingBottom: 60,
-    paddingHorizontal: 50,
-    color: "#1a1a2e",
-  },
-  // 헤더
-  headerRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: 20,
-    borderBottom: "2 solid #1e3a5f",
-    paddingBottom: 12,
-  },
-  docTitle: {
-    fontSize: 28,
-    fontFamily: "Helvetica-Bold",
-    color: "#1e3a5f",
-    letterSpacing: 4,
-  },
-  companyInfo: {
-    textAlign: "right",
     fontSize: 9,
-    color: "#555",
-    lineHeight: 1.5,
+    paddingTop: 36,
+    paddingBottom: 50,
+    paddingHorizontal: 44,
+    backgroundColor: "#ffffff",
+    color: "#111111",
   },
-  companyName: {
-    fontSize: 12,
-    fontFamily: "Helvetica-Bold",
-    color: "#1e3a5f",
-    marginBottom: 2,
-  },
-  // 견적 메타
-  metaRow: {
+
+  // ── 최상단 헤더 바
+  topBar: {
+    backgroundColor: "#111111",
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    marginBottom: 0,
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 20,
+    alignItems: "center",
   },
-  metaBox: {
-    backgroundColor: "#f4f7fb",
-    borderRadius: 4,
-    padding: 10,
-    flex: 1,
-    marginRight: 8,
+  topBarLeft: {
+    color: "#ffffff",
+    fontSize: 7,
+    fontFamily: "Helvetica",
+    letterSpacing: 1,
   },
-  metaBoxRight: {
-    backgroundColor: "#f4f7fb",
-    borderRadius: 4,
-    padding: 10,
-    flex: 1,
-    marginLeft: 8,
+  topBarRight: {
+    color: "#aaaaaa",
+    fontSize: 7,
+    letterSpacing: 0.5,
   },
-  metaLabel: {
-    fontSize: 8,
-    color: "#888",
-    marginBottom: 2,
+
+  // ── 타이틀 영역
+  titleArea: {
+    borderBottom: "2 solid #111111",
+    paddingBottom: 10,
+    marginBottom: 14,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
+    marginTop: 16,
   },
-  metaValue: {
-    fontSize: 10,
+  titleLeft: {},
+  quoteTitle: {
+    fontSize: 26,
     fontFamily: "Helvetica-Bold",
-    color: "#1a1a2e",
+    color: "#111111",
+    letterSpacing: 6,
   },
-  // 수신 정보
-  recipientBox: {
-    borderLeft: "3 solid #1e3a5f",
-    paddingLeft: 10,
-    marginBottom: 20,
-  },
-  recipientLabel: {
+  quoteSubtitle: {
     fontSize: 8,
-    color: "#888",
+    color: "#555555",
+    marginTop: 2,
+    letterSpacing: 2,
+  },
+  titleRight: {
+    textAlign: "right",
+  },
+  quoteNo: {
+    fontSize: 11,
+    fontFamily: "Helvetica-Bold",
+    color: "#111111",
+    letterSpacing: 1,
+  },
+  quoteStatus: {
+    fontSize: 7,
+    color: "#555555",
+    marginTop: 2,
+    letterSpacing: 1,
+  },
+
+  // ── 섹션 구분선
+  sectionDivider: {
+    borderTop: "1 solid #dddddd",
+    marginTop: 12,
+    marginBottom: 10,
+  },
+  sectionLabel: {
+    fontSize: 7,
+    fontFamily: "Helvetica-Bold",
+    color: "#888888",
+    letterSpacing: 2,
+    marginBottom: 8,
+  },
+
+  // ── Section 01: TO / FROM
+  toFromRow: {
+    flexDirection: "row",
+    marginBottom: 14,
+  },
+  toBox: {
+    flex: 1,
+    paddingRight: 20,
+    borderRight: "1 solid #eeeeee",
+  },
+  fromBox: {
+    flex: 1,
+    paddingLeft: 20,
+  },
+  toFromLabel: {
+    fontSize: 7,
+    fontFamily: "Helvetica-Bold",
+    color: "#888888",
+    letterSpacing: 2,
+    marginBottom: 6,
+  },
+  toFromCompany: {
+    fontSize: 11,
+    fontFamily: "Helvetica-Bold",
+    color: "#111111",
     marginBottom: 3,
   },
-  recipientName: {
-    fontSize: 13,
-    fontFamily: "Helvetica-Bold",
-    color: "#1a1a2e",
+  toFromLine: {
+    fontSize: 8,
+    color: "#444444",
+    marginBottom: 2,
+    lineHeight: 1.4,
   },
-  recipientSub: {
-    fontSize: 9,
-    color: "#555",
+  toFromLineGray: {
+    fontSize: 7,
+    color: "#888888",
+    marginBottom: 1,
+  },
+
+  // ── Section 02: 금액 요약
+  amountArea: {
+    backgroundColor: "#f7f7f7",
+    padding: 12,
+    marginBottom: 14,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  grandTotalLabel: {
+    fontSize: 8,
+    color: "#555555",
+    marginBottom: 3,
+    letterSpacing: 1,
+  },
+  grandTotalAmount: {
+    fontSize: 22,
+    fontFamily: "Helvetica-Bold",
+    color: "#111111",
+  },
+  grandTotalSub: {
+    fontSize: 7,
+    color: "#888888",
     marginTop: 2,
   },
-  // 테이블
+  amountBreakdown: {
+    textAlign: "right",
+  },
+  breakdownRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 3,
+  },
+  breakdownLabel: {
+    fontSize: 8,
+    color: "#555555",
+    marginRight: 20,
+  },
+  breakdownValue: {
+    fontSize: 8,
+    color: "#111111",
+    fontFamily: "Helvetica-Bold",
+  },
+  taxBadge: {
+    backgroundColor: "#111111",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    marginTop: 4,
+    alignSelf: "flex-start",
+  },
+  taxBadgeText: {
+    fontSize: 6,
+    color: "#ffffff",
+    letterSpacing: 1,
+  },
+
+  // ── Section 03: 품목 테이블
   table: {
     width: "100%",
-    marginBottom: 16,
+    marginBottom: 14,
   },
   tableHeader: {
     flexDirection: "row",
-    backgroundColor: "#1e3a5f",
+    backgroundColor: "#111111",
     paddingVertical: 6,
-    paddingHorizontal: 4,
+    paddingHorizontal: 6,
   },
-  tableHeaderCell: {
+  thCell: {
     color: "#ffffff",
     fontFamily: "Helvetica-Bold",
-    fontSize: 9,
-    textAlign: "center",
+    fontSize: 7,
+    letterSpacing: 1,
   },
   tableRow: {
     flexDirection: "row",
-    borderBottom: "1 solid #e5e7eb",
-    paddingVertical: 5,
-    paddingHorizontal: 4,
+    borderBottom: "1 solid #eeeeee",
+    paddingVertical: 6,
+    paddingHorizontal: 6,
   },
   tableRowAlt: {
     flexDirection: "row",
-    borderBottom: "1 solid #e5e7eb",
-    paddingVertical: 5,
-    paddingHorizontal: 4,
-    backgroundColor: "#f9fafb",
+    borderBottom: "1 solid #eeeeee",
+    paddingVertical: 6,
+    paddingHorizontal: 6,
+    backgroundColor: "#fafafa",
   },
-  cellNo: { width: "6%", textAlign: "center" },
-  cellCode: { width: "18%", textAlign: "center", fontFamily: "Helvetica" },
-  cellDesc: { width: "34%", paddingLeft: 4 },
-  cellQty: { width: "10%", textAlign: "center" },
-  cellPrice: { width: "16%", textAlign: "right" },
-  cellAmount: { width: "16%", textAlign: "right" },
-  // 합계
+  colNo:     { width: "6%", textAlign: "center" },
+  colCode:   { width: "18%", paddingRight: 4 },
+  colDesc:   { width: "38%", paddingRight: 4 },
+  colQty:    { width: "8%", textAlign: "center" },
+  colPrice:  { width: "15%", textAlign: "right" },
+  colAmount: { width: "15%", textAlign: "right" },
+
+  tdNormal: { fontSize: 8, color: "#222222" },
+  tdCode:   { fontSize: 7, color: "#333333", fontFamily: "Helvetica-Bold" },
+  tdAmount: { fontSize: 8, color: "#111111", fontFamily: "Helvetica-Bold" },
+
+  // ── Section 04: 합계
+  summaryArea: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginBottom: 14,
+  },
   summaryBox: {
-    alignItems: "flex-end",
-    marginBottom: 20,
-  },
-  summaryTable: {
-    width: 240,
-    borderTop: "2 solid #1e3a5f",
-    paddingTop: 6,
+    width: 220,
+    borderTop: "2 solid #111111",
+    paddingTop: 8,
   },
   summaryRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     paddingVertical: 3,
-  },
-  summaryLabel: {
-    fontSize: 10,
-    color: "#555",
-  },
-  summaryValue: {
-    fontSize: 10,
-    color: "#1a1a2e",
+    borderBottom: "1 solid #eeeeee",
   },
   summaryTotalRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingVertical: 4,
-    borderTop: "1 solid #1e3a5f",
-    marginTop: 4,
+    paddingVertical: 5,
+    marginTop: 2,
   },
-  summaryTotalLabel: {
-    fontSize: 12,
+  sumLabel:  { fontSize: 8, color: "#555555" },
+  sumValue:  { fontSize: 8, color: "#111111" },
+  sumTLabel: { fontSize: 10, fontFamily: "Helvetica-Bold", color: "#111111" },
+  sumTValue: { fontSize: 10, fontFamily: "Helvetica-Bold", color: "#111111" },
+
+  // ── Section 05: 신뢰 배지
+  badgeRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 14,
+    borderTop: "1 solid #eeeeee",
+    paddingTop: 10,
+  },
+  badge: {
+    flex: 1,
+    alignItems: "center",
+    paddingHorizontal: 4,
+  },
+  badgeTitle: {
+    fontSize: 7,
     fontFamily: "Helvetica-Bold",
-    color: "#1e3a5f",
+    color: "#111111",
+    marginBottom: 2,
+    textAlign: "center",
   },
-  summaryTotalValue: {
-    fontSize: 12,
+  badgeSub: {
+    fontSize: 6,
+    color: "#888888",
+    textAlign: "center",
+  },
+  badgeDivider: {
+    borderRight: "1 solid #eeeeee",
+  },
+
+  // ── Section 06: 거래 조건
+  termsRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginBottom: 14,
+    backgroundColor: "#f7f7f7",
+    padding: 10,
+  },
+  termItem: {
+    width: "50%",
+    marginBottom: 5,
+  },
+  termLabel: {
+    fontSize: 6,
+    color: "#888888",
+    letterSpacing: 1,
+    marginBottom: 1,
+  },
+  termValue: {
+    fontSize: 8,
+    color: "#111111",
+  },
+
+  // ── Section 07: 서명
+  sigRow: {
+    flexDirection: "row",
+    marginBottom: 14,
+    borderTop: "1 solid #dddddd",
+    paddingTop: 10,
+  },
+  sigBox: {
+    flex: 1,
+    paddingRight: 16,
+  },
+  sigBoxRight: {
+    flex: 1,
+    paddingLeft: 16,
+    borderLeft: "1 solid #eeeeee",
+  },
+  sigLabel: {
+    fontSize: 7,
     fontFamily: "Helvetica-Bold",
-    color: "#1e3a5f",
+    color: "#888888",
+    letterSpacing: 1,
+    marginBottom: 4,
   },
-  // 하단
+  sigName: {
+    fontSize: 9,
+    fontFamily: "Helvetica-Bold",
+    color: "#111111",
+    marginBottom: 2,
+  },
+  sigLine: {
+    borderTop: "1 solid #aaaaaa",
+    marginTop: 24,
+    paddingTop: 3,
+  },
+  sigLineText: {
+    fontSize: 7,
+    color: "#aaaaaa",
+  },
+
+  // ── 푸터
   footer: {
     position: "absolute",
-    bottom: 30,
-    left: 50,
-    right: 50,
+    bottom: 24,
+    left: 44,
+    right: 44,
+    borderTop: "1 solid #dddddd",
+    paddingTop: 6,
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
-  footerNote: {
-    fontSize: 8,
-    color: "#888",
-    textAlign: "center",
-    borderTop: "1 solid #e5e7eb",
-    paddingTop: 8,
-  },
-  taxBadge: {
-    backgroundColor: "#eff6ff",
-    border: "1 solid #bfdbfe",
-    borderRadius: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    marginBottom: 12,
-    alignSelf: "flex-start",
-  },
-  taxBadgeText: {
-    fontSize: 8,
-    color: "#1d4ed8",
+  footerText: {
+    fontSize: 7,
+    color: "#aaaaaa",
   },
 });
 
-// ─── 헬퍼 ─────────────────────────────────────────────────────────────────────
-
-function formatKRW(n: number): string {
-  return n.toLocaleString("en-US") + " 원";
+function fmt(n: number): string {
+  return "₩" + n.toLocaleString("en-US");
 }
 
-function formatDateKR(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const dd = String(d.getDate()).padStart(2, "0");
-  return `${y}년 ${m}월 ${dd}일`;
+function fmtDate(d: Date): string {
+  return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
 }
-
-// ─── PDF 컴포넌트 ────────────────────────────────────────────────────────────
 
 function QuoteDocument({ quote }: { quote: QuoteForPdf }) {
-  const issuedDate = new Date(quote.createdAt);
-  const expiresDate = quote.expiresAt ? new Date(quote.expiresAt) : null;
-  const quoteNo = `Q-${quote.id}-${issuedDate.getFullYear()}${String(issuedDate.getMonth() + 1).padStart(2, "0")}${String(issuedDate.getDate()).padStart(2, "0")}`;
+  const issued = new Date(quote.createdAt);
+  const expires = quote.expiresAt ? new Date(quote.expiresAt) : null;
+  const year = issued.getFullYear();
+  const seq = String(quote.id).padStart(6, "0");
+  const quoteNo = `SMT-${year}-Q-${seq}`;
 
-  const subtotal = quote.items.reduce(
-    (sum, item) => sum + item.unitPrice * item.quantity,
-    0
-  );
+  const subtotal = quote.items.reduce((s, i) => s + i.unitPrice * i.quantity, 0);
   const vat = Math.round(subtotal * 0.1);
-  const grandTotal = subtotal + vat;
+  const grand = subtotal + vat;
+  const totalQty = quote.items.reduce((s, i) => s + i.quantity, 0);
 
-  return React.createElement(
+  const el = React.createElement;
+
+  return el(
     Document,
     { title: `견적서 ${quoteNo}` },
-    React.createElement(
-      Page,
-      { size: "A4", style: S.page },
+    el(Page, { size: "A4", style: S.page },
 
-      // ── 헤더
-      React.createElement(
-        View,
-        { style: S.headerRow },
-        React.createElement(Text, { style: S.docTitle }, "견  적  서"),
-        React.createElement(
-          View,
-          { style: S.companyInfo },
-          React.createElement(Text, { style: S.companyName }, "스마텍"),
-          React.createElement(Text, null, "대표: 홍길동"),
-          React.createElement(Text, null, "사업자등록번호: 000-00-00000"),
-          React.createElement(Text, null, "TEL: 02-0000-0000"),
-          React.createElement(Text, null, "E-mail: info@smartech.co.kr"),
-          React.createElement(Text, null, "주소: 서울특별시 OO구 OO로 000")
-        )
+      // ── 최상단 검은 바
+      el(View, { style: S.topBar },
+        el(Text, { style: S.topBarLeft }, `${quoteNo}  ·  SMARTECH QUOTATION`),
+        el(Text, { style: S.topBarRight }, `STATUS · ACTIVE  |  ${fmtDate(issued)}`)
       ),
 
-      // ── 견적 메타 정보
-      React.createElement(
-        View,
-        { style: S.metaRow },
-        React.createElement(
-          View,
-          { style: S.metaBox },
-          React.createElement(Text, { style: S.metaLabel }, "견적번호"),
-          React.createElement(Text, { style: S.metaValue }, quoteNo)
+      // ── 타이틀
+      el(View, { style: S.titleArea },
+        el(View, { style: S.titleLeft },
+          el(Text, { style: S.quoteTitle }, "견  적  서"),
+          el(Text, { style: S.quoteSubtitle }, "SMARTECH  ·  Edwards Vacuum Korea Authorized Distributor")
         ),
-        React.createElement(
-          View,
-          { style: S.metaBox },
-          React.createElement(Text, { style: S.metaLabel }, "발행일"),
-          React.createElement(Text, { style: S.metaValue }, formatDateKR(issuedDate))
-        ),
-        React.createElement(
-          View,
-          { style: S.metaBoxRight },
-          React.createElement(Text, { style: S.metaLabel }, "유효기간"),
-          React.createElement(
-            Text,
-            { style: S.metaValue },
-            expiresDate ? formatDateKR(expiresDate) : "-"
+        el(View, { style: S.titleRight },
+          el(Text, { style: S.quoteNo }, quoteNo),
+          el(Text, { style: S.quoteStatus },
+            `발행일 ${fmtDate(issued)}  |  유효기간 ${expires ? fmtDate(expires) : "14일"}`
           )
         )
       ),
 
-      // ── 수신 정보
-      React.createElement(
-        View,
-        { style: S.recipientBox },
-        React.createElement(Text, { style: S.recipientLabel }, "수신"),
-        React.createElement(Text, { style: S.recipientName }, quote.user.company + " 귀중"),
-        React.createElement(
-          Text,
-          { style: S.recipientSub },
-          "담당자: " + quote.user.name + "  |  " + quote.user.email
+      // ── Section 01: TO / FROM
+      el(Text, { style: S.sectionLabel }, "— 01  거래처 정보"),
+      el(View, { style: S.toFromRow },
+        el(View, { style: S.toBox },
+          el(Text, { style: S.toFromLabel }, "TO  ·  수  신"),
+          el(Text, { style: S.toFromCompany }, quote.user.company + " 귀중"),
+          el(Text, { style: S.toFromLine }, `담당자: ${quote.user.name}`),
+          el(Text, { style: S.toFromLine }, `E-mail: ${quote.user.email}`),
+          quote.user.phone
+            ? el(Text, { style: S.toFromLine }, `Tel: ${quote.user.phone}`)
+            : null
+        ),
+        el(View, { style: S.fromBox },
+          el(Text, { style: S.toFromLabel }, "FROM  ·  발  신"),
+          el(Text, { style: S.toFromCompany }, "(주)스마텍"),
+          el(Text, { style: S.toFromLine }, "Edwards Vacuum Korea Authorized Distributor"),
+          el(Text, { style: S.toFromLineGray }, "E-mail: info@smartech.co.kr"),
+          el(Text, { style: S.toFromLineGray }, "TEL: 02-0000-0000")
         )
       ),
 
-      // ── 세금계산서 신청 배지
-      quote.taxInvoiceRequested
-        ? React.createElement(
-            View,
-            { style: S.taxBadge },
-            React.createElement(Text, { style: S.taxBadgeText }, "세금계산서 발행 신청 포함")
-          )
-        : null,
-
-      // ── 품목 테이블
-      React.createElement(
-        View,
-        { style: S.table },
-
-        // 테이블 헤더
-        React.createElement(
-          View,
-          { style: S.tableHeader },
-          React.createElement(Text, { style: [S.tableHeaderCell, S.cellNo] }, "No"),
-          React.createElement(Text, { style: [S.tableHeaderCell, S.cellCode] }, "코드번호"),
-          React.createElement(Text, { style: [S.tableHeaderCell, S.cellDesc] }, "품목명"),
-          React.createElement(Text, { style: [S.tableHeaderCell, S.cellQty] }, "수량"),
-          React.createElement(Text, { style: [S.tableHeaderCell, S.cellPrice] }, "단가"),
-          React.createElement(Text, { style: [S.tableHeaderCell, S.cellAmount] }, "금액")
+      // ── Section 02: 금액 요약
+      el(Text, { style: S.sectionLabel }, "— 02  금액 요약"),
+      el(View, { style: S.amountArea },
+        el(View, null,
+          el(Text, { style: S.grandTotalLabel }, "GRAND TOTAL  ·  총액 (VAT 포함)"),
+          el(Text, { style: S.grandTotalAmount }, fmt(grand)),
+          el(Text, { style: S.grandTotalSub }, `ITEMS: ${quote.items.length}종  ·  ${totalQty} EA`),
+          quote.taxInvoiceRequested
+            ? el(View, { style: S.taxBadge },
+                el(Text, { style: S.taxBadgeText }, "세금계산서 발행 신청")
+              )
+            : null
         ),
+        el(View, { style: S.amountBreakdown },
+          el(View, { style: S.breakdownRow },
+            el(Text, { style: S.breakdownLabel }, "공급가액 (Supply)"),
+            el(Text, { style: S.breakdownValue }, fmt(subtotal))
+          ),
+          el(View, { style: S.breakdownRow },
+            el(Text, { style: S.breakdownLabel }, "부가세 10% (VAT)"),
+            el(Text, { style: S.breakdownValue }, fmt(vat))
+          ),
+          el(View, { style: { ...S.breakdownRow, borderTop: "1 solid #cccccc", paddingTop: 4, marginTop: 2 } },
+            el(Text, { style: { ...S.breakdownLabel, fontFamily: "Helvetica-Bold" } }, "합계 (Total)"),
+            el(Text, { style: { ...S.breakdownValue, fontSize: 10 } }, fmt(grand))
+          )
+        )
+      ),
 
-        // 테이블 행
+      // ── Section 03: 품목 테이블
+      el(Text, { style: S.sectionLabel }, `— 03  품목 명세  (${quote.items.length} LINES · ${totalQty} EA)`),
+      el(View, { style: S.table },
+        el(View, { style: S.tableHeader },
+          el(Text, { style: [S.thCell, S.colNo] }, "No"),
+          el(Text, { style: [S.thCell, S.colCode] }, "PART NO"),
+          el(Text, { style: [S.thCell, S.colDesc] }, "DESCRIPTION"),
+          el(Text, { style: [S.thCell, S.colQty] }, "QTY"),
+          el(Text, { style: [S.thCell, S.colPrice] }, "UNIT PRICE"),
+          el(Text, { style: [S.thCell, S.colAmount] }, "SUBTOTAL")
+        ),
         ...quote.items.map((item, idx) =>
-          React.createElement(
-            View,
-            { key: idx, style: idx % 2 === 0 ? S.tableRow : S.tableRowAlt },
-            React.createElement(Text, { style: [{ fontSize: 9, color: "#555" }, S.cellNo] }, String(idx + 1)),
-            React.createElement(Text, { style: [{ fontSize: 8, color: "#2563eb" }, S.cellCode] }, item.product.partNo),
-            React.createElement(Text, { style: [{ fontSize: 9 }, S.cellDesc] }, item.product.description),
-            React.createElement(Text, { style: [{ fontSize: 9 }, S.cellQty] }, String(item.quantity)),
-            React.createElement(Text, { style: [{ fontSize: 9 }, S.cellPrice] }, item.unitPrice.toLocaleString("en-US")),
-            React.createElement(Text, { style: [{ fontSize: 9, fontFamily: "Helvetica-Bold" }, S.cellAmount] }, (item.unitPrice * item.quantity).toLocaleString("en-US"))
+          el(View, { key: String(idx), style: idx % 2 === 0 ? S.tableRow : S.tableRowAlt },
+            el(Text, { style: [S.tdNormal, S.colNo] }, String(idx + 1).padStart(2, "0")),
+            el(Text, { style: [S.tdCode, S.colCode] }, item.product.partNo),
+            el(Text, { style: [S.tdNormal, S.colDesc] }, item.product.description),
+            el(Text, { style: [S.tdNormal, S.colQty] }, `${item.quantity} EA`),
+            el(Text, { style: [S.tdNormal, S.colPrice] }, fmt(item.unitPrice)),
+            el(Text, { style: [S.tdAmount, S.colAmount] }, fmt(item.unitPrice * item.quantity))
           )
         )
       ),
 
-      // ── 합계
-      React.createElement(
-        View,
-        { style: S.summaryBox },
-        React.createElement(
-          View,
-          { style: S.summaryTable },
-          React.createElement(
-            View,
-            { style: S.summaryRow },
-            React.createElement(Text, { style: S.summaryLabel }, "공급가액"),
-            React.createElement(Text, { style: S.summaryValue }, formatKRW(subtotal))
+      // ── Section 04: 합계
+      el(View, { style: S.summaryArea },
+        el(View, { style: S.summaryBox },
+          el(View, { style: S.summaryRow },
+            el(Text, { style: S.sumLabel }, "공급가액"),
+            el(Text, { style: S.sumValue }, fmt(subtotal))
           ),
-          React.createElement(
-            View,
-            { style: S.summaryRow },
-            React.createElement(Text, { style: S.summaryLabel }, "부가세 (10%)"),
-            React.createElement(Text, { style: S.summaryValue }, formatKRW(vat))
+          el(View, { style: S.summaryRow },
+            el(Text, { style: S.sumLabel }, "부가세 (10%)"),
+            el(Text, { style: S.sumValue }, fmt(vat))
           ),
-          React.createElement(
-            View,
-            { style: S.summaryTotalRow },
-            React.createElement(Text, { style: S.summaryTotalLabel }, "합  계"),
-            React.createElement(Text, { style: S.summaryTotalValue }, formatKRW(grandTotal))
+          el(View, { style: S.summaryTotalRow },
+            el(Text, { style: S.sumTLabel }, "최종 합계"),
+            el(Text, { style: S.sumTValue }, fmt(grand))
           )
         )
       ),
 
-      // ── 비고
-      quote.note
-        ? React.createElement(
-            View,
-            { style: { marginBottom: 16, backgroundColor: "#f9fafb", borderRadius: 4, padding: 10 } },
-            React.createElement(Text, { style: { fontSize: 8, color: "#888", marginBottom: 3 } }, "비고"),
-            React.createElement(Text, { style: { fontSize: 9 } }, quote.note)
-          )
-        : null,
-
-      // ── 하단 푸터
-      React.createElement(
-        View,
-        { style: S.footer },
-        React.createElement(
-          Text,
-          { style: S.footerNote },
-          "본 견적서는 발행일로부터 14일간 유효합니다. | 위 금액으로 견적합니다. | 스마텍"
+      // ── Section 05: 신뢰 배지
+      el(View, { style: S.badgeRow },
+        el(View, { style: [S.badge, S.badgeDivider] },
+          el(Text, { style: S.badgeTitle }, "Edwards 공식 대리점"),
+          el(Text, { style: S.badgeSub }, "Authorized Distributor")
+        ),
+        el(View, { style: [S.badge, S.badgeDivider] },
+          el(Text, { style: S.badgeTitle }, "정품 공식 유통"),
+          el(Text, { style: S.badgeSub }, "Serial No. 추적 보증")
+        ),
+        el(View, { style: [S.badge, S.badgeDivider] },
+          el(Text, { style: S.badgeTitle }, "24/7 응급 대응"),
+          el(Text, { style: S.badgeSub }, "긴급 기술 지원")
+        ),
+        el(View, { style: S.badge },
+          el(Text, { style: S.badgeTitle }, "30년 수리 경력"),
+          el(Text, { style: S.badgeSub }, "전문 엔지니어팀")
         )
+      ),
+
+      // ── Section 06: 거래 조건
+      el(Text, { style: S.sectionLabel }, "— 06  거래 조건"),
+      el(View, { style: S.termsRow },
+        el(View, { style: S.termItem },
+          el(Text, { style: S.termLabel }, "PAYMENT"),
+          el(Text, { style: S.termValue }, "세금계산서 발행 · 익월 말 결제")
+        ),
+        el(View, { style: S.termItem },
+          el(Text, { style: S.termLabel }, "DELIVERY"),
+          el(Text, { style: S.termValue }, "국내 재고 D+1 / 해외 주문 D+14")
+        ),
+        el(View, { style: S.termItem },
+          el(Text, { style: S.termLabel }, "SHIPPING"),
+          el(Text, { style: S.termValue }, "수도권 무료 · 지방 별도")
+        ),
+        el(View, { style: S.termItem },
+          el(Text, { style: S.termLabel }, "WARRANTY"),
+          el(Text, { style: S.termValue }, "12개월 제품 보증")
+        ),
+        quote.note
+          ? el(View, { style: { ...S.termItem, width: "100%", marginTop: 4 } },
+              el(Text, { style: S.termLabel }, "REMARK · 비고"),
+              el(Text, { style: S.termValue }, quote.note)
+            )
+          : null
+      ),
+
+      // ── Section 07: 서명
+      el(Text, { style: S.sectionLabel }, "— 07  확인 서명"),
+      el(View, { style: S.sigRow },
+        el(View, { style: S.sigBox },
+          el(Text, { style: S.sigLabel }, "ISSUED BY  ·  발행인"),
+          el(Text, { style: S.sigName }, "(주)스마텍 영업팀"),
+          el(View, { style: S.sigLine },
+            el(Text, { style: S.sigLineText }, "SMARTECH  /  SEAL & SIGNATURE")
+          )
+        ),
+        el(View, { style: S.sigBoxRight },
+          el(Text, { style: S.sigLabel }, "ACKNOWLEDGED BY  ·  수신 확인"),
+          el(Text, { style: S.sigName }, quote.user.company),
+          el(View, { style: S.sigLine },
+            el(Text, { style: S.sigLineText }, `${quote.user.name}  /  DATE: ____.__.__`)
+          )
+        )
+      ),
+
+      // ── 푸터
+      el(View, { style: S.footer },
+        el(Text, { style: S.footerText },
+          `본 견적서는 발행일로부터 14일간 유효합니다.  |  ${quoteNo}`
+        ),
+        el(Text, { style: S.footerText }, "스마텍  ·  (주)SMARTECH")
       )
     )
   );
 }
 
-// ─── 공개 함수 ───────────────────────────────────────────────────────────────
-
 export async function generateQuotePdf(quote: QuoteForPdf): Promise<Buffer> {
   const doc = React.createElement(QuoteDocument, { quote });
-  const arrayBuffer = await renderToBuffer(
-    doc as React.ReactElement<DocumentProps>
-  );
+  const arrayBuffer = await renderToBuffer(doc as React.ReactElement<DocumentProps>);
   return Buffer.from(arrayBuffer);
 }
