@@ -95,6 +95,7 @@ function ProductsContent() {
   const [q, setQ] = useState(searchParams.get("q") ?? "");
   const [category, setCategory] = useState(searchParams.get("category") ?? "");
   const [view, setView] = useState<"table" | "grid">("table");
+  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
 
   // Load entire catalog once
   useEffect(() => {
@@ -185,17 +186,31 @@ function ProductsContent() {
               검색 — 파트번호 / 모델명 / 설명
             </label>
             <input
-              className="w-full bg-transparent border-b-2 border-ink/80 focus:border-edred outline-none py-2 text-sm mono placeholder:text-dim/60"
+              className="w-full bg-transparent border-b-2 border-ink/80 focus:border-edred outline-none py-2 text-sm md:text-[14px] mono placeholder:text-dim/60"
               placeholder="예: RV12, A70316934, nXDS, TIC..."
               value={q}
               onChange={(e) => setQ(e.target.value)}
             />
           </div>
           <div className="flex items-center gap-2">
-            <span className="mono text-[10px] tracking-[0.14em] uppercase text-dim mr-1">VIEW</span>
+            {/* 모바일: 필터 버튼 */}
+            <button
+              onClick={() => setFilterSheetOpen(true)}
+              className="lg:hidden flex items-center gap-1.5 px-3 py-2 text-[12px] mono uppercase tracking-wider border hair hover:bg-ink hover:text-paper transition min-h-[44px]"
+              aria-label="카테고리 필터"
+            >
+              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 4.5h14.25M3 9h9.75M3 13.5h5.25m5.25-.75L17.25 9m0 0L21 12.75M17.25 9v12" />
+              </svg>
+              필터
+              {category && (
+                <span className="bg-edred text-paper text-[9px] px-1 rounded-full">1</span>
+              )}
+            </button>
+            <span className="mono text-[10px] tracking-[0.14em] uppercase text-dim mr-1 hidden sm:inline">VIEW</span>
             <button
               onClick={() => setView("table")}
-              className={`px-3 py-1.5 text-[11px] mono uppercase tracking-wider border hair transition ${
+              className={`px-3 py-1.5 text-[11px] mono uppercase tracking-wider border hair transition min-h-[44px] ${
                 view === "table" ? "bg-ink text-paper border-ink" : "hover:bg-ink hover:text-paper"
               }`}
             >
@@ -203,7 +218,7 @@ function ProductsContent() {
             </button>
             <button
               onClick={() => setView("grid")}
-              className={`px-3 py-1.5 text-[11px] mono uppercase tracking-wider border hair transition ${
+              className={`px-3 py-1.5 text-[11px] mono uppercase tracking-wider border hair transition min-h-[44px] ${
                 view === "grid" ? "bg-ink text-paper border-ink" : "hover:bg-ink hover:text-paper"
               }`}
             >
@@ -211,6 +226,75 @@ function ProductsContent() {
             </button>
           </div>
         </div>
+
+        {/* ── 모바일 필터 하단 시트 ────────────── */}
+        {filterSheetOpen && (
+          <>
+            {/* 오버레이 */}
+            <div
+              className="lg:hidden fixed inset-0 z-40 bg-ink/40 backdrop-blur-sm"
+              onClick={() => setFilterSheetOpen(false)}
+              aria-hidden="true"
+            />
+            {/* 시트 패널 */}
+            <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-paper rounded-t-2xl shadow-2xl max-h-[80vh] overflow-y-auto">
+              {/* 시트 핸들 */}
+              <div className="flex items-center justify-between px-6 pt-4 pb-3 border-b hair">
+                <span className="display text-base tracking-tight">카테고리 필터</span>
+                <button
+                  onClick={() => setFilterSheetOpen(false)}
+                  className="text-ink/60 hover:text-ink transition min-h-[44px] min-w-[44px] flex items-center justify-center"
+                  aria-label="필터 닫기"
+                >
+                  <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <div className="px-6 py-4">
+                <button
+                  onClick={() => { setCategory(""); setFilterSheetOpen(false); }}
+                  className={`w-full text-left px-3 py-3 text-[14px] border-l-2 transition flex justify-between min-h-[44px] items-center ${
+                    !category
+                      ? "border-edred text-edred font-semibold bg-edred/5"
+                      : "border-transparent hover:border-ink/30 text-ink"
+                  }`}
+                >
+                  <span>전체</span>
+                  <span className="mono text-dim text-[12px]">{filtered.length}</span>
+                </button>
+                <div className="mt-4 space-y-5">
+                  {CATEGORY_GROUPS.map((group) => (
+                    <div key={group.label}>
+                      <div className="mono text-[9.5px] tracking-[0.16em] uppercase text-edred/80 mb-2 pl-3">
+                        {group.label}
+                      </div>
+                      {group.items.map((cat) => {
+                        const count = categoryCounts.get(cat) ?? 0;
+                        if (count === 0 && cat !== category) return null;
+                        const active = category === cat;
+                        return (
+                          <button
+                            key={cat}
+                            onClick={() => { setCategory(active ? "" : cat); setFilterSheetOpen(false); }}
+                            className={`w-full text-left px-3 py-2.5 text-[13px] border-l-2 transition flex justify-between items-center min-h-[44px] ${
+                              active
+                                ? "border-edred text-edred font-semibold bg-edred/5"
+                                : "border-transparent hover:border-ink/30 text-ink/80 hover:text-ink"
+                            }`}
+                          >
+                            <span className="truncate pr-2">{cat}</span>
+                            <span className="mono text-[11px] text-dim tabular">{count}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </>
+        )}
 
         <div className="flex gap-8">
           {/* ── Sidebar — category tree ───────── */}
@@ -325,7 +409,7 @@ function CatalogTable({ groups }: { groups: [string, Product[]][] }) {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-[12.5px]">
+            <table className="w-full text-[13px] md:text-[12.5px]">
               <thead>
                 <tr className="text-left mono text-[9.5px] tracking-[0.14em] uppercase text-dim">
                   <th className="py-2 pr-3 w-8"></th>
@@ -414,7 +498,7 @@ function CatalogGrid({ groups }: { groups: [string, Product[]][] }) {
               {items.length} SKU
             </span>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-px bg-line">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-px bg-line">
             {items.map((p) => (
               <Link
                 key={p.id}

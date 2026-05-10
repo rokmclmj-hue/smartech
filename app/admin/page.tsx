@@ -1,153 +1,234 @@
 "use client";
+
 import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 
-type User = { id: number; email: string; name: string; company: string; tier: string; createdAt: string };
-type PriceRule = { tier: string; multiplier: number };
-type Quote = { id: number; userId: number; status: string; createdAt: string; user: { name: string; company: string }; items: any[] };
+type DashboardData = {
+  todayQuotes: number;
+  monthOrders: number;
+  monthRevenue: number;
+  pendingUsers: number;
+  recentOrders: {
+    id: number;
+    company: string;
+    contactName: string | null;
+    amount: number;
+    status: string;
+    createdAt: string;
+  }[];
+  lowStockProducts: {
+    id: number;
+    partNo: string;
+    description: string;
+    stock: number;
+  }[];
+};
 
-const TIER_OPTIONS = ["PENDING", "CONSUMER", "OEM", "DEALER", "ADMIN"];
-const TIER_LABELS: Record<string, string> = { PENDING: "승인대기", CONSUMER: "최종소비자", OEM: "OEM", DEALER: "딜러", ADMIN: "관리자" };
+const STATUS_LABEL: Record<string, string> = {
+  PENDING: "대기",
+  CONFIRMED: "확정",
+  CANCELLED: "취소",
+  DELIVERY_INQUIRY: "납기문의",
+};
 
-export default function AdminPage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-  const [tab, setTab] = useState<"users" | "prices" | "quotes">("users");
-  const [users, setUsers] = useState<User[]>([]);
-  const [rules, setRules] = useState<PriceRule[]>([]);
-  const [quotes, setQuotes] = useState<Quote[]>([]);
+const STATUS_COLOR: Record<string, string> = {
+  PENDING: "bg-amber-100 text-amber-700",
+  CONFIRMED: "bg-green-100 text-green-700",
+  CANCELLED: "bg-red-100 text-red-700",
+  DELIVERY_INQUIRY: "bg-blue-100 text-blue-700",
+};
 
-  const tier = (session?.user as any)?.tier;
+export default function AdminDashboard() {
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (status === "loading") return;
-    if (tier !== "ADMIN") router.push("/");
-  }, [tier, status, router]);
+    fetch("/api/admin/dashboard")
+      .then((r) => {
+        if (!r.ok) throw new Error("데이터를 불러오지 못했습니다");
+        return r.json();
+      })
+      .then(setData)
+      .catch((e) => setError(e.message));
+  }, []);
 
-  useEffect(() => {
-    if (tier !== "ADMIN") return;
-    fetch("/api/admin/users").then((r) => r.json()).then(setUsers);
-    fetch("/api/admin/price-rules").then((r) => r.json()).then(setRules);
-    fetch("/api/quote").then((r) => r.json()).then(setQuotes);
-  }, [tier]);
-
-  async function changeTier(userId: number, newTier: string) {
-    await fetch("/api/admin/users", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId, tier: newTier }) });
-    setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, tier: newTier } : u));
-  }
-
-  async function updateMultiplier(ruleTier: string, multiplier: number) {
-    await fetch("/api/admin/price-rules", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ tier: ruleTier, multiplier }) });
-    setRules((prev) => prev.map((r) => r.tier === ruleTier ? { ...r, multiplier } : r));
-  }
-
-  if (tier !== "ADMIN") return null;
-
-  return (
-    <div className="max-w-6xl mx-auto px-6 py-10">
-      <h1 className="text-3xl font-bold text-slate-800 mb-8">관리자 대시보드</h1>
-
-      <div className="flex gap-3 mb-8 border-b">
-        {(["users", "prices", "quotes"] as const).map((t) => (
-          <button key={t} onClick={() => setTab(t)}
-            className={`pb-3 px-2 text-sm font-medium transition-colors border-b-2 ${tab === t ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-800"}`}>
-            {t === "users" ? `회원 관리 (${users.length})` : t === "prices" ? "가격 배율" : `견적 목록 (${quotes.length})`}
-          </button>
-        ))}
-      </div>
-
-      {tab === "users" && (
-        <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b">
-              <tr>
-                {["회사명", "담당자", "이메일", "현재 등급", "등급 변경", "가입일"].map((h) => (
-                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {users.map((u) => (
-                <tr key={u.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 font-medium">{u.company}</td>
-                  <td className="px-4 py-3">{u.name}</td>
-                  <td className="px-4 py-3 text-gray-500">{u.email}</td>
-                  <td className="px-4 py-3">
-                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                      u.tier === "PENDING" ? "bg-amber-100 text-amber-700" :
-                      u.tier === "DEALER" ? "bg-green-100 text-green-700" :
-                      u.tier === "OEM" ? "bg-purple-100 text-purple-700" :
-                      u.tier === "ADMIN" ? "bg-red-100 text-red-700" :
-                      "bg-blue-100 text-blue-700"
-                    }`}>{TIER_LABELS[u.tier]}</span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <select
-                      value={u.tier}
-                      onChange={(e) => changeTier(u.id, e.target.value)}
-                      className="border border-gray-300 rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    >
-                      {TIER_OPTIONS.map((t) => <option key={t} value={t}>{TIER_LABELS[t]}</option>)}
-                    </select>
-                  </td>
-                  <td className="px-4 py-3 text-gray-400 text-xs">{new Date(u.createdAt).toLocaleDateString("ko-KR")}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+  if (error) {
+    return (
+      <div className="p-8">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 text-sm">
+          오류: {error}
         </div>
-      )}
+      </div>
+    );
+  }
 
-      {tab === "prices" && (
-        <div className="grid sm:grid-cols-2 gap-4 max-w-xl">
-          {rules.map((r) => (
-            <div key={r.tier} className="bg-white border border-gray-200 rounded-xl p-5">
-              <p className="font-semibold text-sm text-slate-700 mb-3">{TIER_LABELS[r.tier]}</p>
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  step="0.01"
-                  value={r.multiplier}
-                  onChange={(e) => setRules((prev) => prev.map((x) => x.tier === r.tier ? { ...x, multiplier: parseFloat(e.target.value) || 1 } : x))}
-                  className="w-24 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <span className="text-sm text-gray-500">배 (원가 ×)</span>
-                <button onClick={() => updateMultiplier(r.tier, r.multiplier)}
-                  className="ml-auto text-xs bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-500 transition-colors">
-                  저장
-                </button>
-              </div>
+  if (!data) {
+    return (
+      <div className="p-8 space-y-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="bg-white rounded-xl border border-gray-200 p-5 animate-pulse">
+              <div className="h-3 bg-gray-200 rounded w-24 mb-3" />
+              <div className="h-8 bg-gray-200 rounded w-16" />
             </div>
           ))}
         </div>
-      )}
+      </div>
+    );
+  }
 
-      {tab === "quotes" && (
-        <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b">
-              <tr>
-                {["견적번호", "회사", "담당자", "품목수", "상태", "접수일"].map((h) => (
-                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {quotes.map((q: any) => (
-                <tr key={q.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 font-mono text-blue-600">#{q.id}</td>
-                  <td className="px-4 py-3 font-medium">{q.user?.company}</td>
-                  <td className="px-4 py-3">{q.user?.name}</td>
-                  <td className="px-4 py-3">{q.items?.length}개</td>
-                  <td className="px-4 py-3"><span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">{q.status}</span></td>
-                  <td className="px-4 py-3 text-gray-400 text-xs">{new Date(q.createdAt).toLocaleDateString("ko-KR")}</td>
+  const kpis = [
+    {
+      label: "오늘 견적 요청",
+      value: data.todayQuotes,
+      unit: "건",
+      icon: "📝",
+      color: "text-blue-600",
+      bg: "bg-blue-50",
+    },
+    {
+      label: "이번 달 주문 확정",
+      value: data.monthOrders,
+      unit: "건",
+      icon: "🛒",
+      color: "text-green-600",
+      bg: "bg-green-50",
+    },
+    {
+      label: "이번 달 매출",
+      value: data.monthRevenue.toLocaleString("ko-KR"),
+      unit: "원",
+      icon: "💰",
+      color: "text-purple-600",
+      bg: "bg-purple-50",
+    },
+    {
+      label: "승인 대기 회원",
+      value: data.pendingUsers,
+      unit: "명",
+      icon: "👥",
+      color: "text-amber-600",
+      bg: "bg-amber-50",
+      urgent: data.pendingUsers > 0,
+    },
+  ];
+
+  return (
+    <div className="p-6 space-y-6">
+      <h1 className="text-2xl font-bold text-gray-900">관리자 대시보드</h1>
+
+      {/* KPI 카드 */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {kpis.map((kpi) => (
+          <div
+            key={kpi.label}
+            className={`bg-white rounded-xl border ${kpi.urgent ? "border-amber-300 ring-1 ring-amber-300" : "border-gray-200"} p-5`}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm text-gray-500">{kpi.label}</span>
+              <span className={`text-xl ${kpi.bg} rounded-lg p-1.5`}>{kpi.icon}</span>
+            </div>
+            <div className={`text-2xl font-bold ${kpi.color}`}>
+              {kpi.value}
+              <span className="text-sm font-normal text-gray-400 ml-1">{kpi.unit}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid lg:grid-cols-2 gap-6">
+        {/* 최근 주문 5건 */}
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+            <h2 className="font-semibold text-gray-800">최근 주문</h2>
+            <Link href="/admin/orders" className="text-xs text-blue-600 hover:underline">
+              전체 보기
+            </Link>
+          </div>
+          {data.recentOrders.length === 0 ? (
+            <div className="px-5 py-8 text-center text-gray-400 text-sm">주문이 없습니다</div>
+          ) : (
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50">
+                <tr>
+                  {["고객사", "금액", "상태", "날짜"].map((h) => (
+                    <th
+                      key={h}
+                      className="px-4 py-2.5 text-left text-xs font-semibold text-gray-500"
+                    >
+                      {h}
+                    </th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {data.recentOrders.map((o) => (
+                  <tr key={o.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-3 font-medium text-gray-800 truncate max-w-[120px]">
+                      {o.company}
+                    </td>
+                    <td className="px-4 py-3 text-gray-700 font-mono text-xs">
+                      {o.amount > 0 ? `₩${o.amount.toLocaleString("ko-KR")}` : "-"}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLOR[o.status] ?? "bg-gray-100 text-gray-600"}`}
+                      >
+                        {STATUS_LABEL[o.status] ?? o.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-gray-400 text-xs">
+                      {new Date(o.createdAt).toLocaleDateString("ko-KR")}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
-      )}
+
+        {/* 재고 부족 경고 */}
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+            <h2 className="font-semibold text-gray-800">
+              재고 부족 제품
+              {data.lowStockProducts.length > 0 && (
+                <span className="ml-2 text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full font-semibold">
+                  {data.lowStockProducts.length}
+                </span>
+              )}
+            </h2>
+            <Link href="/admin/products" className="text-xs text-blue-600 hover:underline">
+              재고 관리
+            </Link>
+          </div>
+          {data.lowStockProducts.length === 0 ? (
+            <div className="px-5 py-8 text-center text-gray-400 text-sm">
+              재고 부족 제품이 없습니다
+            </div>
+          ) : (
+            <div className="divide-y divide-gray-100">
+              {data.lowStockProducts.map((p) => (
+                <div key={p.id} className="flex items-center gap-3 px-5 py-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="font-mono text-xs text-gray-500">{p.partNo}</div>
+                    <div className="text-sm text-gray-800 truncate">{p.description}</div>
+                  </div>
+                  <div
+                    className={`text-xs font-bold px-2 py-1 rounded-full ${
+                      p.stock === 0
+                        ? "bg-red-100 text-red-700"
+                        : "bg-amber-100 text-amber-700"
+                    }`}
+                  >
+                    {p.stock === 0 ? "품절" : `재고 ${p.stock}`}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

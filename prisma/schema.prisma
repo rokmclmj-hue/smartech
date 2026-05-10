@@ -16,18 +16,25 @@ model Product {
   category    String?
   pdfFile     String?
   createdAt   DateTime    @default(now())
+  stock       Int         @default(0)
+  imageUrl    String?
   quoteItems  QuoteItem[]
 }
 
 model User {
-  id           Int      @id @default(autoincrement())
-  email        String   @unique
-  name         String
-  company      String
-  passwordHash String
-  tier         String   @default("PENDING")
-  createdAt    DateTime @default(now())
-  quotes       Quote[]
+  id               Int      @id @default(autoincrement())
+  email            String   @unique
+  name             String
+  company          String
+  passwordHash     String
+  tier             String   @default("PENDING")
+  createdAt        DateTime @default(now())
+  phone            String?
+  businessNo       String?
+  businessFileUrl  String?
+  cardImageUrl     String?
+  quotes           Quote[]
+  orders           Order[]
 }
 
 model PriceRule {
@@ -36,13 +43,17 @@ model PriceRule {
 }
 
 model Quote {
-  id        Int         @id @default(autoincrement())
-  userId    Int
-  status    String      @default("DRAFT")
-  note      String?
-  createdAt DateTime    @default(now())
-  user      User        @relation(fields: [userId], references: [id])
-  items     QuoteItem[]
+  id                  Int         @id @default(autoincrement())
+  userId              Int
+  status              String      @default("DRAFT")
+  note                String?
+  createdAt           DateTime    @default(now())
+  expiresAt           DateTime?
+  taxInvoiceRequested Boolean     @default(false)
+  totalAmount         Float?
+  user                User        @relation(fields: [userId], references: [id])
+  items               QuoteItem[]
+  order               Order?
 }
 
 model QuoteItem {
@@ -53,4 +64,18 @@ model QuoteItem {
   unitPrice Float
   product   Product @relation(fields: [productId], references: [id])
   quote     Quote   @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+}
+
+model Order {
+  id             Int       @id @default(autoincrement())
+  quoteId        Int       @unique
+  userId         Int
+  status         String    @default("PENDING")
+  contactName    String?
+  contactPhone   String?
+  deliveryIssue  Boolean   @default(false)
+  confirmedAt    DateTime?
+  createdAt      DateTime  @default(now())
+  quote          Quote     @relation(fields: [quoteId], references: [id])
+  user           User      @relation(fields: [userId], references: [id])
 }

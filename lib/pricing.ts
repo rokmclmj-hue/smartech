@@ -1,12 +1,14 @@
 import { prisma } from "./db";
 
-export type Tier = "PENDING" | "CONSUMER" | "OEM" | "DEALER" | "ADMIN";
+export type Tier = "PENDING" | "ENDUSER" | "OEM" | "DEALER" | "KEY_DEALER" | "ADMIN";
 
 const DEFAULT_MULTIPLIERS: Record<string, number> = {
-  CONSUMER: 1.5,
-  OEM: 1.35,
-  DEALER: 1.2,
-  ADMIN: 1.0,
+  ENDUSER:    1.35,
+  OEM:        1.25,
+  DEALER:     1.20,
+  KEY_DEALER: 1.15,
+  ADMIN:      1.00,
+  PENDING:    1.35,
 };
 
 let cachedRules: Record<string, number> | null = null;
@@ -18,7 +20,7 @@ export async function getMultiplier(tier: string): Promise<number> {
     cachedRules = Object.fromEntries(rules.map((r: { tier: string; multiplier: number }) => [r.tier, r.multiplier]));
     cacheTime = Date.now();
   }
-  return cachedRules[tier] ?? DEFAULT_MULTIPLIERS[tier] ?? 1.5;
+  return cachedRules[tier] ?? DEFAULT_MULTIPLIERS[tier] ?? 1.35;
 }
 
 export function formatKRW(amount: number): string {

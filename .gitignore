@@ -51,6 +51,9 @@ next-env.d.ts
 *.db
 *.db-journal
 
+# local-only data files (pricing sheets, etc.)
+/data/
+
 # large archives / local-only junk
 *.zip
 app/unnamed.png
