@@ -15,12 +15,18 @@ export async function GET() {
   const now = new Date();
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
 
-  const [todayQuotes, monthOrders, monthRevenue, pendingUsers, recentOrders, lowStockProducts] =
+  const [todayQuotes, monthQuotes, monthOrders, monthRevenue, pendingUsers, staleQuotes, recentOrders, lowStockProducts] =
     await Promise.all([
       // 오늘 견적 요청 건수
       prisma.quote.count({
         where: { createdAt: { gte: todayStart } },
+      }),
+
+      // 이번 달 견적 요청 건수
+      prisma.quote.count({
+        where: { createdAt: { gte: monthStart } },
       }),
 
       // 이번 달 주문 확정 건수
@@ -42,6 +48,14 @@ export async function GET() {
 
       // 승인 대기 회원 수
       prisma.user.count({ where: { tier: "PENDING" } }),
+
+      // 미처리 견적 — 3일 이상 지났으나 주문으로 이어지지 않은 견적
+      prisma.quote.count({
+        where: {
+          createdAt: { lte: threeDaysAgo },
+          order: { is: null },
+        },
+      }),
 
       // 최근 주문 5건
       prisma.order.findMany({
@@ -89,9 +103,11 @@ export async function GET() {
 
   return NextResponse.json({
     todayQuotes,
+    monthQuotes,
     monthOrders,
     monthRevenue: revenueTotal,
     pendingUsers,
+    staleQuotes,
     recentOrders: formattedOrders,
     lowStockProducts,
   });

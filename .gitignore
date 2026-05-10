@@ -64,3 +64,15 @@ lib/productData.json
 제품아이템번호 및 단가/
 제품카다로그/
 .env*.local
+
+# sensitive — user data backups (password hashes, contact info)
+backup-users-*.json
+
+# sensitive — customer contact import sheets
+*.xlsx
+
+# user uploads (stored externally in production)
+/public/uploads/
+
+# Claude Code workspace
+/.claude/

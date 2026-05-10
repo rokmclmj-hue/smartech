@@ -307,19 +307,19 @@ export default function AdminUsersPage() {
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="px-6 py-10 max-w-[1400px] mx-auto space-y-8">
+    <div className="px-4 sm:px-6 py-6 sm:py-10 max-w-[1400px] mx-auto space-y-6 sm:space-y-8">
       {/* 헤더 */}
       <div>
         <div className="mono text-[11px] dim tracking-[0.15em] uppercase mb-3">
           — 05 · CUSTOMERS
         </div>
-        <h1 className="display text-[40px] leading-none text-ink">
+        <h1 className="display text-[28px] sm:text-[40px] leading-tight sm:leading-none text-ink">
           고객 <span className="italic text-edred">관리</span>
         </h1>
       </div>
 
       {/* 탭 (chip) */}
-      <div className="flex gap-2 items-center">
+      <div className="flex gap-2 items-center flex-wrap">
         <button
           onClick={() => setTab("pending")}
           className={`chip ${tab === "pending" ? "active" : ""}`}
@@ -371,7 +371,7 @@ export default function AdminUsersPage() {
             value={searchInput}
             onChange={(e) => handleSearchInput(e.target.value)}
             placeholder="회사·담당자·이메일·사업자번호 검색"
-            className="w-full max-w-sm border hair bg-paper px-4 py-2 text-[13px] focus:outline-none focus:border-ink placeholder:text-dim"
+            className="w-full sm:max-w-sm border hair bg-paper px-4 py-2 text-[13px] focus:outline-none focus:border-ink placeholder:text-dim"
           />
         </div>
       )}
@@ -514,10 +514,78 @@ export default function AdminUsersPage() {
             </>
           )}
 
-          {/* ── 전체 회원 — 테이블 ── */}
+          {/* ── 전체 회원 — 데스크톱: 테이블 / 모바일: 카드 ── */}
           {tab === "all" && (
             <div className="space-y-4">
-              <div className="border hair bg-paper overflow-hidden">
+              {/* 모바일 카드 리스트 */}
+              <div className="md:hidden space-y-3">
+                {allUsers.length === 0 ? (
+                  <div className="border hair bg-paper px-4 py-12 text-center dim text-[13px]">
+                    회원이 없습니다
+                  </div>
+                ) : (
+                  allUsers.map((u) => {
+                    const selectVal = pendingTierChange[u.id] ?? u.tier;
+                    return (
+                      <div
+                        key={u.id}
+                        className="border hair bg-paper p-4 space-y-3"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <div className="font-semibold text-ink truncate">{u.name}</div>
+                            <div className="text-[13px] dim truncate">{u.company}</div>
+                            <div className="mono text-[11px] dim truncate mt-0.5">{u.email}</div>
+                          </div>
+                          <span
+                            className={`shrink-0 mono text-[10px] tracking-[0.08em] uppercase border px-2 py-0.5 ${
+                              TIER_COLOR[u.tier] ?? "border-line text-dim"
+                            }`}
+                          >
+                            {TIER_LABELS[u.tier] ?? u.tier}
+                          </span>
+                        </div>
+                        <div className="mono text-[10px] dim tracking-[0.1em]">
+                          가입 · {new Date(u.createdAt).toLocaleDateString("ko-KR")}
+                        </div>
+                        <div className="flex gap-2 pt-2 border-t hair">
+                          <select
+                            value={selectVal}
+                            onChange={(e) =>
+                              setPendingTierChange((prev) => ({
+                                ...prev,
+                                [u.id]: e.target.value,
+                              }))
+                            }
+                            disabled={actionLoading === u.id || u.tier === "ADMIN"}
+                            className="flex-1 min-w-0 border hair bg-paper px-2 py-2 text-[13px] focus:outline-none focus:border-ink disabled:opacity-40 disabled:cursor-not-allowed"
+                          >
+                            {["PENDING", ...TIER_OPTIONS, "ADMIN"].map((t) => (
+                              <option key={t} value={t}>
+                                {TIER_LABELS[t] ?? t}
+                              </option>
+                            ))}
+                          </select>
+                          <button
+                            onClick={() => changeTier(u, selectVal)}
+                            disabled={
+                              actionLoading === u.id ||
+                              u.tier === "ADMIN" ||
+                              selectVal === u.tier
+                            }
+                            className="shrink-0 mono text-[11px] tracking-[0.1em] uppercase border border-line text-dim px-4 py-2 hover:border-ink hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                          >
+                            {actionLoading === u.id ? "..." : "적용"}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+
+              {/* 데스크톱 테이블 */}
+              <div className="hidden md:block border hair bg-paper overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-[13px] min-w-[760px]">
                     <thead>
@@ -605,7 +673,7 @@ export default function AdminUsersPage() {
 
               {/* 페이지네이션 */}
               {allTotalPages > 1 && (
-                <div className="flex items-center gap-3 justify-end">
+                <div className="flex items-center gap-3 justify-center sm:justify-end">
                   <button
                     onClick={() => setAllPage((p) => Math.max(1, p - 1))}
                     disabled={allPage <= 1}

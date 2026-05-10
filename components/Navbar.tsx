@@ -1,7 +1,9 @@
 "use client";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
+import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
+import RedTape from "./RedTape";
 
 const TIER_LABELS: Record<string, string> = {
   PENDING: "승인대기",
@@ -40,11 +42,13 @@ function useCartCount() {
 
 export default function Navbar() {
   const { data: session } = useSession();
+  const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const tier = (session?.user as { tier?: string })?.tier;
   const cartCount = useCartCount();
 
   // 드로어 열릴 때 스크롤 잠금
+  // ※ 이 useEffect는 모든 hooks가 동일 순서로 호출되도록 early return보다 먼저 위치
   useEffect(() => {
     if (menuOpen) {
       document.body.style.overflow = "hidden";
@@ -56,32 +60,15 @@ export default function Navbar() {
     };
   }, [menuOpen]);
 
+  // 관리자 페이지에서는 자체 헤더가 따로 있어서 공통 Navbar 숨김 (로고 중복 방지)
+  // ※ early return은 모든 hooks 호출 후에 배치 (Rules of Hooks 준수)
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
+
   return (
     <>
-      {/* TOP TAPE — vacuum pressure gauge sweep */}
-      <div className="red-tape relative overflow-hidden" style={{ height: 36 }}>
-        <div className="max-w-[1400px] mx-auto px-4 md:px-6 h-full flex items-center gap-2 md:gap-3 text-[10px] mono tracking-[0.18em] uppercase">
-          <span className="shrink-0 text-paper/85 whitespace-nowrap">
-            <span className="text-paper/55">ATM</span> · 10³ mbar
-          </span>
-          <span className="hidden sm:inline text-paper/25">│</span>
-          <div className="relative flex-1 h-full">
-            <div className="absolute left-0 right-0 top-1/2 h-px bg-paper/20 -translate-y-1/2" />
-            <div className="gauge-track-fill gauge-track-fill--light" />
-            <div className="gauge-needle gauge-needle--light" />
-            <div className="absolute inset-0 hidden sm:flex items-center justify-between px-1">
-              <span className="bg-edred px-2 text-paper/60">LOW</span>
-              <span className="bg-edred px-2 text-paper/60">MEDIUM</span>
-              <span className="bg-edred px-2 text-paper/60">HIGH</span>
-              <span className="bg-edred px-2 text-paper font-bold">ULTRA HIGH</span>
-            </div>
-          </div>
-          <span className="hidden sm:inline text-paper/25">│</span>
-          <span className="shrink-0 text-paper/85 whitespace-nowrap">
-            <span className="text-paper/55">UHV</span> · 10⁻¹⁰ mbar
-          </span>
-        </div>
-      </div>
+      <RedTape />
 
       {/* STICKY HEADER */}
       <header className="sticky top-0 z-40 border-b hair bg-paper/90 backdrop-blur">
@@ -143,6 +130,9 @@ export default function Navbar() {
                 </Link>
                 <Link href="/auth/login" className="hidden sm:inline-flex chip !border-ink/30 text-[11px] hover:bg-ink hover:text-paper transition">
                   로그인
+                </Link>
+                <Link href="/auth/register" className="hidden sm:inline-flex chip !border-edred bg-edred text-paper text-[11px] hover:bg-edred2 transition">
+                  회원가입
                 </Link>
               </>
             )}

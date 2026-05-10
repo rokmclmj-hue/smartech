@@ -6,11 +6,9 @@ import { normalizePhone } from "@/lib/phone";
 
 type CustomerType = "ENDUSER" | "DEALER" | "OEM";
 
-function resolveTier(customerType: CustomerType): string {
-  // Enduser는 즉시 승인(ENDUSER), Dealer/OEM은 PENDING 상태로 저장 후 관리자 승인 대기
-  if (customerType === "ENDUSER") return "ENDUSER";
-  return "PENDING";
-}
+// 모든 가입자는 PENDING으로 시작 → 관리자가 대시보드에서 승인하며 등급 부여
+// (희망 customerType은 SMS 알림으로 관리자에게 전달되어 승인 시 참고)
+const INITIAL_TIER = "PENDING";
 
 export async function POST(req: NextRequest) {
   const body = await req.json() as {
@@ -59,7 +57,6 @@ export async function POST(req: NextRequest) {
   }
 
   const passwordHash = await hash(password, 12);
-  const tier = resolveTier((customerType ?? "ENDUSER") as CustomerType);
 
   const user = await prisma.user.create({
     data: {
@@ -67,7 +64,7 @@ export async function POST(req: NextRequest) {
       name,
       company,
       passwordHash,
-      tier,
+      tier: INITIAL_TIER,
       phone: normalizedPhone,
       businessNo: businessNo ?? null,
       businessFileUrl: businessFileUrl ?? null,

@@ -437,14 +437,14 @@ export default function AdminProductsPage() {
   // ─── 렌더 ─────────────────────────────────────────────────────────────────
 
   return (
-    <div className="px-6 py-10 max-w-[1400px] mx-auto space-y-8">
+    <div className="px-4 sm:px-6 py-6 sm:py-10 max-w-[1400px] mx-auto space-y-6 sm:space-y-8">
       {/* 헤더 */}
       <div className="flex items-end justify-between gap-4 flex-wrap">
         <div>
           <div className="mono text-[11px] dim tracking-[0.15em] uppercase mb-3">
             — 03 · INVENTORY
           </div>
-          <h1 className="display text-[40px] leading-none text-ink">
+          <h1 className="display text-[28px] sm:text-[40px] leading-none text-ink">
             제품 / <span className="italic text-edred">재고</span>
           </h1>
         </div>

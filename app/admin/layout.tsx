@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ToastProvider } from "@/lib/toast";
+import RedTape from "@/components/RedTape";
 
 const NAV_ITEMS = [
   { href: "/admin", label: "대시보드", num: "01", exact: true },
@@ -12,6 +13,8 @@ const NAV_ITEMS = [
   { href: "/admin/products", label: "제품", num: "03" },
   { href: "/admin/quotes", label: "견적", num: "04" },
   { href: "/admin/users", label: "고객", num: "05" },
+  { href: "/admin/proxy-quotes", label: "대행견적서", num: "06", highlight: true },
+  { href: "/admin/settings", label: "설정", num: "07" },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -47,24 +50,52 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <ToastProvider>
     <div className="min-h-screen bg-paper text-ink">
+      {/* 상단 빨간 띠 — 진공 압력 게이지 (홈페이지와 동일) */}
+      <RedTape />
+
       {/* 스티키 상단 헤더 */}
       <header className="sticky top-0 z-40 bg-paper/90 backdrop-blur border-b hair">
-        <div className="max-w-[1400px] mx-auto px-4 md:px-6 h-16 flex items-center justify-between gap-6">
-          {/* 로고 */}
-          <Link href="/admin" className="flex items-baseline gap-1 shrink-0">
-            <span className="display text-[24px] md:text-[28px] tracking-[-0.045em] text-ink leading-none">
-              Smartech
-            </span>
-            <span className="text-edred text-[24px] md:text-[28px] leading-none">.</span>
-            <span className="mono text-[10px] dim tracking-[0.18em] uppercase ml-3 hidden sm:inline">
+        <div className="max-w-[1400px] mx-auto px-4 md:px-6 h-14 md:h-16 flex items-center justify-between gap-4 md:gap-6">
+          {/* 로고 — 홈페이지와 동일 사양 (28/32px, 빨간 점, 세로선 + 부제) */}
+          <Link href="/admin" className="flex items-center gap-2.5 md:gap-3 leading-none text-ink shrink-0">
+            <div className="display text-[28px] md:text-[32px] tracking-[-0.045em]">
+              Smartech<span style={{ color: "#c00020" }}>.</span>
+            </div>
+            <span className="hidden sm:block w-px h-6 bg-ink/60" aria-hidden />
+            <div className="hidden sm:block text-[10px] mono tracking-[0.22em] dim uppercase">
               Admin
-            </span>
+            </div>
           </Link>
 
           {/* 데스크톱 네비 */}
           <nav className="hidden lg:flex items-center gap-1">
             {NAV_ITEMS.map((item) => {
               const active = isActive(item);
+              if (item.highlight) {
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`group relative ml-2 px-3 py-1.5 rounded-md transition-all ${
+                      active
+                        ? "bg-edred text-white shadow-sm"
+                        : "bg-edred text-white hover:brightness-110 shadow-sm"
+                    }`}
+                  >
+                    <span className="flex items-center gap-2">
+                      <span className="mono text-[10px] tracking-[0.1em] text-white/80">
+                        {item.num}
+                      </span>
+                      <span className="text-[14px] font-semibold tracking-tight">
+                        {item.label}
+                      </span>
+                      <span className="mono text-[9px] font-bold tracking-[0.15em] bg-white text-edred px-1.5 py-[2px] rounded">
+                        NEW
+                      </span>
+                    </span>
+                  </Link>
+                );
+              }
               return (
                 <Link
                   key={item.href}
@@ -114,7 +145,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               aria-label="메뉴"
             >
               <svg
-                className="w-5 h-5 text-ink"
+                className="w-6 h-6 text-ink"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -136,6 +167,26 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-2">
               {NAV_ITEMS.map((item) => {
                 const active = isActive(item);
+                if (item.highlight) {
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center gap-3 my-2 px-3 py-3 rounded-md bg-edred text-white shadow-sm"
+                    >
+                      <span className="mono text-[10px] tracking-[0.1em] text-white/80">
+                        {item.num}
+                      </span>
+                      <span className="text-[14px] font-semibold tracking-tight">
+                        {item.label}
+                      </span>
+                      <span className="ml-auto mono text-[9px] font-bold tracking-[0.15em] bg-white text-edred px-1.5 py-[2px] rounded">
+                        NEW
+                      </span>
+                    </Link>
+                  );
+                }
                 return (
                   <Link
                     key={item.href}

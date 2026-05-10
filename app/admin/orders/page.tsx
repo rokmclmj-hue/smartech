@@ -222,13 +222,13 @@ export default function AdminOrdersPage() {
   const totalPages = Math.max(1, Math.ceil(total / PAGE_LIMIT));
 
   return (
-    <div className="px-6 py-10 max-w-[1400px] mx-auto space-y-8">
+    <div className="px-4 sm:px-6 py-6 sm:py-10 max-w-[1400px] mx-auto space-y-6 sm:space-y-8">
       {/* 헤더 */}
       <div>
         <div className="mono text-[11px] dim tracking-[0.15em] uppercase mb-3">
           — 02 · ORDERS
         </div>
-        <h1 className="display text-[40px] leading-none text-ink">
+        <h1 className="display text-[28px] sm:text-[40px] leading-none text-ink">
           주문 <span className="italic text-edred">관리</span>
         </h1>
       </div>

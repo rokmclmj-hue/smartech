@@ -458,7 +458,7 @@ export default function RegisterPage() {
                     {
                       value: "ENDUSER" as CustomerType,
                       label: "일반 고객 (Enduser)",
-                      desc: "가입 즉시 이용 가능",
+                      desc: "관리자 승인 후 이용 가능",
                     },
                     {
                       value: "DEALER" as CustomerType,

@@ -13,10 +13,14 @@ export interface CardOcrResult {
   position: string;
   homepage: string;
   estimatedType: EstimatedType;
+  confidence: number;
   typeReason: string;
   estimatedSize: string;
   estimatedIndustry: string;
 }
+
+// 이 임계값 미만이면 estimatedType을 빈 값으로 처리하고 관리자에게 표시 안 함
+const CONFIDENCE_THRESHOLD = 70;
 
 const EMPTY: CardOcrResult = {
   name: "",
@@ -26,6 +30,7 @@ const EMPTY: CardOcrResult = {
   position: "",
   homepage: "",
   estimatedType: "",
+  confidence: 0,
   typeReason: "",
   estimatedSize: "",
   estimatedIndustry: "",
@@ -95,6 +100,15 @@ const SYSTEM_PROMPT = `당신은 한국 명함 OCR 전문 AI입니다. 명함 �
 - estimatedSize: "대기업"/"중견기업"/"중소기업"/"소기업" 중 하나, 모르면 ""
 - estimatedIndustry: 업종(예: "반도체 장비 제조", "분석연구", "의료기기"), 모르면 ""
 - typeReason: 추정 근거 한 줄 (예: "회사명에 '엔지니어링' 포함")
+
+[★ 확신 점수 (confidence) — 0~100 정수]
+estimatedType 추정에 대한 자체 확신도를 정수로 평가:
+- 90~100: 결정적 단서 2개 이상 (예: 도메인 + 직책 + 회사명 모두 일치)
+- 70~89: 결정적 단서 1개 (예: @samsung.com 도메인만 일치)
+- 50~69: 약한 단서 하나만 (예: 회사명 일부만 추측 가능)
+- 1~49: 거의 추측 → estimatedType은 빈 문자열 ""로 두세요
+- 0: estimatedType이 빈 문자열일 때
+※ 후처리 코드가 70 미만은 빈 값으로 만들 수 있으므로, 솔직하게 평가하세요.
 
 [인식 불가 시]
 해당 필드만 빈 문자열 ""로 둘 것. 절대 추측하거나 임의로 채우지 말 것. 잘못된 정보보다 빈 값이 낫다.
@@ -180,6 +194,12 @@ async function callModel(
               enum: ["OEM", "DEALER", "ENDUSER", ""],
               description: "고객 유형 추정. 자신 없으면 빈 문자열.",
             },
+            confidence: {
+              type: "integer",
+              minimum: 0,
+              maximum: 100,
+              description: "estimatedType에 대한 자체 확신도(0~100). 시스템 프롬프트의 [확신 점수] 기준 적용.",
+            },
             typeReason: { type: "string", description: "추정 근거 한 줄. 추정 안 했으면 빈 문자열." },
             estimatedSize: { type: "string", description: "회사 규모 추정. 모르면 빈 문자열." },
             estimatedIndustry: { type: "string", description: "업종 추정. 모르면 빈 문자열." },
@@ -192,6 +212,7 @@ async function callModel(
             "position",
             "homepage",
             "estimatedType",
+            "confidence",
             "typeReason",
             "estimatedSize",
             "estimatedIndustry",
@@ -216,8 +237,23 @@ async function callModel(
 
   const parsed = toolUseBlock.input as Partial<CardOcrResult>;
   const rawType = (parsed.estimatedType ?? "").toString();
-  const validType: EstimatedType =
+  let validType: EstimatedType =
     rawType === "OEM" || rawType === "DEALER" || rawType === "ENDUSER" ? rawType : "";
+
+  // 확신 점수 정규화 (0~100 정수). 잘못된 값은 0으로.
+  const rawConfidence = Number(parsed.confidence);
+  let confidence = Number.isFinite(rawConfidence)
+    ? Math.max(0, Math.min(100, Math.round(rawConfidence)))
+    : 0;
+
+  // 임계값 미만이면 추정 결과를 비움 (관리자에게 표시 안 함)
+  if (validType && confidence < CONFIDENCE_THRESHOLD) {
+    validType = "";
+  }
+  // 추정 비었으면 confidence도 0
+  if (!validType) {
+    confidence = 0;
+  }
 
   const email = normalizeEmail(parsed.email ?? "");
   const name = sanitizeName((parsed.name ?? "").trim(), email);
@@ -230,7 +266,8 @@ async function callModel(
     position: (parsed.position ?? "").trim(),
     homepage: (parsed.homepage ?? "").trim(),
     estimatedType: validType,
-    typeReason: (parsed.typeReason ?? "").trim(),
+    confidence,
+    typeReason: validType ? (parsed.typeReason ?? "").trim() : "",
     estimatedSize: (parsed.estimatedSize ?? "").trim(),
     estimatedIndustry: (parsed.estimatedIndustry ?? "").trim(),
   };
@@ -282,6 +319,9 @@ function countCoreEmpty(r: CardOcrResult): number {
 
 // primary 우선, 빈 곳만 secondary로 보충
 function mergeResults(primary: CardOcrResult, secondary: CardOcrResult): CardOcrResult {
+  const estimatedType = primary.estimatedType || secondary.estimatedType;
+  // estimatedType을 채택한 쪽의 confidence·typeReason을 함께 가져감
+  const sourceForType = primary.estimatedType ? primary : secondary;
   return {
     name: primary.name || secondary.name,
     company: primary.company || secondary.company,
@@ -289,8 +329,9 @@ function mergeResults(primary: CardOcrResult, secondary: CardOcrResult): CardOcr
     email: primary.email || secondary.email,
     position: primary.position || secondary.position,
     homepage: primary.homepage || secondary.homepage,
-    estimatedType: primary.estimatedType || secondary.estimatedType,
-    typeReason: primary.typeReason || secondary.typeReason,
+    estimatedType,
+    confidence: estimatedType ? sourceForType.confidence : 0,
+    typeReason: estimatedType ? sourceForType.typeReason : "",
     estimatedSize: primary.estimatedSize || secondary.estimatedSize,
     estimatedIndustry: primary.estimatedIndustry || secondary.estimatedIndustry,
   };

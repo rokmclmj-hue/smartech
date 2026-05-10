@@ -1,0 +1,491 @@
+/* ───────────────────────────────────────────────────────────
+   견적서 전용 다크 테마 스타일
+   - 모든 규칙은 .quote-page 스코프 안에만 적용 → 다른 페이지 영향 X
+   - 출처: smartech_quote_dark.html (사용자 제공 디자인 템플릿)
+   ─────────────────────────────────────────────────────────── */
+
+.quote-page {
+  --q-bg: #0A0E14;
+  --q-surface: #0F1620;
+  --q-surface-2: #131C28;
+  --q-line: #2A3441;
+  --q-line-soft: #1B2430;
+  --q-primary: #1F4E79;
+  --q-accent: #3A8DD0;
+  --q-muted: #7A8B9D;
+  --q-text: #E6EEF6;
+  --q-text-dim: #B9C5D2;
+  --q-critical: #E74C3C;
+  --q-success: #27AE60;
+  --q-gold: #D4A537;
+  --q-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  background: var(--q-bg);
+  color: var(--q-text);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.quote-page * { box-sizing: border-box; }
+.quote-page .qmono { font-family: var(--q-mono); font-feature-settings: "tnum" 1; }
+.quote-page .stage { max-width: 1280px; margin: 0 auto; padding: 32px 40px 80px; }
+
+/* ── 상단 유틸리티 바 ─────────────────────────── */
+.quote-page .util {
+  display: flex; justify-content: space-between; align-items: center;
+  font-family: var(--q-mono); font-size: 11px; color: var(--q-muted);
+  letter-spacing: 0.06em; text-transform: uppercase;
+  border-bottom: 1px solid var(--q-line-soft);
+  padding-bottom: 10px; margin-bottom: 28px;
+}
+.quote-page .util .left, .quote-page .util .right {
+  display: flex; gap: 16px; align-items: center; flex-wrap: wrap;
+}
+.quote-page .pulse-dot {
+  display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--q-success); margin-right: 6px; vertical-align: middle;
+  animation: q-pulse 1.8s infinite;
+}
+@keyframes q-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(39,174,96,0.55); }
+  70% { box-shadow: 0 0 0 8px rgba(39,174,96,0); }
+  100% { box-shadow: 0 0 0 0 rgba(39,174,96,0); }
+}
+.quote-page .btn-export {
+  font-family: var(--q-mono); font-size: 11px; letter-spacing: 0.1em;
+  color: var(--q-bg); background: var(--q-accent); border: 1px solid var(--q-accent);
+  padding: 9px 14px; cursor: pointer; text-transform: uppercase;
+}
+.quote-page .btn-export:hover { background: #58A4DE; }
+.quote-page .btn-confirm {
+  font-family: var(--q-mono); font-size: 11px; letter-spacing: 0.1em;
+  color: var(--q-bg); background: var(--q-success); border: 1px solid var(--q-success);
+  padding: 9px 14px; cursor: pointer; text-transform: uppercase;
+}
+.quote-page .btn-confirm:hover { background: #2ECC71; }
+.quote-page .btn-confirm:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── 헤더 ────────────────────────────────────── */
+.quote-page .header {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: end;
+  padding-bottom: 28px; border-bottom: 1px solid var(--q-line);
+}
+.quote-page .wordmark { font-size: 38px; font-weight: 700; letter-spacing: -0.02em; line-height: 1; }
+.quote-page .wordmark .dot { color: var(--q-accent); }
+.quote-page .wordmark-sub {
+  font-family: var(--q-mono); font-size: 11px; color: var(--q-muted);
+  letter-spacing: 0.08em; text-transform: uppercase; margin-top: 12px; line-height: 1.65;
+}
+.quote-page .wordmark-sub .sep { color: var(--q-line); margin: 0 6px; }
+
+.quote-page .meta-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  border-top: 1px solid var(--q-line-soft); border-left: 1px solid var(--q-line-soft);
+  font-family: var(--q-mono); font-size: 11px;
+}
+.quote-page .meta-grid .cell {
+  border-right: 1px solid var(--q-line-soft); border-bottom: 1px solid var(--q-line-soft);
+  padding: 9px 12px;
+}
+.quote-page .meta-grid .cell .k {
+  color: var(--q-muted); letter-spacing: 0.08em; text-transform: uppercase; font-size: 10px;
+}
+.quote-page .meta-grid .cell .v { color: var(--q-text); margin-top: 3px; font-weight: 500; }
+
+/* ── 섹션 라벨 ────────────────────────────────── */
+.quote-page .section-label {
+  font-family: var(--q-mono); font-size: 11px; color: var(--q-muted);
+  letter-spacing: 0.14em; text-transform: uppercase;
+  margin: 56px 0 18px; padding-left: 14px; position: relative;
+}
+.quote-page .section-label::before {
+  content: ""; position: absolute; left: 0; top: 7px; width: 6px; height: 6px; background: var(--q-accent);
+}
+
+/* ── 당사자 (수신/발신) ───────────────────────── */
+.quote-page .parties { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--q-line); }
+.quote-page .party { padding: 22px 24px; }
+.quote-page .party + .party { border-left: 1px solid var(--q-line); }
+.quote-page .party h4 {
+  margin: 0 0 14px; font-family: var(--q-mono); font-size: 11px; color: var(--q-muted);
+  letter-spacing: 0.14em; text-transform: uppercase; font-weight: 500;
+  display: flex; justify-content: space-between;
+}
+.quote-page .party h4 .tag { color: var(--q-accent); }
+.quote-page .party-row {
+  display: grid; grid-template-columns: 80px 1fr; gap: 16px;
+  padding: 7px 0; border-top: 1px dashed var(--q-line-soft); font-size: 13px;
+}
+.quote-page .party-row:first-of-type { border-top: 0; }
+.quote-page .party-row .lbl {
+  font-family: var(--q-mono); font-size: 11px; color: var(--q-muted);
+  letter-spacing: 0.06em; text-transform: uppercase; padding-top: 1px;
+}
+.quote-page .party-row .val { color: var(--q-text); }
+.quote-page .party-row .val.qmono { font-family: var(--q-mono); }
+
+/* ── 총액 히어로 ──────────────────────────────── */
+.quote-page .hero {
+  display: grid; grid-template-columns: 1.4fr 1fr;
+  border: 1px solid var(--q-line); overflow: hidden;
+}
+.quote-page .hero-total {
+  padding: 32px 36px;
+  background: radial-gradient(ellipse at top right, rgba(58,141,208,0.10), transparent 60%),
+              linear-gradient(180deg, #0F1A28 0%, #0B1118 100%);
+}
+.quote-page .hero-eyebrow {
+  font-family: var(--q-mono); font-size: 11px; color: var(--q-muted);
+  letter-spacing: 0.14em; text-transform: uppercase;
+  display: flex; justify-content: space-between;
+}
+.quote-page .hero-eyebrow .ref { color: var(--q-accent); }
+.quote-page .hero-bignum {
+  font-family: var(--q-mono); font-size: clamp(40px, 7vw, 76px); line-height: 1;
+  letter-spacing: -0.03em; margin: 22px 0 18px; font-weight: 600; color: #F5FBFF;
+}
+.quote-page .hero-bignum .won { color: var(--q-accent); margin-right: 12px; font-weight: 500; }
+.quote-page .hero-breakdown {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  border-top: 1px dashed var(--q-line); padding-top: 16px;
+  font-family: var(--q-mono); font-size: 12px;
+}
+.quote-page .hero-breakdown .b { padding-right: 16px; }
+.quote-page .hero-breakdown .k {
+  color: var(--q-muted); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+}
+.quote-page .hero-breakdown .v { color: var(--q-text); font-size: 14px; margin-top: 4px; }
+.quote-page .hero-breakdown .b.total .v { color: var(--q-accent); font-weight: 600; }
+
+.quote-page .hero-side {
+  padding: 32px;
+  background: linear-gradient(135deg, rgba(58,141,208,0.06), rgba(58,141,208,0.02));
+  border-left: 1px solid var(--q-line);
+  display: flex; flex-direction: column; gap: 14px;
+}
+.quote-page .hero-side .eyebrow {
+  font-family: var(--q-mono); font-size: 11px; color: var(--q-accent);
+  letter-spacing: 0.14em; text-transform: uppercase;
+}
+.quote-page .hero-side .grade {
+  display: inline-block; border: 1px solid var(--q-accent); color: var(--q-accent);
+  padding: 4px 10px; font-family: var(--q-mono); font-size: 10px; letter-spacing: 0.14em;
+}
+.quote-page .hero-side .meta-row {
+  display: flex; justify-content: space-between; padding-top: 8px;
+  border-top: 1px dashed var(--q-line-soft);
+  font-family: var(--q-mono); font-size: 11px; color: var(--q-muted);
+}
+
+/* ── 품목 카드 ────────────────────────────────── */
+.quote-page .items { display: flex; flex-direction: column; gap: 18px; }
+.quote-page .card {
+  display: grid; grid-template-columns: minmax(280px, 35%) 1fr;
+  border: 1px solid var(--q-line); background: var(--q-surface);
+  transition: border-color 0.2s; overflow: hidden;
+}
+.quote-page .card:hover { border-color: var(--q-accent); }
+
+.quote-page .ill {
+  background: linear-gradient(180deg, #0C131C, #0A0E14);
+  padding: 24px; position: relative;
+  border-right: 1px solid var(--q-line);
+  display: flex; flex-direction: column; min-height: 240px;
+}
+.quote-page .ill::before {
+  content: ""; position: absolute; inset: 14px;
+  border: 1px dashed var(--q-line-soft); pointer-events: none;
+}
+.quote-page .ill .ill-label {
+  font-family: var(--q-mono); font-size: 10px; color: var(--q-muted);
+  letter-spacing: 0.14em; text-transform: uppercase;
+}
+.quote-page .ill .icon-img {
+  width: 100%; height: 180px; flex: 1; margin-top: 8px; object-fit: contain;
+  filter: invert(1) brightness(1.4) sepia(0.2) hue-rotate(170deg) saturate(1.4) opacity(0.85);
+}
+.quote-page .ill .stamp {
+  position: absolute; right: 14px; bottom: 14px;
+  width: 64px; height: 64px;
+  border: 1px solid rgba(58,141,208,0.4); border-radius: 50%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  color: var(--q-accent); font-family: var(--q-mono); font-size: 7px;
+  letter-spacing: 0.1em; text-align: center; transform: rotate(-8deg);
+  background: rgba(10,14,20,0.5);
+}
+.quote-page .stamp .l1 { font-weight: 700; font-size: 8px; }
+.quote-page .stamp .l2 { font-size: 6px; color: var(--q-muted); margin-top: 2px; }
+
+.quote-page .card-data { padding: 22px 26px; display: grid; gap: 14px; }
+.quote-page .card-head {
+  display: flex; justify-content: space-between; gap: 16px; align-items: flex-start;
+}
+.quote-page .card-head .partno {
+  font-family: var(--q-mono); font-size: 11px; color: var(--q-muted); letter-spacing: 0.1em;
+}
+.quote-page .card-head .model {
+  font-size: 20px; font-weight: 600; margin-top: 4px; letter-spacing: -0.01em;
+}
+.quote-page .card-head .ko { color: var(--q-text-dim); margin-top: 4px; font-size: 13px; }
+.quote-page .badge-genuine {
+  font-family: var(--q-mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;
+  border: 1px solid var(--q-accent); color: var(--q-accent);
+  padding: 4px 8px; white-space: nowrap;
+}
+
+.quote-page .meta-line {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  font-family: var(--q-mono); font-size: 11px;
+  border-top: 1px solid var(--q-line-soft); border-bottom: 1px solid var(--q-line-soft);
+  padding: 10px 0;
+}
+.quote-page .meta-line .k {
+  color: var(--q-muted); letter-spacing: 0.1em; text-transform: uppercase; font-size: 10px;
+}
+.quote-page .meta-line .v { color: var(--q-text); margin-top: 2px; }
+
+.quote-page .price-block {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  border: 1px solid var(--q-line); background: var(--q-surface-2);
+}
+.quote-page .price-block .pcell {
+  padding: 12px 14px; border-right: 1px solid var(--q-line);
+}
+.quote-page .price-block .pcell:last-child {
+  border-right: 0; background: rgba(58,141,208,0.06);
+}
+.quote-page .price-block .k {
+  font-family: var(--q-mono); font-size: 9px; color: var(--q-muted);
+  letter-spacing: 0.14em; text-transform: uppercase;
+}
+.quote-page .price-block .v {
+  font-family: var(--q-mono); font-size: 15px; color: var(--q-text);
+  margin-top: 4px; font-weight: 500;
+}
+.quote-page .price-block .pcell:last-child .v { color: var(--q-accent); font-weight: 600; }
+
+.quote-page .status-line {
+  display: flex; justify-content: space-between;
+  font-family: var(--q-mono); font-size: 11px; color: var(--q-muted);
+  padding-top: 4px; flex-wrap: wrap; gap: 10px;
+}
+.quote-page .status-line .ok { color: var(--q-success); }
+
+/* ── 합계 요약 ────────────────────────────────── */
+.quote-page .summary {
+  border: 1px solid var(--q-line); background: var(--q-surface);
+  display: grid; grid-template-columns: 1fr 1fr;
+}
+.quote-page .summary-left {
+  padding: 24px; border-right: 1px solid var(--q-line);
+  font-family: var(--q-mono); font-size: 11px; color: var(--q-muted);
+  letter-spacing: 0.1em; text-transform: uppercase;
+  display: flex; flex-direction: column; gap: 10px; justify-content: center;
+}
+.quote-page .summary-left .row { display: flex; justify-content: space-between; }
+.quote-page .summary-left .row .v { color: var(--q-text); }
+.quote-page .summary-right {
+  padding: 24px;
+  display: flex; flex-direction: column; gap: 10px; justify-content: center;
+}
+.quote-page .summary-right .row {
+  display: grid; grid-template-columns: 1fr auto;
+  font-family: var(--q-mono); font-size: 13px;
+  padding: 8px 0; border-bottom: 1px dashed var(--q-line-soft); align-items: baseline;
+}
+.quote-page .summary-right .row .k {
+  color: var(--q-muted); letter-spacing: 0.08em; text-transform: uppercase; font-size: 11px;
+}
+.quote-page .summary-right .row .v { color: var(--q-text); font-weight: 500; }
+.quote-page .summary-right .row.grand { border-bottom: 0; padding-top: 14px; }
+.quote-page .summary-right .row.grand .v {
+  color: var(--q-accent); font-size: 22px; font-weight: 600;
+}
+
+/* ── 신뢰 시그널 ──────────────────────────────── */
+.quote-page .trust { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--q-line); }
+.quote-page .trust .cell { padding: 22px 22px 26px; border-right: 1px solid var(--q-line); }
+.quote-page .trust .cell:last-child { border-right: 0; }
+.quote-page .trust .num-tag { font-family: var(--q-mono); font-size: 10px; color: var(--q-accent); letter-spacing: 0.14em; }
+.quote-page .trust .ttl { font-size: 16px; font-weight: 600; margin-top: 14px; letter-spacing: -0.01em; }
+.quote-page .trust .desc { margin-top: 8px; color: var(--q-text-dim); font-size: 12px; line-height: 1.55; }
+
+/* ── 거래 조건 ────────────────────────────────── */
+.quote-page .terms { border: 1px solid var(--q-line); font-family: var(--q-mono); font-size: 12px; }
+.quote-page .terms .row {
+  display: grid; grid-template-columns: 160px 1fr;
+  border-top: 1px solid var(--q-line); padding: 12px 18px;
+}
+.quote-page .terms .row:first-child { border-top: 0; }
+.quote-page .terms .k { color: var(--q-muted); letter-spacing: 0.1em; text-transform: uppercase; font-size: 11px; }
+.quote-page .terms .v { color: var(--q-text); }
+
+/* ── 서명 ────────────────────────────────────── */
+.quote-page .signature { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--q-line); }
+.quote-page .signature .box { padding: 22px; border-right: 1px solid var(--q-line); }
+.quote-page .signature .box:last-child { border-right: 0; }
+.quote-page .signature .lbl {
+  font-family: var(--q-mono); font-size: 11px; color: var(--q-muted);
+  letter-spacing: 0.14em; text-transform: uppercase;
+}
+.quote-page .signature .area {
+  margin-top: 14px; border: 1px dashed var(--q-line); height: 110px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--q-muted); font-family: var(--q-mono); font-size: 11px;
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+.quote-page .signature .who {
+  margin-top: 12px; font-family: var(--q-mono); font-size: 11px; color: var(--q-text-dim);
+}
+
+/* ── 푸터 ────────────────────────────────────── */
+.quote-page .qfooter {
+  margin-top: 56px; padding-top: 22px; border-top: 1px solid var(--q-line-soft);
+  font-family: var(--q-mono); font-size: 10px; color: var(--q-muted);
+  letter-spacing: 0.1em; text-transform: uppercase;
+  display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+}
+
+/* ── 반응형 ──────────────────────────────────── */
+@media (max-width: 900px) {
+  .quote-page .stage { padding: 22px 18px 80px; }
+  .quote-page .header,
+  .quote-page .parties,
+  .quote-page .hero,
+  .quote-page .summary,
+  .quote-page .signature { grid-template-columns: 1fr; }
+  .quote-page .party + .party,
+  .quote-page .signature .box { border-left: 0; }
+  .quote-page .card { grid-template-columns: 1fr; }
+  .quote-page .ill { border-right: 0; border-bottom: 1px solid var(--q-line); }
+  .quote-page .price-block { grid-template-columns: 1fr 1fr; }
+  .quote-page .trust { grid-template-columns: 1fr 1fr; }
+}
+
+/* ───────────────────────────────────────────────────────────
+   PDF 출력 모드 (window.print() 시 활성화)
+   - .pdf-only 영역만 표시, 다크 풀 버전 숨김
+   - A4 사이즈, 라이트 테마, 단순 양식
+   ─────────────────────────────────────────────────────────── */
+
+.quote-page .pdf-only { display: none; }
+
+@media print {
+  @page { size: A4 portrait; margin: 0; }
+  html, body { background: #fff !important; color: #111 !important; }
+  .quote-page { background: #fff !important; color: #111 !important; }
+  .quote-page .full-version { display: none !important; }
+  .quote-page .pdf-only { display: block !important; padding: 15mm !important; }
+  .quote-page .util,
+  .quote-page .btn-export,
+  .quote-page .btn-confirm { display: none !important; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
+
+.quote-page .pdf-only {
+  background: #FFFFFF; color: #111;
+  font-family: 'Pretendard', sans-serif;
+  width: 210mm; min-height: 297mm;
+  padding: 15mm; margin: 0 auto;
+  box-sizing: border-box;
+  font-size: 9.5pt; line-height: 1.45;
+}
+.quote-page .pdf-only .pmono { font-family: 'JetBrains Mono', monospace; }
+
+.quote-page .pdf-only .p-top {
+  display: flex; justify-content: space-between; align-items: baseline;
+  border-bottom: 1.5pt solid #1F4E79; padding-bottom: 4mm; margin-bottom: 5mm;
+}
+.quote-page .pdf-only .p-top .wm {
+  font-size: 14pt; font-weight: 700; letter-spacing: -0.01em; color: #1F4E79;
+}
+.quote-page .pdf-only .p-top .wm small {
+  color: #555; font-weight: 500; font-size: 9pt; margin-left: 8px;
+  letter-spacing: 0.05em; text-transform: uppercase;
+}
+.quote-page .pdf-only .p-top .meta {
+  font-family: 'JetBrains Mono', monospace; font-size: 8.5pt; color: #111; text-align: right;
+}
+.quote-page .pdf-only .p-top .meta span { margin-left: 12px; }
+
+.quote-page .pdf-only .p-parties {
+  display: grid; grid-template-columns: 1fr 1fr;
+  border: 0.5pt solid #BFBFBF; margin-bottom: 4mm;
+}
+.quote-page .pdf-only .p-parties > div { padding: 3mm 4mm; }
+.quote-page .pdf-only .p-parties > div + div { border-left: 0.5pt solid #BFBFBF; }
+.quote-page .pdf-only .p-parties h5 {
+  margin: 0 0 2mm; font-family: 'JetBrains Mono', monospace; font-size: 8pt;
+  color: #1F4E79; letter-spacing: 0.16em;
+}
+.quote-page .pdf-only .p-parties .row {
+  display: grid; grid-template-columns: 22mm 1fr; font-size: 9pt; padding: 0.6mm 0;
+}
+.quote-page .pdf-only .p-parties .row .k {
+  font-family: 'JetBrains Mono', monospace; color: #555; font-size: 8pt;
+  letter-spacing: 0.06em; text-transform: uppercase;
+}
+
+.quote-page .pdf-only .p-table { width: 100%; border-collapse: collapse; margin-bottom: 4mm; font-size: 9pt; }
+.quote-page .pdf-only .p-table th,
+.quote-page .pdf-only .p-table td {
+  border-bottom: 0.5pt solid #BFBFBF; padding: 2.4mm 2mm; vertical-align: top;
+}
+.quote-page .pdf-only .p-table thead th {
+  border-top: 0.5pt solid #111; border-bottom: 0.5pt solid #111;
+  text-align: left; font-family: 'JetBrains Mono', monospace; font-size: 8pt;
+  letter-spacing: 0.1em; text-transform: uppercase; background: #F4F6F8; font-weight: 600;
+}
+.quote-page .pdf-only .p-table .num-col { text-align: right; font-family: 'JetBrains Mono', monospace; }
+.quote-page .pdf-only .p-table .desc-ko { color: #555; font-size: 8.5pt; display: block; margin-top: 0.5mm; }
+.quote-page .pdf-only .p-table td.partno { font-family: 'JetBrains Mono', monospace; font-size: 8.5pt; }
+
+.quote-page .pdf-only .p-totals {
+  margin-left: auto; width: 75mm; margin-bottom: 4mm;
+  font-family: 'JetBrains Mono', monospace; font-size: 9.5pt;
+}
+.quote-page .pdf-only .p-totals .row {
+  display: grid; grid-template-columns: 1fr auto;
+  padding: 1.6mm 0; border-bottom: 0.5pt solid #BFBFBF;
+}
+.quote-page .pdf-only .p-totals .row .k {
+  color: #555; letter-spacing: 0.08em; text-transform: uppercase; font-size: 8.5pt;
+}
+.quote-page .pdf-only .p-totals .row.grand {
+  border-top: 1pt solid #1F4E79; border-bottom: 1pt solid #1F4E79;
+  padding: 2.5mm 0; margin-top: 1mm;
+}
+.quote-page .pdf-only .p-totals .row.grand .k { color: #1F4E79; font-weight: 700; font-size: 10pt; }
+.quote-page .pdf-only .p-totals .row.grand .v { color: #1F4E79; font-weight: 700; font-size: 13pt; }
+
+.quote-page .pdf-only .p-terms {
+  border: 0.5pt solid #BFBFBF; font-family: 'JetBrains Mono', monospace;
+  font-size: 8.5pt; margin-bottom: 4mm;
+}
+.quote-page .pdf-only .p-terms .row {
+  display: grid; grid-template-columns: 28mm 1fr;
+  padding: 1.6mm 3mm; border-bottom: 0.5pt solid #E2E2E2;
+}
+.quote-page .pdf-only .p-terms .row:last-child { border-bottom: 0; }
+.quote-page .pdf-only .p-terms .k { color: #555; letter-spacing: 0.1em; text-transform: uppercase; }
+
+.quote-page .pdf-only .p-sig { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin-bottom: 3mm; }
+.quote-page .pdf-only .p-sig .box {
+  border: 0.5pt dashed #888; padding: 3mm; height: 24mm; position: relative;
+}
+.quote-page .pdf-only .p-sig .box .lbl {
+  font-family: 'JetBrains Mono', monospace; font-size: 8pt; color: #1F4E79;
+  letter-spacing: 0.14em; text-transform: uppercase;
+}
+.quote-page .pdf-only .p-sig .box .name {
+  position: absolute; left: 3mm; bottom: 3mm; font-size: 8.5pt; color: #555;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.quote-page .pdf-only .p-footer {
+  border-top: 0.5pt solid #BFBFBF; padding-top: 2mm;
+  font-family: 'JetBrains Mono', monospace; font-size: 7.5pt; color: #555;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  display: flex; justify-content: space-between;
+}

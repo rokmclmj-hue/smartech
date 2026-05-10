@@ -23,7 +23,7 @@ model Product {
 
 model User {
   id               Int        @id @default(autoincrement())
-  email            String     @unique
+  email            String?    @unique
   name             String
   company          String
   passwordHash     String
@@ -34,6 +34,9 @@ model User {
   businessFileUrl  String?
   cardImageUrl     String?
   rejectedAt       DateTime?
+  aiEstimatedTier  String?
+  aiConfidence     Int?
+  aiTypeReason     String?
   quotes           Quote[]
   orders           Order[]
   createdQuotes    Quote[]    @relation("QuoteCreatedBy")

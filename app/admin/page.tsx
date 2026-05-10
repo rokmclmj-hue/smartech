@@ -2,59 +2,158 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { matchPartner } from "@/lib/partners";
 
-type DashboardData = {
+type UserItem = {
+  id: number;
+  email: string;
+  name: string;
+  company: string;
+  tier: string;
+  createdAt: string;
+  phone: string | null;
+  businessNo: string | null;
+  businessFileUrl: string | null;
+  cardImageUrl: string | null;
+};
+
+type DashboardStats = {
   todayQuotes: number;
+  monthQuotes: number;
   monthOrders: number;
   monthRevenue: number;
   pendingUsers: number;
-  recentOrders: {
-    id: number;
-    company: string;
-    contactName: string | null;
-    amount: number;
-    status: string;
-    createdAt: string;
-  }[];
-  lowStockProducts: {
-    id: number;
-    partNo: string;
-    description: string;
-    stock: number;
-  }[];
+  staleQuotes: number;
 };
 
-const STATUS_LABEL: Record<string, string> = {
-  PENDING: "대기",
-  CONFIRMED: "확정",
-  CANCELLED: "취소",
-  DELIVERY_INQUIRY: "납기문의",
-};
+// ─── 미처리 견적 알림 띠 (3일 이상 미응답 PENDING) ──────────
+function StaleQuotesAlert({ count }: { count: number }) {
+  if (count <= 0) return null;
+  return (
+    <Link
+      href="/admin/quotes"
+      className="block border border-edred bg-edred/5 px-4 sm:px-5 py-3 sm:py-4 hover:bg-edred/10 transition-colors"
+    >
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-3 flex-wrap">
+          <span className="mono text-[10px] tracking-[0.18em] uppercase border border-edred text-edred px-2 py-0.5">
+            ⚠ ALERT
+          </span>
+          <div className="text-[14px] text-ink">
+            <span className="font-semibold text-edred">미처리 견적 {count}건</span>
+            <span className="dim text-[12px] ml-2">3일 이상 응답 없는 견적 — 즉시 영업팀 응답 필요</span>
+          </div>
+        </div>
+        <span className="mono text-[11px] tracking-[0.12em] uppercase text-edred">
+          [ 견적 처리 → ]
+        </span>
+      </div>
+    </Link>
+  );
+}
 
-const STATUS_COLOR: Record<string, string> = {
-  PENDING: "border-ink/40 text-ink",
-  CONFIRMED: "border-edred text-edred",
-  CANCELLED: "border-line text-dim",
-  DELIVERY_INQUIRY: "border-ink text-ink bg-ink text-paper",
-};
+// ─── KPI 4 패널 (회원승인·발주·견적·매출) ─────────────────
+function KpiPanels({
+  stats,
+  pendingCount,
+}: {
+  stats: DashboardStats;
+  pendingCount: number;
+}) {
+  const kpis: Array<{
+    eyebrow: string;
+    value: string;
+    meta: string;
+    urgent?: boolean;
+    href?: string;
+  }> = [
+    {
+      eyebrow: "PENDING · 회원 승인",
+      value: `${pendingCount.toLocaleString("ko-KR")}명`,
+      meta: pendingCount > 0 ? "승인 대기 — 우선 작업" : "모두 처리 완료",
+      urgent: pendingCount > 0,
+      href: "/admin/users",
+    },
+    {
+      eyebrow: "MTD · 발주 건수",
+      value: `${stats.monthOrders.toLocaleString("ko-KR")}건`,
+      meta: "이번 달 확정 주문",
+      href: "/admin/orders",
+    },
+    {
+      eyebrow: "MTD · 견적 건수",
+      value: `${stats.monthQuotes.toLocaleString("ko-KR")}건`,
+      meta: `이번 달 누적 · 오늘 ${stats.todayQuotes}건`,
+      href: "/admin/quotes",
+    },
+    {
+      eyebrow: "MTD · 매출",
+      value: `₩${stats.monthRevenue.toLocaleString("ko-KR")}`,
+      meta: "이번 달 누적 (VAT 별도)",
+      href: "/admin/orders",
+    },
+  ];
+
+  return (
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      {kpis.map((k) => {
+        const inner = (
+          <div
+            className={`kpi-panel kpi-cell px-4 sm:px-5 py-4 sm:py-5 relative h-full ${
+              k.urgent ? "ring-1 ring-edred/40" : ""
+            }`}
+          >
+            <div className="kpi-eyebrow mb-2 sm:mb-3">{k.eyebrow}</div>
+            <div className="kpi-num text-[22px] sm:text-[28px] lg:text-[30px] leading-none break-all">
+              {k.value}
+            </div>
+            <div className="kpi-meta mt-2 sm:mt-3">{k.meta}</div>
+            <span className="kpi-accent" />
+          </div>
+        );
+        return k.href ? (
+          <Link
+            key={k.eyebrow}
+            href={k.href}
+            className="block hover:opacity-80 transition-opacity"
+          >
+            {inner}
+          </Link>
+        ) : (
+          <div key={k.eyebrow}>{inner}</div>
+        );
+      })}
+    </div>
+  );
+}
 
 export default function AdminDashboard() {
-  const [data, setData] = useState<DashboardData | null>(null);
+  const [users, setUsers] = useState<UserItem[] | null>(null);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/admin/dashboard")
-      .then((r) => {
-        if (!r.ok) throw new Error("데이터를 불러오지 못했습니다");
+    Promise.all([
+      fetch("/api/admin/users?tier=PENDING&limit=200").then((r) => {
+        if (!r.ok) throw new Error("회원 데이터 로드 실패");
         return r.json();
+      }),
+      fetch("/api/admin/dashboard").then((r) => {
+        if (!r.ok) throw new Error("통계 데이터 로드 실패");
+        return r.json();
+      }),
+    ])
+      .then(([userData, statsData]: [{ items: UserItem[] }, DashboardStats]) => {
+        setUsers(userData.items);
+        setStats(statsData);
       })
-      .then(setData)
-      .catch((e) => setError(e.message));
+      .catch((e: Error) => setError(e.message));
   }, []);
 
+  // ─── 에러 ────────────────────────────────────────────────
   if (error) {
     return (
-      <div className="px-6 py-10 max-w-[1400px] mx-auto">
+      <div className="px-4 sm:px-6 py-6 sm:py-10 max-w-[1400px] mx-auto">
         <div className="border border-edred/30 bg-edred/5 px-5 py-4 text-edred text-sm">
           {error}
         </div>
@@ -62,203 +161,199 @@ export default function AdminDashboard() {
     );
   }
 
-  if (!data) {
+  // ─── 로딩 ────────────────────────────────────────────────
+  if (!users || !stats) {
     return (
-      <div className="px-6 py-10 max-w-[1400px] mx-auto space-y-8">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="px-4 sm:px-6 py-6 sm:py-10 max-w-[1400px] mx-auto space-y-6 sm:space-y-8">
+        <div className="h-[70px] bg-ink/[0.04] animate-pulse" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {[1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className="kpi-panel p-5 animate-pulse h-[110px]"
-            />
+            <div key={i} className="kpi-panel p-5 animate-pulse h-[110px]" />
+          ))}
+        </div>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="border hair bg-paper p-5 h-[160px] animate-pulse" />
           ))}
         </div>
       </div>
     );
   }
 
-  const kpis = [
-    {
-      eyebrow: "TODAY · 견적",
-      value: data.todayQuotes.toLocaleString("ko-KR"),
-      meta: "오늘 들어온 요청",
-      urgent: false,
-    },
-    {
-      eyebrow: "MTD · 주문확정",
-      value: data.monthOrders.toLocaleString("ko-KR"),
-      meta: "이번 달 누적",
-      urgent: false,
-    },
-    {
-      eyebrow: "MTD · 매출",
-      value: "₩" + data.monthRevenue.toLocaleString("ko-KR"),
-      meta: "이번 달 누적 (VAT 별도)",
-      urgent: false,
-    },
-    {
-      eyebrow: "PENDING · 회원",
-      value: data.pendingUsers.toLocaleString("ko-KR"),
-      meta: "승인 대기 중",
-      urgent: data.pendingUsers > 0,
-    },
-  ];
-
-  return (
-    <div className="px-6 py-10 max-w-[1400px] mx-auto space-y-10">
-      {/* 헤더 */}
-      <div>
+  // ─── 0건 ─ 모두 처리 완료 ───────────────────────────────
+  if (users.length === 0) {
+    return (
+      <div className="px-4 sm:px-6 py-6 sm:py-10 max-w-[1400px] mx-auto">
         <div className="mono text-[11px] dim tracking-[0.15em] uppercase mb-3">
           — 01 · DASHBOARD
         </div>
-        <h1 className="display text-[40px] leading-none text-ink">
+        <h1 className="display text-[28px] sm:text-[40px] leading-none text-ink mb-6 sm:mb-10">
           관리자 <span className="italic text-edred">대시보드</span>
         </h1>
-        <p className="dim text-[13px] mt-3">
-          오늘의 운영 현황과 주요 지표
-        </p>
-      </div>
 
-      {/* KPI 패널 */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {kpis.map((kpi) => (
-          <div
-            key={kpi.eyebrow}
-            className={`kpi-panel kpi-cell px-5 py-5 relative ${
-              kpi.urgent ? "ring-1 ring-edred/40" : ""
-            }`}
-          >
-            <div className="kpi-eyebrow mb-3">{kpi.eyebrow}</div>
-            <div className="kpi-num text-[32px] leading-none">{kpi.value}</div>
-            <div className="kpi-meta mt-3">{kpi.meta}</div>
-            <span className="kpi-accent" />
+        {/* 미처리 견적 알림 (3일+) */}
+        {stats.staleQuotes > 0 && (
+          <div className="mb-4 sm:mb-6">
+            <StaleQuotesAlert count={stats.staleQuotes} />
           </div>
-        ))}
-      </div>
+        )}
 
-      {/* 하단 2단 */}
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* 최근 주문 */}
-        <section className="border hair bg-paper">
-          <div className="flex items-baseline justify-between px-5 py-4 border-b hair">
-            <div>
-              <div className="mono text-[10px] dim tracking-[0.15em] uppercase mb-1">
-                — Recent Orders
-              </div>
-              <h2 className="text-[15px] font-semibold tracking-tight text-ink">
-                최근 주문
-              </h2>
-            </div>
+        {/* KPI 4 패널 */}
+        <div className="mb-6 sm:mb-10">
+          <KpiPanels stats={stats} pendingCount={users.length} />
+        </div>
+
+        <div className="border hair bg-paper px-4 sm:px-6 py-10 sm:py-16 text-center">
+          <div className="mono text-[10px] tracking-[0.18em] uppercase text-edred mb-4">
+            ● ALL CLEAR
+          </div>
+          <div className="display text-[48px] sm:text-[64px] leading-none text-ink mb-4 tabular">0</div>
+          <h2 className="text-[18px] sm:text-[20px] font-semibold text-ink mb-3">
+            승인 대기 회원이 없습니다
+          </h2>
+          <p className="dim text-[13px] leading-[1.6] max-w-md mx-auto">
+            모든 가입 신청이 처리되었습니다.<br />
+            새 가입 신청이 들어오면 자동으로 이곳에 표시됩니다.
+          </p>
+          <div className="mt-8 flex gap-3 justify-center flex-wrap">
+            <Link
+              href="/admin/users"
+              className="mono text-[11px] tracking-[0.12em] uppercase border border-ink text-ink px-5 py-2.5 hover:bg-ink hover:text-paper transition-colors"
+            >
+              [ 전체 회원 보기 → ]
+            </Link>
             <Link
               href="/admin/orders"
-              className="mono text-[10px] tracking-[0.12em] uppercase text-edred hover:underline"
+              className="mono text-[11px] tracking-[0.12em] uppercase border border-line text-dim px-5 py-2.5 hover:border-ink hover:text-ink transition-colors"
             >
-              View All →
+              [ 주문 관리 → ]
             </Link>
           </div>
-          {data.recentOrders.length === 0 ? (
-            <div className="px-5 py-12 text-center dim text-[13px]">
-              주문이 없습니다
-            </div>
-          ) : (
-            <table className="w-full text-[13px]">
-              <thead>
-                <tr className="border-b hair">
-                  {["고객사", "금액", "상태", "날짜"].map((h) => (
-                    <th
-                      key={h}
-                      className="px-4 py-2.5 text-left mono text-[10px] dim tracking-[0.12em] uppercase font-normal"
-                    >
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {data.recentOrders.map((o) => (
-                  <tr
-                    key={o.id}
-                    className="border-b hair hover:bg-ink/[0.02] transition-colors"
-                  >
-                    <td className="px-4 py-3 text-ink truncate max-w-[140px]">
-                      {o.company}
-                    </td>
-                    <td className="px-4 py-3 mono text-[12px] tabular text-ink">
-                      {o.amount > 0 ? `₩${o.amount.toLocaleString("ko-KR")}` : "—"}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`mono text-[10px] tracking-[0.08em] uppercase border px-2 py-0.5 ${
-                          STATUS_COLOR[o.status] ?? "border-line text-dim"
-                        }`}
-                      >
-                        {STATUS_LABEL[o.status] ?? o.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 mono text-[11px] dim">
-                      {new Date(o.createdAt).toLocaleDateString("ko-KR")}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </section>
+        </div>
+      </div>
+    );
+  }
 
-        {/* 재고 부족 */}
-        <section className="border hair bg-paper">
-          <div className="flex items-baseline justify-between px-5 py-4 border-b hair">
-            <div>
-              <div className="mono text-[10px] dim tracking-[0.15em] uppercase mb-1">
-                — Low Stock
+  // ─── N건 ─ 승인 대기 목록 ───────────────────────────────
+  const PREVIEW_LIMIT = 6;
+  const previewUsers = users.slice(0, PREVIEW_LIMIT);
+  const remaining = users.length - PREVIEW_LIMIT;
+
+  // 신규 거래처 후보 카운트
+  const unregisteredCount = users.filter((u) => matchPartner(u.company) === null).length;
+
+  return (
+    <div className="px-4 sm:px-6 py-6 sm:py-10 max-w-[1400px] mx-auto space-y-6 sm:space-y-8">
+      {/* 헤더 */}
+      <div>
+        <div className="mono text-[11px] dim tracking-[0.15em] uppercase mb-3">
+          — 01 · DASHBOARD · 승인 대기
+        </div>
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+          <div>
+            <h1 className="display text-[28px] sm:text-[40px] leading-tight sm:leading-none text-ink">
+              <span className="text-edred">{users.length}명</span>{" "}
+              <span className="italic text-edred">승인 대기</span>
+            </h1>
+            <p className="dim text-[13px] mt-3 leading-[1.6]">
+              가입 신청한 회원을 검토하고 등급을 부여해주세요. 승인이 우선 작업입니다.
+              {unregisteredCount > 0 && (
+                <>
+                  <br />
+                  그중 <span className="text-edred font-semibold">{unregisteredCount}명</span>은 기존 거래처 리스트(81개사)에 없는 신규 후보입니다.
+                </>
+              )}
+            </p>
+          </div>
+          <Link
+            href="/admin/users"
+            className="block w-full sm:w-auto text-center bg-edred text-paper hover:bg-edred2 px-6 py-3 mono text-[12px] tracking-[0.12em] uppercase font-semibold transition-colors"
+          >
+            [ 승인 처리 페이지 → ]
+          </Link>
+        </div>
+      </div>
+
+      {/* 미처리 견적 알림 (3일+) */}
+      <StaleQuotesAlert count={stats.staleQuotes} />
+
+      {/* KPI 4 패널 */}
+      <KpiPanels stats={stats} pendingCount={users.length} />
+
+      {/* 미리보기 카드 */}
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {previewUsers.map((u) => {
+          const m = matchPartner(u.company);
+          return (
+            <Link
+              key={u.id}
+              href="/admin/users"
+              className="border hair bg-paper p-5 space-y-3 hover:border-edred/60 transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-ink">{u.name}</span>
+                <span className="mono text-[10px] tracking-[0.08em] uppercase border border-edred text-edred px-2 py-0.5">
+                  대기
+                </span>
               </div>
-              <h2 className="text-[15px] font-semibold tracking-tight text-ink">
-                재고 부족 제품
-                {data.lowStockProducts.length > 0 && (
-                  <span className="ml-2 mono text-[10px] text-edred tracking-[0.1em]">
-                    {data.lowStockProducts.length}건
+              <div className="flex items-center gap-2 flex-wrap">
+                <div className="text-[14px] font-medium text-ink">{u.company}</div>
+                {m ? (
+                  <span
+                    className="mono text-[9px] tracking-[0.08em] uppercase border border-ink/30 text-ink/70 bg-ink/5 px-1.5 py-0.5"
+                    title={`기존 거래처 (${m.matchType === "partial" ? "부분매칭" : "정확매칭"})`}
+                  >
+                    기존 {m.type}
+                  </span>
+                ) : (
+                  <span
+                    className="mono text-[9px] tracking-[0.08em] uppercase border border-edred bg-edred/5 text-edred px-1.5 py-0.5 font-semibold"
+                    title="기존 거래처 리스트(81개사)에 없음"
+                  >
+                    ✦ 신규 후보
                   </span>
                 )}
-              </h2>
-            </div>
-            <Link
-              href="/admin/products"
-              className="mono text-[10px] tracking-[0.12em] uppercase text-edred hover:underline"
-            >
-              Manage →
+              </div>
+              <div className="space-y-0.5">
+                <div className="mono text-[11px] dim">{u.email}</div>
+                {u.phone && <div className="mono text-[11px] dim">{u.phone}</div>}
+                {u.businessNo && (
+                  <div className="mono text-[11px] dim">사업자 · {u.businessNo}</div>
+                )}
+              </div>
+              <div className="flex items-center justify-between pt-2 border-t hair">
+                <div className="mono text-[10px] dim tracking-[0.1em]">
+                  가입 · {new Date(u.createdAt).toLocaleDateString("ko-KR")}
+                </div>
+                <div className="flex gap-1.5">
+                  {u.cardImageUrl && (
+                    <span className="mono text-[9px] tracking-[0.1em] uppercase border border-line text-dim px-1.5 py-0.5">
+                      명함
+                    </span>
+                  )}
+                  {u.businessFileUrl && (
+                    <span className="mono text-[9px] tracking-[0.1em] uppercase border border-line text-dim px-1.5 py-0.5">
+                      등록증
+                    </span>
+                  )}
+                </div>
+              </div>
             </Link>
-          </div>
-          {data.lowStockProducts.length === 0 ? (
-            <div className="px-5 py-12 text-center dim text-[13px]">
-              재고 부족 제품이 없습니다
-            </div>
-          ) : (
-            <ul>
-              {data.lowStockProducts.map((p) => (
-                <li
-                  key={p.id}
-                  className="flex items-center gap-3 px-5 py-3 border-b hair last:border-b-0"
-                >
-                  <span className="text-edred shrink-0">→</span>
-                  <div className="flex-1 min-w-0">
-                    <div className="mono text-[11px] dim">{p.partNo}</div>
-                    <div className="text-[13px] text-ink truncate">
-                      {p.description}
-                    </div>
-                  </div>
-                  <div
-                    className={`mono text-[11px] tabular tracking-[0.1em] uppercase ${
-                      p.stock === 0 ? "text-edred" : "text-ink"
-                    }`}
-                  >
-                    {p.stock === 0 ? "품절" : `재고 ${p.stock}`}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
+          );
+        })}
       </div>
+
+      {/* 더 보기 */}
+      {remaining > 0 && (
+        <div className="text-center pt-2">
+          <Link
+            href="/admin/users"
+            className="mono text-[11px] tracking-[0.12em] uppercase text-edred hover:underline"
+          >
+            … + {remaining}명 더 보기 →
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

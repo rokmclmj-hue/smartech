@@ -9,6 +9,7 @@ import {
   type DocumentProps,
 } from "@react-pdf/renderer";
 import { VAT_RATE } from "./constants";
+import { SMARTECH_COMPANY } from "./company";
 
 export interface QuoteForPdf {
   id: number;
@@ -70,12 +71,12 @@ const S = StyleSheet.create({
   // ── 타이틀 영역
   titleArea: {
     borderBottom: "2 solid #111111",
-    paddingBottom: 10,
-    marginBottom: 14,
+    paddingBottom: 8,
+    marginBottom: 10,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-end",
-    marginTop: 16,
+    marginTop: 10,
   },
   titleLeft: {},
   quoteTitle: {
@@ -117,13 +118,13 @@ const S = StyleSheet.create({
     fontFamily: "Helvetica-Bold",
     color: "#888888",
     letterSpacing: 2,
-    marginBottom: 8,
+    marginBottom: 4,
   },
 
   // ── Section 01: TO / FROM
   toFromRow: {
     flexDirection: "row",
-    marginBottom: 14,
+    marginBottom: 10,
   },
   toBox: {
     flex: 1,
@@ -162,8 +163,8 @@ const S = StyleSheet.create({
   // ── Section 02: 금액 요약
   amountArea: {
     backgroundColor: "#f7f7f7",
-    padding: 12,
-    marginBottom: 14,
+    padding: 10,
+    marginBottom: 10,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -218,7 +219,7 @@ const S = StyleSheet.create({
   // ── Section 03: 품목 테이블
   table: {
     width: "100%",
-    marginBottom: 14,
+    marginBottom: 10,
   },
   tableHeader: {
     flexDirection: "row",
@@ -260,7 +261,7 @@ const S = StyleSheet.create({
   summaryArea: {
     flexDirection: "row",
     justifyContent: "flex-end",
-    marginBottom: 14,
+    marginBottom: 10,
   },
   summaryBox: {
     width: 220,
@@ -288,9 +289,9 @@ const S = StyleSheet.create({
   badgeRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 14,
+    marginBottom: 10,
     borderTop: "1 solid #eeeeee",
-    paddingTop: 10,
+    paddingTop: 6,
   },
   badge: {
     flex: 1,
@@ -317,9 +318,9 @@ const S = StyleSheet.create({
   termsRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    marginBottom: 14,
+    marginBottom: 10,
     backgroundColor: "#f7f7f7",
-    padding: 10,
+    padding: 8,
   },
   termItem: {
     width: "50%",
@@ -339,9 +340,9 @@ const S = StyleSheet.create({
   // ── Section 07: 서명
   sigRow: {
     flexDirection: "row",
-    marginBottom: 14,
+    marginBottom: 8,
     borderTop: "1 solid #dddddd",
-    paddingTop: 10,
+    paddingTop: 6,
   },
   sigBox: {
     flex: 1,
@@ -367,7 +368,7 @@ const S = StyleSheet.create({
   },
   sigLine: {
     borderTop: "1 solid #aaaaaa",
-    marginTop: 24,
+    marginTop: 16,
     paddingTop: 3,
   },
   sigLineText: {
@@ -446,17 +447,22 @@ function QuoteDocument({ quote }: { quote: QuoteForPdf }) {
           el(Text, { style: S.toFromLabel }, "TO  ·  수  신"),
           el(Text, { style: S.toFromCompany }, quote.user.company + " 귀중"),
           el(Text, { style: S.toFromLine }, `담당자: ${quote.user.name}`),
-          el(Text, { style: S.toFromLine }, `E-mail: ${quote.user.email}`),
+          quote.user.email
+            ? el(Text, { style: S.toFromLine }, `E-mail: ${quote.user.email}`)
+            : null,
           quote.user.phone
             ? el(Text, { style: S.toFromLine }, `Tel: ${quote.user.phone}`)
             : null
         ),
         el(View, { style: S.fromBox },
           el(Text, { style: S.toFromLabel }, "FROM  ·  발  신"),
-          el(Text, { style: S.toFromCompany }, "(주)스마텍"),
-          el(Text, { style: S.toFromLine }, "Edwards Vacuum Korea Authorized Distributor"),
-          el(Text, { style: S.toFromLineGray }, "E-mail: info@smartech.co.kr"),
-          el(Text, { style: S.toFromLineGray }, "TEL: 02-0000-0000")
+          el(Text, { style: S.toFromCompany }, SMARTECH_COMPANY.name),
+          el(Text, { style: S.toFromLine }, SMARTECH_COMPANY.role),
+          el(Text, { style: S.toFromLineGray }, `대표자: ${SMARTECH_COMPANY.ceo}  /  사업자번호: ${SMARTECH_COMPANY.bizNo}`),
+          el(Text, { style: S.toFromLineGray }, `TEL: ${SMARTECH_COMPANY.officeTel}  /  FAX: ${SMARTECH_COMPANY.fax}  /  M: ${SMARTECH_COMPANY.mobileTel}`),
+          el(Text, { style: S.toFromLineGray }, `E-mail: ${SMARTECH_COMPANY.email}  /  Web: ${SMARTECH_COMPANY.website}`),
+          el(Text, { style: S.toFromLineGray }, `본사: ${SMARTECH_COMPANY.headOfficeKo}`),
+          el(Text, { style: S.toFromLineGray }, `A/S: ${SMARTECH_COMPANY.cheonanCenterKo}`)
         )
       ),
 
@@ -719,19 +725,23 @@ function DeliveryNoteDocument({ data }: { data: DeliveryNoteForPdf }) {
             ? el(Text, { style: S.toFromLine }, `사업자번호: ${data.user.businessNo}`)
             : null,
           el(Text, { style: S.toFromLine }, `담당자: ${data.user.name}`),
-          el(Text, { style: S.toFromLine }, `E-mail: ${data.user.email}`),
+          data.user.email
+            ? el(Text, { style: S.toFromLine }, `E-mail: ${data.user.email}`)
+            : null,
           data.user.phone
             ? el(Text, { style: S.toFromLine }, `Tel: ${data.user.phone}`)
             : null
         ),
         el(View, { style: S.fromBox },
           el(Text, { style: S.toFromLabel }, "공급자  ·  FROM"),
-          el(Text, { style: S.toFromCompany }, "(주)스마텍"),
-          el(Text, { style: S.toFromLine }, "Edwards Vacuum Korea Authorized Distributor"),
-          el(Text, { style: S.toFromLineGray }, "사업자번호: 000-00-00000"),
-          el(Text, { style: S.toFromLineGray }, "대표자: 이명재"),
-          el(Text, { style: S.toFromLineGray }, "주소: 경기도 수원시 신원로 55, 907호"),
-          el(Text, { style: S.toFromLineGray }, "TEL: 031-204-7170  /  FAX: 031-206-7178")
+          el(Text, { style: S.toFromCompany }, SMARTECH_COMPANY.name),
+          el(Text, { style: S.toFromLine }, SMARTECH_COMPANY.role),
+          el(Text, { style: S.toFromLineGray }, `사업자번호: ${SMARTECH_COMPANY.bizNo}  /  법인번호: ${SMARTECH_COMPANY.corpNo}`),
+          el(Text, { style: S.toFromLineGray }, `대표자: ${SMARTECH_COMPANY.ceo}`),
+          el(Text, { style: S.toFromLineGray }, `본점: ${SMARTECH_COMPANY.registeredAddressKo}`),
+          el(Text, { style: S.toFromLineGray }, `영업본사: ${SMARTECH_COMPANY.headOfficeKo}`),
+          el(Text, { style: S.toFromLineGray }, `TEL: ${SMARTECH_COMPANY.officeTel}  /  FAX: ${SMARTECH_COMPANY.fax}  /  M: ${SMARTECH_COMPANY.mobileTel}`),
+          el(Text, { style: S.toFromLineGray }, `E-mail: ${SMARTECH_COMPANY.email}  /  Web: ${SMARTECH_COMPANY.website}`)
         )
       ),
 
