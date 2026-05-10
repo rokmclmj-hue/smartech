@@ -252,7 +252,7 @@ export async function POST(req: NextRequest) {
   });
 
   const productContext = products
-    .map((p) => `[${p.partNo}] ${p.description} (${p.category})`)
+    .map((p: { partNo: string; description: string; category: string | null }) => `[${p.partNo}] ${p.description} (${p.category})`)
     .join("\n");
 
   const systemPrompt = `당신은 스마텍(Smartech)의 진공펌프 전문 상담 AI입니다.

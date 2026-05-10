@@ -46,7 +46,7 @@ export default async function FeaturedProducts() {
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-      {products.map((p, i) => (
+      {products.map((p: (typeof all)[number], i: number) => (
         <Link
           key={p.id}
           href={`/products/${encodeURIComponent(p.partNo)}`}

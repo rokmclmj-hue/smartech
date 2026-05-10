@@ -15,7 +15,7 @@ let cacheTime = 0;
 export async function getMultiplier(tier: string): Promise<number> {
   if (!cachedRules || Date.now() - cacheTime > 60_000) {
     const rules = await prisma.priceRule.findMany();
-    cachedRules = Object.fromEntries(rules.map((r) => [r.tier, r.multiplier]));
+    cachedRules = Object.fromEntries(rules.map((r: { tier: string; multiplier: number }) => [r.tier, r.multiplier]));
     cacheTime = Date.now();
   }
   return cachedRules[tier] ?? DEFAULT_MULTIPLIERS[tier] ?? 1.5;
