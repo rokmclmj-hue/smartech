@@ -61,7 +61,7 @@ export async function GET(
       user: {
         name: order.user.name,
         company: order.user.company,
-        email: order.user.email,
+        email: order.user.email ?? '',
         phone: order.user.phone,
         businessNo: order.user.businessNo,
       },
