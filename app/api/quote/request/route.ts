@@ -96,7 +96,10 @@ export async function POST(req: NextRequest) {
 
   // PDF 생성 & 이메일 발송 (실패해도 견적 생성은 성공 처리)
   try {
-    const pdfBuffer = await generateQuotePdf(quote);
+    const pdfBuffer = await generateQuotePdf({
+      ...quote,
+      user: { ...quote.user, email: quote.user.email ?? '' },
+    });
     const quoteNo = `Q-${quote.id}-${formatDate(quote.createdAt)}`;
     if (userEmail) {
       await sendQuotePdf(userEmail, pdfBuffer, quoteNo);
