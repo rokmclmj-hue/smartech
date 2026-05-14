@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 
@@ -13,6 +13,10 @@ type Product = {
   category: string;
   isImportant: boolean;
 };
+
+// 카탈로그 데이터 캐시 모드 — 한 번 fetch한 카테고리는 메모리에 남겨 재사용
+type FetchKey = string;
+const keyFor = (q: string, category: string): FetchKey => `${q}::${category}`;
 
 // Grouped category tree — keeps UI tidy
 const CATEGORY_GROUPS: { label: string; items: string[] }[] = [
@@ -90,29 +94,70 @@ function ProductsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const [all, setAll] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState(searchParams.get("q") ?? "");
   const [category, setCategory] = useState(searchParams.get("category") ?? "");
   const [view, setView] = useState<"table" | "grid">("table");
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
 
-  // Load entire catalog once
+  // 좌측 메뉴 숫자 — 카운트 API에서 한 번만 받음 (CDN 캐시)
+  const [staticCounts, setStaticCounts] = useState<Record<string, number>>({});
+  const [totalCount, setTotalCount] = useState(0);
+
+  // 현재 화면에 표시되는 제품 + 클라이언트 누적 캐시
+  const [filtered, setFiltered] = useState<Product[]>([]);
+  const cacheRef = useRef<Map<FetchKey, Product[]>>(new Map());
+  const fetchSeqRef = useRef(0);
+
+  // 마운트 시 카운트 API 호출 — 좌측 메뉴 숫자용
   useEffect(() => {
     let alive = true;
-    setLoading(true);
-    fetch("/api/products?limit=2000")
+    fetch("/api/products/counts")
       .then((r) => r.json())
       .then((d) => {
         if (!alive) return;
-        setAll(d.products ?? []);
-        setLoading(false);
+        setStaticCounts(d.counts ?? {});
+        setTotalCount(d.total ?? 0);
       })
-      .catch(() => alive && setLoading(false));
+      .catch(() => {});
     return () => {
       alive = false;
     };
   }, []);
+
+  // q / category 가 바뀔 때 해당 슬라이스만 fetch (캐시 우선)
+  useEffect(() => {
+    const trimmedQ = q.trim();
+    const key = keyFor(trimmedQ, category);
+    const cached = cacheRef.current.get(key);
+    if (cached) {
+      setFiltered(cached);
+      setLoading(false);
+      return;
+    }
+
+    const seq = ++fetchSeqRef.current;
+    setLoading(true);
+
+    const params = new URLSearchParams();
+    if (trimmedQ) params.set("q", trimmedQ);
+    if (category) params.set("category", category);
+    params.set("limit", "2000");
+
+    fetch(`/api/products?${params.toString()}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (seq !== fetchSeqRef.current) return; // stale 응답 폐기
+        const items: Product[] = d.products ?? [];
+        cacheRef.current.set(key, items);
+        setFiltered(items);
+        setLoading(false);
+      })
+      .catch(() => {
+        if (seq !== fetchSeqRef.current) return;
+        setLoading(false);
+      });
+  }, [q, category]);
 
   // Reflect filters in URL
   useEffect(() => {
@@ -123,31 +168,19 @@ function ProductsContent() {
     router.replace(`/products${qs ? `?${qs}` : ""}`, { scroll: false });
   }, [q, category, router]);
 
-  const filtered = useMemo(() => {
-    const needle = q.trim().toLowerCase();
-    return all.filter((p) => {
-      if (category && p.category !== category) return false;
-      if (needle) {
-        const hay = `${p.partNo} ${p.description}`.toLowerCase();
-        if (!hay.includes(needle)) return false;
-      }
-      return true;
-    });
-  }, [all, q, category]);
-
-  // Count per category (respecting search only, not category)
+  // 좌측 메뉴 표시용 카운트: 검색어 없을 땐 정적 카운트, 검색 중일 땐 현재 결과 기준
   const categoryCounts = useMemo(() => {
-    const needle = q.trim().toLowerCase();
     const map = new Map<string, number>();
-    for (const p of all) {
-      if (needle) {
-        const hay = `${p.partNo} ${p.description}`.toLowerCase();
-        if (!hay.includes(needle)) continue;
-      }
+    const needle = q.trim().toLowerCase();
+    if (!needle) {
+      for (const [cat, n] of Object.entries(staticCounts)) map.set(cat, n);
+      return map;
+    }
+    for (const p of filtered) {
       map.set(p.category, (map.get(p.category) ?? 0) + 1);
     }
     return map;
-  }, [all, q]);
+  }, [staticCounts, filtered, q]);
 
   // Group filtered results by category for display
   const grouped = useMemo(() => {
@@ -173,7 +206,7 @@ function ProductsContent() {
           </h1>
           <p className="mt-4 text-sm md:text-base text-dim max-w-2xl leading-relaxed">
             스마텍이 공급하는 <span className="text-edred font-semibold">Edwards</span> 진공펌프·게이지·컨트롤러·액세서리 전 라인업.
-            총 <span className="kpi-num text-ink">{all.length.toLocaleString()}</span>개 SKU. 가격은 로그인 후 등급별로 표시됩니다.
+            총 <span className="kpi-num text-ink">{totalCount.toLocaleString()}</span>개 SKU. 가격은 로그인 후 등급별로 표시됩니다.
           </p>
         </div>
       </header>
@@ -353,7 +386,7 @@ function ProductsContent() {
               <span>
                 {loading
                   ? "LOADING..."
-                  : `${filtered.length.toLocaleString()} / ${all.length.toLocaleString()} ITEMS`}
+                  : `${filtered.length.toLocaleString()} / ${totalCount.toLocaleString()} ITEMS`}
               </span>
               {(category || q) && (
                 <button
