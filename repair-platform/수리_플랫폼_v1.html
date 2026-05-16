@@ -608,6 +608,10 @@
                         </div>
                     </div>
                     <button class="btn-bl" style="width:100%;padding:14px;" onclick="saveCartQuote()">💾 확정 견적 저장</button>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
+                        <button class="btn-out" style="padding:13px;font-size:14px;font-family:inherit;" onclick="dlStatement()">📄 거래명세표 발행</button>
+                        <button class="btn-out" style="padding:13px;font-size:14px;font-family:inherit;" onclick="dlTaxInvoice()">🧾 세금계산서 발행</button>
+                    </div>
                 </div>
             </div>
 
@@ -681,6 +685,52 @@
     <div style="margin-top:30px;font-size:12px;color:#888;line-height:1.8;">
         ※ 본 견적은 예상 금액이며, 실제 분해 점검 후 변경될 수 있습니다.<br>
         ※ 확정 견적은 분해 완료 후 별도 안내됩니다.
+    </div>
+</div>
+
+<!-- 거래명세표 숨김 템플릿 -->
+<div id="stmt-tpl" style="position:absolute;left:-9999px;width:800px;background:white;padding:36px;font-family:'Malgun Gothic',sans-serif;color:#333;">
+    <div style="text-align:center;font-size:26px;font-weight:900;letter-spacing:6px;border-bottom:3px solid #1a2744;padding-bottom:14px;margin-bottom:20px;">거 래 명 세 표</div>
+    <div style="display:flex;gap:16px;margin-bottom:20px;">
+        <div style="flex:1;border:1px solid #ccc;padding:14px;font-size:13px;line-height:2.2;">
+            <div style="font-weight:700;font-size:14px;margin-bottom:4px;border-bottom:1px solid #eee;padding-bottom:4px;">공급받는자</div>
+            상호: <span id="st-co"></span><br>
+            담당: <span id="st-mgr"></span><br>
+            연락처: <span id="st-tel"></span>
+        </div>
+        <div style="flex:1;border:1px solid #ccc;padding:14px;font-size:13px;line-height:2.2;">
+            <div style="font-weight:700;font-size:14px;margin-bottom:4px;border-bottom:1px solid #eee;padding-bottom:4px;">공급자</div>
+            상호: (주)스마텍<br>
+            대표자: 이명재<br>
+            연락처: 031-204-7170<br>
+            사업자: 000-00-00000
+        </div>
+    </div>
+    <div style="font-size:13px;margin-bottom:10px;">
+        <span>접수번호: <strong id="st-no"></strong></span>
+        &nbsp;&nbsp;|&nbsp;&nbsp;
+        <span>발행일: <strong id="st-date"></strong></span>
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+            <tr style="background:#1a2744;color:white;text-align:center;">
+                <th style="padding:9px 6px;border:1px solid #999;">No.</th>
+                <th style="padding:9px 6px;border:1px solid #999;text-align:left;">품명 / 작업 내용</th>
+                <th style="padding:9px 6px;border:1px solid #999;">수량</th>
+                <th style="padding:9px 6px;border:1px solid #999;text-align:right;">금액</th>
+            </tr>
+        </thead>
+        <tbody id="st-tbody"></tbody>
+        <tfoot>
+            <tr style="font-weight:900;background:#f8f9fa;">
+                <td colspan="3" style="padding:10px 6px;border:1px solid #ccc;text-align:right;font-size:14px;">합  계</td>
+                <td style="padding:10px 6px;border:1px solid #ccc;text-align:right;font-size:15px;" id="st-total"></td>
+            </tr>
+        </tfoot>
+    </table>
+    <div style="margin-top:24px;font-size:12px;color:#888;line-height:1.8;border-top:1px solid #eee;padding-top:12px;">
+        ※ 본 거래명세표는 수리 완료 후 발행되는 최종 정산 문서입니다.<br>
+        ※ 세금계산서는 별도 요청 시 발행됩니다.
     </div>
 </div>
 
@@ -1135,6 +1185,43 @@ function delF(type, idx) {
     renderFileLists();
 }
 function saveChecklist() { alert('점검 내용이 저장되었습니다.\n[Supabase 연결 후] 관리자에게 실시간 알림이 발송됩니다.'); }
+
+async function dlStatement() {
+    const r = repairs.find(x=>x.id===cartRid);
+    if(!r) { alert('먼저 수리 건을 선택해주세요.'); return; }
+    if(!r.items || !r.items.length) { alert('확정 견적 항목이 없습니다.\n부품을 추가하고 확정 견적 저장 후 발행해주세요.'); return; }
+    // 템플릿 채우기
+    document.getElementById('st-co').textContent   = r.company || '-';
+    document.getElementById('st-mgr').textContent  = r.name    || '-';
+    document.getElementById('st-tel').textContent  = r.phone   || '-';
+    document.getElementById('st-no').textContent   = r.id;
+    document.getElementById('st-date').textContent = new Date().toLocaleDateString('ko-KR');
+    document.getElementById('st-tbody').innerHTML  = r.items.map((it, i) =>
+        `<tr>
+            <td style="padding:8px 6px;border:1px solid #ddd;text-align:center;">${i+1}</td>
+            <td style="padding:8px 6px;border:1px solid #ddd;">${it.label}</td>
+            <td style="padding:8px 6px;border:1px solid #ddd;text-align:center;">1식</td>
+            <td style="padding:8px 6px;border:1px solid #ddd;text-align:right;">${(it.amt||0).toLocaleString()}원</td>
+        </tr>`
+    ).join('');
+    document.getElementById('st-total').textContent = (r.total||0).toLocaleString() + '원';
+    // HTML → Canvas → PDF
+    const el = document.getElementById('stmt-tpl');
+    const canvas = await html2canvas(el, {scale:2});
+    const {jsPDF} = window.jspdf;
+    const pdf = new jsPDF('p','mm','a4');
+    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, 210, (canvas.height*210)/canvas.width);
+    pdf.save('거래명세표_' + r.id + '.pdf');
+}
+
+function dlTaxInvoice() {
+    // [전자세금계산서 API 연결 포인트]
+    // 더존 iCUBE, 국세청 e세로 등 전자세금계산서 발행 API 연동 필요
+    // supabase function 또는 별도 백엔드에서 처리
+    const r = repairs.find(x=>x.id===cartRid);
+    const no = r ? r.id : '(건 미선택)';
+    alert('📋 세금계산서 발행 안내\n\n접수번호: ' + no + '\n\n전자세금계산서 발행 서비스 연동 후 자동 발행됩니다.\n현재는 담당자에게 직접 요청해주세요.\n\n☎ 031-204-7170');
+}
 
 // ════════════════════════════════════════════════════════
 //  마스터 설정 렌더
