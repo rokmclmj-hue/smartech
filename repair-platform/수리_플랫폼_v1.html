@@ -210,6 +210,13 @@
         .kit-view-list { background: var(--gray-50); border-radius: 6px; padding: 10px 14px; font-size: 13px; }
         .kit-view-list li { padding: 3px 0; color: var(--gray-700); }
 
+        /* 업체 관리 카드 */
+        .company-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 16px; }
+        .company-card { background: white; border-radius: 10px; padding: 20px; border: 1px solid var(--gray-200); box-shadow: 0 2px 8px rgba(0,0,0,.04); }
+        .company-card h5 { font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 12px; }
+        .company-info { font-size: 13px; color: var(--gray-600); line-height: 2.1; }
+        .pred-warn { background: #fff7ed; border: 1px solid var(--accent); border-radius: 6px; padding: 9px 12px; font-size: 12px; color: #92400e; margin-top: 12px; line-height: 1.6; }
+
         /* 반응형 */
         @media (max-width: 768px) {
             .sidebar { position: fixed; left: -230px; top: 0; z-index: 100; transition: .3s; }
@@ -615,6 +622,11 @@
                 </div>
             </div>
 
+            <!-- ── 탭: 업체 관리 (관리자) ── -->
+            <div class="tab" id="tab-company">
+                <div id="company-content"></div>
+            </div>
+
             <!-- ── 탭: 마스터 설정 (관리자) ── -->
             <div class="tab" id="tab-settings">
                 <div class="card">
@@ -830,7 +842,7 @@ function doRegister() {
 //  앱 진입 & RBAC 사이드바
 // ════════════════════════════════════════════════════════
 const MENUS = {
-    admin:   [{id:'tab-quote',i:'🔧',n:'수리 견적 조회'},{id:'tab-admin',i:'📊',n:'전체 현황'},{id:'tab-cart',i:'📦',n:'수리 카트'},{id:'tab-mypage',i:'👤',n:'마이페이지'},{id:'tab-settings',i:'⚙️',n:'마스터 설정'}],
+    admin:   [{id:'tab-quote',i:'🔧',n:'수리 견적 조회'},{id:'tab-admin',i:'📊',n:'전체 현황'},{id:'tab-cart',i:'📦',n:'수리 카트'},{id:'tab-company',i:'🏢',n:'업체 관리'},{id:'tab-mypage',i:'👤',n:'마이페이지'},{id:'tab-settings',i:'⚙️',n:'마스터 설정'}],
     partner: [{id:'tab-partner',i:'🔩',n:'입고 펌프 작업'}],
     client:  [{id:'tab-quote',i:'🔧',n:'수리 견적 조회'},{id:'tab-mypage',i:'📋',n:'내 수리 이력'}]
 };
@@ -863,6 +875,7 @@ function switchTab(id) {
     if(id==='tab-partner')  renderPartner();
     if(id==='tab-settings') renderSettings();
     if(id==='tab-cart')     renderCart();
+    if(id==='tab-company')  renderCompany();
 }
 
 // ════════════════════════════════════════════════════════
@@ -1380,6 +1393,61 @@ document.addEventListener('click', e => {
 
 // ════════════════════════════════════════════════════════
 //  수리 카트 탭 (관리자 전용)
+// ════════════════════════════════════════════════════════
+//  업체 관리 탭 (관리자 전용)
+// ════════════════════════════════════════════════════════
+function parseKoDate(s) {
+    const m = (s||'').match(/(\d{4})\.\s*(\d{1,2})\.\s*(\d{1,2})/);
+    if(!m) return null;
+    return new Date(parseInt(m[1]), parseInt(m[2])-1, parseInt(m[3]));
+}
+
+function renderCompany() {
+    const clients = users.filter(u => u.role === 'client');
+    const today   = new Date();
+    const warnCount = clients.filter(u => {
+        const last = repairs.filter(r => r.phone === u.phone)[0];
+        const d = last ? parseKoDate(last.date) : null;
+        return d && Math.floor((today - d) / 86400000) > 365;
+    }).length;
+
+    if(!clients.length) {
+        document.getElementById('company-content').innerHTML =
+            '<div class="card"><p style="text-align:center;color:var(--gray-400);padding:28px;">등록된 고객사가 없습니다.<br>회원가입 후 관리자 승인된 업체가 여기에 표시됩니다.</p></div>';
+        return;
+    }
+
+    const cards = clients.map(u => {
+        const myRepairs  = repairs.filter(r => r.phone === u.phone);
+        const count      = myRepairs.length;
+        const models     = [...new Set(myRepairs.map(r => r.model))];
+        const lastRepair = myRepairs[0];
+        const lastDate   = lastRepair ? parseKoDate(lastRepair.date) : null;
+        const days       = lastDate ? Math.floor((today - lastDate) / 86400000) : null;
+        const needPred   = days !== null && days > 365;
+
+        return `
+        <div class="company-card">
+            <h5>🏢 ${u.company}</h5>
+            <div class="company-info">
+                👤 담당자: ${u.name}<br>
+                📞 연락처: ${u.phone}<br>
+                📋 수리 횟수: <strong>${count}회</strong><br>
+                📅 마지막 수리: ${lastRepair ? lastRepair.date : '수리 이력 없음'}<br>
+                🔧 수리 모델: ${models.length ? models.join(', ') : '없음'}
+            </div>
+            ${needPred ? `<div class="pred-warn">⚠️ <strong>예방정비 권고</strong><br>마지막 수리 후 <strong>${days}일</strong> 경과하였습니다. 정기 점검을 권장합니다.</div>` : ''}
+        </div>`;
+    }).join('');
+
+    document.getElementById('company-content').innerHTML = `
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+            <span style="font-size:15px;font-weight:700;">고객사 ${clients.length}개사</span>
+            ${warnCount > 0 ? `<span class="badge b-orange">예방정비 권고 ${warnCount}개사</span>` : '<span class="badge b-green">전체 정상</span>'}
+        </div>
+        <div class="company-grid">${cards}</div>`;
+}
+
 // ════════════════════════════════════════════════════════
 let cartRid = null; // 카트에서 현재 편집 중인 수리 ID
 
