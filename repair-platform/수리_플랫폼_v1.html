@@ -490,7 +490,7 @@
                 <div class="stat-grid" id="my-stats" style="grid-template-columns:repeat(3,1fr);"></div>
                 <div class="card">
                     <h4>내 수리 접수 내역</h4>
-                    <table class="tbl"><thead><tr><th>접수번호</th><th>모델</th><th>접수일</th><th>진행 상태</th><th>견적 금액</th><th>견적서</th></tr></thead>
+                    <table class="tbl"><thead><tr><th>접수번호</th><th>모델</th><th>접수일</th><th>진행 상태</th><th>견적 금액</th><th>견적서</th><th>발주</th></tr></thead>
                     <tbody id="my-tbody"></tbody></table>
                 </div>
             </div>
@@ -951,13 +951,24 @@ function renderMypage() {
         <div class="stat-card"><div class="stat-val">${cnt.total}</div><div class="stat-lbl">전체 접수</div></div>
         <div class="stat-card"><div class="stat-val" style="color:var(--orange)">${cnt.active}</div><div class="stat-lbl">진행 중</div></div>
         <div class="stat-card"><div class="stat-val" style="color:var(--green)">${cnt.done}</div><div class="stat-lbl">수리 완료</div></div>`;
-    const SB = {'접수완료':'b-blue','입고확인':'b-orange','수리중':'b-orange','완료':'b-green'};
+    const SB = {'접수완료':'b-blue','발주접수':'b-green','입고확인':'b-orange','수리중':'b-orange','납품준비':'b-orange','완료':'b-green'};
     document.getElementById('my-tbody').innerHTML = my.length ? my.map(r=>`
         <tr><td><strong>${r.id}</strong></td><td>${r.model}</td><td>${r.date}</td>
         <td><span class="badge ${SB[r.status]||'b-gray'}">${r.status}</span></td>
         <td>${r.total?.toLocaleString()}원</td>
-        <td><button onclick="dlPdf('${r.id}')" style="padding:4px 10px;font-size:12px;background:var(--blue);color:white;border:none;border-radius:4px;cursor:pointer;">PDF</button></td></tr>`).join('')
-        : '<tr><td colspan="6" style="text-align:center;padding:28px;color:var(--gray-400);">접수 내역이 없습니다.</td></tr>';
+        <td><button onclick="dlPdf('${r.id}')" style="padding:4px 10px;font-size:12px;background:var(--blue);color:white;border:none;border-radius:4px;cursor:pointer;">PDF</button></td>
+        <td>${r.status==='접수완료' ? `<button onclick="doOrder('${r.id}')" style="padding:4px 10px;font-size:12px;background:var(--green);color:white;border:none;border-radius:4px;cursor:pointer;">발주 진행</button>` : '<span style="font-size:12px;color:var(--gray-400);">—</span>'}</td></tr>`).join('')
+        : '<tr><td colspan="7" style="text-align:center;padding:28px;color:var(--gray-400);">접수 내역이 없습니다.</td></tr>';
+}
+
+function doOrder(id) {
+    if(!confirm('발주를 진행하시겠습니까?\n확정 후에는 담당자를 통해 취소할 수 있습니다.')) return;
+    const r = repairs.find(x=>x.id===id); if(!r) return;
+    r.status = '발주접수';
+    localStorage.setItem('smp_repairs', JSON.stringify(repairs));
+    // [SUPABASE 연결 포인트] supabase.from('repairs').update({status:'발주접수'}).eq('id',id)
+    renderMypage();
+    alert('발주가 접수되었습니다.\n담당자가 확인 후 연락드리겠습니다.');
 }
 
 // ════════════════════════════════════════════════════════
@@ -970,8 +981,8 @@ function renderAdmin() {
         <div class="stat-card"><div class="stat-val" style="color:var(--orange)">${cnt.active}</div><div class="stat-lbl">진행 중</div></div>
         <div class="stat-card"><div class="stat-val" style="color:var(--green)">${cnt.done}</div><div class="stat-lbl">수리 완료</div></div>
         <div class="stat-card"><div class="stat-val">${cnt.users}</div><div class="stat-lbl">등록 고객사</div></div>`;
-    const SB = {'접수완료':'b-blue','입고확인':'b-orange','수리중':'b-orange','완료':'b-green'};
-    const statOpts = ['접수완료','입고확인','수리중','완료'];
+    const SB = {'접수완료':'b-blue','발주접수':'b-green','입고확인':'b-orange','수리중':'b-orange','납품준비':'b-orange','완료':'b-green'};
+    const statOpts = ['접수완료','발주접수','입고확인','수리중','납품준비','완료'];
     document.getElementById('adm-tbody').innerHTML = repairs.length ? repairs.map(r=>`
         <tr><td><strong>${r.id}</strong></td><td>${r.company||'-'}</td><td>${r.model}</td><td>${r.date}</td>
         <td><select onchange="updStatus('${r.id}',this.value)" style="padding:4px 8px;border-radius:4px;border:1px solid var(--gray-200);font-size:13px;font-family:inherit;">${statOpts.map(s=>`<option ${r.status===s?'selected':''}>${s}</option>`).join('')}</select></td>
