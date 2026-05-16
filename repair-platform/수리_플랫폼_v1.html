@@ -77,6 +77,7 @@
         .nav-item { padding: 12px 18px; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; transition: .2s; border-left: 3px solid transparent; }
         .nav-item:hover { background: rgba(255,255,255,.08); }
         .nav-item.active { background: rgba(255,255,255,.1); border-left-color: var(--accent); font-weight: 700; }
+        .nav-badge { display:inline-flex; align-items:center; justify-content:center; min-width:18px; height:18px; padding:0 5px; background:var(--red); color:white; border-radius:9px; font-size:11px; font-weight:700; margin-left:auto; }
         .sb-foot { padding: 16px 18px; border-top: 1px solid rgba(255,255,255,.1); }
         .sb-uname { font-size: 14px; font-weight: 700; color: white; }
         .sb-uinfo { font-size: 12px; color: rgba(255,255,255,.6); margin-top: 2px; }
@@ -518,9 +519,10 @@
                 <!-- [SUPABASE 연결 포인트]
                      supabase.from('repairs').select('*, users(company,name,phone)') -->
                 <div class="stat-grid" id="adm-stats"></div>
+                <div id="adm-pending"></div>
                 <div class="card">
                     <h4>전체 수리 접수 현황</h4>
-                    <table class="tbl"><thead><tr><th>접수번호</th><th>고객사</th><th>모델</th><th>접수일</th><th>진행 상태</th><th>견적 금액</th><th>견적서</th></tr></thead>
+                    <table class="tbl"><thead><tr><th>접수번호</th><th>고객사</th><th>모델</th><th>접수일</th><th>진행 상태</th><th>견적 금액</th><th>견적서</th><th>관리</th></tr></thead>
                     <tbody id="adm-tbody"></tbody></table>
                 </div>
             </div>
@@ -859,6 +861,7 @@ function enterApp() {
     b.className = 'badge '+ROLE_B[curUser.role];
     b.textContent = ROLE_KR[curUser.role];
     showPg('pg-app');
+    if(curUser.role==='admin') updateNavBadge();
     switchTab(menus[0].id);
 }
 
@@ -1020,19 +1023,19 @@ function resetQuote() {
 // ════════════════════════════════════════════════════════
 function renderMypage() {
     const my = repairs.filter(r=>r.phone===curUser.phone);
-    const cnt = { total:my.length, active:my.filter(r=>r.status!=='완료').length, done:my.filter(r=>r.status==='완료').length };
+    const cnt = { total:my.length, active:my.filter(r=>r.status!=='납품완료'&&r.status!=='오더취소').length, done:my.filter(r=>r.status==='납품완료').length };
     document.getElementById('my-stats').innerHTML = `
         <div class="stat-card"><div class="stat-val">${cnt.total}</div><div class="stat-lbl">전체 접수</div></div>
         <div class="stat-card"><div class="stat-val" style="color:var(--orange)">${cnt.active}</div><div class="stat-lbl">진행 중</div></div>
-        <div class="stat-card"><div class="stat-val" style="color:var(--green)">${cnt.done}</div><div class="stat-lbl">수리 완료</div></div>`;
-    const SB = {'접수완료':'b-blue','발주접수':'b-green','입고확인':'b-orange','수리중':'b-orange','납품준비':'b-orange','완료':'b-green'};
+        <div class="stat-card"><div class="stat-val" style="color:var(--green)">${cnt.done}</div><div class="stat-lbl">납품 완료</div></div>`;
+    const SB = {'접수완료':'b-blue','발주접수':'b-green','입고확인':'b-orange','수리중':'b-orange','납품준비':'b-orange','납품완료':'b-green','오더취소':'b-gray'};
     document.getElementById('my-tbody').innerHTML = my.length ? my.map(r=>`
         <tr><td><strong>${r.id}</strong></td><td>${r.model}</td><td>${r.date}</td>
         <td><span class="badge ${SB[r.status]||'b-gray'}">${r.status}</span></td>
         <td>${r.total?.toLocaleString()}원</td>
         <td><button onclick="dlPdf('${r.id}')" style="padding:4px 10px;font-size:12px;background:var(--blue);color:white;border:none;border-radius:4px;cursor:pointer;">PDF</button></td>
         <td>${r.status==='접수완료' ? `<button onclick="doOrder('${r.id}')" style="padding:4px 10px;font-size:12px;background:var(--green);color:white;border:none;border-radius:4px;cursor:pointer;">발주 진행</button>` : '<span style="font-size:12px;color:var(--gray-400);">—</span>'}</td>
-        <td>${['발주접수','입고확인','수리중','납품준비','완료'].includes(r.status) ? `<button onclick="showMyFiles('${r.id}')" style="padding:4px 10px;font-size:12px;background:var(--accent);color:white;border:none;border-radius:4px;cursor:pointer;">파일 보기</button>` : '<span style="font-size:12px;color:var(--gray-400);">—</span>'}</td></tr>`).join('')
+        <td>${['발주접수','입고확인','수리중','납품준비','납품완료'].includes(r.status) ? `<button onclick="showMyFiles('${r.id}')" style="padding:4px 10px;font-size:12px;background:var(--accent);color:white;border:none;border-radius:4px;cursor:pointer;">파일 보기</button>` : '<span style="font-size:12px;color:var(--gray-400);">—</span>'}</td></tr>`).join('')
         : '<tr><td colspan="8" style="text-align:center;padding:28px;color:var(--gray-400);">접수 내역이 없습니다.</td></tr>';
 }
 
@@ -1103,32 +1106,70 @@ function doOrder(id) {
 //  관리자 대시보드
 // ════════════════════════════════════════════════════════
 function renderAdmin() {
-    const cnt = { total:repairs.length, active:repairs.filter(r=>r.status!=='완료').length, done:repairs.filter(r=>r.status==='완료').length, users:users.filter(u=>u.role==='client').length };
+    const cnt = { total:repairs.length, active:repairs.filter(r=>r.status!=='납품완료'&&r.status!=='오더취소').length, done:repairs.filter(r=>r.status==='납품완료').length, users:users.filter(u=>u.role==='client').length };
     document.getElementById('adm-stats').innerHTML = `
         <div class="stat-card"><div class="stat-val">${cnt.total}</div><div class="stat-lbl">전체 접수</div></div>
         <div class="stat-card"><div class="stat-val" style="color:var(--orange)">${cnt.active}</div><div class="stat-lbl">진행 중</div></div>
-        <div class="stat-card"><div class="stat-val" style="color:var(--green)">${cnt.done}</div><div class="stat-lbl">수리 완료</div></div>
+        <div class="stat-card"><div class="stat-val" style="color:var(--green)">${cnt.done}</div><div class="stat-lbl">납품 완료</div></div>
         <div class="stat-card"><div class="stat-val">${cnt.users}</div><div class="stat-lbl">등록 고객사</div></div>`;
-    const SB = {'접수완료':'b-blue','발주접수':'b-green','입고확인':'b-orange','수리중':'b-orange','납품준비':'b-orange','완료':'b-green'};
-    const statOpts = ['접수완료','발주접수','입고확인','수리중','납품준비','완료'];
+    const pending = users.filter(u=>u.role==='client'&&!u.approved);
+    const pendingEl = document.getElementById('adm-pending');
+    if(pending.length) {
+        pendingEl.innerHTML = `<div class="card" style="border-left:4px solid var(--red);margin-bottom:16px;background:var(--orange-light);">
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                <span style="font-size:20px;">🔔</span>
+                <div style="flex:1;">
+                    <div style="font-weight:700;font-size:14px;color:var(--red);margin-bottom:4px;">승인 대기 중인 회원이 ${pending.length}명 있습니다</div>
+                    <div style="font-size:13px;color:var(--gray-600);">${pending.map(u=>`${u.company||u.name}(${u.phone})`).join(', ')}</div>
+                </div>
+                <button onclick="switchTab('tab-settings')" style="padding:8px 16px;background:var(--red);color:white;border:none;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;">회원 관리 →</button>
+            </div>
+        </div>`;
+    } else {
+        pendingEl.innerHTML = '';
+    }
+    const SB = {'접수완료':'b-blue','발주접수':'b-green','입고확인':'b-orange','수리중':'b-orange','납품준비':'b-orange','납품완료':'b-green','오더취소':'b-gray'};
+    const statOpts = ['접수완료','발주접수','입고확인','수리중','납품준비','납품완료','오더취소'];
     document.getElementById('adm-tbody').innerHTML = repairs.length ? repairs.map(r=>`
         <tr><td><strong>${r.id}</strong></td><td>${r.company||'-'}</td><td>${r.model}</td><td>${r.date}</td>
         <td><select onchange="updStatus('${r.id}',this.value)" style="padding:4px 8px;border-radius:4px;border:1px solid var(--gray-200);font-size:13px;font-family:inherit;">${statOpts.map(s=>`<option ${r.status===s?'selected':''}>${s}</option>`).join('')}</select></td>
         <td>${r.total?.toLocaleString()}원</td>
-        <td><button onclick="dlPdf('${r.id}')" style="padding:4px 10px;font-size:12px;background:var(--blue);color:white;border:none;border-radius:4px;cursor:pointer;">PDF</button></td></tr>`).join('')
-        : '<tr><td colspan="7" style="text-align:center;padding:28px;color:var(--gray-400);">접수 내역이 없습니다.</td></tr>';
+        <td><button onclick="dlPdf('${r.id}')" style="padding:4px 10px;font-size:12px;background:var(--blue);color:white;border:none;border-radius:4px;cursor:pointer;">PDF</button></td>
+        <td><button onclick="deleteRepair('${r.id}')" style="padding:4px 8px;font-size:13px;background:none;border:none;cursor:pointer;" title="삭제">🗑️</button></td></tr>`).join('')
+        : '<tr><td colspan="8" style="text-align:center;padding:28px;color:var(--gray-400);">접수 내역이 없습니다.</td></tr>';
 }
 function updStatus(id, s) {
     const r = repairs.find(x=>x.id===id);
     if(r) { r.status=s; localStorage.setItem('smp_repairs',JSON.stringify(repairs)); }
     // [SUPABASE 연결 포인트] supabase.from('repairs').update({status:s}).eq('id',id)
 }
+function deleteRepair(id) {
+    if(!confirm(`접수번호 ${id}를 삭제하시겠습니까?`)) return;
+    if(!confirm('삭제하면 복구할 수 없습니다. 정말 삭제하시겠습니까?')) return;
+    repairs = repairs.filter(r=>r.id!==id);
+    localStorage.setItem('smp_repairs',JSON.stringify(repairs));
+    renderAdmin();
+    // [SUPABASE 연결 포인트] supabase.from('repairs').delete().eq('id',id)
+}
+function updateNavBadge() {
+    const count = users.filter(u=>u.role==='client'&&!u.approved).length;
+    const navSettings = document.getElementById('nav-tab-settings');
+    if(!navSettings) return;
+    const existing = navSettings.querySelector('.nav-badge');
+    if(existing) existing.remove();
+    if(count > 0) {
+        const badge = document.createElement('span');
+        badge.className = 'nav-badge';
+        badge.textContent = count;
+        navSettings.appendChild(badge);
+    }
+}
 
 // ════════════════════════════════════════════════════════
 //  외주업체 화면 (RBAC: 고객정보 마스킹)
 // ════════════════════════════════════════════════════════
 function renderPartner() {
-    const active = repairs.filter(r=>r.status!=='완료');
+    const active = repairs.filter(r=>r.status!=='납품완료'&&r.status!=='오더취소');
     document.getElementById('pt-tbody').innerHTML = active.length ? active.map(r=>`
         <tr><td><strong>${r.id}</strong></td>
         <td>🔒 [위탁 처리건]</td>
@@ -1259,7 +1300,7 @@ function renderSettings() {
 }
 function approveUser(phone) {
     const u=users.find(x=>x.phone===phone);
-    if(u){u.approved=true; sv('smp_users'); renderSettings();}
+    if(u){u.approved=true; sv('smp_users'); renderSettings(); updateNavBadge();}
     // [SUPABASE 연결 포인트] supabase.from('users').update({approved:true}).eq('phone',phone)
 }
 function delUser(phone) { if(confirm('삭제하시겠습니까?')){users=users.filter(u=>u.phone!==phone); sv('smp_users'); renderSettings();} }
