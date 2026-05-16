@@ -187,6 +187,29 @@
         .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 18px; }
         .modal-foot { display: flex; gap: 10px; margin-top: 18px; }
 
+        /* 부품 검색 드롭다운 */
+        .search-wrap { position: relative; }
+        .search-drop { position: absolute; z-index: 999; top: 100%; left: 0; right: 0; background: white; border: 1px solid var(--gray-200); border-radius: 6px; max-height: 200px; overflow-y: auto; box-shadow: 0 4px 14px rgba(0,0,0,.12); }
+        .search-drop-item { padding: 9px 13px; cursor: pointer; font-size: 13px; border-bottom: 1px solid var(--gray-100); display: flex; justify-content: space-between; align-items: center; }
+        .search-drop-item:last-child { border-bottom: none; }
+        .search-drop-item:hover { background: var(--blue-light); }
+        .search-drop-item .part-price { font-size: 12px; color: var(--gray-400); }
+
+        /* 관리자 전용 영역 */
+        .admin-area { background: #fffbeb; border: 1px dashed #f59e0b; border-radius: 8px; padding: 12px 14px; margin-top: 12px; display: none; }
+        .admin-area-title { font-size: 13px; font-weight: 700; color: #d97706; margin-bottom: 8px; }
+
+        /* 카트 라인 */
+        .cart-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--gray-100); font-size: 14px; gap: 8px; }
+        .cart-row:last-child { border-bottom: none; }
+        .cart-row .cart-label { flex: 1; }
+        .cart-row .cart-amt { font-weight: 700; white-space: nowrap; }
+        .cart-row .cart-del { background: none; border: none; color: var(--red); cursor: pointer; font-size: 16px; padding: 0 4px; flex-shrink: 0; }
+
+        /* 키트 목록 */
+        .kit-view-list { background: var(--gray-50); border-radius: 6px; padding: 10px 14px; font-size: 13px; }
+        .kit-view-list li { padding: 3px 0; color: var(--gray-700); }
+
         /* 반응형 */
         @media (max-width: 768px) {
             .sidebar { position: fixed; left: -230px; top: 0; z-index: 100; transition: .3s; }
@@ -405,6 +428,26 @@
                             <div id="q-lines"></div>
                             <div class="q-total"><span>총 견적 합계</span><span id="q-grand" style="color:var(--blue);">0원</span></div>
                         </div>
+
+                        <!-- 부품 추가 영역 -->
+                        <div class="card" style="border:1px solid var(--gray-200);margin-bottom:14px;">
+                            <div style="font-weight:700;font-size:14px;margin-bottom:10px;">🔧 부품 추가</div>
+                            <button class="btn-out" style="width:100%;margin-bottom:10px;font-size:13px;" onclick="toggleKitView()">📋 모델 기본 키트 보기 / 숨기기</button>
+                            <div id="kit-view" style="display:none;margin-bottom:12px;"></div>
+                            <div class="search-wrap">
+                                <input type="text" id="part-search" placeholder="부품번호 또는 품명 입력 (단종 자동 제외)..." style="width:100%;padding:10px;border:1px solid var(--gray-200);border-radius:6px;font-family:inherit;font-size:14px;box-sizing:border-box;" oninput="searchPartsQ(this.value)" autocomplete="off">
+                                <div class="search-drop" id="part-drop" style="display:none;"></div>
+                            </div>
+                            <!-- 관리자 전용: 합계 직접 입력 -->
+                            <div class="admin-area" id="q-admin-area">
+                                <div class="admin-area-title">⚙️ 관리자 전용 — 견적 합계 직접 수정</div>
+                                <div style="display:flex;gap:8px;">
+                                    <input type="number" id="custom-total-inp" placeholder="금액 (원 단위)" style="flex:1;padding:8px;border:1px solid #f59e0b;border-radius:6px;font-family:inherit;font-size:14px;">
+                                    <button class="btn-bl" style="padding:8px 18px;" onclick="applyCustomTotal()">적용</button>
+                                </div>
+                            </div>
+                        </div>
+
                         <p style="font-size:12px;color:var(--gray-400);line-height:1.8;margin-bottom:14px;">
                             ※ 본 견적은 예상 금액이며, 실제 분해 후 추가 비용이 발생할 수 있습니다.<br>
                             ※ 확정 견적은 입고 후 분해 점검 완료 시 별도 안내됩니다.
@@ -508,6 +551,52 @@
                         <!-- [SUPABASE 연결 포인트] supabase.from('inspection_reports').insert({repair_id, items, inspector_id}) -->
                         <button class="btn-bl" style="width:100%;padding:12px;margin-top:14px;" onclick="saveChecklist()">점검 완료 저장</button>
                     </div>
+                </div>
+            </div>
+
+            <!-- ── 탭: 수리 카트 (관리자 전용) ── -->
+            <div class="tab" id="tab-cart">
+                <div class="card">
+                    <h4>📦 분해 후 정밀 견적 관리</h4>
+                    <p style="font-size:13px;color:var(--gray-400);margin-bottom:14px;">입고된 펌프를 분해한 뒤 실제 교체 부품을 추가하여 확정 견적을 산출합니다.</p>
+                    <div class="fg">
+                        <label style="font-size:14px;font-weight:700;">수리 접수 건 선택</label>
+                        <select id="cart-sel" onchange="loadCartRepair(this.value)" style="width:100%;padding:10px;border:1px solid var(--gray-200);border-radius:6px;font-family:inherit;font-size:14px;margin-top:6px;">
+                            <option value="">— 접수 건을 선택하세요 —</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="cart-detail" style="display:none;">
+                    <div class="card" style="border:1px solid var(--gray-200);">
+                        <h4>견적 항목</h4>
+                        <div id="cart-info" style="font-size:13px;color:var(--gray-500);margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--gray-100);"></div>
+                        <div id="cart-lines"></div>
+                        <div class="q-total"><span>확정 견적 합계</span><span id="cart-grand" style="color:var(--blue);">0원</span></div>
+                    </div>
+                    <div class="card" style="border:1px solid var(--gray-200);">
+                        <h4>🔍 부품 검색하여 추가</h4>
+                        <div class="search-wrap" style="margin-bottom:14px;">
+                            <input type="text" id="cart-search" placeholder="부품번호 또는 품명 입력 (단종 자동 제외)..." style="width:100%;padding:10px;border:1px solid var(--gray-200);border-radius:6px;font-family:inherit;font-size:14px;box-sizing:border-box;" oninput="searchCartParts(this.value)" autocomplete="off">
+                            <div class="search-drop" id="cart-drop" style="display:none;"></div>
+                        </div>
+                        <div>
+                            <label style="font-size:13px;font-weight:700;display:block;margin-bottom:6px;">📋 키트에서 일괄 추가</label>
+                            <div style="display:flex;gap:8px;">
+                                <select id="cart-kit-sel" style="flex:1;padding:10px;border:1px solid var(--gray-200);border-radius:6px;font-family:inherit;font-size:13px;">
+                                    <option value="">키트 선택...</option>
+                                </select>
+                                <button class="btn-out" style="white-space:nowrap;" onclick="addKitToCart()">일괄 추가</button>
+                            </div>
+                        </div>
+                        <div class="admin-area" style="display:block;margin-top:14px;">
+                            <div class="admin-area-title">⚙️ 합계 직접 수정</div>
+                            <div style="display:flex;gap:8px;">
+                                <input type="number" id="cart-override" placeholder="금액 (원 단위)" style="flex:1;padding:8px;border:1px solid #f59e0b;border-radius:6px;font-family:inherit;font-size:14px;">
+                                <button class="btn-bl" style="padding:8px 18px;" onclick="applyCartOverride()">적용</button>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn-bl" style="width:100%;padding:14px;" onclick="saveCartQuote()">💾 확정 견적 저장</button>
                 </div>
             </div>
 
@@ -680,7 +769,7 @@ function doRegister() {
 //  앱 진입 & RBAC 사이드바
 // ════════════════════════════════════════════════════════
 const MENUS = {
-    admin:   [{id:'tab-quote',i:'🔧',n:'수리 견적 조회'},{id:'tab-admin',i:'📊',n:'전체 현황'},{id:'tab-mypage',i:'👤',n:'마이페이지'},{id:'tab-settings',i:'⚙️',n:'마스터 설정'}],
+    admin:   [{id:'tab-quote',i:'🔧',n:'수리 견적 조회'},{id:'tab-admin',i:'📊',n:'전체 현황'},{id:'tab-cart',i:'📦',n:'수리 카트'},{id:'tab-mypage',i:'👤',n:'마이페이지'},{id:'tab-settings',i:'⚙️',n:'마스터 설정'}],
     partner: [{id:'tab-partner',i:'🔩',n:'입고 펌프 작업'}],
     client:  [{id:'tab-quote',i:'🔧',n:'수리 견적 조회'},{id:'tab-mypage',i:'📋',n:'내 수리 이력'}]
 };
@@ -712,6 +801,7 @@ function switchTab(id) {
     if(id==='tab-mypage')   renderMypage();
     if(id==='tab-partner')  renderPartner();
     if(id==='tab-settings') renderSettings();
+    if(id==='tab-cart')     renderCart();
 }
 
 // ════════════════════════════════════════════════════════
@@ -802,11 +892,27 @@ function calcQuote() {
         warnHtml = `<div class="warn-banner"><div class="warn-ico">⚠️</div><div class="warn-txt"><strong>예방 정비 주의 – ${rule.msg}</strong>${Q.hours.toLocaleString()}시간 ${Q.proc==='harsh'?'가혹 공정':'일반 공정'} 가동으로 <b>${rule.parts}</b>를 권장합니다. 미교체 시 6개월 내 고착 위험이 높습니다.</div></div>`;
     }
     document.getElementById('warn-area').innerHTML = warnHtml;
-    let total = 0;
-    document.getElementById('q-lines').innerHTML = Q.items.map(it=>{ total+=it.amt; return `<div class="q-row${it.added?' added':''}"><span>${it.added?'+ ':''}${it.label}</span><span>${it.amt.toLocaleString()}원</span></div>`; }).join('');
-    document.getElementById('q-grand').textContent = total.toLocaleString()+'원';
-    Q.total = total;
+    updateQuoteDisplay();
+    // 관리자 전용 영역 표시
+    const adminArea = document.getElementById('q-admin-area');
+    if(adminArea) adminArea.style.display = curUser?.role==='admin' ? 'block' : 'none';
+    // 부품 검색창 초기화
+    const ps = document.getElementById('part-search'); if(ps) ps.value='';
+    const pd = document.getElementById('part-drop');   if(pd) pd.style.display='none';
     goQ(3);
+}
+
+function updateQuoteDisplay() {
+    let total = 0;
+    document.getElementById('q-lines').innerHTML = Q.items.map((it, idx) => {
+        total += it.amt;
+        const delBtn = it.added
+            ? `<button class="cart-del" onclick="removePartFromQuote(${idx})" title="항목 삭제">❌</button>`
+            : '';
+        return `<div class="cart-row"><span class="cart-label${it.added?' added':''}">${it.added?'＋ ':''}${it.label}</span><span class="cart-amt">${it.amt.toLocaleString()}원</span>${delBtn}</div>`;
+    }).join('');
+    Q.total = total;
+    document.getElementById('q-grand').textContent = total.toLocaleString()+'원';
 }
 
 function submitRepair() {
@@ -1017,6 +1123,167 @@ async function dlPdf(id) {
     const pdf=new jsPDF('p','mm','a4');
     pdf.addImage(canvas.toDataURL('image/png'),'PNG',0,0,210,(canvas.height*210)/canvas.width);
     pdf.save('견적서_'+r.id+'.pdf');
+}
+
+// ════════════════════════════════════════════════════════
+//  견적 Step3 — 부품 추가 / 삭제 / 키트 보기
+// ════════════════════════════════════════════════════════
+function removePartFromQuote(idx) {
+    if(Q.items[idx] && !Q.items[idx].added) { alert('기본 패키지는 삭제할 수 없습니다.'); return; }
+    Q.items.splice(idx, 1);
+    updateQuoteDisplay();
+}
+
+function searchPartsQ(val) {
+    const drop = document.getElementById('part-drop');
+    if(!val || val.length < 1) { drop.style.display='none'; return; }
+    const kw = val.toLowerCase();
+    const hits = priceDB.filter(p => p.status !== '단종' && (p.part.toLowerCase().includes(kw) || (p.name||'').toLowerCase().includes(kw))).slice(0, 10);
+    if(!hits.length) { drop.style.display='none'; return; }
+    drop.innerHTML = hits.map(p => `<div class="search-drop-item" onclick="addPartToQuote('${p.part}','${(p.name||'').replace(/'/g,"\\'")}',${p.cost})"><span>${p.part} — ${p.name||''}</span><span class="part-price">${(p.cost||0).toLocaleString()}원</span></div>`).join('');
+    drop.style.display = 'block';
+}
+
+function addPartToQuote(part, name, cost) {
+    const margin = parseFloat(document.getElementById('q-margin').value) || 1;
+    Q.items.push({ label:`${part} ${name}`, amt: Math.round(cost * margin), added:true });
+    updateQuoteDisplay();
+    document.getElementById('part-search').value = '';
+    document.getElementById('part-drop').style.display = 'none';
+}
+
+let kitViewOpen = false;
+function toggleKitView() {
+    const el = document.getElementById('kit-view');
+    kitViewOpen = !kitViewOpen;
+    if(!kitViewOpen) { el.style.display='none'; return; }
+    const items = kitDB[Q.model] || [];
+    if(!items.length) {
+        el.innerHTML = `<p style="font-size:13px;color:var(--gray-400);">「${Q.model}」 모델의 키트 데이터가 없습니다.<br>마스터 설정에서 키트 파일을 먼저 업로드해주세요.</p>`;
+    } else {
+        el.innerHTML = `<div class="kit-view-list"><strong style="font-size:13px;display:block;margin-bottom:6px;">${Q.model} 기본 교체 파트 (${items.length}종)</strong><ul style="margin:0;padding-left:18px;">${items.map(i=>`<li>${i}</li>`).join('')}</ul></div>`;
+    }
+    el.style.display = 'block';
+}
+
+function applyCustomTotal() {
+    const val = parseInt(document.getElementById('custom-total-inp').value);
+    if(!val || val <= 0) { alert('올바른 금액을 입력해주세요.'); return; }
+    Q.total = val;
+    document.getElementById('q-grand').textContent = val.toLocaleString()+'원';
+    alert('견적 합계가 ' + val.toLocaleString() + '원으로 수정되었습니다.');
+}
+
+// 검색 드롭다운 외부 클릭 시 닫기
+document.addEventListener('click', e => {
+    if(!e.target.closest('.search-wrap')) {
+        const d1 = document.getElementById('part-drop');
+        const d2 = document.getElementById('cart-drop');
+        if(d1) d1.style.display='none';
+        if(d2) d2.style.display='none';
+    }
+});
+
+// ════════════════════════════════════════════════════════
+//  수리 카트 탭 (관리자 전용)
+// ════════════════════════════════════════════════════════
+let cartRid = null; // 카트에서 현재 편집 중인 수리 ID
+
+function renderCart() {
+    const sel = document.getElementById('cart-sel');
+    sel.innerHTML = '<option value="">— 접수 건을 선택하세요 —</option>' +
+        repairs.map(r => `<option value="${r.id}">[${r.status}] ${r.id} — ${r.company} (${r.model})</option>`).join('');
+    // 키트 드롭다운
+    const ks = document.getElementById('cart-kit-sel');
+    if(ks) ks.innerHTML = '<option value="">키트 선택...</option>' + Object.keys(kitDB).map(k=>`<option value="${k}">${k} (${kitDB[k].length}종)</option>`).join('');
+    document.getElementById('cart-detail').style.display = 'none';
+    cartRid = null;
+}
+
+function loadCartRepair(id) {
+    if(!id) { document.getElementById('cart-detail').style.display='none'; cartRid=null; return; }
+    const r = repairs.find(x=>x.id===id);
+    if(!r) return;
+    cartRid = id;
+    document.getElementById('cart-info').innerHTML = `<strong>${r.id}</strong> &nbsp;|&nbsp; ${r.company} &nbsp;|&nbsp; ${r.model} &nbsp;|&nbsp; 진행 상태: <strong>${r.status}</strong>`;
+    renderCartLines(r);
+    document.getElementById('cart-detail').style.display = 'block';
+    document.getElementById('cart-search').value = '';
+    document.getElementById('cart-drop').style.display = 'none';
+}
+
+function renderCartLines(r) {
+    let total = 0;
+    document.getElementById('cart-lines').innerHTML = (r.items||[]).map((it, idx) => {
+        total += it.amt;
+        const delBtn = it.added
+            ? `<button class="cart-del" onclick="removeCartPart(${idx})" title="항목 삭제">❌</button>`
+            : '';
+        return `<div class="cart-row"><span class="cart-label">${it.added?'＋ ':''}${it.label}</span><span class="cart-amt">${it.amt.toLocaleString()}원</span>${delBtn}</div>`;
+    }).join('') || '<p style="color:var(--gray-400);font-size:13px;text-align:center;padding:12px;">항목이 없습니다.</p>';
+    document.getElementById('cart-grand').textContent = total.toLocaleString()+'원';
+}
+
+function removeCartPart(idx) {
+    const r = repairs.find(x=>x.id===cartRid); if(!r) return;
+    if(r.items[idx] && !r.items[idx].added) { alert('기본 패키지는 삭제할 수 없습니다.'); return; }
+    r.items.splice(idx, 1);
+    renderCartLines(r);
+}
+
+function searchCartParts(val) {
+    const drop = document.getElementById('cart-drop');
+    if(!val || val.length < 1) { drop.style.display='none'; return; }
+    const kw = val.toLowerCase();
+    const hits = priceDB.filter(p => p.status !== '단종' && (p.part.toLowerCase().includes(kw) || (p.name||'').toLowerCase().includes(kw))).slice(0, 10);
+    if(!hits.length) { drop.style.display='none'; return; }
+    drop.innerHTML = hits.map(p => `<div class="search-drop-item" onclick="addPartToCart('${p.part}','${(p.name||'').replace(/'/g,"\\'")}',${p.cost})"><span>${p.part} — ${p.name||''}</span><span class="part-price">${(p.cost||0).toLocaleString()}원</span></div>`).join('');
+    drop.style.display = 'block';
+}
+
+function addPartToCart(part, name, cost) {
+    const r = repairs.find(x=>x.id===cartRid); if(!r) return;
+    if(!r.items) r.items = [];
+    r.items.push({ label:`${part} ${name}`, amt: cost, added:true });
+    renderCartLines(r);
+    document.getElementById('cart-search').value = '';
+    document.getElementById('cart-drop').style.display = 'none';
+}
+
+function addKitToCart() {
+    const r = repairs.find(x=>x.id===cartRid); if(!r) return;
+    const kitKey = document.getElementById('cart-kit-sel').value;
+    if(!kitKey) { alert('키트를 선택해주세요.'); return; }
+    const items = kitDB[kitKey] || [];
+    if(!items.length) { alert('해당 키트에 항목이 없습니다.'); return; }
+    if(!r.items) r.items = [];
+    items.forEach(name => r.items.push({ label: name, amt: 0, added:true }));
+    renderCartLines(r);
+    alert(`${kitKey} 키트 ${items.length}개 항목이 추가되었습니다.\n금액은 0원으로 추가되었으니 단가표 확인 후 직접 수정해주세요.`);
+}
+
+function applyCartOverride() {
+    const r = repairs.find(x=>x.id===cartRid); if(!r) return;
+    const val = parseInt(document.getElementById('cart-override').value);
+    if(!val || val <= 0) { alert('올바른 금액을 입력해주세요.'); return; }
+    r.total = val;
+    document.getElementById('cart-grand').textContent = val.toLocaleString()+'원';
+    alert('합계가 ' + val.toLocaleString() + '원으로 수정되었습니다.');
+}
+
+function saveCartQuote() {
+    const r = repairs.find(x=>x.id===cartRid); if(!r) return;
+    // cart-grand의 현재 표시값으로 total 동기화
+    let total = 0;
+    (r.items||[]).forEach(it => total += (it.amt||0));
+    // override가 적용됐다면 이미 r.total에 세팅됨, 아니면 items 합산
+    if(!r.total || document.getElementById('cart-grand').textContent !== (r.total||0).toLocaleString()+'원') {
+        r.total = total;
+    }
+    localStorage.setItem('smp_repairs', JSON.stringify(repairs));
+    // [SUPABASE 연결 포인트] supabase.from('repairs').update({items:r.items, total:r.total}).eq('id',r.id)
+    alert('✅ 확정 견적이 저장되었습니다!\n접수번호: ' + cartRid + '\n합계: ' + (r.total||total).toLocaleString() + '원');
+    renderCart();
 }
 
 // ════════════════════════════════════════════════════════
