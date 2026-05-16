@@ -490,8 +490,19 @@
                 <div class="stat-grid" id="my-stats" style="grid-template-columns:repeat(3,1fr);"></div>
                 <div class="card">
                     <h4>내 수리 접수 내역</h4>
-                    <table class="tbl"><thead><tr><th>접수번호</th><th>모델</th><th>접수일</th><th>진행 상태</th><th>견적 금액</th><th>견적서</th><th>발주</th></tr></thead>
+                    <table class="tbl"><thead><tr><th>접수번호</th><th>모델</th><th>접수일</th><th>진행 상태</th><th>견적 금액</th><th>견적서</th><th>발주</th><th>파일</th></tr></thead>
                     <tbody id="my-tbody"></tbody></table>
+                </div>
+                <!-- 파일 미리보기 카드 (파일 보기 클릭 시 표시) -->
+                <div class="card" id="my-files" style="display:none;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+                        <h4 style="margin:0;">📷 분해 사진 &amp; 검사 성적서</h4>
+                        <button class="btn-out" style="font-size:12px;padding:5px 12px;" onclick="document.getElementById('my-files').style.display='none'">닫기</button>
+                    </div>
+                    <div id="my-file-content"></div>
+                    <div style="margin-top:14px;">
+                        <button class="btn-bl" style="width:100%;padding:11px;" onclick="dlFilePdf()">📥 PDF로 다운로드</button>
+                    </div>
                 </div>
             </div>
 
@@ -957,8 +968,62 @@ function renderMypage() {
         <td><span class="badge ${SB[r.status]||'b-gray'}">${r.status}</span></td>
         <td>${r.total?.toLocaleString()}원</td>
         <td><button onclick="dlPdf('${r.id}')" style="padding:4px 10px;font-size:12px;background:var(--blue);color:white;border:none;border-radius:4px;cursor:pointer;">PDF</button></td>
-        <td>${r.status==='접수완료' ? `<button onclick="doOrder('${r.id}')" style="padding:4px 10px;font-size:12px;background:var(--green);color:white;border:none;border-radius:4px;cursor:pointer;">발주 진행</button>` : '<span style="font-size:12px;color:var(--gray-400);">—</span>'}</td></tr>`).join('')
-        : '<tr><td colspan="7" style="text-align:center;padding:28px;color:var(--gray-400);">접수 내역이 없습니다.</td></tr>';
+        <td>${r.status==='접수완료' ? `<button onclick="doOrder('${r.id}')" style="padding:4px 10px;font-size:12px;background:var(--green);color:white;border:none;border-radius:4px;cursor:pointer;">발주 진행</button>` : '<span style="font-size:12px;color:var(--gray-400);">—</span>'}</td>
+        <td>${['발주접수','입고확인','수리중','납품준비','완료'].includes(r.status) ? `<button onclick="showMyFiles('${r.id}')" style="padding:4px 10px;font-size:12px;background:var(--accent);color:white;border:none;border-radius:4px;cursor:pointer;">파일 보기</button>` : '<span style="font-size:12px;color:var(--gray-400);">—</span>'}</td></tr>`).join('')
+        : '<tr><td colspan="8" style="text-align:center;padding:28px;color:var(--gray-400);">접수 내역이 없습니다.</td></tr>';
+}
+
+function showMyFiles(id) {
+    const files = fileStore[id] || {photo:[], report:[]};
+    const photos  = (files.photo  || []).filter(f => f.data);
+    const reports = (files.report || []);
+    if(!photos.length && !reports.length) {
+        alert('아직 업로드된 파일이 없습니다.\n수리 진행 후 담당자가 업로드하면 확인하실 수 있습니다.');
+        return;
+    }
+    const photoHtml = photos.length
+        ? `<div style="margin-bottom:16px;">
+               <p style="font-weight:700;font-size:14px;margin-bottom:8px;">📷 분해 사진 (${photos.length}장)</p>
+               <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;">
+                   ${photos.map(f=>`<img src="${f.data}" alt="${f.name}" style="width:100%;border-radius:6px;border:1px solid var(--gray-200);object-fit:cover;aspect-ratio:1;">`).join('')}
+               </div>
+           </div>`
+        : `<p style="font-size:13px;color:var(--gray-400);margin-bottom:12px;">분해 사진이 아직 없습니다.</p>`;
+    const reportHtml = reports.length
+        ? `<div>
+               <p style="font-weight:700;font-size:14px;margin-bottom:8px;">📄 검사 성적서 (${reports.length}건)</p>
+               ${reports.map(f=>`<div class="file-item">📄 ${f.name||f}</div>`).join('')}
+           </div>`
+        : '';
+    document.getElementById('my-file-content').innerHTML = photoHtml + reportHtml;
+    const card = document.getElementById('my-files');
+    card.dataset.rid = id;
+    card.style.display = 'block';
+    card.scrollIntoView({behavior:'smooth'});
+}
+
+async function dlFilePdf() {
+    const id = document.getElementById('my-files').dataset.rid;
+    const files  = fileStore[id] || {};
+    const photos = (files.photo || []).filter(f => f.data);
+    if(!photos.length) { alert('다운로드할 사진이 없습니다.'); return; }
+    const {jsPDF} = window.jspdf;
+    const pdf = new jsPDF('p','mm','a4');
+    pdf.setFontSize(16); pdf.setFont(undefined,'bold');
+    pdf.text('분해 점검 사진 보고서', 105, 18, {align:'center'});
+    pdf.setFontSize(11); pdf.setFont(undefined,'normal');
+    pdf.text('접수번호: ' + id, 20, 28);
+    pdf.text('(주)스마텍  |  031-204-7170', 20, 35);
+    pdf.line(20, 39, 190, 39);
+    let y = 46;
+    for(const f of photos) {
+        if(y + 75 > 285) { pdf.addPage(); y = 15; }
+        try { pdf.addImage(f.data, 'JPEG', 20, y, 80, 60); } catch(e) {}
+        pdf.setFontSize(9);
+        pdf.text(f.name, 22, y + 63);
+        y += 70;
+    }
+    pdf.save('분해사진_' + id + '.pdf');
 }
 
 function doOrder(id) {
@@ -1019,25 +1084,56 @@ function openUpload(id) {
 function onFileDrop(e, type) {
     e.preventDefault(); e.currentTarget.classList.remove('drag-over');
     if(!selRid) return;
-    const files = Array.from(e.dataTransfer.files).map(f=>f.name);
+    const files = Array.from(e.dataTransfer.files);
     if(!fileStore[selRid]) fileStore[selRid]={photo:[],report:[]};
-    fileStore[selRid][type] = [...(fileStore[selRid][type]||[]), ...files];
-    localStorage.setItem('smp_files',JSON.stringify(fileStore)); renderFileLists();
     // [SUPABASE 연결 포인트] for each file: supabase.storage.from('repair-photos').upload(`${selRid}/${f.name}`, f)
+    let done = 0;
+    files.forEach(f => {
+        const reader = new FileReader();
+        reader.onload = ev => {
+            fileStore[selRid][type].push({ name: f.name, data: ev.target.result, mime: f.type });
+            done++;
+            if(done === files.length) {
+                try { localStorage.setItem('smp_files', JSON.stringify(fileStore)); } catch(err) { alert('저장 공간이 부족합니다. 파일 크기를 줄이거나 기존 파일을 삭제해주세요.'); }
+                renderFileLists();
+            }
+        };
+        reader.readAsDataURL(f);
+    });
 }
 function onFileSelect(inp, type) {
     if(!selRid) return;
-    const files = Array.from(inp.files).map(f=>f.name);
+    const files = Array.from(inp.files);
     if(!fileStore[selRid]) fileStore[selRid]={photo:[],report:[]};
-    fileStore[selRid][type] = [...(fileStore[selRid][type]||[]), ...files];
-    localStorage.setItem('smp_files',JSON.stringify(fileStore)); renderFileLists();
+    let done = 0;
+    files.forEach(f => {
+        const reader = new FileReader();
+        reader.onload = ev => {
+            fileStore[selRid][type].push({ name: f.name, data: ev.target.result, mime: f.type });
+            done++;
+            if(done === files.length) {
+                try { localStorage.setItem('smp_files', JSON.stringify(fileStore)); } catch(err) { alert('저장 공간이 부족합니다. 파일 크기를 줄이거나 기존 파일을 삭제해주세요.'); }
+                renderFileLists();
+            }
+        };
+        reader.readAsDataURL(f);
+    });
 }
 function renderFileLists() {
     const s = fileStore[selRid]||{photo:[],report:[]};
-    document.getElementById('photo-list').innerHTML = (s.photo||[]).map(f=>`<div class="file-item">📷 ${f}<span onclick="delF('photo','${f}')" style="cursor:pointer;color:var(--red);">✕</span></div>`).join('');
-    document.getElementById('report-list').innerHTML = (s.report||[]).map(f=>`<div class="file-item">📄 ${f}<span onclick="delF('report','${f}')" style="cursor:pointer;color:var(--red);">✕</span></div>`).join('');
+    document.getElementById('photo-list').innerHTML = (s.photo||[]).map((f,i)=>{
+        const thumb = f.data && f.mime?.startsWith('image/') ? `<img src="${f.data}" style="width:56px;height:56px;object-fit:cover;border-radius:4px;flex-shrink:0;">` : '📷';
+        return `<div class="file-item" style="align-items:center;gap:8px;">${thumb}<span style="flex:1;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${f.name||f}</span><span onclick="delF('photo',${i})" style="cursor:pointer;color:var(--red);flex-shrink:0;">✕</span></div>`;
+    }).join('') || '<p style="font-size:13px;color:var(--gray-400);">업로드된 사진이 없습니다.</p>';
+    document.getElementById('report-list').innerHTML = (s.report||[]).map((f,i)=>
+        `<div class="file-item">📄 <span style="flex:1;font-size:13px;">${f.name||f}</span><span onclick="delF('report',${i})" style="cursor:pointer;color:var(--red);">✕</span></div>`
+    ).join('') || '<p style="font-size:13px;color:var(--gray-400);">업로드된 성적서가 없습니다.</p>';
 }
-function delF(type,name) { fileStore[selRid][type]=fileStore[selRid][type].filter(f=>f!==name); localStorage.setItem('smp_files',JSON.stringify(fileStore)); renderFileLists(); }
+function delF(type, idx) {
+    fileStore[selRid][type].splice(idx, 1);
+    try { localStorage.setItem('smp_files', JSON.stringify(fileStore)); } catch(e) {}
+    renderFileLists();
+}
 function saveChecklist() { alert('점검 내용이 저장되었습니다.\n[Supabase 연결 후] 관리자에게 실시간 알림이 발송됩니다.'); }
 
 // ════════════════════════════════════════════════════════
