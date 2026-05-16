@@ -33,7 +33,7 @@
         .auth-sub { font-size: 14px; color: var(--blue); margin-bottom: 24px; }
         .fg { margin-bottom: 16px; }
         .fg label { display: block; font-size: 14px; font-weight: 600; color: var(--gray-800); margin-bottom: 6px; }
-        .fg input { width: 100%; padding: 12px 14px; border: 1px solid var(--gray-200); border-radius: 8px; font-size: 15px; outline: none; transition: .2s; font-family: inherit; }
+        .fg input { width: 100%; padding: 12px 14px; border: 1px solid var(--gray-200); border-radius: 8px; font-size: 15px; outline: none; transition: .2s; font-family: inherit; box-sizing: border-box; }
         .fg input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
         .chk-row { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; font-size: 14px; color: var(--gray-600); cursor: pointer; }
         .chk-row input { width: 16px; height: 16px; cursor: pointer; }
@@ -243,7 +243,7 @@
             <div class="auth-sub">스마텍 회원 전용 서비스입니다</div>
             <div class="fg">
                 <label>전화번호</label>
-                <input type="tel" id="l-phone" placeholder="010-1234-5678" oninput="fmtPhone(this)" onkeydown="if(event.key==='Enter')doLogin()">
+                <input type="tel" id="l-phone" placeholder="010-1234-5678" maxlength="13" oninput="fmtPhone(this)" onkeydown="if(event.key==='Enter')doLogin()">
             </div>
             <div class="fg">
                 <label>비밀번호</label>
@@ -304,7 +304,7 @@
                     <div class="fg"><label>상호명 <span style="color:var(--red)">*</span></label><input type="text" id="r-company" placeholder="(주)스마텍"></div>
                     <div class="fg"><label>대표자명 <span style="color:var(--red)">*</span></label><input type="text" id="r-name" placeholder="홍길동"></div>
                     <div class="fg"><label>주소</label><input type="text" id="r-addr" placeholder="경기도 수원시..."></div>
-                    <div class="fg"><label>연락처 <span style="color:var(--red)">*</span></label><input type="tel" id="r-tel" placeholder="010-0000-0000" oninput="fmtPhone(this)"></div>
+                    <div class="fg"><label>연락처 <span style="color:var(--red)">*</span></label><input type="tel" id="r-tel" placeholder="010-0000-0000" maxlength="13" onblur="fmtPhone(this)"></div>
                 </div>
                 <div class="fg"><label>이메일 <span style="color:var(--red)">*</span></label><input type="email" id="r-email" placeholder="example@company.com"></div>
                 <!-- [SUPABASE 연결 포인트] 이메일 인증: supabase.auth.signUp({ email }) -->
@@ -316,7 +316,7 @@
 
             <!-- Step 3: 계정 설정 -->
             <div class="sc" id="rs3">
-                <div class="fg"><label>아이디 (전화번호)</label><input type="tel" id="r-phone" placeholder="010-0000-0000" oninput="fmtPhone(this)"></div>
+                <div class="fg"><label>아이디 (전화번호)</label><input type="tel" id="r-phone" placeholder="010-0000-0000" maxlength="13" onblur="fmtPhone(this)"></div>
                 <div class="fg"><label>비밀번호 (6자 이상)</label><input type="password" id="r-pw1"></div>
                 <div class="fg"><label>비밀번호 확인</label><input type="password" id="r-pw2"></div>
                 <!-- [SUPABASE 연결 포인트]
@@ -788,10 +788,10 @@ function showPg(id) { document.querySelectorAll('.page').forEach(p=>p.classList.
 //  유틸
 // ════════════════════════════════════════════════════════
 function fmtPhone(el) {
-    let v = el.value.replace(/\D/g,'');
-    if(v.length<=3) el.value=v;
-    else if(v.length<=7) el.value=v.slice(0,3)+'-'+v.slice(3);
-    else el.value=v.slice(0,3)+'-'+v.slice(3,7)+'-'+v.slice(7,11);
+    const v = el.value.replace(/\D/g,'').slice(0, 11);
+    if(v.length <= 3)      el.value = v;
+    else if(v.length <= 7) el.value = v.slice(0,3) + '-' + v.slice(3);
+    else                   el.value = v.slice(0,3) + '-' + v.slice(3,7) + '-' + v.slice(7);
 }
 function cleanPhone(s) { return s.replace(/-/g,''); }
 
