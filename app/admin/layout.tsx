@@ -1,6 +1,6 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -126,16 +126,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           {/* 우측 사용자 정보 + 모바일 햄버거 */}
           <div className="flex items-center gap-4">
-            <div className="hidden md:flex items-center gap-2">
-              <span className="kpi-status" />
-              <div className="text-right leading-tight">
-                <div className="text-[12px] text-ink truncate max-w-[160px]">
-                  {(session.user as any)?.name ?? session.user?.email}
-                </div>
-                <div className="mono text-[9px] text-edred tracking-[0.18em] uppercase">
-                  ADMIN
+            <div className="hidden md:flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <span className="kpi-status" />
+                <div className="text-right leading-tight">
+                  <div className="text-[12px] text-ink truncate max-w-[160px]">
+                    {(session.user as any)?.name ?? session.user?.email}
+                  </div>
+                  <div className="mono text-[9px] text-edred tracking-[0.18em] uppercase">
+                    ADMIN
+                  </div>
                 </div>
               </div>
+              <button
+                onClick={() => signOut({ callbackUrl: "/auth/login" })}
+                className="mono text-[10px] tracking-[0.1em] uppercase border hair text-dim px-3 py-1.5 hover:border-ink hover:text-ink transition-colors"
+              >
+                로그아웃
+              </button>
             </div>
 
             {/* 모바일 햄버거 */}
@@ -213,16 +221,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 );
               })}
               <div className="pt-3 pb-2 border-t hair mt-2">
-                <div className="flex items-center gap-2">
-                  <span className="kpi-status" />
-                  <div className="leading-tight">
-                    <div className="text-[12px] text-ink">
-                      {(session.user as any)?.name ?? session.user?.email}
-                    </div>
-                    <div className="mono text-[9px] text-edred tracking-[0.18em] uppercase">
-                      ADMIN
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="kpi-status" />
+                    <div className="leading-tight">
+                      <div className="text-[12px] text-ink">
+                        {(session.user as any)?.name ?? session.user?.email}
+                      </div>
+                      <div className="mono text-[9px] text-edred tracking-[0.18em] uppercase">
+                        ADMIN
+                      </div>
                     </div>
                   </div>
+                  <button
+                    onClick={() => signOut({ callbackUrl: "/auth/login" })}
+                    className="mono text-[10px] tracking-[0.1em] uppercase border hair text-dim px-3 py-1.5 hover:border-ink hover:text-ink transition-colors"
+                  >
+                    로그아웃
+                  </button>
                 </div>
               </div>
             </div>

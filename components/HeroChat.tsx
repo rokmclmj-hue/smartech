@@ -97,6 +97,19 @@ export default function HeroChat() {
         )}
       </div>
 
+      {/* 상담 완료 후 전문가 연결 CTA */}
+      {!loading && messages.length > 1 && messages[messages.length - 1]?.role === "assistant" && (
+        <div className="px-5 py-3 border-t hair bg-[#F6F4EF] flex items-center justify-between gap-3">
+          <span className="text-[12px] text-[#6A6660]">AI 분석 결과로 전문가 상담을 신청하세요.</span>
+          <button
+            onClick={() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })}
+            className="shrink-0 bg-ink text-paper px-4 py-2 text-[12px] hover:bg-[#c00020] transition-colors"
+          >
+            전문가 상담 →
+          </button>
+        </div>
+      )}
+
       {/* Quick chips */}
       <div className="px-5 py-3 border-t hair flex flex-wrap gap-2">
         {QUICK_CHIPS.map((c) => (

@@ -1,0 +1,1725 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스마텍 수리 플랫폼 | SMARTECH Repair</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --blue: #2563EB; --blue-dark: #1d4ed8; --blue-light: #dbeafe;
+            --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb;
+            --gray-400: #9ca3af; --gray-600: #4b5563; --gray-800: #1f2937;
+            --orange: #f97316; --orange-light: #fff7ed;
+            --green: #16a34a; --red: #dc2626;
+            --primary: #1a2744; --accent: #c8932a;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', system-ui, sans-serif; background: var(--gray-50); }
+        .page { display: none; }
+        .page.active { display: flex; }
+
+        /* ── 인증 화면 ── */
+        .auth-wrap { min-height: 100vh; background: white; align-items: center; justify-content: center; padding: 20px; flex-direction: column; }
+        .auth-card { width: 100%; max-width: 440px; }
+        .auth-logo { text-align: center; margin-bottom: 28px; }
+        .auth-logo .brand { font-size: 26px; font-weight: 900; color: var(--primary); letter-spacing: 3px; }
+        .auth-logo .sub { font-size: 13px; color: var(--gray-400); margin-top: 4px; }
+        .auth-box { border: 1px solid var(--gray-200); border-radius: 14px; padding: 32px; box-shadow: 0 4px 24px rgba(0,0,0,0.06); }
+        .auth-title { font-size: 26px; font-weight: 700; color: var(--gray-800); margin-bottom: 4px; }
+        .auth-sub { font-size: 14px; color: var(--blue); margin-bottom: 24px; }
+        .fg { margin-bottom: 16px; }
+        .fg label { display: block; font-size: 14px; font-weight: 600; color: var(--gray-800); margin-bottom: 6px; }
+        .fg input { width: 100%; padding: 12px 14px; border: 1px solid var(--gray-200); border-radius: 8px; font-size: 15px; outline: none; transition: .2s; font-family: inherit; box-sizing: border-box; }
+        .fg input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
+        .chk-row { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; font-size: 14px; color: var(--gray-600); cursor: pointer; }
+        .chk-row input { width: 16px; height: 16px; cursor: pointer; }
+        .btn-full { width: 100%; padding: 14px; background: var(--blue); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; transition: .2s; font-family: inherit; }
+        .btn-full:hover { background: var(--blue-dark); }
+        .auth-foot { text-align: center; margin-top: 18px; font-size: 14px; color: var(--gray-600); }
+        .auth-foot a { color: var(--blue); font-weight: 700; cursor: pointer; }
+
+        /* ── 회원가입 단계 바 ── */
+        .step-bar { display: flex; align-items: flex-start; margin-bottom: 26px; }
+        .si { display: flex; flex-direction: column; align-items: center; flex: 1; position: relative; }
+        .si:not(:last-child)::after { content: ''; position: absolute; top: 15px; left: 55%; width: 90%; height: 2px; background: var(--gray-200); z-index: 0; }
+        .si.done::after, .si.active::after { background: var(--blue); }
+        .si-dot { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; z-index: 1; border: 2px solid var(--gray-200); background: white; color: var(--gray-400); }
+        .si.active .si-dot { background: var(--blue); border-color: var(--blue); color: white; }
+        .si.done .si-dot { background: var(--blue); border-color: var(--blue); color: white; }
+        .si-lbl { font-size: 11px; color: var(--gray-400); margin-top: 5px; }
+        .si.active .si-lbl { color: var(--blue); font-weight: 700; }
+        .info-box { background: var(--blue-light); border-radius: 8px; padding: 13px 16px; font-size: 14px; color: #1d4ed8; margin-bottom: 14px; font-weight: 600; }
+        .drop-zone { border: 2px dashed var(--gray-200); border-radius: 12px; padding: 36px 20px; text-align: center; cursor: pointer; background: var(--gray-50); transition: .2s; }
+        .drop-zone:hover, .drop-zone.drag-over { border-color: var(--blue); background: var(--blue-light); }
+        .drop-zone .dz-icon { font-size: 42px; color: var(--gray-400); margin-bottom: 10px; }
+        .drop-zone p { font-size: 14px; color: var(--gray-600); line-height: 1.6; }
+        .drop-zone a { color: var(--blue); font-weight: 700; }
+        .drop-zone small { font-size: 12px; color: var(--gray-400); display: block; margin-top: 4px; }
+        .sc { display: none; }
+        .sc.active { display: block; }
+        .btn-row { display: flex; gap: 10px; margin-top: 18px; }
+        .btn-out { flex: 1; padding: 12px; border: 2px solid var(--blue); background: white; color: var(--blue); border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; }
+        .btn-bl { flex: 2; padding: 12px; background: var(--blue); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; }
+        .btn-bl:hover { background: var(--blue-dark); }
+        .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+        /* ── 앱 레이아웃 ── */
+        .app-wrap { min-height: 100vh; flex-direction: row; }
+        .sidebar { width: 230px; background: var(--primary); color: white; display: flex; flex-direction: column; min-height: 100vh; flex-shrink: 0; }
+        .sb-logo { padding: 22px 20px; border-bottom: 1px solid rgba(255,255,255,.1); }
+        .sb-logo .brand { font-size: 17px; font-weight: 900; letter-spacing: 2px; }
+        .sb-logo .tag { font-size: 10px; color: var(--accent); margin-top: 3px; }
+        .sb-nav { flex: 1; padding: 10px 0; overflow-y: auto; }
+        .nav-item { padding: 12px 18px; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px; transition: .2s; border-left: 3px solid transparent; }
+        .nav-item:hover { background: rgba(255,255,255,.08); }
+        .nav-item.active { background: rgba(255,255,255,.1); border-left-color: var(--accent); font-weight: 700; }
+        .nav-badge { display:inline-flex; align-items:center; justify-content:center; min-width:18px; height:18px; padding:0 5px; background:var(--red); color:white; border-radius:9px; font-size:11px; font-weight:700; margin-left:auto; }
+        .sb-foot { padding: 16px 18px; border-top: 1px solid rgba(255,255,255,.1); }
+        .sb-uname { font-size: 14px; font-weight: 700; color: white; }
+        .sb-uinfo { font-size: 12px; color: rgba(255,255,255,.6); margin-top: 2px; }
+        .logout-btn { margin-top: 10px; width: 100%; padding: 8px; background: rgba(255,255,255,.1); border: none; border-radius: 6px; color: white; cursor: pointer; font-size: 13px; font-family: inherit; }
+        .logout-btn:hover { background: rgba(255,255,255,.2); }
+        .app-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .app-hdr { background: white; padding: 13px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--gray-200); }
+        .app-hdr h3 { font-size: 16px; font-weight: 700; color: var(--gray-800); }
+        .hdr-right { display: flex; align-items: center; gap: 10px; }
+        .pw-btn { padding: 7px 13px; background: var(--gray-100); border: 1px solid var(--gray-200); border-radius: 6px; font-size: 13px; cursor: pointer; font-family: inherit; }
+        .app-body { flex: 1; padding: 22px 24px; overflow-y: auto; }
+        .tab { display: none; }
+        .tab.active { display: block; }
+
+        /* ── 카드 ── */
+        .card { background: white; border-radius: 10px; padding: 22px; box-shadow: 0 2px 10px rgba(0,0,0,.04); margin-bottom: 18px; border: 1px solid var(--gray-200); }
+        .card h4 { font-size: 15px; font-weight: 700; color: var(--gray-800); margin-bottom: 14px; }
+
+        /* ── 견적 마법사 ── */
+        .wizard { display: flex; justify-content: center; margin-bottom: 28px; }
+        .ws { display: flex; flex-direction: column; align-items: center; flex: 1; max-width: 110px; position: relative; }
+        .ws:not(:last-child)::after { content: ''; position: absolute; top: 15px; left: 55%; width: 90%; height: 2px; background: var(--gray-200); }
+        .ws.done::after, .ws.active::after { background: var(--blue); }
+        .ws-dot { width: 30px; height: 30px; border-radius: 50%; background: var(--gray-200); color: var(--gray-400); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; z-index: 1; }
+        .ws.active .ws-dot { background: var(--blue); color: white; }
+        .ws.done .ws-dot { background: var(--green); color: white; }
+        .ws-lbl { font-size: 11px; margin-top: 4px; color: var(--gray-400); text-align: center; }
+        .ws.active .ws-lbl { color: var(--blue); font-weight: 700; }
+
+        /* 펌프 종류 카드 */
+        .pump-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+        .pump-card { border: 2px solid var(--gray-200); border-radius: 10px; padding: 20px 16px; text-align: center; cursor: pointer; transition: .2s; }
+        .pump-card:hover { border-color: var(--blue); background: var(--blue-light); }
+        .pump-card.sel { border-color: var(--blue); background: var(--blue-light); }
+        .pc-icon { font-size: 38px; margin-bottom: 8px; }
+        .pc-name { font-size: 15px; font-weight: 700; color: var(--gray-800); }
+        .pc-models { font-size: 12px; color: var(--gray-400); margin-top: 3px; }
+
+        /* 슬라이더 */
+        .slider-val { text-align: center; font-size: 22px; font-weight: 900; color: var(--blue); margin-bottom: 8px; }
+        input[type=range] { width: 100%; -webkit-appearance: none; height: 6px; border-radius: 3px; background: var(--gray-200); outline: none; cursor: pointer; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: var(--blue); cursor: pointer; }
+        .slider-ticks { display: flex; justify-content: space-between; font-size: 11px; color: var(--gray-400); margin-top: 4px; }
+
+        /* 공정 선택 */
+        .proc-row { display: flex; gap: 12px; }
+        .proc-btn { flex: 1; padding: 14px 10px; border: 2px solid var(--gray-200); border-radius: 8px; text-align: center; cursor: pointer; transition: .2s; }
+        .proc-btn:hover { border-color: var(--blue); }
+        .proc-btn.sel { border-color: var(--blue); background: var(--blue-light); }
+        .proc-icon { font-size: 26px; margin-bottom: 5px; }
+        .proc-name { font-size: 14px; font-weight: 700; }
+        .proc-desc { font-size: 11px; color: var(--gray-400); margin-top: 2px; }
+
+        /* 경고 배너 */
+        .warn-banner { background: var(--orange-light); border: 1px solid var(--orange); border-radius: 8px; padding: 14px 16px; margin-bottom: 14px; display: flex; gap: 10px; }
+        .warn-ico { font-size: 20px; flex-shrink: 0; padding-top: 2px; }
+        .warn-txt { font-size: 13px; color: #9a3412; line-height: 1.7; }
+        .warn-txt strong { display: block; font-size: 14px; font-weight: 700; margin-bottom: 3px; }
+
+        /* 견적 결과 */
+        .q-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--gray-100); font-size: 14px; }
+        .q-row:last-of-type { border-bottom: none; }
+        .q-row.added { color: #1d4ed8; }
+        .q-total { display: flex; justify-content: space-between; font-size: 20px; font-weight: 900; color: var(--primary); border-top: 2px solid var(--gray-200); padding-top: 14px; margin-top: 4px; }
+
+        /* 접수 완료 */
+        .receipt-box { background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: 10px; padding: 24px; text-align: center; }
+        .receipt-no { font-size: 22px; font-weight: 900; color: var(--primary); letter-spacing: 2px; margin-bottom: 16px; }
+        .qr-wrap { display: inline-block; padding: 14px; background: white; border: 1px solid var(--gray-200); border-radius: 8px; }
+        .receipt-note { font-size: 13px; color: var(--gray-600); margin-top: 16px; line-height: 2; text-align: left; }
+
+        /* 배지 */
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+        .b-blue { background: #dbeafe; color: #1d4ed8; }
+        .b-green { background: #dcfce7; color: #16a34a; }
+        .b-orange { background: #fff7ed; color: #c2410c; }
+        .b-gray { background: var(--gray-100); color: var(--gray-600); }
+
+        /* 테이블 */
+        .tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .tbl th { background: var(--gray-50); padding: 10px 12px; text-align: left; border-bottom: 2px solid var(--gray-200); font-weight: 700; color: var(--gray-600); white-space: nowrap; }
+        .tbl td { padding: 11px 12px; border-bottom: 1px solid var(--gray-100); }
+        .tbl tr:hover td { background: var(--gray-50); }
+
+        /* 통계 카드 */
+        .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 18px; }
+        .stat-card { background: white; border-radius: 10px; padding: 18px; border: 1px solid var(--gray-200); }
+        .stat-val { font-size: 28px; font-weight: 900; color: var(--primary); }
+        .stat-lbl { font-size: 12px; color: var(--gray-400); margin-top: 4px; }
+
+        /* 파일 업로드 */
+        .file-drop { border: 2px dashed var(--gray-200); border-radius: 8px; padding: 24px; text-align: center; cursor: pointer; background: var(--gray-50); transition: .2s; font-size: 14px; color: var(--gray-600); }
+        .file-drop:hover, .file-drop.drag-over { border-color: var(--blue); background: var(--blue-light); }
+        .file-item { display: flex; justify-content: space-between; align-items: center; padding: 7px 10px; background: var(--gray-100); border-radius: 5px; margin-bottom: 5px; font-size: 13px; }
+
+        /* 체크리스트 */
+        .chk-item { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border: 1px solid var(--gray-200); border-radius: 8px; margin-bottom: 8px; font-size: 14px; }
+        .chk-item input[type=checkbox] { width: 17px; height: 17px; cursor: pointer; flex-shrink: 0; }
+        .chk-item select { margin-left: auto; padding: 4px 8px; border: 1px solid var(--gray-200); border-radius: 4px; font-size: 13px; font-family: inherit; }
+
+        /* 파트너 보안 안내 */
+        .security-notice { background: #fff9ed; border: 1px solid var(--accent); border-radius: 8px; padding: 13px 16px; font-size: 13px; color: #92400e; margin-bottom: 16px; }
+
+        /* 비밀번호 변경 모달 */
+        .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 999; align-items: center; justify-content: center; padding: 20px; }
+        .modal-bg.show { display: flex; }
+        .modal-box { background: white; border-radius: 12px; padding: 28px; width: 100%; max-width: 360px; }
+        .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 18px; }
+        .modal-foot { display: flex; gap: 10px; margin-top: 18px; }
+
+        /* 부품 검색 드롭다운 */
+        .search-wrap { position: relative; }
+        .search-drop { position: absolute; z-index: 999; top: 100%; left: 0; right: 0; background: white; border: 1px solid var(--gray-200); border-radius: 6px; max-height: 200px; overflow-y: auto; box-shadow: 0 4px 14px rgba(0,0,0,.12); }
+        .search-drop-item { padding: 9px 13px; cursor: pointer; font-size: 13px; border-bottom: 1px solid var(--gray-100); display: flex; justify-content: space-between; align-items: center; }
+        .search-drop-item:last-child { border-bottom: none; }
+        .search-drop-item:hover { background: var(--blue-light); }
+        .search-drop-item .part-price { font-size: 12px; color: var(--gray-400); }
+
+        /* 관리자 전용 영역 */
+        .admin-area { background: #fffbeb; border: 1px dashed #f59e0b; border-radius: 8px; padding: 12px 14px; margin-top: 12px; display: none; }
+        .admin-area-title { font-size: 13px; font-weight: 700; color: #d97706; margin-bottom: 8px; }
+
+        /* 카트 라인 */
+        .cart-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--gray-100); font-size: 14px; gap: 8px; }
+        .cart-row:last-child { border-bottom: none; }
+        .cart-row .cart-label { flex: 1; }
+        .cart-row .cart-amt { font-weight: 700; white-space: nowrap; }
+        .cart-row .cart-del { background: none; border: none; color: var(--red); cursor: pointer; font-size: 16px; padding: 0 4px; flex-shrink: 0; }
+
+        /* 키트 목록 */
+        .kit-view-list { background: var(--gray-50); border-radius: 6px; padding: 10px 14px; font-size: 13px; }
+        .kit-view-list li { padding: 3px 0; color: var(--gray-700); }
+
+        /* 업체 관리 카드 */
+        .company-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 16px; }
+        .company-card { background: white; border-radius: 10px; padding: 20px; border: 1px solid var(--gray-200); box-shadow: 0 2px 8px rgba(0,0,0,.04); }
+        .company-card h5 { font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 12px; }
+        .company-info { font-size: 13px; color: var(--gray-600); line-height: 2.1; }
+        .pred-warn { background: #fff7ed; border: 1px solid var(--accent); border-radius: 6px; padding: 9px 12px; font-size: 12px; color: #92400e; margin-top: 12px; line-height: 1.6; }
+
+        /* 반응형 */
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; left: -230px; top: 0; z-index: 100; transition: .3s; }
+            .sidebar.open { left: 0; }
+            .stat-grid { grid-template-columns: repeat(2, 1fr); }
+            .g2 { grid-template-columns: 1fr; }
+            .pump-grid { grid-template-columns: 1fr 1fr; }
+            .ham-btn { display: block; }
+        }
+
+        /* ── 토스트 알림 ── */
+        #toast-wrap { position:fixed; bottom:24px; right:24px; z-index:9999; display:flex; flex-direction:column-reverse; gap:8px; pointer-events:none; }
+        .toast { padding:13px 20px; border-radius:10px; font-size:14px; font-weight:600; color:white; box-shadow:0 4px 20px rgba(0,0,0,.22); opacity:0; transform:translateY(10px); transition:.25s; max-width:310px; line-height:1.5; }
+        .toast.in { opacity:1; transform:translateY(0); }
+        .t-ok   { background:#16a34a; }
+        .t-err  { background:#dc2626; }
+        .t-info { background:#2563EB; }
+        .t-warn { background:#f97316; }
+
+        /* ── 로딩 오버레이 ── */
+        #loading { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:9998; align-items:center; justify-content:center; flex-direction:column; gap:14px; }
+        #loading.on { display:flex; }
+        .spin { width:44px; height:44px; border:4px solid rgba(255,255,255,.3); border-top:4px solid #fff; border-radius:50%; animation:rot .7s linear infinite; }
+        @keyframes rot { to { transform:rotate(360deg); } }
+        #loading span { color:#fff; font-size:15px; font-weight:700; }
+
+        /* ── 비밀번호 눈 토글 ── */
+        .eye-wrap { position:relative; }
+        .eye-wrap input { padding-right:44px !important; }
+        .eye-btn { position:absolute; right:11px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; font-size:18px; line-height:1; padding:2px; color:var(--gray-400); }
+
+        /* ── 햄버거 메뉴 + 사이드바 오버레이 ── */
+        .ham-btn { display:none; background:none; border:none; font-size:22px; cursor:pointer; padding:4px 6px; color:var(--gray-800); }
+        .sb-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:99; }
+        .sb-overlay.on { display:block; }
+
+        /* ── 테이블 가로 스크롤 ── */
+        .tbl-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+    </style>
+</head>
+<body>
+
+<!-- 토스트 알림 컨테이너 -->
+<div id="toast-wrap"></div>
+
+<!-- 로딩 오버레이 -->
+<div id="loading"><div class="spin"></div><span>처리 중...</span></div>
+
+<!-- 모바일 사이드바 오버레이 -->
+<div class="sb-overlay" id="sb-overlay" onclick="toggleSidebar()"></div>
+
+<!-- ════════════════════════════════════════
+  1. 로그인 페이지
+════════════════════════════════════════ -->
+<div id="pg-login" class="page auth-wrap active">
+    <div class="auth-card">
+        <div class="auth-logo">
+            <div class="brand">SMARTECH</div>
+            <div class="sub">수리 서비스 플랫폼</div>
+        </div>
+        <div class="auth-box">
+            <div class="auth-title">로그인</div>
+            <div class="auth-sub">스마텍 회원 전용 서비스입니다</div>
+            <div class="fg">
+                <label>전화번호</label>
+                <input type="tel" id="l-phone" placeholder="010-1234-5678" maxlength="13" oninput="fmtPhone(this)" onkeydown="if(event.key==='Enter')doLogin()">
+            </div>
+            <div class="fg">
+                <label>비밀번호</label>
+                <div class="eye-wrap">
+                    <input type="password" id="l-pw" onkeydown="if(event.key==='Enter')doLogin()">
+                    <button type="button" class="eye-btn" onclick="toggleEye('l-pw',this)">👁</button>
+                </div>
+            </div>
+            <label class="chk-row"><input type="checkbox" id="l-remember"> 전화번호·비밀번호 저장</label>
+            <button class="btn-full" onclick="doLogin()">로그인</button>
+        </div>
+        <div class="auth-foot">계정이 없으신가요? <a onclick="showPg('pg-register')">회원가입</a></div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════
+  2. 회원가입 페이지 (3단계)
+════════════════════════════════════════ -->
+<div id="pg-register" class="page auth-wrap">
+    <div class="auth-card" style="max-width:480px;">
+        <div class="auth-logo">
+            <div class="brand">SMARTECH</div>
+            <div class="sub">수리 서비스 플랫폼</div>
+        </div>
+        <div class="auth-box">
+            <div class="auth-title">회원가입</div>
+            <div style="font-size:13px;color:var(--gray-600);margin-bottom:20px;">가입 후 관리자 승인을 받으면 등급별 가격을 확인하고 견적을 요청하실 수 있습니다.</div>
+
+            <!-- 단계 표시 -->
+            <div class="step-bar">
+                <div class="si active" id="rsi1"><div class="si-dot">1</div><div class="si-lbl">명함 업로드</div></div>
+                <div class="si" id="rsi2"><div class="si-dot">2</div><div class="si-lbl">정보 확인</div></div>
+                <div class="si" id="rsi3"><div class="si-dot">3</div><div class="si-lbl">계정 설정</div></div>
+            </div>
+
+            <!-- Step 1: 명함 업로드 -->
+            <div class="sc active" id="rs1">
+                <div class="info-box">📇 명함 사진을 업로드하면 AI가 정보를 자동으로 입력해드립니다.</div>
+                <!-- [ANTHROPIC API 연결 포인트]
+                     업로드 이미지 → Claude Vision (claude-opus-4-7) 으로 OCR
+                     추출: 회사명, 대표자명, 전화번호, 이메일 → Step2 자동 입력
+                     API: POST /api/ocr-card -->
+                <div class="drop-zone" id="card-dz"
+                     onclick="document.getElementById('card-inp').click()"
+                     ondrop="onCardDrop(event)" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')">
+                    <div class="dz-icon">🖼️</div>
+                    <p>명함 사진을 여기에 끌어다 놓거나<br><a>클릭하여 파일 선택</a></p>
+                    <small>JPG, PNG, WEBP 지원</small>
+                </div>
+                <input type="file" id="card-inp" accept="image/*" style="display:none" onchange="onCardFile(this)">
+                <div id="card-prev" style="margin-top:10px;"></div>
+                <div class="btn-row">
+                    <button class="btn-out" onclick="goReg(2)">건너뛰기</button>
+                    <button class="btn-bl" onclick="goReg(2)">다음 단계 →</button>
+                </div>
+            </div>
+
+            <!-- Step 2: 정보 확인 -->
+            <div class="sc" id="rs2">
+                <div class="g2">
+                    <div class="fg"><label>상호명 <span style="color:var(--red)">*</span></label><input type="text" id="r-company" placeholder="(주)스마텍"></div>
+                    <div class="fg"><label>대표자명 <span style="color:var(--red)">*</span></label><input type="text" id="r-name" placeholder="홍길동"></div>
+                    <div class="fg"><label>주소</label><input type="text" id="r-addr" placeholder="경기도 수원시..."></div>
+                    <div class="fg"><label>연락처 <span style="color:var(--red)">*</span></label><input type="tel" id="r-tel" placeholder="010-0000-0000" maxlength="13" onblur="fmtPhone(this)"></div>
+                </div>
+                <div class="fg"><label>이메일 <span style="color:var(--red)">*</span></label><input type="email" id="r-email" placeholder="example@company.com"></div>
+                <!-- [SUPABASE 연결 포인트] 이메일 인증: supabase.auth.signUp({ email }) -->
+                <div class="btn-row">
+                    <button class="btn-out" onclick="goReg(1)">← 이전</button>
+                    <button class="btn-bl" onclick="goReg(3)">다음 단계 →</button>
+                </div>
+            </div>
+
+            <!-- Step 3: 계정 설정 -->
+            <div class="sc" id="rs3">
+                <div class="fg"><label>아이디 (전화번호)</label><input type="tel" id="r-phone" placeholder="010-0000-0000" maxlength="13" onblur="fmtPhone(this)"></div>
+                <div class="fg"><label>비밀번호 (6자 이상)</label><div class="eye-wrap"><input type="password" id="r-pw1"><button type="button" class="eye-btn" onclick="toggleEye('r-pw1',this)">👁</button></div></div>
+                <div class="fg"><label>비밀번호 확인</label><div class="eye-wrap"><input type="password" id="r-pw2"><button type="button" class="eye-btn" onclick="toggleEye('r-pw2',this)">👁</button></div></div>
+                <!-- [SUPABASE 연결 포인트]
+                     supabase.from('users').insert({phone, name, company, email, role:'client', approved:false})
+                     관리자가 approved=true로 승인 후 로그인 가능 -->
+                <div class="btn-row">
+                    <button class="btn-out" onclick="goReg(2)">← 이전</button>
+                    <button class="btn-bl" onclick="doRegister()">가입 완료</button>
+                </div>
+            </div>
+        </div>
+        <div class="auth-foot" style="margin-top:12px;">이미 계정이 있으신가요? <a onclick="showPg('pg-login')">로그인</a></div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════
+  3. 메인 앱 (로그인 후)
+════════════════════════════════════════ -->
+<div id="pg-app" class="page app-wrap">
+    <!-- 사이드바 -->
+    <div class="sidebar" id="sidebar">
+        <div class="sb-logo">
+            <div class="brand">SMARTECH</div>
+            <div class="tag">Repair Platform v1</div>
+        </div>
+        <div class="sb-nav" id="sb-nav"></div>
+        <div class="sb-foot">
+            <div class="sb-uname" id="sb-name"></div>
+            <div class="sb-uinfo" id="sb-co"></div>
+            <div class="sb-uinfo" id="sb-role"></div>
+            <button class="logout-btn" onclick="doLogout()">로그아웃</button>
+        </div>
+    </div>
+
+    <!-- 메인 영역 -->
+    <div class="app-main">
+        <div class="app-hdr">
+            <div style="display:flex;align-items:center;gap:10px;">
+                <button class="ham-btn" onclick="toggleSidebar()">☰</button>
+                <h3 id="hdr-title">수리 견적 조회</h3>
+            </div>
+            <div class="hdr-right">
+                <span id="hdr-badge"></span>
+                <button class="pw-btn" onclick="showPwModal()">🔒 비밀번호 변경</button>
+            </div>
+        </div>
+        <div class="app-body">
+
+            <!-- ── 탭: 견적 조회 (고객용) ── -->
+            <div class="tab active" id="tab-quote">
+                <div class="card">
+                    <!-- 4단계 위저드 -->
+                    <div class="wizard">
+                        <div class="ws active" id="ws1"><div class="ws-dot">1</div><div class="ws-lbl">펌프 선택</div></div>
+                        <div class="ws" id="ws2"><div class="ws-dot">2</div><div class="ws-lbl">상세 정보</div></div>
+                        <div class="ws" id="ws3"><div class="ws-dot">3</div><div class="ws-lbl">견적 확인</div></div>
+                        <div class="ws" id="ws4"><div class="ws-dot">4</div><div class="ws-lbl">접수 완료</div></div>
+                    </div>
+
+                    <!-- Q Step 1: 펌프 종류 -->
+                    <div class="sc active" id="qs1">
+                        <h4 style="text-align:center;margin-bottom:20px;">수리하실 펌프 종류를 선택해주세요</h4>
+                        <div class="pump-grid">
+                            <div class="pump-card" onclick="selPump('oil',this)"><div class="pc-icon">🛢️</div><div class="pc-name">오일 펌프</div><div class="pc-models">E2M, RV 시리즈</div></div>
+                            <div class="pump-card" onclick="selPump('dry',this)"><div class="pc-icon">🌀</div><div class="pc-name">드라이 펌프</div><div class="pc-models">nXDS, XDS 시리즈</div></div>
+                            <div class="pump-card" onclick="selPump('booster',this)"><div class="pc-icon">⚡</div><div class="pc-name">부스터 펌프</div><div class="pc-models">EH 시리즈</div></div>
+                            <div class="pump-card" onclick="selPump('combo',this)"><div class="pc-icon">🔧</div><div class="pc-name">조합 시스템</div><div class="pc-models">nXDS+EH, E2M+EH</div></div>
+                        </div>
+                        <div style="text-align:center;margin-top:22px;">
+                            <button class="btn-bl" style="padding:12px 44px;" id="q-btn1" disabled onclick="goQ(2)">다음 단계 →</button>
+                        </div>
+                    </div>
+
+                    <!-- Q Step 2: 상세 정보 -->
+                    <div class="sc" id="qs2">
+                        <div class="g2" style="margin-bottom:16px;">
+                            <div class="fg">
+                                <label>세부 모델명</label>
+                                <select id="q-model" style="width:100%;padding:11px;border:1px solid var(--gray-200);border-radius:8px;font-size:15px;font-family:inherit;">
+                                    <option value="">선택하세요</option>
+                                </select>
+                            </div>
+                            <div class="fg">
+                                <label>고객 유형</label>
+                                <select id="q-margin" style="width:100%;padding:11px;border:1px solid var(--gray-200);border-radius:8px;font-size:15px;font-family:inherit;">
+                                    <option value="1.3">End User (일반 고객)</option>
+                                    <option value="1.2">OEM 파트너</option>
+                                    <option value="1.13">Dealer (딜러)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="fg">
+                            <label>예상 가동 시간</label>
+                            <div class="slider-val" id="hr-disp">5,000 시간</div>
+                            <input type="range" id="q-hours" min="1000" max="30000" step="1000" value="5000" oninput="updHr(this.value)">
+                            <div class="slider-ticks"><span>1,000h</span><span>10,000h</span><span>20,000h</span><span>30,000h</span></div>
+                        </div>
+                        <div class="fg" style="margin-top:18px;">
+                            <label style="margin-bottom:12px;display:block;">사용 공정 환경</label>
+                            <div class="proc-row">
+                                <div class="proc-btn sel" id="pc-clean" onclick="selProc('clean')">
+                                    <div class="proc-icon">🌿</div><div class="proc-name">일반 공정</div><div class="proc-desc">Clean Air · 일반 환경</div>
+                                </div>
+                                <div class="proc-btn" id="pc-harsh" onclick="selProc('harsh')">
+                                    <div class="proc-icon">⚗️</div><div class="proc-name">가혹 공정</div><div class="proc-desc">CVD · Etch · 파우더 가스</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="btn-row">
+                            <button class="btn-out" onclick="goQ(1)">← 이전</button>
+                            <button class="btn-bl" onclick="calcQuote()">견적 계산 →</button>
+                        </div>
+                    </div>
+
+                    <!-- Q Step 3: 견적 결과 -->
+                    <div class="sc" id="qs3">
+                        <div id="warn-area"></div>
+                        <div class="card" style="border:1px solid var(--gray-200);margin-bottom:14px;">
+                            <div id="q-lines"></div>
+                            <div class="q-total"><span>총 견적 합계</span><span id="q-grand" style="color:var(--blue);">0원</span></div>
+                        </div>
+
+                        <!-- 부품 추가 영역 -->
+                        <div class="card" style="border:1px solid var(--gray-200);margin-bottom:14px;">
+                            <div style="font-weight:700;font-size:14px;margin-bottom:10px;">🔧 부품 추가</div>
+                            <button class="btn-out" style="width:100%;margin-bottom:10px;font-size:13px;" onclick="toggleKitView()">📋 모델 기본 키트 보기 / 숨기기</button>
+                            <div id="kit-view" style="display:none;margin-bottom:12px;"></div>
+                            <div class="search-wrap">
+                                <input type="text" id="part-search" placeholder="부품번호 또는 품명 입력 (단종 자동 제외)..." style="width:100%;padding:10px;border:1px solid var(--gray-200);border-radius:6px;font-family:inherit;font-size:14px;box-sizing:border-box;" oninput="searchPartsQ(this.value)" autocomplete="off">
+                                <div class="search-drop" id="part-drop" style="display:none;"></div>
+                            </div>
+                            <!-- 관리자 전용: 합계 직접 입력 -->
+                            <div class="admin-area" id="q-admin-area">
+                                <div class="admin-area-title">⚙️ 관리자 전용 — 견적 합계 직접 수정</div>
+                                <div style="display:flex;gap:8px;">
+                                    <input type="number" id="custom-total-inp" placeholder="금액 (원 단위)" style="flex:1;padding:8px;border:1px solid #f59e0b;border-radius:6px;font-family:inherit;font-size:14px;">
+                                    <button class="btn-bl" style="padding:8px 18px;" onclick="applyCustomTotal()">적용</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p style="font-size:12px;color:var(--gray-400);line-height:1.8;margin-bottom:14px;">
+                            ※ 본 견적은 예상 금액이며, 실제 분해 후 추가 비용이 발생할 수 있습니다.<br>
+                            ※ 확정 견적은 입고 후 분해 점검 완료 시 별도 안내됩니다.
+                        </p>
+                        <div class="btn-row">
+                            <button class="btn-out" onclick="goQ(2)">← 수정</button>
+                            <button class="btn-bl" onclick="submitRepair()">수리 접수 신청 →</button>
+                        </div>
+                    </div>
+
+                    <!-- Q Step 4: 접수 완료 -->
+                    <div class="sc" id="qs4">
+                        <div style="text-align:center;margin-bottom:20px;">
+                            <div style="font-size:50px;margin-bottom:8px;">✅</div>
+                            <div style="font-size:20px;font-weight:900;color:var(--green);">수리 접수가 완료되었습니다!</div>
+                            <div style="font-size:14px;color:var(--gray-600);margin-top:6px;">아래 QR코드를 출력하여 펌프에 부착해서 보내주세요</div>
+                        </div>
+                        <div class="receipt-box">
+                            <div class="receipt-no" id="r-no">SM-000000-00</div>
+                            <div class="qr-wrap"><div id="qr-box"></div></div>
+                            <div class="receipt-note">
+                                📦 <strong>택배 발송 주소:</strong> 경기도 수원시 영통구 광교중앙로 248번길 31 (주)스마텍<br>
+                                📞 <strong>전화 문의:</strong> 031-204-7170<br>
+                                <!-- [SUPABASE 연결 포인트] 접수 확인 이메일 자동 발송 활성화 -->
+                                📧 가입 이메일로 접수 확인서가 발송됩니다. (Supabase 연결 후 활성화)
+                            </div>
+                        </div>
+                        <div class="btn-row" style="margin-top:16px;">
+                            <button class="btn-out" onclick="resetQuote()">새 접수 신청</button>
+                            <button class="btn-bl" onclick="switchTab('tab-mypage')">마이페이지 확인 →</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── 탭: 마이페이지 ── -->
+            <div class="tab" id="tab-mypage">
+                <!-- [SUPABASE 연결 포인트]
+                     supabase.from('repairs').select('*').eq('customer_phone', curUser.phone) -->
+                <div class="stat-grid" id="my-stats" style="grid-template-columns:repeat(3,1fr);"></div>
+                <div class="card">
+                    <h4>내 수리 접수 내역</h4>
+                    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>접수번호</th><th>모델</th><th>접수일</th><th>진행 상태</th><th>견적 금액</th><th>견적서</th><th>발주</th><th>파일</th></tr></thead>
+                    <tbody id="my-tbody"></tbody></table></div>
+                </div>
+                <!-- 파일 미리보기 카드 (파일 보기 클릭 시 표시) -->
+                <div class="card" id="my-files" style="display:none;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+                        <h4 style="margin:0;">📷 분해 사진 &amp; 검사 성적서</h4>
+                        <button class="btn-out" style="font-size:12px;padding:5px 12px;" onclick="document.getElementById('my-files').style.display='none'">닫기</button>
+                    </div>
+                    <div id="my-file-content"></div>
+                    <div style="margin-top:14px;">
+                        <button class="btn-bl" style="width:100%;padding:11px;" onclick="dlFilePdf()">📥 PDF로 다운로드</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── 탭: 관리자 대시보드 ── -->
+            <div class="tab" id="tab-admin">
+                <!-- [SUPABASE 연결 포인트]
+                     supabase.from('repairs').select('*, users(company,name,phone)') -->
+                <div class="stat-grid" id="adm-stats"></div>
+                <div id="adm-pending"></div>
+                <div class="card">
+                    <h4>전체 수리 접수 현황</h4>
+                    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>접수번호</th><th>고객사</th><th>모델</th><th>접수일</th><th>진행 상태</th><th>견적 금액</th><th>견적서</th><th>관리</th></tr></thead>
+                    <tbody id="adm-tbody"></tbody></table></div>
+                </div>
+            </div>
+
+            <!-- ── 탭: 외주업체 화면 ── -->
+            <div class="tab" id="tab-partner">
+                <div class="security-notice">🔒 고객사 정보 및 금액은 보안 정책상 표시되지 않습니다. 모델명과 작업 지시 사항만 확인하세요.</div>
+                <div class="card">
+                    <h4>입고 펌프 작업 목록</h4>
+                    <!-- [SUPABASE 연결 포인트]
+                         supabase.from('repairs').select('id,model,status').neq('status','완료') -->
+                    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>접수번호</th><th>고객사</th><th>모델</th><th>진행 상태</th><th>작업</th></tr></thead>
+                    <tbody id="pt-tbody"></tbody></table></div>
+                </div>
+                <div class="card" id="pt-upload" style="display:none;">
+                    <h4 id="pt-upload-title">분해 사진 & 점검 체크리스트</h4>
+                    <div class="g2">
+                        <div>
+                            <label style="font-size:14px;font-weight:700;display:block;margin-bottom:8px;">📷 분해 사진 (다중 선택 가능)</label>
+                            <div class="file-drop" onclick="document.getElementById('photo-inp').click()"
+                                 ondrop="onFileDrop(event,'photo')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')">
+                                📱 스마트폰 터치 또는 클릭하여 사진 선택<br><small>여러 장 한꺼번에 선택 가능</small>
+                            </div>
+                            <input type="file" id="photo-inp" multiple accept="image/*" style="display:none" onchange="onFileSelect(this,'photo')">
+                            <!-- [SUPABASE 연결 포인트] supabase.storage.from('repair-photos').upload(path,file) -->
+                            <div id="photo-list" style="margin-top:8px;"></div>
+                        </div>
+                        <div>
+                            <label style="font-size:14px;font-weight:700;display:block;margin-bottom:8px;">📜 검사 성적서</label>
+                            <div class="file-drop" onclick="document.getElementById('rpt-inp').click()"
+                                 ondrop="onFileDrop(event,'report')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')">
+                                📎 파일을 끌어다 놓거나 클릭하여 선택<br><small>PDF, JPG 지원</small>
+                            </div>
+                            <input type="file" id="rpt-inp" multiple accept=".pdf,image/*" style="display:none" onchange="onFileSelect(this,'report')">
+                            <!-- [SUPABASE 연결 포인트] supabase.storage.from('repair-reports').upload(path,file) -->
+                            <div id="report-list" style="margin-top:8px;"></div>
+                        </div>
+                    </div>
+                    <div style="margin-top:18px;">
+                        <h5 style="font-size:14px;margin-bottom:12px;">🔍 분해 점검 체크리스트</h5>
+                        <div class="chk-item"><input type="checkbox" id="ck1"><label for="ck1">오일 오염도</label><select><option>양호</option><option>경미한 오염</option><option>심한 오염</option></select></div>
+                        <div class="chk-item"><input type="checkbox" id="ck2"><label for="ck2">베어링 마모 상태</label><select><option>양호</option><option>교체 권장</option><option>교체 필수</option></select></div>
+                        <div class="chk-item"><input type="checkbox" id="ck3"><label for="ck3">로터 스크래치</label><select><option>없음</option><option>경미함</option><option>심함</option></select></div>
+                        <div class="chk-item"><input type="checkbox" id="ck4"><label for="ck4">실(Seal) 키트 마모</label><select><option>양호</option><option>교체 권장</option><option>교체 필수</option></select></div>
+                        <div class="chk-item"><input type="checkbox" id="ck5"><label for="ck5">케이싱 손상</label><select><option>없음</option><option>경미함</option><option>수리 필요</option></select></div>
+                        <!-- [SUPABASE 연결 포인트] supabase.from('inspection_reports').insert({repair_id, items, inspector_id}) -->
+                        <button class="btn-bl" style="width:100%;padding:12px;margin-top:14px;" onclick="saveChecklist()">점검 완료 저장</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── 탭: 수리 카트 (관리자 전용) ── -->
+            <div class="tab" id="tab-cart">
+                <div class="card">
+                    <h4>📦 분해 후 정밀 견적 관리</h4>
+                    <p style="font-size:13px;color:var(--gray-400);margin-bottom:14px;">입고된 펌프를 분해한 뒤 실제 교체 부품을 추가하여 확정 견적을 산출합니다.</p>
+                    <div class="fg">
+                        <label style="font-size:14px;font-weight:700;">수리 접수 건 선택</label>
+                        <select id="cart-sel" onchange="loadCartRepair(this.value)" style="width:100%;padding:10px;border:1px solid var(--gray-200);border-radius:6px;font-family:inherit;font-size:14px;margin-top:6px;">
+                            <option value="">— 접수 건을 선택하세요 —</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="cart-detail" style="display:none;">
+                    <div class="card" style="border:1px solid var(--gray-200);">
+                        <h4>견적 항목</h4>
+                        <div id="cart-info" style="font-size:13px;color:var(--gray-500);margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--gray-100);"></div>
+                        <div id="cart-lines"></div>
+                        <div class="q-total"><span>확정 견적 합계</span><span id="cart-grand" style="color:var(--blue);">0원</span></div>
+                    </div>
+                    <div class="card" style="border:1px solid var(--gray-200);">
+                        <h4>🔍 부품 검색하여 추가</h4>
+                        <div class="search-wrap" style="margin-bottom:14px;">
+                            <input type="text" id="cart-search" placeholder="부품번호 또는 품명 입력 (단종 자동 제외)..." style="width:100%;padding:10px;border:1px solid var(--gray-200);border-radius:6px;font-family:inherit;font-size:14px;box-sizing:border-box;" oninput="searchCartParts(this.value)" autocomplete="off">
+                            <div class="search-drop" id="cart-drop" style="display:none;"></div>
+                        </div>
+                        <div>
+                            <label style="font-size:13px;font-weight:700;display:block;margin-bottom:6px;">📋 키트에서 일괄 추가</label>
+                            <div style="display:flex;gap:8px;">
+                                <select id="cart-kit-sel" style="flex:1;padding:10px;border:1px solid var(--gray-200);border-radius:6px;font-family:inherit;font-size:13px;">
+                                    <option value="">키트 선택...</option>
+                                </select>
+                                <button class="btn-out" style="white-space:nowrap;" onclick="addKitToCart()">일괄 추가</button>
+                            </div>
+                        </div>
+                        <div class="admin-area" style="display:block;margin-top:14px;">
+                            <div class="admin-area-title">⚙️ 합계 직접 수정</div>
+                            <div style="display:flex;gap:8px;">
+                                <input type="number" id="cart-override" placeholder="금액 (원 단위)" style="flex:1;padding:8px;border:1px solid #f59e0b;border-radius:6px;font-family:inherit;font-size:14px;">
+                                <button class="btn-bl" style="padding:8px 18px;" onclick="applyCartOverride()">적용</button>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn-bl" style="width:100%;padding:14px;" onclick="saveCartQuote()">💾 확정 견적 저장</button>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
+                        <button class="btn-out" style="padding:13px;font-size:14px;font-family:inherit;" onclick="dlStatement()">📄 거래명세표 발행</button>
+                        <button class="btn-out" style="padding:13px;font-size:14px;font-family:inherit;" onclick="dlTaxInvoice()">🧾 세금계산서 발행</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── 탭: 업체 관리 (관리자) ── -->
+            <div class="tab" id="tab-company">
+                <div id="company-content"></div>
+            </div>
+
+            <!-- ── 탭: 마스터 설정 (관리자) ── -->
+            <div class="tab" id="tab-settings">
+                <div class="card">
+                    <h4>마스터 데이터 관리</h4>
+                    <div class="g2">
+                        <div class="fg">
+                            <label>📊 부품 단가표 업로드 (.xlsx)</label>
+                            <p style="font-size:12px;color:var(--gray-400);margin-bottom:6px;">컬럼: 순번 | 부품번호 | 품명 | 원가 | <strong>상태(판매중/단종)</strong></p>
+                            <!-- [SUPABASE 연결 포인트] 전체 덮어쓰기:
+                                 await supabase.from('parts').delete().neq('id',0)
+                                 await supabase.from('parts').upsert(partsData) -->
+                            <input type="file" accept=".xlsx,.xls" onchange="loadPartsDB(this)" style="width:100%;padding:8px;border:1px solid var(--gray-200);border-radius:6px;">
+                        </div>
+                        <div class="fg">
+                            <label>🔧 교체 파트 키트 업로드 (.xlsx)</label>
+                            <p style="font-size:12px;color:var(--gray-400);margin-bottom:6px;">1행: 모델명 | 2행~: 기본 교체 파트 목록</p>
+                            <input type="file" accept=".xlsx,.xls" onchange="loadKitDB(this)" style="width:100%;padding:8px;border:1px solid var(--gray-200);border-radius:6px;">
+                        </div>
+                    </div>
+                    <div style="margin-top:18px;">
+                        <h5 style="font-size:14px;margin-bottom:10px;">로드된 키트 (<span id="kit-cnt">0</span>개 모델)</h5>
+                        <div class="tbl-wrap"><table class="tbl"><thead><tr><th>모델명</th><th>항목 수</th><th>관리</th></tr></thead><tbody id="kit-tbody"></tbody></table></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h4>회원 관리 (승인 / 권한 설정)</h4>
+                    <!-- [SUPABASE 연결 포인트] supabase.from('users').select('*').order('created_at') -->
+                    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>상호명</th><th>대표자</th><th>전화번호</th><th>권한</th><th>승인 상태</th><th>관리</th></tr></thead>
+                    <tbody id="usr-tbody"></tbody></table></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- 비밀번호 변경 모달 -->
+<div class="modal-bg" id="pw-modal">
+    <div class="modal-box">
+        <div class="modal-title">🔒 비밀번호 변경</div>
+        <div class="fg"><label>현재 비밀번호</label><div class="eye-wrap"><input type="password" id="pw-old"><button type="button" class="eye-btn" onclick="toggleEye('pw-old',this)">👁</button></div></div>
+        <div class="fg"><label>새 비밀번호</label><div class="eye-wrap"><input type="password" id="pw-n1"><button type="button" class="eye-btn" onclick="toggleEye('pw-n1',this)">👁</button></div></div>
+        <div class="fg"><label>새 비밀번호 확인</label><div class="eye-wrap"><input type="password" id="pw-n2"><button type="button" class="eye-btn" onclick="toggleEye('pw-n2',this)">👁</button></div></div>
+        <!-- [SUPABASE 연결 포인트] supabase.auth.updateUser({ password: newPw }) -->
+        <div class="modal-foot">
+            <button class="btn-out" onclick="hidePwModal()">취소</button>
+            <button class="btn-bl" onclick="changePw()">변경 저장</button>
+        </div>
+    </div>
+</div>
+
+<!-- PDF 숨김 템플릿 -->
+<div id="pdf-tpl" style="position:absolute;left:-9999px;width:800px;background:white;padding:40px;font-family:'Malgun Gothic',sans-serif;color:#333;">
+    <div style="text-align:center;font-size:24px;font-weight:900;border-bottom:3px solid #1a2744;padding-bottom:12px;margin-bottom:20px;">수리 견적서 / REPAIR QUOTATION</div>
+    <div style="display:flex;gap:20px;margin-bottom:20px;">
+        <div style="flex:1;border:1px solid #ddd;padding:12px;border-radius:6px;font-size:14px;line-height:2;">
+            수신: <span id="pdf-co"></span><br>담당: <span id="pdf-mgr"></span><br>연락처: <span id="pdf-tel"></span>
+        </div>
+        <div style="flex:1;border:1px solid #ddd;padding:12px;border-radius:6px;font-size:14px;line-height:2;">
+            공급자: (주)스마텍<br>대표자: 이명재<br>전화: 031-204-7170
+        </div>
+    </div>
+    <table style="width:100%;border-collapse:collapse;">
+        <thead><tr style="background:#1a2744;color:white;"><th style="padding:10px;border:1px solid #ddd;">품명</th><th style="padding:10px;border:1px solid #ddd;">접수번호</th><th style="padding:10px;border:1px solid #ddd;text-align:right;">금액</th></tr></thead>
+        <tbody><tr><td id="pdf-item" style="padding:10px;border:1px solid #ddd;"></td><td id="pdf-no" style="padding:10px;border:1px solid #ddd;text-align:center;"></td><td id="pdf-amt" style="padding:10px;border:1px solid #ddd;text-align:right;"></td></tr></tbody>
+    </table>
+    <div style="text-align:right;margin-top:20px;font-size:20px;font-weight:900;">합계: <span id="pdf-sum"></span></div>
+    <div style="margin-top:30px;font-size:12px;color:#888;line-height:1.8;">
+        ※ 본 견적은 예상 금액이며, 실제 분해 점검 후 변경될 수 있습니다.<br>
+        ※ 확정 견적은 분해 완료 후 별도 안내됩니다.
+    </div>
+</div>
+
+<!-- 거래명세표 숨김 템플릿 -->
+<div id="stmt-tpl" style="position:absolute;left:-9999px;width:800px;background:white;padding:36px;font-family:'Malgun Gothic',sans-serif;color:#333;">
+    <div style="text-align:center;font-size:26px;font-weight:900;letter-spacing:6px;border-bottom:3px solid #1a2744;padding-bottom:14px;margin-bottom:20px;">거 래 명 세 표</div>
+    <div style="display:flex;gap:16px;margin-bottom:20px;">
+        <div style="flex:1;border:1px solid #ccc;padding:14px;font-size:13px;line-height:2.2;">
+            <div style="font-weight:700;font-size:14px;margin-bottom:4px;border-bottom:1px solid #eee;padding-bottom:4px;">공급받는자</div>
+            상호: <span id="st-co"></span><br>
+            담당: <span id="st-mgr"></span><br>
+            연락처: <span id="st-tel"></span>
+        </div>
+        <div style="flex:1;border:1px solid #ccc;padding:14px;font-size:13px;line-height:2.2;">
+            <div style="font-weight:700;font-size:14px;margin-bottom:4px;border-bottom:1px solid #eee;padding-bottom:4px;">공급자</div>
+            상호: (주)스마텍<br>
+            대표자: 이명재<br>
+            연락처: 031-204-7170<br>
+            사업자: 000-00-00000
+        </div>
+    </div>
+    <div style="font-size:13px;margin-bottom:10px;">
+        <span>접수번호: <strong id="st-no"></strong></span>
+        &nbsp;&nbsp;|&nbsp;&nbsp;
+        <span>발행일: <strong id="st-date"></strong></span>
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+            <tr style="background:#1a2744;color:white;text-align:center;">
+                <th style="padding:9px 6px;border:1px solid #999;">No.</th>
+                <th style="padding:9px 6px;border:1px solid #999;text-align:left;">품명 / 작업 내용</th>
+                <th style="padding:9px 6px;border:1px solid #999;">수량</th>
+                <th style="padding:9px 6px;border:1px solid #999;text-align:right;">금액</th>
+            </tr>
+        </thead>
+        <tbody id="st-tbody"></tbody>
+        <tfoot>
+            <tr style="font-weight:900;background:#f8f9fa;">
+                <td colspan="3" style="padding:10px 6px;border:1px solid #ccc;text-align:right;font-size:14px;">합  계</td>
+                <td style="padding:10px 6px;border:1px solid #ccc;text-align:right;font-size:15px;" id="st-total"></td>
+            </tr>
+        </tfoot>
+    </table>
+    <div style="margin-top:24px;font-size:12px;color:#888;line-height:1.8;border-top:1px solid #eee;padding-top:12px;">
+        ※ 본 거래명세표는 수리 완료 후 발행되는 최종 정산 문서입니다.<br>
+        ※ 세금계산서는 별도 요청 시 발행됩니다.
+    </div>
+</div>
+
+<!-- ======================================================
+  개발용 테스트 계정 안내 (실제 배포 시 이 주석 삭제)
+  관리자: 전화번호 01000000000 / 비밀번호 admin1234
+  외주업체: 전화번호 01099999999 / 비밀번호 partner1234
+====================================================== -->
+
+<script>
+// ════════════════════════════════════════════════════════
+//  UI 유틸: 토스트 / 로딩 / 눈 토글 / 사이드바
+// ════════════════════════════════════════════════════════
+function toast(msg, type='info') {
+    const w = document.getElementById('toast-wrap');
+    const d = document.createElement('div');
+    d.className = 'toast t-' + type;
+    d.textContent = msg;
+    w.appendChild(d);
+    requestAnimationFrame(() => requestAnimationFrame(() => d.classList.add('in')));
+    setTimeout(() => { d.classList.remove('in'); d.addEventListener('transitionend', () => d.remove(), {once:true}); }, 3200);
+}
+function showLoad(msg='처리 중...') { const l=document.getElementById('loading'); l.querySelector('span').textContent=msg; l.classList.add('on'); }
+function hideLoad() { document.getElementById('loading').classList.remove('on'); }
+function toggleEye(id, btn) {
+    const inp = document.getElementById(id);
+    inp.type = inp.type==='password' ? 'text' : 'password';
+    btn.textContent = inp.type==='password' ? '👁' : '🙈';
+}
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sb-overlay').classList.toggle('on');
+}
+
+// ════════════════════════════════════════════════════════
+//  데이터 저장소
+//  [SUPABASE 연결 후] 아래 localStorage → Supabase API 호출로 교체
+// ════════════════════════════════════════════════════════
+
+let users = JSON.parse(localStorage.getItem('smp_users') || 'null') || [
+    { phone:'01000000000', pw:'admin1234',   role:'admin',   name:'이명재', company:'(주)스마텍', approved:true },
+    { phone:'01099999999', pw:'partner1234', role:'partner', name:'외주담당', company:'외주업체',  approved:true }
+];
+let repairs  = JSON.parse(localStorage.getItem('smp_repairs')  || '[]');
+let kitDB    = JSON.parse(localStorage.getItem('smp_kits')     || '{}');
+let fileStore = JSON.parse(localStorage.getItem('smp_files')   || '{}');
+let priceDB  = [];
+let curUser  = null;
+let selRid   = null;
+let Q = { type:'', model:'', hours:5000, proc:'clean', total:0, items:[] };
+let selPumpEl = null;
+
+// IndexedDB (부품 단가표 대용량 저장)
+let _idb;
+const iReq = indexedDB.open('SMPRepair', 1);
+iReq.onupgradeneeded = e => e.target.result.createObjectStore('parts');
+iReq.onsuccess = e => { _idb = e.target.result; const t = _idb.transaction('parts').objectStore('parts').get('data'); t.onsuccess = () => { priceDB = t.result || []; }; };
+
+const sv = k => localStorage.setItem(k, JSON.stringify(k==='smp_users'?users:k==='smp_repairs'?repairs:k==='smp_kits'?kitDB:fileStore));
+
+// ════════════════════════════════════════════════════════
+//  페이지 전환
+// ════════════════════════════════════════════════════════
+function showPg(id) { document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+
+// ════════════════════════════════════════════════════════
+//  유틸
+// ════════════════════════════════════════════════════════
+function fmtPhone(el) {
+    const v = el.value.replace(/\D/g,'').slice(0, 11);
+    if(v.length <= 3)      el.value = v;
+    else if(v.length <= 7) el.value = v.slice(0,3) + '-' + v.slice(3);
+    else                   el.value = v.slice(0,3) + '-' + v.slice(3,7) + '-' + v.slice(7);
+}
+function cleanPhone(s) { return s.replace(/-/g,''); }
+
+// ════════════════════════════════════════════════════════
+//  인증
+// ════════════════════════════════════════════════════════
+function doLogin() {
+    const phone = cleanPhone(document.getElementById('l-phone').value);
+    const pw    = document.getElementById('l-pw').value;
+    // [SUPABASE 연결 포인트] supabase.auth.signInWithPassword({ phone, password:pw })
+    // [SUPABASE SSO] 메인 홈페이지와 동일한 Supabase 프로젝트 사용 시
+    //   메인 사이트에서 로그인된 세션이 이 사이트에서도 자동 인식됨
+    //   supabase.auth.getSession() 으로 세션 확인 후 enterApp() 호출
+    const u = users.find(x => cleanPhone(x.phone)===phone && x.pw===pw);
+    if(!u)           { toast('전화번호 또는 비밀번호가 올바르지 않습니다.', 'err'); return; }
+    if(!u.approved)  { toast('관리자 승인 대기 중입니다. 잠시 후 다시 시도해주세요.', 'warn'); return; }
+    curUser = u;
+    sessionStorage.setItem('smp_sess', JSON.stringify(u));
+    enterApp();
+}
+
+function doLogout() {
+    curUser = null;
+    sessionStorage.removeItem('smp_sess');
+    // [SUPABASE 연결 포인트] supabase.auth.signOut()
+    showPg('pg-login');
+}
+
+function doRegister() {
+    const phone   = cleanPhone(document.getElementById('r-phone').value);
+    const pw1     = document.getElementById('r-pw1').value;
+    const pw2     = document.getElementById('r-pw2').value;
+    const company = document.getElementById('r-company').value.trim();
+    const name    = document.getElementById('r-name').value.trim();
+    const email   = document.getElementById('r-email').value.trim();
+    if(!company||!name||!phone) { toast('필수 항목(상호명, 대표자명, 전화번호)을 입력해주세요.', 'err'); return; }
+    if(pw1.length<6)            { toast('비밀번호는 6자 이상이어야 합니다.', 'err'); return; }
+    if(pw1!==pw2)               { toast('비밀번호가 일치하지 않습니다.', 'err'); return; }
+    if(users.find(u=>cleanPhone(u.phone)===phone)) { toast('이미 등록된 전화번호입니다.', 'err'); return; }
+    users.push({ phone, pw:pw1, role:'client', name, company, email, approved:false });
+    sv('smp_users');
+    // [SUPABASE 연결 포인트] supabase.from('users').insert({phone,name,company,email,role:'client',approved:false})
+    toast('가입 완료! 관리자 승인 후 로그인하실 수 있습니다.', 'ok');
+    setTimeout(() => showPg('pg-login'), 1600);
+}
+
+// ════════════════════════════════════════════════════════
+//  앱 진입 & RBAC 사이드바
+// ════════════════════════════════════════════════════════
+const MENUS = {
+    admin:   [{id:'tab-quote',i:'🔧',n:'수리 견적 조회'},{id:'tab-admin',i:'📊',n:'전체 현황'},{id:'tab-cart',i:'📦',n:'수리 카트'},{id:'tab-company',i:'🏢',n:'업체 관리'},{id:'tab-mypage',i:'👤',n:'마이페이지'},{id:'tab-settings',i:'⚙️',n:'마스터 설정'}],
+    partner: [{id:'tab-partner',i:'🔩',n:'입고 펌프 작업'}],
+    client:  [{id:'tab-quote',i:'🔧',n:'수리 견적 조회'},{id:'tab-mypage',i:'📋',n:'내 수리 이력'}]
+};
+const ROLE_KR = { admin:'최고 관리자', partner:'외주 파트너', client:'고객사' };
+const ROLE_B  = { admin:'b-blue', partner:'b-orange', client:'b-green' };
+
+function enterApp() {
+    const menus = MENUS[curUser.role] || MENUS.client;
+    document.getElementById('sb-nav').innerHTML = menus.map(m=>`<div class="nav-item" id="nav-${m.id}" onclick="switchTab('${m.id}')">${m.i} ${m.n}</div>`).join('');
+    document.getElementById('sb-name').textContent = curUser.name;
+    document.getElementById('sb-co').textContent   = curUser.company;
+    document.getElementById('sb-role').textContent = ROLE_KR[curUser.role];
+    const b = document.getElementById('hdr-badge');
+    b.className = 'badge '+ROLE_B[curUser.role];
+    b.textContent = ROLE_KR[curUser.role];
+    showPg('pg-app');
+    if(curUser.role==='admin') updateNavBadge();
+    switchTab(menus[0].id);
+}
+
+function switchTab(id) {
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    const nav = document.getElementById('nav-'+id);
+    if(nav) nav.classList.add('active');
+    const m = (MENUS[curUser.role]||[]).find(x=>x.id===id);
+    if(m) document.getElementById('hdr-title').textContent = m.n;
+    if(id==='tab-admin')    renderAdmin();
+    if(id==='tab-mypage')   renderMypage();
+    if(id==='tab-partner')  renderPartner();
+    if(id==='tab-settings') renderSettings();
+    if(id==='tab-cart')     renderCart();
+    if(id==='tab-company')  renderCompany();
+}
+
+// ════════════════════════════════════════════════════════
+//  회원가입 단계 전환
+// ════════════════════════════════════════════════════════
+let rStep = 1;
+function goReg(n) {
+    document.getElementById('rs'+rStep).classList.remove('active');
+    ['rsi1','rsi2','rsi3'].forEach((id,i)=>{
+        const el=document.getElementById(id);
+        el.classList.remove('active','done');
+        if(i+1<n) el.classList.add('done');
+        else if(i+1===n) el.classList.add('active');
+    });
+    rStep = n;
+    document.getElementById('rs'+n).classList.add('active');
+}
+
+function onCardDrop(e) { e.preventDefault(); document.getElementById('card-dz').classList.remove('drag-over'); if(e.dataTransfer.files[0]) showCardPrev(e.dataTransfer.files[0]); }
+function onCardFile(inp) { if(inp.files[0]) showCardPrev(inp.files[0]); }
+function showCardPrev(f) {
+    const r=new FileReader();
+    r.onload=e=>{
+        document.getElementById('card-prev').innerHTML=`<img src="${e.target.result}" style="max-width:100%;border-radius:8px;border:1px solid var(--gray-200);">`;
+        // [ANTHROPIC API 연결 포인트]
+        // fetch('/api/ocr-card', {method:'POST',body:JSON.stringify({image:e.target.result})})
+        //   .then(r=>r.json()).then(data=>{
+        //     document.getElementById('r-company').value = data.company || '';
+        //     document.getElementById('r-name').value    = data.name    || '';
+        //     document.getElementById('r-tel').value     = data.phone   || '';
+        //     document.getElementById('r-email').value   = data.email   || '';
+        //   });
+    };
+    r.readAsDataURL(f);
+}
+
+// ════════════════════════════════════════════════════════
+//  견적 마법사
+// ════════════════════════════════════════════════════════
+const PUMPS = {
+    oil:     { name:'오일 펌프',    models:['E2M0.7/1.5','E2M18','E2M28','E2M40','RV3','RV12'],  base:{E2M07:380000,'E2M0.7/1.5':380000,E2M18:520000,E2M28:650000,E2M40:780000,RV3:350000,RV12:480000} },
+    dry:     { name:'드라이 펌프',  models:['nXDS6i','nXDS10i','XDS35i'],                         base:{nXDS6i:850000,nXDS10i:950000,XDS35i:1200000} },
+    booster: { name:'부스터 펌프',  models:['EH250','EH500','EH1200'],                            base:{EH250:1100000,EH500:1400000,EH1200:1800000} },
+    combo:   { name:'조합 시스템', models:['nXDS+EH','E2M+EH'],                                   base:{'nXDS+EH':2200000,'E2M+EH':1800000} }
+};
+const PRED = [
+    { test:(h,p)=>h>=10000&&p==='harsh', level:'critical', msg:'가혹 공정 10,000시간 이상 가동', parts:'베어링 세트·실 키트 전체·블레이드 교체 필요', add:320000 },
+    { test:(h,p)=>h>=15000&&p==='clean', level:'critical', msg:'일반 공정 15,000시간 이상 가동', parts:'베어링 세트·실 키트 교체 필요',               add:220000 },
+    { test:(h,p)=>h>=8000 &&p==='harsh', level:'warn',     msg:'가혹 공정 8,000시간 초과',        parts:'실 키트 점검 및 교체 권장',                  add:120000 },
+    { test:(h,p)=>h>=10000&&p==='clean', level:'warn',     msg:'일반 공정 10,000시간 초과',        parts:'베어링 점검 권장',                           add:80000  }
+];
+
+function selPump(type, el) {
+    if(selPumpEl) selPumpEl.classList.remove('sel');
+    el.classList.add('sel'); selPumpEl = el;
+    Q.type = type;
+    document.getElementById('q-btn1').disabled = false;
+    const sel = document.getElementById('q-model');
+    sel.innerHTML = '<option value="">선택하세요</option>' + PUMPS[type].models.map(m=>`<option value="${m}">${m}</option>`).join('');
+}
+function selProc(p) {
+    Q.proc = p;
+    document.getElementById('pc-clean').classList.toggle('sel', p==='clean');
+    document.getElementById('pc-harsh').classList.toggle('sel', p==='harsh');
+}
+function updHr(v) { Q.hours=parseInt(v); document.getElementById('hr-disp').textContent=parseInt(v).toLocaleString()+' 시간'; }
+
+function goQ(n) {
+    document.querySelectorAll('[id^=qs]').forEach(e=>e.classList.remove('active'));
+    document.querySelectorAll('[id^=ws]').forEach((e,i)=>{ e.classList.remove('active','done'); if(i+1<n)e.classList.add('done'); else if(i+1===n)e.classList.add('active'); });
+    document.getElementById('qs'+n).classList.add('active');
+}
+
+function calcQuote() {
+    const model = document.getElementById('q-model').value;
+    if(!model) { toast('모델명을 선택해주세요.', 'warn'); return; }
+    const margin = parseFloat(document.getElementById('q-margin').value);
+    const base   = (PUMPS[Q.type]?.base?.[model] || 650000);
+    const baseAmt = Math.round(base * margin);
+    Q.model = model;
+    Q.items = [{ label:`${model} Overhaul 기본 패키지`, amt:baseAmt, added:false }];
+    // 예방정비 판단
+    const rule = PRED.find(r=>r.test(Q.hours, Q.proc));
+    let warnHtml = '';
+    if(rule) {
+        const addAmt = Math.round(rule.add * margin);
+        Q.items.push({ label:`예방 정비 소모품 (${rule.msg})`, amt:addAmt, added:true });
+        warnHtml = `<div class="warn-banner"><div class="warn-ico">⚠️</div><div class="warn-txt"><strong>예방 정비 주의 – ${rule.msg}</strong>${Q.hours.toLocaleString()}시간 ${Q.proc==='harsh'?'가혹 공정':'일반 공정'} 가동으로 <b>${rule.parts}</b>를 권장합니다. 미교체 시 6개월 내 고착 위험이 높습니다.</div></div>`;
+    }
+    document.getElementById('warn-area').innerHTML = warnHtml;
+    updateQuoteDisplay();
+    // 관리자 전용 영역 표시
+    const adminArea = document.getElementById('q-admin-area');
+    if(adminArea) adminArea.style.display = curUser?.role==='admin' ? 'block' : 'none';
+    // 부품 검색창 초기화
+    const ps = document.getElementById('part-search'); if(ps) ps.value='';
+    const pd = document.getElementById('part-drop');   if(pd) pd.style.display='none';
+    goQ(3);
+}
+
+function updateQuoteDisplay() {
+    let total = 0;
+    document.getElementById('q-lines').innerHTML = Q.items.map((it, idx) => {
+        total += it.amt;
+        const delBtn = it.added
+            ? `<button class="cart-del" onclick="removePartFromQuote(${idx})" title="항목 삭제">❌</button>`
+            : '';
+        return `<div class="cart-row"><span class="cart-label${it.added?' added':''}">${it.added?'＋ ':''}${it.label}</span><span class="cart-amt">${it.amt.toLocaleString()}원</span>${delBtn}</div>`;
+    }).join('');
+    Q.total = total;
+    document.getElementById('q-grand').textContent = total.toLocaleString()+'원';
+}
+
+function submitRepair() {
+    const d   = new Date();
+    const seq = String(repairs.length+1).padStart(2,'0');
+    const no  = `SM-${String(d.getFullYear()).slice(2)}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${seq}`;
+    const rep = { id:no, phone:curUser?.phone||'', name:curUser?.name||'', company:curUser?.company||'', model:Q.model, type:Q.type, hours:Q.hours, proc:Q.proc, total:Q.total, items:Q.items, status:'접수완료', date:d.toLocaleDateString('ko-KR') };
+    repairs.unshift(rep);
+    localStorage.setItem('smp_repairs', JSON.stringify(repairs));
+    // [SUPABASE 연결 포인트] supabase.from('repairs').insert(rep)
+    document.getElementById('r-no').textContent = no;
+    const qb = document.getElementById('qr-box');
+    qb.innerHTML = '';
+    try { new QRCode(qb, { text: no+'|'+Q.model, width:140, height:140 }); } catch(e) { qb.textContent = no; }
+    goQ(4);
+}
+
+function resetQuote() {
+    Q = { type:'', model:'', hours:5000, proc:'clean', total:0, items:[] };
+    if(selPumpEl) { selPumpEl.classList.remove('sel'); selPumpEl=null; }
+    document.getElementById('q-btn1').disabled = true;
+    document.getElementById('hr-disp').textContent = '5,000 시간';
+    document.getElementById('q-hours').value = 5000;
+    document.getElementById('pc-clean').classList.add('sel');
+    document.getElementById('pc-harsh').classList.remove('sel');
+    goQ(1);
+}
+
+// ════════════════════════════════════════════════════════
+//  마이페이지
+// ════════════════════════════════════════════════════════
+function renderMypage() {
+    const my = repairs.filter(r=>r.phone===curUser.phone);
+    const cnt = { total:my.length, active:my.filter(r=>r.status!=='납품완료'&&r.status!=='오더취소').length, done:my.filter(r=>r.status==='납품완료').length };
+    document.getElementById('my-stats').innerHTML = `
+        <div class="stat-card"><div class="stat-val">${cnt.total}</div><div class="stat-lbl">전체 접수</div></div>
+        <div class="stat-card"><div class="stat-val" style="color:var(--orange)">${cnt.active}</div><div class="stat-lbl">진행 중</div></div>
+        <div class="stat-card"><div class="stat-val" style="color:var(--green)">${cnt.done}</div><div class="stat-lbl">납품 완료</div></div>`;
+    const SB = {'접수완료':'b-blue','발주접수':'b-green','입고확인':'b-orange','수리중':'b-orange','납품준비':'b-orange','납품완료':'b-green','오더취소':'b-gray'};
+    document.getElementById('my-tbody').innerHTML = my.length ? my.map(r=>`
+        <tr><td><strong>${r.id}</strong></td><td>${r.model}</td><td>${r.date}</td>
+        <td><span class="badge ${SB[r.status]||'b-gray'}">${r.status}</span></td>
+        <td>${r.total?.toLocaleString()}원</td>
+        <td><button onclick="dlPdf('${r.id}')" style="padding:4px 10px;font-size:12px;background:var(--blue);color:white;border:none;border-radius:4px;cursor:pointer;">PDF</button></td>
+        <td>${r.status==='접수완료' ? `<button onclick="doOrder('${r.id}')" style="padding:4px 10px;font-size:12px;background:var(--green);color:white;border:none;border-radius:4px;cursor:pointer;">발주 진행</button>` : '<span style="font-size:12px;color:var(--gray-400);">—</span>'}</td>
+        <td>${['발주접수','입고확인','수리중','납품준비','납품완료'].includes(r.status) ? `<button onclick="showMyFiles('${r.id}')" style="padding:4px 10px;font-size:12px;background:var(--accent);color:white;border:none;border-radius:4px;cursor:pointer;">파일 보기</button>` : '<span style="font-size:12px;color:var(--gray-400);">—</span>'}</td></tr>`).join('')
+        : '<tr><td colspan="8" style="text-align:center;padding:28px;color:var(--gray-400);">접수 내역이 없습니다.</td></tr>';
+}
+
+function showMyFiles(id) {
+    const files = fileStore[id] || {photo:[], report:[]};
+    const photos  = (files.photo  || []).filter(f => f.data);
+    const reports = (files.report || []);
+    if(!photos.length && !reports.length) {
+        toast('아직 업로드된 파일이 없습니다. 수리 진행 후 담당자가 업로드하면 확인하실 수 있습니다.', 'info');
+        return;
+    }
+    const photoHtml = photos.length
+        ? `<div style="margin-bottom:16px;">
+               <p style="font-weight:700;font-size:14px;margin-bottom:8px;">📷 분해 사진 (${photos.length}장)</p>
+               <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;">
+                   ${photos.map(f=>`<img src="${f.data}" alt="${f.name}" style="width:100%;border-radius:6px;border:1px solid var(--gray-200);object-fit:cover;aspect-ratio:1;">`).join('')}
+               </div>
+           </div>`
+        : `<p style="font-size:13px;color:var(--gray-400);margin-bottom:12px;">분해 사진이 아직 없습니다.</p>`;
+    const reportHtml = reports.length
+        ? `<div>
+               <p style="font-weight:700;font-size:14px;margin-bottom:8px;">📄 검사 성적서 (${reports.length}건)</p>
+               ${reports.map(f=>`<div class="file-item">📄 ${f.name||f}</div>`).join('')}
+           </div>`
+        : '';
+    document.getElementById('my-file-content').innerHTML = photoHtml + reportHtml;
+    const card = document.getElementById('my-files');
+    card.dataset.rid = id;
+    card.style.display = 'block';
+    card.scrollIntoView({behavior:'smooth'});
+}
+
+async function dlFilePdf() {
+    const id = document.getElementById('my-files').dataset.rid;
+    const files  = fileStore[id] || {};
+    const photos = (files.photo || []).filter(f => f.data);
+    if(!photos.length) { toast('다운로드할 사진이 없습니다.', 'warn'); return; }
+    const {jsPDF} = window.jspdf;
+    const pdf = new jsPDF('p','mm','a4');
+    pdf.setFontSize(16); pdf.setFont(undefined,'bold');
+    pdf.text('분해 점검 사진 보고서', 105, 18, {align:'center'});
+    pdf.setFontSize(11); pdf.setFont(undefined,'normal');
+    pdf.text('접수번호: ' + id, 20, 28);
+    pdf.text('(주)스마텍  |  031-204-7170', 20, 35);
+    pdf.line(20, 39, 190, 39);
+    let y = 46;
+    for(const f of photos) {
+        if(y + 75 > 285) { pdf.addPage(); y = 15; }
+        try { pdf.addImage(f.data, 'JPEG', 20, y, 80, 60); } catch(e) {}
+        pdf.setFontSize(9);
+        pdf.text(f.name, 22, y + 63);
+        y += 70;
+    }
+    pdf.save('분해사진_' + id + '.pdf');
+}
+
+function doOrder(id) {
+    if(!confirm('발주를 진행하시겠습니까?\n확정 후에는 담당자를 통해 취소할 수 있습니다.')) return;
+    const r = repairs.find(x=>x.id===id); if(!r) return;
+    r.status = '발주접수';
+    localStorage.setItem('smp_repairs', JSON.stringify(repairs));
+    // [SUPABASE 연결 포인트] supabase.from('repairs').update({status:'발주접수'}).eq('id',id)
+    updateNavBadge();
+    renderMypage();
+    toast('발주가 접수되었습니다. 담당자가 확인 후 연락드리겠습니다.', 'ok');
+}
+
+// ════════════════════════════════════════════════════════
+//  관리자 대시보드
+// ════════════════════════════════════════════════════════
+function renderAdmin() {
+    updateNavBadge();
+    const cnt = { total:repairs.length, active:repairs.filter(r=>r.status!=='납품완료'&&r.status!=='오더취소').length, done:repairs.filter(r=>r.status==='납품완료').length, users:users.filter(u=>u.role==='client').length };
+    document.getElementById('adm-stats').innerHTML = `
+        <div class="stat-card"><div class="stat-val">${cnt.total}</div><div class="stat-lbl">전체 접수</div></div>
+        <div class="stat-card"><div class="stat-val" style="color:var(--orange)">${cnt.active}</div><div class="stat-lbl">진행 중</div></div>
+        <div class="stat-card"><div class="stat-val" style="color:var(--green)">${cnt.done}</div><div class="stat-lbl">납품 완료</div></div>
+        <div class="stat-card"><div class="stat-val">${cnt.users}</div><div class="stat-lbl">등록 고객사</div></div>`;
+    const pending     = users.filter(u=>u.role==='client'&&!u.approved);
+    const newReceipts = repairs.filter(r=>r.status==='접수완료');
+    const newOrders   = repairs.filter(r=>r.status==='발주접수');
+    const pendingEl   = document.getElementById('adm-pending');
+    let bannerHtml = '';
+
+    if(newReceipts.length) {
+        bannerHtml += `<div class="card" style="border-left:4px solid var(--blue);margin-bottom:12px;background:var(--blue-light);">
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                <span style="font-size:20px;">📋</span>
+                <div style="flex:1;">
+                    <div style="font-weight:700;font-size:14px;color:var(--blue);margin-bottom:4px;">신규 수리 접수 ${newReceipts.length}건이 확인을 기다립니다</div>
+                    <div style="font-size:13px;color:var(--gray-600);">${newReceipts.map(r=>`${r.company} — ${r.model}`).join(', ')}</div>
+                </div>
+            </div>
+        </div>`;
+    }
+    if(newOrders.length) {
+        bannerHtml += `<div class="card" style="border-left:4px solid var(--green);margin-bottom:12px;background:#dcfce7;">
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                <span style="font-size:20px;">📦</span>
+                <div style="flex:1;">
+                    <div style="font-weight:700;font-size:14px;color:var(--green);margin-bottom:4px;">발주 확정 ${newOrders.length}건 — 입고 처리가 필요합니다</div>
+                    <div style="font-size:13px;color:var(--gray-600);">${newOrders.map(r=>`${r.company} — ${r.model}`).join(', ')}</div>
+                </div>
+            </div>
+        </div>`;
+    }
+    if(pending.length) {
+        bannerHtml += `<div class="card" style="border-left:4px solid var(--red);margin-bottom:12px;background:var(--orange-light);">
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                <span style="font-size:20px;">🔔</span>
+                <div style="flex:1;">
+                    <div style="font-weight:700;font-size:14px;color:var(--red);margin-bottom:4px;">승인 대기 중인 회원이 ${pending.length}명 있습니다</div>
+                    <div style="font-size:13px;color:var(--gray-600);">${pending.map(u=>`${u.company||u.name}(${u.phone})`).join(', ')}</div>
+                </div>
+                <button onclick="switchTab('tab-settings')" style="padding:8px 16px;background:var(--red);color:white;border:none;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;">회원 관리 →</button>
+            </div>
+        </div>`;
+    }
+    pendingEl.innerHTML = bannerHtml;
+    const SB = {'접수완료':'b-blue','발주접수':'b-green','입고확인':'b-orange','수리중':'b-orange','납품준비':'b-orange','납품완료':'b-green','오더취소':'b-gray'};
+    const statOpts = ['접수완료','발주접수','입고확인','수리중','납품준비','납품완료','오더취소'];
+    document.getElementById('adm-tbody').innerHTML = repairs.length ? repairs.map(r=>`
+        <tr><td><strong>${r.id}</strong></td><td>${r.company||'-'}</td><td>${r.model}</td><td>${r.date}</td>
+        <td><select onchange="updStatus('${r.id}',this.value)" style="padding:4px 8px;border-radius:4px;border:1px solid var(--gray-200);font-size:13px;font-family:inherit;">${statOpts.map(s=>`<option ${r.status===s?'selected':''}>${s}</option>`).join('')}</select></td>
+        <td>${r.total?.toLocaleString()}원</td>
+        <td><button onclick="dlPdf('${r.id}')" style="padding:4px 10px;font-size:12px;background:var(--blue);color:white;border:none;border-radius:4px;cursor:pointer;">PDF</button></td>
+        <td><button onclick="deleteRepair('${r.id}')" style="padding:4px 8px;font-size:13px;background:none;border:none;cursor:pointer;" title="삭제">🗑️</button></td></tr>`).join('')
+        : '<tr><td colspan="8" style="text-align:center;padding:28px;color:var(--gray-400);">접수 내역이 없습니다.</td></tr>';
+}
+function updStatus(id, s) {
+    const r = repairs.find(x=>x.id===id);
+    if(r) { r.status=s; localStorage.setItem('smp_repairs',JSON.stringify(repairs)); updateNavBadge(); }
+    // [SUPABASE 연결 포인트] supabase.from('repairs').update({status:s}).eq('id',id)
+}
+function deleteRepair(id) {
+    if(!confirm(`접수번호 ${id}를 삭제하시겠습니까?`)) return;
+    if(!confirm('삭제하면 복구할 수 없습니다. 정말 삭제하시겠습니까?')) return;
+    repairs = repairs.filter(r=>r.id!==id);
+    localStorage.setItem('smp_repairs',JSON.stringify(repairs));
+    renderAdmin();
+    // [SUPABASE 연결 포인트] supabase.from('repairs').delete().eq('id',id)
+}
+function updateNavBadge() {
+    // 마스터 설정: 승인 대기 회원 수
+    const pendingUsers = users.filter(u=>u.role==='client'&&!u.approved).length;
+    const navSettings = document.getElementById('nav-tab-settings');
+    if(navSettings) {
+        const ex = navSettings.querySelector('.nav-badge'); if(ex) ex.remove();
+        if(pendingUsers > 0) {
+            const b = document.createElement('span'); b.className='nav-badge'; b.textContent=pendingUsers;
+            navSettings.appendChild(b);
+        }
+    }
+    // 전체 현황: 신규 접수 + 발주 확인 필요 건 수
+    const newOrders = repairs.filter(r=>r.status==='접수완료'||r.status==='발주접수').length;
+    const navAdmin = document.getElementById('nav-tab-admin');
+    if(navAdmin) {
+        const ex = navAdmin.querySelector('.nav-badge'); if(ex) ex.remove();
+        if(newOrders > 0) {
+            const b = document.createElement('span'); b.className='nav-badge'; b.textContent=newOrders;
+            navAdmin.appendChild(b);
+        }
+    }
+}
+
+// ════════════════════════════════════════════════════════
+//  외주업체 화면 (RBAC: 고객정보 마스킹)
+// ════════════════════════════════════════════════════════
+function renderPartner() {
+    const active = repairs.filter(r=>r.status!=='납품완료'&&r.status!=='오더취소');
+    document.getElementById('pt-tbody').innerHTML = active.length ? active.map(r=>`
+        <tr><td><strong>${r.id}</strong></td>
+        <td>🔒 [위탁 처리건]</td>
+        <td>${r.model}</td>
+        <td><span class="badge b-orange">${r.status}</span></td>
+        <td><button onclick="openUpload('${r.id}')" style="padding:4px 10px;font-size:12px;background:var(--accent);color:white;border:none;border-radius:4px;cursor:pointer;">작업 업로드</button></td></tr>`).join('')
+        : '<tr><td colspan="5" style="text-align:center;padding:28px;color:var(--gray-400);">입고 대기 중인 펌프가 없습니다.</td></tr>';
+}
+function openUpload(id) {
+    selRid = id;
+    document.getElementById('pt-upload-title').textContent = `분해 사진 & 점검 체크리스트 (${id})`;
+    document.getElementById('pt-upload').style.display = 'block';
+    document.getElementById('pt-upload').scrollIntoView({behavior:'smooth'});
+    renderFileLists();
+}
+function onFileDrop(e, type) {
+    e.preventDefault(); e.currentTarget.classList.remove('drag-over');
+    if(!selRid) return;
+    const files = Array.from(e.dataTransfer.files);
+    if(!fileStore[selRid]) fileStore[selRid]={photo:[],report:[]};
+    // [SUPABASE 연결 포인트] for each file: supabase.storage.from('repair-photos').upload(`${selRid}/${f.name}`, f)
+    let done = 0;
+    files.forEach(f => {
+        const reader = new FileReader();
+        reader.onload = ev => {
+            fileStore[selRid][type].push({ name: f.name, data: ev.target.result, mime: f.type });
+            done++;
+            if(done === files.length) {
+                try { localStorage.setItem('smp_files', JSON.stringify(fileStore)); } catch(err) { toast('저장 공간이 부족합니다. 파일 크기를 줄이거나 기존 파일을 삭제해주세요.', 'err'); }
+                renderFileLists();
+            }
+        };
+        reader.readAsDataURL(f);
+    });
+}
+function onFileSelect(inp, type) {
+    if(!selRid) return;
+    const files = Array.from(inp.files);
+    if(!fileStore[selRid]) fileStore[selRid]={photo:[],report:[]};
+    let done = 0;
+    files.forEach(f => {
+        const reader = new FileReader();
+        reader.onload = ev => {
+            fileStore[selRid][type].push({ name: f.name, data: ev.target.result, mime: f.type });
+            done++;
+            if(done === files.length) {
+                try { localStorage.setItem('smp_files', JSON.stringify(fileStore)); } catch(err) { toast('저장 공간이 부족합니다. 파일 크기를 줄이거나 기존 파일을 삭제해주세요.', 'err'); }
+                renderFileLists();
+            }
+        };
+        reader.readAsDataURL(f);
+    });
+}
+function renderFileLists() {
+    const s = fileStore[selRid]||{photo:[],report:[]};
+    document.getElementById('photo-list').innerHTML = (s.photo||[]).map((f,i)=>{
+        const thumb = f.data && f.mime?.startsWith('image/') ? `<img src="${f.data}" style="width:56px;height:56px;object-fit:cover;border-radius:4px;flex-shrink:0;">` : '📷';
+        return `<div class="file-item" style="align-items:center;gap:8px;">${thumb}<span style="flex:1;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${f.name||f}</span><span onclick="delF('photo',${i})" style="cursor:pointer;color:var(--red);flex-shrink:0;">✕</span></div>`;
+    }).join('') || '<p style="font-size:13px;color:var(--gray-400);">업로드된 사진이 없습니다.</p>';
+    document.getElementById('report-list').innerHTML = (s.report||[]).map((f,i)=>
+        `<div class="file-item">📄 <span style="flex:1;font-size:13px;">${f.name||f}</span><span onclick="delF('report',${i})" style="cursor:pointer;color:var(--red);">✕</span></div>`
+    ).join('') || '<p style="font-size:13px;color:var(--gray-400);">업로드된 성적서가 없습니다.</p>';
+}
+function delF(type, idx) {
+    fileStore[selRid][type].splice(idx, 1);
+    try { localStorage.setItem('smp_files', JSON.stringify(fileStore)); } catch(e) {}
+    renderFileLists();
+}
+function saveChecklist() { toast('점검 내용이 저장되었습니다.', 'ok'); }
+
+async function dlStatement() {
+    const r = repairs.find(x=>x.id===cartRid);
+    if(!r) { toast('먼저 수리 건을 선택해주세요.', 'warn'); return; }
+    if(!r.items || !r.items.length) { toast('확정 견적 항목이 없습니다. 부품을 추가하고 확정 견적 저장 후 발행해주세요.', 'warn'); return; }
+    // 템플릿 채우기
+    document.getElementById('st-co').textContent   = r.company || '-';
+    document.getElementById('st-mgr').textContent  = r.name    || '-';
+    document.getElementById('st-tel').textContent  = r.phone   || '-';
+    document.getElementById('st-no').textContent   = r.id;
+    document.getElementById('st-date').textContent = new Date().toLocaleDateString('ko-KR');
+    document.getElementById('st-tbody').innerHTML  = r.items.map((it, i) =>
+        `<tr>
+            <td style="padding:8px 6px;border:1px solid #ddd;text-align:center;">${i+1}</td>
+            <td style="padding:8px 6px;border:1px solid #ddd;">${it.label}</td>
+            <td style="padding:8px 6px;border:1px solid #ddd;text-align:center;">1식</td>
+            <td style="padding:8px 6px;border:1px solid #ddd;text-align:right;">${(it.amt||0).toLocaleString()}원</td>
+        </tr>`
+    ).join('');
+    document.getElementById('st-total').textContent = (r.total||0).toLocaleString() + '원';
+    // HTML → Canvas → PDF
+    showLoad('거래명세표 생성 중...');
+    const el = document.getElementById('stmt-tpl');
+    const canvas = await html2canvas(el, {scale:2});
+    const {jsPDF} = window.jspdf;
+    const pdf = new jsPDF('p','mm','a4');
+    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, 210, (canvas.height*210)/canvas.width);
+    pdf.save('거래명세표_' + r.id + '.pdf');
+    hideLoad();
+    toast('거래명세표가 저장되었습니다.', 'ok');
+}
+
+function dlTaxInvoice() {
+    // [전자세금계산서 API 연결 포인트]
+    // 더존 iCUBE, 국세청 e세로 등 전자세금계산서 발행 API 연동 필요
+    // supabase function 또는 별도 백엔드에서 처리
+    const r = repairs.find(x=>x.id===cartRid);
+    const no = r ? r.id : '(건 미선택)';
+    toast('세금계산서(' + no + ')는 담당자에게 직접 요청해주세요. ☎ 031-204-7170', 'info');
+}
+
+// ════════════════════════════════════════════════════════
+//  마스터 설정 렌더
+// ════════════════════════════════════════════════════════
+function renderSettings() {
+    const keys = Object.keys(kitDB);
+    document.getElementById('kit-cnt').textContent = keys.length;
+    document.getElementById('kit-tbody').innerHTML = keys.map(k=>`
+        <tr><td>${k}</td><td>${kitDB[k].length}</td>
+        <td><button onclick="delKit('${k}')" style="padding:3px 8px;font-size:12px;background:var(--red);color:white;border:none;border-radius:4px;cursor:pointer;">삭제</button></td></tr>`).join('')
+        || '<tr><td colspan="3" style="text-align:center;padding:20px;color:var(--gray-400);">업로드된 키트가 없습니다.</td></tr>';
+    const ROLE_KR = { admin:'최고 관리자', partner:'외주 파트너', client:'고객사' };
+    document.getElementById('usr-tbody').innerHTML = users.filter(u=>u.role!=='admin').map(u=>`
+        <tr><td>${u.company}</td><td>${u.name}</td><td>${u.phone}</td>
+        <td>${ROLE_KR[u.role]||u.role}</td>
+        <td><span class="badge ${u.approved?'b-green':'b-orange'}">${u.approved?'승인':'대기'}</span></td>
+        <td>
+            ${!u.approved?`<button onclick="approveUser('${u.phone}')" style="padding:3px 8px;font-size:12px;background:var(--green);color:white;border:none;border-radius:4px;cursor:pointer;margin-right:4px;">승인</button>`:''}
+            <button onclick="delUser('${u.phone}')" style="padding:3px 8px;font-size:12px;background:var(--red);color:white;border:none;border-radius:4px;cursor:pointer;">삭제</button>
+        </td></tr>`).join('')
+        || '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--gray-400);">등록된 사용자가 없습니다.</td></tr>';
+}
+function approveUser(phone) {
+    const u=users.find(x=>x.phone===phone);
+    if(u){u.approved=true; sv('smp_users'); renderSettings(); updateNavBadge();}
+    // [SUPABASE 연결 포인트] supabase.from('users').update({approved:true}).eq('phone',phone)
+}
+function delUser(phone) { if(confirm('삭제하시겠습니까?')){users=users.filter(u=>u.phone!==phone); sv('smp_users'); renderSettings();} }
+function delKit(k) { delete kitDB[k]; localStorage.setItem('smp_kits',JSON.stringify(kitDB)); renderSettings(); }
+
+function loadKitDB(input) {
+    const r=new FileReader();
+    r.onload=e=>{
+        const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+        const df=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});
+        const head=df[0];
+        for(let c=0;c<head.length;c++){if(head[c]){let its=[];for(let row=1;row<df.length;row++)if(df[row][c])its.push(df[row][c]);kitDB[head[c].trim()]=its;}}
+        localStorage.setItem('smp_kits',JSON.stringify(kitDB)); renderSettings();
+    };
+    r.readAsArrayBuffer(input.files[0]);
+}
+function loadPartsDB(input) {
+    const r=new FileReader();
+    r.onload=e=>{
+        const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+        const raw=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1}).slice(2);
+        // 4번째 컬럼(index 4): 상태(판매중/단종) - 단종 부품은 DB에 보존하되 검색에서 제외
+        priceDB=raw.map(row=>({part:String(row[1]||''),name:row[2],cost:Number(row[3]||0),status:row[4]||'판매중'}));
+        _idb.transaction('parts','readwrite').objectStore('parts').put(priceDB,'data');
+        // [SUPABASE 연결 포인트] 기존 데이터 덮어쓰기:
+        //   await supabase.from('parts').delete().neq('id',0)
+        //   await supabase.from('parts').upsert(priceDB)
+        toast('단가표가 로드되었습니다. (단종 부품은 검색 제외)', 'ok');
+    };
+    r.readAsArrayBuffer(input.files[0]);
+}
+
+// ════════════════════════════════════════════════════════
+//  비밀번호 변경
+// ════════════════════════════════════════════════════════
+function showPwModal() { document.getElementById('pw-modal').classList.add('show'); }
+function hidePwModal() { document.getElementById('pw-modal').classList.remove('show'); ['pw-old','pw-n1','pw-n2'].forEach(id=>document.getElementById(id).value=''); }
+function changePw() {
+    const old=document.getElementById('pw-old').value;
+    const n1=document.getElementById('pw-n1').value;
+    const n2=document.getElementById('pw-n2').value;
+    if(!curUser||curUser.pw!==old) { toast('현재 비밀번호가 올바르지 않습니다.', 'err'); return; }
+    if(n1.length<6) { toast('새 비밀번호는 6자 이상이어야 합니다.', 'err'); return; }
+    if(n1!==n2) { toast('새 비밀번호가 일치하지 않습니다.', 'err'); return; }
+    curUser.pw=n1;
+    const u=users.find(x=>x.phone===curUser.phone);
+    if(u) u.pw=n1;
+    sv('smp_users');
+    // [SUPABASE 연결 포인트] supabase.auth.updateUser({ password: n1 })
+    toast('비밀번호가 변경되었습니다.', 'ok'); hidePwModal();
+}
+
+// ════════════════════════════════════════════════════════
+//  PDF 견적서 발행
+// ════════════════════════════════════════════════════════
+async function dlPdf(id) {
+    const r=repairs.find(x=>x.id===id); if(!r) return;
+    showLoad('PDF 생성 중...');
+    document.getElementById('pdf-co').textContent  = r.company;
+    document.getElementById('pdf-mgr').textContent = r.name;
+    document.getElementById('pdf-tel').textContent = r.phone;
+    document.getElementById('pdf-item').textContent= r.model+' Overhaul';
+    document.getElementById('pdf-no').textContent  = r.id;
+    document.getElementById('pdf-amt').textContent = r.total?.toLocaleString()+'원';
+    document.getElementById('pdf-sum').textContent = r.total?.toLocaleString()+'원';
+    const el=document.getElementById('pdf-tpl');
+    const canvas=await html2canvas(el,{scale:2});
+    const {jsPDF}=window.jspdf;
+    const pdf=new jsPDF('p','mm','a4');
+    pdf.addImage(canvas.toDataURL('image/png'),'PNG',0,0,210,(canvas.height*210)/canvas.width);
+    pdf.save('견적서_'+r.id+'.pdf');
+    hideLoad();
+    toast('견적서 PDF가 저장되었습니다.', 'ok');
+}
+
+// ════════════════════════════════════════════════════════
+//  견적 Step3 — 부품 추가 / 삭제 / 키트 보기
+// ════════════════════════════════════════════════════════
+function removePartFromQuote(idx) {
+    if(Q.items[idx] && !Q.items[idx].added) { toast('기본 패키지는 삭제할 수 없습니다.', 'warn'); return; }
+    Q.items.splice(idx, 1);
+    updateQuoteDisplay();
+}
+
+function searchPartsQ(val) {
+    const drop = document.getElementById('part-drop');
+    if(!val || val.length < 1) { drop.style.display='none'; return; }
+    const kw = val.toLowerCase();
+    const hits = priceDB.filter(p => p.status !== '단종' && (p.part.toLowerCase().includes(kw) || (p.name||'').toLowerCase().includes(kw))).slice(0, 10);
+    if(!hits.length) { drop.style.display='none'; return; }
+    drop.innerHTML = hits.map(p => `<div class="search-drop-item" onclick="addPartToQuote('${p.part}','${(p.name||'').replace(/'/g,"\\'")}',${p.cost})"><span>${p.part} — ${p.name||''}</span><span class="part-price">${(p.cost||0).toLocaleString()}원</span></div>`).join('');
+    drop.style.display = 'block';
+}
+
+function addPartToQuote(part, name, cost) {
+    const margin = parseFloat(document.getElementById('q-margin').value) || 1;
+    Q.items.push({ label:`${part} ${name}`, amt: Math.round(cost * margin), added:true });
+    updateQuoteDisplay();
+    document.getElementById('part-search').value = '';
+    document.getElementById('part-drop').style.display = 'none';
+}
+
+let kitViewOpen = false;
+function toggleKitView() {
+    const el = document.getElementById('kit-view');
+    kitViewOpen = !kitViewOpen;
+    if(!kitViewOpen) { el.style.display='none'; return; }
+    const items = kitDB[Q.model] || [];
+    if(!items.length) {
+        el.innerHTML = `<p style="font-size:13px;color:var(--gray-400);">「${Q.model}」 모델의 키트 데이터가 없습니다.<br>마스터 설정에서 키트 파일을 먼저 업로드해주세요.</p>`;
+    } else {
+        el.innerHTML = `<div class="kit-view-list"><strong style="font-size:13px;display:block;margin-bottom:6px;">${Q.model} 기본 교체 파트 (${items.length}종)</strong><ul style="margin:0;padding-left:18px;">${items.map(i=>`<li>${i}</li>`).join('')}</ul></div>`;
+    }
+    el.style.display = 'block';
+}
+
+function applyCustomTotal() {
+    const val = parseInt(document.getElementById('custom-total-inp').value);
+    if(!val || val <= 0) { toast('올바른 금액을 입력해주세요.', 'err'); return; }
+    Q.total = val;
+    document.getElementById('q-grand').textContent = val.toLocaleString()+'원';
+    toast('견적 합계가 ' + val.toLocaleString() + '원으로 수정되었습니다.', 'ok');
+}
+
+// 검색 드롭다운 외부 클릭 시 닫기
+document.addEventListener('click', e => {
+    if(!e.target.closest('.search-wrap')) {
+        const d1 = document.getElementById('part-drop');
+        const d2 = document.getElementById('cart-drop');
+        if(d1) d1.style.display='none';
+        if(d2) d2.style.display='none';
+    }
+});
+
+// ════════════════════════════════════════════════════════
+//  수리 카트 탭 (관리자 전용)
+// ════════════════════════════════════════════════════════
+//  업체 관리 탭 (관리자 전용)
+// ════════════════════════════════════════════════════════
+function parseKoDate(s) {
+    const m = (s||'').match(/(\d{4})\.\s*(\d{1,2})\.\s*(\d{1,2})/);
+    if(!m) return null;
+    return new Date(parseInt(m[1]), parseInt(m[2])-1, parseInt(m[3]));
+}
+
+function renderCompany() {
+    const clients = users.filter(u => u.role === 'client');
+    const today   = new Date();
+    const warnCount = clients.filter(u => {
+        const last = repairs.filter(r => r.phone === u.phone)[0];
+        const d = last ? parseKoDate(last.date) : null;
+        return d && Math.floor((today - d) / 86400000) > 365;
+    }).length;
+
+    if(!clients.length) {
+        document.getElementById('company-content').innerHTML =
+            '<div class="card"><p style="text-align:center;color:var(--gray-400);padding:28px;">등록된 고객사가 없습니다.<br>회원가입 후 관리자 승인된 업체가 여기에 표시됩니다.</p></div>';
+        return;
+    }
+
+    const cards = clients.map(u => {
+        const myRepairs  = repairs.filter(r => r.phone === u.phone);
+        const count      = myRepairs.length;
+        const models     = [...new Set(myRepairs.map(r => r.model))];
+        const lastRepair = myRepairs[0];
+        const lastDate   = lastRepair ? parseKoDate(lastRepair.date) : null;
+        const days       = lastDate ? Math.floor((today - lastDate) / 86400000) : null;
+        const needPred   = days !== null && days > 365;
+
+        return `
+        <div class="company-card">
+            <h5>🏢 ${u.company}</h5>
+            <div class="company-info">
+                👤 담당자: ${u.name}<br>
+                📞 연락처: ${u.phone}<br>
+                📋 수리 횟수: <strong>${count}회</strong><br>
+                📅 마지막 수리: ${lastRepair ? lastRepair.date : '수리 이력 없음'}<br>
+                🔧 수리 모델: ${models.length ? models.join(', ') : '없음'}
+            </div>
+            ${needPred ? `<div class="pred-warn">⚠️ <strong>예방정비 권고</strong><br>마지막 수리 후 <strong>${days}일</strong> 경과하였습니다. 정기 점검을 권장합니다.</div>` : ''}
+        </div>`;
+    }).join('');
+
+    document.getElementById('company-content').innerHTML = `
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+            <span style="font-size:15px;font-weight:700;">고객사 ${clients.length}개사</span>
+            ${warnCount > 0 ? `<span class="badge b-orange">예방정비 권고 ${warnCount}개사</span>` : '<span class="badge b-green">전체 정상</span>'}
+        </div>
+        <div class="company-grid">${cards}</div>`;
+}
+
+// ════════════════════════════════════════════════════════
+let cartRid = null; // 카트에서 현재 편집 중인 수리 ID
+
+function renderCart() {
+    const sel = document.getElementById('cart-sel');
+    sel.innerHTML = '<option value="">— 접수 건을 선택하세요 —</option>' +
+        repairs.map(r => `<option value="${r.id}">[${r.status}] ${r.id} — ${r.company} (${r.model})</option>`).join('');
+    // 키트 드롭다운
+    const ks = document.getElementById('cart-kit-sel');
+    if(ks) ks.innerHTML = '<option value="">키트 선택...</option>' + Object.keys(kitDB).map(k=>`<option value="${k}">${k} (${kitDB[k].length}종)</option>`).join('');
+    document.getElementById('cart-detail').style.display = 'none';
+    cartRid = null;
+}
+
+function loadCartRepair(id) {
+    if(!id) { document.getElementById('cart-detail').style.display='none'; cartRid=null; return; }
+    const r = repairs.find(x=>x.id===id);
+    if(!r) return;
+    cartRid = id;
+    document.getElementById('cart-info').innerHTML = `<strong>${r.id}</strong> &nbsp;|&nbsp; ${r.company} &nbsp;|&nbsp; ${r.model} &nbsp;|&nbsp; 진행 상태: <strong>${r.status}</strong>`;
+    renderCartLines(r);
+    document.getElementById('cart-detail').style.display = 'block';
+    document.getElementById('cart-search').value = '';
+    document.getElementById('cart-drop').style.display = 'none';
+}
+
+function renderCartLines(r) {
+    let total = 0;
+    document.getElementById('cart-lines').innerHTML = (r.items||[]).map((it, idx) => {
+        total += it.amt;
+        const delBtn = it.added
+            ? `<button class="cart-del" onclick="removeCartPart(${idx})" title="항목 삭제">❌</button>`
+            : '';
+        return `<div class="cart-row"><span class="cart-label">${it.added?'＋ ':''}${it.label}</span><span class="cart-amt">${it.amt.toLocaleString()}원</span>${delBtn}</div>`;
+    }).join('') || '<p style="color:var(--gray-400);font-size:13px;text-align:center;padding:12px;">항목이 없습니다.</p>';
+    document.getElementById('cart-grand').textContent = total.toLocaleString()+'원';
+}
+
+function removeCartPart(idx) {
+    const r = repairs.find(x=>x.id===cartRid); if(!r) return;
+    if(r.items[idx] && !r.items[idx].added) { toast('기본 패키지는 삭제할 수 없습니다.', 'warn'); return; }
+    r.items.splice(idx, 1);
+    renderCartLines(r);
+}
+
+function searchCartParts(val) {
+    const drop = document.getElementById('cart-drop');
+    if(!val || val.length < 1) { drop.style.display='none'; return; }
+    const kw = val.toLowerCase();
+    const hits = priceDB.filter(p => p.status !== '단종' && (p.part.toLowerCase().includes(kw) || (p.name||'').toLowerCase().includes(kw))).slice(0, 10);
+    if(!hits.length) { drop.style.display='none'; return; }
+    drop.innerHTML = hits.map(p => `<div class="search-drop-item" onclick="addPartToCart('${p.part}','${(p.name||'').replace(/'/g,"\\'")}',${p.cost})"><span>${p.part} — ${p.name||''}</span><span class="part-price">${(p.cost||0).toLocaleString()}원</span></div>`).join('');
+    drop.style.display = 'block';
+}
+
+function addPartToCart(part, name, cost) {
+    const r = repairs.find(x=>x.id===cartRid); if(!r) return;
+    if(!r.items) r.items = [];
+    r.items.push({ label:`${part} ${name}`, amt: cost, added:true });
+    renderCartLines(r);
+    document.getElementById('cart-search').value = '';
+    document.getElementById('cart-drop').style.display = 'none';
+}
+
+function addKitToCart() {
+    const r = repairs.find(x=>x.id===cartRid); if(!r) return;
+    const kitKey = document.getElementById('cart-kit-sel').value;
+    if(!kitKey) { toast('키트를 선택해주세요.', 'warn'); return; }
+    const items = kitDB[kitKey] || [];
+    if(!items.length) { toast('해당 키트에 항목이 없습니다.', 'warn'); return; }
+    if(!r.items) r.items = [];
+    items.forEach(name => r.items.push({ label: name, amt: 0, added:true }));
+    renderCartLines(r);
+    toast(`${kitKey} 키트 ${items.length}개 항목이 추가되었습니다. 금액은 0원이므로 확인 후 수정해주세요.`, 'info');
+}
+
+function applyCartOverride() {
+    const r = repairs.find(x=>x.id===cartRid); if(!r) return;
+    const val = parseInt(document.getElementById('cart-override').value);
+    if(!val || val <= 0) { toast('올바른 금액을 입력해주세요.', 'err'); return; }
+    r.total = val;
+    document.getElementById('cart-grand').textContent = val.toLocaleString()+'원';
+    toast('합계가 ' + val.toLocaleString() + '원으로 수정되었습니다.', 'ok');
+}
+
+function saveCartQuote() {
+    const r = repairs.find(x=>x.id===cartRid); if(!r) return;
+    // cart-grand의 현재 표시값으로 total 동기화
+    let total = 0;
+    (r.items||[]).forEach(it => total += (it.amt||0));
+    // override가 적용됐다면 이미 r.total에 세팅됨, 아니면 items 합산
+    if(!r.total || document.getElementById('cart-grand').textContent !== (r.total||0).toLocaleString()+'원') {
+        r.total = total;
+    }
+    localStorage.setItem('smp_repairs', JSON.stringify(repairs));
+    // [SUPABASE 연결 포인트] supabase.from('repairs').update({items:r.items, total:r.total}).eq('id',r.id)
+    toast('확정 견적이 저장되었습니다! ' + cartRid + ' / ' + (r.total||total).toLocaleString() + '원', 'ok');
+    renderCart();
+}
+
+// ════════════════════════════════════════════════════════
+//  초기화: 저장된 세션 복원
+// ════════════════════════════════════════════════════════
+(function init() {
+    const s = sessionStorage.getItem('smp_sess');
+    if(s) { curUser=JSON.parse(s); enterApp(); }
+    // [SUPABASE SSO 연결 포인트]
+    // supabase.auth.getSession().then(({data:{session}})=>{
+    //   if(session) { curUser=session.user; enterApp(); }
+    // });
+})();
+
+// 다른 탭(고객)이 접수/발주 시 관리자 탭 배지 자동 갱신
+window.addEventListener('storage', e => {
+    if(e.key === 'smp_repairs' && curUser?.role === 'admin') {
+        repairs = JSON.parse(e.newValue || '[]');
+        updateNavBadge();
+        toast('새 수리 접수 건이 들어왔습니다.', 'info');
+    }
+});
+</script>
+</body>
+</html>

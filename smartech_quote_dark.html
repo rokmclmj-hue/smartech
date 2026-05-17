@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SMT-2026-Q-001847 · SMARTECH QUOTATION</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" as="style" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<style>
+  :root {
+    --bg: #0A0E14; --surface: #0F1620; --surface-2: #131C28;
+    --line: #2A3441; --line-soft: #1B2430;
+    --primary: #1F4E79; --accent: #3A8DD0;
+    --muted: #7A8B9D; --text: #E6EEF6; --text-dim: #B9C5D2;
+    --critical: #E74C3C; --success: #27AE60; --gold: #D4A537;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans: 'Pretendard', 'Inter', -apple-system, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  .mono { font-family: var(--mono); font-feature-settings: "tnum" 1; }
+  .stage { max-width: 1280px; margin: 0 auto; padding: 32px 40px 80px; }
+
+  .util { display: flex; justify-content: space-between; align-items: center; font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; border-bottom: 1px solid var(--line-soft); padding-bottom: 10px; margin-bottom: 28px; }
+  .util .left, .util .right { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+  .pulse-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--success); margin-right: 6px; vertical-align: middle; box-shadow: 0 0 0 0 rgba(39,174,96,0.6); animation: pulse 1.8s infinite; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(39,174,96,0.55); } 70% { box-shadow: 0 0 0 8px rgba(39,174,96,0); } 100% { box-shadow: 0 0 0 0 rgba(39,174,96,0); } }
+  .btn-export { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; color: var(--bg); background: var(--accent); border: 1px solid var(--accent); padding: 9px 14px; cursor: pointer; text-transform: uppercase; }
+  .btn-export:hover { background: #58A4DE; }
+
+  .header { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: end; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+  .wordmark { font-size: 38px; font-weight: 700; letter-spacing: -0.02em; line-height: 1; }
+  .wordmark .dot { color: var(--accent); }
+  .wordmark-sub { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 12px; line-height: 1.65; }
+  .wordmark-sub .sep { color: var(--line); margin: 0 6px; }
+
+  .meta-grid { display: grid; grid-template-columns: repeat(2, 1fr); border-top: 1px solid var(--line-soft); border-left: 1px solid var(--line-soft); font-family: var(--mono); font-size: 11px; }
+  .meta-grid .cell { border-right: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft); padding: 9px 12px; }
+  .meta-grid .cell .k { color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; font-size: 10px; }
+  .meta-grid .cell .v { color: var(--text); margin-top: 3px; font-weight: 500; }
+
+  .section-label { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0.14em; text-transform: uppercase; margin: 56px 0 18px; padding-left: 14px; position: relative; }
+  .section-label::before { content: ""; position: absolute; left: 0; top: 7px; width: 6px; height: 6px; background: var(--accent); }
+
+  .parties { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); }
+  .party { padding: 22px 24px; }
+  .party + .party { border-left: 1px solid var(--line); }
+  .party h4 { margin: 0 0 14px; font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0.14em; text-transform: uppercase; font-weight: 500; display: flex; justify-content: space-between; }
+  .party h4 .tag { color: var(--accent); }
+  .party-row { display: grid; grid-template-columns: 80px 1fr; gap: 16px; padding: 7px 0; border-top: 1px dashed var(--line-soft); font-size: 13px; }
+  .party-row:first-of-type { border-top: 0; }
+  .party-row .lbl { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; padding-top: 1px; }
+  .party-row .val { color: var(--text); }
+  .party-row .val.mono { font-family: var(--mono); }
+
+  .hero { display: grid; grid-template-columns: 1.4fr 1fr; border: 1px solid var(--line); overflow: hidden; }
+  .hero-total { padding: 32px 36px; background: radial-gradient(ellipse at top right, rgba(58,141,208,0.10), transparent 60%), linear-gradient(180deg, #0F1A28 0%, #0B1118 100%); }
+  .hero-eyebrow { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0.14em; text-transform: uppercase; display: flex; justify-content: space-between; }
+  .hero-eyebrow .ref { color: var(--accent); }
+  .hero-bignum { font-family: var(--mono); font-size: clamp(48px, 8vw, 88px); line-height: 1; letter-spacing: -0.03em; margin: 22px 0 18px; font-weight: 600; color: #F5FBFF; }
+  .hero-bignum .won { color: var(--accent); margin-right: 12px; font-weight: 500; }
+  .hero-breakdown { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px dashed var(--line); padding-top: 16px; font-family: var(--mono); font-size: 12px; }
+  .hero-breakdown .b { padding-right: 16px; }
+  .hero-breakdown .k { color: var(--muted); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; }
+  .hero-breakdown .v { color: var(--text); font-size: 14px; margin-top: 4px; }
+  .hero-breakdown .b.total .v { color: var(--accent); font-weight: 600; }
+
+  .hero-saving { padding: 32px; background: linear-gradient(135deg, rgba(212,165,55,0.08), rgba(212,165,55,0.02)); border-left: 1px solid var(--line); }
+  .saving-eyebrow { font-family: var(--mono); font-size: 11px; color: var(--gold); letter-spacing: 0.14em; text-transform: uppercase; display: flex; justify-content: space-between; }
+  .saving-eyebrow .grade { border: 1px solid rgba(212,165,55,0.4); padding: 2px 8px; font-size: 10px; }
+  .saving-amount { font-family: var(--mono); font-size: 32px; color: var(--gold); font-weight: 600; margin: 16px 0 4px; letter-spacing: -0.01em; }
+  .saving-amount .minus { color: rgba(212,165,55,0.7); margin-right: 6px; }
+  .saving-pct { font-family: var(--mono); font-size: 12px; color: var(--text-dim); }
+  .saving-bar { margin-top: 22px; height: 6px; background: rgba(212,165,55,0.12); position: relative; overflow: hidden; }
+  .saving-bar > i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: linear-gradient(90deg, var(--gold), #F0C46B); transition: width 1.2s cubic-bezier(.2,.7,.2,1); }
+  .saving-meta { margin-top: 10px; font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; display: flex; justify-content: space-between; }
+
+  .items { display: flex; flex-direction: column; gap: 18px; }
+  .card { display: grid; grid-template-columns: minmax(280px, 35%) 1fr; border: 1px solid var(--line); background: var(--surface); transition: border-color 0.2s; overflow: hidden; }
+  .card:hover { border-color: var(--accent); }
+  .card:hover .ill svg { transform: scale(1.04); }
+
+  .ill { background: linear-gradient(180deg, #0C131C, #0A0E14); padding: 24px; position: relative; border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 240px; }
+  .ill::before { content: ""; position: absolute; inset: 14px; border: 1px dashed var(--line-soft); pointer-events: none; }
+  .ill .ill-label { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.14em; text-transform: uppercase; }
+  .ill svg { width: 100%; height: 180px; flex: 1; margin-top: 8px; transition: transform 0.3s ease; }
+  .ill .stamp { position: absolute; right: 14px; bottom: 14px; width: 64px; height: 64px; border: 1px solid rgba(58,141,208,0.4); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--accent); font-family: var(--mono); font-size: 7px; letter-spacing: 0.1em; text-align: center; transform: rotate(-8deg); background: rgba(10,14,20,0.5); }
+  .stamp .l1 { font-weight: 700; font-size: 8px; }
+  .stamp .l2 { font-size: 6px; color: var(--muted); margin-top: 2px; }
+
+  .card-data { padding: 22px 26px; display: grid; gap: 14px; }
+  .card-head { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; }
+  .card-head .partno { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0.1em; }
+  .card-head .model { font-size: 20px; font-weight: 600; margin-top: 4px; letter-spacing: -0.01em; }
+  .card-head .ko { color: var(--text-dim); margin-top: 4px; font-size: 13px; }
+  .badge-genuine { font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; border: 1px solid var(--accent); color: var(--accent); padding: 4px 8px; white-space: nowrap; }
+
+  .meta-line { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-family: var(--mono); font-size: 11px; border-top: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft); padding: 10px 0; }
+  .meta-line .k { color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; font-size: 10px; }
+  .meta-line .v { color: var(--text); margin-top: 2px; }
+
+  .spec-table { font-family: var(--mono); font-size: 12px; }
+  .spec-table .row { display: grid; grid-template-columns: 130px 1fr; padding: 6px 0; border-top: 1px dashed var(--line-soft); }
+  .spec-table .row:first-child { border-top: 0; }
+  .spec-table .k { color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; font-size: 10px; }
+  .spec-table .v { color: var(--text); }
+
+  .price-block { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line); background: var(--surface-2); }
+  .price-block .pcell { padding: 12px 14px; border-right: 1px solid var(--line); }
+  .price-block .pcell:last-child { border-right: 0; background: rgba(58,141,208,0.06); }
+  .price-block .k { font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: 0.14em; text-transform: uppercase; }
+  .price-block .v { font-family: var(--mono); font-size: 15px; color: var(--text); margin-top: 4px; font-weight: 500; }
+  .price-block .v.strike { color: var(--muted); text-decoration: line-through; font-size: 13px; }
+  .price-block .pcell:last-child .v { color: var(--accent); font-weight: 600; }
+
+  .status-line { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 11px; color: var(--muted); padding-top: 4px; flex-wrap: wrap; gap: 10px; }
+  .status-line .left { display: flex; gap: 14px; flex-wrap: wrap; }
+  .status-line .ok { color: var(--success); }
+  .status-line .ord { color: var(--gold); }
+
+  .summary { border: 1px solid var(--line); background: var(--surface); display: grid; grid-template-columns: 1fr 1fr; }
+  .summary-left { padding: 24px; border-right: 1px solid var(--line); font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; display: flex; flex-direction: column; gap: 10px; justify-content: center; }
+  .summary-left .row { display: flex; justify-content: space-between; }
+  .summary-left .row .v { color: var(--text); }
+  .summary-right { padding: 24px; display: flex; flex-direction: column; gap: 10px; justify-content: center; }
+  .summary-right .row { display: grid; grid-template-columns: 1fr auto; font-family: var(--mono); font-size: 13px; padding: 8px 0; border-bottom: 1px dashed var(--line-soft); align-items: baseline; }
+  .summary-right .row .k { color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; font-size: 11px; }
+  .summary-right .row .v { color: var(--text); font-weight: 500; }
+  .summary-right .row.grand { border-bottom: 0; padding-top: 14px; }
+  .summary-right .row.grand .v { color: var(--accent); font-size: 22px; font-weight: 600; }
+
+  .trust { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line); }
+  .trust .cell { padding: 22px 22px 26px; border-right: 1px solid var(--line); }
+  .trust .cell:last-child { border-right: 0; }
+  .trust .num-tag { font-family: var(--mono); font-size: 10px; color: var(--accent); letter-spacing: 0.14em; }
+  .trust .ttl { font-size: 16px; font-weight: 600; margin-top: 14px; letter-spacing: -0.01em; }
+  .trust .desc { margin-top: 8px; color: var(--text-dim); font-size: 12px; line-height: 1.55; }
+
+  .terms { border: 1px solid var(--line); font-family: var(--mono); font-size: 12px; }
+  .terms .row { display: grid; grid-template-columns: 160px 1fr; border-top: 1px solid var(--line); padding: 12px 18px; }
+  .terms .row:first-child { border-top: 0; }
+  .terms .k { color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; font-size: 11px; }
+  .terms .v { color: var(--text); }
+
+  .signature { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); }
+  .signature .box { padding: 22px; border-right: 1px solid var(--line); }
+  .signature .box:last-child { border-right: 0; }
+  .signature .lbl { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0.14em; text-transform: uppercase; }
+  .signature .area { margin-top: 14px; border: 1px dashed var(--line); height: 110px; display: flex; align-items: center; justify-content: center; color: var(--muted); font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; }
+  .signature .who { margin-top: 12px; font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
+
+  .footer { margin-top: 56px; padding-top: 22px; border-top: 1px solid var(--line-soft); font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+
+  @media (max-width: 900px) {
+    .stage { padding: 22px 18px 80px; }
+    .header, .parties, .hero, .summary, .signature { grid-template-columns: 1fr; }
+    .party + .party, .signature .box { border-left: 0; }
+    .card { grid-template-columns: 1fr; }
+    .ill { border-right: 0; border-bottom: 1px solid var(--line); }
+    .price-block { grid-template-columns: 1fr 1fr; }
+    .trust { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* PDF mode */
+  .pdf-only { display: none; }
+  body.pdf-export .full-version { display: none !important; }
+  body.pdf-export .pdf-only { display: block !important; }
+  body.pdf-export { background: #fff; color: #111; }
+
+  .pdf-only { background: #FFFFFF; color: #111; font-family: 'Pretendard', sans-serif; width: 210mm; min-height: 297mm; padding: 15mm; margin: 0 auto; box-sizing: border-box; font-size: 9.5pt; line-height: 1.45; }
+  .pdf-only .pmono { font-family: 'JetBrains Mono', monospace; }
+  .p-top { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1.5pt solid #1F4E79; padding-bottom: 4mm; margin-bottom: 5mm; }
+  .p-top .wm { font-size: 14pt; font-weight: 700; letter-spacing: -0.01em; color: #1F4E79; }
+  .p-top .wm small { color: #555; font-weight: 500; font-size: 9pt; margin-left: 8px; letter-spacing: 0.05em; text-transform: uppercase; }
+  .p-top .meta { font-family: 'JetBrains Mono', monospace; font-size: 8.5pt; color: #111; text-align: right; }
+  .p-top .meta span { margin-left: 12px; }
+  .p-parties { display: grid; grid-template-columns: 1fr 1fr; border: 0.5pt solid #BFBFBF; margin-bottom: 4mm; }
+  .p-parties > div { padding: 3mm 4mm; }
+  .p-parties > div + div { border-left: 0.5pt solid #BFBFBF; }
+  .p-parties h5 { margin: 0 0 2mm; font-family: 'JetBrains Mono', monospace; font-size: 8pt; color: #1F4E79; letter-spacing: 0.16em; }
+  .p-parties .row { display: grid; grid-template-columns: 22mm 1fr; font-size: 9pt; padding: 0.6mm 0; }
+  .p-parties .row .k { font-family: 'JetBrains Mono', monospace; color: #555; font-size: 8pt; letter-spacing: 0.06em; text-transform: uppercase; }
+  .p-table { width: 100%; border-collapse: collapse; margin-bottom: 4mm; font-size: 9pt; }
+  .p-table th, .p-table td { border-bottom: 0.5pt solid #BFBFBF; padding: 2.4mm 2mm; vertical-align: top; }
+  .p-table thead th { border-top: 0.5pt solid #111; border-bottom: 0.5pt solid #111; text-align: left; font-family: 'JetBrains Mono', monospace; font-size: 8pt; letter-spacing: 0.1em; text-transform: uppercase; background: #F4F6F8; font-weight: 600; }
+  .p-table .num-col { text-align: right; font-family: 'JetBrains Mono', monospace; }
+  .p-table .desc-ko { color: #555; font-size: 8.5pt; display: block; margin-top: 0.5mm; }
+  .p-table td.partno { font-family: 'JetBrains Mono', monospace; font-size: 8.5pt; }
+  .p-totals { margin-left: auto; width: 75mm; margin-bottom: 4mm; font-family: 'JetBrains Mono', monospace; font-size: 9.5pt; }
+  .p-totals .row { display: grid; grid-template-columns: 1fr auto; padding: 1.6mm 0; border-bottom: 0.5pt solid #BFBFBF; }
+  .p-totals .row .k { color: #555; letter-spacing: 0.08em; text-transform: uppercase; font-size: 8.5pt; }
+  .p-totals .row.grand { border-top: 1pt solid #1F4E79; border-bottom: 1pt solid #1F4E79; padding: 2.5mm 0; margin-top: 1mm; }
+  .p-totals .row.grand .k { color: #1F4E79; font-weight: 700; font-size: 10pt; }
+  .p-totals .row.grand .v { color: #1F4E79; font-weight: 700; font-size: 13pt; }
+  .p-terms { border: 0.5pt solid #BFBFBF; font-family: 'JetBrains Mono', monospace; font-size: 8.5pt; margin-bottom: 4mm; }
+  .p-terms .row { display: grid; grid-template-columns: 28mm 1fr; padding: 1.6mm 3mm; border-bottom: 0.5pt solid #E2E2E2; }
+  .p-terms .row:last-child { border-bottom: 0; }
+  .p-terms .k { color: #555; letter-spacing: 0.1em; text-transform: uppercase; }
+  .p-sig { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin-bottom: 3mm; }
+  .p-sig .box { border: 0.5pt dashed #888; padding: 3mm; height: 24mm; position: relative; }
+  .p-sig .box .lbl { font-family: 'JetBrains Mono', monospace; font-size: 8pt; color: #1F4E79; letter-spacing: 0.14em; text-transform: uppercase; }
+  .p-sig .box .name { position: absolute; left: 3mm; bottom: 3mm; font-size: 8.5pt; color: #555; font-family: 'JetBrains Mono', monospace; }
+  .p-footer { border-top: 0.5pt solid #BFBFBF; padding-top: 2mm; font-family: 'JetBrains Mono', monospace; font-size: 7.5pt; color: #555; letter-spacing: 0.06em; text-transform: uppercase; display: flex; justify-content: space-between; }
+
+  @media print {
+    @page { size: A4 portrait; margin: 0; }
+    html, body { background: #fff !important; color: #111 !important; }
+    .full-version { display: none !important; }
+    .pdf-only { display: block !important; padding: 15mm; }
+    .btn-export { display: none !important; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="full-version">
+  <div class="stage">
+
+    <div class="util">
+      <div class="left">
+        <span>FILE — quote.html</span><span>·</span>
+        <span>SMT-2026-Q-001847</span><span>·</span><span>REV 01</span>
+      </div>
+      <div class="right">
+        <span><span class="pulse-dot"></span>STATUS · ACTIVE</span>
+        <button class="btn-export" id="btnExport" type="button">[ EXPORT → PDF ]</button>
+      </div>
+    </div>
+
+    <div class="header">
+      <div>
+        <div class="wordmark">Smartech<span class="dot">.</span></div>
+        <div class="wordmark-sub">
+          Edwards Vacuum Korea<span class="sep">·</span>Authorized Distributor<span class="sep">·</span>SINCE 2011<span class="sep">·</span>OPS SYSTEM v2.6
+        </div>
+      </div>
+      <div class="meta-grid">
+        <div class="cell"><div class="k">Q-REF</div><div class="v">SMT-2026-Q-001847</div></div>
+        <div class="cell"><div class="k">ISSUED</div><div class="v">2026.05.10 · 14:32 KST</div></div>
+        <div class="cell"><div class="k">VALID UNTIL</div><div class="v">2026.06.09 (30d)</div></div>
+        <div class="cell"><div class="k">REVISION</div><div class="v">REV 01</div></div>
+        <div class="cell"><div class="k">HASH</div><div class="v">0x4A2F8E91A7D3</div></div>
+        <div class="cell"><div class="k">LOC</div><div class="v">N37.5° · E127.0° / SEOUL, KR</div></div>
+      </div>
+    </div>
+
+    <div class="section-label">— SECTION 01 · PARTIES</div>
+    <div class="parties">
+      <div class="party">
+        <h4><span>TO · 수신처</span><span class="tag">[ CLIENT ]</span></h4>
+        <div class="party-row"><div class="lbl">Company</div><div class="val">한국정밀반도체(주) · KPSC</div></div>
+        <div class="party-row"><div class="lbl">Dept</div><div class="val">FAB 2 진공설비팀</div></div>
+        <div class="party-row"><div class="lbl">Attn</div><div class="val">박현우 책임</div></div>
+        <div class="party-row"><div class="lbl">Tel</div><div class="val mono">031-548-9120</div></div>
+        <div class="party-row"><div class="lbl">Email</div><div class="val mono"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="88e0ffa6f8e9fae3c8e3f8fbeba6ebe7a6e3fa">[email&#160;protected]</a></div></div>
+      </div>
+      <div class="party">
+        <h4><span>FROM · 발신처</span><span class="tag">[ ISSUER ]</span></h4>
+        <div class="party-row"><div class="lbl">Company</div><div class="val">(주)스마텍 · Smartech Co., Ltd.</div></div>
+        <div class="party-row"><div class="lbl">Role</div><div class="val">Edwards Vacuum Korea Authorized Distributor</div></div>
+        <div class="party-row"><div class="lbl">Biz No</div><div class="val mono">123-45-67890</div></div>
+        <div class="party-row"><div class="lbl">CEO</div><div class="val">이민재</div></div>
+        <div class="party-row"><div class="lbl">Tel</div><div class="val mono">031-204-7170 · 24/7</div></div>
+        <div class="party-row"><div class="lbl">Email</div><div class="val mono"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="e4968b8f898788898ea48389858d88ca878b89">[email&#160;protected]</a></div></div>
+        <div class="party-row"><div class="lbl">Loc</div><div class="val mono">N37.5° · E127.0° / SEOUL, KR</div></div>
+      </div>
+    </div>
+
+    <div class="section-label">— SECTION 02 · TOTAL</div>
+    <div class="hero">
+      <div class="hero-total">
+        <div class="hero-eyebrow"><span>TOTAL · INCL. VAT</span><span class="ref">Q-REF SMT-2026-Q-001847</span></div>
+        <div class="hero-bignum"><span class="won">₩</span><span id="bigTotal">26,341,656</span></div>
+        <div class="hero-breakdown">
+          <div class="b"><div class="k">SUPPLY (공급가액)</div><div class="v">₩ 23,946,960</div></div>
+          <div class="b"><div class="k">VAT (10%)</div><div class="v">₩ 2,394,696</div></div>
+          <div class="b total"><div class="k">GRAND TOTAL</div><div class="v">₩ 26,341,656</div></div>
+        </div>
+      </div>
+      <div class="hero-saving">
+        <div class="saving-eyebrow"><span>SAVINGS · DEALER vs RRP</span><span class="grade">GRADE · DEALER</span></div>
+        <div class="saving-amount"><span class="minus">−</span>₩ 3,602,640</div>
+        <div class="saving-pct">정가(End user) 대비 13.1% 절감</div>
+        <div class="saving-bar"><i id="savingBar"></i></div>
+        <div class="saving-meta"><span>RRP ₩ 27,549,600</span><span>YOU ₩ 23,946,960</span></div>
+      </div>
+    </div>
+
+    <div class="section-label">— SECTION 03 · ITEMS · 03 LINES</div>
+    <div class="items">
+
+      <article class="card">
+        <div class="ill">
+          <div class="ill-label">01 / 03 · APG200</div>
+          <svg viewBox="0 0 320 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M40 130 A80 80 0 0 1 200 130" stroke="#3A8DD0" stroke-width="2" stroke-linecap="round"/>
+            <path d="M55 130 A65 65 0 0 1 185 130" stroke="#7A8B9D" stroke-width="1" stroke-dasharray="2 4"/>
+            <line x1="40" y1="130" x2="48" y2="130" stroke="#3A8DD0" stroke-width="2"/>
+            <line x1="120" y1="50" x2="120" y2="58" stroke="#3A8DD0" stroke-width="2"/>
+            <line x1="200" y1="130" x2="192" y2="130" stroke="#3A8DD0" stroke-width="2"/>
+            <text x="36" y="148" fill="#7A8B9D" font-family="JetBrains Mono" font-size="8">1000</text>
+            <text x="108" y="44" fill="#7A8B9D" font-family="JetBrains Mono" font-size="8">10⁻¹</text>
+            <text x="190" y="148" fill="#7A8B9D" font-family="JetBrains Mono" font-size="8">10⁻⁴</text>
+            <line x1="120" y1="130" x2="160" y2="78" stroke="#3A8DD0" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="120" cy="130" r="3" fill="#3A8DD0"/>
+            <rect x="220" y="70" width="80" height="42" stroke="#3A8DD0" stroke-width="1.5" rx="3"/>
+            <text x="228" y="96" fill="#3A8DD0" font-family="JetBrains Mono" font-size="13" font-weight="600">1.2E-3</text>
+            <text x="266" y="108" fill="#7A8B9D" font-family="JetBrains Mono" font-size="7">mbar</text>
+            <rect x="80" y="160" width="80" height="18" stroke="#7A8B9D" stroke-width="1.5" rx="2"/>
+            <line x1="100" y1="160" x2="100" y2="178" stroke="#7A8B9D" stroke-width="1"/>
+            <line x1="120" y1="160" x2="120" y2="178" stroke="#7A8B9D" stroke-width="1"/>
+            <line x1="140" y1="160" x2="140" y2="178" stroke="#7A8B9D" stroke-width="1"/>
+            <text x="110" y="194" fill="#7A8B9D" font-family="JetBrains Mono" font-size="8">NW25</text>
+            <line x1="120" y1="135" x2="120" y2="160" stroke="#7A8B9D" stroke-width="1.5"/>
+          </svg>
+          <div class="stamp"><div class="l1">GENUINE</div><div class="l2">EDWARDS</div><div class="l2">SN ████</div></div>
+        </div>
+        <div class="card-data">
+          <div class="card-head">
+            <div>
+              <div class="partno">PART NO · D1G1021100</div>
+              <div class="model">APG200 — XM-NW25</div>
+              <div class="ko">저진공 피라니 게이지 (Active Pirani)</div>
+            </div>
+            <span class="badge-genuine">● Edwards Genuine</span>
+          </div>
+          <div class="meta-line">
+            <div><div class="k">Category</div><div class="v">Vacuum Gauge / Low Vacuum</div></div>
+            <div><div class="k">Application</div><div class="v">연구소 · 반도체 백킹라인 · 분석기 모니터링</div></div>
+          </div>
+          <div class="spec-table">
+            <div class="row"><div class="k">측정 범위</div><div class="v">1000 → 1×10⁻⁴ mbar</div></div>
+            <div class="row"><div class="k">인터페이스</div><div class="v">NW25 (KF25)</div></div>
+            <div class="row"><div class="k">출력</div><div class="v">RS232 + Analog</div></div>
+            <div class="row"><div class="k">응답 시간</div><div class="v">&lt; 0.5 sec</div></div>
+          </div>
+          <div class="price-block">
+            <div class="pcell"><div class="k">Unit · Dealer</div><div class="v">₩ 8,136,000</div></div>
+            <div class="pcell"><div class="k">RRP · 정가</div><div class="v strike">₩ 9,360,000</div></div>
+            <div class="pcell"><div class="k">Quantity</div><div class="v">2 EA</div></div>
+            <div class="pcell"><div class="k">Subtotal</div><div class="v">₩ 16,272,000</div></div>
+          </div>
+          <div class="status-line">
+            <div class="left"><span class="ok">● IN STOCK</span><span>국내 재고 2 EA</span><span>출고 D+1</span></div>
+            <span>WARRANTY 12M</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="ill">
+          <div class="ill-label">02 / 03 · TIC · 3-HEAD</div>
+          <svg viewBox="0 0 320 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="30" y="40" width="260" height="120" rx="4" stroke="#3A8DD0" stroke-width="2"/>
+            <rect x="48" y="58" width="148" height="80" rx="2" stroke="#7A8B9D" stroke-width="1.5"/>
+            <text x="56" y="74" fill="#7A8B9D" font-family="JetBrains Mono" font-size="8">CH1</text>
+            <rect x="84" y="66" width="100" height="6" fill="none" stroke="#3A8DD0" stroke-width="1"/>
+            <rect x="84" y="66" width="78" height="6" fill="#3A8DD0"/>
+            <text x="56" y="98" fill="#7A8B9D" font-family="JetBrains Mono" font-size="8">CH2</text>
+            <rect x="84" y="90" width="100" height="6" fill="none" stroke="#3A8DD0" stroke-width="1"/>
+            <rect x="84" y="90" width="52" height="6" fill="#3A8DD0"/>
+            <text x="56" y="122" fill="#7A8B9D" font-family="JetBrains Mono" font-size="8">CH3</text>
+            <rect x="84" y="114" width="100" height="6" fill="none" stroke="#3A8DD0" stroke-width="1"/>
+            <rect x="84" y="114" width="34" height="6" fill="#3A8DD0"/>
+            <rect x="216" y="58" width="28" height="28" rx="2" stroke="#7A8B9D" stroke-width="1.5"/>
+            <rect x="252" y="58" width="28" height="28" rx="2" stroke="#7A8B9D" stroke-width="1.5"/>
+            <rect x="216" y="94" width="28" height="28" rx="2" stroke="#7A8B9D" stroke-width="1.5"/>
+            <rect x="252" y="94" width="28" height="28" rx="2" stroke="#3A8DD0" stroke-width="1.5"/>
+            <circle cx="266" cy="108" r="3" fill="#3A8DD0"/>
+            <rect x="50" y="148" width="40" height="6" stroke="#7A8B9D" stroke-width="1.2"/>
+            <rect x="100" y="148" width="40" height="6" stroke="#7A8B9D" stroke-width="1.2"/>
+            <text x="50" y="172" fill="#7A8B9D" font-family="JetBrains Mono" font-size="7">RS232</text>
+            <text x="100" y="172" fill="#7A8B9D" font-family="JetBrains Mono" font-size="7">PROFIBUS</text>
+          </svg>
+          <div class="stamp"><div class="l1">GENUINE</div><div class="l2">EDWARDS</div><div class="l2">SN ████</div></div>
+        </div>
+        <div class="card-data">
+          <div class="card-head">
+            <div>
+              <div class="partno">PART NO · D39700000</div>
+              <div class="model">TIC Instrument Controller — 3-Head RS232</div>
+              <div class="ko">터보 인터페이스 컨트롤러 (3-Head)</div>
+            </div>
+            <span class="badge-genuine">● Edwards Genuine</span>
+          </div>
+          <div class="meta-line">
+            <div><div class="k">Category</div><div class="v">Controller</div></div>
+            <div><div class="k">Application</div><div class="v">터보펌프 + 백킹펌프 + 게이지 통합 제어</div></div>
+          </div>
+          <div class="spec-table">
+            <div class="row"><div class="k">채널</div><div class="v">3채널 동시 제어</div></div>
+            <div class="row"><div class="k">통신</div><div class="v">RS232 / Profibus 옵션</div></div>
+            <div class="row"><div class="k">디스플레이</div><div class="v">Touch LCD</div></div>
+            <div class="row"><div class="k">호환</div><div class="v">nEXT · STP · iXH 시리즈</div></div>
+          </div>
+          <div class="price-block">
+            <div class="pcell"><div class="k">Unit · Dealer</div><div class="v">₩ 1,776,360</div></div>
+            <div class="pcell"><div class="k">RRP · 정가</div><div class="v strike">₩ 2,043,600</div></div>
+            <div class="pcell"><div class="k">Quantity</div><div class="v">1 EA</div></div>
+            <div class="pcell"><div class="k">Subtotal</div><div class="v">₩ 1,776,360</div></div>
+          </div>
+          <div class="status-line">
+            <div class="left"><span class="ok">● IN STOCK</span><span>국내 재고 1 EA</span><span>출고 D+1</span></div>
+            <span>WARRANTY 12M</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="ill">
+          <div class="ill-label">03 / 03 · HV8000</div>
+          <svg viewBox="0 0 320 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="160" cy="38" rx="58" ry="10" stroke="#3A8DD0" stroke-width="2"/>
+            <ellipse cx="160" cy="38" rx="46" ry="6" stroke="#7A8B9D" stroke-width="1"/>
+            <circle cx="118" cy="38" r="2" fill="#7A8B9D"/><circle cx="138" cy="33" r="2" fill="#7A8B9D"/>
+            <circle cx="160" cy="32" r="2" fill="#7A8B9D"/><circle cx="182" cy="33" r="2" fill="#7A8B9D"/>
+            <circle cx="202" cy="38" r="2" fill="#7A8B9D"/><circle cx="160" cy="44" r="2" fill="#7A8B9D"/>
+            <line x1="102" y1="38" x2="102" y2="162" stroke="#3A8DD0" stroke-width="2"/>
+            <line x1="218" y1="38" x2="218" y2="162" stroke="#3A8DD0" stroke-width="2"/>
+            <path d="M115 60 L205 70 L115 80 L205 90 L115 100 L205 110 L115 120 L205 130 L115 140 L205 150" stroke="#7A8B9D" stroke-width="1" fill="none" stroke-linecap="round"/>
+            <line x1="102" y1="80" x2="74" y2="80" stroke="#3A8DD0" stroke-width="2"/>
+            <rect x="56" y="74" width="18" height="12" stroke="#3A8DD0" stroke-width="1.5"/>
+            <text x="22" y="84" fill="#7A8B9D" font-family="JetBrains Mono" font-size="8">IN</text>
+            <line x1="218" y1="130" x2="246" y2="130" stroke="#3A8DD0" stroke-width="2"/>
+            <rect x="246" y="124" width="18" height="12" stroke="#3A8DD0" stroke-width="1.5"/>
+            <text x="270" y="134" fill="#7A8B9D" font-family="JetBrains Mono" font-size="8">OUT</text>
+            <ellipse cx="160" cy="162" rx="58" ry="10" stroke="#3A8DD0" stroke-width="2"/>
+            <ellipse cx="160" cy="162" rx="46" ry="6" stroke="#7A8B9D" stroke-width="1"/>
+            <circle cx="118" cy="162" r="2" fill="#7A8B9D"/><circle cx="138" cy="167" r="2" fill="#7A8B9D"/>
+            <circle cx="160" cy="168" r="2" fill="#7A8B9D"/><circle cx="182" cy="167" r="2" fill="#7A8B9D"/>
+            <circle cx="202" cy="162" r="2" fill="#7A8B9D"/>
+            <text x="140" y="190" fill="#7A8B9D" font-family="JetBrains Mono" font-size="8">ISO-K</text>
+          </svg>
+          <div class="stamp"><div class="l1">GENUINE</div><div class="l2">EDWARDS</div><div class="l2">SN ████</div></div>
+        </div>
+        <div class="card-data">
+          <div class="card-head">
+            <div>
+              <div class="partno">PART NO · A71205550</div>
+              <div class="model">After Cooler HV8000</div>
+              <div class="ko">배기 가스 애프터 쿨러 (HV8000급)</div>
+            </div>
+            <span class="badge-genuine">● Edwards Genuine</span>
+          </div>
+          <div class="meta-line">
+            <div><div class="k">Category</div><div class="v">Accessory · Heat Exchanger</div></div>
+            <div><div class="k">Application</div><div class="v">대용량 산업용 진공 시스템 배기 냉각</div></div>
+          </div>
+          <div class="spec-table">
+            <div class="row"><div class="k">처리 용량</div><div class="v">HV8000 라인 호환</div></div>
+            <div class="row"><div class="k">냉각 방식</div><div class="v">수냉식 (Water Cooled)</div></div>
+            <div class="row"><div class="k">재질</div><div class="v">STS304</div></div>
+            <div class="row"><div class="k">연결 규격</div><div class="v">ISO-K 플랜지</div></div>
+          </div>
+          <div class="price-block">
+            <div class="pcell"><div class="k">Unit · Dealer</div><div class="v">₩ 5,898,600</div></div>
+            <div class="pcell"><div class="k">RRP · 정가</div><div class="v strike">₩ 6,786,000</div></div>
+            <div class="pcell"><div class="k">Quantity</div><div class="v">1 EA</div></div>
+            <div class="pcell"><div class="k">Subtotal</div><div class="v">₩ 5,898,600</div></div>
+          </div>
+          <div class="status-line">
+            <div class="left"><span class="ord">◐ ON ORDER</span><span>Edwards UK 입고 D+14</span></div>
+            <span>WARRANTY 12M</span>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <div class="section-label">— SECTION 04 · SUMMARY</div>
+    <div class="summary">
+      <div class="summary-left">
+        <div class="row"><span>ITEMS COUNT</span><span class="v">3 LINES · 4 EA</span></div>
+        <div class="row"><span>CURRENCY</span><span class="v">KRW (₩)</span></div>
+        <div class="row"><span>VALID</span><span class="v">2026.06.09 (30d)</span></div>
+        <div class="row"><span>HASH</span><span class="v">0x4A2F8E91A7D3</span></div>
+      </div>
+      <div class="summary-right">
+        <div class="row"><span class="k">SUB-TOTAL</span><span class="v">₩ 23,946,960</span></div>
+        <div class="row"><span class="k">VAT (10%)</span><span class="v">₩ 2,394,696</span></div>
+        <div class="row grand"><span class="k">GRAND TOTAL · INCL. VAT</span><span class="v">₩ 26,341,656</span></div>
+      </div>
+    </div>
+
+    <div class="section-label">— SECTION 05 · TRUST SIGNALS</div>
+    <div class="trust">
+      <div class="cell"><div class="num-tag">[ 01 ]</div><div class="ttl">Edwards Authorized</div><div class="desc">한국 공식 대리점 인증<br/>Korea Official Distributor.</div></div>
+      <div class="cell"><div class="num-tag">[ 02 ]</div><div class="ttl">정품 공식 유통</div><div class="desc">모든 제품 정품<br/>시리얼 추적 가능.</div></div>
+      <div class="cell"><div class="num-tag">[ 03 ]</div><div class="ttl">24/7 응급 대응</div><div class="desc">펌프 다운 시 분 단위 출동<br/>HOTLINE · 031-204-7170.</div></div>
+      <div class="cell"><div class="num-tag">[ 04 ]</div><div class="ttl">30년 수리 경력</div><div class="desc">Edwards 펌프 분해·점검·조립<br/>현장 엔지니어 상시 가동.</div></div>
+    </div>
+
+    <div class="section-label">— SECTION 06 · TERMS</div>
+    <div class="terms">
+      <div class="row"><span class="k">PAYMENT</span><span class="v">세금계산서 발행 · 익월 말 결제</span></div>
+      <div class="row"><span class="k">DELIVERY</span><span class="v">국내 재고분 D+1 / 해외 발주분 D+14</span></div>
+      <div class="row"><span class="k">SHIPPING</span><span class="v">별도 (실비 청구) · 수도권 무료 옵션</span></div>
+      <div class="row"><span class="k">INSTALL</span><span class="v">별도 견적 · 시운전 패키지 가능</span></div>
+      <div class="row"><span class="k">WARRANTY</span><span class="v">12개월 · Edwards 정품 보증</span></div>
+      <div class="row"><span class="k">A / S</span><span class="v">24/7 콜 응대 · 30년 경력 엔지니어</span></div>
+    </div>
+
+    <div class="section-label">— SECTION 07 · SIGNATURES</div>
+    <div class="signature">
+      <div class="box"><div class="lbl">— ISSUED BY · 발행인</div><div class="area">[ STAMP · 스마텍 운영팀 ]</div><div class="who">SMARTECH OPS · SEAL</div></div>
+      <div class="box"><div class="lbl">— ACKNOWLEDGED BY · 수신 확인</div><div class="area">[ SIGNATURE · 수령자 서명 ]</div><div class="who">CLIENT · NAME / DATE</div></div>
+    </div>
+
+    <div class="footer">
+      <span>© 2026 SMARTECH CO., LTD. · ALL RIGHTS RESERVED</span>
+      <span>SMT-2026-Q-001847 · GENERATED BY OPS SYSTEM v2.6</span>
+      <span>Edwards Vacuum Korea Official Distributor · Since 2011</span>
+    </div>
+  </div>
+</div>
+
+<div class="pdf-only">
+  <div class="p-top">
+    <div class="wm">SMARTECH · QUOTATION<small>견적서</small></div>
+    <div class="meta"><span>Q-REF · SMT-2026-Q-001847</span><span>ISSUED · 2026.05.10</span><span>VALID · 2026.06.09</span></div>
+  </div>
+  <div class="p-parties">
+    <div>
+      <h5>TO · 수신처</h5>
+      <div class="row"><div class="k">Company</div><div class="v">한국정밀반도체(주) · KPSC</div></div>
+      <div class="row"><div class="k">Dept</div><div class="v">FAB 2 진공설비팀</div></div>
+      <div class="row"><div class="k">Attn</div><div class="v">박현우 책임</div></div>
+      <div class="row"><div class="k">Tel</div><div class="v pmono">031-548-9120</div></div>
+      <div class="row"><div class="k">Email</div><div class="v pmono"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="a3cbd48dd3c2d1c8e3c8d3d0c08dc0cc8dc8d1">[email&#160;protected]</a></div></div>
+    </div>
+    <div>
+      <h5>FROM · 발신처</h5>
+      <div class="row"><div class="k">Company</div><div class="v">(주)스마텍 · Smartech Co., Ltd.</div></div>
+      <div class="row"><div class="k">Role</div><div class="v">Edwards Vacuum Korea Authorized Distributor</div></div>
+      <div class="row"><div class="k">Tel</div><div class="v pmono">031-204-7170 · 24/7</div></div>
+      <div class="row"><div class="k">Email</div><div class="v pmono"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="2c5e4347414f4041466c4b414d4540024f4341">[email&#160;protected]</a></div></div>
+      <div class="row"><div class="k">CEO</div><div class="v">이민재</div></div>
+    </div>
+  </div>
+  <table class="p-table">
+    <thead><tr><th style="width:8mm;">No</th><th style="width:26mm;">Part NO</th><th>Description</th><th style="width:14mm;text-align:right;">Qty</th><th style="width:26mm;text-align:right;">Unit Price</th><th style="width:28mm;text-align:right;">Subtotal</th></tr></thead>
+    <tbody>
+      <tr><td class="pmono">01</td><td class="partno">D1G1021100</td><td>APG200 — XM-NW25<span class="desc-ko">저진공 피라니 게이지</span></td><td class="num-col">2 EA</td><td class="num-col">₩ 8,136,000</td><td class="num-col">₩ 16,272,000</td></tr>
+      <tr><td class="pmono">02</td><td class="partno">D39700000</td><td>TIC Instrument Controller — 3-Head RS232<span class="desc-ko">3-Head 컨트롤러</span></td><td class="num-col">1 EA</td><td class="num-col">₩ 1,776,360</td><td class="num-col">₩ 1,776,360</td></tr>
+      <tr><td class="pmono">03</td><td class="partno">A71205550</td><td>After Cooler HV8000<span class="desc-ko">배기 애프터 쿨러</span></td><td class="num-col">1 EA</td><td class="num-col">₩ 5,898,600</td><td class="num-col">₩ 5,898,600</td></tr>
+    </tbody>
+  </table>
+  <div class="p-totals">
+    <div class="row"><span class="k">Sub-Total</span><span class="v">₩ 23,946,960</span></div>
+    <div class="row"><span class="k">VAT (10%)</span><span class="v">₩ 2,394,696</span></div>
+    <div class="row grand"><span class="k">GRAND TOTAL</span><span class="v">₩ 26,341,656</span></div>
+  </div>
+  <div class="p-terms">
+    <div class="row"><span class="k">Payment</span><span class="v">세금계산서 발행 · 익월 말 결제</span></div>
+    <div class="row"><span class="k">Delivery</span><span class="v">국내 재고분 D+1 / 해외 발주분 D+14</span></div>
+    <div class="row"><span class="k">Shipping</span><span class="v">별도 (실비 청구) · 수도권 무료 옵션</span></div>
+    <div class="row"><span class="k">Install</span><span class="v">별도 견적 · 시운전 패키지 가능</span></div>
+    <div class="row"><span class="k">Warranty</span><span class="v">12개월 · Edwards 정품 보증</span></div>
+    <div class="row"><span class="k">A / S</span><span class="v">24/7 콜 응대 · 30년 경력 엔지니어</span></div>
+  </div>
+  <div class="p-sig">
+    <div class="box"><div class="lbl">— ISSUED BY · 발행인</div><div class="name">(주)스마텍 · SEAL</div></div>
+    <div class="box"><div class="lbl">— ACKNOWLEDGED · 수신 확인</div><div class="name">CLIENT · NAME / DATE</div></div>
+  </div>
+  <div class="p-footer"><span>© 2026 SMARTECH CO., LTD. · Edwards Vacuum Korea Authorized Distributor</span><span>PAGE 1 / 1</span></div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+(function(){
+  function fillSaving(){var b=document.getElementById('savingBar');if(!b)return;setTimeout(function(){b.style.width='13.1%';},200);}
+  function countUp(){var el=document.getElementById('bigTotal');if(!el)return;var t=26341656,d=1000,s=performance.now();function f(n){return Math.round(n).toLocaleString('en-US');}function k(n){var p=Math.min(1,(n-s)/d),e=1-Math.pow(1-p,3);el.textContent=f(t*e);if(p<1)requestAnimationFrame(k);else el.textContent=f(t);}requestAnimationFrame(k);}
+  function exp(){document.body.classList.add('pdf-export');window.scrollTo(0,0);setTimeout(function(){window.print();},120);}
+  function res(){document.body.classList.remove('pdf-export');}
+  document.addEventListener('DOMContentLoaded',function(){fillSaving();countUp();var b=document.getElementById('btnExport');if(b)b.addEventListener('click',exp);window.addEventListener('afterprint',res);});
+})();
+</script>
+</body>
+</html>

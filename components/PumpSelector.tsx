@@ -190,7 +190,7 @@ function fmtP(mbar: number): string {
 }
 
 export default function PumpSelector() {
-  const [tab, setTab] = useState<Tab>("new");
+  const [tab, setTab] = useState<Tab>("repurchase");
   const [selectedCategory, setSelectedCategory] = useState<CatalogItem | null>(null);
   const [search, setSearch] = useState("");
 
@@ -389,11 +389,11 @@ export default function PumpSelector() {
     <div className="mt-8">
       {/* Tabs */}
       <div className="flex border-b border-[#E3DFD6]">
-        <button className={tabCls("new")} onClick={() => { setTab("new"); setSelectedCategory(null); setSearch(""); }}>
-          신규제품구매
-        </button>
         <button className={tabCls("repurchase")} onClick={() => { setTab("repurchase"); setSelectedCategory(null); setSearch(""); }}>
           재구매
+        </button>
+        <button className={tabCls("new")} onClick={() => { setTab("new"); setSelectedCategory(null); setSearch(""); }}>
+          신규제품구매
         </button>
         <button className={tabCls("selection")} onClick={() => { setTab("selection"); setSelectedCategory(null); }}>
           펌프선정
@@ -437,7 +437,18 @@ export default function PumpSelector() {
               <div className="mt-1.5 text-[10px] text-[#6A6660]">총 {repurchaseResults.length}개 · 가격은 부가세 미포함 기준입니다.</div>
             )}
             <button
-              onClick={() => window.location.href = "#contact"}
+              onClick={() => {
+                const top = repurchaseResults[0];
+                const sub = encodeURIComponent(
+                  top
+                    ? `재구매 견적 문의 — ${top.partNo} (${top.desc.slice(0, 30)})`
+                    : `재구매 견적 문의 — ${search.trim() || "문의"}`
+                );
+                const bodyText = top
+                  ? `파트번호: ${top.partNo}\n제품명: ${top.desc}\n수량: \n납기 희망일: \n`
+                  : `검색어: ${search.trim()}\n수량: \n납기 희망일: \n`;
+                window.open(`mailto:rokmclmj@gmail.com?subject=${sub}&body=${encodeURIComponent(bodyText)}`, "_blank");
+              }}
               className="mt-4 w-full bg-ink text-paper py-3 text-[13px] hover:bg-[#c00020] transition-colors"
             >
               선택 모델로 견적 문의 →
@@ -554,7 +565,14 @@ export default function PumpSelector() {
                 )}
 
                 <button
-                  onClick={() => window.location.href = "#contact"}
+                  onClick={() => {
+                    const cat = selectedCategory?.category ?? "";
+                    const sub = encodeURIComponent(
+                      `신규제품 견적 문의 — ${cat || search.trim() || "신규 제품"}`
+                    );
+                    const bodyText = `제품 카테고리: ${cat}\n파트번호/모델: ${search.trim()}\n수량: \n납기 희망일: \n`;
+                    window.open(`mailto:rokmclmj@gmail.com?subject=${sub}&body=${encodeURIComponent(bodyText)}`, "_blank");
+                  }}
                   className="mt-4 w-full bg-ink text-paper py-3 text-[13px] hover:bg-[#c00020] transition-colors"
                 >
                   선택 모델로 견적 문의 →
@@ -1023,7 +1041,23 @@ export default function PumpSelector() {
 
               {/* 전문가 문의 CTA */}
               <button
-                onClick={() => window.location.href = "#contact"}
+                onClick={() => {
+                  const pumpDesc = [pumpL1, pumpL2, pumpL3].filter(Boolean).join(" > ");
+                  const sub = encodeURIComponent(`펌프 선정 전문가 검토 요청 — ${pumpDesc || "조건 상담"}`);
+                  const rawVol = form.chamberVol === "기타" ? chamberVolCustom : form.chamberVol;
+                  const rawP = targetP === "기타" ? targetPCustom : targetP;
+                  const rawSpec = form.pipeSpec === "기타" ? pipeSpecCustom : form.pipeSpec;
+                  const rawLen = form.pipeLen === "기타" ? pipeLenCustom : form.pipeLen;
+                  const lines = [
+                    `펌프 종류: ${pumpDesc || "미선택"}`,
+                    rawVol ? `챔버볼륨: ${rawVol}L` : "",
+                    rawP ? `목표압력: ${rawP} mbar` : "",
+                    rawSpec && rawLen ? `배관: ${rawSpec}, ${rawLen}m` : "",
+                    results && results.length > 0 ? `AI 추천 1위: ${results[0].model}` : "",
+                  ].filter(Boolean).join("\n");
+                  const body = encodeURIComponent(`${lines}\n\n담당자 검토 요청드립니다.`);
+                  window.open(`mailto:rokmclmj@gmail.com?subject=${sub}&body=${body}`, "_blank");
+                }}
                 className="w-full border border-ink text-ink py-3 text-[13px] hover:bg-ink hover:text-paper transition-colors"
               >
                 스마텍 전문가 검토 요청 →

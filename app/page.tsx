@@ -1,4 +1,5 @@
 import Link from "next/link";
+import HeroCtaCards from "@/components/HeroCtaCards";
 import HeroChat from "@/components/HeroChat";
 import Industries from "@/components/Industries";
 import Counter from "@/components/Counter";
@@ -9,6 +10,7 @@ import ProductShowcase from "@/components/ProductShowcase";
 import ProductCategories from "@/components/ProductCategories";
 import PumpSelector from "@/components/PumpSelector";
 import HeroVideoIntro from "@/components/HeroVideoIntro";
+import ContactQuoteCta from "@/components/ContactQuoteCta";
 
 function hiEd(text: string, white = false) {
   return text.split(/(\bEdwards\b|\bSmartech\b)/).map((p, i) => {
@@ -43,42 +45,11 @@ export default function Home() {
                 스마텍은 <span className="text-edred font-semibold">Edwards</span> 코리아의 공식 파트너로서,
                 20대 핵심 진공 산업 전반에 걸쳐 고객사별 맞춤형 하이엔드 진공 솔루션을 제공합니다.
               </p>
-              <div className="mt-9 grid grid-cols-3 gap-2.5 max-w-xl hero-rise" style={{ ["--rd" as never]: ".75s" }}>
-                <Link
-                  href="#b2b"
-                  className="group border border-ink p-4 flex flex-col justify-between min-h-[108px] hover:bg-ink hover:text-paper transition-all"
-                >
-                  <div className="text-[9px] mono tracking-widest opacity-50">DIRECT QUOTE</div>
-                  <div>
-                    <div className="mt-2 text-[20px] display leading-tight tracking-tight">견적 문의</div>
-                    <div className="mt-1.5 text-[11px] opacity-60 group-hover:opacity-80">신규제품구매 →</div>
-                  </div>
-                </Link>
-                <Link
-                  href="#b2b"
-                  className="group border border-ink bg-ink text-paper p-4 flex flex-col justify-between min-h-[108px] hover:bg-edred hover:border-edred transition-all"
-                >
-                  <div className="text-[9px] mono tracking-widest opacity-50">AI ASSISTANT</div>
-                  <div>
-                    <div className="mt-2 text-[20px] display leading-tight tracking-tight">AI 견적문의</div>
-                    <div className="mt-1.5 text-[11px] opacity-60 group-hover:opacity-80">모델 자동 추천 →</div>
-                  </div>
-                </Link>
-                <Link
-                  href="#contact"
-                  className="group border border-ink p-4 flex flex-col justify-between min-h-[108px] hover:bg-ink hover:text-paper transition-all"
-                >
-                  <div className="text-[9px] mono tracking-widest opacity-50">REPAIR</div>
-                  <div>
-                    <div className="mt-2 text-[20px] display leading-tight tracking-tight">수리 문의</div>
-                    <div className="mt-1.5 text-[11px] opacity-60 group-hover:opacity-80">A/S · 오버홀 →</div>
-                  </div>
-                </Link>
-              </div>
+              <HeroCtaCards />
               <div className="mt-10 hidden md:flex flex-wrap items-center gap-x-6 gap-y-2 text-[12px] mono text-black hero-rise" style={{ ["--rd" as never]: ".9s" }}>
-                <span>CALL  031–204–7170</span>
+                <a href="tel:031-204-7170" className="hover:text-edred transition-colors">CALL  031-204-7170</a>
                 <span>·</span>
-                <span>MAIL  rokmclmj@gmail.com</span>
+                <a href="mailto:rokmclmj@gmail.com" className="hover:text-edred transition-colors">MAIL  rokmclmj@gmail.com</a>
               </div>
             </div>
 
@@ -352,11 +323,11 @@ export default function Home() {
 
           {/* B2C */}
           <div className="p-10 md:p-16 relative overflow-hidden">
-            <div className="mono text-[11px] dim">— 04b · B2C · RESEARCHER</div>
+            <div className="mono text-[11px] dim">— 04b · 제품 검색 · 펌프선정</div>
             <h3 className="display text-[38px] md:text-[52px] leading-[1.05] mt-4">
-              어떤 펌프를 골라야 할지<br />
-              <span className="italic">모르겠다면,</span><br />
-              <span className="text-edred">아래 옵션에서 선택하세요.</span>
+              파트번호 재구매,<br />
+              <span className="italic">신규 구매,</span><br />
+              <span className="text-edred">펌프선정 — 바로 시작하세요.</span>
             </h3>
             <PumpSelector />
           </div>
@@ -400,7 +371,7 @@ export default function Home() {
               <span className="italic text-edred">먼저</span>입니다.
             </h2>
             <p className="mt-8 text-[15px] leading-[1.75] text-[#2a2823] max-w-[44ch]">
-              "2006년부터 이어진 스마텍의 여정, 성장의 중심에는 늘 '신뢰'가 있었습니다."
+              "2006년 Edwards 코리아에서 시작한 현장 경험이, 2011년 스마텍 창업의 뿌리가 되었습니다."
             </p>
             <p className="mt-5 text-[15px] leading-[1.75] text-[#2a2823] max-w-[44ch]">
               스마텍은 2011년 창업과 2018년 법인화를 통해 전문성을 확장해 왔습니다.
@@ -445,12 +416,12 @@ export default function Home() {
             <div className="col-span-12 lg:col-span-7">
               <div className="border border-paper/20">
                 <div className="grid grid-cols-2 divide-x divide-paper/20">
-                  <a href="tel:03120471700" className="p-8 hover:bg-edred transition-colors group block">
+                  <a href="tel:031-204-7170" className="p-8 hover:bg-edred transition-colors group block">
                     <div className="mono text-[11px] opacity-70 flex items-center gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-edred inline-block animate-pulse" />
                       CALL · 24/7
                     </div>
-                    <div className="display text-[44px] leading-none mt-3 tabular">031·204·7170</div>
+                    <div className="display text-[44px] leading-none mt-3 tabular">031-204-7170</div>
                     <div className="text-[12px] mt-3 opacity-70">24시간 응급 대응 · 펌프 다운은 분 단위로 움직입니다</div>
                   </a>
                   <a href="mailto:rokmclmj@gmail.com" className="p-8 hover:bg-edred transition-colors group block">
@@ -459,10 +430,8 @@ export default function Home() {
                     <div className="text-[12px] mt-3 opacity-70">야간·주말 메일도 확인합니다</div>
                   </a>
                 </div>
-                <div className="p-8 border-t border-paper/20 flex flex-wrap gap-3">
-                  <Link href="/quote" className="bg-edred text-paper px-6 py-4 text-sm hover:bg-edred2 transition-colors">
-                    견적 요청하기 →
-                  </Link>
+                <div className="p-8 border-t border-paper/20 flex flex-wrap gap-3 items-start">
+                  <ContactQuoteCta />
                   <Link href="/auth/register" className="border border-paper/30 px-6 py-4 text-sm hover:bg-paper hover:text-ink transition-colors">
                     B2B 회원가입
                   </Link>
@@ -500,36 +469,36 @@ export default function Home() {
             <div className="col-span-6 md:col-span-3">
               <div className="mono text-[11px] dim mb-3">PRODUCTS</div>
               <div className="space-y-2">
-                <div>오일 로터리 베인</div>
-                <div>드라이 스크롤 / 스크류</div>
-                <div>반도체 드라이 펌프</div>
-                <div>터보분자 펌프</div>
-                <div>게이지 · 리크 디텍터</div>
+                <Link href="/products" className="block hover:text-edred transition-colors">오일 로터리 베인</Link>
+                <Link href="/products" className="block hover:text-edred transition-colors">드라이 스크롤 / 스크류</Link>
+                <Link href="/products" className="block hover:text-edred transition-colors">반도체 드라이 펌프</Link>
+                <Link href="/products" className="block hover:text-edred transition-colors">터보분자 펌프</Link>
+                <Link href="/products" className="block hover:text-edred transition-colors">게이지 · 리크 디텍터</Link>
               </div>
             </div>
             <div className="col-span-6 md:col-span-3">
               <div className="mono text-[11px] dim mb-3">INDUSTRIES</div>
               <div className="space-y-2">
-                <div>반도체 · 디스플레이</div>
-                <div>화학 · 제약</div>
-                <div>연구개발 · 대학</div>
-                <div>식품 · 포장</div>
-                <div>우주 · 항공</div>
+                <Link href="/#industries" className="block hover:text-edred transition-colors">반도체 · 디스플레이</Link>
+                <Link href="/#industries" className="block hover:text-edred transition-colors">화학 · 제약</Link>
+                <Link href="/#industries" className="block hover:text-edred transition-colors">연구개발 · 대학</Link>
+                <Link href="/#industries" className="block hover:text-edred transition-colors">식품 · 포장</Link>
+                <Link href="/#industries" className="block hover:text-edred transition-colors">우주 · 항공</Link>
               </div>
             </div>
             <div className="col-span-6 md:col-span-3">
               <div className="mono text-[11px] dim mb-3">COMPANY</div>
               <div className="space-y-2">
-                <div>회사 소개</div>
-                <div>공식 대리점 인증</div>
-                <div>대표 메시지</div>
+                <Link href="/#about" className="block hover:text-edred transition-colors">회사 소개</Link>
+                <Link href="/#about" className="block hover:text-edred transition-colors">공식 대리점 인증</Link>
+                <Link href="/#about" className="block hover:text-edred transition-colors">대표 메시지</Link>
               </div>
             </div>
             <div className="col-span-6 md:col-span-3">
               <div className="mono text-[11px] dim mb-3">CONTACT</div>
               <div className="space-y-2">
-                <div>✉ rokmclmj@gmail.com</div>
-                <div>☏ 031–204–7170 <span className="text-edred">· 24/7</span></div>
+                <a href="mailto:rokmclmj@gmail.com" className="block hover:text-edred transition-colors">✉ rokmclmj@gmail.com</a>
+                <a href="tel:031-204-7170" className="block hover:text-edred transition-colors">☏ 031-204-7170 <span className="text-edred">· 24/7</span></a>
                 <div>(주)스마텍</div>
                 <div><span className="text-edred font-semibold">Edwards</span> Vacuum 공식 대리점</div>
               </div>
