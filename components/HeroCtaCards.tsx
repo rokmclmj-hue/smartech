@@ -3,25 +3,19 @@
 import Link from "next/link";
 
 export default function HeroCtaCards() {
-  function scrollToB2b(e: React.MouseEvent) {
-    e.preventDefault();
-    document.getElementById("b2b")?.scrollIntoView({ behavior: "smooth" });
-  }
-
   return (
     <div className="mt-9 grid grid-cols-3 gap-2.5 max-w-xl hero-rise" style={{ ["--rd" as never]: ".75s" }}>
-      {/* 견적 문의 — 카드 클릭: 전용견적 섹션으로 스크롤 */}
-      <button
-        type="button"
-        onClick={scrollToB2b}
-        className="group border border-ink p-4 flex flex-col justify-between min-h-[108px] hover:bg-ink hover:text-paper transition-all cursor-pointer text-left"
+      {/* 견적 문의 — 제품 카탈로그로 이동 */}
+      <Link
+        href="/products"
+        className="group border border-ink p-4 flex flex-col justify-between min-h-[108px] hover:bg-ink hover:text-paper transition-all"
       >
         <div className="text-[9px] mono tracking-widest opacity-50">DIRECT QUOTE</div>
         <div>
           <div className="mt-2 text-[20px] display leading-tight tracking-tight">견적 문의</div>
-          <div className="mt-1.5 text-[11px] opacity-60 group-hover:opacity-80">전용견적 바로가기 →</div>
+          <div className="mt-1.5 text-[11px] opacity-60 group-hover:opacity-80">제품 카탈로그 →</div>
         </div>
-      </button>
+      </Link>
 
       {/* AI 상담 */}
       <div

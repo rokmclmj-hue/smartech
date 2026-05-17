@@ -1,6 +1,8 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 import productData from "@/lib/productCatalog.json";
+import { addToCartByPartNo } from "@/lib/cartUtils";
 import { recommendPumps, TURBO_PUMPS, ALL_PUMPS, calcTurboPumpDown } from "@/lib/pumpSpeedData";
 import type { PumpDownResult, TurboPumpDownResult, PumpModel } from "@/lib/pumpSpeedData";
 
@@ -222,6 +224,9 @@ export default function PumpSelector() {
   const [turboError, setTurboError] = useState("");
   const [turboIsCalc, setTurboIsCalc] = useState(false);
 
+  const [cartLoading, setCartLoading] = useState<string | null>(null);
+  const [cartAdded, setCartAdded] = useState<Set<string>>(new Set());
+
   // 선택된 TMP 객체 + 호환 백킹펌프 목록
   const selectedTMPObj = TURBO_PUMPS.find(t => t.model === turboTMP) ?? null;
   const compatiblePumps = selectedTMPObj && !selectedTMPObj.integrated
@@ -343,6 +348,16 @@ export default function PumpSelector() {
     }, 20);
   }
 
+  async function handleAddToCart(partNo: string, desc: string) {
+    setCartLoading(partNo);
+    const result = await addToCartByPartNo(partNo, desc);
+    setCartLoading(null);
+    if (result === "ok") {
+      setCartAdded(prev => new Set([...prev, partNo]));
+      setTimeout(() => setCartAdded(prev => { const s = new Set(prev); s.delete(partNo); return s; }), 2000);
+    }
+  }
+
   // ── 카탈로그 검색 ─────────────────────────────────────────
   const productItems = selectedCategory?.seriesKey
     ? (productData[selectedCategory.seriesKey] as { partNo: string; desc: string; price: number }[]).filter(
@@ -423,10 +438,17 @@ export default function PumpSelector() {
                         <div className="text-[12px] font-medium leading-snug">{item.desc}</div>
                         <div className="text-[10px] text-[#6A6660] mono mt-0.5">{item.partNo} · {item.series}</div>
                       </div>
-                      <div className="shrink-0 ml-4 text-right">
+                      <div className="shrink-0 ml-4 flex items-center gap-2">
                         <div className="text-[12px] font-semibold text-[#c00020]">
                           {item.price.toLocaleString()}원
                         </div>
+                        <button
+                          onClick={() => handleAddToCart(item.partNo, item.desc)}
+                          disabled={cartLoading === item.partNo}
+                          className={`px-2.5 py-1 text-[11px] border transition-colors whitespace-nowrap ${cartAdded.has(item.partNo) ? "bg-ink text-paper border-ink" : "border-[#E3DFD6] hover:border-ink hover:bg-ink hover:text-paper"} disabled:opacity-50`}
+                        >
+                          {cartAdded.has(item.partNo) ? "✓" : cartLoading === item.partNo ? "…" : "담기"}
+                        </button>
                       </div>
                     </div>
                   ))
@@ -436,23 +458,12 @@ export default function PumpSelector() {
             {repurchaseResults.length > 0 && (
               <div className="mt-1.5 text-[10px] text-[#6A6660]">총 {repurchaseResults.length}개 · 가격은 부가세 미포함 기준입니다.</div>
             )}
-            <button
-              onClick={() => {
-                const top = repurchaseResults[0];
-                const sub = encodeURIComponent(
-                  top
-                    ? `재구매 견적 문의 — ${top.partNo} (${top.desc.slice(0, 30)})`
-                    : `재구매 견적 문의 — ${search.trim() || "문의"}`
-                );
-                const bodyText = top
-                  ? `파트번호: ${top.partNo}\n제품명: ${top.desc}\n수량: \n납기 희망일: \n`
-                  : `검색어: ${search.trim()}\n수량: \n납기 희망일: \n`;
-                window.open(`mailto:rokmclmj@gmail.com?subject=${sub}&body=${encodeURIComponent(bodyText)}`, "_blank");
-              }}
-              className="mt-4 w-full bg-ink text-paper py-3 text-[13px] hover:bg-[#c00020] transition-colors"
+            <Link
+              href="/quote"
+              className="mt-4 w-full bg-ink text-paper py-3 text-[13px] hover:bg-[#c00020] transition-colors block text-center"
             >
-              선택 모델로 견적 문의 →
-            </button>
+              견적 카트 보기 →
+            </Link>
           </div>
         )}
 
@@ -478,10 +489,17 @@ export default function PumpSelector() {
                             <div className="text-[12px] font-medium leading-snug">{item.desc}</div>
                             <div className="text-[10px] text-[#6A6660] mono mt-0.5">{item.partNo}</div>
                           </div>
-                          <div className="shrink-0 ml-4 text-right">
+                          <div className="shrink-0 ml-4 flex items-center gap-2">
                             <div className="text-[12px] font-semibold text-[#c00020]">
                               {item.price.toLocaleString()}원
                             </div>
+                            <button
+                              onClick={() => handleAddToCart(item.partNo, item.desc)}
+                              disabled={cartLoading === item.partNo}
+                              className={`px-2.5 py-1 text-[11px] border transition-colors whitespace-nowrap ${cartAdded.has(item.partNo) ? "bg-ink text-paper border-ink" : "border-[#E3DFD6] hover:border-ink hover:bg-ink hover:text-paper"} disabled:opacity-50`}
+                            >
+                              {cartAdded.has(item.partNo) ? "✓" : cartLoading === item.partNo ? "…" : "담기"}
+                            </button>
                           </div>
                         </div>
                       ))}
@@ -547,10 +565,17 @@ export default function PumpSelector() {
                               <div className="text-[12px] font-medium leading-snug">{item.desc}</div>
                               <div className="text-[10px] text-[#6A6660] mono mt-0.5">{item.partNo}</div>
                             </div>
-                            <div className="shrink-0 ml-4 text-right">
+                            <div className="shrink-0 ml-4 flex items-center gap-2">
                               <div className="text-[12px] font-semibold text-[#c00020]">
                                 {item.price.toLocaleString()}원
                               </div>
+                              <button
+                                onClick={() => handleAddToCart(item.partNo, item.desc)}
+                                disabled={cartLoading === item.partNo}
+                                className={`px-2.5 py-1 text-[11px] border transition-colors whitespace-nowrap ${cartAdded.has(item.partNo) ? "bg-ink text-paper border-ink" : "border-[#E3DFD6] hover:border-ink hover:bg-ink hover:text-paper"} disabled:opacity-50`}
+                              >
+                                {cartAdded.has(item.partNo) ? "✓" : cartLoading === item.partNo ? "…" : "담기"}
+                              </button>
                             </div>
                           </div>
                         ))
@@ -564,19 +589,12 @@ export default function PumpSelector() {
                   </div>
                 )}
 
-                <button
-                  onClick={() => {
-                    const cat = selectedCategory?.category ?? "";
-                    const sub = encodeURIComponent(
-                      `신규제품 견적 문의 — ${cat || search.trim() || "신규 제품"}`
-                    );
-                    const bodyText = `제품 카테고리: ${cat}\n파트번호/모델: ${search.trim()}\n수량: \n납기 희망일: \n`;
-                    window.open(`mailto:rokmclmj@gmail.com?subject=${sub}&body=${encodeURIComponent(bodyText)}`, "_blank");
-                  }}
-                  className="mt-4 w-full bg-ink text-paper py-3 text-[13px] hover:bg-[#c00020] transition-colors"
+                <Link
+                  href="/quote"
+                  className="mt-4 w-full bg-ink text-paper py-3 text-[13px] hover:bg-[#c00020] transition-colors block text-center"
                 >
-                  선택 모델로 견적 문의 →
-                </button>
+                  견적 카트 보기 →
+                </Link>
               </>
             )}
           </div>
@@ -963,6 +981,22 @@ export default function PumpSelector() {
                       </div>
                     </div>
                   )}
+                  {turboResult.reachable && (
+                    <div className="px-4 py-3 border-t border-[#E3DFD6] flex gap-2">
+                      <Link
+                        href={`/products?q=${encodeURIComponent(turboResult.turboModel)}`}
+                        className="flex-1 text-center text-[11px] border border-[#E3DFD6] py-2 hover:border-ink hover:bg-ink hover:text-paper transition-colors"
+                      >
+                        {turboResult.turboModel} 카탈로그 →
+                      </Link>
+                      <Link
+                        href={`/products?q=${encodeURIComponent(turboResult.backingModel)}`}
+                        className="flex-1 text-center text-[11px] border border-[#E3DFD6] py-2 hover:border-ink hover:bg-ink hover:text-paper transition-colors"
+                      >
+                        {turboResult.backingModel} 카탈로그 →
+                      </Link>
+                    </div>
+                  )}
                   <div className="px-4 py-2.5 border-t border-[#E3DFD6] bg-[#F6F4EF]">
                     <p className="text-[10px] text-[#6A6660] leading-relaxed">
                       ※ TMP 스핀업 시간(1~3분)은 포함되지 않습니다. SUS+Nitrile, 아웃게싱 1.3×10⁻⁷ mbar·L/s·cm² 기준.
@@ -1017,12 +1051,18 @@ export default function PumpSelector() {
                             </div>
                           </div>
 
-                          {/* 시간 */}
+                          {/* 시간 + 카탈로그 */}
                           <div className="shrink-0 text-right">
                             <div className={`text-[13px] font-semibold mono ${i === 0 ? "text-ink" : ""}`}>
                               {fmtTime(r.pumpDownTime_s)}
                             </div>
                             <div className="text-[10px] text-[#6A6660]">pump-down</div>
+                            <Link
+                              href={`/products?q=${encodeURIComponent(r.model)}`}
+                              className="mt-1 block text-[10px] text-[#6A6660] hover:text-ink underline"
+                            >
+                              카탈로그 →
+                            </Link>
                           </div>
                         </div>
                       ))}

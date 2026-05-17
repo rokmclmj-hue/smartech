@@ -1,5 +1,6 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
+import Link from "next/link";
 
 type Message = { role: "user" | "assistant"; content: string };
 
@@ -97,16 +98,24 @@ export default function HeroChat() {
         )}
       </div>
 
-      {/* 상담 완료 후 전문가 연결 CTA */}
+      {/* 상담 완료 후 CTA */}
       {!loading && messages.length > 1 && messages[messages.length - 1]?.role === "assistant" && (
-        <div className="px-5 py-3 border-t hair bg-[#F6F4EF] flex items-center justify-between gap-3">
-          <span className="text-[12px] text-[#6A6660]">AI 분석 결과로 전문가 상담을 신청하세요.</span>
-          <button
-            onClick={() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })}
-            className="shrink-0 bg-ink text-paper px-4 py-2 text-[12px] hover:bg-[#c00020] transition-colors"
-          >
-            전문가 상담 →
-          </button>
+        <div className="px-5 py-3 border-t hair bg-[#F6F4EF] flex items-center justify-between gap-3 flex-wrap">
+          <span className="text-[12px] text-[#6A6660]">추천 제품을 카탈로그에서 바로 견적 카트에 담으세요.</span>
+          <div className="flex gap-2 shrink-0">
+            <Link
+              href="/products"
+              className="bg-[#E3DFD6] text-ink px-4 py-2 text-[12px] hover:bg-ink hover:text-paper transition-colors"
+            >
+              제품 카탈로그 →
+            </Link>
+            <button
+              onClick={() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })}
+              className="bg-ink text-paper px-4 py-2 text-[12px] hover:bg-[#c00020] transition-colors"
+            >
+              전문가 상담 →
+            </button>
+          </div>
         </div>
       )}
 
