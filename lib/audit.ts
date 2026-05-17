@@ -3,6 +3,7 @@ import { prisma } from "./db";
 export type AuditAction =
   | "quote.send"
   | "quote.duplicate"
+  | "quote.delete"
   | "quote.update"
   | "quote.cancel"
   | "order.confirm"

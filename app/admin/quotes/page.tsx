@@ -187,25 +187,22 @@ export default function AdminQuotesPage() {
     }
   }
 
-  // 복제
-  async function duplicateQuote(quoteId: number) {
+  // 삭제
+  async function deleteQuote(quoteId: number) {
     const ok = await confirm({
-      message: "이 견적을 복제하시겠습니까?",
-      detail: "DRAFT 상태로 새 견적이 생성됩니다.",
-      confirmLabel: "복제",
+      message: "이 견적을 삭제하시겠습니까?",
+      detail: "삭제 후 복구할 수 없습니다.",
+      confirmLabel: "삭제",
+      destructive: true,
     });
     if (!ok) return;
 
     setActionLoading(quoteId);
     try {
-      const res = await fetch(`/api/admin/quotes/${quoteId}/duplicate`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({}),
-      });
-      const data = await res.json().catch(() => ({})) as { quoteId?: number; error?: string };
-      if (!res.ok) throw new Error(data.error ?? "복제 실패");
-      success(`새 견적 #${data.quoteId} 가 생성되었습니다`);
+      const res = await fetch(`/api/admin/quotes/${quoteId}`, { method: "DELETE" });
+      const data = await res.json().catch(() => ({})) as { error?: string };
+      if (!res.ok) throw new Error(data.error ?? "삭제 실패");
+      success("견적이 삭제되었습니다");
       fetchQuotes(filter, search, page);
     } catch (e) {
       toastError(e instanceof Error ? e.message : "오류가 발생했습니다");
@@ -361,13 +358,15 @@ export default function AdminQuotesPage() {
                             >
                               {actionLoading === q.id ? "..." : "Send"}
                             </button>
-                            <button
-                              onClick={() => duplicateQuote(q.id)}
-                              disabled={actionLoading === q.id}
-                              className="mono text-[10px] tracking-[0.1em] uppercase border border-line text-dim px-2.5 py-1 hover:border-ink hover:text-ink disabled:opacity-40 transition-colors"
-                            >
-                              Copy
-                            </button>
+                            {q.status !== "CONFIRMED" && (
+                              <button
+                                onClick={() => deleteQuote(q.id)}
+                                disabled={actionLoading === q.id}
+                                className="mono text-[10px] tracking-[0.1em] uppercase border border-line text-dim px-2.5 py-1 hover:border-edred hover:text-edred hover:border-edred disabled:opacity-40 transition-colors"
+                              >
+                                Delete
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>
