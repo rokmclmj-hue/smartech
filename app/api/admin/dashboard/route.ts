@@ -17,8 +17,8 @@ export async function GET() {
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
 
-  const [todayQuotes, monthQuotes, monthOrders, monthRevenue, pendingUsers, staleQuotes, recentOrders, lowStockProducts] =
-    await Promise.all([
+  async function fetchAll() {
+    return Promise.all([
       // 오늘 견적 요청 건수
       prisma.quote.count({
         where: { createdAt: { gte: todayStart } },
@@ -75,6 +75,31 @@ export async function GET() {
         take: 20,
       }),
     ]);
+  }
+
+  // Neon DB 콜드 스타트(잠든 DB 깨어나는 시간) 대응: 연결 실패 시 1회 재시도
+  let results;
+  try {
+    results = await fetchAll();
+  } catch (e: any) {
+    if (e?.code === "P1001") {
+      await new Promise((r) => setTimeout(r, 800));
+      results = await fetchAll();
+    } else {
+      throw e;
+    }
+  }
+
+  const [
+    todayQuotes,
+    monthQuotes,
+    monthOrders,
+    monthRevenue,
+    pendingUsers,
+    staleQuotes,
+    recentOrders,
+    lowStockProducts,
+  ] = results;
 
   // 매출 계산
   const revenueTotal = monthRevenue.reduce((sum, order) => {

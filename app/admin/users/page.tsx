@@ -263,6 +263,30 @@ export default function AdminUsersPage() {
     }
   }
 
+  async function deleteUser(user: UserItem) {
+    const ok = await confirm({
+      message: `${user.name}(${user.company}) 회원을 완전히 삭제하시겠습니까?`,
+      detail: "삭제된 데이터는 복구할 수 없습니다. 견적·주문 기록이 있으면 삭제할 수 없습니다.",
+      confirmLabel: "삭제",
+      destructive: true,
+    });
+    if (!ok) return;
+    setActionLoading(user.id);
+    try {
+      const res = await fetch(`/api/admin/users?userId=${user.id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        throw new Error((json as { error?: string }).error ?? "처리 실패");
+      }
+      success(`${user.name}님 계정이 삭제되었습니다`);
+      fetchAll(allPage, search);
+    } catch (e) {
+      toastError(e instanceof Error ? e.message : "오류가 발생했습니다");
+    } finally {
+      setActionLoading(null);
+    }
+  }
+
   async function reApproveUser(userId: number, userName: string) {
     const tier = rejectedApproveTarget[userId];
     if (!tier) {
@@ -577,6 +601,13 @@ export default function AdminUsersPage() {
                           >
                             {actionLoading === u.id ? "..." : "적용"}
                           </button>
+                          <button
+                            onClick={() => deleteUser(u)}
+                            disabled={actionLoading === u.id || u.tier === "ADMIN"}
+                            className="shrink-0 mono text-[11px] tracking-[0.1em] uppercase border border-edred/40 text-edred/60 px-3 py-2 hover:border-edred hover:text-edred disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                          >
+                            삭제
+                          </button>
                         </div>
                       </div>
                     );
@@ -659,6 +690,13 @@ export default function AdminUsersPage() {
                                     className="mono text-[10px] tracking-[0.1em] uppercase border border-line text-dim px-2.5 py-1 hover:border-ink hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                                   >
                                     {actionLoading === u.id ? "..." : "적용"}
+                                  </button>
+                                  <button
+                                    onClick={() => deleteUser(u)}
+                                    disabled={actionLoading === u.id || u.tier === "ADMIN"}
+                                    className="mono text-[10px] tracking-[0.1em] uppercase border border-edred/40 text-edred/60 px-2.5 py-1 hover:border-edred hover:text-edred disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                  >
+                                    삭제
                                   </button>
                                 </div>
                               </td>

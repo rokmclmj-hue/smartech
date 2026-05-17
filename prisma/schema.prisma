@@ -16,7 +16,8 @@ model Product {
   category    String?
   pdfFile     String?
   createdAt   DateTime    @default(now())
-  stock       Int         @default(0)
+  stock          Int         @default(0)
+  isDiscontinued Boolean     @default(false)
   imageUrl    String?
   quoteItems  QuoteItem[]
 }

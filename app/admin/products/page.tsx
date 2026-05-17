@@ -13,6 +13,7 @@ type Product = {
   costPrice: number;
   stock: number;
   isImportant: boolean;
+  isDiscontinued: boolean;
 };
 
 type PriceRule = {
@@ -94,6 +95,7 @@ export default function AdminProductsPage() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
   const [lowStock, setLowStock] = useState(false);
+  const [showDiscontinued, setShowDiscontinued] = useState(false);
   const debouncedSearch = useDebounce(search, 300);
   const debouncedCategory = useDebounce(category, 300);
 
@@ -131,6 +133,7 @@ export default function AdminProductsPage() {
       if (debouncedSearch) params.set("search", debouncedSearch);
       if (debouncedCategory) params.set("category", debouncedCategory);
       if (lowStock) params.set("lowStock", "1");
+      if (showDiscontinued) params.set("discontinued", "1");
       params.set("page", String(overridePage ?? page));
       params.set("limit", String(limit));
 
@@ -143,7 +146,7 @@ export default function AdminProductsPage() {
         .catch(() => toastError("제품 데이터를 불러오지 못했습니다"))
         .finally(() => setLoading(false));
     },
-    [debouncedSearch, debouncedCategory, lowStock, page, toastError]
+    [debouncedSearch, debouncedCategory, lowStock, showDiscontinued, page, toastError]
   );
 
   // 필터 변경 시 페이지 초기화
@@ -154,7 +157,7 @@ export default function AdminProductsPage() {
     }
     // fetchProducts를 deps에 넣으면 무한루프 발생 가능. 필터 변경에만 반응.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tab, debouncedSearch, debouncedCategory, lowStock]);
+  }, [tab, debouncedSearch, debouncedCategory, lowStock, showDiscontinued]);
 
   // 페이지 변경 시 fetch
   useEffect(() => {
@@ -250,6 +253,50 @@ export default function AdminProductsPage() {
       toastError("저장에 실패했습니다");
     } finally {
       setSavingCost(null);
+    }
+  }
+
+  // ─── 상태(판매중/품절/단종) 변경 ─────────────────────────────────────────────
+
+  const [savingStatus, setSavingStatus] = useState<number | null>(null);
+
+  async function saveStatus(product: Product, newStatus: "판매중" | "품절" | "단종") {
+    setSavingStatus(product.id);
+    try {
+      let patchData: { isDiscontinued?: boolean; stock?: number } = {};
+      if (newStatus === "단종") {
+        patchData = { isDiscontinued: true };
+      } else if (newStatus === "품절") {
+        patchData = { isDiscontinued: false, stock: 0 };
+      } else {
+        patchData = { isDiscontinued: false, ...(product.stock === 0 ? { stock: 1 } : {}) };
+      }
+      const res = await fetch("/api/admin/products", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId: product.id, ...patchData }),
+      });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        toastError((j as { error?: string }).error ?? "저장에 실패했습니다");
+        return;
+      }
+      setProducts((prev) =>
+        prev.map((p) =>
+          p.id === product.id
+            ? {
+                ...p,
+                isDiscontinued: patchData.isDiscontinued ?? p.isDiscontinued,
+                stock: patchData.stock !== undefined ? patchData.stock : p.stock,
+              }
+            : p
+        )
+      );
+      success(`상태가 ${newStatus}(으)로 변경되었습니다`);
+    } catch {
+      toastError("저장에 실패했습니다");
+    } finally {
+      setSavingStatus(null);
     }
   }
 
@@ -540,6 +587,12 @@ export default function AdminProductsPage() {
             >
               재고부족
             </button>
+            <button
+              onClick={() => setShowDiscontinued((v) => !v)}
+              className={`chip ${showDiscontinued ? "active" : ""} mono text-[11px]`}
+            >
+              단종만
+            </button>
           </div>
 
           {/* 총 건수 + 페이지 정보 */}
@@ -593,7 +646,11 @@ export default function AdminProductsPage() {
                           <tr
                             key={p.id}
                             className={`border-b hair last:border-b-0 hover:bg-ink/[0.02] transition-colors ${
-                              p.stock === 0 ? "bg-edred/[0.04]" : ""
+                              p.isDiscontinued
+                                ? "opacity-50 bg-ink/[0.02]"
+                                : p.stock === 0
+                                ? "bg-edred/[0.04]"
+                                : ""
                             }`}
                           >
                             {/* 코드번호 */}
@@ -723,15 +780,33 @@ export default function AdminProductsPage() {
 
                             {/* 상태 */}
                             <td className="px-4 py-3">
-                              <span
-                                className={`mono text-[10px] tracking-[0.08em] uppercase border px-2 py-0.5 ${
-                                  p.stock === 0
+                              <select
+                                value={
+                                  p.isDiscontinued
+                                    ? "단종"
+                                    : p.stock === 0
+                                    ? "품절"
+                                    : "판매중"
+                                }
+                                onChange={(e) =>
+                                  saveStatus(
+                                    p,
+                                    e.target.value as "판매중" | "품절" | "단종"
+                                  )
+                                }
+                                disabled={savingStatus === p.id}
+                                className={`mono text-[10px] tracking-[0.08em] border px-2 py-0.5 bg-paper focus:outline-none focus:border-ink disabled:opacity-40 cursor-pointer transition-colors ${
+                                  p.isDiscontinued
+                                    ? "border-line text-dim"
+                                    : p.stock === 0
                                     ? "border-edred text-edred"
                                     : "border-ink text-ink"
                                 }`}
                               >
-                                {p.stock === 0 ? "품절" : "판매중"}
-                              </span>
+                                <option value="판매중">판매중</option>
+                                <option value="품절">품절</option>
+                                <option value="단종">단종</option>
+                              </select>
                             </td>
 
                             {/* 편집 버튼 */}

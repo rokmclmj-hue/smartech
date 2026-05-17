@@ -12,6 +12,7 @@ export async function GET(req: NextRequest) {
   const search = searchParams.get("search") ?? "";
   const category = searchParams.get("category") ?? "";
   const lowStock = searchParams.get("lowStock") === "1";
+  const discontinued = searchParams.get("discontinued") === "1";
   const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1);
   const rawLimit = parseInt(searchParams.get("limit") ?? "100", 10) || 100;
   const limit = Math.min(Math.max(1, rawLimit), 500);
@@ -26,6 +27,7 @@ export async function GET(req: NextRequest) {
   }
   if (category) where.category = category;
   if (lowStock) where.stock = { lt: 5 };
+  if (discontinued) where.isDiscontinued = true;
 
   const [total, items] = await Promise.all([
     prisma.product.count({ where }),
@@ -42,6 +44,7 @@ export async function GET(req: NextRequest) {
         costPrice: true,
         stock: true,
         isImportant: true,
+        isDiscontinued: true,
         imageUrl: true,
       },
     }),
@@ -122,13 +125,14 @@ export async function PATCH(req: NextRequest) {
   if (!admin) return NextResponse.json({ error: "권한 없음" }, { status: 403 });
 
   const body = await req.json();
-  const { productId, stock, costPrice, description, category, partNo } = body as {
+  const { productId, stock, costPrice, description, category, partNo, isDiscontinued } = body as {
     productId: unknown;
     stock?: unknown;
     costPrice?: unknown;
     description?: unknown;
     category?: unknown;
     partNo?: unknown;
+    isDiscontinued?: unknown;
   };
 
   if (typeof productId !== "number") {
@@ -164,6 +168,12 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: "파트번호(partNo)는 비워둘 수 없습니다" }, { status: 400 });
     }
     data.partNo = partNo.trim();
+  }
+  if (isDiscontinued !== undefined) {
+    if (typeof isDiscontinued !== "boolean") {
+      return NextResponse.json({ error: "isDiscontinued는 true/false여야 합니다" }, { status: 400 });
+    }
+    data.isDiscontinued = isDiscontinued;
   }
 
   if (Object.keys(data).length === 0) {

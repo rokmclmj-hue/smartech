@@ -159,3 +159,43 @@ export async function PATCH(req: NextRequest) {
 
   return NextResponse.json({ ok: true, userId: updated.id, tier: updated.tier });
 }
+
+export async function DELETE(req: NextRequest) {
+  const admin = await getAdminSession();
+  if (!admin) return NextResponse.json({ error: "권한 없음" }, { status: 403 });
+
+  const { searchParams } = new URL(req.url);
+  const userId = parseInt(searchParams.get("userId") ?? "", 10);
+  if (isNaN(userId)) return NextResponse.json({ error: "userId가 필요합니다" }, { status: 400 });
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      name: true,
+      tier: true,
+      _count: { select: { quotes: true, orders: true } },
+    },
+  });
+  if (!user) return NextResponse.json({ error: "사용자를 찾을 수 없습니다" }, { status: 404 });
+  if (user.tier === "ADMIN") return NextResponse.json({ error: "관리자 계정은 삭제할 수 없습니다" }, { status: 403 });
+  if (user._count.quotes > 0 || user._count.orders > 0) {
+    return NextResponse.json(
+      { error: "견적 또는 주문 기록이 있는 회원은 삭제할 수 없습니다" },
+      { status: 409 }
+    );
+  }
+
+  await prisma.auditLog.deleteMany({ where: { userId } });
+  await prisma.user.delete({ where: { id: userId } });
+
+  await logAudit({
+    userId: admin.userId,
+    action: "user.delete",
+    target: "User",
+    targetId: userId,
+    payload: { name: user.name },
+  });
+
+  return NextResponse.json({ ok: true });
+}
