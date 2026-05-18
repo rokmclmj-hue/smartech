@@ -117,7 +117,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
       // OAuth 로그인
       if (account && (account.provider === "kakao" || account.provider === "google")) {
-        const email = token.email;
+        // 카카오는 이메일 동의 없이도 로그인 가능 — Kakao ID로 식별
+        const email =
+          token.email ??
+          (account.provider === "kakao" && token.sub
+            ? `kakao_${token.sub}@kakao.smartech`
+            : null);
         const name = token.name ?? "";
         if (email) {
           try {
