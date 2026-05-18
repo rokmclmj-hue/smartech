@@ -37,14 +37,22 @@ function LoginContent() {
   }
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-6">
+    <div className="min-h-screen flex flex-col items-center justify-center px-6 bg-paper">
       <div className="w-full max-w-sm">
-        {/* 헤더 */}
-        <div className="text-center mb-8">
-          <div className="display text-[32px] tracking-[-0.045em] text-ink leading-none mb-1">
-            Smartech<span style={{ color: "#c00020" }}>.</span>
-          </div>
-          <p className="text-[13px] text-gray-400 mt-2">회원 전용 가격 및 견적 서비스</p>
+
+        {/* 로고 */}
+        <div className="text-center mb-10">
+          <Link href="/" className="inline-block">
+            <div className="display text-[36px] tracking-[-0.045em] text-ink leading-none">
+              Smartech<span style={{ color: "#c00020" }}>.</span>
+            </div>
+          </Link>
+          <p className="text-[12px] mono tracking-[0.18em] uppercase text-gray-400 mt-3">
+            Partner Portal
+          </p>
+          <p className="text-[13px] text-gray-500 mt-1">
+            파트너사 전용 가격 및 견적 서비스
+          </p>
         </div>
 
         {registered === "approved" && (
@@ -52,14 +60,9 @@ function LoginContent() {
             ✓ 가입 완료! 아래 방법으로 로그인해주세요.
           </div>
         )}
-        {registered === "1" && (
-          <div className="mb-6 px-4 py-3 bg-blue-50 border border-blue-200 text-sm text-blue-700 rounded-lg text-center">
-            가입 신청 완료. 담당자 확인 후 이용 가능합니다.
-          </div>
-        )}
 
+        {/* 소셜 로그인 */}
         <div className="space-y-3">
-          {/* 카카오 */}
           <button
             onClick={() => signIn("kakao", { callbackUrl: "/" })}
             className="w-full flex items-center justify-center gap-3 bg-[#FEE500] hover:bg-[#f5dc00] text-[#3C1E1E] font-semibold py-3.5 rounded-xl transition-colors text-[15px]"
@@ -70,10 +73,9 @@ function LoginContent() {
             카카오로 시작하기
           </button>
 
-          {/* 구글 */}
           <button
             onClick={() => signIn("google", { callbackUrl: "/" })}
-            className="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-3.5 rounded-xl transition-colors text-[15px]"
+            className="w-full flex items-center justify-center gap-3 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-semibold py-3.5 rounded-xl transition-colors text-[15px] shadow-sm"
           >
             <svg width="20" height="20" viewBox="0 0 18 18">
               <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
@@ -116,7 +118,7 @@ function LoginContent() {
               onChange={(e) => setMagicEmail(e.target.value)}
               required
               placeholder="이메일 주소 입력"
-              className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 bg-white"
             />
             {magicError && <p className="text-red-500 text-xs">{magicError}</p>}
             <button
@@ -129,11 +131,12 @@ function LoginContent() {
           </form>
         )}
 
-        <p className="text-center text-xs text-gray-300 mt-8">
-          <Link href="/auth/admin" className="hover:text-gray-400 transition-colors">
+        {/* 관리자 링크 — 매우 작게 */}
+        <div className="mt-12 text-center">
+          <Link href="/auth/admin" className="text-[11px] text-gray-300 hover:text-gray-400 transition-colors">
             관리자
           </Link>
-        </p>
+        </div>
       </div>
     </div>
   );

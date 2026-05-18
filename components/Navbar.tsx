@@ -62,7 +62,7 @@ export default function Navbar() {
 
   // 관리자 페이지에서는 자체 헤더가 따로 있어서 공통 Navbar 숨김 (로고 중복 방지)
   // ※ early return은 모든 hooks 호출 후에 배치 (Rules of Hooks 준수)
-  if (pathname?.startsWith("/admin")) {
+  if (pathname?.startsWith("/admin") || pathname?.startsWith("/auth")) {
     return null;
   }
 
