@@ -15,7 +15,8 @@ const NAV_ITEMS = [
   { href: "/admin/users", label: "고객", num: "05" },
   { href: "/admin/proxy-quotes", label: "대행견적서", num: "06", highlight: true },
   { href: "/admin/companies", label: "거래처", num: "07" },
-  { href: "/admin/settings", label: "설정", num: "08" },
+  { href: "/admin/quick", label: "빠른링크", num: "08" },
+  { href: "/admin/settings", label: "설정", num: "09" },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
