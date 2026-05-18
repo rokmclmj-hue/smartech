@@ -51,6 +51,40 @@ export async function sendBusinessDocRequest(
 }
 
 /**
+ * 매직 링크 이메일 발송 (비밀번호 없이 로그인)
+ */
+export async function sendMagicLink(to: string, magicUrl: string): Promise<void> {
+  await transporter.sendMail({
+    from: `"스마텍" <${process.env.GMAIL_USER}>`,
+    to,
+    subject: "[스마텍] 로그인 링크가 도착했습니다",
+    html: `
+      <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px 24px;background:#fff;border:1px solid #e5e7eb;">
+        <div style="font-size:22px;font-weight:700;letter-spacing:-0.03em;margin-bottom:4px;">
+          Smartech<span style="color:#c00020;">.</span>
+        </div>
+        <div style="font-size:11px;color:#9ca3af;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:32px;">
+          Edwards Vacuum · Korea Official
+        </div>
+        <p style="font-size:15px;color:#111;margin-bottom:8px;">안녕하세요.</p>
+        <p style="font-size:14px;color:#374151;line-height:1.7;margin-bottom:32px;">
+          아래 버튼을 클릭하시면 비밀번호 없이 바로 로그인됩니다.<br>
+          <span style="color:#9ca3af;font-size:12px;">링크는 15분간 유효하며 1회만 사용 가능합니다.</span>
+        </p>
+        <a href="${magicUrl}" style="display:inline-block;background:#c00020;color:#fff;padding:14px 32px;font-size:15px;font-weight:600;text-decoration:none;letter-spacing:-0.01em;">
+          로그인하기 →
+        </a>
+        <p style="margin-top:32px;font-size:12px;color:#9ca3af;line-height:1.6;">
+          본인이 요청하지 않은 경우 이 메일을 무시하셔도 됩니다.<br>
+          문의: 031-204-7170
+        </p>
+      </div>
+    `,
+    text: `스마텍 로그인 링크\n\n아래 링크를 클릭하여 로그인하세요 (15분 유효):\n${magicUrl}\n\n본인이 요청하지 않은 경우 무시하세요.`,
+  });
+}
+
+/**
  * 등급 승인 완료 이메일을 발송합니다.
  */
 export async function sendApprovalNotice(

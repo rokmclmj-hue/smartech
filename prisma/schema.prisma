@@ -107,6 +107,21 @@ model AuditLog {
   @@index([userId, createdAt])
 }
 
+// 이메일·SMS 매직 링크 토큰 (15분 만료)
+model MagicLinkToken {
+  id        String    @id @default(cuid())
+  email     String?
+  phone     String?
+  token     String    @unique @default(cuid())
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([token])
+  @@index([email])
+  @@index([phone])
+}
+
 // 기존 거래처 화이트리스트 — 엑셀 임포트 or 수동 등록
 model KnownCompany {
   id          Int      @id @default(autoincrement())
