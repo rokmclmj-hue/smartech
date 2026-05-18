@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useToast } from "@/lib/toast";
 
@@ -48,7 +48,7 @@ function fmtDateTime(iso: string): string {
   return d.toLocaleDateString("ko-KR") + " " + d.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
 }
 
-export default function AdminQuotesPage() {
+function AdminQuotesContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -402,5 +402,13 @@ export default function AdminQuotesPage() {
         </>
       )}
     </div>
+  );
+}
+
+export default function AdminQuotesPage() {
+  return (
+    <Suspense>
+      <AdminQuotesContent />
+    </Suspense>
   );
 }
