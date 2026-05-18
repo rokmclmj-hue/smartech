@@ -327,7 +327,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-md md:bg-white md:border md:border-gray-200 md:rounded-2xl md:shadow-sm p-6 md:p-8 min-h-screen md:min-h-0">
         <h1 className="text-2xl font-bold text-slate-800 mb-2">회원가입</h1>
         <p className="text-sm text-gray-500 mb-6">
-          가입 후 관리자 승인을 받으면 등급별 가격을 확인하고 견적을 요청하실 수 있습니다.
+          가입 즉시 전용 가격을 확인하고 견적을 요청하실 수 있습니다.
         </p>
 
         <StepBar current={step} />
@@ -337,6 +337,7 @@ export default function RegisterPage() {
           <div>
             <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 text-sm text-blue-700 mb-6">
               명함 사진을 업로드하면 AI가 정보를 자동으로 입력해드립니다.
+              <span className="block mt-1 text-blue-500 text-xs">명함이 없으면 건너뛰고 직접 입력하실 수 있습니다.</span>
             </div>
 
             <div
@@ -402,26 +403,28 @@ export default function RegisterPage() {
               className="hidden"
               onChange={handleFileChange}
             />
+
+            <button
+              type="button"
+              onClick={() => setStep(2)}
+              className="mt-4 w-full text-center text-sm text-gray-400 hover:text-gray-600 py-2 transition-colors"
+            >
+              명함 없이 직접 입력하기 →
+            </button>
           </div>
         )}
 
         {/* ── STEP 2: 정보 확인 및 수정 ──────────────────────────────────── */}
         {step === 2 && (
           <div>
-            {aiEstimate && (
+            {aiEstimate && (aiEstimate.size || aiEstimate.industry) && (
               <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 mb-4 text-sm">
-                <p className="font-medium text-blue-800 mb-1">AI 추정 결과</p>
+                <p className="font-medium text-blue-800 mb-1">AI 인식 결과</p>
                 <ul className="text-blue-700 space-y-0.5">
-                  {aiEstimate.type && (
-                    <li>
-                      • 고객 유형: <strong>{TYPE_LABEL[aiEstimate.type as CustomerType]}</strong>
-                      {aiEstimate.reason && <span className="text-blue-600"> — {aiEstimate.reason}</span>}
-                    </li>
-                  )}
                   {aiEstimate.size && <li>• 회사 규모: {aiEstimate.size}</li>}
                   {aiEstimate.industry && <li>• 업종: {aiEstimate.industry}</li>}
                 </ul>
-                <p className="text-xs text-blue-500 mt-2">※ 추정값입니다. 아래에서 직접 수정하실 수 있습니다.</p>
+                <p className="text-xs text-blue-500 mt-2">※ 아래에서 직접 수정하실 수 있습니다.</p>
               </div>
             )}
 
@@ -450,53 +453,7 @@ export default function RegisterPage() {
                 </div>
               ))}
 
-              {/* 고객 유형 선택 */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  고객 유형 <span className="text-red-500">*</span>
-                </label>
-                <div className="space-y-2">
-                  {[
-                    {
-                      value: "ENDUSER" as CustomerType,
-                      label: "일반 고객 (Enduser)",
-                      desc: "관리자 승인 후 이용 가능",
-                    },
-                    {
-                      value: "DEALER" as CustomerType,
-                      label: "딜러 등록",
-                      desc: "관리자 승인 후 딜러 가격 적용",
-                    },
-                    {
-                      value: "OEM" as CustomerType,
-                      label: "OEM 등록",
-                      desc: "관리자 승인 후 OEM 가격 적용",
-                    },
-                  ].map(({ value, label, desc }) => (
-                    <label
-                      key={value}
-                      className={`flex items-start gap-3 border rounded-lg px-4 py-3 cursor-pointer transition-colors ${
-                        form.customerType === value
-                          ? "border-blue-500 bg-blue-50"
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="customerType"
-                        value={value}
-                        checked={form.customerType === value}
-                        onChange={() => updateForm("customerType", value)}
-                        className="mt-0.5 accent-blue-600"
-                      />
-                      <div>
-                        <p className="text-sm font-medium text-gray-800">{label}</p>
-                        <p className="text-xs text-gray-500">{desc}</p>
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              </div>
+              {/* 고객 유형은 서버에서 자동 분류 — UI 노출 없음 */}
             </div>
 
             <div className="flex gap-3 mt-6">
