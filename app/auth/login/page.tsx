@@ -82,49 +82,48 @@ function LoginContent() {
           </button>
         </div>
 
-        {/* 구분선 */}
-        <div className="relative my-6">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-200" />
+        {/* 이메일 매직 링크 카드 */}
+        <div className="mt-4 border border-gray-200 rounded-2xl p-4 bg-white">
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" className="text-gray-900">
+              <rect x="2" y="4" width="16" height="13" rx="2"/>
+              <path d="M2 7l8 5 8-5"/>
+            </svg>
+            <p className="text-sm font-semibold text-gray-900 tracking-tight">이메일로 링크 받기</p>
           </div>
-          <div className="relative flex justify-center text-xs text-gray-400">
-            <span className="bg-paper px-3">이메일로 링크 받기</span>
-          </div>
+          {magicSent ? (
+            <div className="py-3 text-center">
+              <p className="text-sm font-semibold text-green-700">이메일을 확인해 주세요</p>
+              <p className="text-xs text-green-600 mt-1">{magicEmail}으로 링크를 보냈습니다.</p>
+              <p className="text-xs text-green-500 mt-0.5">15분 안에 클릭하면 바로 로그인됩니다.</p>
+              <button
+                onClick={() => { setMagicSent(false); setMagicEmail(""); }}
+                className="mt-3 text-xs text-green-700 underline"
+              >
+                다른 이메일로 보내기
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleMagicLink} className="space-y-2">
+              <input
+                type="email"
+                value={magicEmail}
+                onChange={(e) => setMagicEmail(e.target.value)}
+                required
+                placeholder="이메일 주소 입력"
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 bg-gray-50"
+              />
+              {magicError && <p className="text-red-500 text-xs">{magicError}</p>}
+              <button
+                type="submit"
+                disabled={magicSending}
+                className="w-full bg-gray-900 hover:bg-gray-700 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition-colors text-sm"
+              >
+                {magicSending ? "발송 중..." : "로그인 링크 받기"}
+              </button>
+            </form>
+          )}
         </div>
-
-        {/* 이메일 매직 링크 */}
-        {magicSent ? (
-          <div className="px-4 py-5 bg-green-50 border border-green-200 rounded-xl text-center">
-            <p className="text-sm font-semibold text-green-700">이메일을 확인해 주세요</p>
-            <p className="text-xs text-green-600 mt-1">{magicEmail}으로 링크를 보냈습니다.</p>
-            <p className="text-xs text-green-500 mt-0.5">15분 안에 클릭하면 바로 로그인됩니다.</p>
-            <button
-              onClick={() => { setMagicSent(false); setMagicEmail(""); }}
-              className="mt-3 text-xs text-green-700 underline"
-            >
-              다른 이메일로 보내기
-            </button>
-          </div>
-        ) : (
-          <form onSubmit={handleMagicLink} className="space-y-2">
-            <input
-              type="email"
-              value={magicEmail}
-              onChange={(e) => setMagicEmail(e.target.value)}
-              required
-              placeholder="이메일 주소 입력"
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 bg-white"
-            />
-            {magicError && <p className="text-red-500 text-xs">{magicError}</p>}
-            <button
-              type="submit"
-              disabled={magicSending}
-              className="w-full bg-gray-900 hover:bg-gray-700 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition-colors text-sm"
-            >
-              {magicSending ? "발송 중..." : "로그인 링크 받기"}
-            </button>
-          </form>
-        )}
 
         {/* 관리자 링크 — 매우 작게 */}
         <div className="mt-12 text-center">
