@@ -106,3 +106,19 @@ model AuditLog {
   @@index([target, targetId])
   @@index([userId, createdAt])
 }
+
+// 기존 거래처 화이트리스트 — 엑셀 임포트 or 수동 등록
+model KnownCompany {
+  id          Int      @id @default(autoincrement())
+  companyName String
+  phone       String?
+  email       String?
+  tier        String   // DEALER | OEM | ENDUSER
+  source      String   @default("excel") // excel | manual
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([phone])
+  @@index([email])
+  @@index([companyName])
+}
