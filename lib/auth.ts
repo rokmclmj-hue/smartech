@@ -30,12 +30,12 @@ async function findOrCreateOAuthUser(email: string, name: string) {
 const providers: any[] = [
   Credentials({
     credentials: {
+      magicToken: { label: "매직 링크 토큰", type: "text" },
+      // 관리자 전용 (UI에서 노출 안 함)
       phone: { label: "전화번호", type: "tel" },
       password: { label: "비밀번호", type: "password" },
-      magicToken: { label: "매직 링크 토큰", type: "text" },
     },
     async authorize(credentials) {
-      // ── 매직 링크 토큰 검증 ──────────────────────────────────
       if (credentials?.magicToken) {
         const token = await prisma.magicLinkToken.findUnique({
           where: { token: credentials.magicToken as string },
@@ -80,12 +80,12 @@ const providers: any[] = [
         return null;
       }
 
-      // ── 기존 전화번호+비밀번호 로그인 ────────────────────────
+      // 관리자 전용 전화번호+비밀번호
       if (!credentials?.phone || !credentials?.password) return null;
       const phone = normalizePhone(credentials.phone as string);
       if (!phone) return null;
       const user = await prisma.user.findFirst({ where: { phone } });
-      if (!user) return null;
+      if (!user || user.tier !== "ADMIN") return null;
       const valid = await compare(credentials.password as string, user.passwordHash);
       if (!valid) return null;
       return { id: String(user.id), email: user.email, name: user.name, tier: user.tier, company: user.company };
@@ -108,8 +108,14 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers,
   callbacks: {
-    async jwt({ token, user, account }) {
-      // OAuth 로그인 (카카오/구글) — DB에서 사용자 조회 or 생성
+    async jwt({ token, user, account, trigger, session }) {
+      // 세션 업데이트 (회사명 설정 후 갱신)
+      if (trigger === "update" && session?.company !== undefined) {
+        token.company = session.company;
+        return token;
+      }
+
+      // OAuth 로그인
       if (account && (account.provider === "kakao" || account.provider === "google")) {
         const email = token.email;
         const name = token.name ?? "";
@@ -126,7 +132,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         return token;
       }
 
-      // Credentials 로그인
+      // Credentials 로그인 (매직 링크 / 관리자)
       if (user) {
         token.tier = (user as any).tier;
         token.company = (user as any).company;
@@ -146,5 +152,5 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   pages: {
     signIn: "/auth/login",
   },
-  session: { strategy: "jwt" },
+  session: { strategy: "jwt", maxAge: 30 * 24 * 60 * 60 }, // 30일
 });
