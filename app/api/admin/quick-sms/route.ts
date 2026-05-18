@@ -22,8 +22,8 @@ export async function POST(req: NextRequest) {
 
   const hasSolapi =
     process.env.SOLAPI_API_KEY &&
-    process.env.SOLAPI_SECRET &&
-    process.env.SOLAPI_SENDER;
+    process.env.SOLAPI_API_SECRET &&
+    (process.env.SOLAPI_SENDER ?? process.env.ADMIN_PHONE);
 
   // 기존 미사용 토큰 만료
   await prisma.magicLinkToken.updateMany({
@@ -50,11 +50,12 @@ export async function POST(req: NextRequest) {
     const { SolapiMessageService } = await import("solapi");
     const service = new SolapiMessageService(
       process.env.SOLAPI_API_KEY!,
-      process.env.SOLAPI_SECRET!
+      process.env.SOLAPI_API_SECRET!
     );
+    const sender = (process.env.SOLAPI_SENDER ?? process.env.ADMIN_PHONE)!;
     await service.send({
       to: digits,
-      from: process.env.SOLAPI_SENDER!,
+      from: sender,
       text: `[스마텍] 로그인 링크입니다.\n${magicUrl}\n(60분 유효, 1회 사용)`,
     } as any);
     return NextResponse.json({ ok: true });

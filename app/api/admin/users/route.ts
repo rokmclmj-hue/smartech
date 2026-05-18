@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAdminSession } from "@/lib/admin-auth";
 import { logAudit } from "@/lib/audit";
+import { notifyUserApproved } from "@/lib/notifier";
 
 const VALID_TIERS = [
   "PENDING",
@@ -128,7 +129,7 @@ export async function PATCH(req: NextRequest) {
 
   const existing = await prisma.user.findUnique({
     where: { id: userId },
-    select: { tier: true },
+    select: { tier: true, name: true, email: true, phone: true },
   });
   if (!existing) {
     return NextResponse.json({ error: "사용자를 찾을 수 없습니다" }, { status: 404 });
@@ -145,7 +146,6 @@ export async function PATCH(req: NextRequest) {
     select: { id: true, tier: true },
   });
 
-  // 감사 로그 action 결정
   const auditAction =
     prevTier === "PENDING" ? "user.approve" : "user.tier_change";
 
@@ -156,6 +156,11 @@ export async function PATCH(req: NextRequest) {
     targetId: userId,
     payload: { from: prevTier, to: tier },
   });
+
+  // PENDING → 승인 시 고객에게 알림 발송 (비동기, 실패해도 응답에 영향 없음)
+  if (prevTier === "PENDING" && tier !== "REJECTED" && tier !== "PENDING") {
+    notifyUserApproved(existing.phone, existing.email, existing.name).catch(() => {});
+  }
 
   return NextResponse.json({ ok: true, userId: updated.id, tier: updated.tier });
 }
