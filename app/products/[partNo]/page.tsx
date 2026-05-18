@@ -14,10 +14,17 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   if (!product) return notFound();
 
   const session = await auth();
-  const tier = (session?.user as { tier?: string })?.tier ?? "GUEST";
-  const showPrice = tier !== "GUEST" && tier !== "PENDING";
-  const multiplier = showPrice ? await getMultiplier(tier) : null;
-  const displayPrice = showPrice && multiplier ? Math.round(product.costPrice * multiplier) : null;
+  const tier = (session?.user as { tier?: string })?.tier ?? "PUBLIC";
+
+  // PUBLIC·PENDING 모두 공개 가격(PUBLIC 배율)으로 표시
+  // 등급명은 고객에게 절대 노출하지 않음
+  const pricingTier = (tier === "PUBLIC" || tier === "GUEST" || tier === "PENDING")
+    ? "PUBLIC"
+    : tier;
+  const multiplier = await getMultiplier(pricingTier);
+  const displayPrice = Math.round(product.costPrice * multiplier);
+  const isLoggedIn = !!session;
+  const isPending = tier === "PENDING";
 
   return (
     <>
@@ -40,11 +47,11 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
           {/* 가격 정보 — 데스크탑에서는 여기에 표시, 모바일에서는 하단 바에서 표시 */}
           <div className="hidden md:block border-t pt-6 mb-6">
             <h2 className="text-lg font-semibold mb-4">가격 정보</h2>
-            <PriceBlock displayPrice={displayPrice} tier={tier} />
+            <PriceBlock displayPrice={displayPrice} isLoggedIn={isLoggedIn} isPending={isPending} />
           </div>
 
           {/* 견적 담기 버튼 — 데스크탑 */}
-          {session && tier !== "PENDING" && (
+          {isLoggedIn && !isPending && (
             <div className="hidden md:block">
               <AddToQuoteButton product={{ id: product.id, partNo: product.partNo, description: product.description }} />
             </div>
@@ -69,33 +76,28 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
       {/* 모바일 하단 고정 바 — 가격 + 견적 담기 버튼 */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-paper border-t border-gray-200 shadow-lg px-4 py-3">
         <div className="flex items-center justify-between gap-3">
-          {/* 가격 표시 */}
+          {/* 가격 표시 — 항상 가격 노출, 등급명 없음 */}
           <div className="flex-1 min-w-0">
-            {displayPrice ? (
-              <>
-                <p className="text-[10px] text-gray-400 leading-none mb-0.5">등급별 가격 (VAT 별도)</p>
-                <p className="text-lg font-bold text-blue-700 leading-tight tabular-nums">
-                  {formatKRW(displayPrice)}
-                </p>
-              </>
-            ) : tier === "PENDING" ? (
-              <p className="text-sm text-amber-600 font-medium">승인 대기 중</p>
-            ) : (
-              <Link href="/auth/login" className="text-sm text-blue-600 hover:underline font-medium">
-                로그인 후 가격 확인 →
-              </Link>
+            <p className="text-[10px] text-gray-400 leading-none mb-0.5">
+              {isLoggedIn && !isPending ? "귀사 적용가 (VAT 별도)" : "참고가격 (VAT 별도)"}
+            </p>
+            <p className="text-lg font-bold text-blue-700 leading-tight tabular-nums">
+              {formatKRW(displayPrice)}
+            </p>
+            {isPending && (
+              <p className="text-[10px] text-amber-500 mt-0.5">확인 중 — 확정가는 담당자 문의</p>
             )}
           </div>
 
           {/* 견적 담기 버튼 */}
-          {session && tier !== "PENDING" ? (
+          {isLoggedIn && !isPending ? (
             <div className="flex-shrink-0">
               <AddToQuoteButton
                 product={{ id: product.id, partNo: product.partNo, description: product.description }}
                 compact
               />
             </div>
-          ) : !session ? (
+          ) : !isLoggedIn ? (
             <Link
               href="/auth/login"
               className="flex-shrink-0 bg-blue-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold min-h-[44px] flex items-center"
@@ -109,34 +111,34 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   );
 }
 
-function PriceBlock({ displayPrice, tier }: { displayPrice: number | null; tier: string }) {
-  if (displayPrice) {
-    return (
-      <div className="bg-blue-50 rounded-xl p-6">
-        <p className="text-3xl font-bold text-blue-700">{formatKRW(displayPrice)}</p>
-        <p className="text-xs text-gray-500 mt-1">부가세 별도 | {tierText(tier)} 기준</p>
-      </div>
-    );
-  }
-  if (tier === "PENDING") {
-    return (
-      <div className="bg-amber-50 border border-amber-200 rounded-xl p-6">
-        <p className="text-amber-700 font-medium">관리자 등급 승인 대기 중입니다.</p>
-        <p className="text-sm text-amber-600 mt-1">승인 후 등급별 가격을 확인하실 수 있습니다.</p>
-      </div>
-    );
-  }
+function PriceBlock({
+  displayPrice,
+  isLoggedIn,
+  isPending,
+}: {
+  displayPrice: number;
+  isLoggedIn: boolean;
+  isPending: boolean;
+}) {
   return (
-    <div className="bg-gray-50 border border-gray-200 rounded-xl p-6">
-      <p className="text-gray-700 font-medium">가격 확인은 로그인 후 이용 가능합니다.</p>
-      <Link href="/auth/login" className="mt-3 inline-block bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-500 transition-colors">
-        로그인
-      </Link>
+    <div className="bg-blue-50 rounded-xl p-6">
+      <p className="text-3xl font-bold text-blue-700">{formatKRW(displayPrice)}</p>
+      <p className="text-xs text-gray-500 mt-1">
+        {isLoggedIn && !isPending
+          ? "귀사 적용가 · 부가세 별도"
+          : "참고가격 · 부가세 별도"}
+      </p>
+      {isPending && (
+        <p className="text-xs text-amber-500 mt-2">확인 중입니다 — 확정가는 담당자에게 문의해 주세요.</p>
+      )}
+      {!isLoggedIn && (
+        <Link
+          href="/auth/login"
+          className="mt-3 inline-block bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-500 transition-colors"
+        >
+          로그인하면 더 좋은 조건으로 →
+        </Link>
+      )}
     </div>
   );
-}
-
-function tierText(tier: string) {
-  const map: Record<string, string> = { ENDUSER: "Enduser", OEM: "OEM", DEALER: "딜러", KEY_DEALER: "Key딜러", ADMIN: "원가" };
-  return map[tier] ?? tier;
 }
