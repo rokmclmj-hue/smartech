@@ -40,7 +40,7 @@ export default function AdminQuickPage() {
       const res = await fetch("/api/admin/quick-sms", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: digits, link: quoteLink }),
+        body: JSON.stringify({ phone: digits }),
       });
 
       if (res.ok) {
@@ -76,7 +76,7 @@ export default function AdminQuickPage() {
       <div className="w-full max-w-sm bg-white border hair shadow-sm p-6 space-y-5">
         {/* 안내 */}
         <div className="text-[13px] text-ink/70 leading-[1.6]">
-          고객 전화번호를 입력하면 제품 페이지 링크를 문자로 발송합니다.
+          고객 전화번호를 입력하면 로그인 링크를 문자로 발송합니다. (60분 유효)
         </div>
 
         {/* 전화번호 입력 */}
@@ -136,7 +136,7 @@ export default function AdminQuickPage() {
 
       {/* 하단 안내 */}
       <div className="mt-6 mono text-[10px] dim tracking-[0.1em] text-center">
-        SMS 발송은 솔라피 연동 완료 후 활성화됩니다.
+        SOLAPI_API_KEY 환경변수 설정 시 실제 SMS 발송
       </div>
     </div>
   );

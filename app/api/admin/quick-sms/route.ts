@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/db";
+import { randomUUID } from "crypto";
+
+const EXPIRES_MINUTES = 60;
 
 async function requireAdmin() {
   const session = await auth();
@@ -10,25 +14,52 @@ export async function POST(req: NextRequest) {
   if (!(await requireAdmin()))
     return NextResponse.json({ error: "권한 없음" }, { status: 403 });
 
-  const { phone, link } = (await req.json()) as { phone?: string; link?: string };
+  const { phone } = (await req.json()) as { phone?: string };
+  const digits = (phone ?? "").replace(/\D/g, "");
 
-  if (!phone || phone.replace(/\D/g, "").length < 10)
+  if (digits.length < 10)
     return NextResponse.json({ error: "전화번호가 올바르지 않습니다" }, { status: 400 });
 
-  // Solapi 연동은 Step 9에서 추가 예정
-  // SOLAPI_API_KEY, SOLAPI_SECRET, SOLAPI_SENDER 환경변수 필요
   const hasSolapi =
     process.env.SOLAPI_API_KEY &&
     process.env.SOLAPI_SECRET &&
     process.env.SOLAPI_SENDER;
 
+  // 기존 미사용 토큰 만료
+  await prisma.magicLinkToken.updateMany({
+    where: { phone: digits, usedAt: null, expiresAt: { gt: new Date() } },
+    data: { expiresAt: new Date() },
+  });
+
+  // 새 토큰 생성 (60분 유효)
+  const token = randomUUID();
+  const expiresAt = new Date(Date.now() + EXPIRES_MINUTES * 60 * 1000);
+  await prisma.magicLinkToken.create({
+    data: { phone: digits, token, expiresAt },
+  });
+
+  const baseUrl = req.headers.get("origin") ?? process.env.AUTH_URL ?? "http://localhost:3000";
+  const magicUrl = `${baseUrl}/auth/magic?token=${token}`;
+
   if (!hasSolapi) {
-    return NextResponse.json(
-      { error: "SMS 서비스 설정이 필요합니다 (SOLAPI_API_KEY, SOLAPI_SECRET, SOLAPI_SENDER)" },
-      { status: 503 }
-    );
+    console.log(`[quick-sms] 개발 모드 — 링크: ${magicUrl}`);
+    return NextResponse.json({ ok: true, devLink: magicUrl });
   }
 
-  // Step 9에서 실제 발송 로직 추가
-  return NextResponse.json({ ok: true, phone, link });
+  try {
+    const { SolapiMessageService } = await import("solapi");
+    const service = new SolapiMessageService(
+      process.env.SOLAPI_API_KEY!,
+      process.env.SOLAPI_SECRET!
+    );
+    await service.send({
+      to: digits,
+      from: process.env.SOLAPI_SENDER!,
+      text: `[스마텍] 로그인 링크입니다.\n${magicUrl}\n(60분 유효, 1회 사용)`,
+    } as any);
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("[quick-sms] SMS 발송 실패:", err);
+    return NextResponse.json({ error: "SMS 발송에 실패했습니다." }, { status: 500 });
+  }
 }
