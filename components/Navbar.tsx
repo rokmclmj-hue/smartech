@@ -76,7 +76,7 @@ export default function Navbar() {
           {/* 로고 */}
           <Link href="/" className="flex items-center gap-2.5 md:gap-3 leading-none text-ink">
             <div className="display text-[28px] md:text-[32px] tracking-[-0.045em]">
-              Smartech<span className="dot-settle" style={{ color: "#c00020" }}>.</span>
+              Smartech<span style={{ color: "#c00020" }}>.</span>
             </div>
             <span className="hidden sm:block w-px h-6 bg-ink/60" aria-hidden />
             <div className="hidden sm:block text-[10px] mono tracking-[0.22em] dim uppercase">
@@ -128,11 +128,8 @@ export default function Navbar() {
                 <Link href="/#contact" className="hidden sm:inline-flex chip !border-ink hover:bg-ink hover:text-paper transition">
                   상담 신청 →
                 </Link>
-                <Link href="/auth/login" className="hidden sm:inline-flex chip !border-ink/30 text-[11px] hover:bg-ink hover:text-paper transition">
+                <Link href="/auth/login" className="hidden sm:inline-flex chip !border-edred bg-edred text-paper text-[11px] hover:bg-edred/90 transition">
                   로그인
-                </Link>
-                <Link href="/auth/register" className="hidden sm:inline-flex chip !border-edred bg-edred text-paper text-[11px] hover:bg-edred2 transition">
-                  회원가입
                 </Link>
               </>
             )}
@@ -289,13 +286,6 @@ export default function Navbar() {
                 className="py-3 border-b hair text-ink hover:text-edred transition-colors min-h-[44px] flex items-center"
               >
                 로그인
-              </Link>
-              <Link
-                href="/auth/register"
-                onClick={() => setMenuOpen(false)}
-                className="py-3 border-b hair text-ink hover:text-edred transition-colors min-h-[44px] flex items-center"
-              >
-                회원가입
               </Link>
               <Link
                 href="/#contact"

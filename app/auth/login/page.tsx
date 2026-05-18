@@ -129,9 +129,10 @@ function LoginContent() {
           </form>
         )}
 
-        <p className="text-center text-xs text-gray-400 mt-6">
-          처음 방문이신가요?{" "}
-          <Link href="/auth/register" className="text-gray-600 underline">회원가입</Link>
+        <p className="text-center text-xs text-gray-300 mt-8">
+          <Link href="/auth/admin" className="hover:text-gray-400 transition-colors">
+            관리자
+          </Link>
         </p>
       </div>
     </div>
