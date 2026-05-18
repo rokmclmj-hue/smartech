@@ -1,6 +1,7 @@
 "use client";
 
 import { SMARTECH_COMPANY } from "@/lib/company";
+import MarginSettings from "@/components/MarginSettings";
 
 // ─── 표시용 그룹 정의 ────────────────────────────────────────
 type Row = { label: string; value: string; mono?: boolean; highlight?: boolean };
@@ -142,6 +143,17 @@ export default function AdminSettingsPage() {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* 마진율 설정 */}
+      <div className="border hair bg-paper">
+        <div className="px-5 py-3 border-b hair flex items-center justify-between">
+          <h2 className="text-[14px] font-semibold text-ink tracking-tight">등급별 마진율 설정</h2>
+          <span className="mono text-[10px] text-edred tracking-[0.12em] uppercase">관리자 전용</span>
+        </div>
+        <div className="px-5 py-5">
+          <MarginSettings />
+        </div>
       </div>
 
       {/* 사용처 안내 */}
