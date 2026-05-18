@@ -1,7 +1,7 @@
 "use client";
 import { signIn } from "next-auth/react";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 export default function LoginPage() {
@@ -11,6 +11,9 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const registered = searchParams.get("registered");
+  const isAutoApproved = registered === "approved";
 
   useEffect(() => {
     const saved = localStorage.getItem("smartech_login");
@@ -47,7 +50,17 @@ export default function LoginPage() {
     <div className="min-h-[80vh] flex items-center justify-center px-6">
       <div className="w-full max-w-md bg-white border border-gray-200 rounded-2xl shadow-sm p-8">
         <h1 className="text-2xl font-bold text-slate-800 mb-2">로그인</h1>
-        <p className="text-sm text-gray-500 mb-8">스마텍 회원 전용 서비스입니다</p>
+        {isAutoApproved ? (
+          <div className="mb-6 px-4 py-3 bg-green-50 border border-green-200 text-sm text-green-700 rounded-lg">
+            ✓ 가입이 완료되었습니다. 바로 로그인하여 전용 가격을 확인하세요.
+          </div>
+        ) : registered ? (
+          <div className="mb-6 px-4 py-3 bg-blue-50 border border-blue-200 text-sm text-blue-700 rounded-lg">
+            가입 신청이 완료되었습니다. 담당자 확인 후 이용 가능합니다.
+          </div>
+        ) : (
+          <p className="text-sm text-gray-500 mb-8">스마텍 회원 전용 서비스입니다</p>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

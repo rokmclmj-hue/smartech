@@ -311,7 +311,9 @@ export default function RegisterPage() {
         return;
       }
 
-      router.push("/auth/login?registered=1");
+      const data = (await res.json()) as { autoApproved?: boolean };
+      // 기존 거래처는 즉시 로그인, 신규는 승인 대기 안내
+      router.push(data.autoApproved ? "/auth/login?registered=approved" : "/auth/login?registered=1");
     } catch {
       setError("서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요");
     } finally {

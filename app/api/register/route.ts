@@ -3,12 +3,9 @@ import { hash } from "bcryptjs";
 import { prisma } from "@/lib/db";
 import { notifyNewMember } from "@/lib/solapi";
 import { normalizePhone } from "@/lib/phone";
+import { classifyCompany } from "@/lib/classify-company";
 
 type CustomerType = "ENDUSER" | "DEALER" | "OEM";
-
-// 모든 가입자는 PENDING으로 시작 → 관리자가 대시보드에서 승인하며 등급 부여
-// (희망 customerType은 SMS 알림으로 관리자에게 전달되어 승인 시 참고)
-const INITIAL_TIER = "PENDING";
 
 export async function POST(req: NextRequest) {
   const body = await req.json() as {
@@ -58,32 +55,51 @@ export async function POST(req: NextRequest) {
 
   const passwordHash = await hash(password, 12);
 
+  // 자동 등급 분류: 화이트리스트 → 키워드 → 기본값(ENDUSER)
+  const classification = await classifyCompany({
+    phone: normalizedPhone,
+    email,
+    companyName: company,
+  });
+
+  // 화이트리스트 매칭: 즉시 해당 등급 (승인 불필요)
+  // 키워드 매칭 or 기본값: PENDING (관리자 확인 후 확정)
+  const finalTier = classification.source === "whitelist"
+    ? classification.tier
+    : "PENDING";
+
   const user = await prisma.user.create({
     data: {
       email,
       name,
       company,
       passwordHash,
-      tier: INITIAL_TIER,
+      tier: finalTier,
       phone: normalizedPhone,
       businessNo: businessNo ?? null,
       businessFileUrl: businessFileUrl ?? null,
       cardImageUrl: cardImageUrl ?? null,
+      // AI 추정 결과 기록 (관리자 검토용)
+      aiEstimatedTier: classification.tier,
+      aiTypeReason: classification.source,
     },
   });
 
   // 관리자 SMS 알림 (실패해도 가입은 완료)
   try {
     const tierLabel =
-      customerType === "DEALER"
-        ? "딜러 신청"
-        : customerType === "OEM"
-        ? "OEM 신청"
-        : "일반 고객";
+      finalTier !== "PENDING"
+        ? `${finalTier} (자동 승인)`
+        : classification.source === "keyword"
+        ? `PENDING — ${classification.tier} 추정 (키워드)`
+        : "PENDING — 신규 업체 (검토 필요)";
     await notifyNewMember(user.name, user.company, tierLabel);
   } catch {
     // SMS 실패 무시
   }
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({
+    ok: true,
+    autoApproved: finalTier !== "PENDING",
+  });
 }
