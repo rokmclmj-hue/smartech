@@ -62,13 +62,15 @@ export default function Navbar() {
 
   // 관리자 페이지에서는 자체 헤더가 따로 있어서 공통 Navbar 숨김 (로고 중복 방지)
   // ※ early return은 모든 hooks 호출 후에 배치 (Rules of Hooks 준수)
-  if (pathname?.startsWith("/admin") || pathname?.startsWith("/auth")) {
+  if (pathname?.startsWith("/admin")) {
     return null;
   }
 
+  const isAuthPage = pathname?.startsWith("/auth");
+
   return (
     <>
-      <RedTape />
+      {!isAuthPage && <RedTape />}
 
       {/* STICKY HEADER */}
       <header className="sticky top-0 z-40 border-b hair bg-paper/90 backdrop-blur">

@@ -40,18 +40,13 @@ function LoginContent() {
     <div className="min-h-screen flex flex-col items-center justify-center px-6 bg-paper">
       <div className="w-full max-w-sm">
 
-        {/* 로고 */}
+        {/* 헤드라인 */}
         <div className="text-center mb-10">
-          <Link href="/" className="inline-block">
-            <div className="display text-[36px] tracking-[-0.045em] text-ink leading-none">
-              Smartech<span style={{ color: "#c00020" }}>.</span>
-            </div>
-          </Link>
-          <p className="text-[12px] mono tracking-[0.18em] uppercase text-gray-400 mt-3">
+          <div className="display text-[36px] tracking-[-0.045em] text-ink leading-none">
             Partner Portal
-          </p>
-          <p className="text-[13px] text-gray-500 mt-1">
-            파트너사 전용 가격 및 견적 서비스
+          </div>
+          <p className="text-[13px] text-gray-500 mt-2">
+            검증된 파트너사 전용 채널
           </p>
         </div>
 
