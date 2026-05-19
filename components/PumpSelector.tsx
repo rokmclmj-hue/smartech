@@ -7,7 +7,7 @@ import { recommendPumps, TURBO_PUMPS, ALL_PUMPS, calcTurboPumpDown } from "@/lib
 import type { PumpDownResult, TurboPumpDownResult, PumpModel } from "@/lib/pumpSpeedData";
 
 type SeriesKey = keyof typeof productData;
-type Tab = "repurchase" | "new" | "selection";
+type Tab = "search" | "selection";
 
 type CatalogItem = {
   category: string;
@@ -192,7 +192,7 @@ function fmtP(mbar: number): string {
 }
 
 export default function PumpSelector() {
-  const [tab, setTab] = useState<Tab>("repurchase");
+  const [tab, setTab] = useState<Tab>("search");
   const [selectedCategory, setSelectedCategory] = useState<CatalogItem | null>(null);
   const [search, setSearch] = useState("");
 
@@ -375,15 +375,6 @@ export default function PumpSelector() {
     (item) => ({ ...item, series: "" })
   );
 
-  const repurchaseResults: FlatItem[] =
-    search.trim().length >= 1
-      ? spareItems.filter(
-          (item) =>
-            item.desc.toLowerCase().includes(search.toLowerCase()) ||
-            item.partNo.toLowerCase().includes(search.toLowerCase())
-        )
-      : [];
-
   const newGlobalResults: FlatItem[] =
     !selectedCategory && search.trim().length >= 1
       ? spareItems.filter(
@@ -404,11 +395,8 @@ export default function PumpSelector() {
     <div className="mt-8">
       {/* Tabs */}
       <div className="flex border-b border-[#E3DFD6]">
-        <button className={tabCls("repurchase")} onClick={() => { setTab("repurchase"); setSelectedCategory(null); setSearch(""); }}>
-          재구매
-        </button>
-        <button className={tabCls("new")} onClick={() => { setTab("new"); setSelectedCategory(null); setSearch(""); }}>
-          신규제품구매
+        <button className={tabCls("search")} onClick={() => { setTab("search"); setSelectedCategory(null); setSearch(""); }}>
+          제품 검색
         </button>
         <button className={tabCls("selection")} onClick={() => { setTab("selection"); setSelectedCategory(null); }}>
           펌프선정
@@ -416,59 +404,8 @@ export default function PumpSelector() {
       </div>
 
       <div className="mt-6">
-        {/* 재구매 */}
-        {tab === "repurchase" && (
-          <div>
-            <p className="text-[12px] text-[#6A6660] mb-4">파트번호 또는 모델명을 입력하면 전체 카탈로그에서 조회합니다.</p>
-            <input
-              type="text"
-              placeholder="파트번호 또는 모델명 입력 (예: A37141919, E2M28)"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full border border-[#E3DFD6] px-3 py-2.5 text-[13px] focus:outline-none focus:border-ink bg-transparent"
-            />
-            {search.trim().length >= 1 && (
-              <div className="mt-2 border border-[#E3DFD6] divide-y divide-[#E3DFD6] max-h-[320px] overflow-y-auto">
-                {repurchaseResults.length === 0 ? (
-                  <div className="p-4 text-[12px] text-[#6A6660]">일치하는 항목이 없습니다.</div>
-                ) : (
-                  repurchaseResults.map((item, i) => (
-                    <div key={i} className="flex items-center justify-between px-3 py-2.5 hover:bg-[#f0ede8] transition-colors">
-                      <div>
-                        <div className="text-[12px] font-medium leading-snug">{item.desc}</div>
-                        <div className="text-[10px] text-[#6A6660] mono mt-0.5">{item.partNo} · {item.series}</div>
-                      </div>
-                      <div className="shrink-0 ml-4 flex items-center gap-2">
-                        <div className="text-[12px] font-semibold text-[#c00020]">
-                          {item.price.toLocaleString()}원
-                        </div>
-                        <button
-                          onClick={() => handleAddToCart(item.partNo, item.desc)}
-                          disabled={cartLoading === item.partNo}
-                          className={`px-2.5 py-1 text-[11px] border transition-colors whitespace-nowrap ${cartAdded.has(item.partNo) ? "bg-ink text-paper border-ink" : "border-[#E3DFD6] hover:border-ink hover:bg-ink hover:text-paper"} disabled:opacity-50`}
-                        >
-                          {cartAdded.has(item.partNo) ? "✓" : cartLoading === item.partNo ? "…" : "담기"}
-                        </button>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            )}
-            {repurchaseResults.length > 0 && (
-              <div className="mt-1.5 text-[10px] text-[#6A6660]">총 {repurchaseResults.length}개 · 가격은 부가세 미포함 기준입니다.</div>
-            )}
-            <Link
-              href="/quote"
-              className="mt-4 w-full bg-ink text-paper py-3 text-[13px] hover:bg-[#c00020] transition-colors block text-center"
-            >
-              견적 카트 보기 →
-            </Link>
-          </div>
-        )}
-
-        {/* 신규제품구매 */}
-        {tab === "new" && (
+        {/* 제품 검색 */}
+        {tab === "search" && (
           <div>
             {!selectedCategory ? (
               <>

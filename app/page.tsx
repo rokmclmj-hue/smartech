@@ -236,101 +236,15 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══════════════ B2B / B2C ═══════════════ */}
+      {/* ═══════════════ 제품 검색 / 펌프선정 ═══════════════ */}
       <section id="b2b" className="border-b hair">
-        <div className="grid grid-cols-1 lg:grid-cols-2 divide-x hair">
-          {/* B2B */}
-          <div className="bg-ink text-paper p-10 md:p-16 relative overflow-hidden">
-            {/* ghost index — adds right-side visual weight */}
-            <div aria-hidden className="hidden lg:block absolute -top-6 -right-6 display text-[220px] leading-none tracking-[-0.05em] opacity-[0.04] select-none pointer-events-none">
-              04a
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 relative">
-              {/* Left — headline + body + CTAs */}
-              <div className="lg:col-span-7">
-                <div className="mono text-[11px] opacity-70">— 04a · B2B</div>
-                <h3 className="display text-[56px] md:text-[72px] leading-[0.95] mt-4">
-                  <span className="italic text-edred">전용견적</span>
-                </h3>
-                <div className="mt-5 mono text-[11px] tracking-[0.18em] opacity-60 uppercase">
-                  Expert Consulting &amp; Fast Delivery
-                </div>
-                <p className="mt-6 text-[14.5px] leading-[1.75] opacity-90">
-                  고객사 공정의 중단 없는 운영을 위해 소모품 및 주요 메이저 품목들은 국내 상시 재고로 운용하고 있습니다.
-                  스마텍은 가장 필요한 순간, 가장 빠른 대응을 약속드립니다.
-                </p>
-                <div className="mt-10 flex flex-wrap gap-3">
-                  <Link href="/auth/register" className="bg-edred text-paper px-6 py-4 text-sm hover:bg-edred2 transition-colors">
-                    B2B 회원가입 → 가격 확인
-                  </Link>
-                  <Link href="#contact" className="border border-paper/30 px-6 py-4 text-sm hover:bg-paper hover:text-ink transition-colors">
-                    견적 직접 문의 →
-                  </Link>
-                </div>
-              </div>
-
-              {/* Right — feature panel */}
-              <div className="lg:col-span-5 lg:border-l lg:border-paper/15 lg:pl-8 flex flex-col justify-center">
-                <div className="mono text-[10px] opacity-60 tracking-[0.18em] uppercase mb-5">What You Get</div>
-                <ul className="space-y-5 text-[13.5px]">
-                  <li className="flex gap-3 items-start">
-                    <span className="text-edred shrink-0 mt-0.5">→</span>
-                    <div>
-                      <div>정품 공식 유통 경로</div>
-                      <div className="text-[11px] opacity-55 mt-1"><span className="text-edred font-semibold">Edwards</span> 코리아 인증 대리점</div>
-                    </div>
-                  </li>
-                  <li className="flex gap-3 items-start">
-                    <span className="text-edred shrink-0 mt-0.5">→</span>
-                    <div>
-                      <div>사양서 기반 모델 제안</div>
-                      <div className="text-[11px] opacity-55 mt-1">공정 요건에 맞춘 최적 구성</div>
-                    </div>
-                  </li>
-                  <li className="flex gap-3 items-start">
-                    <span className="text-edred shrink-0 mt-0.5">→</span>
-                    <div>
-                      <div>국내 상시 재고 운용</div>
-                      <div className="text-[11px] opacity-55 mt-1">소모품 · 주요 품목 즉시 출고 가능</div>
-                    </div>
-                  </li>
-                  <li className="flex gap-3 items-start">
-                    <span className="text-edred shrink-0 mt-0.5">→</span>
-                    <div>
-                      <div>신속 납기 대응</div>
-                      <div className="text-[11px] opacity-55 mt-1">긴급 발주 시 당일·익일 출고 지원</div>
-                    </div>
-                  </li>
-                  <li className="flex gap-3 items-start">
-                    <span className="text-edred shrink-0 mt-0.5">→</span>
-                    <div>
-                      <div>전담 기술 지원</div>
-                      <div className="text-[11px] opacity-55 mt-1">설치·시운전·유지보수 전 과정 동행</div>
-                    </div>
-                  </li>
-                  <li className="flex gap-3 items-start">
-                    <span className="text-edred shrink-0 mt-0.5">→</span>
-                    <div>
-                      <div>A/S · 오버홀 서비스</div>
-                      <div className="text-[11px] opacity-55 mt-1">공장 가동 중단 최소화를 위한 신속 처리</div>
-                    </div>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          {/* B2C */}
-          <div className="p-10 md:p-16 relative overflow-hidden">
-            <div className="mono text-[11px] dim">— 04b · 제품 검색 · 펌프선정</div>
-            <h3 className="display text-[38px] md:text-[52px] leading-[1.05] mt-4">
-              파트번호 재구매,<br />
-              <span className="italic">신규 구매,</span><br />
-              <span className="text-edred">펌프선정 — 바로 시작하세요.</span>
-            </h3>
-            <PumpSelector />
-          </div>
+        <div className="max-w-[1400px] mx-auto px-6 py-16 md:py-20">
+          <div className="mono text-[11px] dim mb-4">— 04 · 제품 검색 · 펌프선정</div>
+          <h3 className="display text-[38px] md:text-[52px] leading-[1.05]">
+            필요한 제품,<br />
+            <span className="text-edred">지금 바로 찾으세요.</span>
+          </h3>
+          <PumpSelector />
         </div>
       </section>
 
