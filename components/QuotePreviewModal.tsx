@@ -163,37 +163,9 @@ export default function QuotePreviewModal({ open, onClose }: Props) {
               </div>
             </div>
 
-            {/* SECTION 02 · TOTAL */}
-            <div className="section-label">— SECTION 02 · TOTAL</div>
-            <div className="hero">
-              <div className="hero-total">
-                <div className="hero-eyebrow">
-                  <span>TOTAL · INCL. VAT</span>
-                  <span className="ref">PREVIEW</span>
-                </div>
-                <div className="hero-bignum"><span className="won">₩</span>{fmt(grandTotal)}</div>
-                <div className="hero-breakdown">
-                  <div className="b"><div className="k">SUPPLY (공급가액)</div><div className="v">₩ {fmt(subtotal)}</div></div>
-                  <div className="b"><div className="k">VAT (10%)</div><div className="v">₩ {fmt(vat)}</div></div>
-                  <div className="b total"><div className="k">GRAND TOTAL</div><div className="v">₩ {fmt(grandTotal)}</div></div>
-                </div>
-              </div>
-              <div className="hero-side">
-                <div className="eyebrow">PREVIEW · {isLoggedIn ? tierLabel : "PUBLIC"}</div>
-                <p style={{ fontSize: 13, color: "var(--q-text-dim)", lineHeight: 1.6 }}>
-                  {isLoggedIn
-                    ? `${tierLabel} 등급 가격이 적용된 미리보기입니다.\n정식 견적서는 로그인 후 제출하세요.`
-                    : "현재 공개가(PUBLIC) 기준입니다.\n로그인 시 등급별 확정가가 적용됩니다."}
-                </p>
-                <div className="meta-row" style={{ display:"flex", justifyContent:"space-between", paddingTop:8, borderTop:"1px dashed var(--q-line-soft)", fontFamily:"var(--q-mono)", fontSize:11, color:"var(--q-muted)" }}>
-                  <span>DATE</span><span>{ymd(today)}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* SECTION 03 · ITEMS */}
+            {/* SECTION 02 · ITEMS */}
             <div className="section-label">
-              — SECTION 03 · ITEMS · {String(items.length).padStart(2,"0")} LINES
+              — SECTION 02 · ITEMS · {String(items.length).padStart(2,"0")} LINES
             </div>
 
             {loading ? (
@@ -261,6 +233,34 @@ export default function QuotePreviewModal({ open, onClose }: Props) {
                 })}
               </div>
             )}
+
+            {/* SECTION 03 · TOTAL */}
+            <div className="section-label">— SECTION 03 · TOTAL</div>
+            <div className="hero">
+              <div className="hero-total">
+                <div className="hero-eyebrow">
+                  <span>TOTAL · INCL. VAT</span>
+                  <span className="ref">PREVIEW</span>
+                </div>
+                <div className="hero-bignum"><span className="won">₩</span>{fmt(grandTotal)}</div>
+                <div className="hero-breakdown">
+                  <div className="b"><div className="k">SUPPLY (공급가액)</div><div className="v">₩ {fmt(subtotal)}</div></div>
+                  <div className="b"><div className="k">VAT (10%)</div><div className="v">₩ {fmt(vat)}</div></div>
+                  <div className="b total"><div className="k">GRAND TOTAL</div><div className="v">₩ {fmt(grandTotal)}</div></div>
+                </div>
+              </div>
+              <div className="hero-side">
+                <div className="eyebrow">PREVIEW · {isLoggedIn ? tierLabel : "PUBLIC"}</div>
+                <p style={{ fontSize: 13, color: "var(--q-text-dim)", lineHeight: 1.6 }}>
+                  {isLoggedIn
+                    ? `${tierLabel} 등급 가격이 적용된 미리보기입니다.\n정식 견적서는 로그인 후 제출하세요.`
+                    : "현재 공개가(PUBLIC) 기준입니다.\n로그인 시 등급별 확정가가 적용됩니다."}
+                </p>
+                <div className="meta-row" style={{ display:"flex", justifyContent:"space-between", paddingTop:8, borderTop:"1px dashed var(--q-line-soft)", fontFamily:"var(--q-mono)", fontSize:11, color:"var(--q-muted)" }}>
+                  <span>DATE</span><span>{ymd(today)}</span>
+                </div>
+              </div>
+            </div>
 
             {/* SECTION 04 · SUMMARY */}
             <div className="section-label">— SECTION 04 · SUMMARY</div>

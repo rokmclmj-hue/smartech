@@ -48,3 +48,42 @@ export function getProductIconName(partNo: string, description: string): string 
   }
   return FALLBACK_ICON;
 }
+
+// ─── 실제 제품 사진 매핑 ────────────────────────────────────────
+// 아이콘 파일 위치: /public/images/products/{name}
+const PHOTO_BASE = "/images/products";
+
+const PHOTO_RULES: Array<[RegExp, string]> = [
+  [/\bT[-\s]?Station\b/i,          "t-station.jpeg"],
+  [/\bnXRi?\b/i,                    "nxri.jpeg"],
+  [/\bSTP[-\s]?i[XA]\b/i,          "stp-new.png"],   // STP iXA 계열
+  [/\biXH\b/i,                      "ixh-ixl.jpeg"],
+  [/\biXL\b/i,                      "ixl-new.png"],
+  [/\bnEXT\b/i,                     "next.png"],
+  [/\bnES\b/i,                      "nes.jpeg"],
+  [/\bGXS\b/i,                      "gxs.jpeg"],
+  [/\bEXS\b/i,                      "exs.jpeg"],
+  [/\bELD\s*500\b/i,                "eld500.jpeg"],
+  [/\bAIM\b/i,                      "aim-new.png"],
+  [/\bAPG\b/i,                      "apg-new.png"],
+  [/\bTIC\b/i,                      "tic-new.png"],
+  [/\bSTP\b/i,                      "stp-new.png"],
+  [/\bE2M\s*(40|80|175|275)\b/i,   "e2m-large-new.png"],
+  [/\bE2M\b/i,                      "e2m-small-new.png"],
+  [/\bE2S\b/i,                      "e2s.png"],
+  [/\bnXDS\b/i,                     "xds.jpeg"],
+  [/\bXDS\b/i,                      "xds.jpeg"],
+  [/\bEH\d*\b/i,                    "eh.jpeg"],
+  [/\bRV\d*\b/i,                    "rv.jpeg"],
+];
+
+const FALLBACK_PHOTO = "rv.jpeg";
+
+// partNo + description → 실제 제품 사진 URL 반환
+export function getProductPhotoUrl(partNo: string, description: string): string {
+  const haystack = `${partNo} ${description}`;
+  for (const [pattern, file] of PHOTO_RULES) {
+    if (pattern.test(haystack)) return `${PHOTO_BASE}/${file}`;
+  }
+  return `${PHOTO_BASE}/${FALLBACK_PHOTO}`;
+}
