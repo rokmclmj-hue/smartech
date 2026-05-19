@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import QuoteBar from "@/components/QuoteBar";
 import { SessionProvider } from "./providers";
 
 export const metadata: Metadata = {
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SessionProvider>
           <Navbar />
           <main>{children}</main>
+          <QuoteBar />
         </SessionProvider>
       </body>
     </html>
