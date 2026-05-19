@@ -1,21 +1,19 @@
 "use client";
 
-import Link from "next/link";
-
 export default function HeroCtaCards() {
   return (
     <div className="mt-9 grid grid-cols-3 gap-2.5 max-w-xl hero-rise" style={{ ["--rd" as never]: ".75s" }}>
-      {/* 견적 문의 — 제품 카탈로그로 이동 */}
-      <Link
-        href="/products"
-        className="group border border-ink p-4 flex flex-col justify-between min-h-[108px] hover:bg-ink hover:text-paper transition-all"
+      {/* 견적 문의 — 제품 검색 섹션으로 스크롤 */}
+      <div
+        onClick={() => document.getElementById("b2b")?.scrollIntoView({ behavior: "smooth" })}
+        className="group border border-ink p-4 flex flex-col justify-between min-h-[108px] hover:bg-ink hover:text-paper transition-all cursor-pointer"
       >
         <div className="text-[9px] mono tracking-widest opacity-50">DIRECT QUOTE</div>
         <div>
           <div className="mt-2 text-[20px] display leading-tight tracking-tight">견적 문의</div>
-          <div className="mt-1.5 text-[11px] opacity-60 group-hover:opacity-80">제품 카탈로그 →</div>
+          <div className="mt-1.5 text-[11px] opacity-60 group-hover:opacity-80">제품 검색 →</div>
         </div>
-      </Link>
+      </div>
 
       {/* AI 상담 */}
       <div
