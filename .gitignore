@@ -1,5 +1,8 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+# CAD 파일 (대용량 바이너리 — git 추적 제외)
+/smartech-cad/
+
 # dependencies
 /node_modules
 /.pnp
