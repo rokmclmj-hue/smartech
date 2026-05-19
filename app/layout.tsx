@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./quote/[id]/quote-styles.css";
 import Navbar from "@/components/Navbar";
 import QuoteBar from "@/components/QuoteBar";
 import { SessionProvider } from "./providers";
