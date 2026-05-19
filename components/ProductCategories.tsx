@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import ProductPanel, { type PanelItem } from "./ProductPanel";
 
 const ITEMS = [
   { category: "오일펌프(소형 RV)",        code: "RV 시리즈",           title: "오일 로터리 베인 펌프 (소형)",       image: "/images/products/rv.jpeg" },
@@ -35,16 +36,20 @@ const INITIAL = 16;
 
 export default function ProductCategories() {
   const [expanded, setExpanded] = useState(false);
+  const [panelItem, setPanelItem] = useState<PanelItem | null>(null);
   const visible = expanded ? ITEMS : ITEMS.slice(0, INITIAL);
 
   return (
-    <div>
+    <>
+      <ProductPanel item={panelItem} onClose={() => setPanelItem(null)} />
+
+      <div>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
         {visible.map((item, i) => (
-          <Link
+          <button
             key={item.category}
-            href={`/products?category=${encodeURIComponent(item.category)}`}
-            className="group border hair bg-white p-5 hover:bg-ink hover:text-paper transition-colors overflow-hidden"
+            onClick={() => setPanelItem({ category: item.category, code: item.code, title: item.title, image: item.image })}
+            className="group border hair bg-white p-5 hover:bg-ink hover:text-paper transition-colors overflow-hidden text-left w-full"
           >
             <div className="flex justify-between text-[10.5px] mono opacity-60">
               <span>{String(i + 1).padStart(2, "0")} / {ITEMS.length}</span>
@@ -64,7 +69,7 @@ export default function ProductCategories() {
             <div className="mono text-[11px] opacity-60 mt-1">{(item as any).label ?? item.category}</div>
 
             <div className="mt-3 text-[11px] opacity-70 group-hover:opacity-100">제품 보기 →</div>
-          </Link>
+          </button>
         ))}
       </div>
 
@@ -95,6 +100,7 @@ export default function ProductCategories() {
           </Link>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }
