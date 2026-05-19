@@ -3,8 +3,9 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { SMARTECH_COMPANY } from "@/lib/company";
+import { getProductIconUrl } from "@/lib/product-icons";
 
-const SMARTECH = SMARTECH_COMPANY;
+const SM = SMARTECH_COMPANY;
 
 type CartItem = {
   productId: number;
@@ -12,20 +13,18 @@ type CartItem = {
   description: string;
   quantity: number;
 };
-
 type PricedItem = CartItem & { unitPrice: number | null };
+type Props = { open: boolean; onClose: () => void };
 
-type Props = {
-  open: boolean;
-  onClose: () => void;
-};
+const NAV = "#1F4E79";
+const NAV_LIGHT = "#EBF2FA";
+const BORDER = "#BFCFDF";
+const MUTED = "#6B7F93";
+const MONO = "'JetBrains Mono', ui-monospace, monospace";
 
-function fmt(n: number) {
-  return n.toLocaleString("ko-KR");
-}
-
-function yyyymmdd(d: Date) {
-  return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
+function fmt(n: number) { return n.toLocaleString("ko-KR"); }
+function ymd(d: Date) {
+  return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,"0")}.${String(d.getDate()).padStart(2,"0")}`;
 }
 
 export default function QuotePreviewModal({ open, onClose }: Props) {
@@ -35,46 +34,30 @@ export default function QuotePreviewModal({ open, onClose }: Props) {
   const [showLoginGate, setShowLoginGate] = useState(false);
 
   async function fetchPrices() {
-    const cartRaw: CartItem[] = JSON.parse(localStorage.getItem("quoteCart") ?? "[]");
-    if (!Array.isArray(cartRaw) || cartRaw.length === 0) {
-      setItems([]);
-      return;
-    }
-    const ids = cartRaw.map((i) => i.productId).join(",");
+    const cart: CartItem[] = JSON.parse(localStorage.getItem("quoteCart") ?? "[]");
+    if (!Array.isArray(cart) || cart.length === 0) { setItems([]); return; }
+    const ids = cart.map((i) => i.productId).join(",");
     setLoading(true);
     try {
       const data = await fetch(`/api/products?ids=${ids}&limit=200`).then((r) => r.json());
       const priceMap = new Map<number, number | null>(
         (data.products ?? []).map((p: any) => [p.id, p.displayPrice])
       );
-      setItems(
-        cartRaw.map((item) => ({
-          ...item,
-          unitPrice: priceMap.get(item.productId) ?? null,
-        }))
-      );
+      setItems(cart.map((item) => ({ ...item, unitPrice: priceMap.get(item.productId) ?? null })));
     } finally {
       setLoading(false);
     }
   }
 
-  useEffect(() => {
-    if (!open) return;
-    setShowLoginGate(false);
-    fetchPrices();
-  }, [open]);
-
+  useEffect(() => { if (open) { setShowLoginGate(false); fetchPrices(); } }, [open]);
   useEffect(() => {
     window.addEventListener("quoteCartUpdated", fetchPrices);
     return () => window.removeEventListener("quoteCartUpdated", fetchPrices);
   }, []);
-
   useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
+    const fn = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", fn);
+    return () => window.removeEventListener("keydown", fn);
   }, [onClose]);
 
   if (!open) return null;
@@ -84,174 +67,248 @@ export default function QuotePreviewModal({ open, onClose }: Props) {
   const grandTotal = subtotal + vat;
   const today = new Date();
   const isLoggedIn = !!session;
-  const tierLabel = (session?.user as any)?.tier ?? null;
+  const tierLabel = (session?.user as any)?.tier ?? "PUBLIC";
+  const userName = (session?.user as any)?.name ?? "";
+  const userCompany = (session?.user as any)?.company ?? "";
 
   return (
     <>
-      {/* 인쇄 시 미리보기만 표시 */}
       <style>{`
         @media print {
           body * { visibility: hidden; }
           .qpm-printable, .qpm-printable * { visibility: visible; }
           .qpm-printable {
-            position: fixed !important;
-            top: 0 !important; left: 0 !important;
+            position: fixed !important; top: 0 !important; left: 0 !important;
             width: 100% !important; height: auto !important;
-            overflow: visible !important;
-            background: white !important;
+            overflow: visible !important; background: #fff !important;
             z-index: 9999 !important;
           }
+          .qpm-screen-only { display: none !important; }
         }
       `}</style>
 
-      {/* 왼쪽 화이트 미리보기 — QuotePanel(480px) 제외한 영역 */}
+      {/* 왼쪽 미리보기 패널 */}
       <div className="fixed top-0 bottom-0 left-0 right-[480px] z-50 bg-white overflow-y-auto qpm-printable">
 
-        {/* 고정 헤더 */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between z-10 print:hidden">
-          <div>
-            <div style={{ fontFamily: "monospace", fontSize: 10, letterSpacing: "0.16em", color: "#9ca3af", textTransform: "uppercase" }}>
-              QUOTATION PREVIEW · 견적서 미리보기
-            </div>
-            <div style={{ fontSize: 18, fontWeight: 600, marginTop: 2 }}>Smartech · 견적서</div>
+        {/* ── 상단 고정 바 (화면 전용) ── */}
+        <div className="qpm-screen-only" style={{
+          position: "sticky", top: 0, background: "#fff", borderBottom: `1px solid ${BORDER}`,
+          padding: "12px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", zIndex: 10,
+        }}>
+          <div style={{ fontFamily: MONO, fontSize: 10, color: MUTED, letterSpacing: "0.14em", textTransform: "uppercase" }}>
+            QUOTATION PREVIEW · 견적서 미리보기
           </div>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center border border-gray-300 hover:bg-gray-100 transition-colors text-[18px] leading-none text-gray-500"
-            aria-label="닫기"
-          >
-            ×
-          </button>
+          <button onClick={onClose} style={{
+            width: 32, height: 32, border: `1px solid ${BORDER}`, background: "none",
+            cursor: "pointer", fontSize: 18, color: MUTED, display: "flex", alignItems: "center", justifyContent: "center",
+          }}>×</button>
         </div>
 
-        {/* 본문 */}
-        <div className="px-8 py-6 max-w-3xl mx-auto">
+        {/* ── 본문 (A4 스타일) ── */}
+        <div style={{ maxWidth: 760, margin: "0 auto", padding: "32px 40px 60px" }}>
 
-          {/* 발행 정보 */}
-          <div className="flex justify-between items-start mb-6">
+          {/* 헤더 */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", borderBottom: `2pt solid ${NAV}`, paddingBottom: 16, marginBottom: 24 }}>
             <div>
-              <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.01em" }}>SMARTECH</div>
-              <div style={{ fontSize: 11, color: "#6b7280", marginTop: 2 }}>
-                Edwards Vacuum Korea · 공식 대리점
+              <div style={{ fontSize: 30, fontWeight: 700, color: NAV, letterSpacing: "-0.02em", lineHeight: 1 }}>SMARTECH</div>
+              <div style={{ fontFamily: MONO, fontSize: 10, color: MUTED, marginTop: 8, letterSpacing: "0.08em", textTransform: "uppercase", lineHeight: 1.7 }}>
+                Edwards Vacuum Korea · Authorized Distributor · Since 2011
               </div>
             </div>
-            <div style={{ textAlign: "right", fontSize: 11, color: "#6b7280", fontFamily: "monospace" }}>
-              <div>발행일 · {yyyymmdd(today)}</div>
+            <div style={{ textAlign: "right", fontFamily: MONO, fontSize: 10, color: MUTED }}>
+              <div style={{ color: NAV, fontWeight: 700, fontSize: 12, letterSpacing: "0.12em", marginBottom: 6 }}>QUOTATION PREVIEW</div>
+              <div>발행일 · {ymd(today)}</div>
               <div style={{ marginTop: 2 }}>
-                {isLoggedIn
-                  ? `${(session?.user as any)?.name ?? ""} · ${tierLabel ?? "ENDUSER"} 가`
-                  : "비로그인 · 공개가 기준"}
+                {isLoggedIn ? `${tierLabel} 등급 확정가 적용` : "공개가 기준 · 로그인 시 확정가"}
               </div>
             </div>
           </div>
 
-          <div style={{ height: 1, background: "#111", marginBottom: 24 }} />
+          {/* 수신처 / 발신처 */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", border: `0.5pt solid ${BORDER}`, marginBottom: 24, fontSize: 11 }}>
+            <div style={{ padding: "16px 20px" }}>
+              <div style={{ fontFamily: MONO, fontSize: 9, color: NAV, letterSpacing: "0.16em", textTransform: "uppercase", marginBottom: 10 }}>TO · 수신처</div>
+              {isLoggedIn ? (
+                <>
+                  <Row label="Company" value={userCompany || "—"} />
+                  <Row label="Attn" value={userName || "—"} />
+                  <Row label="Grade" value={tierLabel} mono />
+                </>
+              ) : (
+                <div style={{ color: MUTED, fontFamily: MONO, fontSize: 10, paddingTop: 4 }}>로그인 후 확인 가능</div>
+              )}
+            </div>
+            <div style={{ padding: "16px 20px", borderLeft: `0.5pt solid ${BORDER}` }}>
+              <div style={{ fontFamily: MONO, fontSize: 9, color: NAV, letterSpacing: "0.16em", textTransform: "uppercase", marginBottom: 10 }}>FROM · 발신처</div>
+              <Row label="Company" value={`${SM.name} · ${SM.english}`} />
+              <Row label="CEO" value={SM.ceo} />
+              <Row label="Tel" value={SM.officeTel} mono />
+              <Row label="Email" value={SM.email} mono />
+            </div>
+          </div>
 
-          {/* 품목 테이블 */}
+          {/* 섹션 라벨 */}
+          <SectionLabel text={`ITEMS · ${String(items.length).padStart(2,"0")} LINES`} />
+
+          {/* 품목 카드 */}
           {loading ? (
-            <div className="space-y-2 mb-6">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="h-12 bg-gray-100 animate-pulse" />
-              ))}
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 24 }}>
+              {[1,2,3].map((i) => <div key={i} style={{ height: 100, background: "#f1f5f9", borderRadius: 2 }} />)}
             </div>
           ) : items.length === 0 ? (
-            <div className="py-12 text-center text-gray-400 text-sm">담긴 제품이 없습니다.</div>
+            <div style={{ padding: "40px 0", textAlign: "center", color: MUTED, fontSize: 13 }}>담긴 제품이 없습니다.</div>
           ) : (
-            <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: 24, fontSize: 12 }}>
-              <thead>
-                <tr style={{ borderBottom: "2px solid #111" }}>
-                  <th style={{ textAlign: "left", padding: "6px 8px 6px 0", fontFamily: "monospace", fontSize: 10, letterSpacing: "0.1em", color: "#6b7280", fontWeight: 600, width: 28 }}>No</th>
-                  <th style={{ textAlign: "left", padding: "6px 8px", fontFamily: "monospace", fontSize: 10, letterSpacing: "0.1em", color: "#6b7280", fontWeight: 600, width: 110 }}>Part No</th>
-                  <th style={{ textAlign: "left", padding: "6px 8px", fontFamily: "monospace", fontSize: 10, letterSpacing: "0.1em", color: "#6b7280", fontWeight: 600 }}>Description</th>
-                  <th style={{ textAlign: "right", padding: "6px 8px", fontFamily: "monospace", fontSize: 10, letterSpacing: "0.1em", color: "#6b7280", fontWeight: 600, width: 50 }}>Qty</th>
-                  <th style={{ textAlign: "right", padding: "6px 8px", fontFamily: "monospace", fontSize: 10, letterSpacing: "0.1em", color: "#6b7280", fontWeight: 600, width: 110 }}>Unit Price</th>
-                  <th style={{ textAlign: "right", padding: "6px 0 6px 8px", fontFamily: "monospace", fontSize: 10, letterSpacing: "0.1em", color: "#6b7280", fontWeight: 600, width: 120 }}>Subtotal</th>
-                </tr>
-              </thead>
-              <tbody>
-                {items.map((item, idx) => (
-                  <tr key={item.productId} style={{ borderBottom: "1px solid #e5e7eb" }}>
-                    <td style={{ padding: "10px 8px 10px 0", fontFamily: "monospace", color: "#9ca3af", fontSize: 11 }}>
-                      {String(idx + 1).padStart(2, "0")}
-                    </td>
-                    <td style={{ padding: "10px 8px", fontFamily: "monospace", fontSize: 11, color: "#374151" }}>
-                      {item.partNo}
-                    </td>
-                    <td style={{ padding: "10px 8px", fontSize: 12, lineHeight: 1.4 }}>
-                      {item.description}
-                    </td>
-                    <td style={{ padding: "10px 8px", textAlign: "right", fontFamily: "monospace" }}>
-                      {item.quantity} EA
-                    </td>
-                    <td style={{ padding: "10px 8px", textAlign: "right", fontFamily: "monospace" }}>
-                      {item.unitPrice != null ? `₩ ${fmt(item.unitPrice)}` : "—"}
-                    </td>
-                    <td style={{ padding: "10px 0 10px 8px", textAlign: "right", fontFamily: "monospace", fontWeight: 600 }}>
-                      {item.unitPrice != null ? `₩ ${fmt(item.unitPrice * item.quantity)}` : "—"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 28 }}>
+              {items.map((item, idx) => {
+                const iconUrl = getProductIconUrl(item.partNo, item.description);
+                const lineTotal = (item.unitPrice ?? 0) * item.quantity;
+                return (
+                  <div key={item.productId} style={{ display: "grid", gridTemplateColumns: "96px 1fr", border: `0.5pt solid ${BORDER}`, overflow: "hidden" }}>
+                    {/* 이미지 */}
+                    <div style={{ background: NAV_LIGHT, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 12, gap: 6 }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={iconUrl} alt="" style={{ width: 60, height: 60, objectFit: "contain" }} />
+                      <div style={{ fontFamily: MONO, fontSize: 8, color: NAV, letterSpacing: "0.1em", textAlign: "center" }}>
+                        {String(idx+1).padStart(2,"0")}/{String(items.length).padStart(2,"0")}
+                      </div>
+                    </div>
+                    {/* 데이터 */}
+                    <div style={{ padding: "14px 18px" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                        <div>
+                          <div style={{ fontFamily: MONO, fontSize: 10, color: MUTED, letterSpacing: "0.1em" }}>{item.partNo}</div>
+                          <div style={{ fontSize: 14, fontWeight: 600, marginTop: 3, letterSpacing: "-0.01em" }}>{item.description}</div>
+                        </div>
+                        <div style={{ fontFamily: MONO, fontSize: 8, border: `0.5pt solid ${NAV}`, color: NAV, padding: "3px 7px", letterSpacing: "0.14em", whiteSpace: "nowrap" }}>
+                          ● Edwards Genuine
+                        </div>
+                      </div>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 1, marginTop: 12, background: BORDER }}>
+                        <PriceCell label="Qty" value={`${item.quantity} EA`} />
+                        <PriceCell label="Unit Price" value={item.unitPrice ? `₩ ${fmt(item.unitPrice)}` : "—"} />
+                        <PriceCell label="Subtotal" value={item.unitPrice ? `₩ ${fmt(lineTotal)}` : "—"} accent />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           )}
 
+          {/* 섹션 라벨 */}
+          <SectionLabel text="SUMMARY · 합계" />
+
           {/* 합계 */}
-          <div style={{ marginLeft: "auto", maxWidth: 280, marginBottom: 32 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "6px 0", color: "#6b7280" }}>
-              <span>소계 (Supply)</span>
-              <span style={{ fontFamily: "monospace" }}>₩ {fmt(subtotal)}</span>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 260px", border: `0.5pt solid ${BORDER}`, marginBottom: 28 }}>
+            <div style={{ padding: "16px 20px", borderRight: `0.5pt solid ${BORDER}` }}>
+              <div style={{ fontFamily: MONO, fontSize: 9, color: MUTED, letterSpacing: "0.12em", textTransform: "uppercase", lineHeight: 2 }}>
+                <div>Items · {items.length} Lines · {items.reduce((s,i)=>s+i.quantity,0)} EA</div>
+                <div>Currency · KRW (₩)</div>
+                <div>VAT · 10% 포함</div>
+                {!isLoggedIn && <div style={{ color: "#D4A537", marginTop: 4 }}>※ 공개가 기준 · 로그인 시 확정가 적용</div>}
+              </div>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "6px 0", color: "#6b7280" }}>
-              <span>VAT (10%)</span>
-              <span style={{ fontFamily: "monospace" }}>₩ {fmt(vat)}</span>
-            </div>
-            <div style={{ height: 2, background: "#111", margin: "6px 0" }} />
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, padding: "8px 0", fontWeight: 700 }}>
-              <span>합계 (Total)</span>
-              <span style={{ fontFamily: "monospace" }}>₩ {fmt(grandTotal)}</span>
+            <div style={{ padding: "16px 20px" }}>
+              <TotalRow label="소계 (Supply)" value={`₩ ${fmt(subtotal)}`} />
+              <TotalRow label="VAT (10%)" value={`₩ ${fmt(vat)}`} />
+              <div style={{ height: 1, background: NAV, margin: "10px 0" }} />
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <span style={{ fontFamily: MONO, fontSize: 10, color: NAV, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>Grand Total</span>
+                <span style={{ fontFamily: MONO, fontSize: 18, fontWeight: 700, color: NAV }}>₩ {fmt(grandTotal)}</span>
+              </div>
             </div>
           </div>
 
-          {/* 안내 */}
-          <div style={{ fontSize: 10, color: "#9ca3af", fontFamily: "monospace", lineHeight: 1.8 }}>
-            <div>※ 가격은 VAT 포함 기준 (소계는 VAT 별도)</div>
-            {!isLoggedIn && <div>※ 현재 공개가 기준 · 로그인 시 등급별 확정가 적용</div>}
-            <div>※ Edwards 정품 · 12개월 보증 · {SMARTECH.officeTel}</div>
+          {/* 섹션 라벨 */}
+          <SectionLabel text="TERMS · 거래 조건" />
+
+          {/* 거래조건 */}
+          <div style={{ border: `0.5pt solid ${BORDER}`, fontFamily: MONO, fontSize: 10, marginBottom: 28 }}>
+            <TermRow label="PAYMENT" value="세금계산서 발행 · 익월 말 결제 (협의)" />
+            <TermRow label="DELIVERY" value="국내 재고분 D+1 / 해외 발주분 D+14 (협의)" />
+            <TermRow label="WARRANTY" value="12개월 · Edwards 정품 보증" />
+            <TermRow label="A / S" value={`24/7 콜 응대 · 현장 엔지니어 출동 · ${SM.officeTel}`} last />
+          </div>
+
+          {/* 푸터 */}
+          <div style={{ borderTop: `0.5pt solid ${BORDER}`, paddingTop: 12, fontFamily: MONO, fontSize: 9, color: MUTED, letterSpacing: "0.06em", textTransform: "uppercase", display: "flex", justifyContent: "space-between" }}>
+            <span>© {today.getFullYear()} SMARTECH CO., LTD. · Edwards Vacuum Korea Authorized Distributor</span>
+            <span>PREVIEW · NOT AN OFFICIAL QUOTATION</span>
           </div>
         </div>
 
-        {/* 로그인 게이트 (PDF 저장 클릭 시 표시) */}
+        {/* ── 로그인 게이트 ── */}
         {showLoginGate && (
-          <div className="absolute inset-0 z-10 bg-white/95 backdrop-blur-sm flex flex-col items-center justify-center p-8">
-            <div style={{ fontFamily: "monospace", fontSize: 10, letterSpacing: "0.16em", color: "#9ca3af", textTransform: "uppercase", marginBottom: 16 }}>
-              로그인 필요
-            </div>
-            <h3 style={{ fontSize: 24, fontWeight: 700, textAlign: "center", marginBottom: 8 }}>
+          <div style={{
+            position: "absolute", inset: 0, zIndex: 10,
+            background: "rgba(255,255,255,0.96)", backdropFilter: "blur(4px)",
+            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 32,
+          }}>
+            <div style={{ fontFamily: MONO, fontSize: 10, color: MUTED, letterSpacing: "0.16em", textTransform: "uppercase", marginBottom: 16 }}>로그인 필요</div>
+            <h3 style={{ fontSize: 24, fontWeight: 700, textAlign: "center", marginBottom: 8, color: "#111" }}>
               견적서 저장을<br />위해 로그인하세요
             </h3>
-            <p style={{ fontSize: 12, color: "#6b7280", textAlign: "center", marginBottom: 24, lineHeight: 1.8 }}>
+            <p style={{ fontSize: 12, color: MUTED, textAlign: "center", marginBottom: 24, lineHeight: 1.8 }}>
               로그인 후 등급별 확정가가 적용되며<br />PDF로 저장할 수 있습니다.
             </p>
-            <Link
-              href="/auth/login"
-              style={{
-                display: "inline-block", padding: "12px 24px",
-                background: "#111", color: "#fff",
-                fontSize: 13, fontFamily: "monospace", letterSpacing: "0.1em",
-                textDecoration: "none", marginBottom: 12,
-              }}
-            >
+            <Link href="/auth/login" style={{
+              display: "inline-block", padding: "12px 28px", background: NAV, color: "#fff",
+              fontSize: 13, fontFamily: MONO, letterSpacing: "0.1em", textDecoration: "none", marginBottom: 12,
+            }}>
               로그인하기 →
             </Link>
-            <button
-              onClick={() => setShowLoginGate(false)}
-              style={{ fontSize: 12, color: "#9ca3af", background: "none", border: "none", cursor: "pointer" }}
-            >
+            <button onClick={() => setShowLoginGate(false)} style={{ fontSize: 12, color: MUTED, background: "none", border: "none", cursor: "pointer" }}>
               계속 둘러보기
             </button>
           </div>
         )}
       </div>
     </>
+  );
+}
+
+// ── 작은 유틸 컴포넌트 ───────────────────────────────────────
+function Row({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "70px 1fr", gap: 8, padding: "4px 0", borderTop: "0.5pt dashed #E2E8F0", fontSize: 11 }}>
+      <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: "#6B7F93", letterSpacing: "0.08em", textTransform: "uppercase", paddingTop: 1 }}>{label}</span>
+      <span style={{ fontFamily: mono ? "'JetBrains Mono', monospace" : undefined }}>{value}</span>
+    </div>
+  );
+}
+
+function SectionLabel({ text }: { text: string }) {
+  return (
+    <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: "#6B7F93", letterSpacing: "0.14em", textTransform: "uppercase", margin: "0 0 14px", paddingLeft: 12, position: "relative" }}>
+      <span style={{ position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)", width: 5, height: 5, background: "#1F4E79", display: "inline-block" }} />
+      — {text}
+    </div>
+  );
+}
+
+function PriceCell({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
+  return (
+    <div style={{ background: accent ? "#EBF2FA" : "#f8fafc", padding: "8px 12px" }}>
+      <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8, color: "#6B7F93", letterSpacing: "0.12em", textTransform: "uppercase" }}>{label}</div>
+      <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 13, marginTop: 3, fontWeight: accent ? 700 : 500, color: accent ? "#1F4E79" : "#111" }}>{value}</div>
+    </div>
+  );
+}
+
+function TotalRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", fontSize: 11 }}>
+      <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: "#6B7F93", letterSpacing: "0.06em", textTransform: "uppercase" }}>{label}</span>
+      <span style={{ fontFamily: "'JetBrains Mono', monospace" }}>{value}</span>
+    </div>
+  );
+}
+
+function TermRow({ label, value, last }: { label: string; value: string; last?: boolean }) {
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "100px 1fr", padding: "9px 16px", borderBottom: last ? "none" : "0.5pt solid #E2E8F0" }}>
+      <span style={{ color: "#6B7F93", letterSpacing: "0.1em", textTransform: "uppercase", fontSize: 9 }}>{label}</span>
+      <span>{value}</span>
+    </div>
   );
 }
