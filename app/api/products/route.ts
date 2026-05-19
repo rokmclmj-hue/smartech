@@ -12,7 +12,13 @@ export async function GET(req: NextRequest) {
   const page = parseInt(searchParams.get("page") ?? "1");
   const limit = Math.min(parseInt(searchParams.get("limit") ?? "24"), 2000);
 
+  const idsParam = searchParams.get("ids");
+
   const where: any = {};
+  if (idsParam) {
+    const ids = idsParam.split(",").map(Number).filter((n) => !isNaN(n) && n > 0);
+    if (ids.length > 0) where.id = { in: ids };
+  }
   if (q) {
     where.OR = [
       { partNo: { contains: q } },

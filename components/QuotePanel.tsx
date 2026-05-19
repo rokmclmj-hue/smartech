@@ -90,7 +90,7 @@ export default function QuotePanel({ open, onClose }: Props) {
     if (!session) {
       setShowLoginGate(true);
     } else {
-      window.location.href = "/quote";
+      window.print();
     }
   }
 
@@ -98,11 +98,6 @@ export default function QuotePanel({ open, onClose }: Props) {
 
   return (
     <>
-      <div
-        className="fixed inset-0 z-40 bg-ink/40 backdrop-blur-sm"
-        onClick={onClose}
-        aria-hidden="true"
-      />
 
       <div className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-[480px] bg-paper border-l hair flex flex-col shadow-2xl">
         {/* 헤더 */}
