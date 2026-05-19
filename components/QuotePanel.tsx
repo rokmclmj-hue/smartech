@@ -188,6 +188,7 @@ export default function QuotePanel({ open, onClose }: Props) {
             </p>
             <Link
               href="/auth/login"
+              onClick={onClose}
               className="inline-block px-6 py-3 bg-ink text-paper text-[13px] mono tracking-wider hover:bg-edred transition-colors mb-3"
             >
               로그인하기 →

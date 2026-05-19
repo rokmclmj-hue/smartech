@@ -380,7 +380,7 @@ export default function QuotePreviewModal({ open, onClose }: Props) {
             <p style={{ fontSize:12, color:"var(--q-muted)", textAlign:"center", marginBottom:24, lineHeight:1.8 }}>
               로그인 후 등급별 확정가가 적용되며<br />PDF로 저장할 수 있습니다.
             </p>
-            <Link href="/auth/login" style={{
+            <Link href="/auth/login" onClick={onClose} style={{
               display:"inline-block", padding:"12px 28px",
               background:"var(--q-accent)", color:"var(--q-bg)",
               fontSize:13, fontFamily:"var(--q-mono)", letterSpacing:"0.1em",
