@@ -53,14 +53,14 @@ export async function GET(req: NextRequest) {
   }
 
   const session = await auth();
-  const tier = (session?.user as any)?.tier ?? "GUEST";
-  const showPrice = tier !== "GUEST" && tier !== "PENDING";
+  const tier = (session?.user as any)?.tier ?? "PUBLIC";
+  const showPrice = tier !== "PENDING";
   const multiplier = showPrice ? await getMultiplier(tier) : null;
 
   const result = products.map((p) => ({
     ...p,
     displayPrice: showPrice && multiplier ? Math.round(p.costPrice * multiplier) : null,
-    priceStatus: tier === "GUEST" ? "login" : tier === "PENDING" ? "pending" : "visible",
+    priceStatus: tier === "PENDING" ? "pending" : "visible",
   }));
 
   return NextResponse.json({ products: result, total, page, limit });

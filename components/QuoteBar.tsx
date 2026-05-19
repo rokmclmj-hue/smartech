@@ -30,7 +30,7 @@ export default function QuoteBar() {
     <>
       <QuotePanel open={open} onClose={() => setOpen(false)} />
       {count > 0 && !open && (
-        <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
+        <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-60 pointer-events-none">
           <button
             onClick={() => setOpen(true)}
             className="pointer-events-auto flex items-center gap-3 bg-ink text-paper px-7 py-3.5 shadow-2xl hover:bg-edred transition-colors border border-white/10"
