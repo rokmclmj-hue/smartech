@@ -108,13 +108,6 @@ export default function ProductPanel({ item, onClose }: Props) {
 
   return (
     <>
-      {/* 배경 어둡게 — 클릭하면 닫힘 */}
-      <div
-        className="fixed inset-0 z-40 bg-ink/40 backdrop-blur-sm"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-
       {/* 패널 */}
       <div className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-[480px] bg-paper border-l hair flex flex-col shadow-2xl">
 
