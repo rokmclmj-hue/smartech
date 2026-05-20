@@ -217,11 +217,19 @@ export default function Home() {
       {/* ═══════════════ PRODUCT CATEGORIES ═══════════════ */}
       <section id="products" className="py-28 border-b hair">
         <div className="max-w-[1400px] mx-auto px-6">
-          <div className="mb-14">
-            <div className="mono text-[11px] dim mb-4">— 03 · PRODUCT LINEUP</div>
-            <h2 className="section-title display">
-              주요 제품<span className="text-edred">.</span>
-            </h2>
+          <div className="grid grid-cols-12 gap-6 mb-14">
+            <div className="col-span-12 lg:col-span-6">
+              <div className="mono text-[11px] dim mb-4">— 03 · PRODUCT LINEUP</div>
+              <h2 className="section-title display">
+                주요 제품<span className="text-edred">.</span>
+              </h2>
+            </div>
+            <div className="col-span-12 lg:col-span-4 lg:col-start-9 flex items-end pb-2">
+              <p className="text-[14px] leading-[1.8] text-[#6A6660]">
+                반도체부터 산업 공정까지,<br />
+                모든 공정에 검증된 제품만을 제안합니다.
+              </p>
+            </div>
           </div>
 
           <ProductCategories />
