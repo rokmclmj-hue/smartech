@@ -447,7 +447,7 @@ export default function PumpSelector() {
       : [];
 
   const tabCls = (t: Tab) =>
-    `flex-1 py-3 text-[13px] font-medium tracking-wide transition-colors border-b-2 ${
+    `flex-1 py-3 text-[15px] font-semibold tracking-wide transition-colors border-b-2 ${
       tab === t
         ? "border-ink text-ink"
         : "border-transparent text-[#6A6660] hover:text-ink"
@@ -478,13 +478,13 @@ export default function PumpSelector() {
           <div>
             {!selectedCategory ? (
               <>
-                <p className="text-[12px] text-[#6A6660] mb-3">신규 도입할 제품을 선택하거나 파트번호·모델명으로 검색하세요.</p>
+                <p className="text-[14px] text-[#6A6660] mb-3">신규 도입할 제품을 선택하거나 파트번호·모델명으로 검색하세요.</p>
                 <input
                   type="text"
                   placeholder="파트번호 또는 모델명 검색 (예: A65301903, EH250)"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full border border-[#E3DFD6] px-3 py-2.5 text-[13px] focus:outline-none focus:border-ink bg-transparent mb-3"
+                  className="w-full border border-[#E3DFD6] px-3 py-2.5 text-[14px] focus:outline-none focus:border-ink bg-transparent mb-3"
                 />
                 {newGlobalResults.length > 0 ? (
                   <>
@@ -522,8 +522,8 @@ export default function PumpSelector() {
                         onClick={() => { setSelectedCategory(item); setSearch(""); }}
                         className="border border-[#E3DFD6] p-3 text-left hover:border-ink hover:bg-ink hover:text-paper transition-all group"
                       >
-                        <div className="text-[12px] font-semibold leading-snug">{item.category}</div>
-                        <div className="text-[10px] text-[#6A6660] mt-0.5 group-hover:text-paper/70 leading-snug">
+                        <div className="text-[13px] font-semibold leading-snug">{item.category}</div>
+                        <div className="text-[11px] text-[#6A6660] mt-1 group-hover:text-paper/70 leading-snug">
                           {item.desc}
                         </div>
                       </button>

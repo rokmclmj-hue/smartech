@@ -239,8 +239,8 @@ export default function Home() {
       {/* ═══════════════ 제품 검색 / 펌프선정 ═══════════════ */}
       <section id="b2b" className="border-b hair">
         <div className="max-w-[1400px] mx-auto px-6 py-16 md:py-20">
-          <div className="mono text-[11px] dim mb-4">— 04 · 제품 검색 · 펌프선정 및 시뮬레이션</div>
-          <h3 className="display text-[38px] md:text-[52px] leading-[1.05]">
+          <div className="mono text-[13px] dim mb-4">— 04 · 제품 검색 · 펌프선정 및 시뮬레이션</div>
+          <h3 className="display leading-[1.05]" style={{ fontSize: "clamp(32px, 3.6vw, 56px)" }}>
             사양에서 선정까지,<br />
             <span className="text-edred">한곳에서.</span>
           </h3>
@@ -252,8 +252,8 @@ export default function Home() {
       <section id="ai" className="py-28 border-b hair bg-paper">
         <div className="max-w-[1400px] mx-auto px-6 grid grid-cols-12 gap-6">
           <div className="col-span-12 lg:col-span-5">
-            <div className="mono text-[11px] dim mb-4">— 05 · AI CONSULT</div>
-            <h2 className="display leading-[1.12] tracking-[-0.03em]" style={{ fontSize: "clamp(24px,2.8vw,44px)" }}>
+            <div className="mono text-[13px] dim mb-4">— 05 · AI CONSULT</div>
+            <h2 className="display leading-[1.12] tracking-[-0.03em]" style={{ fontSize: "clamp(32px,3.6vw,56px)" }}>
               복잡한 공정 조건만 입력해 주세요.<br />
               <span className="italic text-edred">스마텍 AI</span>가 최적의{" "}
               <span className="text-edred font-semibold">Edwards</span><br />
@@ -279,8 +279,8 @@ export default function Home() {
       <section id="about" className="py-28 border-b hair">
         <div className="max-w-[1400px] mx-auto px-6 grid grid-cols-12 gap-6">
           <div className="col-span-12 lg:col-span-5">
-            <div className="mono text-[11px] dim mb-4">— 06 · ABOUT</div>
-            <h2 className="section-title display">
+            <div className="mono text-[13px] dim mb-4">— 06 · ABOUT</div>
+            <h2 className="display leading-[1.05]" style={{ fontSize: "clamp(32px,3.6vw,56px)" }}>
               신뢰와 전문성이<br />
               <span className="italic text-edred">먼저</span>입니다.
             </h2>
