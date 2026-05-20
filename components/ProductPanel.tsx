@@ -21,6 +21,7 @@ export type PanelItem = {
 type Props = {
   item: PanelItem | null;
   onClose: () => void;
+  catalogUrl?: string;
 };
 
 function formatKRW(v: number) {
@@ -31,7 +32,7 @@ function formatKRW(v: number) {
   }).format(v);
 }
 
-export default function ProductPanel({ item, onClose }: Props) {
+export default function ProductPanel({ item, onClose, catalogUrl }: Props) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [quantities, setQuantities] = useState<Record<number, number>>({});
@@ -136,6 +137,16 @@ export default function ProductPanel({ item, onClose }: Props) {
               className="absolute inset-0 w-full h-full object-contain"
             />
           </div>
+          {catalogUrl && (
+            <a
+              href={catalogUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-flex items-center gap-1 text-[11px] mono text-edred hover:underline font-medium tracking-[0.06em]"
+            >
+              카탈로그 PDF →
+            </a>
+          )}
         </div>
 
         {/* 제품 목록 — 스크롤 가능 */}

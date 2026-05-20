@@ -5,6 +5,9 @@ import productData from "@/lib/productCatalog.json";
 import { addToCartByPartNo } from "@/lib/cartUtils";
 import { recommendPumps, TURBO_PUMPS, ALL_PUMPS, calcTurboPumpDown } from "@/lib/pumpSpeedData";
 import type { PumpDownResult, TurboPumpDownResult, PumpModel } from "@/lib/pumpSpeedData";
+import ProductPanel from "@/components/ProductPanel";
+import type { PanelItem } from "@/components/ProductPanel";
+import { CATALOG_MAP } from "@/lib/catalogs";
 
 type SeriesKey = keyof typeof productData;
 type Tab = "search" | "selection";
@@ -51,6 +54,28 @@ const PROCESS_OPTIONS = [
   "리사이클링", "의료 / 생명공학", "차세대 모빌리티", "특수 용접 / 금속",
   "리튬 1차전지", "ESS 에너지 저장",
 ];
+
+// 펌프 시리즈 → ProductPanel 에 넘길 PanelItem 매핑
+const SERIES_PANEL_MAP: Record<string, PanelItem> = {
+  "RV":       { category: "오일펌프(소형 RV)",       code: "RV 시리즈",    title: "오일 로터리 베인 펌프 (소형)",    image: "/images/products/rv.jpeg"      },
+  "E2M_small":{ category: "오일펌프(소형 E2M)",      code: "E2M 시리즈",   title: "오일 로터리 베인 펌프 (E2M 소형)",image: "/images/products/rv.jpeg"      },
+  "E2M_large":{ category: "오일펌프(중대형 E2M)",    code: "E2M 시리즈",   title: "오일 로터리 베인 펌프 (E2M 중대형)",image: "/images/products/rv.jpeg"    },
+  "nES":      { category: "오일펌프(nES)",            code: "nES 시리즈",   title: "오일 로터리 베인 펌프 (nES)",      image: "/images/products/rv.jpeg"      },
+  "E2M+EH":   { category: "오일펌프(중대형 E2M)",    code: "E2M+EH",       title: "오일펌프 + 루츠 부스터 조합",     image: "/images/products/rv.jpeg"      },
+  "nES+EH":   { category: "오일펌프(nES)",            code: "nES+EH",       title: "oES + 루츠 부스터 조합",          image: "/images/products/rv.jpeg"      },
+  "GXS":      { category: "산업용드라이펌프(GXS)",   code: "GXS 시리즈",   title: "산업용 드라이 스크류",            image: "/images/products/gxs.jpeg"     },
+  "EXS":      { category: "산업용드라이펌프(EXS)",   code: "EXS 시리즈",   title: "부식성 환경 드라이 스크류",       image: "/images/products/exs.jpeg"     },
+  "EDS":      { category: "산업용드라이펌프(GXS)",   code: "EDS 시리즈",   title: "산업용 드라이 스크류 (EDS)",      image: "/images/products/gxs.jpeg"     },
+  "EDC":      { category: "산업용드라이펌프(GXS)",   code: "EDC 시리즈",   title: "드라이 클로 펌프",                image: "/images/products/gxs.jpeg"     },
+  "GXS+GXB":  { category: "산업용드라이펌프(GXS)",   code: "GXS+GXB",      title: "산업용 드라이 + 부스터 조합",     image: "/images/products/gxs.jpeg"     },
+  "nXDS":     { category: "스크롤펌프(소형 nXDS)",   code: "nXDS 시리즈",  title: "드라이 스크롤 펌프 (소형)",       image: "/images/products/xds.jpeg"     },
+  "XDS":      { category: "스크롤펌프(중형 XDS)",    code: "XDS 시리즈",   title: "드라이 스크롤 펌프 (중형)",       image: "/images/products/xds.jpeg"     },
+  "nXRi":     { category: "반도체드라이펌프(nXRi)",  code: "nXRi 시리즈",  title: "멀티루츠 드라이 펌프",            image: "/images/products/ixh-ixl.jpeg" },
+  "iXH":      { category: "반도체드라이펌프(iXH)",   code: "iXH 시리즈",   title: "반도체 드라이 펌프 (iXH)",        image: "/images/products/ixh-ixl.jpeg" },
+  "nXL":      { category: "반도체드라이펌프(iXL)",   code: "iXL 시리즈",   title: "반도체 드라이 펌프 (iXL)",        image: "/images/products/ixh-ixl.jpeg" },
+  "EH":       { category: "부스터펌프(EH)",           code: "EH 시리즈",    title: "루츠 부스터 펌프",                image: "/images/products/eh.jpeg"      },
+  "nEXT":     { category: "터보펌프(nEXT)",           code: "nEXT 시리즈",  title: "터보분자 펌프 (nEXT)",            image: "/images/products/next.png"     },
+};
 
 const PUMP_L1 = ["오일펌프", "드라이펌프", "부스터펌프", "터보펌프"];
 
@@ -240,6 +265,7 @@ export default function PumpSelector() {
 
   const [pressureUnit, setPressureUnit] = useState<PressureUnit>("mbar");
   const [timeUnit, setTimeUnit]         = useState<TimeUnit>("s");
+  const [panelItem, setPanelItem]       = useState<PanelItem | null>(null);
 
   const [results, setResults] = useState<PumpDownResult[] | null>(null);
   const [calcError, setCalcError] = useState("");
@@ -429,6 +455,13 @@ export default function PumpSelector() {
 
   return (
     <div className="mt-8">
+      {/* 제품 패널 */}
+      <ProductPanel
+        item={panelItem}
+        onClose={() => setPanelItem(null)}
+        catalogUrl={panelItem ? (CATALOG_MAP[panelItem.category] ?? undefined) : undefined}
+      />
+
       {/* Tabs */}
       <div className="flex border-b border-[#E3DFD6]">
         <button className={tabCls("search")} onClick={() => { setTab("search"); setSelectedCategory(null); setSearch(""); }}>
@@ -1073,12 +1106,12 @@ export default function PumpSelector() {
                               <div className={`text-[13px] font-semibold mono ${i === 0 ? "text-ink" : ""}`}>
                                 {fmtTime(r.pumpDownTime_s, timeUnit)}
                               </div>
-                              <Link
-                                href={`/products?q=${encodeURIComponent(r.model)}`}
-                                className="mt-1 block text-[10px] text-[#6A6660] hover:text-ink underline"
+                              <button
+                                onClick={() => setPanelItem(SERIES_PANEL_MAP[r.series] ?? null)}
+                                className="mt-1 block text-[10px] text-[#6A6660] hover:text-ink underline w-full text-right"
                               >
                                 카탈로그 →
-                              </Link>
+                              </button>
                             </div>
                           </div>
                         );
