@@ -1176,7 +1176,7 @@ function solvePumpInlet(
 function calcPumpDownNumerical(input: PumpDownInput, pump: PumpModel): PumpDownResult {
   const {
     chamberVol_L,
-    outgassingRate = 1.3e-7,
+    outgassingRate = 1.9e-7,   // SS+Viton seals (PumpCalc 실측 역산: 1.93e-7)
     chamberSurface_cm2,
     startPressure_mbar = 1013,
     targetPressure_mbar,
@@ -1189,13 +1189,14 @@ function calcPumpDownNumerical(input: PumpDownInput, pump: PumpModel): PumpDownR
   const V       = chamberVol_L * 1e-3;                       // m³
   const scale   = hz === 50 ? 50 / 60 : 1.0;
   const surface = chamberSurface_cm2 ?? Math.pow(chamberVol_L * 1e-3, 2 / 3) * 6 * 1e4;
-  const Q_out   = outgassingRate * surface * 1e-3;            // mbar·m³/s (상수 근사)
-  const reachable = targetPressure_mbar > pump.ultimate;
+  // SS+Viton 씰 기준 areaFactor=3 (PumpCalc 기본값), 시간 의존형 Q(t)=Q_base×max(1,3600/t)
+  const areaFactor  = 3.0;
+  const Q_out_base  = outgassingRate * surface * areaFactor * 1e-3; // mbar·m³/s at t=3600s
+  const reachable = targetPressure_mbar >= pump.ultimate;
 
   let P   = startPressure_mbar;
   let t_s = 0;
   const maxT = 86400; // 24h 상한
-  const dt   = 1.0;   // 1초 스텝
 
   while (P > targetPressure_mbar && t_s < maxT) {
     const C      = pipeConductance_m3h(pipeID_mm, pipeLength_m, pipeBends, P); // m³/h
@@ -1205,8 +1206,18 @@ function calcPumpDownNumerical(input: PumpDownInput, pump: PumpModel): PumpDownR
     const S_eff   = S_pump > 0 ? S_pump * P_pump / P : 0;
     const S_eff_s = S_eff / 3600; // m³/s
 
+    // 시간 의존형 아웃게싱: Q(t) = Q_base × max(1, 3600/t)  [PumpCalc Exponent=1, t_ref=3600s]
+    const Q_out = Q_out_base * Math.max(1, 3600 / Math.max(t_s, 1));
+
     // dP/dt = (-S_eff × P + Q_out) / V  [mbar/s]
-    const dP = ((-S_eff_s * P + Q_out) / V) * dt;
+    const dPdt = (-S_eff_s * P + Q_out) / V;
+
+    // 적응형 타임스텝: 한 스텝에서 압력이 2% 이상 변하지 않도록 제한
+    const dt = dPdt < 0
+      ? Math.min(1.0, Math.max(1e-4, 0.02 * P / (-dPdt + 1e-12)))
+      : 1.0;
+
+    const dP = dPdt * dt;
     P = Math.max(P + dP, pump.ultimate);
     t_s += dt;
 
@@ -1291,7 +1302,7 @@ export function recommendPumps(
     if (p.speed60Hz <= 0) return false;
     if (p.type === "booster") return false;  // 부스터 단독 제외
     if (p.ultimate <= 0) return false;       // ultimate 미정 제외
-    if (p.ultimate >= input.targetPressure_mbar) return false;
+    if (p.ultimate > input.targetPressure_mbar) return false;
     if (seriesFilter && seriesFilter.length > 0 && !seriesFilter.includes(p.series)) return false;
     return true;
   });
