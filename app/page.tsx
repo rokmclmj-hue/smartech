@@ -241,7 +241,8 @@ export default function Home() {
         <div className="max-w-[1400px] mx-auto px-6 py-16 md:py-20">
           <div className="mono text-[13px] dim mb-4">— 04 · 제품 검색 · 펌프선정 및 시뮬레이션</div>
           <h3 className="display leading-[1.05]" style={{ fontSize: "clamp(32px, 4.2vw, 62px)" }}>
-            사양에서 선정까지, <span className="text-edred">한곳에서.</span>
+            사양에서 선정까지,<br />
+            <span className="text-edred">한곳에서.</span>
           </h3>
           <PumpSelector />
         </div>
