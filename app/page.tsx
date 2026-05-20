@@ -241,8 +241,7 @@ export default function Home() {
             </div>
             <div className="col-span-12 lg:col-span-4 lg:col-start-9 flex items-end pb-1">
               <p className="text-[14px] leading-[1.8] text-[#6A6660]">
-                오일 로터리 베인부터 터보분자,<br />
-                반도체 드라이, 게이지, 리크 디텍터까지.<br />
+                오일 로터리 베인부터 터보분자, 반도체 드라이까지.<br />
                 공정 조건에 맞게 조합해 제안합니다.
               </p>
             </div>
