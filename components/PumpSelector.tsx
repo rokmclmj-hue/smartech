@@ -56,7 +56,7 @@ const PUMP_L1 = ["오일펌프", "드라이펌프", "부스터펌프", "터보�
 
 const PUMP_L2_MAP: Record<string, string[]> = {
   "오일펌프":   ["1단펌프", "2단펌프"],
-  "드라이펌프": ["산업용 드라이", "반도체 드라이", "스크롤펌프"],
+  "드라이펌프": ["산업용 드라이", "반도체 드라이", "연구소용 드라이"],
 };
 
 const PUMP_L3_MAP: Record<string, string[]> = {
@@ -64,7 +64,7 @@ const PUMP_L3_MAP: Record<string, string[]> = {
   "2단펌프":       ["오일 단독", "오일 단독 + 부스터펌프"],
   "산업용 드라이": ["드라이 단독", "드라이 + 부스터 조합"],
   "반도체 드라이": ["드라이 단독", "드라이 + 부스터 조합"],
-  "스크롤펌프":    ["스크롤 단독", "스크롤 + 부스터 조합"],
+  "연구소용 드라이": ["드라이 단독", "드라이 + 부스터 조합"],
 };
 
 const PIPE_SPEC_OPTIONS = ["KF16", "KF25", "KF40", "KF50", "ISO63", "ISO100", "ISO160", "기타"];
@@ -118,37 +118,69 @@ const XDD1_PROXY: PumpModel = {
   speed50Hz: 1.2, speed60Hz: 1.5, ultimate: 3.5, motorKW_50Hz: 0.1,
 };
 
-const TMP_TARGET_P_OPTIONS = [
-  { label: "1×10⁻³ mbar",  value: "0.001"     },
-  { label: "1×10⁻⁴ mbar",  value: "0.0001"    },
-  { label: "1×10⁻⁵ mbar",  value: "0.00001"   },
-  { label: "1×10⁻⁶ mbar",  value: "0.000001"  },
-  { label: "1×10⁻⁷ mbar",  value: "0.0000001" },
-  { label: "기타",           value: "기타"      },
-];
+// 압력 단위 변환 상수
+const MBAR_TO_TORR = 0.750064;
+const MBAR_TO_PA   = 100;
 
-// 목표 압력 선택지
-const TARGET_P_OPTIONS = [
-  { label: "100 mbar",      value: "100"     },
-  { label: "10 mbar",       value: "10"      },
-  { label: "1 mbar",        value: "1"       },
-  { label: "0.1 mbar",      value: "0.1"     },
-  { label: "0.01 mbar",     value: "0.01"    },
-  { label: "1×10⁻³ mbar",  value: "0.001"   },
-  { label: "1×10⁻⁴ mbar",  value: "0.0001"  },
-  { label: "1×10⁻⁵ mbar",  value: "0.00001"   },
-  { label: "1×10⁻⁶ mbar",  value: "0.000001"  },
-  { label: "1×10⁻⁷ mbar",  value: "0.0000001" },
-  { label: "기타",           value: "기타"      },
-];
+type PressureUnit = "mbar" | "Torr" | "Pa";
+type TimeUnit     = "s" | "min";
 
-function fmtTime(sec: number): string {
+function mbarToUnit(mbar: number, unit: PressureUnit): number {
+  if (unit === "Torr") return mbar * MBAR_TO_TORR;
+  if (unit === "Pa")   return mbar * MBAR_TO_PA;
+  return mbar;
+}
+
+function unitToMbar(val: number, unit: PressureUnit): number {
+  if (unit === "Torr") return val / MBAR_TO_TORR;
+  if (unit === "Pa")   return val / MBAR_TO_PA;
+  return val;
+}
+
+function fmtPressure(mbar: number, unit: PressureUnit): string {
+  const val = mbarToUnit(mbar, unit);
+  if (val >= 0.1) return `${+val.toPrecision(3)} ${unit}`;
+  const exp  = Math.floor(Math.log10(val));
+  const coef = val / Math.pow(10, exp);
+  if (Math.abs(coef - 1) < 0.05) return `10⁻${Math.abs(exp)} ${unit}`;
+  return `${coef.toFixed(1)}×10⁻${Math.abs(exp)} ${unit}`;
+}
+
+// 압력 선택지 값은 항상 mbar 기준 내부값 — 라벨만 단위에 따라 동적 생성
+const TARGET_P_VALUES_MBAR = ["100","10","1","0.1","0.01","0.001","0.0001","0.00001","0.000001","0.0000001"];
+const TMP_TARGET_P_VALUES_MBAR = ["0.001","0.0001","0.00001","0.000001","0.0000001"];
+
+function getTargetPOptions(unit: PressureUnit) {
+  return TARGET_P_VALUES_MBAR.map((v) => ({
+    label: fmtPressure(parseFloat(v), unit),
+    value: v,
+  })).concat([{ label: "기타", value: "기타" }]);
+}
+
+function getTmpTargetPOptions(unit: PressureUnit) {
+  return TMP_TARGET_P_VALUES_MBAR.map((v) => ({
+    label: fmtPressure(parseFloat(v), unit),
+    value: v,
+  })).concat([{ label: "기타", value: "기타" }]);
+}
+
+function fmtTime(sec: number, unit: TimeUnit): string {
+  if (unit === "min") {
+    const min = sec / 60;
+    if (min < 0.1) return "< 0.1분";
+    return `${min.toFixed(1)}분`;
+  }
   if (sec < 1)    return "< 1초";
   if (sec < 60)   return `${sec}초`;
   if (sec < 3600) return `${Math.floor(sec / 60)}분 ${sec % 60}초`;
   const h = Math.floor(sec / 3600);
   const m = Math.floor((sec % 3600) / 60);
   return `${h}시간 ${m}분`;
+}
+
+function calcThroughputSlm(effectiveSpeed_m3h: number, target_mbar: number): number {
+  const targetTorr = target_mbar * MBAR_TO_TORR;
+  return effectiveSpeed_m3h * targetTorr * 0.02193;
 }
 
 /** L1/L2/L3 펌프 종류 선택 → 허용 시리즈 목록 (null = 전체) */
@@ -167,29 +199,26 @@ function resolveSeriesFilter(l1: string, l2: string, l3: string): string[] | und
   if (l1 === "부스터펌프") return [];   // 단독 사용 불가 → 빈 배열로 "결과없음" 표시
   if (l1 === "터보펌프")   return [];   // 데이터 미확보
   if (l1 === "드라이펌프") {
-    if (l2 === "스크롤펌프") return ["nXDS", "XDS"];
+    if (l2 === "연구소용 드라이") {
+      if (l3 === "드라이 단독")          return ["nXDS", "XDS", "nXRi"];
+      if (l3 === "드라이 + 부스터 조합") return ["XDS", "EH"];
+      return ["nXDS", "XDS", "nXRi"];
+    }
     if (l2 === "산업용 드라이") {
       if (l3 === "드라이 단독")          return ["GXS", "EXS", "EDS", "EDC"];
       if (l3 === "드라이 + 부스터 조합") return ["GXS+GXB"];
       return ["GXS", "EXS", "EDS", "EDC", "GXS+GXB"];
     }
     if (l2 === "반도체 드라이") {
-      if (l3 === "드라이 단독")          return ["iXH", "nXRi"];
-      if (l3 === "드라이 + 부스터 조합") return ["iXH", "nXRi"];
-      return ["iXH", "nXRi"];
+      if (l3 === "드라이 단독")          return ["iXH", "iXL"];
+      if (l3 === "드라이 + 부스터 조합") return ["iXH", "iXL"];
+      return ["iXH", "iXL"];
     }
-    return ["nXDS", "XDS", "GXS", "EXS", "EDS", "EDC", "GXS+GXB", "iXH", "nXRi"];
+    return ["nXDS", "XDS", "nXRi", "GXS", "EXS", "EDS", "EDC", "GXS+GXB", "iXH", "iXL"];
   }
   return undefined;
 }
 
-function fmtP(mbar: number): string {
-  if (mbar >= 0.1)   return `${mbar} mbar`;
-  const exp = Math.floor(Math.log10(mbar));
-  const coef = mbar / Math.pow(10, exp);
-  if (Math.abs(coef - 1) < 0.05) return `10⁻${Math.abs(exp)} mbar`;
-  return `${coef.toFixed(1)}×10⁻${Math.abs(exp)} mbar`;
-}
 
 export default function PumpSelector() {
   const [tab, setTab] = useState<Tab>("search");
@@ -208,6 +237,9 @@ export default function PumpSelector() {
   const [chamberVolCustom, setChamberVolCustom] = useState("");
   const [targetP, setTargetP] = useState("");
   const [targetPCustom, setTargetPCustom] = useState("");
+
+  const [pressureUnit, setPressureUnit] = useState<PressureUnit>("mbar");
+  const [timeUnit, setTimeUnit]         = useState<TimeUnit>("s");
 
   const [results, setResults] = useState<PumpDownResult[] | null>(null);
   const [calcError, setCalcError] = useState("");
@@ -249,7 +281,11 @@ export default function PumpSelector() {
     const pipeID     = rawSpec in PIPE_ID_MM
                          ? PIPE_ID_MM[rawSpec]
                          : parseFloat(rawSpec);
-    const target     = parseFloat(rawP);
+    // 커스텀 직접입력은 선택된 단위 기준 → mbar로 변환, 선택지값은 이미 mbar
+    const rawParsed  = parseFloat(rawP);
+    const target     = targetP === "기타"
+                         ? unitToMbar(rawParsed, pressureUnit)
+                         : rawParsed;
     const bends      = parseFloat(rawBends) || 0;
 
     if (!chamberVol || !pipeLen || !pipeID || !target) {
@@ -704,21 +740,31 @@ export default function PumpSelector() {
                   )}
                 </div>
                 <div>
-                  <label className="text-[10px] mono text-[#6A6660] uppercase tracking-wider">
-                    목표 도달압력 <span className="text-[#c00020]">*</span>
-                  </label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-[10px] mono text-[#6A6660] uppercase tracking-wider">
+                      목표 도달압력 <span className="text-[#c00020]">*</span>
+                    </label>
+                    <div className="flex gap-1">
+                      {(["mbar","Torr","Pa"] as PressureUnit[]).map((u) => (
+                        <button key={u}
+                          onClick={() => setPressureUnit(u)}
+                          className={`px-1.5 py-0.5 text-[10px] border transition-colors ${pressureUnit === u ? "bg-ink text-paper border-ink" : "border-[#E3DFD6] text-[#6A6660] hover:border-ink"}`}
+                        >{u}</button>
+                      ))}
+                    </div>
+                  </div>
                   <select
                     value={targetP}
                     onChange={(e) => { setTargetP(e.target.value); if (e.target.value !== "기타") setTargetPCustom(""); }}
-                    className="mt-1 w-full border border-[#E3DFD6] px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-transparent"
+                    className="w-full border border-[#E3DFD6] px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-transparent"
                   >
                     <option value="">선택</option>
-                    {TARGET_P_OPTIONS.map((o) => (
+                    {getTargetPOptions(pressureUnit).map((o) => (
                       <option key={o.value} value={o.value}>{o.label}</option>
                     ))}
                   </select>
                   {targetP === "기타" && (
-                    <input type="text" placeholder="직접 입력 (mbar)"
+                    <input type="text" placeholder={`직접 입력 (${pressureUnit})`}
                       value={targetPCustom} onChange={(e) => setTargetPCustom(e.target.value)}
                       className="mt-1.5 w-full border border-[#E3DFD6] px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-transparent"
                     />
@@ -877,7 +923,7 @@ export default function PumpSelector() {
                   {!turboResult.reachable ? (
                     <div className="px-4 py-4 text-[12px] text-[#6A6660] leading-relaxed">
                       목표 압력에 도달할 수 없습니다.
-                      아웃게싱 한계: {fmtP(turboResult.ultimateSystem_mbar)} — 목표 압력을 높이거나 챔버 면적 조건을 확인하세요.
+                      아웃게싱 한계: {fmtPressure(turboResult.ultimateSystem_mbar, pressureUnit)} — 목표 압력을 높이거나 챔버 면적 조건을 확인하세요.
                     </div>
                   ) : (
                     <div>
@@ -890,7 +936,7 @@ export default function PumpSelector() {
                           </div>
                         </div>
                         <div className="shrink-0 text-right">
-                          <div className="text-[13px] font-semibold mono">{fmtTime(turboResult.stage1_s)}</div>
+                          <div className="text-[13px] font-semibold mono">{fmtTime(turboResult.stage1_s, timeUnit)}</div>
                           <div className="text-[10px] text-[#6A6660]">{turboResult.backingModel}</div>
                         </div>
                       </div>
@@ -899,11 +945,11 @@ export default function PumpSelector() {
                         <div className="flex-1">
                           <div className="text-[12px] font-medium">Stage 2 — TMP 고진공</div>
                           <div className="text-[10px] text-[#6A6660] mono mt-0.5">
-                            유효속도 {turboResult.tmpEffSpeed_Ls} L/s · 한계 {fmtP(turboResult.ultimateSystem_mbar)}
+                            유효속도 {turboResult.tmpEffSpeed_Ls} L/s · 한계 {fmtPressure(turboResult.ultimateSystem_mbar, pressureUnit)}
                           </div>
                         </div>
                         <div className="shrink-0 text-right">
-                          <div className="text-[13px] font-semibold mono">{fmtTime(turboResult.stage2_s)}</div>
+                          <div className="text-[13px] font-semibold mono">{fmtTime(turboResult.stage2_s, timeUnit)}</div>
                           <div className="text-[10px] text-[#6A6660]">{turboResult.turboModel}</div>
                         </div>
                       </div>
@@ -913,7 +959,7 @@ export default function PumpSelector() {
                           <div className="text-[12px] font-semibold">총 펌프다운 시간</div>
                         </div>
                         <div className="shrink-0 text-right">
-                          <div className="text-[15px] font-bold mono text-ink">{fmtTime(turboResult.totalTime_s)}</div>
+                          <div className="text-[15px] font-bold mono text-ink">{fmtTime(turboResult.totalTime_s, timeUnit)}</div>
                         </div>
                       </div>
                     </div>
@@ -947,14 +993,36 @@ export default function PumpSelector() {
               {pumpL1 !== "터보펌프" && results !== null && (
                 <div className="border border-[#E3DFD6] mt-2">
                   {/* 결과 헤더 */}
-                  <div className="px-4 py-2.5 bg-[#F6F4EF] border-b border-[#E3DFD6] flex items-baseline justify-between">
-                    <span className="text-[11px] font-semibold mono uppercase tracking-wider">계산 결과</span>
-                    <span className="text-[10px] text-[#6A6660]">
-                      목표 {fmtP(parseFloat(targetP === "기타" ? targetPCustom : targetP))}
-                      {" · "}{form.chamberVol === "기타" ? chamberVolCustom : form.chamberVol}L
-                      {" · "}{form.pipeSpec === "기타" ? pipeSpecCustom : form.pipeSpec}
-                      {" "}{form.pipeLen === "기타" ? pipeLenCustom : form.pipeLen}m
-                    </span>
+                  <div className="px-4 py-2.5 bg-[#F6F4EF] border-b border-[#E3DFD6] flex items-center justify-between gap-2">
+                    <div>
+                      <span className="text-[11px] font-semibold mono uppercase tracking-wider">계산 결과</span>
+                      <span className="ml-3 text-[10px] text-[#6A6660]">
+                        목표 {fmtPressure(parseFloat(targetP === "기타" ? String(unitToMbar(parseFloat(targetPCustom), pressureUnit)) : targetP), pressureUnit)}
+                        {" · "}{form.chamberVol === "기타" ? chamberVolCustom : form.chamberVol}L
+                        {" · "}{form.pipeSpec === "기타" ? pipeSpecCustom : form.pipeSpec}
+                        {" "}{form.pipeLen === "기타" ? pipeLenCustom : form.pipeLen}m
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      {/* 처리량 컬럼 레이블 */}
+                      <div className="text-right">
+                        <div className="text-[10px] font-semibold text-[#6A6660] uppercase tracking-wider">처리량</div>
+                        <div className="text-[10px] text-[#6A6660]">
+                          @ {fmtPressure(parseFloat(targetP === "기타" ? String(unitToMbar(parseFloat(targetPCustom), pressureUnit)) : targetP), pressureUnit)}
+                        </div>
+                      </div>
+                      {/* 구분선 */}
+                      <div className="w-px h-6 bg-[#E3DFD6]" />
+                      {/* 시간 단위 선택 */}
+                      <div className="flex gap-1">
+                        {(["s","min"] as TimeUnit[]).map((u) => (
+                          <button key={u}
+                            onClick={() => setTimeUnit(u)}
+                            className={`px-1.5 py-0.5 text-[10px] border transition-colors ${timeUnit === u ? "bg-ink text-paper border-ink" : "border-[#E3DFD6] text-[#6A6660] hover:border-ink"}`}
+                          >{u === "s" ? "초" : "분"}</button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
 
                   {results.length === 0 ? (
@@ -966,43 +1034,55 @@ export default function PumpSelector() {
                     </div>
                   ) : (
                     <div className="divide-y divide-[#E3DFD6]">
-                      {results.map((r, i) => (
-                        <div key={r.model}
-                          className={`flex items-center px-4 py-3 gap-3 ${i === 0 ? "bg-[#F6F4EF]" : "hover:bg-[#faf9f6]"} transition-colors`}
-                        >
-                          {/* 순위 */}
-                          <span className={`shrink-0 w-5 h-5 flex items-center justify-center text-[10px] font-bold ${
-                            i === 0 ? "bg-ink text-paper" : "border border-[#E3DFD6] text-[#6A6660]"
-                          }`}>
-                            {i + 1}
-                          </span>
+                      {results.map((r, i) => {
+                        const targetMbar = targetP === "기타"
+                          ? unitToMbar(parseFloat(targetPCustom), pressureUnit)
+                          : parseFloat(targetP);
+                        const throughput = calcThroughputSlm(r.effectiveSpeed_m3h, targetMbar);
+                        return (
+                          <div key={r.model}
+                            className={`flex items-center px-4 py-3 gap-3 ${i === 0 ? "bg-[#F6F4EF]" : "hover:bg-[#faf9f6]"} transition-colors`}
+                          >
+                            {/* 순위 */}
+                            <span className={`shrink-0 w-5 h-5 flex items-center justify-center text-[10px] font-bold ${
+                              i === 0 ? "bg-ink text-paper" : "border border-[#E3DFD6] text-[#6A6660]"
+                            }`}>
+                              {i + 1}
+                            </span>
 
-                          {/* 모델 정보 */}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-baseline gap-2">
-                              <span className="text-[13px] font-semibold">{r.model}</span>
-                              <span className="text-[10px] text-[#6A6660]">{r.series}</span>
+                            {/* 모델 정보 */}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-baseline gap-2">
+                                <span className="text-[13px] font-semibold">{r.model}</span>
+                                <span className="text-[10px] text-[#6A6660]">{r.series}</span>
+                              </div>
+                              <div className="text-[10px] text-[#6A6660] mono mt-0.5">
+                                정격 {r.pumpSpeed_m3h} m³/h · 유효 {r.effectiveSpeed_m3h} m³/h
+                              </div>
                             </div>
-                            <div className="text-[10px] text-[#6A6660] mono mt-0.5">
-                              정격 {r.pumpSpeed_m3h} m³/h · 유효 {r.effectiveSpeed_m3h} m³/h
+
+                            {/* 처리량 — 숫자만, 레이블은 헤더에 */}
+                            <div className="shrink-0 text-right">
+                              <div className="text-[12px] font-semibold mono">
+                                {throughput >= 10 ? throughput.toFixed(1) : throughput.toFixed(3)} slm
+                              </div>
+                            </div>
+
+                            {/* 시간 + 카탈로그 */}
+                            <div className="shrink-0 text-right">
+                              <div className={`text-[13px] font-semibold mono ${i === 0 ? "text-ink" : ""}`}>
+                                {fmtTime(r.pumpDownTime_s, timeUnit)}
+                              </div>
+                              <Link
+                                href={`/products?q=${encodeURIComponent(r.model)}`}
+                                className="mt-1 block text-[10px] text-[#6A6660] hover:text-ink underline"
+                              >
+                                카탈로그 →
+                              </Link>
                             </div>
                           </div>
-
-                          {/* 시간 + 카탈로그 */}
-                          <div className="shrink-0 text-right">
-                            <div className={`text-[13px] font-semibold mono ${i === 0 ? "text-ink" : ""}`}>
-                              {fmtTime(r.pumpDownTime_s)}
-                            </div>
-                            <div className="text-[10px] text-[#6A6660]">pump-down</div>
-                            <Link
-                              href={`/products?q=${encodeURIComponent(r.model)}`}
-                              className="mt-1 block text-[10px] text-[#6A6660] hover:text-ink underline"
-                            >
-                              카탈로그 →
-                            </Link>
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
 
