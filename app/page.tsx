@@ -217,19 +217,11 @@ export default function Home() {
       {/* ═══════════════ PRODUCT CATEGORIES ═══════════════ */}
       <section id="products" className="py-28 border-b hair">
         <div className="max-w-[1400px] mx-auto px-6">
-          <div className="grid grid-cols-12 gap-6 mb-14">
-            <div className="col-span-12 lg:col-span-6">
-              <div className="mono text-[11px] dim mb-4">— 03 · PRODUCT LINEUP</div>
-              <h2 className="section-title display">
-                주요 제품<span className="text-edred">.</span>
-              </h2>
-            </div>
-            <div className="col-span-12 lg:col-span-5 lg:col-start-8 mt-4">
-              <p className="text-[15px] leading-[1.75] text-[#2a2823]">
-                오일 로터리 베인부터 터보분자, 반도체 드라이, 게이지, 리크 디텍터까지.
-                공정 조건에 맞게 조합해 제안합니다.
-              </p>
-            </div>
+          <div className="mb-14">
+            <div className="mono text-[11px] dim mb-4">— 03 · PRODUCT LINEUP</div>
+            <h2 className="section-title display">
+              주요 제품<span className="text-edred">.</span>
+            </h2>
           </div>
 
           <ProductCategories />
@@ -239,11 +231,22 @@ export default function Home() {
       {/* ═══════════════ 제품 검색 / 펌프선정 ═══════════════ */}
       <section id="b2b" className="border-b hair">
         <div className="max-w-[1400px] mx-auto px-6 py-16 md:py-20">
-          <div className="mono text-[13px] dim mb-4">— 04 · 제품 검색 · 펌프선정 및 시뮬레이션</div>
-          <h3 className="display leading-[1.05]" style={{ fontSize: "clamp(32px, 4.2vw, 62px)" }}>
-            사양에서 선정까지,<br />
-            <span className="text-edred">한곳에서.</span>
-          </h3>
+          <div className="grid grid-cols-12 gap-6 mb-10">
+            <div className="col-span-12 lg:col-span-6">
+              <div className="mono text-[13px] dim mb-4">— 04 · 제품 검색 · 펌프선정 및 시뮬레이션</div>
+              <h3 className="display leading-[1.05]" style={{ fontSize: "clamp(32px, 4.2vw, 62px)" }}>
+                사양에서 선정까지,<br />
+                <span className="text-edred">한곳에서.</span>
+              </h3>
+            </div>
+            <div className="col-span-12 lg:col-span-4 lg:col-start-9 flex items-end pb-1">
+              <p className="text-[14px] leading-[1.8] text-[#6A6660]">
+                오일 로터리 베인부터 터보분자,<br />
+                반도체 드라이, 게이지, 리크 디텍터까지.<br />
+                공정 조건에 맞게 조합해 제안합니다.
+              </p>
+            </div>
+          </div>
           <PumpSelector />
         </div>
       </section>
