@@ -399,7 +399,7 @@ export default function PumpSelector() {
           제품 검색
         </button>
         <button className={tabCls("selection")} onClick={() => { setTab("selection"); setSelectedCategory(null); }}>
-          펌프선정
+          펌프선정 및 시뮬레이션
         </button>
       </div>
 

@@ -239,10 +239,10 @@ export default function Home() {
       {/* ═══════════════ 제품 검색 / 펌프선정 ═══════════════ */}
       <section id="b2b" className="border-b hair">
         <div className="max-w-[1400px] mx-auto px-6 py-16 md:py-20">
-          <div className="mono text-[11px] dim mb-4">— 04 · 제품 검색 · 펌프선정</div>
+          <div className="mono text-[11px] dim mb-4">— 04 · 제품 검색 · 펌프선정 및 시뮬레이션</div>
           <h3 className="display text-[38px] md:text-[52px] leading-[1.05]">
-            필요한 제품,<br />
-            <span className="text-edred">지금 바로 찾으세요.</span>
+            사양에서 선정까지,<br />
+            <span className="text-edred">한곳에서.</span>
           </h3>
           <PumpSelector />
         </div>
