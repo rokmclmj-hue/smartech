@@ -4,12 +4,6 @@ import Link from "next/link";
 
 type Message = { role: "user" | "assistant"; content: string };
 
-const QUICK_CHIPS = [
-  { label: "반도체 CVD · 200 m³/h", q: "반도체 CVD 공정, 오일프리 드라이펌프 200 m³/h 필요" },
-  { label: "MS 분석 · 10⁻⁷ mbar",  q: "질량분석기용 터보펌프 백킹, 10⁻⁷ mbar 도달" },
-  { label: "동결건조 · 수증기",      q: "식품 동결건조 라인, 수증기 처리 많음" },
-  { label: "OLED 증착",             q: "OLED 증착 라인, 청정 진공 유지" },
-];
 
 export default function HeroChat() {
   const [messages, setMessages] = useState<Message[]>([
@@ -119,18 +113,9 @@ export default function HeroChat() {
         </div>
       )}
 
-      {/* Quick chips */}
-      <div className="px-5 py-3 border-t hair flex flex-wrap gap-2">
-        {QUICK_CHIPS.map((c) => (
-          <button
-            key={c.label}
-            className="chip !rounded-none text-[11px]"
-            onClick={() => send(c.q)}
-            disabled={loading}
-          >
-            {c.label}
-          </button>
-        ))}
+      {/* 입력 안내 */}
+      <div className="px-5 py-3 border-t hair">
+        <p className="text-[12px] text-ink">예: 10⁻³ mbar, 오일프리, 분석기용 터보 백킹 펌프 필요</p>
       </div>
 
       {/* Input */}

@@ -264,9 +264,8 @@ export default function Home() {
           <div className="col-span-12 lg:col-span-5">
             <div className="mono text-[13px] dim mb-4">— 05 · AI CONSULT</div>
             <h2 className="display leading-[1.12] tracking-[-0.03em]" style={{ fontSize: "clamp(32px,3.6vw,56px)" }}>
-              복잡한 공정 조건만 입력해 주세요.<br />
-              <span className="italic text-edred">스마텍 AI</span>가 최적의{" "}
-              <span className="text-edred font-semibold">Edwards</span><br />
+              <span className="italic" style={{ color: "#2563eb" }}>스마텍 AI</span>가<br />
+              최적의 <span className="text-edred font-semibold">Edwards</span><br />
               라인업을 제안합니다.
             </h2>
             <p className="mt-6 text-[15px] leading-[1.75] text-[#2a2823] max-w-[48ch]">
