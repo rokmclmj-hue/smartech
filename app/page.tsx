@@ -10,7 +10,7 @@ import ProductShowcase from "@/components/ProductShowcase";
 import ProductCategories from "@/components/ProductCategories";
 import PumpSelector from "@/components/PumpSelector";
 import HeroVideoIntro from "@/components/HeroVideoIntro";
-import ContactQuoteCta from "@/components/ContactQuoteCta";
+import HeroClock from "@/components/HeroClock";
 
 function hiEd(text: string, white = false) {
   return text.split(/(\bEdwards\b|\bSmartech\b)/).map((p, i) => {
@@ -434,10 +434,6 @@ export default function Home() {
   );
 }
 
-/* ─── Clock (client component) ─── */
-function HeroClock() {
-  return <div id="hero-clock" suppressHydrationWarning>FILE —</div>;
-}
 
 /* ─── Static data ─── */
 const STEPS = [
