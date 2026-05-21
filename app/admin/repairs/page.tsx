@@ -3,6 +3,15 @@
 import { useEffect, useState, useCallback } from "react";
 
 type RepairFile = { fileType: string };
+type FullRepairFile = {
+  id: number;
+  fileType: string;
+  fileName: string;
+  fileUrl: string;
+  fileSize: number;
+  uploadedBy: string;
+  createdAt: string;
+};
 type UploadToken = { id: string; expiresAt: string; usedAt: string | null };
 type Repair = {
   id: number;
@@ -54,6 +63,19 @@ export default function AdminRepairsPage() {
   const [editNote, setEditNote] = useState("");
   const [editExtra, setEditExtra] = useState("");
 
+  // 파일 목록 (상세 패널용)
+  const [fullFiles, setFullFiles] = useState<FullRepairFile[]>([]);
+  const [filesLoading, setFilesLoading] = useState(false);
+
+  // 관리자 업로드
+  const [adminUploadType, setAdminUploadType] = useState("disassembly_photo");
+  const [adminUploading, setAdminUploading] = useState(false);
+
+  // 외주업체 링크
+  const [outsourcePhone, setOutsourcePhone] = useState("");
+  const [generatingToken, setGeneratingToken] = useState(false);
+  const [tokenUrl, setTokenUrl] = useState("");
+
   const load = useCallback(async () => {
     const q = statusFilter !== "ALL" ? `?status=${statusFilter}` : "";
     const res = await fetch(`/api/admin/repairs${q}`);
@@ -64,10 +86,64 @@ export default function AdminRepairsPage() {
 
   useEffect(() => { load(); }, [load]);
 
+  async function loadFiles(repairId: number) {
+    setFilesLoading(true);
+    try {
+      const res = await fetch(`/api/admin/repairs/${repairId}/files`);
+      const data = await res.json();
+      setFullFiles(data.files ?? []);
+    } finally {
+      setFilesLoading(false);
+    }
+  }
+
   function openDetail(r: Repair) {
     setSelected(r);
     setEditNote(r.adminNote ?? "");
     setEditExtra(r.extraAmount > 0 ? String(r.extraAmount) : "");
+    setTokenUrl("");
+    setOutsourcePhone("");
+    loadFiles(r.id);
+  }
+
+  async function adminUpload(files: FileList) {
+    if (!selected || !files.length) return;
+    setAdminUploading(true);
+    const formData = new FormData();
+    formData.append("fileType", adminUploadType);
+    Array.from(files).forEach((f) => formData.append("files", f));
+    try {
+      const res = await fetch(`/api/admin/repairs/${selected.id}/files`, {
+        method: "POST",
+        body: formData,
+      });
+      if (!res.ok) throw new Error();
+      await loadFiles(selected.id);
+      await load();
+    } catch {
+      alert("업로드 실패");
+    } finally {
+      setAdminUploading(false);
+    }
+  }
+
+  async function generateToken() {
+    if (!selected) return;
+    setGeneratingToken(true);
+    try {
+      const res = await fetch(`/api/admin/repairs/${selected.id}/upload-token`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: outsourcePhone || undefined }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setTokenUrl(data.uploadUrl);
+    } catch {
+      alert("링크 생성 실패");
+    } finally {
+      setGeneratingToken(false);
+    }
   }
 
   async function updateStatus(newStatus: string) {
@@ -332,15 +408,123 @@ export default function AdminRepairsPage() {
                 </div>
               </div>
 
-              {/* 파일 현황 */}
+              {/* 파일 목록 */}
               <div className="border border-line p-4 text-[13px]">
-                <div className="mono text-[10px] text-dim tracking-widest mb-3">파일 현황</div>
-                <div className="space-y-1.5">
-                  <FileRow label="분해 사진" count={fileCount(selected, "disassembly_photo")} />
-                  <FileRow label="검사 성적서" count={fileCount(selected, "inspection_cert")} />
-                  <FileRow label="견적서 PDF" count={fileCount(selected, "quote_pdf")} />
-                  <FileRow label="거래명세표" count={fileCount(selected, "delivery_note")} />
+                <div className="mono text-[10px] text-dim tracking-widest mb-3">업로드된 파일</div>
+                {filesLoading ? (
+                  <div className="text-[12px] text-dim animate-pulse py-2">로딩 중...</div>
+                ) : fullFiles.length === 0 ? (
+                  <div className="text-[12px] text-dim py-2">업로드된 파일이 없습니다.</div>
+                ) : (
+                  <div className="space-y-1.5">
+                    {fullFiles.map((f) => (
+                      <div key={f.id} className="flex items-center gap-2 border border-line px-3 py-2">
+                        <span className="text-green-600 text-[11px]">✓</span>
+                        <span className="flex-1 text-[12px] truncate">{f.fileName}</span>
+                        <span className="text-[10px] text-dim shrink-0">
+                          {f.uploadedBy === "admin" ? "관리자" : f.uploadedBy === "outsource" ? "외주" : "고객"}
+                        </span>
+                        {f.fileUrl.startsWith("http") && (
+                          <a
+                            href={f.fileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[10px] text-edred hover:underline shrink-0"
+                          >
+                            보기
+                          </a>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* 관리자 직접 업로드 */}
+              <div className="border border-line p-4 text-[13px]">
+                <div className="mono text-[10px] text-dim tracking-widest mb-3">관리자 업로드</div>
+                <div className="mb-3">
+                  <label className="text-[11px] text-dim block mb-1">파일 종류</label>
+                  <select
+                    value={adminUploadType}
+                    onChange={(e) => setAdminUploadType(e.target.value)}
+                    className="w-full border border-line px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-paper"
+                  >
+                    <option value="disassembly_photo">분해 사진</option>
+                    <option value="inspection_cert">검사 성적서</option>
+                    <option value="quote_pdf">견적서 PDF</option>
+                    <option value="delivery_note">거래명세표</option>
+                    <option value="bank_copy">통장 사본</option>
+                  </select>
                 </div>
+                <label
+                  className={`flex flex-col items-center justify-center border-2 border-dashed cursor-pointer py-6 transition ${
+                    adminUploading
+                      ? "border-ink/30 bg-ink/5 cursor-wait"
+                      : "border-line hover:border-ink hover:bg-ink/5"
+                  }`}
+                >
+                  <input
+                    type="file"
+                    className="hidden"
+                    multiple
+                    disabled={adminUploading}
+                    onChange={(e) => e.target.files && adminUpload(e.target.files)}
+                  />
+                  {adminUploading ? (
+                    <div className="flex items-center gap-2 text-[12px] text-dim">
+                      <span className="animate-spin w-3 h-3 border-2 border-dim/30 border-t-ink rounded-full inline-block" />
+                      업로드 중...
+                    </div>
+                  ) : (
+                    <>
+                      <div className="text-[24px] text-dim mb-1">↑</div>
+                      <div className="text-[12px] font-medium">클릭하여 파일 선택</div>
+                    </>
+                  )}
+                </label>
+              </div>
+
+              {/* 외주업체 업로드 링크 */}
+              <div className="border border-line p-4 text-[13px]">
+                <div className="mono text-[10px] text-dim tracking-widest mb-3">외주업체 업로드 링크</div>
+                <div className="mb-3">
+                  <label className="text-[11px] text-dim block mb-1">외주업체 전화번호 (선택 — 문자 발송용)</label>
+                  <input
+                    type="tel"
+                    value={outsourcePhone}
+                    onChange={(e) => setOutsourcePhone(e.target.value)}
+                    placeholder="010-0000-0000"
+                    className="w-full border border-line px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-paper"
+                  />
+                </div>
+                <button
+                  onClick={generateToken}
+                  disabled={generatingToken}
+                  className="w-full py-2.5 border border-ink text-ink text-[12px] font-semibold hover:bg-ink hover:text-paper transition disabled:opacity-40"
+                >
+                  {generatingToken ? "생성 중..." : "7일 업로드 링크 생성"}
+                </button>
+                {tokenUrl && (
+                  <div className="mt-3 space-y-2">
+                    <div className="bg-ink/5 border border-line px-3 py-2 text-[11px] mono break-all">
+                      {tokenUrl}
+                    </div>
+                    <button
+                      onClick={() => { navigator.clipboard.writeText(tokenUrl); alert("복사되었습니다."); }}
+                      className="w-full py-2 bg-ink text-paper text-[12px] font-semibold hover:bg-edred transition"
+                    >
+                      링크 복사
+                    </button>
+                  </div>
+                )}
+                {selected.uploadTokens.length > 0 && (
+                  <p className="text-[11px] text-dim mt-3">
+                    기존 링크 {selected.uploadTokens.length}개 (최근:{" "}
+                    {formatDate(selected.uploadTokens[0].expiresAt)} 만료
+                    {selected.uploadTokens[0].usedAt ? " · 사용됨" : " · 미사용"})
+                  </p>
+                )}
               </div>
 
               {/* 관리자 메모 */}
