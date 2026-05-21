@@ -75,7 +75,7 @@ const providers: any[] = [
         if (token.phone) {
           const user = await prisma.user.findFirst({ where: { phone: token.phone } });
           if (!user) return null;
-          return { id: String(user.id), email: user.email, name: user.name, tier: user.tier, company: user.company };
+          return { id: String(user.id), email: user.email, name: user.name, tier: user.tier, company: user.company, phone: user.phone };
         }
         return null;
       }
@@ -88,7 +88,7 @@ const providers: any[] = [
       if (!user || user.tier !== "ADMIN") return null;
       const valid = await compare(credentials.password as string, user.passwordHash);
       if (!valid) return null;
-      return { id: String(user.id), email: user.email, name: user.name, tier: user.tier, company: user.company };
+      return { id: String(user.id), email: user.email, name: user.name, tier: user.tier, company: user.company, phone: user.phone };
     },
   }),
 ];
@@ -130,6 +130,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             token.tier = dbUser.tier;
             token.company = dbUser.company;
             token.id = String(dbUser.id);
+            token.phone = dbUser.phone ?? null;
           } catch (err) {
             console.error("[auth] OAuth user lookup failed:", err);
           }
@@ -142,6 +143,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.tier = (user as any).tier;
         token.company = (user as any).company;
         token.id = user.id;
+        token.phone = (user as any).phone ?? null;
       }
       return token;
     },
@@ -150,6 +152,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         (session.user as any).tier = token.tier;
         (session.user as any).company = token.company;
         (session.user as any).id = token.id;
+        (session.user as any).phone = token.phone ?? null;
       }
       return session;
     },

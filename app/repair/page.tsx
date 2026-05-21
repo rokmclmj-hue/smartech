@@ -100,7 +100,7 @@ export default function RepairPage() {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [repairNo, setRepairNo] = useState("");
-  const [noKitMode, setNoKitMode] = useState(false); // 키트 없는 타브랜드/미등록
+  const [noKitMode, setNoKitMode] = useState(false);
 
   const [form, setForm] = useState<FormData>({
     pumpFamily: "",
@@ -189,25 +189,6 @@ export default function RepairPage() {
   // ── 렌더링 ─────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-paper text-ink">
-      {/* 상단 바 */}
-      <header className="border-b border-line sticky top-0 bg-paper/95 backdrop-blur-sm z-40">
-        <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
-          <Link href="/" className="text-[13px] mono text-dim hover:text-ink transition flex items-center gap-2">
-            <span>←</span>
-            <span>SMARTECH</span>
-          </Link>
-          <span className="text-[11px] mono tracking-widest text-dim uppercase">
-            Repair Service
-          </span>
-          {session ? (
-            <span className="text-[12px] text-dim">{user?.name}</span>
-          ) : (
-            <Link href="/auth/login?callbackUrl=/repair" className="text-[12px] text-edred hover:underline">
-              로그인
-            </Link>
-          )}
-        </div>
-      </header>
 
       <main className="max-w-5xl mx-auto px-6 py-12">
         {/* 타이틀 */}
@@ -275,6 +256,10 @@ export default function RepairPage() {
                     setField("pumpModel", "");
                     setField("selectedKitId", null);
                     setNoKitMode(false);
+                    // 모델 선택 영역으로 부드럽게 스크롤
+                    setTimeout(() => {
+                      document.getElementById("model-selection")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }, 100);
                   }}
                   className={`text-left border p-5 transition-all group ${
                     form.pumpFamily === fam.id
@@ -312,7 +297,7 @@ export default function RepairPage() {
 
             {/* 모델 선택 (선택된 계열의 키트 목록) */}
             {form.pumpFamily && (
-              <div className="border border-line p-6 mb-8">
+              <div id="model-selection" className="border border-line p-6 mb-8 scroll-mt-20">
                 <h3 className="text-[14px] font-semibold mb-1">모델을 선택하세요</h3>
                 <p className="text-[12px] text-dim mb-5">
                   목록에 없는 모델은 "기타 / 목록 없음"을 선택해 주세요.
@@ -424,7 +409,11 @@ export default function RepairPage() {
               onClick={() => setStep(1)}
               className="px-8 py-4 bg-ink text-paper text-[14px] font-semibold hover:bg-edred transition-all disabled:opacity-30 disabled:cursor-not-allowed"
             >
-              다음 단계 →
+              {!form.pumpFamily
+                ? "펌프 종류를 선택하세요"
+                : (!form.selectedKitId && !noKitMode) || !form.pumpModel
+                ? "↓ 아래에서 모델을 선택하세요"
+                : "다음 단계 →"}
             </button>
           </div>
         )}
