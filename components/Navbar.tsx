@@ -107,6 +107,12 @@ export default function Navbar() {
                 </span>
                 {/* 견적 카트 아이콘 + 뱃지 */}
                 <Link
+                  href="/mypage"
+                  className="hidden sm:inline-flex chip !border-ink/60 hover:bg-ink hover:text-paper transition text-[11px]"
+                >
+                  마이페이지
+                </Link>
+                <Link
                   href="/quote"
                   className="hidden sm:inline-flex relative chip !border-ink/60 hover:bg-ink hover:text-paper transition text-[11px]"
                   aria-label={`견적 카트 ${cartCount}개`}
@@ -246,6 +252,15 @@ export default function Navbar() {
           {/* 로그인/비로그인 분기 메뉴 */}
           {session ? (
             <>
+              {/* 마이페이지 */}
+              <Link
+                href="/mypage"
+                onClick={() => setMenuOpen(false)}
+                className="py-3 border-b hair text-ink hover:text-edred transition-colors min-h-[44px] flex items-center"
+              >
+                마이페이지
+              </Link>
+
               {/* 견적 카트 — 뱃지 포함 */}
               <Link
                 href="/quote"
