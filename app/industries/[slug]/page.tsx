@@ -112,7 +112,7 @@ export default async function IndustryDetailPage({
               <div className="mono text-[11px] dim mb-3 md:mb-5">
                 — INDUSTRY · {industry.slug.toUpperCase()}
               </div>
-              <h1 className="display text-[clamp(36px,8vw,110px)] leading-[0.95]">
+              <h1 className="display text-[clamp(28px,5vw,72px)] leading-[1.05]">
                 {industry.title}
               </h1>
               <p className="mt-5 md:mt-6 text-[15px] md:text-[17px] leading-[1.55] max-w-[52ch] text-[#2a2823]">
@@ -136,12 +136,11 @@ export default async function IndustryDetailPage({
       {/* ═══════════════ OVERVIEW ═══════════════ */}
       <section className="border-b hair py-20">
         <div className="max-w-[1400px] mx-auto px-6">
-          <div className="grid grid-cols-12 gap-6">
+          <div className="grid grid-cols-12 gap-6 items-center">
             <div className="col-span-12 lg:col-span-4">
               <div className="mono text-[11px] dim mb-4">— 01 · OVERVIEW</div>
               <h2 className="display text-[34px] leading-[1.1]">
-                왜 이 산업에<br />
-                <span className="italic text-edred">진공</span>이 필요한가
+                왜 이 산업에 <span className="italic text-edred">진공</span>이 필요한가
               </h2>
             </div>
             <div className="col-span-12 lg:col-span-7 lg:col-start-6">
@@ -162,8 +161,7 @@ export default async function IndustryDetailPage({
                 — 02 · VACUUM PROCESSES
               </div>
               <h2 className="display text-[34px] leading-[1.1]">
-                실제 적용되는<br />
-                <span className="italic">세부 공정</span>
+                실제 적용되는 <span className="italic">세부 공정</span>
               </h2>
             </div>
           </div>
