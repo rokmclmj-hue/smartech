@@ -103,7 +103,7 @@ export default function Navbar() {
             {session ? (
               <>
                 <span className="hidden sm:block text-[11px] mono dim">
-                  {(session.user as { company?: string })?.company} ({TIER_LABELS[tier ?? ""] ?? tier})
+                  {(session.user as { company?: string })?.company}
                 </span>
                 {/* 견적 카트 아이콘 + 뱃지 */}
                 <Link
@@ -225,9 +225,7 @@ export default function Navbar() {
               <p className="text-sm font-medium text-ink">
                 {(session.user as { company?: string })?.company}
               </p>
-              <p className="text-[11px] text-dim">
-                {TIER_LABELS[tier ?? ""] ?? tier}
-              </p>
+              <p className="text-[11px] text-dim">회원</p>
             </div>
           )}
 

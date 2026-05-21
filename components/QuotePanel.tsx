@@ -171,7 +171,7 @@ export default function QuotePanel({ open, onClose }: Props) {
               전체 비우기
             </button>
             <div className="mono text-[10px] text-dim pt-1">
-              ※ 로그인 시 등급별 확정가 적용 · 가격은 VAT 별도
+              ※ 로그인 시 우대 가격 적용 · 가격은 VAT 별도
             </div>
           </div>
         )}
@@ -184,7 +184,7 @@ export default function QuotePanel({ open, onClose }: Props) {
               견적서 저장을<br />위해 로그인하세요
             </h3>
             <p className="text-[12px] text-dim text-center mb-6">
-              로그인 후 등급별 확정가가 적용되며<br />PDF로 저장할 수 있습니다.
+              로그인 후 우대가격이 적용되며<br />PDF로 저장할 수 있습니다.
             </p>
             <Link
               href="/auth/login"

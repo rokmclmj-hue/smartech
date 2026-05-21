@@ -148,7 +148,7 @@ export default function QuotePreviewModal({ open, onClose }: Props) {
                 ) : (
                   <div className="party-row">
                     <div className="lbl">Notice</div>
-                    <div className="val" style={{ color: "var(--q-gold)" }}>로그인 후 등급별 확정가 적용</div>
+                    <div className="val" style={{ color: "var(--q-gold)" }}>로그인 후 우대 가격 적용</div>
                   </div>
                 )}
               </div>
@@ -250,11 +250,11 @@ export default function QuotePreviewModal({ open, onClose }: Props) {
                 </div>
               </div>
               <div className="hero-side">
-                <div className="eyebrow">PREVIEW · {isLoggedIn ? tierLabel : "PUBLIC"}</div>
+                <div className="eyebrow">PREVIEW · QUOTE</div>
                 <p style={{ fontSize: 13, color: "var(--q-text-dim)", lineHeight: 1.6 }}>
                   {isLoggedIn
-                    ? `${tierLabel} 등급 가격이 적용된 미리보기입니다.\n정식 견적서는 로그인 후 제출하세요.`
-                    : "현재 공개가(PUBLIC) 기준입니다.\n로그인 시 등급별 확정가가 적용됩니다."}
+                    ? "우대 가격이 적용된 미리보기입니다.\n정식 견적서는 로그인 후 제출하세요."
+                    : "현재 공개가 기준입니다.\n로그인 시 우대 가격이 적용됩니다."}
                 </p>
                 <div className="meta-row" style={{ display:"flex", justifyContent:"space-between", paddingTop:8, borderTop:"1px dashed var(--q-line-soft)", fontFamily:"var(--q-mono)", fontSize:11, color:"var(--q-muted)" }}>
                   <span>DATE</span><span>{ymd(today)}</span>
@@ -378,7 +378,7 @@ export default function QuotePreviewModal({ open, onClose }: Props) {
               견적서 저장을<br />위해 로그인하세요
             </h3>
             <p style={{ fontSize:12, color:"var(--q-muted)", textAlign:"center", marginBottom:24, lineHeight:1.8 }}>
-              로그인 후 등급별 확정가가 적용되며<br />PDF로 저장할 수 있습니다.
+              로그인 후 우대가격이 적용되며<br />PDF로 저장할 수 있습니다.
             </p>
             <Link href="/auth/login" onClick={onClose} style={{
               display:"inline-block", padding:"12px 28px",

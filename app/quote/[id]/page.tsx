@@ -388,13 +388,12 @@ export default function QuoteDetailPage() {
               </div>
             </div>
             <div className="hero-side">
-              <div className="eyebrow">{showSavings ? "GRADE · " + userTier : "QUOTE · ACTIVE"}</div>
+              <div className="eyebrow">QUOTE · ACTIVE</div>
               {showSavings ? (
                 <>
-                  <span className="grade">{userTier} TIER</span>
+                  <span className="grade">SPECIAL PRICE</span>
                   <p style={{ fontSize: 13, color: "#B9C5D2", lineHeight: 1.6 }}>
-                    {userTier} 등급 가격이 적용된 견적입니다.<br />
-                    정가(End User) 대비 우대 단가가 반영되어 있습니다.
+                    우대 가격이 적용된 견적서입니다.
                   </p>
                   <div className="meta-row">
                     <span>VALID</span>

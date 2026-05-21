@@ -231,7 +231,7 @@ export default function ProductPanel({ item, onClose, catalogUrl }: Props) {
         {/* 푸터 */}
         <div className="px-6 py-3 border-t hair shrink-0">
           <div className="mono text-[10px] text-dim">
-            ※ 로그인 시 등급별 확정가 적용 · 가격은 VAT 별도
+            ※ 로그인 시 우대 가격 적용 · 가격은 VAT 별도
           </div>
         </div>
       </div>
