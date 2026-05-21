@@ -161,8 +161,9 @@ export default function AdminRepairsPage() {
         }),
       });
       if (!res.ok) throw new Error();
-      await load();
-      setSelected(null);
+      // 패널 닫지 않고 선택된 항목의 상태만 업데이트
+      setSelected((prev) => prev ? { ...prev, status: newStatus } : null);
+      load(); // 목록 백그라운드 새로고침
     } catch {
       alert("저장 실패");
     } finally {
@@ -174,6 +175,7 @@ export default function AdminRepairsPage() {
     if (!selected) return;
     setSaving(true);
     try {
+      const extra = editExtra ? Number(editExtra) : 0;
       await fetch("/api/admin/repairs", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -181,11 +183,13 @@ export default function AdminRepairsPage() {
           id: selected.id,
           status: selected.status,
           adminNote: editNote || null,
-          extraAmount: editExtra ? Number(editExtra) : 0,
+          extraAmount: extra,
         }),
       });
-      await load();
-      setSelected(null);
+      setSelected((prev) =>
+        prev ? { ...prev, adminNote: editNote || null, extraAmount: extra } : null
+      );
+      load();
     } finally {
       setSaving(false);
     }
@@ -195,7 +199,9 @@ export default function AdminRepairsPage() {
     r.files.filter((f) => f.fileType === type).length;
 
   return (
-    <div className="p-6 max-w-7xl">
+    <div className="flex overflow-hidden" style={{ height: "calc(100vh - 100px)" }}>
+      {/* 왼쪽: 목록 영역 */}
+      <div className="flex-1 min-w-0 overflow-y-auto p-6">
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -310,16 +316,11 @@ export default function AdminRepairsPage() {
         </table>
       </div>
 
-      {/* 상세 패널 */}
+      </div>{/* 왼쪽 목록 영역 끝 */}
+
+      {/* 오른쪽: 상세 패널 */}
       {selected && (
-        <div className="fixed inset-0 z-50 flex">
-          {/* 배경 */}
-          <div
-            className="flex-1 bg-ink/40 backdrop-blur-sm"
-            onClick={() => setSelected(null)}
-          />
-          {/* 패널 */}
-          <div className="w-full max-w-lg bg-paper overflow-y-auto shadow-2xl">
+        <div className="w-[480px] shrink-0 border-l border-line overflow-y-auto bg-paper">
             <div className="sticky top-0 bg-paper border-b border-line px-6 py-4 flex items-center justify-between z-10">
               <div>
                 <div className="mono text-[11px] text-dim mb-0.5">{selected.repairNo}</div>
@@ -548,7 +549,6 @@ export default function AdminRepairsPage() {
                 {saving ? "저장 중..." : "메모 / 금액 저장"}
               </button>
             </div>
-          </div>
         </div>
       )}
     </div>
