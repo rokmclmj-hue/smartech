@@ -221,8 +221,8 @@ export default function RepairPage() {
                     {i < step ? "✓" : i + 1}
                   </div>
                   <span
-                    className={`text-[10px] mt-1.5 mono tracking-wide whitespace-nowrap ${
-                      i === step ? "text-ink font-semibold" : "text-dim"
+                    className={`text-[13px] mt-1.5 tracking-wide whitespace-nowrap font-bold ${
+                      i === step ? "text-[#000000]" : "text-[#1a1a1a]"
                     }`}
                   >
                     {label}
@@ -246,7 +246,7 @@ export default function RepairPage() {
             <h2 className="text-[22px] font-bold tracking-tight mb-2">펌프 종류를 선택하세요</h2>
             <p className="text-[13px] text-dim mb-8">Edwards 외 타브랜드도 접수 가능합니다.</p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-10">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-10">
               {PUMP_FAMILIES.map((fam) => (
                 <button
                   key={fam.id}
