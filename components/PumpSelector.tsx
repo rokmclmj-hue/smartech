@@ -446,12 +446,12 @@ export default function PumpSelector() {
         )
       : [];
 
-  const tabCls = (t: Tab) =>
-    `flex-1 py-3 text-[15px] font-semibold tracking-wide transition-colors border-b-2 ${
-      tab === t
-        ? "border-ink text-ink"
-        : "border-transparent text-[#6A6660] hover:text-ink"
-    }`;
+  const tabCls = (t: Tab) => {
+    if (t === "search") {
+      return `flex-1 py-4 text-[17px] font-semibold tracking-wide transition-colors border border-[#E3DFD6] text-ink hover:bg-ink hover:text-paper hover:border-ink`;
+    }
+    return `flex-1 py-4 text-[17px] font-semibold tracking-wide transition-colors border border-[#E3DFD6] text-ink hover:bg-edred hover:text-paper hover:border-edred`;
+  };
 
   return (
     <div className="mt-8">
@@ -463,7 +463,7 @@ export default function PumpSelector() {
       />
 
       {/* Tabs */}
-      <div className="flex border-b border-[#E3DFD6]">
+      <div className="flex gap-2">
         <button className={tabCls("search")} onClick={() => { setTab("search"); setSelectedCategory(null); setSearch(""); }}>
           제품 검색
         </button>
@@ -484,7 +484,7 @@ export default function PumpSelector() {
                   placeholder="파트번호 또는 모델명 검색 (예: A65301903, EH250)"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full border border-[#E3DFD6] px-3 py-2.5 text-[14px] focus:outline-none focus:border-ink bg-transparent mb-3"
+                  className="w-full border-2 border-ink px-3 py-2.5 text-[14px] focus:outline-none bg-transparent mb-3 placeholder:text-[#2a2823]"
                 />
                 {newGlobalResults.length > 0 ? (
                   <>
