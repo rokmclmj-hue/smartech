@@ -23,14 +23,14 @@ model Product {
 }
 
 model User {
-  id               Int        @id @default(autoincrement())
-  email            String?    @unique
+  id               Int             @id @default(autoincrement())
+  email            String?         @unique
   name             String
   company          String
   passwordHash     String
-  tier             String     @default("PENDING")
-  createdAt        DateTime   @default(now())
-  phone            String?    @unique
+  tier             String          @default("PENDING")
+  createdAt        DateTime        @default(now())
+  phone            String?         @unique
   businessNo       String?
   businessFileUrl  String?
   cardImageUrl     String?
@@ -40,8 +40,9 @@ model User {
   aiTypeReason     String?
   quotes           Quote[]
   orders           Order[]
-  createdQuotes    Quote[]    @relation("QuoteCreatedBy")
+  createdQuotes    Quote[]         @relation("QuoteCreatedBy")
   auditLogs        AuditLog[]
+  repairRequests   RepairRequest[]
 }
 
 model PriceRule {
@@ -122,6 +123,151 @@ model MagicLinkToken {
   @@index([phone])
 }
 
+// ─────────────────────────────────────────────────
+// 수리 플랫폼
+// ─────────────────────────────────────────────────
+
+// 펌프 모델별 기본 수리 키트 (엑셀 임포트 or 수동 등록)
+model RepairKit {
+  id           Int              @id @default(autoincrement())
+  pumpFamily   String           // scroll | rotary_vane | booster | dry | other
+  pumpMaker    String           @default("EDWARDS")
+  pumpModel    String           // "nXDS10i", "RV8", "EH500" 등
+  modelGroup   String?          // "nXDS10i/15i" — 화면 표시용 묶음명
+  basePrice    Int              @default(0)   // 기본 수리비 (원), 0이면 상담 필요
+  description  String?
+  isActive     Boolean          @default(true)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  parts        RepairKitPart[]
+  extraParts   RepairKitExtra[]
+  requests     RepairRequest[]
+
+  @@index([pumpFamily])
+  @@index([pumpModel])
+}
+
+// 기본 키트에 포함된 교체 파트 목록
+model RepairKitPart {
+  id        Int       @id @default(autoincrement())
+  kitId     Int
+  name      String    // "Tip seal", "Bearing" 등
+  quantity  String?   // "x5", "x1" 등
+  sortOrder Int       @default(0)
+  kit       RepairKit @relation(fields: [kitId], references: [id], onDelete: Cascade)
+}
+
+// 추가 교체 시 발생 가능한 파트 및 단가
+model RepairKitExtra {
+  id        Int       @id @default(autoincrement())
+  kitId     Int
+  name      String    // "Scroll", "Blade", "커플링" 등
+  price     Int       // 단가 (원)
+  kit       RepairKit @relation(fields: [kitId], references: [id], onDelete: Cascade)
+}
+
+// 수리 접수
+model RepairRequest {
+  id            Int               @id @default(autoincrement())
+  repairNo      String            @unique  // SM-YYMMDD-NN
+  userId        Int?              // 로그인 회원 (null 이면 비회원 문의)
+
+  // 장비 정보
+  pumpFamily    String            // scroll | rotary_vane | booster | dry | other
+  pumpMaker     String            @default("EDWARDS")
+  pumpModel     String
+  pumpSerial    String?
+  kitId         Int?              // 매핑된 수리 키트
+
+  // 증상 (복수 선택 가능)
+  symptoms      String[]
+  symptomNote   String?           // 기타 증상 메모
+
+  // 금액 (단위: 원)
+  baseAmount    Int               @default(0)
+  extraAmount   Int               @default(0)  // 관리자가 추가한 파트비
+  totalAmount   Int               @default(0)
+
+  // 연락처 (비회원도 입력)
+  contactName   String
+  contactPhone  String
+  contactEmail  String?
+  company       String?
+
+  // 진행 상태
+  // RECEIVED(접수완료) | IN_PROGRESS(수리진행) | INSPECTION(검사중) | COMPLETED(수리완료) | DELIVERED(납품완료) | CANCELLED(취소)
+  status        String            @default("RECEIVED")
+
+  // 관리자 메모 / 외주 배정
+  adminNote     String?
+  assignedAt    DateTime?         // 외주업체 배정 시각
+
+  // 발송 이력
+  docsSentAt    DateTime?         // 최종 서류 발송 시각
+  docsSentCount Int               @default(0)
+
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  user          User?             @relation(fields: [userId], references: [id])
+  kit           RepairKit?        @relation(fields: [kitId], references: [id])
+  files         RepairFile[]
+  statusLogs    RepairStatusLog[]
+  uploadTokens  UploadToken[]
+
+  @@index([status])
+  @@index([repairNo])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// 수리 관련 파일 (분해 사진, 검사 성적서, 견적서 PDF 등) — 영구 보관
+model RepairFile {
+  id          Int           @id @default(autoincrement())
+  repairId    Int
+  // disassembly_photo | inspection_cert | quote_pdf | delivery_note | bank_copy | other
+  fileType    String
+  fileName    String
+  fileUrl     String        // Vercel Blob URL
+  fileSize    Int?          // bytes
+  uploadedBy  String        // customer | admin | outsource
+  createdAt   DateTime      @default(now())
+
+  repair      RepairRequest @relation(fields: [repairId], references: [id], onDelete: Cascade)
+
+  @@index([repairId, fileType])
+}
+
+// 수리 상태 변경 이력
+model RepairStatusLog {
+  id        Int           @id @default(autoincrement())
+  repairId  Int
+  fromStatus String?
+  toStatus  String
+  note      String?
+  changedBy String        // admin | system | customer
+  createdAt DateTime      @default(now())
+
+  repair    RepairRequest @relation(fields: [repairId], references: [id], onDelete: Cascade)
+
+  @@index([repairId])
+}
+
+// 외주업체 일회용 업로드 토큰 (로그인 없이 파일 업로드)
+model UploadToken {
+  id        String        @id @default(cuid())
+  repairId  Int
+  token     String        @unique @default(cuid())
+  expiresAt DateTime      // 생성 후 7일
+  usedAt    DateTime?     // 최초 업로드 시각 (만료 X, 추적용)
+  createdAt DateTime      @default(now())
+
+  repair    RepairRequest @relation(fields: [repairId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+}
+
+// ─────────────────────────────────────────────────
 // 기존 거래처 화이트리스트 — 엑셀 임포트 or 수동 등록
 model KnownCompany {
   id          Int      @id @default(autoincrement())
