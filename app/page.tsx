@@ -418,7 +418,8 @@ export default function Home() {
                 <a href="mailto:rokmclmj@gmail.com" className="block hover:text-edred transition-colors">✉ rokmclmj@gmail.com</a>
                 <a href="tel:031-204-7170" className="block hover:text-edred transition-colors">☏ 031-204-7170 <span className="text-edred">· 24/7</span></a>
                 <div>(주)스마텍</div>
-                <div><span className="text-edred font-semibold">Edwards</span> Vacuum 공식 대리점</div>
+                <div><span className="text-edred font-semibold">Edwards</span> 코리아 공식대리점</div>
+                <div>www.smartechvacuum.com</div>
               </div>
             </div>
           </div>
