@@ -344,20 +344,15 @@ export default function Home() {
                       <span className="w-1.5 h-1.5 rounded-full bg-edred inline-block animate-pulse" />
                       CALL · 24/7
                     </div>
-                    <div className="display text-[44px] leading-none mt-3 tabular">031-204-7170</div>
-                    <div className="text-[12px] mt-3 opacity-70">24시간 응급 대응 · 펌프 다운은 분 단위로 움직입니다</div>
+                    <div className="display text-[36px] leading-none mt-3 tabular">031-204-7170</div>
                   </a>
                   <a href="mailto:rokmclmj@gmail.com" className="p-8 hover:bg-edred transition-colors group block">
-                    <div className="mono text-[11px] opacity-70">MAIL</div>
-                    <div className="display text-[36px] leading-none mt-3 break-all">rokmclmj@gmail.com</div>
-                    <div className="text-[12px] mt-3 opacity-70">야간·주말 메일도 확인합니다</div>
+                    <div className="mono text-[11px] opacity-70 flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-edred inline-block animate-pulse" />
+                      MAIL · 24/7
+                    </div>
+                    <div className="display text-[28px] leading-none mt-3">rokmclmj@gmail.com</div>
                   </a>
-                </div>
-                <div className="p-8 border-t border-paper/20 flex flex-wrap gap-3 items-start">
-                  <ContactQuoteCta />
-                  <Link href="/auth/register" className="border border-paper/30 px-6 py-4 text-sm hover:bg-paper hover:text-ink transition-colors">
-                    B2B 회원가입
-                  </Link>
                 </div>
               </div>
             </div>
@@ -474,6 +469,6 @@ const STEPS = [
 const TIMELINE = [
   { year: "2006", title: "Edwards 코리아 합류", desc: "기술영업으로 5년, 수많은 고객 현장과 공정 앞에서 진공을 읽는 감각을 쌓은 시간." },
   { year: "2011", title: "Smartech 창업", desc: "Edwards 공식 대리점으로, '기술하는 파트너'로 출발했습니다." },
-  { year: "2018", title: "(주)스마텍 법인 전환", desc: "규모보다 신뢰를 먼저 키우자 — 그렇게 커진 이름입니다." },
+  { year: "2018", title: "(주)스마텍 법인 전환", desc: "법인 전환과 동시에 천안 AS 센터를 개소하였습니다." },
   { year: "NOW", title: "거래처의 신뢰를 지켜가는 중", desc: "오래된 거래처가 지금도 먼저 전화해 오는 것, 그게 스마텍의 가장 큰 자랑입니다." },
 ];

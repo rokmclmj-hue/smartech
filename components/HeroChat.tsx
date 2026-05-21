@@ -113,10 +113,6 @@ export default function HeroChat() {
         </div>
       )}
 
-      {/* 입력 안내 */}
-      <div className="px-5 py-3 border-t hair">
-        <p className="text-[12px] text-ink">예: 10⁻³ mbar, 오일프리, 분석기용 터보 백킹 펌프 필요</p>
-      </div>
 
       {/* Input */}
       <div className="p-3 border-t hair flex gap-2">
