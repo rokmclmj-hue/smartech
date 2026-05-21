@@ -1,6 +1,8 @@
 "use client";
+import { useRouter } from "next/navigation";
 
 export default function HeroCtaCards() {
+  const router = useRouter();
   return (
     <div className="mt-9 grid grid-cols-3 gap-2.5 max-w-xl hero-rise" style={{ ["--rd" as never]: ".75s" }}>
       {/* 견적 문의 — 제품 검색 섹션으로 스크롤 */}
@@ -30,12 +32,9 @@ export default function HeroCtaCards() {
         </div>
       </div>
 
-      {/* 수리 문의 */}
+      {/* 수리 문의 — /repair 페이지로 이동 */}
       <div
-        onClick={(e) => {
-          e.preventDefault();
-          document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
-        }}
+        onClick={() => router.push("/repair")}
         className="group border border-ink p-4 flex flex-col justify-between min-h-[108px] hover:bg-ink hover:text-paper transition-all cursor-pointer"
       >
         <div className="text-[9px] mono tracking-widest opacity-50">REPAIR</div>

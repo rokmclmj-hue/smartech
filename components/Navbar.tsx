@@ -127,8 +127,8 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                <Link href="/#contact" className="hidden sm:inline-flex chip !border-ink hover:bg-ink hover:text-paper transition">
-                  상담 신청 →
+                <Link href="/repair" className="hidden sm:inline-flex chip !border-ink hover:bg-ink hover:text-paper transition">
+                  수리 문의 →
                 </Link>
                 <Link href="/auth/login" className="hidden sm:inline-flex chip !border-edred bg-edred text-paper text-[11px] hover:bg-edred/90 transition">
                   로그인
