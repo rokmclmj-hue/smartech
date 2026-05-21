@@ -14,6 +14,34 @@ export function generateStaticParams() {
   return INDUSTRIES.map((i) => ({ slug: i.slug }));
 }
 
+const PUMP_PDF: Record<string, string> = {
+  RV:          "/catalogs/1.오일펌프_소형RV.pdf",
+  E2M:         "/catalogs/2.오일펌프_중대형E2M.pdf",
+  E2S:         "/catalogs/2-1오일펌프 중대형E2S.pdf",
+  nES:         "/catalogs/3.오일펌프_nES.pdf",
+  nXDS:        "/catalogs/4.스크롤펌프_소형nXDS.pdf",
+  XDS:         "/catalogs/5.스크롤펌프_중형XDS.pdf",
+  EH:          "/catalogs/6.부스터펌프EH.pdf",
+  GXS:         "/catalogs/7.산업용드라이펌프_GXS Dry.pdf",
+  EXS:         "/catalogs/7-1.산업용드라이_EXS.pdf",
+  iXH:         "/catalogs/8.반도체드라이_iXH.pdf",
+  iXL:         "/catalogs/9.반도체드라이_iXL.pdf",
+  nXRi:        "/catalogs/8-1.반도체드라이_nXRi.pdf",
+  ELD500:      "/catalogs/9-1.헬륨리크디텍터_ELD500.pdf",
+  nEXT:        "/catalogs/10.nEXT 터보펌프.pdf",
+  "T-station": "/catalogs/11.터보펌프_nEXT_Pumping_Station.pdf",
+  STP:         "/catalogs/12.터보펌프_STP.pdf",
+  APG200:      "/catalogs/13.저진공게이지_APG200.pdf",
+  AIM200:      "/catalogs/14.고진공게이지AIM200.pdf",
+  WRG200:      "/catalogs/15.저진공+고진공게이지_WRG200.pdf",
+  "P4-P5":     "/catalogs/16.디스플레이진공게이지_P4-P5.pdf",
+  TIC:         "/catalogs/17.컨트롤러_TIC.pdf",
+  ADC:         "/catalogs/18.컨트롤러_ADC.pdf",
+  EMF:         "/catalogs/19.미스트필터(EMF).pdf",
+  Ultra19:     "/catalogs/20.진공펌프오일_Ultra19.pdf",
+  Fittings:    "/catalogs/21.피팅_52~57페이지사용.PDF",
+};
+
 const PUMP_IMAGE: Record<string, string> = {
   RV: "/images/products/rv.jpeg",
   E2M: "/images/products/e2m.png",
@@ -44,6 +72,10 @@ const PUMP_IMAGE: Record<string, string> = {
 
 function pumpImage(name: string): string {
   return PUMP_IMAGE[name] ?? "/images/products/rv.jpeg";
+}
+
+function pumpPdf(name: string): string | null {
+  return PUMP_PDF[name] ?? null;
 }
 
 export default async function IndustryDetailPage({
@@ -116,17 +148,6 @@ export default async function IndustryDetailPage({
               <p className="text-[15.5px] leading-[1.85] text-[#2a2823]">
                 {hiEd(industry.description)}
               </p>
-              <div className="mt-8 pt-6 border-t hair text-[12px] mono dim">
-                REFERENCE —{" "}
-                <a
-                  href={industry.edwardsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline-red pb-0.5 hover:text-edred"
-                >
-                  edwardsvacuum.com →
-                </a>
-              </div>
             </div>
           </div>
         </div>
@@ -172,56 +193,48 @@ export default async function IndustryDetailPage({
                 — 03 · RECOMMENDED MODELS
               </div>
               <h2 className="display text-[34px] leading-[1.1]">
-                이 산업에 맞는<br />
-                <span className="text-edred">Edwards</span> <span className="italic">조합</span>
+                이 산업에 맞는 <span className="text-edred">Edwards</span> <span className="italic">조합</span>
               </h2>
-            </div>
-            <div className="col-span-12 lg:col-span-5 lg:col-start-8 mt-4">
-              <p className="text-[14.5px] leading-[1.7] text-[#2a2823]">
-                공정 조건(압력·유량·가스종·부식성)에 따라 조합이 달라집니다.
-                정확한 모델은 사양서를 받아본 후 제안드립니다.
-              </p>
             </div>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {industry.recommendedPumps.map((pump, i) => (
-              <div
-                key={pump}
-                className="border hair bg-paper flex flex-col overflow-hidden group"
-              >
-                <div className="aspect-[4/3] relative bg-[#F6F4EF] border-b hair overflow-hidden">
-                  <img
-                    src={pumpImage(pump)}
-                    alt={pump}
-                    className="absolute inset-0 w-full h-full object-contain p-3 group-hover:scale-105 transition-transform duration-500"
-                    loading="lazy"
-                  />
-                </div>
-                <div className="p-4">
-                  <div className="mono text-[10.5px] opacity-60">
-                    {String(i + 1).padStart(2, "0")} · <span className="text-edred font-semibold">Edwards</span>
+            {industry.recommendedPumps.map((pump, i) => {
+              const pdf = pumpPdf(pump);
+              const Wrapper = pdf ? "a" : "div";
+              const wrapperProps = pdf
+                ? { href: pdf, target: "_blank", rel: "noopener noreferrer" }
+                : {};
+              return (
+                <Wrapper
+                  key={pump}
+                  {...(wrapperProps as any)}
+                  className={`border hair bg-paper flex flex-col overflow-hidden group${pdf ? " cursor-pointer" : ""}`}
+                >
+                  <div className="aspect-[4/3] relative bg-[#F6F4EF] border-b hair overflow-hidden">
+                    <img
+                      src={pumpImage(pump)}
+                      alt={pump}
+                      className="absolute inset-0 w-full h-full object-contain p-3 group-hover:scale-105 transition-transform duration-500"
+                      loading="lazy"
+                    />
                   </div>
-                  <div className="display text-[24px] leading-none mt-2">{pump}</div>
-                </div>
-              </div>
-            ))}
+                  <div className="p-4">
+                    <div className="mono text-[10.5px] opacity-60">
+                      {String(i + 1).padStart(2, "0")} · <span className="text-edred font-semibold">Edwards</span>
+                    </div>
+                    <div className="display text-[24px] leading-none mt-2">{pump}</div>
+                    {pdf && (
+                      <div className="mt-2 text-[10px] mono text-edred opacity-70 group-hover:opacity-100">
+                        카탈로그 PDF →
+                      </div>
+                    )}
+                  </div>
+                </Wrapper>
+              );
+            })}
           </div>
 
-          <div className="mt-10 flex flex-wrap gap-3">
-            <Link
-              href="/#contact"
-              className="inline-flex items-center gap-3 bg-ink text-paper px-6 py-4 text-sm hover:bg-edred transition-colors"
-            >
-              <span className="w-2 h-2 rounded-full bg-edred inline-block" />이 산업 상담 받기 →
-            </Link>
-            <Link
-              href="/products"
-              className="inline-flex items-center gap-2 border border-ink px-6 py-4 text-sm hover:bg-ink hover:text-paper transition-colors"
-            >
-              전체 제품 라인업 →
-            </Link>
-          </div>
         </div>
       </section>
 

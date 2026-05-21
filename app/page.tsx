@@ -182,7 +182,7 @@ export default function Home() {
         <div className="max-w-[1400px] mx-auto px-6">
           <div className="mb-16 text-center">
             <div className="mono text-[11px] dim mb-4">— 01 · TOTAL SOLUTION</div>
-            <h2 className="section-title display">
+            <h2 className="section-title display" style={{ fontSize: "clamp(28px, 4.8vw, 72px)" }}>
               판매로 시작해, <span className="italic text-edred">운전 수명 내내</span> 함께합니다.
             </h2>
             <p className="mt-6 text-[15px] leading-[1.75] text-[#2a2823]">

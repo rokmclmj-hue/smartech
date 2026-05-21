@@ -23,8 +23,7 @@ export default function Industries() {
               <span className="italic">보이지 않는 기반</span>입니다.
             </h2>
             <p className="mt-6 text-[15px] max-w-[55ch] leading-[1.75] text-[#2a2823]">
-              반도체부터 핵융합까지 — 스마텍은 20개 산업에서 쓰입니다.
-              카드를 클릭하면 공정·권장 모델 상세 페이지로 이동합니다.
+              반도체부터 핵융합까지, 진공펌프는 20개 산업에서 쓰입니다.
             </p>
           </div>
 
@@ -98,7 +97,7 @@ export default function Industries() {
         </div>
 
         <div className="mt-10 text-[12.5px] dim mono flex justify-between">
-          <span>카드를 클릭하면 산업별 상세 공정·권장 펌프 페이지가 열립니다</span>
+          <span></span>
           <span>{visible.length} / 20 INDUSTRIES</span>
         </div>
       </div>
