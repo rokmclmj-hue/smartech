@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" stroke="#111111" stroke-linecap="round" stroke-linejoin="round">
+  <!-- EMF Oil Mist Filter — vertical cylinder with inlet/outlet, end cap, drain -->
+  <!-- Main cylindrical body -->
+  <rect x="52" y="32" width="96" height="128" rx="48" stroke-width="9"/>
+  <!-- Top end cap (domed) -->
+  <path d="M52,56 Q52,24 100,24 Q148,24 148,56" stroke-width="8"/>
+  <!-- Bleed valve on top cap -->
+  <line x1="100" y1="24" x2="100" y2="10" stroke-width="7"/>
+  <rect x="86"  y="4"  width="28" height="12" rx="4" stroke-width="6"/>
+  <!-- Filter element ribs (visible through body — mesh pattern) -->
+  <line x1="56"  y1="72"  x2="144" y2="72"  stroke-width="4"/>
+  <line x1="56"  y1="90"  x2="144" y2="90"  stroke-width="4"/>
+  <line x1="56"  y1="108" x2="144" y2="108" stroke-width="4"/>
+  <line x1="56"  y1="126" x2="144" y2="126" stroke-width="4"/>
+  <!-- Vertical ribs -->
+  <line x1="76"  y1="56"  x2="76"  y2="144" stroke-width="3"/>
+  <line x1="100" y1="56"  x2="100" y2="144" stroke-width="3"/>
+  <line x1="124" y1="56"  x2="124" y2="144" stroke-width="3"/>
+  <!-- Inlet port — upper right side -->
+  <line x1="148" y1="68"  x2="170" y2="58"  stroke-width="8"/>
+  <rect x="170" y="50"   width="16" height="16" rx="4" stroke-width="6"/>
+  <!-- Outlet port — lower left side (clean air out) -->
+  <line x1="52"  y1="124" x2="30"  y2="134" stroke-width="8"/>
+  <rect x="14"   y="126"  width="16" height="16" rx="4" stroke-width="6"/>
+  <!-- Bottom drain point -->
+  <rect x="84"  y="160"  width="32" height="14" rx="7" stroke-width="7"/>
+  <line x1="100" y1="174" x2="100" y2="188" stroke-width="7"/>
+  <circle cx="100" cy="192" r="6" stroke-width="5"/>
+</svg>

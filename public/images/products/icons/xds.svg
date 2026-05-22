@@ -1,16 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" stroke="#111111" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
-  <!-- 중형 스크롤 펌프 -->
-  <!-- 사각형 하우징 (중형은 박스형) -->
-  <rect x="30" y="35" width="130" height="120" rx="10"/>
-  <!-- 스크롤 나선 (더 큰 스크롤) -->
-  <path d="M 95 95 Q 95 72 112 62 Q 132 50 145 68 Q 155 85 145 105 Q 133 125 112 128 Q 85 132 68 115 Q 52 96 60 72 Q 68 50 90 44"/>
-  <!-- 중심 축 -->
-  <circle cx="95" cy="95" r="9"/>
-  <!-- 상단 흡입 플랜지 -->
-  <rect x="80" y="22" width="30" height="13" rx="3"/>
-  <line x1="85" y1="35" x2="85" y2="35"/>
-  <!-- 하단 배출 플랜지 -->
-  <rect x="80" y="155" width="30" height="13" rx="3"/>
-  <!-- 우측 모터 연결부 -->
-  <rect x="160" y="60" width="12" height="70" rx="4"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" stroke="#111111" stroke-linecap="round" stroke-linejoin="round">
+  <!-- XDS Dry Scroll Pump (medium) — top view, square housing, larger scroll -->
+  <!-- Square housing (different from nXDS circle) -->
+  <rect x="16" y="16" width="168" height="168" rx="14" stroke-width="9"/>
+  <rect x="26" y="26" width="148" height="148" rx="10" stroke-width="4"/>
+  <!-- Larger Archimedean spiral (1.75 turns, bigger radius) -->
+  <path d="M100,100 C100,82 114,72 130,74 C150,77 164,95 162,116 C160,140 140,158 116,158 C88,158 66,138 66,110 C66,78 88,54 120,52 C156,50 182,78 180,114" stroke-width="7"/>
+  <!-- Center hub (larger than nXDS) -->
+  <circle cx="100" cy="100" r="13" stroke-width="7"/>
+  <!-- Counter scroll arc -->
+  <path d="M100,100 C100,118 86,128 74,122 C58,114 54,96 62,82" stroke-width="5"/>
+  <!-- Inlet port — top center -->
+  <rect x="82" y="2" width="36" height="14" rx="3" stroke-width="7"/>
+  <line x1="82" y1="16" x2="82" y2="16" stroke-width="7"/>
+  <!-- Outlet port — bottom center -->
+  <rect x="82" y="184" width="36" height="14" rx="3" stroke-width="7"/>
+  <!-- Motor attachment — right side -->
+  <rect x="184" y="76" width="14" height="48" rx="5" stroke-width="7"/>
 </svg>

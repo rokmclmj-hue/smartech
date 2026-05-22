@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" stroke="#111111" stroke-linecap="round" stroke-linejoin="round">
+  <!-- P4/P5 Display Gauge — digital display panel, prominent screen -->
+  <!-- Outer instrument housing -->
+  <rect x="20" y="18" width="160" height="164" rx="10" stroke-width="9"/>
+  <!-- Inner bezel -->
+  <rect x="28" y="26" width="144" height="148" rx="7" stroke-width="4"/>
+  <!-- Digital display screen (large, fills top 2/3) -->
+  <rect x="34" y="34" width="132" height="88" rx="6" stroke-width="7"/>
+  <!-- 7-segment style large number (pressure reading) -->
+  <!-- Top segment -->
+  <line x1="60"  y1="50"  x2="92"  y2="50"  stroke-width="6"/>
+  <!-- Upper-left vertical -->
+  <line x1="54"  y1="52"  x2="54"  y2="78"  stroke-width="6"/>
+  <!-- Upper-right vertical -->
+  <line x1="98"  y1="52"  x2="98"  y2="78"  stroke-width="6"/>
+  <!-- Middle segment -->
+  <line x1="56"  y1="80"  x2="96"  y2="80"  stroke-width="6"/>
+  <!-- Lower-left vertical -->
+  <line x1="54"  y1="82"  x2="54"  y2="108" stroke-width="6"/>
+  <!-- Lower-right vertical -->
+  <line x1="98"  y1="82"  x2="98"  y2="108" stroke-width="6"/>
+  <!-- Bottom segment -->
+  <line x1="60"  y1="110" x2="92"  y2="110" stroke-width="6"/>
+  <!-- Decimal point -->
+  <circle cx="107" cy="110" r="4" stroke-width="5"/>
+  <!-- Exponent digits (smaller) -->
+  <line x1="118" y1="54"  x2="138" y2="54"  stroke-width="4"/>
+  <line x1="118" y1="54"  x2="118" y2="72"  stroke-width="4"/>
+  <line x1="118" y1="72"  x2="138" y2="72"  stroke-width="4"/>
+  <line x1="138" y1="54"  x2="138" y2="72"  stroke-width="4"/>
+  <!-- Units label area below digits -->
+  <line x1="42"  y1="100" x2="148" y2="100" stroke-width="3"/>
+  <!-- Unit text lines (mbar/Torr/Pa area) -->
+  <line x1="68"  y1="107" x2="118" y2="107" stroke-width="3"/>
+  <!-- Control buttons row below display -->
+  <rect x="34" y="132" width="132" height="36" rx="5" stroke-width="6"/>
+  <rect x="44"  y="140" width="28" height="20" rx="4" stroke-width="5"/>
+  <rect x="80"  y="140" width="28" height="20" rx="4" stroke-width="5"/>
+  <rect x="116" y="140" width="28" height="20" rx="4" stroke-width="5"/>
+  <!-- Bottom connection port -->
+  <line x1="100" y1="182" x2="100" y2="196" stroke-width="8"/>
+  <circle cx="100" cy="198" r="5" stroke-width="6"/>
+</svg>

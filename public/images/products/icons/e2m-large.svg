@@ -1,26 +1,36 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" stroke="#111111" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
-  <!-- 대형 원통 펌프 본체 -->
-  <rect x="35" y="55" width="110" height="75" rx="8"/>
-  <!-- 흡입구 좌측 (대형) -->
-  <line x1="15" y1="92" x2="35" y2="92"/>
-  <circle cx="9" cy="92" r="10"/>
-  <!-- 배출구 우측 (대형) -->
-  <line x1="145" y1="85" x2="165" y2="85"/>
-  <line x1="145" y1="99" x2="165" y2="99"/>
-  <line x1="165" y1="85" x2="165" y2="99"/>
-  <!-- 내부 대형 로터 -->
-  <circle cx="82" cy="92" r="24"/>
-  <line x1="82" y1="68" x2="82" y2="116"/>
-  <line x1="58" y1="92" x2="106" y2="92"/>
-  <line x1="65" y1="75" x2="99" y2="109"/>
-  <line x1="99" y1="75" x2="65" y2="109"/>
-  <!-- 오일 게이지 -->
-  <rect x="118" y="65" width="15" height="30" rx="2"/>
-  <!-- 오일 주입구 -->
-  <rect x="65" y="40" width="35" height="15" rx="3"/>
-  <!-- 받침 프레임 -->
-  <rect x="30" y="130" width="120" height="14" rx="3"/>
-  <line x1="50" y1="144" x2="50" y2="162"/>
-  <line x1="130" y1="144" x2="130" y2="162"/>
-  <line x1="30" y1="162" x2="150" y2="162"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" stroke="#111111" stroke-linecap="round" stroke-linejoin="round">
+  <!-- E2M Large — wide body, large motor drum, prominent oil sight glass -->
+  <!-- Main pump body (wide, tall) -->
+  <rect x="18" y="52" width="112" height="88" rx="8" stroke-width="9"/>
+  <!-- Large inlet flange — left side (bigger than E2M small) -->
+  <circle cx="18" cy="96" r="26" stroke-width="9"/>
+  <circle cx="18" cy="96" r="14" stroke-width="4"/>
+  <!-- Large internal rotor with 4 vanes + cross -->
+  <circle cx="74" cy="96" r="28" stroke-width="6"/>
+  <line x1="74" y1="68"  x2="74"  y2="124" stroke-width="5"/>
+  <line x1="46" y1="96"  x2="102" y2="96"  stroke-width="5"/>
+  <line x1="54" y1="76"  x2="94"  y2="116" stroke-width="4"/>
+  <line x1="94" y1="76"  x2="54"  y2="116" stroke-width="4"/>
+  <!-- Oil sight glass (large, prominent) -->
+  <rect x="106" y="63" width="14" height="42" rx="3" stroke-width="6"/>
+  <line x1="109" y1="70"  x2="117" y2="70"  stroke-width="3"/>
+  <line x1="109" y1="78"  x2="117" y2="78"  stroke-width="3"/>
+  <line x1="109" y1="86"  x2="117" y2="86"  stroke-width="3"/>
+  <!-- Oil fill port on top -->
+  <rect x="52" y="36" width="36" height="16" rx="4" stroke-width="6"/>
+  <line x1="70" y1="52" x2="70" y2="52" stroke-width="6"/>
+  <!-- Motor drum — large cylinder on right -->
+  <rect x="130" y="56" width="44" height="78" rx="8" stroke-width="9"/>
+  <!-- Motor ventilation fins -->
+  <line x1="140" y1="66"  x2="164" y2="66"  stroke-width="3"/>
+  <line x1="140" y1="76"  x2="164" y2="76"  stroke-width="3"/>
+  <line x1="140" y1="86"  x2="164" y2="86"  stroke-width="3"/>
+  <line x1="140" y1="96"  x2="164" y2="96"  stroke-width="3"/>
+  <line x1="140" y1="106" x2="164" y2="106" stroke-width="3"/>
+  <line x1="140" y1="116" x2="164" y2="116" stroke-width="3"/>
+  <!-- Heavy mounting frame -->
+  <rect x="14" y="152" width="160" height="11" rx="4" stroke-width="7"/>
+  <line x1="36"  y1="163" x2="36"  y2="178" stroke-width="6"/>
+  <line x1="155" y1="163" x2="155" y2="178" stroke-width="6"/>
+  <line x1="18"  y1="178" x2="172" y2="178" stroke-width="6"/>
 </svg>

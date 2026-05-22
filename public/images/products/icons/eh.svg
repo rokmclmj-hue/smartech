@@ -1,23 +1,29 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" stroke="#111111" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
-  <!-- 루츠 부스터 - 8자형 로터 2개가 맞물리는 구조 -->
-  <!-- 외부 하우징 -->
-  <rect x="30" y="45" width="140" height="110" rx="10"/>
-  <!-- 좌측 8자 로터 (타원 2개) -->
-  <ellipse cx="75" cy="78" rx="22" ry="14"/>
-  <ellipse cx="75" cy="122" rx="22" ry="14"/>
-  <!-- 우측 8자 로터 (타원 2개) -->
-  <ellipse cx="125" cy="78" rx="22" ry="14"/>
-  <ellipse cx="125" cy="122" rx="22" ry="14"/>
-  <!-- 좌우 로터 축 -->
-  <line x1="75" y1="45" x2="75" y2="45"/>
-  <circle cx="75" cy="100" r="4"/>
-  <circle cx="125" cy="100" r="4"/>
-  <!-- 흡입구 상단 -->
-  <line x1="90" y1="30" x2="110" y2="30"/>
-  <line x1="90" y1="30" x2="90" y2="45"/>
-  <line x1="110" y1="30" x2="110" y2="45"/>
-  <!-- 배출구 하단 -->
-  <line x1="90" y1="155" x2="90" y2="170"/>
-  <line x1="110" y1="155" x2="110" y2="170"/>
-  <line x1="90" y1="170" x2="110" y2="170"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" stroke="#111111" stroke-linecap="round" stroke-linejoin="round">
+  <!-- EH Roots Booster — FIGURE-8 twin lobe rotors (most distinctive pump shape) -->
+  <!-- Outer housing -->
+  <rect x="18" y="38" width="164" height="124" rx="10" stroke-width="9"/>
+  <!-- Left Roots lobe — top oval -->
+  <ellipse cx="72" cy="72" rx="30" ry="20" stroke-width="7"/>
+  <!-- Left Roots lobe — bottom oval -->
+  <ellipse cx="72" cy="128" rx="30" ry="20" stroke-width="7"/>
+  <!-- Left shaft center -->
+  <circle cx="72" cy="100" r="6" stroke-width="5"/>
+  <!-- Right Roots lobe — top oval (meshing with left) -->
+  <ellipse cx="128" cy="72" rx="30" ry="20" stroke-width="7"/>
+  <!-- Right Roots lobe — bottom oval -->
+  <ellipse cx="128" cy="128" rx="30" ry="20" stroke-width="7"/>
+  <!-- Right shaft center -->
+  <circle cx="128" cy="100" r="6" stroke-width="5"/>
+  <!-- Gear sync line between shafts -->
+  <line x1="72" y1="100" x2="128" y2="100" stroke-width="4" stroke-dasharray="6,4"/>
+  <!-- Inlet port — top center -->
+  <rect x="82" y="22" width="36" height="16" rx="3" stroke-width="7"/>
+  <line x1="82" y1="38" x2="82" y2="38" stroke-width="7"/>
+  <!-- Outlet port — bottom center -->
+  <rect x="82" y="162" width="36" height="16" rx="3" stroke-width="7"/>
+  <!-- Timing gear housing — right side -->
+  <rect x="182" y="52" width="14" height="96" rx="4" stroke-width="6"/>
+  <line x1="182" y1="80"  x2="196" y2="80"  stroke-width="3"/>
+  <line x1="182" y1="100" x2="196" y2="100" stroke-width="3"/>
+  <line x1="182" y1="120" x2="196" y2="120" stroke-width="3"/>
 </svg>

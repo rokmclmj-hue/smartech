@@ -39,7 +39,7 @@ export default function QuoteBar() {
         <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-60 pointer-events-none">
           <button
             onClick={() => setOpen(true)}
-            className="pointer-events-auto flex items-center gap-3 bg-ink text-paper px-7 py-3.5 shadow-2xl hover:bg-edred transition-colors border border-white/10"
+            className="pointer-events-auto flex items-center gap-3 bg-edred text-paper px-7 py-3.5 shadow-2xl hover:bg-ink transition-colors border border-white/10"
           >
             <span className="text-[13px] font-medium tracking-tight">견적서 미리보기</span>
             <span className="w-px h-3.5 bg-white/30" aria-hidden="true" />

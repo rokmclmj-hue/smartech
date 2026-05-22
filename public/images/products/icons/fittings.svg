@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" stroke="#111111" stroke-linecap="round" stroke-linejoin="round">
+  <!-- KF/NW/ISO Fittings &amp; Accessories — KF flange assembly face-on view -->
+  <!-- Outer clamp ring (NW clamp) -->
+  <circle cx="100" cy="96" r="82" stroke-width="9"/>
+  <!-- Clamp wing — LEFT -->
+  <path d="M18,96 Q10,78 16,64 Q22,52 34,50" stroke-width="8"/>
+  <line x1="16"  y1="64" x2="4"   y2="58"  stroke-width="7"/>
+  <line x1="4"   y1="58" x2="2"   y2="74"  stroke-width="7"/>
+  <!-- Clamp wing — RIGHT -->
+  <path d="M182,96 Q190,78 184,64 Q178,52 166,50" stroke-width="8"/>
+  <line x1="184" y1="64" x2="196" y2="58"  stroke-width="7"/>
+  <line x1="196" y1="58" x2="198" y2="74"  stroke-width="7"/>
+  <!-- Centering ring (middle ring) -->
+  <circle cx="100" cy="96" r="58" stroke-width="8"/>
+  <!-- O-ring groove (inner ring) -->
+  <circle cx="100" cy="96" r="46" stroke-width="6"/>
+  <!-- O-ring seated (shows O-ring cross-section as thicker band) -->
+  <circle cx="100" cy="96" r="38" stroke-width="5"/>
+  <!-- Center bore (vacuum path — most prominent opening) -->
+  <circle cx="100" cy="96" r="28" stroke-width="9"/>
+  <!-- Bolt holes around centering ring (6 holes at 60° spacing) -->
+  <circle cx="100" cy="38"  r="6" stroke-width="5"/>
+  <circle cx="150" cy="67"  r="6" stroke-width="5"/>
+  <circle cx="150" cy="125" r="6" stroke-width="5"/>
+  <circle cx="100" cy="154" r="6" stroke-width="5"/>
+  <circle cx="50"  cy="125" r="6" stroke-width="5"/>
+  <circle cx="50"  cy="67"  r="6" stroke-width="5"/>
+  <!-- Clamp screw (bottom, tightening point) -->
+  <line x1="88"  y1="178" x2="112" y2="178" stroke-width="6"/>
+  <line x1="92"  y1="184" x2="108" y2="184" stroke-width="5"/>
+  <line x1="96"  y1="190" x2="104" y2="190" stroke-width="4"/>
+</svg>

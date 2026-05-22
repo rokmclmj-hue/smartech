@@ -1,24 +1,33 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" stroke="#111111" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
-  <!-- STP Maglev 터보펌프 - 자기부상 터보 -->
-  <!-- 원통형 하우징 -->
-  <rect x="55" y="25" width="85" height="145" rx="10"/>
-  <!-- 자기부상(Maglev) 베어링 표시 - 자석 기호 -->
-  <rect x="65" y="38" width="65" height="18" rx="4"/>
-  <!-- 자기장 곡선 -->
-  <path d="M72 56 Q 97 70 122 56" stroke-dasharray="4,3"/>
-  <!-- 터빈 블레이드 (측면에서 본 모양) -->
-  <ellipse cx="97" cy="110" rx="30" ry="8"/>
-  <line x1="97" y1="85" x2="97" y2="135"/>
-  <!-- 스테이터 링 -->
-  <ellipse cx="97" cy="95" rx="30" ry="8"/>
-  <ellipse cx="97" cy="125" rx="30" ry="8"/>
-  <!-- 상단 흡입 플랜지 -->
-  <rect x="77" y="12" width="40" height="13" rx="3"/>
-  <!-- 하단 배출구 -->
-  <rect x="77" y="170" width="40" height="13" rx="3"/>
-  <!-- 자기부상 표시 (소형 자석 기호 양쪽) -->
-  <line x1="55" y1="80" x2="42" y2="80"/>
-  <line x1="42" y1="75" x2="42" y2="85"/>
-  <line x1="140" y1="80" x2="153" y2="80"/>
-  <line x1="153" y1="75" x2="153" y2="85"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" stroke="#111111" stroke-linecap="round" stroke-linejoin="round">
+  <!-- STP Maglev Turbomolecular — tall cylinder, FLOATING bearing rings (no contact) -->
+  <!-- Tall cylindrical housing -->
+  <rect x="62" y="16" width="76" height="168" rx="10" stroke-width="9"/>
+  <!-- Top inlet flange -->
+  <ellipse cx="100" cy="16" rx="38" ry="10" stroke-width="8"/>
+  <ellipse cx="100" cy="16" rx="26" ry="6"  stroke-width="4"/>
+  <!-- Center rotor shaft -->
+  <line x1="100" y1="16" x2="100" y2="184" stroke-width="5"/>
+  <!-- MAGLEV BEARING RINGS — floating (gap between ring and shaft, distinctive) -->
+  <!-- Upper bearing ring (floats — does NOT touch shaft) -->
+  <ellipse cx="100" cy="54"  rx="24" ry="7" stroke-width="7"/>
+  <line x1="76"  y1="54"  x2="62"  y2="54"  stroke-width="5"/>
+  <line x1="124" y1="54"  x2="138" y2="54"  stroke-width="5"/>
+  <!-- Middle bearing ring -->
+  <ellipse cx="100" cy="100" rx="24" ry="7" stroke-width="7"/>
+  <line x1="76"  y1="100" x2="62"  y2="100" stroke-width="5"/>
+  <line x1="124" y1="100" x2="138" y2="100" stroke-width="5"/>
+  <!-- Lower bearing ring -->
+  <ellipse cx="100" cy="146" rx="24" ry="7" stroke-width="7"/>
+  <line x1="76"  y1="146" x2="62"  y2="146" stroke-width="5"/>
+  <line x1="124" y1="146" x2="138" y2="146" stroke-width="5"/>
+  <!-- Stator blade lines between rings -->
+  <line x1="68" y1="70"  x2="132" y2="70"  stroke-width="4"/>
+  <line x1="68" y1="82"  x2="132" y2="82"  stroke-width="4"/>
+  <line x1="68" y1="116" x2="132" y2="116" stroke-width="4"/>
+  <line x1="68" y1="128" x2="132" y2="128" stroke-width="4"/>
+  <!-- Bottom outlet flange -->
+  <ellipse cx="100" cy="184" rx="38" ry="10" stroke-width="8"/>
+  <!-- Foreline port — right side -->
+  <line x1="138" y1="162" x2="158" y2="162" stroke-width="7"/>
+  <rect x="158" y="155" width="12" height="14" rx="2" stroke-width="5"/>
 </svg>

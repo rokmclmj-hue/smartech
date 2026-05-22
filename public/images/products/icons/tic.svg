@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" stroke="#111111" stroke-linecap="round" stroke-linejoin="round">
+  <!-- TIC Turbo Interface Controller — horizontal rack unit, turbo symbol front panel -->
+  <!-- Rack housing (horizontal, 1U/2U style) -->
+  <rect x="10" y="44" width="180" height="112" rx="6" stroke-width="9"/>
+  <!-- Front panel bezel -->
+  <rect x="18" y="52" width="164" height="96" rx="4" stroke-width="4"/>
+  <!-- LEFT: Large turbomolecular pump symbol (top-view fan) -->
+  <circle cx="58" cy="100" r="34" stroke-width="7"/>
+  <circle cx="58" cy="100" r="12" stroke-width="5"/>
+  <!-- 6 curved turbo blades -->
+  <path d="M58,66 Q70,68 72,80"    stroke-width="5"/>
+  <path d="M72,80 Q80,92 74,104"   stroke-width="5"/>
+  <path d="M74,104 Q68,116 58,118" stroke-width="5"/>
+  <path d="M58,118 Q46,116 42,104" stroke-width="5"/>
+  <path d="M42,104 Q36,92 42,80"   stroke-width="5"/>
+  <path d="M42,80 Q46,68 58,66"    stroke-width="5"/>
+  <!-- CENTER: Status display strip -->
+  <rect x="100" y="64" width="54" height="28" rx="4" stroke-width="6"/>
+  <line x1="108" y1="73"  x2="146" y2="73"  stroke-width="4"/>
+  <line x1="108" y1="82"  x2="146" y2="82"  stroke-width="4"/>
+  <!-- Status LEDs row -->
+  <circle cx="108" cy="105" r="5" stroke-width="5"/>
+  <circle cx="122" cy="105" r="5" stroke-width="5"/>
+  <circle cx="136" cy="105" r="5" stroke-width="5"/>
+  <circle cx="150" cy="105" r="5" stroke-width="5"/>
+  <!-- RIGHT: Connector section -->
+  <!-- D-sub style connectors -->
+  <rect x="160" y="66" width="14" height="22" rx="2" stroke-width="5"/>
+  <line x1="163" y1="71"  x2="171" y2="71"  stroke-width="2"/>
+  <line x1="163" y1="75"  x2="171" y2="75"  stroke-width="2"/>
+  <line x1="163" y1="79"  x2="171" y2="79"  stroke-width="2"/>
+  <rect x="160" y="96" width="14" height="22" rx="2" stroke-width="5"/>
+  <line x1="163" y1="101" x2="171" y2="101" stroke-width="2"/>
+  <line x1="163" y1="105" x2="171" y2="105" stroke-width="2"/>
+  <line x1="163" y1="109" x2="171" y2="109" stroke-width="2"/>
+  <!-- Rack ears -->
+  <rect x="10"  y="44"  width="8"  height="112" rx="3" stroke-width="5"/>
+  <rect x="182" y="44"  width="8"  height="112" rx="3" stroke-width="5"/>
+  <circle cx="14"  cy="62"  r="4" stroke-width="4"/>
+  <circle cx="14"  cy="138" r="4" stroke-width="4"/>
+  <circle cx="186" cy="62"  r="4" stroke-width="4"/>
+  <circle cx="186" cy="138" r="4" stroke-width="4"/>
+</svg>

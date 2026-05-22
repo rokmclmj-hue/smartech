@@ -81,9 +81,6 @@ export default function ProductCategories() {
           >
             전체 보기 ({ITEMS.length - INITIAL}개 더)
           </button>
-          <Link href="/products" className="text-[12.5px] underline-red pb-0.5">
-            전체 카탈로그 →
-          </Link>
         </div>
       )}
 
@@ -95,9 +92,6 @@ export default function ProductCategories() {
           >
             접기 ↑
           </button>
-          <Link href="/products" className="text-[12.5px] underline-red pb-0.5">
-            전체 카탈로그 →
-          </Link>
         </div>
       )}
       </div>

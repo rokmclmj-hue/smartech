@@ -1,25 +1,41 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" stroke="#111111" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
-  <!-- 저진공 게이지 APG200 - 원형 압력계 다이얼 -->
-  <!-- 외부 원형 케이스 -->
-  <circle cx="100" cy="100" r="70"/>
-  <!-- 내부 다이얼 면 -->
-  <circle cx="100" cy="100" r="58"/>
-  <!-- 눈금 (주요 눈금 8개) -->
-  <line x1="100" y1="42" x2="100" y2="52"/>
-  <line x1="141" y1="59" x2="134" y2="66"/>
-  <line x1="158" y1="100" x2="148" y2="100"/>
-  <line x1="141" y1="141" x2="134" y2="134"/>
-  <line x1="100" y1="158" x2="100" y2="148"/>
-  <line x1="59" y1="141" x2="66" y2="134"/>
-  <line x1="42" y1="100" x2="52" y2="100"/>
-  <line x1="59" y1="59" x2="66" y2="66"/>
-  <!-- 중심 피봇 -->
-  <circle cx="100" cy="100" r="5"/>
-  <!-- 압력 바늘 (약 2/3 위치 가리킴) -->
-  <line x1="100" y1="100" x2="130" y2="62"/>
-  <!-- 하단 연결 포트 -->
-  <line x1="100" y1="170" x2="100" y2="185"/>
-  <circle cx="100" cy="188" r="5"/>
-  <!-- 단위 표시 영역 -->
-  <rect x="75" y="110" width="50" height="16" rx="3"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" stroke="#111111" stroke-linecap="round" stroke-linejoin="round">
+  <!-- APG200 Pirani Vacuum Gauge — clean precision dial face -->
+  <!-- Outer bezel ring -->
+  <circle cx="100" cy="96" r="80" stroke-width="9"/>
+  <!-- Inner dial face ring -->
+  <circle cx="100" cy="96" r="68" stroke-width="4"/>
+  <!-- Scale arc (visible range 270°, from ~135° to ~405°) -->
+  <!-- Major tick marks — 9 marks evenly spaced around 270° -->
+  <line x1="100" y1="28"  x2="100" y2="42"  stroke-width="6"/> <!-- 12 o'clock (top) -->
+  <line x1="147" y1="38"  x2="140" y2="50"  stroke-width="6"/>
+  <line x1="175" y1="76"  x2="163" y2="82"  stroke-width="6"/>
+  <line x1="180" y1="120" x2="168" y2="118" stroke-width="6"/>
+  <line x1="156" y1="158" x2="148" y2="148" stroke-width="6"/>
+  <line x1="118" y1="172" x2="114" y2="160" stroke-width="6"/>
+  <line x1="82"  y1="172" x2="86"  y2="160" stroke-width="6"/>
+  <line x1="44"  y1="158" x2="52"  y2="148" stroke-width="6"/>
+  <line x1="20"  y1="120" x2="32"  y2="118" stroke-width="6"/>
+  <line x1="25"  y1="76"  x2="37"  y2="82"  stroke-width="6"/>
+  <line x1="53"  y1="38"  x2="60"  y2="50"  stroke-width="6"/>
+  <!-- Minor tick marks (between major) -->
+  <line x1="125" y1="30"  x2="122" y2="40"  stroke-width="3"/>
+  <line x1="162" y1="54"  x2="156" y2="63"  stroke-width="3"/>
+  <line x1="179" y1="98"  x2="167" y2="99"  stroke-width="3"/>
+  <line x1="169" y1="140" x2="158" y2="135" stroke-width="3"/>
+  <line x1="138" y1="168" x2="132" y2="157" stroke-width="3"/>
+  <line x1="75"  y1="30"  x2="78"  y2="40"  stroke-width="3"/>
+  <line x1="38"  y1="54"  x2="44"  y2="63"  stroke-width="3"/>
+  <line x1="21"  y1="98"  x2="33"  y2="99"  stroke-width="3"/>
+  <line x1="31"  y1="140" x2="42"  y2="135" stroke-width="3"/>
+  <line x1="62"  y1="168" x2="68"  y2="157" stroke-width="3"/>
+  <!-- Pressure needle (pointing to ~2/3 scale) -->
+  <line x1="100" y1="96" x2="148" y2="60" stroke-width="6"/>
+  <!-- Needle pivot center -->
+  <circle cx="100" cy="96" r="8" stroke-width="6"/>
+  <circle cx="100" cy="96" r="3" stroke-width="4"/>
+  <!-- Gauge label area (bottom of dial) -->
+  <rect x="72" y="120" width="56" height="16" rx="4" stroke-width="4"/>
+  <!-- Connection port — bottom center -->
+  <line x1="100" y1="176" x2="100" y2="190" stroke-width="8"/>
+  <circle cx="100" cy="194" r="6" stroke-width="6"/>
 </svg>

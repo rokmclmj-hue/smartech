@@ -1,18 +1,31 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" stroke="#111111" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
-  <!-- nEXT 터보펌프 - 위에서 본 터빈 날개 모양 -->
-  <!-- 외부 링 -->
-  <circle cx="100" cy="100" r="75"/>
-  <!-- 내부 허브 -->
-  <circle cx="100" cy="100" r="20"/>
-  <!-- 터빈 날개 8개 (위에서 본 모양 - 곡선 블레이드) -->
-  <path d="M100 80 Q 115 70 130 55"/>
-  <path d="M120 100 Q 130 85 145 72"/>
-  <path d="M120 100 Q 130 115 143 130"/>
-  <path d="M100 120 Q 115 130 128 148"/>
-  <path d="M100 120 Q 85 130 70 148"/>
-  <path d="M80 100 Q 70 115 55 128"/>
-  <path d="M80 100 Q 70 85 55 72"/>
-  <path d="M100 80 Q 85 70 70 55"/>
-  <!-- 고정 스테이터 링 -->
-  <circle cx="100" cy="100" r="50"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" stroke="#111111" stroke-linecap="round" stroke-linejoin="round">
+  <!-- nEXT Turbomolecular Pump — SIDE VIEW, large top flange, stacked blade stages -->
+  <!-- Large top inlet flange (most prominent turbopump feature) -->
+  <ellipse cx="100" cy="32" rx="68" ry="18" stroke-width="9"/>
+  <ellipse cx="100" cy="32" rx="52" ry="12" stroke-width="5"/>
+  <!-- Cylindrical body -->
+  <line x1="32"  y1="32"  x2="32"  y2="158" stroke-width="9"/>
+  <line x1="168" y1="32"  x2="168" y2="158" stroke-width="9"/>
+  <!-- Stacked rotor blade stages (horizontal lines inside — turbo characteristic) -->
+  <line x1="38"  y1="58"  x2="162" y2="58"  stroke-width="6"/>
+  <line x1="38"  y1="75"  x2="162" y2="75"  stroke-width="6"/>
+  <line x1="38"  y1="92"  x2="162" y2="92"  stroke-width="6"/>
+  <line x1="38"  y1="109" x2="162" y2="109" stroke-width="6"/>
+  <line x1="38"  y1="126" x2="162" y2="126" stroke-width="6"/>
+  <!-- Blade tilt angles — alternating stator/rotor -->
+  <line x1="50"  y1="58"  x2="60"  y2="75"  stroke-width="3"/>
+  <line x1="80"  y1="58"  x2="90"  y2="75"  stroke-width="3"/>
+  <line x1="110" y1="58"  x2="120" y2="75"  stroke-width="3"/>
+  <line x1="140" y1="58"  x2="150" y2="75"  stroke-width="3"/>
+  <line x1="50"  y1="75"  x2="40"  y2="92"  stroke-width="3"/>
+  <line x1="80"  y1="75"  x2="70"  y2="92"  stroke-width="3"/>
+  <line x1="110" y1="75"  x2="100" y2="92"  stroke-width="3"/>
+  <line x1="140" y1="75"  x2="130" y2="92"  stroke-width="3"/>
+  <!-- Lower body (electronic section, wider) -->
+  <rect x="26" y="130" width="148" height="28" rx="5" stroke-width="7"/>
+  <!-- Bottom outlet flange -->
+  <ellipse cx="100" cy="168" rx="40" ry="10" stroke-width="7"/>
+  <!-- Foreline port (small, side) -->
+  <line x1="168" y1="148" x2="184" y2="148" stroke-width="6"/>
+  <rect x="184" y="141" width="10" height="14" rx="2" stroke-width="5"/>
 </svg>

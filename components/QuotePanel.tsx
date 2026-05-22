@@ -160,7 +160,7 @@ export default function QuotePanel({ open, onClose }: Props) {
           <div className="px-6 py-4 border-t hair shrink-0 space-y-2">
             <button
               onClick={handleSavePdf}
-              className="w-full py-3 bg-ink text-paper text-[13px] mono tracking-wider hover:bg-edred transition-colors"
+              className="w-full py-3 bg-edred text-paper text-[13px] mono tracking-wider hover:bg-ink transition-colors"
             >
               견적서 저장 (PDF) →
             </button>

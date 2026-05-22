@@ -1,24 +1,31 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" stroke="#111111" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
-  <!-- 고진공 이온 게이지 AIM200 - 이온 궤도 표현 -->
-  <!-- 외부 튜브 하우징 -->
-  <rect x="60" y="30" width="70" height="130" rx="35"/>
-  <!-- 이온 수집 양극 (아노드 - 중심 와이어) -->
-  <line x1="95" y1="50" x2="95" y2="140"/>
-  <!-- 이온 궤도 타원 -->
-  <ellipse cx="95" cy="95" rx="22" ry="32"/>
-  <ellipse cx="95" cy="95" rx="14" ry="20"/>
-  <!-- 전자 방출 필라멘트 (두 개) -->
-  <path d="M 70 75 Q 78 80 70 85"/>
-  <path d="M 70 105 Q 78 110 70 115"/>
-  <path d="M 120 75 Q 112 80 120 85"/>
-  <path d="M 120 105 Q 112 110 120 115"/>
-  <!-- 전기 연결선 (상단/하단) -->
-  <line x1="95" y1="30" x2="95" y2="15"/>
-  <line x1="85" y1="15" x2="105" y2="15"/>
-  <!-- 연결 포트 (하단) -->
-  <line x1="95" y1="160" x2="95" y2="175"/>
-  <line x1="85" y1="175" x2="105" y2="175"/>
-  <!-- 이온 전류 방향 화살표 표시 -->
-  <line x1="73" y1="90" x2="62" y2="90"/>
-  <line x1="62" y1="85" x2="62" y2="95"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" stroke="#111111" stroke-linecap="round" stroke-linejoin="round">
+  <!-- AIM200 Ion Gauge — glass tube with internal electrode cage structure -->
+  <!-- Glass tube housing (tall rounded tube) -->
+  <rect x="60" y="18" width="80" height="148" rx="40" stroke-width="9"/>
+  <!-- Inner tube wall -->
+  <rect x="70" y="28" width="60" height="128" rx="30" stroke-width="4"/>
+  <!-- Anode cage — oval grid structure (ion gauge signature) -->
+  <ellipse cx="100" cy="92" rx="22" ry="38" stroke-width="6"/>
+  <!-- Anode grid bars (horizontal) -->
+  <line x1="78"  y1="72"  x2="122" y2="72"  stroke-width="3"/>
+  <line x1="78"  y1="86"  x2="122" y2="86"  stroke-width="3"/>
+  <line x1="78"  y1="100" x2="122" y2="100" stroke-width="3"/>
+  <line x1="78"  y1="114" x2="122" y2="114" stroke-width="3"/>
+  <!-- Center collector wire -->
+  <line x1="100" y1="54"  x2="100" y2="130" stroke-width="4"/>
+  <!-- Filament wires — LEFT (electron emitters) -->
+  <path d="M78,74 Q72,82 78,90" stroke-width="5"/>
+  <path d="M78,104 Q72,112 78,120" stroke-width="5"/>
+  <!-- Filament wires — RIGHT -->
+  <path d="M122,74 Q128,82 122,90" stroke-width="5"/>
+  <path d="M122,104 Q128,112 122,120" stroke-width="5"/>
+  <!-- Electrical leads — top (BNC/connector pins) -->
+  <line x1="100" y1="18" x2="100" y2="6"  stroke-width="6"/>
+  <line x1="86"  y1="6"  x2="114" y2="6"  stroke-width="5"/>
+  <line x1="86"  y1="6"  x2="86"  y2="0"  stroke-width="4"/>
+  <line x1="100" y1="6"  x2="100" y2="0"  stroke-width="4"/>
+  <line x1="114" y1="6"  x2="114" y2="0"  stroke-width="4"/>
+  <!-- Connection port — bottom -->
+  <line x1="100" y1="166" x2="100" y2="184" stroke-width="8"/>
+  <rect x="84" y="184" width="32" height="12" rx="4" stroke-width="6"/>
 </svg>
