@@ -21,7 +21,7 @@ export async function POST(
   const repair = await prisma.repairRequest.findUnique({ where: { id: repairId } });
   if (!repair) return NextResponse.json({ error: "접수 없음" }, { status: 404 });
 
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7일
+  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30일
 
   const uploadToken = await prisma.uploadToken.create({
     data: { repairId, expiresAt },
@@ -44,7 +44,7 @@ export async function POST(
       await svc.send({
         to: body.phone,
         from: process.env.ADMIN_PHONE!,
-        text: `[스마텍] 수리 접수 ${repair.repairNo} 업로드 링크\n${uploadUrl}\n(7일 후 만료)`,
+        text: `[스마텍] 수리 접수 ${repair.repairNo} 업로드 링크\n${uploadUrl}\n(30일 후 만료)`,
       });
     } catch {
       // SMS 실패해도 링크는 반환
