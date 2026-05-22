@@ -11,6 +11,9 @@ type Repair = {
   repairNo: string;
   pumpMaker: string;
   pumpModel: string;
+  pumpSerial: string | null;
+  repairTier: number | null;
+  aiConfidence: string | null;
   status: string;
   baseAmount: number;
   totalAmount: number;
@@ -141,8 +144,13 @@ export default function MypagePage() {
                     <div className="flex items-center gap-4">
                       <div>
                         <div className="mono text-[11px] text-dim mb-0.5">{r.repairNo}</div>
-                        <div className="font-semibold text-[15px]">
-                          {r.pumpMaker} {r.pumpModel}
+                        <div className="font-semibold text-[15px] flex items-center gap-2">
+                          {r.pumpMaker} {r.pumpModel || "모델 확인 중"}
+                          {r.aiConfidence === "low" && !r.pumpModel && (
+                            <span className="text-[9px] bg-amber-100 text-amber-700 px-1.5 py-0.5 font-semibold">
+                              담당자 확인 중
+                            </span>
+                          )}
                         </div>
                         <div className="text-[12px] text-dim mt-0.5">{formatDate(r.createdAt)}</div>
                       </div>
@@ -217,7 +225,23 @@ export default function MypagePage() {
                       {/* 접수 정보 */}
                       <div className="border border-line p-4 space-y-2 text-[13px]">
                         <div className="mono text-[10px] text-dim tracking-widest mb-2">접수 정보</div>
-                        <InfoRow label="장비" value={`${r.pumpMaker} ${r.pumpModel}`} />
+                        <InfoRow
+                          label="장비"
+                          value={`${r.pumpMaker} ${r.pumpModel || "확인 중"}`}
+                        />
+                        {r.pumpSerial && (
+                          <InfoRow label="S/N" value={r.pumpSerial} />
+                        )}
+                        {r.repairTier && (
+                          <InfoRow
+                            label="수리단계"
+                            value={
+                              r.repairTier === 1 ? "Tier 1 — 기본수리"
+                              : r.repairTier === 2 ? "Tier 2 — 기본수리 + 파트교체"
+                              : "Tier 3 — 전체수리"
+                            }
+                          />
+                        )}
                         {r.symptoms.length > 0 && (
                           <InfoRow label="증상" value={r.symptoms.join(", ")} />
                         )}
@@ -225,6 +249,11 @@ export default function MypagePage() {
                           <InfoRow label="메모" value={r.symptomNote} />
                         )}
                         <InfoRow label="견적" value={formatPrice(r.totalAmount)} />
+                        {r.aiConfidence === "low" && !r.pumpModel && (
+                          <div className="mt-2 p-3 bg-amber-50 border border-amber-200 text-[12px] text-amber-800">
+                            모델명 확인을 위해 담당자가 연락드릴 예정입니다.
+                          </div>
+                        )}
                       </div>
 
                       {/* 파일 다운로드 */}
