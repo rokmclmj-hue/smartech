@@ -17,10 +17,13 @@ export async function POST(req: NextRequest) {
     symptoms,
     symptomNote,
     baseAmount,
+    selectedTier,
     contactName,
     contactPhone,
     contactEmail,
     company,
+    aiConfidence,
+    aiModelRaw,
   } = body;
 
   // 필수값 검증
@@ -59,6 +62,9 @@ export async function POST(req: NextRequest) {
       contactPhone,
       contactEmail: contactEmail ?? null,
       company: company ?? null,
+      aiConfidence: aiConfidence ?? null,
+      aiModelRaw: aiModelRaw ?? null,
+      repairTier: selectedTier ?? null,
       status: "RECEIVED",
       statusLogs: {
         create: {

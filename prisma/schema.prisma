@@ -200,6 +200,13 @@ model RepairRequest {
   // RECEIVED(접수완료) | IN_PROGRESS(수리진행) | INSPECTION(검사중) | COMPLETED(수리완료) | DELIVERED(납품완료) | CANCELLED(취소)
   status        String            @default("RECEIVED")
 
+  // AI 인식 결과
+  aiConfidence  String?           // high | medium | low | null
+  aiModelRaw    String?           // AI가 인식한 원본 모델명
+
+  // 선택 수리 단계
+  repairTier    Int?              // 1 | 2 | 3
+
   // 관리자 메모 / 외주 배정
   adminNote     String?
   assignedAt    DateTime?         // 외주업체 배정 시각

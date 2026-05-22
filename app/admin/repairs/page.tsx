@@ -19,6 +19,7 @@ type Repair = {
   pumpMaker: string;
   pumpModel: string;
   pumpFamily: string;
+  pumpSerial: string | null;
   status: string;
   contactName: string;
   contactPhone: string;
@@ -27,7 +28,10 @@ type Repair = {
   baseAmount: number;
   extraAmount: number;
   totalAmount: number;
+  repairTier: number | null;
   adminNote: string | null;
+  aiConfidence: string | null;
+  aiModelRaw: string | null;
   symptoms: string[];
   symptomNote: string | null;
   createdAt: string;
@@ -62,6 +66,10 @@ export default function AdminRepairsPage() {
   const [saving, setSaving] = useState(false);
   const [editNote, setEditNote] = useState("");
   const [editExtra, setEditExtra] = useState("");
+
+  // 모델명 수동 수정
+  const [editModel, setEditModel] = useState("");
+  const [savingModel, setSavingModel] = useState(false);
 
   // 파일 목록 (상세 패널용)
   const [fullFiles, setFullFiles] = useState<FullRepairFile[]>([]);
@@ -101,9 +109,30 @@ export default function AdminRepairsPage() {
     setSelected(r);
     setEditNote(r.adminNote ?? "");
     setEditExtra(r.extraAmount > 0 ? String(r.extraAmount) : "");
+    setEditModel(r.pumpModel ?? "");
     setTokenUrl("");
     setOutsourcePhone("");
     loadFiles(r.id);
+  }
+
+  async function saveModel() {
+    if (!selected || !editModel.trim()) return;
+    setSavingModel(true);
+    try {
+      await fetch("/api/admin/repairs", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: selected.id,
+          status: selected.status,
+          pumpModel: editModel.trim(),
+        }),
+      });
+      setSelected((prev) => prev ? { ...prev, pumpModel: editModel.trim() } : null);
+      load();
+    } finally {
+      setSavingModel(false);
+    }
   }
 
   async function adminUpload(files: FileList) {
@@ -267,7 +296,14 @@ export default function AdminRepairsPage() {
                 >
                   <td className="px-4 py-3 mono font-semibold text-[12px]">{r.repairNo}</td>
                   <td className="px-4 py-3">
-                    <div className="font-medium">{r.pumpModel}</div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{r.pumpModel || "미확인"}</span>
+                      {r.aiConfidence === "low" && (
+                        <span className="text-[9px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-semibold">
+                          모델확인필요
+                        </span>
+                      )}
+                    </div>
                     <div className="text-[11px] text-dim">{r.pumpMaker}</div>
                   </td>
                   <td className="px-4 py-3">
@@ -356,10 +392,63 @@ export default function AdminRepairsPage() {
                 <p className="text-[11px] text-dim mt-2">클릭하면 상태가 변경되고 고객에게 SMS가 발송됩니다.</p>
               </div>
 
+              {/* AI 인식 결과 + 모델 수동 수정 */}
+              {selected.aiConfidence && (
+                <div className={`border p-4 text-[13px] ${
+                  selected.aiConfidence === "low"
+                    ? "border-amber-300 bg-amber-50"
+                    : "border-line"
+                }`}>
+                  <div className="mono text-[10px] text-dim tracking-widest mb-2">AI 인식 결과</div>
+                  <div className="flex gap-2 items-center mb-2">
+                    <span className={`text-[10px] px-2 py-0.5 rounded font-semibold ${
+                      selected.aiConfidence === "high" ? "bg-green-100 text-green-700"
+                      : selected.aiConfidence === "medium" ? "bg-blue-100 text-blue-700"
+                      : "bg-amber-100 text-amber-700"
+                    }`}>
+                      {selected.aiConfidence === "high" ? "HIGH — 인식 성공"
+                       : selected.aiConfidence === "medium" ? "MEDIUM — 추정"
+                       : "LOW — 인식 실패"}
+                    </span>
+                    {selected.aiModelRaw && (
+                      <span className="text-[12px] text-dim">원본: {selected.aiModelRaw}</span>
+                    )}
+                  </div>
+                  {selected.aiConfidence === "low" && (
+                    <div className="mt-3 space-y-2">
+                      <label className="text-[11px] text-dim block">모델명 직접 입력 후 저장</label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={editModel}
+                          onChange={(e) => setEditModel(e.target.value)}
+                          placeholder="예: XDS35iE, nXDS10i"
+                          className="flex-1 border border-line px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-white"
+                        />
+                        <button
+                          onClick={saveModel}
+                          disabled={savingModel || !editModel.trim()}
+                          className="px-4 py-2 bg-ink text-paper text-[12px] font-semibold hover:bg-edred transition disabled:opacity-40"
+                        >
+                          {savingModel ? "..." : "저장"}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* 장비 / 증상 */}
               <div className="border border-line p-4 space-y-2 text-[13px]">
                 <div className="mono text-[10px] text-dim tracking-widest mb-2">접수 정보</div>
-                <Row label="장비" value={`${selected.pumpMaker} ${selected.pumpModel}`} />
+                <Row label="장비" value={`${selected.pumpMaker} ${selected.pumpModel || "미확인"}`} />
+                {selected.repairTier && (
+                  <Row label="수리단계" value={`Tier ${selected.repairTier} (${
+                    selected.repairTier === 1 ? "기본수리"
+                    : selected.repairTier === 2 ? "기본+파트교체"
+                    : "전체수리"
+                  })`} />
+                )}
                 <Row label="증상" value={selected.symptoms.join(", ")} />
                 {selected.symptomNote && <Row label="메모" value={selected.symptomNote} />}
               </div>
@@ -504,7 +593,7 @@ export default function AdminRepairsPage() {
                   disabled={generatingToken}
                   className="w-full py-2.5 border border-ink text-ink text-[12px] font-semibold hover:bg-ink hover:text-paper transition disabled:opacity-40"
                 >
-                  {generatingToken ? "생성 중..." : "7일 업로드 링크 생성"}
+                  {generatingToken ? "생성 중..." : "30일 업로드 링크 생성"}
                 </button>
                 {tokenUrl && (
                   <div className="mt-3 space-y-2">
