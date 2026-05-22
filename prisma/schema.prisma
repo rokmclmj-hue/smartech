@@ -134,7 +134,9 @@ model RepairKit {
   pumpMaker    String           @default("EDWARDS")
   pumpModel    String           // "nXDS10i", "RV8", "EH500" 등
   modelGroup   String?          // "nXDS10i/15i" — 화면 표시용 묶음명
-  basePrice    Int              @default(0)   // 기본 수리비 (원), 0이면 상담 필요
+  basePrice    Int              @default(0)   // 기본수리 (Tier 1), 0이면 상담 필요
+  tier2Price   Int              @default(0)   // 기본수리+파트교체 (Tier 2)
+  tier3Price   Int              @default(0)   // 전체수리 (Tier 3)
   description  String?
   isActive     Boolean          @default(true)
   createdAt    DateTime         @default(now())
@@ -258,7 +260,7 @@ model UploadToken {
   id        String        @id @default(cuid())
   repairId  Int
   token     String        @unique @default(cuid())
-  expiresAt DateTime      // 생성 후 7일
+  expiresAt DateTime      // 생성 후 30일
   usedAt    DateTime?     // 최초 업로드 시각 (만료 X, 추적용)
   createdAt DateTime      @default(now())
 
