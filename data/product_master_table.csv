@@ -1,0 +1,95 @@
+﻿id,catalog_file,manufacturer,product_type_en,product_type_ko,model_name,pumping_speed_m3h_50hz,ultimate_vacuum_mbar,motor_power_kw,oil_type,inlet_connection,application_ko,notes
+1,1.오일펌프_소형RV.pdf,Edwards,Oil Rotary Vane Pump,오일 로터리 베인 펌프,RV3,3.3,2.0E-3,0.45,Ultragrade 19,NW25,"질량분석기(GCMS/LCMS), 전자현미경(SEM/TEM), 연구개발, 터보펌프 백킹",소형 2단 / 가스 밸러스트 2단계 / 모드 선택 스위치
+2,1.오일펌프_소형RV.pdf,Edwards,Oil Rotary Vane Pump,오일 로터리 베인 펌프,RV5,5.1,2.0E-3,0.45,Ultragrade 19,NW25,"질량분석기(GCMS/LCMS), 전자현미경(SEM/TEM), 연구개발, 터보펌프 백킹",소형 2단 / 가스 밸러스트 2단계 / 모드 선택 스위치
+3,1.오일펌프_소형RV.pdf,Edwards,Oil Rotary Vane Pump,오일 로터리 베인 펌프,RV8,8.5,2.0E-3,0.45,Ultragrade 19,NW25,"질량분석기(GCMS/LCMS), 전자현미경(SEM/TEM), 연구개발, 터보펌프 백킹",소형 2단 / 가스 밸러스트 2단계 / 모드 선택 스위치
+4,1.오일펌프_소형RV.pdf,Edwards,Oil Rotary Vane Pump,오일 로터리 베인 펌프,RV12,12,2.0E-3,0.45,Ultragrade 19,NW25,"질량분석기(GCMS/LCMS), 전자현미경(SEM/TEM), 연구개발, 터보펌프 백킹",소형 2단 / 가스 밸러스트 2단계 / 모드 선택 스위치
+5,1-1.오일펌프_소형E2M.pdf,Edwards,Oil Rotary Vane Pump,오일 로터리 베인 펌프,E2M0.7,0.75,3.0E-3,0.09,Ultragrade 15,NW10,"과학·실험실 응용, 터보펌프 백킹",소형 2단 / IEC 커넥터 내장
+6,1-1.오일펌프_소형E2M.pdf,Edwards,Oil Rotary Vane Pump,오일 로터리 베인 펌프,E2M1.5,1.6,1.0E-3,0.16,Ultragrade 15,NW25,"과학·실험실 응용, 터보펌프 백킹",소형 2단 / IEC 커넥터 내장
+7,1-1.오일펌프_소형E2M.pdf,Edwards,Oil Rotary Vane Pump,오일 로터리 베인 펌프,E1M18,17,1.0E-2,0.55,Ultragrade 19,NW25,"과학·실험실 응용, 터보펌프 백킹",소형 1단(단단) / IEC 커넥터 내장
+8,1-1.오일펌프_소형E2M.pdf,Edwards,Oil Rotary Vane Pump,오일 로터리 베인 펌프,E2M18,17,1.0E-3,0.75,Ultragrade 19,NW25,"과학·실험실 응용, 터보펌프 백킹",소형 2단 / IEC 커넥터 내장
+9,1-1.오일펌프_소형E2M.pdf,Edwards,Oil Rotary Vane Pump,오일 로터리 베인 펌프,E2M28,27.5,1.0E-3,0.9,Ultragrade 19,NW25,"과학·실험실 응용, 터보펌프 백킹",소형 2단 / IEC 커넥터 내장
+10,2.오일펌프_중대형E2M.pdf,Edwards,Oil Rotary Vane Pump,오일 로터리 베인 펌프,E2M40,37,3.0E-3,1.1,Ultragrade 70,NW40/ISO-F40,"코팅, 제약 동결건조, 플라즈마 처리, 열처리, 화학 공정",중대형 2단 / HC·FX·AZ·EX 변형 있음
+11,2.오일펌프_중대형E2M.pdf,Edwards,Oil Rotary Vane Pump,오일 로터리 베인 펌프,E2M80,74,3.0E-3,2.2,Ultragrade 70,NW40/ISO-F40,"코팅, 제약 동결건조, 플라즈마 처리, 열처리, 화학 공정",중대형 2단 / HC·FX·AZ·EX 변형 있음
+12,2.오일펌프_중대형E2M.pdf,Edwards,Oil Rotary Vane Pump,오일 로터리 베인 펌프,E2M175,160,3.0E-3,5.5,Ultragrade 70,NW63/ISO-F63,"코팅, 제약 동결건조, 플라즈마 처리, 열처리, 화학 공정",중대형 2단 / HC·FX·AZ·EX 변형 있음
+13,2.오일펌프_중대형E2M.pdf,Edwards,Oil Rotary Vane Pump,오일 로터리 베인 펌프,E2M275,255,3.0E-3,7.5,Ultragrade 70,NW63/ISO-F63,"코팅, 제약 동결건조, 플라즈마 처리, 열처리, 화학 공정",중대형 2단 / HC·FX·AZ·EX 변형 있음
+14,2-1오일펌프 중대형E2S.pdf,Edwards,Oil Rotary Vane Pump,오일 로터리 베인 펌프,E2S45,42,3.0E-3,1.1,Ultragrade Performance 70,NW40/ISO-F40,"진공 탈기·건조, 열처리·진공로, 플라즈마 처리, 누설 검사, 가스 생산",현대적 경제형 2단 / 수증기 처리 강화 / 에어 냉각
+15,2-1오일펌프 중대형E2S.pdf,Edwards,Oil Rotary Vane Pump,오일 로터리 베인 펌프,E2S65,57,3.0E-3,1.5,Ultragrade Performance 70,NW40/ISO-F40,"진공 탈기·건조, 열처리·진공로, 플라즈마 처리, 누설 검사, 가스 생산",현대적 경제형 2단 / 수증기 처리 강화 / 에어 냉각
+16,2-1오일펌프 중대형E2S.pdf,Edwards,Oil Rotary Vane Pump,오일 로터리 베인 펌프,E2S85,78,3.0E-3,2.2,Ultragrade Performance 70,NW40/ISO-F40,"진공 탈기·건조, 열처리·진공로, 플라즈마 처리, 누설 검사, 가스 생산",현대적 경제형 2단 / 수증기 처리 강화 / 에어 냉각
+17,3.오일펌프_nES.pdf,Edwards,Oil Rotary Vane Pump (Single Stage),오일 로터리 베인 펌프 (단단),nES40,38.5,0.5,1.3,Ultragrade Performance 70,NW40/ISO-F40,"코팅(글래스/웹/광학), 열처리(템퍼링/??칭/어닐링), 건조(변압기/배터리), 일반산업",차세대 단단 / 에어 냉각
+18,3.오일펌프_nES.pdf,Edwards,Oil Rotary Vane Pump (Single Stage),오일 로터리 베인 펌프 (단단),nES65,54,0.5,1.8,Ultragrade Performance 70,NW40/ISO-F40,"코팅(글래스/웹/광학), 열처리(템퍼링/??칭/어닐링), 건조(변압기/배터리), 일반산업",차세대 단단 / 에어 냉각
+19,3.오일펌프_nES.pdf,Edwards,Oil Rotary Vane Pump (Single Stage),오일 로터리 베인 펌프 (단단),nES100,87.5,0.5,3,Ultragrade Performance 70,NW40/ISO-F40,"코팅(글래스/웹/광학), 열처리(템퍼링/??칭/어닐링), 건조(변압기/배터리), 일반산업",차세대 단단 / 에어 냉각
+20,3.오일펌프_nES.pdf,Edwards,Oil Rotary Vane Pump (Single Stage),오일 로터리 베인 펌프 (단단),nES200,170,0.08,4.5,Ultragrade Performance 70,NW63/ISO-F63,"코팅(글래스/웹/광학), 열처리(템퍼링/??칭/어닐링), 건조(변압기/배터리), 일반산업",차세대 단단 / 에어 냉각
+21,3.오일펌프_nES.pdf,Edwards,Oil Rotary Vane Pump (Single Stage),오일 로터리 베인 펌프 (단단),nES300,240,0.08,5.5,Ultragrade Performance 70,NW63/ISO-F63,"코팅(글래스/웹/광학), 열처리(템퍼링/??칭/어닐링), 건조(변압기/배터리), 일반산업",차세대 단단 / 에어 냉각
+22,3.오일펌프_nES.pdf,Edwards,Oil Rotary Vane Pump (Single Stage),오일 로터리 베인 펌프 (단단),nES300S,284,0.08,6,Ultragrade Performance 70,NW63/ISO-F63,"코팅(글래스/웹/광학), 열처리(템퍼링/??칭/어닐링), 건조(변압기/배터리), 일반산업",차세대 단단 / 에어 냉각 / 고속형
+23,3.오일펌프_nES.pdf,Edwards,Oil Rotary Vane Pump (Single Stage),오일 로터리 베인 펌프 (단단),nES470,400,0.08,11,Ultragrade Performance 70,NW100/ISO-F100,"코팅(글래스/웹/광학), 열처리(템퍼링/??칭/어닐링), 건조(변압기/배터리), 일반산업",차세대 단단 / 에어+수냉 선택
+24,3.오일펌프_nES.pdf,Edwards,Oil Rotary Vane Pump (Single Stage),오일 로터리 베인 펌프 (단단),nES570,470,0.08,11,Ultragrade Performance 70,NW100/ISO-F100,"코팅(글래스/웹/광학), 열처리(템퍼링/??칭/어닐링), 건조(변압기/배터리), 일반산업",차세대 단단 / 에어+수냉 선택
+25,3.오일펌프_nES.pdf,Edwards,Oil Rotary Vane Pump (Single Stage),오일 로터리 베인 펌프 (단단),nES630,640,0.08,18.5,Ultragrade Performance 70,NW100/ISO-F100,"코팅(글래스/웹/광학), 열처리(템퍼링/??칭/어닐링), 건조(변압기/배터리), 일반산업",차세대 단단 / 에어+수냉 선택
+26,3.오일펌프_nES.pdf,Edwards,Oil Rotary Vane Pump (Single Stage),오일 로터리 베인 펌프 (단단),nES750,755,0.08,18.5,Ultragrade Performance 70,NW100/ISO-F100,"코팅(글래스/웹/광학), 열처리(템퍼링/??칭/어닐링), 건조(변압기/배터리), 일반산업",차세대 단단 / 에어+수냉 선택
+27,4.스크롤펌프_소형nXDS.pdf,Edwards,Dry Scroll Pump,드라이 스크롤 펌프,nXDS6i,6.2,2.0E-2,0.26,없음 (무오일),NW25,"질량분석기(GCMS/LCMS), 전자현미경(SEM/TEM), 연구개발, 터보펌프 백킹",소형 무오일 드라이 / 스마트 컨트롤러 내장
+28,4.스크롤펌프_소형nXDS.pdf,Edwards,Dry Scroll Pump,드라이 스크롤 펌프,nXDS10i,11.4,7.0E-3,0.28,없음 (무오일),NW25,"질량분석기(GCMS/LCMS), 전자현미경(SEM/TEM), 연구개발, 터보펌프 백킹",소형 무오일 드라이 / 스마트 컨트롤러 내장
+29,4.스크롤펌프_소형nXDS.pdf,Edwards,Dry Scroll Pump,드라이 스크롤 펌프,nXDS15i,15.1,7.0E-3,0.3,없음 (무오일),NW25,"질량분석기(GCMS/LCMS), 전자현미경(SEM/TEM), 연구개발, 터보펌프 백킹",소형 무오일 드라이 / 스마트 컨트롤러 내장
+30,4.스크롤펌프_소형nXDS.pdf,Edwards,Dry Scroll Pump,드라이 스크롤 펌프,nXDS20i,22,3.0E-2,0.26,없음 (무오일),NW25,"질량분석기(GCMS/LCMS), 전자현미경(SEM/TEM), 연구개발, 터보펌프 백킹",소형 무오일 드라이 / 스마트 컨트롤러 내장
+31,5.스크롤펌프_중형XDS.pdf,Edwards,Dry Scroll Pump,드라이 스크롤 펌프,XDS35i,35,1.0E-2,0.52,없음 (무오일),NW40,"반도체 장비 백킹, 실험실, 산업용 건식 공정",중형 무오일 드라이 / 허메틱 밀봉 / 단순 단면 스크롤 구조
+32,5.스크롤펌프_중형XDS.pdf,Edwards,Dry Scroll Pump,드라이 스크롤 펌프,XDS46i,40,5.0E-2,0.52,없음 (무오일),NW40,"터보펌프 백킹, 반도체 장비, 실험실, 산업용 건식 공정",중형 무오일 드라이 / 1~10mbar 구간 최적화 / 허메틱 밀봉
+33,6.부스터펌프EH.pdf,Edwards,Mechanical Booster Pump,기계적 부스터 펌프,EH250,310,N/A (부스터),2.2,Ultragrade 20,ISO63,"반도체 공정, 진공 증류, 박막 코팅, 제약 동결건조, 이차전지, 우주 시뮬레이션",독립 구동 가능 (히드로키네틱 드라이브) / 에어 냉각
+34,6.부스터펌프EH.pdf,Edwards,Mechanical Booster Pump,기계적 부스터 펌프,EH500,505,N/A (부스터),2.2,Ultragrade 20,ISO100,"반도체 공정, 진공 증류, 박막 코팅, 제약 동결건조, 이차전지, 우주 시뮬레이션",독립 구동 가능 (히드로키네틱 드라이브) / 에어 냉각
+35,6.부스터펌프EH.pdf,Edwards,Mechanical Booster Pump,기계적 부스터 펌프,EH1200,1195,N/A (부스터),3,Ultragrade 20,ISO160,"반도체 공정, 진공 증류, 박막 코팅, 제약 동결건조, 이차전지, 우주 시뮬레이션",독립 구동 가능 (히드로키네틱 드라이브) / 수냉식
+36,6.부스터펌프EH.pdf,Edwards,Mechanical Booster Pump,기계적 부스터 펌프,EH2600,2590,N/A (부스터),11,Ultragrade 20,ISO160,"반도체 공정, 진공 증류, 박막 코팅, 제약 동결건조, 이차전지, 우주 시뮬레이션",독립 구동 가능 (히드로키네틱 드라이브) / 수냉식
+37,6.부스터펌프EH.pdf,Edwards,Mechanical Booster Pump,기계적 부스터 펌프,EH4200,4140,N/A (부스터),11,Ultragrade 20,ISO250,"반도체 공정, 진공 증류, 박막 코팅, 제약 동결건조, 이차전지, 우주 시뮬레이션",독립 구동 가능 (히드로키네틱 드라이브) / 수냉식
+38,7.산업용드라이펌프_GXS Dry.pdf,Edwards,Dry Screw Vacuum Pump (Industrial),드라이 스크류 펌프 (산업용),GXS160,160,7.0E-3,5,PFPE Drynert 25/6,ISO63,"야금(진공 브레이징/소결/열처리), 코팅(CVD/PVD), 건조(동결건조/변압기), 태양전지, LED, 우주 시뮬레이션",산업용 스크류 / 내장형 컨트롤러 / 수냉식 / 이더넷 모니터링
+39,7.산업용드라이펌프_GXS Dry.pdf,Edwards,Dry Screw Vacuum Pump (Industrial),드라이 스크류 펌프 (산업용),GXS250,250,4.0E-3,9,PFPE Drynert 25/6,ISO63,"야금(진공 브레이징/소결/열처리), 코팅(CVD/PVD), 건조(동결건조/변압기), 태양전지, LED, 우주 시뮬레이션",산업용 스크류 / 내장형 컨트롤러 / 수냉식 / 이더넷 모니터링
+40,7.산업용드라이펌프_GXS Dry.pdf,Edwards,Dry Screw Vacuum Pump (Industrial),드라이 스크류 펌프 (산업용),GXS450,450,5.0E-3,17.3,PFPE Drynert 25/6,ISO100,"야금(진공 브레이징/소결/열처리), 코팅(CVD/PVD), 건조(동결건조/변압기), 태양전지, LED, 우주 시뮬레이션",산업용 스크류 / 내장형 컨트롤러 / 수냉식 / 이더넷 모니터링
+41,7.산업용드라이펌프_GXS Dry.pdf,Edwards,Dry Screw Vacuum Pump (Industrial),드라이 스크류 펌프 (산업용),GXS750,740,3.0E-3,37,PFPE Drynert 25/6,ISO100,"야금(진공 브레이징/소결/열처리), 코팅(CVD/PVD), 건조(동결건조/변압기), 태양전지, LED, 우주 시뮬레이션",산업용 스크류 / 내장형 컨트롤러 / 수냉식 / 이더넷 모니터링
+42,7-1.산업용드라이_EXS.pdf,Edwards,Dry Screw Vacuum Pump (Industrial),드라이 스크류 펌프 (산업용),EXS160,160,1.0E-2,5,PFPE Drynert 25/6,ISO63,"야금(진공 브레이징/소결/질화), 코팅(CVD/DLC/PVD), 플라즈마, 태양전지, 이차전지(전극건조/전해질충전)",GXS 기반 차세대 산업용 스크류 / VFD(주파수 변환기) 내장 / Modbus RTU
+43,7-1.산업용드라이_EXS.pdf,Edwards,Dry Screw Vacuum Pump (Industrial),드라이 스크류 펌프 (산업용),EXS250,250,1.0E-2,9,PFPE Drynert 25/6,ISO63,"야금(진공 브레이징/소결/질화), 코팅(CVD/DLC/PVD), 플라즈마, 태양전지, 이차전지(전극건조/전해질충전)",GXS 기반 차세대 산업용 스크류 / VFD(주파수 변환기) 내장 / Modbus RTU
+44,7-1.산업용드라이_EXS.pdf,Edwards,Dry Screw Vacuum Pump (Industrial),드라이 스크류 펌프 (산업용),EXS450,450,1.0E-2,17.3,PFPE Drynert 25/6,ISO100,"야금(진공 브레이징/소결/질화), 코팅(CVD/DLC/PVD), 플라즈마, 태양전지, 이차전지(전극건조/전해질충전)",GXS 기반 차세대 산업용 스크류 / VFD(주파수 변환기) 내장 / Modbus RTU
+45,7-1.산업용드라이_EXS.pdf,Edwards,Dry Screw Vacuum Pump (Industrial),드라이 스크류 펌프 (산업용),EXS750,740,1.0E-2,22,PFPE Drynert 25/6,ISO100,"야금(진공 브레이징/소결/질화), 코팅(CVD/DLC/PVD), 플라즈마, 태양전지, 이차전지(전극건조/전해질충전)",GXS 기반 차세대 산업용 스크류 / VFD(주파수 변환기) 내장 / Modbus RTU
+46,8.반도체드라이_iXH.pdf,Edwards,Dry Pump for Semiconductor (Harsh),반도체용 드라이 펌프 (가혹 공정),iXH100,100,2.0E-2,2.1,없음 (무오일),ISO63,"HDP-CVD, RTP, SACVD, MOCVD, PECVD, LPCVD, ALD / 가혹 공정 전용",반도체 가혹 공정용 / 단독 드라이 펌프 / 수냉식
+47,8.반도체드라이_iXH.pdf,Edwards,Dry Pump for Semiconductor (Harsh),반도체용 드라이 펌프 (가혹 공정),iXH610,665,5.0E-3,2.6,없음 (무오일),ISO100,"HDP-CVD, RTP, SACVD, MOCVD, PECVD, LPCVD, ALD / 가혹 공정 전용",드라이펌프(100m3/h) + 부스터(600m3/h) 조합 / 수냉식
+48,8.반도체드라이_iXH.pdf,Edwards,Dry Pump for Semiconductor (Harsh),반도체용 드라이 펌프 (가혹 공정),iXH1210,1025,5.0E-3,3.2,없음 (무오일),ISO100,"HDP-CVD, RTP, SACVD, MOCVD, PECVD, LPCVD, ALD / 가혹 공정 전용",드라이펌프(100m3/h) + 부스터(1200m3/h) 조합 / 수냉식
+49,8.반도체드라이_iXH.pdf,Edwards,Dry Pump for Semiconductor (Harsh),반도체용 드라이 펌프 (가혹 공정),iXH1820,1820,5.0E-3,3.9,없음 (무오일),ISO160,"HDP-CVD, RTP, SACVD, MOCVD, PECVD, LPCVD, ALD / 가혹 공정 전용",드라이펌프(200m3/h) + 부스터(1800m3/h) 조합 / 수냉식
+50,8.반도체드라이_iXH.pdf,Edwards,Dry Pump for Semiconductor (Harsh),반도체용 드라이 펌프 (가혹 공정),iXH3030,2900,5.0E-3,5.7,없음 (무오일),ISO160,"HDP-CVD, RTP, SACVD, MOCVD, PECVD, LPCVD, ALD / 가혹 공정 전용",드라이펌프(300m3/h) + 부스터(3000m3/h) 조합 / 수냉식
+51,9.반도체드라이_iXL.pdf,Edwards,Dry Pump for Semiconductor (FPD/Solar),반도체용 드라이 펌프 (FPD/태양전지),iXL250Q,1750,5.0E-3,5.3,없음 (무오일),ISO160,"FPD(평판 디스플레이) Gen4~10, 태양전지 제조, Load Lock, PVD, PECVD",드라이펌프(250m3/h) + 부스터(1800m3/h) / 대기압 고속 펌프다운 특화
+52,9.반도체드라이_iXL.pdf,Edwards,Dry Pump for Semiconductor (FPD/Solar),반도체용 드라이 펌프 (FPD/태양전지),iXL500Q,2250,5.0E-3,7,없음 (무오일),ISO160,"FPD(평판 디스플레이) Gen4~10, 태양전지 제조, Load Lock, PVD, PECVD",드라이펌프(500m3/h) + 부스터(1800m3/h) / 대기압 고속 펌프다운 특화
+53,9.반도체드라이_iXL.pdf,Edwards,Dry Pump for Semiconductor (FPD/Solar),반도체용 드라이 펌프 (FPD/태양전지),iXL500R,2500,5.0E-3,7,없음 (무오일),ISO160,"FPD(평판 디스플레이) Gen4~10, 태양전지 제조, Load Lock, PVD, PECVD",드라이펌프(500m3/h) + 부스터(3000m3/h) / 대기압 고속 펌프다운 특화
+54,9.반도체드라이_iXL.pdf,Edwards,Dry Pump for Semiconductor (FPD/Solar),반도체용 드라이 펌프 (FPD/태양전지),iXL750Q,2700,5.0E-3,9.8,없음 (무오일),ISO160,"FPD(평판 디스플레이) Gen4~10, 태양전지 제조, Load Lock, PVD, PECVD",드라이펌프(750m3/h) + 부스터(1800m3/h) / 대기압 고속 펌프다운 특화
+55,8-1.반도체드라이_nXRi.pdf,Edwards,Dry Pump (Multi-stage Roots),드라이 펌프 (다단 루츠),nXR30i,30,3.0E-2,0.45,없음 (무오일),NW25,"분석기기(전자현미경/질량분석기/RGA), 연구개발(UHV/고에너지물리), 산업(건조/플라즈마세정)",컴팩트 고성능 무오일 드라이 / 15000rpm 고속 / 단상 100-240V
+56,8-1.반도체드라이_nXRi.pdf,Edwards,Dry Pump (Multi-stage Roots),드라이 펌프 (다단 루츠),nXR40i,40,3.0E-2,0.45,없음 (무오일),NW25,"분석기기(전자현미경/질량분석기/RGA), 연구개발(UHV/고에너지물리), 산업(건조/플라즈마세정)",컴팩트 고성능 무오일 드라이 / 15000rpm 고속 / 단상 100-240V
+57,8-1.반도체드라이_nXRi.pdf,Edwards,Dry Pump (Multi-stage Roots),드라이 펌프 (다단 루츠),nXR60i,60,3.0E-2,0.45,없음 (무오일),NW40,"분석기기(전자현미경/질량분석기/RGA), 연구개발(UHV/고에너지물리), 산업(건조/플라즈마세정)",컴팩트 고성능 무오일 드라이 / 15000rpm 고속 / 단상 100-240V
+58,8-1.반도체드라이_nXRi.pdf,Edwards,Dry Pump (Multi-stage Roots),드라이 펌프 (다단 루츠),nXR90i,90,3.0E-2,0.45,없음 (무오일),NW40,"분석기기(전자현미경/질량분석기/RGA), 연구개발(UHV/고에너지물리), 산업(건조/플라즈마세정)",컴팩트 고성능 무오일 드라이 / 15000rpm 고속 / 단상 100-240V
+59,8-1.반도체드라이_nXRi.pdf,Edwards,Dry Pump (Multi-stage Roots),드라이 펌프 (다단 루츠),nXR120i,120,3.0E-2,0.45,없음 (무오일),NW40,"분석기기(전자현미경/질량분석기/RGA), 연구개발(UHV/고에너지물리), 산업(건조/플라즈마세정)",컴팩트 고성능 무오일 드라이 / 15000rpm 고속 / 단상 100-240V / 최대 20mbar 연속 입구압
+60,9-1.헬륨리크디텍터_ELD500.pdf,Edwards,Helium Leak Detector,헬륨 리크 디텍터,ELD500-WET,2.5,N/A (리크 디텍터),0.42,N/A,"누설 검사 (반도체/자동차/의료기기/냉동/배관)",헬륨 누설 감도 5E-12 mbar·l/s / 진공모드+스니퍼모드 / 내장 오일 백킹 펌프 / 이동형
+61,9-1.헬륨리크디텍터_ELD500.pdf,Edwards,Helium Leak Detector,헬륨 리크 디텍터,ELD500-DRY,1.6,N/A (리크 디텍터),0.35,N/A,"누설 검사 (반도체/자동차/의료기기/냉동/배관)",헬륨 누설 감도 3E-11 mbar·l/s / 진공모드+스니퍼모드 / 드라이 백킹 펌프 / 이동형
+62,9-1.헬륨리크디텍터_ELD500.pdf,Edwards,Helium Leak Detector,헬륨 리크 디텍터,ELD500-FLEX,N/A,N/A (리크 디텍터),0.2,N/A,"누설 검사 (반도체/자동차/의료기기/냉동/배관)",헬륨 누설 감도 5E-12 mbar·l/s / 외부 백킹 펌프 사용 / 초경량 30kg
+63,10.nEXT 터보펌프.pdf,Edwards,Turbomolecular Pump,터보분자 펌프,nEXT55D,198,<1.0E-8,0.08,없음 (베어링 오일 카트리지),DN63 ISO-K,"연구개발, 고에너지물리(빔라인/가속기), 질량분석기, 전자현미경, 코팅, 산업",55 l/s (N2) / 듀플렉스(터보+드래그) / 90000rpm / 권장 백킹: nXDS6i
+64,10.nEXT 터보펌프.pdf,Edwards,Turbomolecular Pump,터보분자 펌프,nEXT85D,306,<1.0E-8,0.08,없음 (베어링 오일 카트리지),DN63 ISO-K,"연구개발, 고에너지물리(빔라인/가속기), 질량분석기, 전자현미경, 코팅, 산업",85 l/s (N2) / 듀플렉스(터보+드래그) / 90000rpm / 권장 백킹: nXDS6i
+65,10.nEXT 터보펌프.pdf,Edwards,Turbomolecular Pump,터보분자 펌프,nEXT240D,864,<1.0E-8,0.16,없음 (베어링 오일 카트리지),DN100 ISO-K,"연구개발, 고에너지물리(빔라인/가속기), 질량분석기, 전자현미경, 코팅, 산업",240 l/s (N2) / 듀플렉스 / 60000rpm / 권장 백킹: RV12 또는 nXDS10i
+66,10.nEXT 터보펌프.pdf,Edwards,Turbomolecular Pump,터보분자 펌프,nEXT300D,1080,<1.0E-8,0.16,없음 (베어링 오일 카트리지),DN100 ISO-K,"연구개발, 고에너지물리(빔라인/가속기), 질량분석기, 전자현미경, 코팅, 산업",300 l/s (N2) / 듀플렉스 / 60000rpm / 권장 백킹: RV12 또는 nXDS10i
+67,10.nEXT 터보펌프.pdf,Edwards,Turbomolecular Pump,터보분자 펌프,nEXT400D,1440,<1.0E-8,0.16,없음 (베어링 오일 카트리지),DN160 ISO-K,"연구개발, 고에너지물리(빔라인/가속기), 질량분석기, 전자현미경, 코팅, 산업",400 l/s (N2) / 듀플렉스 / 60000rpm / 권장 백킹: RV12 또는 nXDS10i
+68,10.nEXT 터보펌프.pdf,Edwards,Turbomolecular Pump,터보분자 펌프,nEXT730D,2628,<3.5E-9,N/A,없음 (베어링 오일 카트리지),DN160 ISO-K,"코팅, 열처리, E-beam 용접, Etch, 이온주입, 탈기, 실린더 배기",730 l/s (N2) / 49200rpm / 권장 백킹: nXRi 또는 XDS35i / 별도 EPS800 전원공급장치 필요
+69,10.nEXT 터보펌프.pdf,Edwards,Turbomolecular Pump,터보분자 펌프,nEXT930D,3330,<3.5E-9,N/A,없음 (베어링 오일 카트리지),DN200 ISO-K,"코팅, 열처리, E-beam 용접, Etch, 이온주입, 탈기, 실린더 배기",925 l/s (N2) / 42000rpm / 권장 백킹: nXRi 또는 XDS35i / 별도 EPS800 전원공급장치 필요
+70,10.nEXT 터보펌프.pdf,Edwards,Turbomolecular Pump,터보분자 펌프,nEXT1230H,4500,<5.0E-10,N/A,없음 (베어링 오일 카트리지),DN200 ISO-K,"코팅, 열처리, E-beam 용접, Etch, 이온주입, 탈기, 실린더 배기",1250 l/s (N2) / 42000rpm / H변형(경가스 압축 최적화) / 별도 EPS800 전원공급장치 필요
+71,11.터보펌프_nEXT_Pumping_Station.pdf,Edwards,Turbomolecular Pumping Station,터보분자 펌핑 스테이션,nEXT Pumping Station,N/A,<1.0E-8,N/A,없음 (무오일 백킹 또는 오일 백킹 선택),"DN40~DN160","연구개발, 분석기기, 산업용 고진공",nEXT85/240/300/400 터보 + RV5/RV12/nXDS6i~20i 백킹 조합 / TIC 컨트롤러 내장 / 조립 완성 제품
+72,12.터보펌프_STP.pdf,Edwards,Maglev Turbomolecular Pump,마그레브 터보분자 펌프,STP-iXR2206,7920,<1.0E-10,0.2,없음 (마그레브 베어링),N/A (모델별 상이),"코팅, 반도체, 평판디스플레이, 야금, 태양전지, R&D",2200 l/s (N2) / 마그레브 베어링(무보수) / 5축 디지털 제어 / 기존 10인치 확산 펌프 대체
+73,12.터보펌프_STP.pdf,Edwards,Maglev Turbomolecular Pump,마그레브 터보분자 펌프,STP-iXA3306,11880,<1.0E-10,0.3,없음 (마그레브 베어링),N/A (모델별 상이),"코팅, 반도체, 평판디스플레이, 야금, 태양전지, R&D",3300 l/s (N2) / 마그레브 베어링(무보수) / 기존 16인치 확산 펌프 대체 / 에너지 97% 절감
+74,12.터보펌프_STP.pdf,Edwards,Maglev Turbomolecular Pump,마그레브 터보분자 펌프,STP-XA4503C,16200,<1.0E-10,0.3,없음 (마그레브 베어링),N/A (모델별 상이),"코팅, 반도체, 평판디스플레이, 야금, 태양전지, R&D",4500 l/s (N2) / 마그레브 베어링(무보수) / 기존 20인치 확산 펌프 대체 / 에너지 98% 절감
+75,13.저진공게이지_APG200.pdf,Edwards,Vacuum Gauge (Pirani),진공 게이지 (피라니),APG200-M,N/A (게이지),5.0E-4,N/A,N/A,"분석기기, 반도체, 의료기기, 연구개발","측정 범위: 대기압~5×10⁻⁴ mbar / 피라니 원리 / 25% 소형화 / 360° LED 링 / 15-48V DC 광범위 전원 / NW16·NW25 플랜지"
+76,13.저진공게이지_APG200.pdf,Edwards,Vacuum Gauge (Pirani),진공 게이지 (피라니),APG200-LC,N/A (게이지),1.0E-4,N/A,N/A,"분석기기, 반도체, 의료기기, 연구개발","측정 범위: 대기압~1×10⁻⁴ mbar / 내부식성(LC 버전) / Pt/Ir 필라멘트 / 25% 소형화 / 360° LED 링"
+77,14.고진공게이지AIM200.pdf,Edwards,Vacuum Gauge (Cold Cathode),진공 게이지 (냉음극),AIM200,N/A (게이지),1.0E-9,N/A,N/A,"분석기기, 반도체, 의료기기","측정 범위: 1×10⁻⁹~1×10⁻² mbar / 역 자화 방식 냉음극 / 저누설 자기장 / 360° LED 링 / 15-48V DC / 스트라이커 내장 / NW25·NW40·DN40CF"
+78,15.저진공+고진공게이지_WRG200.pdf,Edwards,Vacuum Gauge (Wide Range),진공 게이지 (광범위),WRG200,N/A (게이지),1.0E-9,N/A,N/A,"분석기기, 반도체, 의료기기, 연구개발","측정 범위: 1×10⁻⁹~1000 mbar (단일 포트!) / 역자화+피라니 복합 / 360° LED 링 / 15-48V DC / RS232·RS485·0-10V 출력 / NW25·NW40·DN40CF"
+79,16.디스플레이진공게이지_P4-P5.pdf,Edwards,Handheld Vacuum Gauge,핸드헬드 진공 게이지,P4,N/A (게이지),1,N/A,N/A,"산업 공정 점검, 진공 시스템 모니터링, 누설 검사","측정 범위: 2000~1 mbar (절대압) / 피에조저항 원리 / USB-C + 블루투스 LE 옵션 / 데이터 로거 내장 / NW16 플랜지"
+80,16.디스플레이진공게이지_P4-P5.pdf,Edwards,Handheld Vacuum Gauge,핸드헬드 진공 게이지,P5,N/A (게이지),5.0E-5,N/A,N/A,"산업 공정 점검, 진공 시스템 모니터링, 누설 검사","측정 범위: 1200~5×10⁻⁵ mbar (절대압) / 피에조저항+피라니 복합 / USB-C + 블루투스 LE 옵션 / 데이터 로거 내장 / NW16 플랜지"
+81,17.컨트롤러_TIC.pdf,Edwards,Vacuum Controller,진공 컨트롤러,TIC-3head,N/A (컨트롤러),N/A,0.055,N/A,"분석기기, 연구개발, 반도체 진공 시스템","3채널 게이지 컨트롤러 / APG·AIM·WRG·AIGX 자동 인식 / 6개 릴레이 세트포인트 / RS232·RS485 / Windows PC 소프트웨어"
+82,17.컨트롤러_TIC.pdf,Edwards,Vacuum Controller,진공 컨트롤러,TIC-6head,N/A (컨트롤러),N/A,0.16,N/A,"분석기기, 연구개발, 반도체 진공 시스템","6채널 게이지 컨트롤러 / APG·AIM·WRG·AIGX·Barocel 자동 인식 / 터보펌프·백킹펌프 제어 / RS232·RS485 / Ethernet 모니터링"
+83,18.컨트롤러_ADC.pdf,Edwards,Vacuum Controller,진공 컨트롤러,ADC-Standard,N/A (컨트롤러),N/A,N/A,N/A,"실험실, 산업용 진공 모니터링","단채널 게이지 컨트롤러 / APG·WRG 등 자동 인식 / 1/8 DIN 소형 / 100-240V AC / 0-10V 아날로그 출력"
+84,18.컨트롤러_ADC.pdf,Edwards,Vacuum Controller,진공 컨트롤러,ADC-MkII,N/A (컨트롤러),N/A,N/A,N/A,"실험실, 산업용 진공 모니터링","2채널 게이지 컨트롤러 / APG·AIM·WRG 지원 / 2 세트포인트 릴레이 / RS232 통신 / 0-10V 아날로그 출력×2"
+85,19.미스트필터(EMF).pdf,Edwards,Oil Mist Filter,오일 미스트 필터,EMF3,3,N/A (필터),N/A,N/A,"오일 로터리 펌프 배기 필터 (E2M0.7/1.5)","유량 3 m³/h / NW10 플랜지 / 섬유 복합 미스트 필터 + 활성탄 탈취 필터 / 압력 릴리프 밸브 내장"
+86,19.미스트필터(EMF).pdf,Edwards,Oil Mist Filter,오일 미스트 필터,EMF10,12,N/A (필터),N/A,N/A,"오일 로터리 펌프 배기 필터 (RV3/5/8 등)","유량 12 m³/h / NW25 플랜지 / 섬유 복합 미스트 필터 + 활성탄 탈취 필터 / 오일 레벨 확인창"
+87,19.미스트필터(EMF).pdf,Edwards,Oil Mist Filter,오일 미스트 필터,EMF20,20,N/A (필터),N/A,N/A,"오일 로터리 펌프 배기 필터 (RV12/E1M18/E2M18)","유량 20 m³/h / NW25 플랜지 / 섬유 복합 미스트 필터 + 활성탄 탈취 필터 / 오일 드레인 키트 옵션"
+88,20.진공펌프오일_Ultra19.pdf,Edwards,Vacuum Pump Oil,진공 펌프 오일,Ultragrade 15,N/A (오일),N/A,N/A,N/A,"E2M0.7/1.5 등 소형 2단 오일 로터리 펌프","점도 38cSt@40°C / 인화점 220°C / 저증기압 미네랄 오일 / 1L 또는 4L 병"
+89,20.진공펌프오일_Ultra19.pdf,Edwards,Vacuum Pump Oil,진공 펌프 오일,Ultragrade 19,N/A (오일),N/A,N/A,N/A,"RV, E2M18/28, nES, E2S 오일 로터리 펌프","점도 55cSt@40°C / 인화점 220°C / 저증기압 프리미엄 미네랄 오일 / 1L 또는 4L 병"
+90,20.진공펌프오일_Ultra19.pdf,Edwards,Vacuum Pump Oil,진공 펌프 오일,Ultragrade 20,N/A (오일),N/A,N/A,N/A,"EH 부스터 펌프 (기어케이스용)","점도 103cSt@40°C / 인화점 220°C / 고점도 미네랄 오일"
+91,20.진공펌프오일_Ultra19.pdf,Edwards,Vacuum Pump Oil,진공 펌프 오일,Ultragrade 70,N/A (오일),N/A,N/A,N/A,"E2M 중대형(E2M40~275), E2S, nES 산업용 오일 로터리","점도 70cSt@40°C / 인화점 230°C / 산업용 고급 미네랄 오일"
+92,21.피팅_52~57페이지사용.PDF,Edwards,Vacuum Fittings Catalog,진공 피팅 카탈로그,Fitting-ISO-KF (NW),N/A (피팅),N/A,N/A,N/A,"진공 배관 연결 (NW10~50 플랜지)","ISO-KF(NW) 플랜지 시리즈 / 클램프·센터링 링·O-링 포함 / 크기: NW10/16/25/40/50 / 스테인리스 또는 알루미늄"
+93,21.피팅_52~57페이지사용.PDF,Edwards,Vacuum Fittings Catalog,진공 피팅 카탈로그,Fitting-ISO-K,N/A (피팅),N/A,N/A,N/A,"고진공 배관 연결 (DN63~250 플랜지)","ISO-K 플랜지 시리즈 / 볼트 클램프 방식 / 크기: DN63/100/160/200/250 / 스테인리스"
+94,21.피팅_52~57페이지사용.PDF,Edwards,Vacuum Fittings Catalog,진공 피팅 카탈로그,Fitting-CF (ConFlat),N/A (피팅),N/A,N/A,N/A,"초고진공(UHV) 배관 연결","ConFlat(CF) 플랜지 시리즈 / 금속 가스켓 방식 / UHV 적용 / 크기: DN16~253 / 스테인리스"

@@ -55,7 +55,9 @@ next-env.d.ts
 *.db-journal
 
 # local-only data files (pricing sheets, etc.)
-/data/
+/data/*
+# AI 마케팅 자동화용 제품 마스터 테이블은 추적
+!/data/product_master_table.csv
 
 # large archives / local-only junk
 *.zip
