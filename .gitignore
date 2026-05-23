@@ -58,6 +58,7 @@ next-env.d.ts
 /data/*
 # AI 마케팅 자동화용 제품 마스터 테이블은 추적
 !/data/product_master_table.csv
+!/data/keyword_map.csv
 
 # large archives / local-only junk
 *.zip
