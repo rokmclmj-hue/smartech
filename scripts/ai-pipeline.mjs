@@ -214,6 +214,49 @@ async function main() {
   console.log(`\n${ isPassed ? '✅ 2팀 판정: 통과' : '❌ 2팀 판정: 반려'}`);
   console.log(verifyLeader);
 
+  // ── 3팀: SEO 최적화 (2팀 통과 시만 실행) ──
+  let seoA = '', seoB = '', seoLeader = '';
+  let seoTitle = '', seoMeta = '', seoTags = '', seoFinalDraft = draft;
+
+  if (isPassed) {
+    seoA = await callAgent(
+      `당신은 스마텍 콘텐츠 3팀 팀원입니다. 네이버 검색 최적화(SEO) 전문가입니다.
+블로그 글 제목이 네이버에서 잘 검색되도록 최적화하는 역할입니다.`,
+      `다음 블로그 글을 보고 네이버 검색 최적화 제목 3개를 제안하세요.\n\n[글 내용]\n${draft}\n\n[검색량 데이터]\n${keywordText.slice(0, 1000)}\n\n규칙:\n- 제목 길이: 25~35자\n- 핵심 키워드를 앞쪽에 배치\n- 검색자의 의도(질문형 or 정보형)에 맞게\n- "스마텍" 브랜드명은 제목에 포함하지 않음\n\n형식:\n1. [제목] - [이유 한 줄]\n2. [제목] - [이유 한 줄]\n3. [제목] - [이유 한 줄]`,
+      '3팀 팀원A · SEO 제목 최적화'
+    );
+
+    seoB = await callAgent(
+      `당신은 스마텍 콘텐츠 3팀 팀원입니다. 네이버 블로그 콘텐츠 구조 최적화 전문가입니다.
+소제목과 키워드 배치를 검색 최적화에 맞게 분석하는 역할입니다.`,
+      `다음 블로그 글의 구조를 네이버 SEO에 맞게 분석하세요.\n\n[글 내용]\n${draft}\n\n분석 항목:\n1. 현재 소제목(##) 목록과 개선 제안\n2. 핵심 키워드가 첫 단락에 자연스럽게 들어가 있는지\n3. 추천 태그 키워드 5~8개\n4. 메타 설명(검색 결과에 표시되는 요약문) 160자 이내\n\n형식:\n현재소제목: [목록]\n개선소제목: [목록]\n키워드배치: [문제없음 / 수정필요: 내용]\n추천태그: [쉼표로 구분]\n메타설명: [160자 이내]`,
+      '3팀 팀원B · 구조·키워드 최적화'
+    );
+
+    seoLeader = await callAgent(
+      `당신은 스마텍 콘텐츠 3팀 팀장입니다.
+두 팀원의 SEO 분석을 종합해 최종 발행 제목과 메타 설명을 확정하고, 최종 발행용 글을 완성합니다.
+브랜드 보이스와 말투는 절대 바꾸지 않습니다. 소제목만 필요 시 SEO에 맞게 수정합니다.`,
+      `팀원A 제목 제안:\n${seoA}\n\n팀원B 구조 분석:\n${seoB}\n\n원본 글:\n${draft}\n\n다음 형식을 정확히 지켜 완성하세요:\n\n최종제목: [선정된 제목]\n메타설명: [160자 이내]\n추천태그: [쉼표 구분 5~8개]\n\n---발행용---\n[소제목만 필요 시 수정된 최종 글 전체]`,
+      '3팀 팀장 · 최종 SEO 발행본',
+      2048
+    );
+
+    const titleMatch = seoLeader.match(/최종제목:\s*(.+)/);
+    const metaMatch = seoLeader.match(/메타설명:\s*(.+)/);
+    const tagsMatch = seoLeader.match(/추천태그:\s*(.+)/);
+    const finalMatch = seoLeader.match(/---발행용---\n([\s\S]+)$/);
+
+    seoTitle = titleMatch ? titleMatch[1].trim() : '';
+    seoMeta = metaMatch ? metaMatch[1].trim() : '';
+    seoTags = tagsMatch ? tagsMatch[1].trim() : '';
+    seoFinalDraft = finalMatch ? finalMatch[1].trim() : draft;
+
+    console.log(`\n🔍 3팀 SEO 최적화 완료`);
+    console.log(`제목: ${seoTitle}`);
+    console.log(`태그: ${seoTags}`);
+  }
+
   // ── 결과 저장 ──
   const outputDir = path.join(root, 'data', '콘텐츠');
   if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
@@ -227,6 +270,38 @@ async function main() {
     + String(now.getMinutes()).padStart(2,'0');
 
   const verdict = isPassed ? '✅ 통과' : '❌ 반려';
+  const seoSection = isPassed ? [
+    '',
+    '---',
+    '',
+    '## 3팀 · SEO 최적화',
+    '',
+    '### 팀원A · SEO 제목 제안',
+    seoA,
+    '',
+    '### 팀원B · 구조·키워드 분석',
+    seoB,
+    '',
+    '### 팀장 · 최종 SEO 확정',
+    seoLeader,
+    '',
+    '---',
+    '',
+    '## 최종 발행본 (SEO 적용)',
+    `**제목:** ${seoTitle}`,
+    `**메타설명:** ${seoMeta}`,
+    `**태그:** ${seoTags}`,
+    '',
+    seoFinalDraft,
+  ] : [
+    '',
+    '---',
+    '',
+    '## 최종 초안 (2팀 반려 — SEO 미실행)',
+    '',
+    draft,
+  ];
+
   const fullOutput = [
     '# 스마텍 AI 파이프라인 결과',
     '',
@@ -251,12 +326,7 @@ async function main() {
     '',
     '### 팀장 · 최종 판정',
     verifyLeader,
-    '',
-    '---',
-    '',
-    '## 최종 초안',
-    '',
-    draft,
+    ...seoSection,
   ].join('\n');
 
   const outputPath = path.join(outputDir, `글_${ts}_${isPassed ? '통과' : '반려'}.md`);
@@ -266,8 +336,15 @@ async function main() {
   console.log('  완료!');
   console.log(`  저장 위치: ${outputPath}`);
   console.log('========================================\n');
-  console.log('─── 최종 초안 ───\n');
-  console.log(draft);
+  if (isPassed) {
+    console.log(`─── 최종 발행본 (SEO 적용) ───\n`);
+    console.log(`제목: ${seoTitle}`);
+    console.log(`태그: ${seoTags}\n`);
+    console.log(seoFinalDraft);
+  } else {
+    console.log('─── 최종 초안 (반려) ───\n');
+    console.log(draft);
+  }
 }
 
 main().catch(err => console.error('\n❌ 오류:', err.message));
