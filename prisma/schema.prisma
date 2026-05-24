@@ -292,3 +292,28 @@ model KnownCompany {
   @@index([email])
   @@index([companyName])
 }
+
+// 블로그 게시글 (AI 파이프라인 생성 + 직접 작성)
+model BlogPost {
+  id          Int       @id @default(autoincrement())
+  title       String
+  content     String
+  metaDesc    String    @default("")
+  tags        String    @default("")
+  category    String    @default("일반")
+  status      String    @default("DRAFT") // DRAFT | PUBLISHED | ARCHIVED
+  sourceFile  String?
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([status])
+  @@index([category])
+}
+
+// 사이트 설정 키-값 저장소
+model SiteSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}

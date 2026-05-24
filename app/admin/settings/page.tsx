@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { SMARTECH_COMPANY } from "@/lib/company";
 import MarginSettings from "@/components/MarginSettings";
 
@@ -69,6 +70,99 @@ const SECTIONS: Section[] = [
   },
 ];
 
+// ─── 편집 가능한 연락처 설정 ─────────────────────────────────
+const EDITABLE_FIELDS = [
+  { key: "contact_phone",   label: "대표전화",    placeholder: "031-000-0000" },
+  { key: "contact_mobile",  label: "대표 휴대폰", placeholder: "010-0000-0000" },
+  { key: "contact_fax",     label: "팩스",        placeholder: "031-000-0000" },
+  { key: "contact_email",   label: "이메일",       placeholder: "info@example.com" },
+  { key: "contact_website", label: "웹사이트",     placeholder: "https://www.smartech.co.kr" },
+  { key: "notice_text",     label: "공지 문구",    placeholder: "홈페이지에 표시할 공지 사항" },
+];
+
+function ContactSettings() {
+  const [values, setValues] = useState<Record<string, string>>({});
+  const [saved, setSaved] = useState<Record<string, string>>({});
+  const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/admin/settings-edit")
+      .then((r) => r.json())
+      .then((data) => {
+        setValues(data);
+        setSaved(data);
+        setLoaded(true);
+      });
+  }, []);
+
+  const isDirty = JSON.stringify(values) !== JSON.stringify(saved);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const res = await fetch("/api/admin/settings-edit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
+      if (res.ok) {
+        setSaved({ ...values });
+        setToast({ msg: "저장되었습니다", ok: true });
+      } else {
+        setToast({ msg: "저장 실패", ok: false });
+      }
+    } finally {
+      setSaving(false);
+      setTimeout(() => setToast(null), 3000);
+    }
+  };
+
+  if (!loaded) {
+    return (
+      <div className="mono text-[11px] dim tracking-[0.12em] uppercase py-8 text-center">
+        — Loading
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative">
+      <div className="divide-y hair">
+        {EDITABLE_FIELDS.map((f) => (
+          <div key={f.key} className="px-5 py-3 grid grid-cols-[140px_1fr] gap-4 items-center">
+            <div className="mono text-[11px] dim tracking-[0.06em] uppercase">{f.label}</div>
+            <input
+              value={values[f.key] ?? ""}
+              onChange={(e) => setValues((v) => ({ ...v, [f.key]: e.target.value }))}
+              placeholder={f.placeholder}
+              className="text-[13px] mono border hair px-3 py-1.5 bg-transparent focus:outline-none focus:border-ink w-full max-w-md"
+            />
+          </div>
+        ))}
+      </div>
+      <div className="px-5 py-4 border-t hair flex items-center gap-4">
+        <button
+          onClick={handleSave}
+          disabled={saving || !isDirty}
+          className="mono text-[10px] tracking-[0.1em] uppercase bg-edred text-white px-5 py-2.5 hover:brightness-110 transition-all disabled:opacity-40"
+        >
+          {saving ? "저장 중..." : "저장"}
+        </button>
+        {isDirty && (
+          <span className="mono text-[10px] text-yellow-600 tracking-[0.06em]">저장되지 않은 변경사항이 있습니다</span>
+        )}
+        {toast && (
+          <span className={`mono text-[10px] tracking-[0.06em] ${toast.ok ? "text-green-600" : "text-red-600"}`}>
+            {toast.msg}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── 메인 ────────────────────────────────────────────────────
 export default function AdminSettingsPage() {
   return (
@@ -87,18 +181,15 @@ export default function AdminSettingsPage() {
         </p>
       </div>
 
-      {/* 안내 박스 — 편집 모드 */}
-      <div className="border hair bg-edred/5 px-5 py-4 flex items-start gap-3">
-        <span className="mono text-[10px] tracking-[0.12em] uppercase border border-edred text-edred px-2 py-0.5 mt-0.5">
-          READ ONLY
+      {/* 안내 박스 */}
+      <div className="border hair bg-ink/[0.02] px-5 py-4 flex items-start gap-3">
+        <span className="mono text-[10px] tracking-[0.12em] uppercase border hair text-dim px-2 py-0.5 mt-0.5">
+          INFO
         </span>
         <div className="flex-1 text-[13px] leading-[1.6] text-ink">
           <p>
-            현재는 <span className="font-semibold">읽기 전용 모드</span>입니다.
-            정보 변경이 필요하면 개발자에게 요청해주세요. (소스 파일 <span className="mono text-[12px] text-edred">lib/company.ts</span> 직접 수정)
-          </p>
-          <p className="mt-1 dim text-[12px]">
-            추후 단계에서 폼으로 직접 수정·저장하는 기능이 추가될 예정입니다.
+            아래 <span className="font-semibold">기본 정보·등록 정보</span>는 소스 파일(<span className="mono text-[12px] text-edred">lib/company.ts</span>)에서 관리됩니다.
+            연락처·공지 문구 등 <span className="font-semibold">자주 바뀌는 항목</span>은 아래 "연락처 설정"에서 직접 수정·저장할 수 있습니다.
           </p>
         </div>
       </div>
@@ -143,6 +234,15 @@ export default function AdminSettingsPage() {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* 편집 가능한 연락처 설정 */}
+      <div className="border hair bg-paper">
+        <div className="px-5 py-3 border-b hair flex items-center justify-between">
+          <h2 className="text-[14px] font-semibold text-ink tracking-tight">연락처 설정 (편집 가능)</h2>
+          <span className="mono text-[10px] text-edred tracking-[0.12em] uppercase">DB 저장</span>
+        </div>
+        <ContactSettings />
       </div>
 
       {/* 마진율 설정 */}

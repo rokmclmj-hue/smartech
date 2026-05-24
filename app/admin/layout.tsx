@@ -19,6 +19,8 @@ const NAV_ITEMS = [
   { href: "/admin/companies", label: "거래처", num: "08" },
   { href: "/admin/quick", label: "빠른링크", num: "09" },
   { href: "/admin/settings", label: "설정", num: "10" },
+  { href: "/admin/ai-pipeline", label: "AI콘텐츠", num: "11" },
+  { href: "/admin/blog", label: "블로그", num: "12" },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
