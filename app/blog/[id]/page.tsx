@@ -1,0 +1,248 @@
+export const dynamic = "force-dynamic";
+
+import { prisma } from "@/lib/db";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import type { Metadata } from "next";
+
+type Props = { params: Promise<{ id: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  const post = await prisma.blogPost.findUnique({
+    where: { id: Number(id), status: "PUBLISHED" },
+    select: { title: true, metaDesc: true, tags: true },
+  });
+  if (!post) return { title: "스마텍 블로그" };
+  return {
+    title: `${post.title} — 스마텍`,
+    description: post.metaDesc || undefined,
+    keywords: post.tags || undefined,
+  };
+}
+
+function formatDate(d: Date) {
+  return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
+}
+
+// 마크다운 → React 엘리먼트 (AI 생성 콘텐츠 패턴에 맞춘 간단 파서)
+function renderMarkdown(text: string) {
+  const lines = text.split("\n");
+  const elements: React.ReactNode[] = [];
+  let i = 0;
+  let listBuffer: string[] = [];
+
+  function flushList() {
+    if (listBuffer.length === 0) return;
+    elements.push(
+      <ul key={`ul-${i}`} className="space-y-1.5 pl-4 my-4">
+        {listBuffer.map((item, j) => (
+          <li key={j} className="text-[15px] leading-relaxed flex gap-2">
+            <span className="text-edred shrink-0 mt-1">—</span>
+            <span dangerouslySetInnerHTML={{ __html: inlineFormat(item) }} />
+          </li>
+        ))}
+      </ul>
+    );
+    listBuffer = [];
+  }
+
+  function inlineFormat(s: string): string {
+    return s
+      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+      .replace(/\*(.+?)\*/g, "<em>$1</em>")
+      .replace(/`(.+?)`/g, '<code class="bg-ink/10 px-1 py-0.5 rounded text-[13px] mono">$1</code>');
+  }
+
+  while (i < lines.length) {
+    const line = lines[i];
+
+    // 빈 줄
+    if (line.trim() === "") {
+      flushList();
+      i++;
+      continue;
+    }
+
+    // 구분선
+    if (/^---+$/.test(line.trim())) {
+      flushList();
+      elements.push(<hr key={`hr-${i}`} className="my-6 border-ink/10" />);
+      i++;
+      continue;
+    }
+
+    // H1
+    if (line.startsWith("# ")) {
+      flushList();
+      elements.push(
+        <h1 key={`h1-${i}`} className="display text-[24px] md:text-[28px] leading-tight tracking-[-0.02em] mt-8 mb-3">
+          {line.slice(2)}
+        </h1>
+      );
+      i++;
+      continue;
+    }
+
+    // H2
+    if (line.startsWith("## ")) {
+      flushList();
+      elements.push(
+        <h2 key={`h2-${i}`} className="text-[19px] font-bold leading-snug tracking-tight mt-8 mb-3 border-b hair pb-2">
+          {line.slice(3)}
+        </h2>
+      );
+      i++;
+      continue;
+    }
+
+    // H3
+    if (line.startsWith("### ")) {
+      flushList();
+      elements.push(
+        <h3 key={`h3-${i}`} className="text-[16px] font-semibold leading-snug mt-6 mb-2">
+          {line.slice(4)}
+        </h3>
+      );
+      i++;
+      continue;
+    }
+
+    // 번호 목록 (1. 2. 3.)
+    if (/^\d+\.\s/.test(line)) {
+      flushList();
+      const olItems: string[] = [];
+      while (i < lines.length && /^\d+\.\s/.test(lines[i])) {
+        olItems.push(lines[i].replace(/^\d+\.\s/, ""));
+        i++;
+      }
+      elements.push(
+        <ol key={`ol-${i}`} className="space-y-2 pl-1 my-4 list-decimal list-inside">
+          {olItems.map((item, j) => (
+            <li key={j} className="text-[15px] leading-relaxed">
+              <span dangerouslySetInnerHTML={{ __html: inlineFormat(item) }} />
+            </li>
+          ))}
+        </ol>
+      );
+      continue;
+    }
+
+    // 글머리 목록 (- * •)
+    if (/^[-*•]\s/.test(line)) {
+      listBuffer.push(line.slice(2));
+      i++;
+      continue;
+    }
+
+    // 일반 단락
+    flushList();
+    elements.push(
+      <p
+        key={`p-${i}`}
+        className="text-[15px] leading-[1.8] my-3"
+        dangerouslySetInnerHTML={{ __html: inlineFormat(line) }}
+      />
+    );
+    i++;
+  }
+
+  flushList();
+  return elements;
+}
+
+export default async function BlogPostPage({ params }: Props) {
+  const { id } = await params;
+  const post = await prisma.blogPost.findUnique({
+    where: { id: Number(id), status: "PUBLISHED" },
+  });
+
+  if (!post) return notFound();
+
+  const tags = post.tags ? post.tags.split(/[,\s]+/).filter(Boolean) : [];
+
+  return (
+    <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-10 md:py-16">
+      <div className="max-w-3xl mx-auto">
+        {/* 브레드크럼 */}
+        <nav className="flex items-center gap-2 mono text-[10px] dim tracking-[0.08em] mb-8">
+          <Link href="/" className="hover:text-ink transition-colors">홈</Link>
+          <span>/</span>
+          <Link href="/blog" className="hover:text-ink transition-colors">블로그</Link>
+          <span>/</span>
+          <span className="text-ink truncate max-w-[200px]">{post.category}</span>
+        </nav>
+
+        {/* 헤더 */}
+        <header className="mb-10">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="mono text-[9px] tracking-[0.1em] bg-edred/10 text-edred px-2.5 py-1 border border-edred/20">
+              {post.category}
+            </span>
+            <span className="mono text-[10px] dim">
+              {formatDate(post.publishedAt ?? post.createdAt)}
+            </span>
+          </div>
+
+          <h1 className="display text-[26px] md:text-[36px] leading-tight tracking-[-0.025em] mb-4">
+            {post.title}
+          </h1>
+
+          {post.metaDesc && (
+            <p className="text-[16px] dim leading-relaxed border-l-2 border-edred pl-4">
+              {post.metaDesc}
+            </p>
+          )}
+        </header>
+
+        {/* 본문 */}
+        <article className="border-t hair pt-8">
+          {renderMarkdown(post.content)}
+        </article>
+
+        {/* 태그 */}
+        {tags.length > 0 && (
+          <div className="mt-10 pt-6 border-t hair flex flex-wrap gap-2">
+            {tags.map((tag) => (
+              <span key={tag} className="mono text-[10px] tracking-[0.06em] border hair px-2.5 py-1 text-dim">
+                #{tag}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* CTA */}
+        <div className="mt-12 border hair px-6 py-8 bg-ink/[0.02]">
+          <div className="mono text-[9px] tracking-[0.18em] dim uppercase mb-3">문의</div>
+          <p className="text-[15px] leading-relaxed mb-5">
+            {post.category} 관련하여 문의 사항이 있으시면 언제든지 스마텍으로 연락 부탁드립니다.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/repair"
+              className="mono text-[11px] tracking-[0.1em] uppercase border border-edred text-edred px-5 py-2.5 hover:bg-edred hover:text-white transition-colors"
+            >
+              수리 문의 →
+            </Link>
+            <a
+              href="tel:031-204-7170"
+              className="mono text-[11px] tracking-[0.1em] uppercase border hair text-dim px-5 py-2.5 hover:border-ink hover:text-ink transition-colors"
+            >
+              031-204-7170
+            </a>
+          </div>
+        </div>
+
+        {/* 목록으로 */}
+        <div className="mt-8 pt-6 border-t hair">
+          <Link
+            href="/blog"
+            className="mono text-[11px] tracking-[0.1em] uppercase text-dim hover:text-ink transition-colors"
+          >
+            ← 블로그 목록으로
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
