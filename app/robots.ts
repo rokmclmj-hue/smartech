@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/admin/", "/api/", "/auth/", "/mypage/"],
       },
     ],
-    sitemap: "https://www.smartechvacuum.com/sitemap.xml",
+    sitemap: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.smartechvacuum.com"}/sitemap.xml`,
   };
 }

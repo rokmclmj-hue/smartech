@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next";
 import { prisma } from "@/lib/db";
 
-const BASE_URL = "https://www.smartechvacuum.com";
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.smartechvacuum.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 발행된 블로그 글
