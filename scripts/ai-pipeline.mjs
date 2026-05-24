@@ -99,6 +99,23 @@ function loadProductInquiryEmails() {
   return header + '\n' + filtered.join('\n');
 }
 
+// --- 통화 상담 기록 로드 (data/상담기록/*.txt) ---
+function loadCallTranscripts() {
+  const dir = path.join(root, 'data', '상담기록');
+  if (!fs.existsSync(dir)) return '';
+  const files = fs.readdirSync(dir)
+    .filter(f => f.endsWith('.txt'))
+    .sort((a, b) => b.localeCompare(a))
+    .slice(0, 20);
+  if (files.length === 0) return '';
+  return files.map(f => {
+    try {
+      const content = fs.readFileSync(path.join(dir, f), 'utf8');
+      return `[${f}]\n${content.slice(0, 1000)}`;
+    } catch { return ''; }
+  }).filter(Boolean).join('\n\n---\n\n');
+}
+
 // --- 브랜드 보이스 로드 ---
 function loadBrandVoice() {
   return fs.readFileSync(path.join(root, 'data/brand/brand-voice.md'), 'utf8');
@@ -187,6 +204,10 @@ async function main() {
   const brandVoice = loadBrandVoice();
   const productContext = loadProductContext();
   const allProductMaster = loadAllProductMaster();
+  const callTranscripts = loadCallTranscripts();
+  if (callTranscripts) {
+    console.log('📞 통화 상담 기록 로드됨 (data/상담기록/)\n');
+  }
 
   const keywordText = keywords
     .map(k => `[${k.category}] ${k.keyword}: 월 ${k.total.toLocaleString()}회 검색 (경쟁도: ${k.competition})`)
@@ -207,7 +228,7 @@ async function main() {
     `당신은 스마텍(에드워드 진공펌프 한국 공식 대리점, 천안 AS센터)의 콘텐츠 마케팅 팀원입니다.
 실제 고객 문의와 현장 사례를 분석해서 블로그 주제를 제안하는 역할입니다.
 고객이 실제로 겪은 문제, 현장에서 반복되는 질문 중심으로 제안하세요.`,
-    `다음은 스마텍 실제 고객 이메일 데이터(CSV)입니다:\n헤더: 날짜,연도,카테고리,고객사,제품_모델,메일제목,내용요약,해결방법,스레드ID\n\n${emailData}\n\n주요 제품 정보:\n${productContext}\n\n이 데이터를 바탕으로 블로그 글 주제 3가지를 제안하세요.\n고객이 실제로 겪은 문제나 자주 묻는 내용 중심으로.\n\n형식:\n1. [구체적인 글 제목] - [선택 이유 한 줄]`,
+    `다음은 스마텍 실제 고객 이메일 데이터(CSV)입니다:\n헤더: 날짜,연도,카테고리,고객사,제품_모델,메일제목,내용요약,해결방법,스레드ID\n\n${emailData}\n\n주요 제품 정보:\n${productContext}\n${callTranscripts ? `\n\n[통화 상담 기록 (최근 20건)]\n이 데이터는 거래처와의 실제 통화 내용을 텍스트로 변환한 것입니다. 이메일에 없는 생생한 현장 이슈가 담겨 있습니다.\n\n${callTranscripts}` : ''}\n\n이 데이터를 바탕으로 블로그 글 주제 3가지를 제안하세요.\n고객이 실제로 겪은 문제나 자주 묻는 내용 중심으로. 통화 기록이 있다면 그 내용도 적극 반영하세요.\n\n형식:\n1. [구체적인 글 제목] - [선택 이유 한 줄]`,
     '팀원B · 고객 현장 분석'
   );
 
