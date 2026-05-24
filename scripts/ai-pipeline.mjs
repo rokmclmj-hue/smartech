@@ -49,7 +49,7 @@ function loadBrandVoice() {
   return fs.readFileSync(path.join(root, 'data/brand/brand-voice.md'), 'utf8');
 }
 
-// --- 제품 마스터 로드 (핵심 3개) ---
+// --- 제품 마스터 로드 (주제 선정용 핵심 4개) ---
 function loadProductContext() {
   const dir = path.join(root, 'data/Product_master_table');
   const files = [
@@ -62,6 +62,21 @@ function loadProductContext() {
     try { return fs.readFileSync(path.join(dir, f), 'utf8').slice(0, 600); }
     catch { return ''; }
   }).filter(Boolean).join('\n\n---\n\n');
+}
+
+// --- 제품 마스터 전체 로드 (2팀 기술 검수용) ---
+function loadAllProductMaster() {
+  const dir = path.join(root, 'data/Product_master_table');
+  try {
+    return fs.readdirSync(dir)
+      .filter(f => f.endsWith('.txt'))
+      .map(f => {
+        try { return `[${f}]\n` + fs.readFileSync(path.join(dir, f), 'utf8').slice(0, 400); }
+        catch { return ''; }
+      })
+      .filter(Boolean)
+      .join('\n\n---\n\n');
+  } catch { return ''; }
 }
 
 // --- 에이전트 호출 ---
@@ -88,6 +103,7 @@ async function main() {
   const emailData = loadEmails();
   const brandVoice = loadBrandVoice();
   const productContext = loadProductContext();
+  const allProductMaster = loadAllProductMaster();
 
   const keywordText = keywords
     .map(k => `[${k.category}] ${k.keyword}: 월 ${k.total.toLocaleString()}회 검색 (경쟁도: ${k.competition})`)
@@ -136,7 +152,7 @@ async function main() {
 
 【필수 규칙】
 - 분량: 900~1300자 (공백 포함)
-- 첫 문장: "~하는 연락이 자주 옵니다", "천안 AS센터에 이런 경우가 꽤 있습니다" 처럼 현장 상황으로 시작
+- 첫 문장: 고객이 주어. "많이들 문의하시는~", "주로 문의하시는~", "겪고 계신 분들이 많으셔서 정리해드립니다" 형태로 시작
 - 실제 모델명(iXH, EXS, nXDS 등), 구체적 수치(금액, 부품 수량, 납기 주수) 반드시 포함
 - 소제목(##)으로 구조화
 
@@ -167,6 +183,37 @@ async function main() {
     2048
   );
 
+  // ── 2팀 팀원A: 기술 스펙 정확성 검수 ──
+  const verifyA = await callAgent(
+    `당신은 스마텍 콘텐츠 2팀 팀원입니다. 블로그 글의 기술적 정확성을 검수합니다.
+에드워드 진공펌프 제품 사양과 수치의 오류를 찾는 역할입니다.
+제품 마스터 자료를 기준으로 검수하되, 자료에 없는 내용은 일반 진공펌프 기술 상식으로 판단합니다.`,
+    `다음 블로그 초안의 기술적 정확성을 검수하세요.\n\n[초안]\n${draft}\n\n[제품 마스터 자료]\n${allProductMaster.slice(0, 6000)}\n\n검수 항목:\n1. 모델명이 실제 에드워드 제품인지\n2. 온도·압력·비용·납기 등 수치가 합리적인지\n3. 기술 설명이 진공펌프 원리상 맞는지\n\n형식:\n문제없음: [항목 목록]\n수정필요: [구체적 내용과 이유] (없으면 "없음")`,
+    '2팀 팀원A · 기술 스펙 검수'
+  );
+
+  // ── 2팀 팀원B: 위험표현·과장광고 검수 ──
+  const verifyB = await callAgent(
+    `당신은 스마텍 콘텐츠 2팀 팀원입니다. 블로그 글의 표현 안전성을 검수합니다.
+과장광고, 위험한 자가수리 유도, 법적 문제 표현을 찾는 역할입니다.`,
+    `다음 블로그 초안의 표현을 검수하세요.\n\n[초안]\n${draft}\n\n검수 항목:\n1. 근거 없는 과장 표현 ("최고", "완벽", "100% 보장" 등)\n2. 비전문가가 따라 하다 위험할 수 있는 자가수리 지침\n3. 경쟁사 비방 또는 법적 문제가 될 수 있는 표현\n4. 가격·납기를 확정적으로 약속하는 표현 (분쟁 소지)\n\n형식:\n문제없음: [항목 목록]\n수정필요: [구체적 내용과 이유] (없으면 "없음")`,
+    '2팀 팀원B · 표현 안전성 검수'
+  );
+
+  // ── 2팀 팀장: 최종 판정 ──
+  const verifyLeader = await callAgent(
+    `당신은 스마텍 콘텐츠 2팀 팀장입니다.
+두 팀원의 검수 결과를 종합해 최종 통과/반려를 결정합니다.
+관리자가 최종 확인하므로 심각한 문제가 없으면 통과입니다.
+사소한 표현 차이는 통과, 실제 오류·위험 지침·법적 문제만 반려입니다.`,
+    `팀원A 검수:\n${verifyA}\n\n팀원B 검수:\n${verifyB}\n\n다음 형식으로 답하세요:\n판정: [통과 / 반려]\n이유: [한 줄]\n수정 권고사항: [있으면 구체적으로, 없으면 "없음"]`,
+    '2팀 팀장 · 최종 판정'
+  );
+
+  const isPassed = verifyLeader.includes('판정: 통과');
+  console.log(`\n${ isPassed ? '✅ 2팀 판정: 통과' : '❌ 2팀 판정: 반려'}`);
+  console.log(verifyLeader);
+
   // ── 결과 저장 ──
   const outputDir = path.join(root, 'data', '콘텐츠');
   if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
@@ -179,17 +226,31 @@ async function main() {
     + String(now.getHours()).padStart(2,'0')
     + String(now.getMinutes()).padStart(2,'0');
 
+  const verdict = isPassed ? '✅ 통과' : '❌ 반려';
   const fullOutput = [
     '# 스마텍 AI 파이프라인 결과',
     '',
-    '## 팀원A 제안 (검색량 분석)',
+    '## 1팀 · 팀원A 제안 (검색량 분석)',
     memberA,
     '',
-    '## 팀원B 제안 (고객 현장)',
+    '## 1팀 · 팀원B 제안 (고객 현장)',
     memberB,
     '',
-    '## 팀장 선정',
+    '## 1팀 · 팀장 선정',
     leader,
+    '',
+    '---',
+    '',
+    `## 2팀 검수 결과: ${verdict}`,
+    '',
+    '### 팀원A · 기술 스펙 검수',
+    verifyA,
+    '',
+    '### 팀원B · 표현 안전성 검수',
+    verifyB,
+    '',
+    '### 팀장 · 최종 판정',
+    verifyLeader,
     '',
     '---',
     '',
@@ -198,7 +259,7 @@ async function main() {
     draft,
   ].join('\n');
 
-  const outputPath = path.join(outputDir, `글_${ts}.md`);
+  const outputPath = path.join(outputDir, `글_${ts}_${isPassed ? '통과' : '반려'}.md`);
   fs.writeFileSync(outputPath, fullOutput, 'utf8');
 
   console.log('========================================');
