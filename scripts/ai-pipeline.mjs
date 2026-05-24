@@ -57,6 +57,48 @@ function loadQuoteEmails() {
   return header + '\n' + quoteLines.slice(0, 80).join('\n');
 }
 
+// --- 기술상담 이메일 전용 로드 (182건) ---
+function loadTechEmails() {
+  const csv = fs.readFileSync(
+    path.join(root, 'data/gmail-export/smartech_gmail_database_fixed.csv'), 'utf8'
+  ).replace(/^﻿/, '');
+  const lines = csv.trim().split('\n');
+  const header = lines[0];
+  const filtered = lines.slice(1).filter(line => {
+    const cols = line.split(',');
+    return cols[2] && cols[2].trim() === '기술상담';
+  });
+  return header + '\n' + filtered.slice(0, 80).join('\n');
+}
+
+// --- 수리 이메일 전용 로드 (53건) ---
+function loadRepairEmails() {
+  const csv = fs.readFileSync(
+    path.join(root, 'data/gmail-export/smartech_gmail_database_fixed.csv'), 'utf8'
+  ).replace(/^﻿/, '');
+  const lines = csv.trim().split('\n');
+  const header = lines[0];
+  const filtered = lines.slice(1).filter(line => {
+    const cols = line.split(',');
+    return cols[2] && cols[2].trim() === '수리';
+  });
+  return header + '\n' + filtered.join('\n');
+}
+
+// --- 제품문의 이메일 전용 로드 (64건, 단종문의 포함) ---
+function loadProductInquiryEmails() {
+  const csv = fs.readFileSync(
+    path.join(root, 'data/gmail-export/smartech_gmail_database_fixed.csv'), 'utf8'
+  ).replace(/^﻿/, '');
+  const lines = csv.trim().split('\n');
+  const header = lines[0];
+  const filtered = lines.slice(1).filter(line => {
+    const cols = line.split(',');
+    return cols[2] && cols[2].trim() === '제품문의';
+  });
+  return header + '\n' + filtered.join('\n');
+}
+
 // --- 브랜드 보이스 로드 ---
 function loadBrandVoice() {
   return fs.readFileSync(path.join(root, 'data/brand/brand-voice.md'), 'utf8');
@@ -219,6 +261,63 @@ ${commonRules}
 - 실제 거래 이력에서 나온 패턴(iXH, EXS, GXS 계열별 납기 차이 등)을 자연스럽게 반영`,
       `${orchestratorBrief}\n\n[견적 이메일 참조 데이터 (2011~2026)]\n${quoteEmails.slice(0, 5000)}`,
       '견적문의 전문 에이전트',
+      2048
+    );
+  } else if (topicCategory === '기술문의') {
+    const techEmails = loadTechEmails();
+    draft = await callAgent(
+      `당신은 스마텍(에드워드 진공펌프 한국 공식 대리점, 천안 AS센터 운영) 블로그의 기술문의 전문 에이전트입니다.
+이명재 대표가 2011년부터 2026년까지 실제 기술 상담 이메일 182건에서 쌓인 지식을 바탕으로
+기술 관련 블로그 글을 이명재 대표가 직접 쓴 것처럼 작성하는 역할입니다.
+
+${commonRules}
+
+[기술문의 특화 규칙]
+- 기술 정보는 반드시 공식 매뉴얼 또는 제품 마스터 자료 기준으로 작성. 불확실한 수치는 절대 쓰지 말 것
+- 모델명·스펙·사양은 정확하게. 틀리면 전문성이 무너지는 영역
+- 고객이 왜 이 정보가 필요한지 상황 맥락을 먼저 설명하고, 기술 답변으로 자연스럽게 이어갈 것
+- "원리"만 설명하는 교과서 글이 아닌, "현장에서 이런 상황에 이 기술이 왜 중요한지"가 느껴지는 글
+- 어렵고 생소한 기술 용어는 괄호 안에 쉬운 설명을 붙일 것`,
+      `${orchestratorBrief}\n\n[기술상담 이메일 참조 데이터 (2011~2026)]\n${techEmails.slice(0, 5000)}`,
+      '기술문의 전문 에이전트',
+      2048
+    );
+  } else if (topicCategory === '단종문의') {
+    const productEmails = loadProductInquiryEmails();
+    draft = await callAgent(
+      `당신은 스마텍(에드워드 진공펌프 한국 공식 대리점, 천안 AS센터 운영) 블로그의 단종문의 전문 에이전트입니다.
+이명재 대표가 2011년부터 2026년까지 실제 제품문의 이메일 64건에서 쌓인 경험을 바탕으로
+단종 제품 관련 블로그 글을 이명재 대표가 직접 쓴 것처럼 작성하는 역할입니다.
+
+${commonRules}
+
+[단종문의 특화 규칙]
+- 단종으로 당황하신 고객의 상황을 충분히 공감하며 시작할 것
+- 단종 모델명은 정확하게. 대체 모델 제안 시 "공식 후속 모델은 ~입니다" 형태로 명확히 안내
+- 단종 후에도 스마텍이 제공할 수 있는 것(재고 부품, 수리, 대체 모델 견적)을 자연스럽게 안내
+- 가격은 언급하지 않음. 대체 모델 납기는 "문의 시 안내드립니다"로 처리
+- "단종됐으니 그냥 새 제품 사세요" 식의 단편적 안내가 아닌, 고객 상황에 맞는 선택지를 제시`,
+      `${orchestratorBrief}\n\n[제품문의 이메일 참조 데이터 (2011~2026)]\n${productEmails.slice(0, 5000)}`,
+      '단종문의 전문 에이전트',
+      2048
+    );
+  } else if (topicCategory === '수리문의') {
+    const repairEmails = loadRepairEmails();
+    draft = await callAgent(
+      `당신은 스마텍(에드워드 진공펌프 한국 공식 대리점, 천안 AS센터 운영) 블로그의 수리문의 전문 에이전트입니다.
+이명재 대표가 2011년부터 2026년까지 실제 수리 이메일 53건과 천안 AS센터의 현장 경험을 바탕으로
+수리 관련 블로그 글을 이명재 대표가 직접 쓴 것처럼 작성하는 역할입니다.
+
+${commonRules}
+
+[수리문의 특화 규칙]
+- 고객이 증상을 설명할 때 자주 쓰는 표현(소리, 냄새, 알람 등)을 자연스럽게 활용
+- 수리 비용은 절대 직접 언급하지 않음 -> "수리비는 분해 후 부품 확인 시 안내드립니다"
+- 수리 납기는 가능하면 범위로 안내 (예: "단순 소모품 교체는 1~3일, 내부 부품 손상은 1~3주")
+- 자가 수리를 직접 유도하는 내용은 쓰지 말 것. "전문 점검이 필요합니다"로 마무리
+- 고객이 수리 맡길지 교체할지 판단하기 어려워하는 상황을 이해하고, 판단 기준을 제시할 것`,
+      `${orchestratorBrief}\n\n[수리 이메일 참조 데이터 (2011~2026)]\n${repairEmails.slice(0, 5000)}`,
+      '수리문의 전문 에이전트',
       2048
     );
   } else {
