@@ -11,6 +11,7 @@ import ProductCategories from "@/components/ProductCategories";
 import PumpSelector from "@/components/PumpSelector";
 import HeroVideoIntro from "@/components/HeroVideoIntro";
 import HeroClock from "@/components/HeroClock";
+import RecentBlogPosts from "@/components/RecentBlogPosts";
 
 function hiEd(text: string, white = false) {
   return text.split(/(\bEdwards\b|\bSmartech\b)/).map((p, i) => {
@@ -326,10 +327,13 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ═══════════════ RECENT BLOG POSTS ═══════════════ */}
+      <RecentBlogPosts />
+
       {/* ═══════════════ CTA / CONTACT ═══════════════ */}
       <section id="contact" className="py-28 border-b hair bg-ink text-paper relative overflow-hidden">
         <div className="max-w-[1400px] mx-auto px-6">
-          <div className="mono text-[11px] opacity-70 mb-6">— 07 · CONTACT</div>
+          <div className="mono text-[11px] opacity-70 mb-6">— 08 · CONTACT</div>
           <h2 className="display text-[clamp(22px,3.8vw,58px)] leading-[1.05]">
             수량, 납기, 커스텀 사양이<br />
             <span className="italic text-edred">있으신가요?</span>
