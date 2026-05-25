@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import productData from "@/lib/productCatalog.json";
@@ -11,7 +11,17 @@ import type { PanelItem } from "@/components/ProductPanel";
 import { CATALOG_MAP } from "@/lib/catalogs";
 
 type SeriesKey = keyof typeof productData;
-type Tab = "search" | "selection";
+type Tab = "search" | "scan" | "selection";
+
+type ScanResult = {
+  modelName: string | null;
+  partNo: string | null;
+  pumpFamily: string;
+  maker: string;
+  confidence: "high" | "medium" | "low";
+  serialNo: string | null;
+  notes: string;
+};
 
 type CatalogItem = {
   category: string;
@@ -250,6 +260,14 @@ export default function PumpSelector() {
   const { data: session } = useSession();
   const [showLoginGate, setShowLoginGate] = useState(false);
   const [tab, setTab] = useState<Tab>("search");
+
+  // AI 모델 인식 탭 상태
+  const [scanFile, setScanFile] = useState<File | null>(null);
+  const [scanPreview, setScanPreview] = useState("");
+  const [scanLoading, setScanLoading] = useState(false);
+  const [scanResult, setScanResult] = useState<ScanResult | null>(null);
+  const [scanProduct, setScanProduct] = useState<{ partNo: string; description: string; unitPrice: number | null; stock: number } | null>(null);
+  const scanInputRef = useRef<HTMLInputElement>(null);
   const [selectedCategory, setSelectedCategory] = useState<CatalogItem | null>(null);
   const [search, setSearch] = useState("");
 
@@ -449,12 +467,90 @@ export default function PumpSelector() {
         )
       : [];
 
-  const tabCls = (t: Tab) => {
-    if (t === "search") {
-      return `flex-1 py-4 text-[17px] font-semibold tracking-wide transition-colors bg-paper text-ink border border-ink hover:bg-ink hover:text-paper`;
+  async function handleScan() {
+    if (!scanFile) return;
+    setScanLoading(true);
+    setScanResult(null);
+    setScanProduct(null);
+    try {
+      const fd = new FormData();
+      fd.append("photos", scanFile);
+      const res = await fetch("/api/repair/identify", { method: "POST", body: fd });
+      const data: ScanResult = await res.json();
+      setScanResult(data);
+
+      if ((data.confidence === "high" || data.confidence === "medium") && (data.modelName || data.partNo)) {
+        const product = await autoAddToCart(data.modelName, data.partNo);
+        if (product) setScanProduct(product);
+      }
+    } catch {
+      setScanResult({ modelName: null, partNo: null, pumpFamily: "other", maker: "EDWARDS", confidence: "low", serialNo: null, notes: "오류가 발생했습니다. 다시 시도해주세요." });
+    } finally {
+      setScanLoading(false);
     }
-    return `flex-1 py-4 text-[17px] font-semibold tracking-wide transition-colors bg-ink text-paper border border-ink hover:bg-edred hover:border-edred`;
-  };
+  }
+
+  async function autoAddToCart(modelName: string | null, scannedPartNo?: string | null): Promise<{ partNo: string; description: string; unitPrice: number | null; stock: number } | null> {
+    try {
+      type ProductRow = { id: number; partNo: string; description: string; displayPrice: number | null; stock: number };
+      let base: ProductRow | null = null;
+
+      // 1순위: 파트번호 직접 매칭 (명판의 CODE No. / Part No.)
+      if (scannedPartNo) {
+        const r = await fetch(`/api/products?q=${encodeURIComponent(scannedPartNo)}&limit=10`);
+        const d = await r.json();
+        base = ((d.products as ProductRow[]) ?? []).find((p) => p.partNo === scannedPartNo) ?? null;
+      }
+
+      // 2순위: 모델명으로 fallback
+      if (!base && modelName) {
+        const res = await fetch(`/api/products?q=${encodeURIComponent(modelName)}&limit=30`);
+        const data = await res.json();
+        const products: ProductRow[] = data.products ?? [];
+        if (products.length === 0) return null;
+
+        const upper = modelName.toUpperCase();
+        const SPECIAL = ["3PH", " FX", "HT ", " HT", "IE2"];
+        const isSpecial = (desc: string) => SPECIAL.some((s) => desc.toUpperCase().includes(s));
+
+        const startsWithMatch = products
+          .filter((p) => p.description.toUpperCase().startsWith(upper))
+          .sort((a, b) => {
+            const aSpec = isSpecial(a.description);
+            const bSpec = isSpecial(b.description);
+            if (aSpec && !bSpec) return 1;
+            if (!aSpec && bSpec) return -1;
+            return a.description.length - b.description.length;
+          });
+
+        base = startsWithMatch[0] ?? products.sort((a, b) => a.description.length - b.description.length)[0];
+      }
+
+      if (!base) return null;
+
+      const cart = JSON.parse(localStorage.getItem("quoteCart") ?? "[]");
+      const existing = cart.find((i: { productId: number }) => i.productId === base!.id);
+      if (!existing) {
+        cart.push({ productId: base.id, partNo: base.partNo, description: base.description, quantity: 1 });
+        localStorage.setItem("quoteCart", JSON.stringify(cart));
+      }
+      window.dispatchEvent(new Event("quoteCartUpdated"));
+      window.dispatchEvent(new Event("openScanQuote"));
+
+      return { partNo: base.partNo, description: base.description, unitPrice: base.displayPrice, stock: base.stock ?? 0 };
+    } catch {
+      return null;
+    }
+  }
+
+  function handleScanFile(file: File) {
+    setScanFile(file);
+    setScanResult(null);
+    setScanProduct(null);
+    const reader = new FileReader();
+    reader.onload = (e) => setScanPreview(e.target?.result as string);
+    reader.readAsDataURL(file);
+  }
 
   return (
     <div className="mt-8">
@@ -466,16 +562,50 @@ export default function PumpSelector() {
       />
 
       {/* Tabs */}
-      <div className="flex gap-2">
-        <button className={tabCls("search")} onClick={() => { setTab("search"); setSelectedCategory(null); setSearch(""); }}>
-          제품 검색
+      <div className="grid grid-cols-3 gap-2">
+        {/* 제품 검색 */}
+        <button
+          onClick={() => { setTab("search"); setSelectedCategory(null); setSearch(""); }}
+          className={`flex flex-col items-center justify-center py-4 px-3 border transition-colors ${
+            tab === "search"
+              ? "bg-ink text-paper border-ink"
+              : "bg-paper text-ink border-ink hover:bg-ink hover:text-paper"
+          }`}
+        >
+          <span className="text-[15px] font-semibold tracking-tight">제품 검색</span>
         </button>
-        <button className={tabCls("selection")} onClick={() => {
-          if (!session) { setShowLoginGate(true); return; }
-          setTab("selection"); setSelectedCategory(null);
-        }}>
-          펌프선정 및 시뮬레이션
-          {!session && <span className="ml-2 mono text-[10px] tracking-[0.08em] opacity-60">🔒 로그인 필요</span>}
+
+        {/* AI 모델 인식 */}
+        <button
+          onClick={() => { setTab("scan"); setScanResult(null); }}
+          className={`flex flex-col items-center justify-center py-4 px-3 border transition-colors ${
+            tab === "scan"
+              ? "bg-ink text-paper border-ink"
+              : "bg-[#F6F4EF] text-ink border-ink hover:bg-ink hover:text-paper"
+          }`}
+        >
+          <span className="text-[15px] font-semibold tracking-tight">AI 모델 인식</span>
+          <span className={`mono text-[10px] tracking-[0.06em] mt-0.5 ${tab === "scan" ? "text-paper/60" : "text-dim"}`}>
+            명판 사진으로 즉시 견적
+          </span>
+        </button>
+
+        {/* 펌프선정 시뮬레이션 */}
+        <button
+          onClick={() => {
+            if (!session) { setShowLoginGate(true); return; }
+            setTab("selection"); setSelectedCategory(null);
+          }}
+          className={`flex flex-col items-center justify-center py-4 px-3 border transition-colors ${
+            tab === "selection"
+              ? "bg-edred text-paper border-edred"
+              : "bg-ink text-paper border-ink hover:bg-edred hover:border-edred"
+          }`}
+        >
+          <span className="text-[15px] font-semibold tracking-tight">펌프선정 시뮬레이션</span>
+          <span className={`mono text-[10px] tracking-[0.06em] mt-0.5 ${tab === "selection" ? "text-paper/70" : !session ? "text-paper/50" : "text-paper/60"}`}>
+            {!session ? "🔒 로그인 필요" : "공정 조건 기반 자동 선정"}
+          </span>
         </button>
       </div>
 
@@ -508,6 +638,152 @@ export default function PumpSelector() {
       )}
 
       <div className="mt-6">
+        {/* AI 모델 인식 */}
+        {tab === "scan" && (
+          <div>
+            <p className="text-[14px] text-[#6A6660] mb-5">
+              펌프에 부착된 <strong>명판(Nameplate)</strong> 사진을 업로드하면 AI가 모델을 자동으로 인식합니다.
+            </p>
+
+            {/* 업로드 영역 */}
+            {!scanPreview ? (
+              <div
+                onClick={() => scanInputRef.current?.click()}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleScanFile(f); }}
+                className="border-2 border-dashed border-ink/20 hover:border-ink/50 transition-colors cursor-pointer flex flex-col items-center justify-center py-14 gap-3 bg-[#F6F4EF]"
+              >
+                <svg className="w-10 h-10 text-dim" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <div className="text-center">
+                  <p className="text-[14px] font-medium text-ink">사진 업로드 또는 촬영</p>
+                  <p className="mono text-[11px] text-dim mt-1">클릭하거나 사진을 드래그해서 놓으세요</p>
+                  <p className="mono text-[10px] text-dim/60 mt-1">JPG · PNG · WEBP 지원</p>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {/* 미리보기 */}
+                <div className="relative border hair overflow-hidden">
+                  <img src={scanPreview} alt="명판 사진" className="w-full max-h-64 object-contain bg-[#F6F4EF]" />
+                  <button
+                    onClick={() => { setScanFile(null); setScanPreview(""); setScanResult(null); }}
+                    className="absolute top-2 right-2 w-7 h-7 bg-ink/70 text-paper flex items-center justify-center text-[14px] hover:bg-edred transition-colors"
+                  >×</button>
+                </div>
+
+                {/* 분석 결과 */}
+                {!scanResult && (
+                  <button
+                    onClick={handleScan}
+                    disabled={scanLoading}
+                    className="w-full py-3 bg-ink text-paper text-[14px] font-semibold hover:bg-edred transition-colors disabled:opacity-50"
+                  >
+                    {scanLoading ? "AI 분석 중..." : "AI 모델 인식 시작 →"}
+                  </button>
+                )}
+
+                {scanResult && (
+                  <div className={`border p-5 space-y-3 ${
+                    scanResult.confidence === "high" ? "border-green-300 bg-green-50" :
+                    scanResult.confidence === "medium" ? "border-yellow-300 bg-yellow-50" :
+                    "border-red-200 bg-red-50"
+                  }`}>
+                    <div className="flex items-center justify-between">
+                      <span className={`mono text-[10px] font-bold tracking-[0.12em] uppercase px-2 py-0.5 rounded ${
+                        scanResult.confidence === "high" ? "bg-green-200 text-green-800" :
+                        scanResult.confidence === "medium" ? "bg-yellow-200 text-yellow-800" :
+                        "bg-red-200 text-red-800"
+                      }`}>
+                        {scanResult.confidence === "high" ? "인식 완료" : scanResult.confidence === "medium" ? "부분 인식" : "인식 불가"}
+                      </span>
+                      <button onClick={() => { setScanFile(null); setScanPreview(""); setScanResult(null); }} className="mono text-[10px] text-dim hover:text-ink">다시 촬영</button>
+                    </div>
+
+                    {scanResult.modelName && (
+                      <div>
+                        <div className="mono text-[10px] text-dim uppercase tracking-[0.1em] mb-1">인식된 모델</div>
+                        <div className="text-[20px] font-bold tracking-tight">{scanResult.modelName}</div>
+                        {scanResult.maker && <div className="mono text-[11px] text-dim mt-0.5">{scanResult.maker}</div>}
+
+                        {/* 가격 · 납기 */}
+                        {scanProduct && (
+                          <div className="mt-3 grid grid-cols-2 gap-2">
+                            <div className="border hair px-3 py-2 bg-paper">
+                              <div className="mono text-[9px] tracking-[0.12em] uppercase text-dim mb-1">공급 가격</div>
+                              <div className="text-[15px] font-bold tracking-tight">
+                                {scanProduct.unitPrice
+                                  ? `₩ ${scanProduct.unitPrice.toLocaleString("ko-KR")}`
+                                  : <span className="text-[12px] text-dim font-normal">로그인 후 확인</span>
+                                }
+                              </div>
+                            </div>
+                            <div className="border hair px-3 py-2 bg-paper">
+                              <div className="mono text-[9px] tracking-[0.12em] uppercase text-dim mb-1">납기</div>
+                              <div className="text-[13px] font-semibold tracking-tight">
+                                {scanProduct.stock > 0
+                                  ? <span className="text-green-700">국내 재고 보유</span>
+                                  : <span className="text-dim font-normal">납기 협의</span>
+                                }
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    <p className="text-[12px] text-dim leading-relaxed">{scanResult.notes}</p>
+
+                    {(scanResult.confidence === "high" || scanResult.confidence === "medium") && scanResult.modelName ? (
+                      <div className="pt-1 space-y-2">
+                        <div className="flex items-center gap-2 py-2.5 px-3 bg-green-100 border border-green-300">
+                          <span className="text-green-700 text-[13px]">✓</span>
+                          <span className="text-[12px] text-green-800 font-medium">견적서에 자동 추가됐습니다. 잠시 후 견적서가 열립니다.</span>
+                        </div>
+                        <button
+                          onClick={() => { setTab("search"); setSearch(scanResult.modelName!); setSelectedCategory(null); }}
+                          className="w-full py-2 border hair text-ink text-[12px] hover:bg-ink hover:text-paper transition-colors"
+                        >
+                          다른 사양 직접 검색 →
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="pt-1 space-y-2">
+                        <p className="text-[12px] text-dim">명판이 잘 보이도록 다시 촬영하거나, 모델명을 직접 입력해 검색해보세요.</p>
+                        <button
+                          onClick={() => { setTab("search"); setScanFile(null); setScanPreview(""); setScanResult(null); }}
+                          className="w-full py-2.5 border hair text-ink text-[13px] hover:bg-ink hover:text-paper transition-colors"
+                        >
+                          모델명 직접 검색 →
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            <input ref={scanInputRef} type="file" accept="image/*" capture="environment" className="hidden"
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) handleScanFile(f); }} />
+
+            {/* 촬영 팁 */}
+            {!scanPreview && (
+              <div className="mt-5 border hair p-4 bg-ink/[0.015]">
+                <div className="mono text-[9px] tracking-[0.16em] uppercase text-dim mb-2">명판 촬영 팁</div>
+                <ul className="space-y-1">
+                  {["명판 전체가 화면에 들어오도록 가까이 촬영하세요", "글자가 흐리지 않게 초점을 맞춰주세요", "그림자가 생기지 않도록 밝은 곳에서 촬영하세요"].map((tip, i) => (
+                    <li key={i} className="text-[12px] text-dim flex gap-2">
+                      <span className="text-edred shrink-0">·</span>{tip}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* 제품 검색 */}
         {tab === "search" && (
           <div>

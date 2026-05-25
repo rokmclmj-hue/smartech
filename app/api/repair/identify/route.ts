@@ -40,11 +40,12 @@ export async function POST(req: NextRequest) {
             ...imageContents,
             {
               type: "text",
-              text: `이 이미지들은 진공 펌프 수리 접수를 위해 고객이 촬영한 사진입니다.
-제품 명판(nameplate), 모델 라벨, 제품 외관을 분석하여 다음 JSON 형식으로만 응답해 주세요 (설명 텍스트 없이 JSON만):
+              text: `이 이미지들은 진공 펌프 명판(nameplate) 사진입니다.
+명판에서 모든 텍스트를 꼼꼼히 읽어 다음 JSON 형식으로만 응답해 주세요 (설명 텍스트 없이 JSON만):
 
 {
   "modelName": "정확한 모델명 (예: XDS35iE, nXDS10i, RV8, E2M40, EH500, iH600 등) 또는 null",
+  "partNo": "명판에 표시된 파트번호/제품코드 (예: A65501903, A73701940 등 영문+숫자 조합) 또는 null",
   "pumpFamily": "scroll | rotary_vane | booster | dry | other",
   "maker": "EDWARDS | Leybold | Pfeiffer | 기타브랜드명",
   "confidence": "high | medium | low",
@@ -52,8 +53,13 @@ export async function POST(req: NextRequest) {
   "notes": "분석 근거 또는 불확실한 이유 (한국어, 1-2문장)"
 }
 
+파트번호 추출 기준:
+- 명판에서 'CODE No.', 'Part No.', 'Model No.' 또는 영문자+숫자 조합(예: A65501903)을 찾아 partNo에 기록
+- 시리얼 번호(Serial No.)는 partNo가 아닌 serialNo에 기록
+- 파트번호는 보통 알파벳 1~2자 + 숫자 7~9자리 형태
+
 confidence 기준:
-- high: 명판 텍스트가 선명하게 보여 모델명 확인 가능
+- high: 명판 텍스트가 선명하게 보여 모델명 또는 파트번호 확인 가능
 - medium: 외관 형태로 계열은 알 수 있지만 정확한 모델번호 불확실
 - low: 사진이 흐리거나 명판이 없어 판단 불가
 
