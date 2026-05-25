@@ -21,8 +21,7 @@ export default function SetupPage() {
         body: JSON.stringify({ company: company.trim() }),
       });
       await update({ company: company.trim() });
-      router.push("/");
-      router.refresh();
+      window.location.href = "/";
     } finally {
       setSaving(false);
     }
@@ -35,8 +34,7 @@ export default function SetupPage() {
       body: JSON.stringify({ company: "미입력" }),
     });
     await update({ company: "미입력" });
-    router.push("/");
-    router.refresh();
+    window.location.href = "/";
   }
 
   return (

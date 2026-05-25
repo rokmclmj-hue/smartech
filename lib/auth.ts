@@ -120,8 +120,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         // 카카오는 이메일 동의 없이도 로그인 가능 — Kakao ID로 식별
         const email =
           token.email ??
-          (account.provider === "kakao" && token.sub
-            ? `kakao_${token.sub}@kakao.smartech`
+          (account.provider === "kakao" && account.providerAccountId
+            ? `kakao_${account.providerAccountId}@kakao.smartech`
             : null);
         const name = token.name ?? "";
         if (email) {

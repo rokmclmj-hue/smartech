@@ -1,12 +1,20 @@
 "use client";
-import { signIn } from "next-auth/react";
-import { useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { signIn, useSession } from "next-auth/react";
+import { useState, Suspense, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 
 function LoginContent() {
+  const { status } = useSession();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const registered = searchParams.get("registered");
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.replace("/");
+    }
+  }, [status, router]);
 
   const [magicEmail, setMagicEmail] = useState("");
   const [magicSending, setMagicSending] = useState(false);

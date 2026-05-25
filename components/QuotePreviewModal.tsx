@@ -62,7 +62,7 @@ export default function QuotePreviewModal({ open, onClose }: Props) {
 
   return (
     /* 왼쪽 패널 — QuotePanel(480px) 제외한 영역 */
-    <div className="fixed top-0 bottom-0 left-0 right-[480px] z-50 overflow-y-auto">
+    <div className="fixed top-0 bottom-0 left-0 right-[480px] z-50 overflow-y-auto print-modal-wrapper">
 
       {/* ── quote-page 다크 테마 래퍼 ── */}
       <div className="quote-page" style={{ minHeight: "100%" }}>
@@ -91,8 +91,20 @@ export default function QuotePreviewModal({ open, onClose }: Props) {
                   type="button"
                   className="btn-export"
                   onClick={() => {
-                    if (!isLoggedIn) { setShowLoginGate(true); }
-                    else { window.print(); }
+                    if (!isLoggedIn) {
+                      setShowLoginGate(true);
+                    } else {
+                      const header = document.querySelector("header") as HTMLElement | null;
+                      const main = document.querySelector("main") as HTMLElement | null;
+                      const hidden: HTMLElement[] = [];
+                      [header, main].forEach((el) => {
+                        if (el) { el.style.display = "none"; hidden.push(el); }
+                      });
+                      document.body.classList.add("printing-quote");
+                      window.print();
+                      hidden.forEach((el) => (el.style.display = ""));
+                      document.body.classList.remove("printing-quote");
+                    }
                   }}
                 >
                   [ EXPORT → PDF ]

@@ -9,11 +9,14 @@ function SetupGuard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
+    const needsCompany =
+      pathname.startsWith("/quote") ||
+      pathname.startsWith("/mypage");
+
     if (
       status === "authenticated" &&
       (session?.user as any)?.company === "" &&
-      !pathname.startsWith("/auth/") &&
-      !pathname.startsWith("/api/")
+      needsCompany
     ) {
       router.push("/auth/setup");
     }

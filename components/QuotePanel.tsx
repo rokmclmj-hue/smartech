@@ -90,7 +90,16 @@ export default function QuotePanel({ open, onClose }: Props) {
     if (!session) {
       setShowLoginGate(true);
     } else {
+      const header = document.querySelector("header") as HTMLElement | null;
+      const main = document.querySelector("main") as HTMLElement | null;
+      const hidden: HTMLElement[] = [];
+      [header, main].forEach((el) => {
+        if (el) { el.style.display = "none"; hidden.push(el); }
+      });
+      document.body.classList.add("printing-quote");
       window.print();
+      hidden.forEach((el) => (el.style.display = ""));
+      document.body.classList.remove("printing-quote");
     }
   }
 
@@ -99,7 +108,7 @@ export default function QuotePanel({ open, onClose }: Props) {
   return (
     <>
 
-      <div className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-[480px] bg-paper border-l hair flex flex-col shadow-2xl">
+      <div data-print-skip className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-[480px] bg-paper border-l hair flex flex-col shadow-2xl">
         {/* 헤더 */}
         <div className="flex items-start justify-between px-6 pt-6 pb-4 border-b hair shrink-0">
           <div>

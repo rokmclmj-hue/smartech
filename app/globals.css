@@ -633,3 +633,24 @@ html.intro-mounted:not(.intro-playing) .dot-settle {
   opacity: .35;
   mix-blend-mode: multiply;
 }
+
+/* ── Quote PDF 인쇄: 견적서 외 요소 숨김 ── */
+@media print {
+  [data-print-skip] {
+    display: none !important;
+  }
+  body.printing-quote header,
+  body.printing-quote main {
+    display: none !important;
+  }
+  .print-modal-wrapper {
+    position: static !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+}
