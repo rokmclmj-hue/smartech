@@ -15,6 +15,7 @@ type PostDetail = PostSummary & {
   metaDesc: string;
   tags: string;
   finalContent: string;
+  naverContent: string;
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -286,6 +287,51 @@ export default function AiPipelinePage() {
                     <div className="mono text-[9px] tracking-[0.18em] dim uppercase mb-3">본문</div>
                     <div className="prose prose-sm max-w-none text-[13px] leading-relaxed whitespace-pre-wrap border hair p-4 bg-ink/[0.015] font-mono">
                       {selected.finalContent}
+                    </div>
+                  </div>
+                )}
+
+                {/* 네이버 블로그 버전 */}
+                {selected.naverContent && (
+                  <div className="border hair p-4 space-y-3 bg-ink/[0.015]">
+                    <div className="mono text-[9px] tracking-[0.18em] dim uppercase">네이버 블로그 버전</div>
+
+                    {/* 제목 */}
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="mono text-[9px] dim">제목</span>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(selected.seoTitle);
+                            showToast("제목 복사됨", true);
+                          }}
+                          className="mono text-[9px] tracking-[0.1em] uppercase border hair text-dim px-3 py-1 hover:border-ink hover:text-ink transition-colors"
+                        >
+                          복사
+                        </button>
+                      </div>
+                      <div className="text-[13px] font-medium border hair px-3 py-2 bg-paper">
+                        {selected.seoTitle}
+                      </div>
+                    </div>
+
+                    {/* 본문 */}
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="mono text-[9px] dim">본문</span>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(selected.naverContent);
+                            showToast("본문 복사됨", true);
+                          }}
+                          className="mono text-[9px] tracking-[0.1em] uppercase border hair text-dim px-3 py-1 hover:border-ink hover:text-ink transition-colors"
+                        >
+                          복사
+                        </button>
+                      </div>
+                      <div className="text-[13px] leading-relaxed whitespace-pre-wrap border hair p-4 bg-paper font-mono">
+                        {selected.naverContent}
+                      </div>
                     </div>
                   </div>
                 )}

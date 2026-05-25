@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 import HeroCtaCards from "@/components/HeroCtaCards";
 import HeroChat from "@/components/HeroChat";

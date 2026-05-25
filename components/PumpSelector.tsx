@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import productData from "@/lib/productCatalog.json";
 import { addToCartByPartNo } from "@/lib/cartUtils";
 import { recommendPumps, TURBO_PUMPS, ALL_PUMPS, calcTurboPumpDown } from "@/lib/pumpSpeedData";
@@ -246,6 +247,8 @@ function resolveSeriesFilter(l1: string, l2: string, l3: string): string[] | und
 
 
 export default function PumpSelector() {
+  const { data: session } = useSession();
+  const [showLoginGate, setShowLoginGate] = useState(false);
   const [tab, setTab] = useState<Tab>("search");
   const [selectedCategory, setSelectedCategory] = useState<CatalogItem | null>(null);
   const [search, setSearch] = useState("");
@@ -448,9 +451,9 @@ export default function PumpSelector() {
 
   const tabCls = (t: Tab) => {
     if (t === "search") {
-      return `flex-1 py-4 text-[17px] font-semibold tracking-wide transition-colors border border-[#E3DFD6] text-ink hover:bg-ink hover:text-paper hover:border-ink`;
+      return `flex-1 py-4 text-[17px] font-semibold tracking-wide transition-colors bg-paper text-ink border border-ink hover:bg-ink hover:text-paper`;
     }
-    return `flex-1 py-4 text-[17px] font-semibold tracking-wide transition-colors border border-[#E3DFD6] text-ink hover:bg-edred hover:text-paper hover:border-edred`;
+    return `flex-1 py-4 text-[17px] font-semibold tracking-wide transition-colors bg-ink text-paper border border-ink hover:bg-edred hover:border-edred`;
   };
 
   return (
@@ -467,10 +470,42 @@ export default function PumpSelector() {
         <button className={tabCls("search")} onClick={() => { setTab("search"); setSelectedCategory(null); setSearch(""); }}>
           제품 검색
         </button>
-        <button className={tabCls("selection")} onClick={() => { setTab("selection"); setSelectedCategory(null); }}>
+        <button className={tabCls("selection")} onClick={() => {
+          if (!session) { setShowLoginGate(true); return; }
+          setTab("selection"); setSelectedCategory(null);
+        }}>
           펌프선정 및 시뮬레이션
+          {!session && <span className="ml-2 mono text-[10px] tracking-[0.08em] opacity-60">🔒 로그인 필요</span>}
         </button>
       </div>
+
+      {/* 로그인 게이트 오버레이 */}
+      {showLoginGate && (
+        <div className="relative mt-6">
+          <div className="absolute inset-0 z-10 bg-paper/95 backdrop-blur-sm flex flex-col items-center justify-center p-8 border hair min-h-[320px]">
+            <div className="mono text-[10px] tracking-[0.16em] uppercase text-dim mb-4">로그인 필요</div>
+            <h3 className="display text-[22px] leading-tight text-center mb-2">
+              펌프선정 시뮬레이션은<br />로그인 후 이용 가능합니다
+            </h3>
+            <p className="text-[12px] text-dim text-center mb-6">
+              로그인하시면 공정 조건에 맞는 최적 펌프를<br />자동으로 시뮬레이션해 드립니다.
+            </p>
+            <Link
+              href="/auth/login"
+              className="inline-block px-6 py-3 bg-ink text-paper text-[13px] mono tracking-wider hover:bg-edred transition-colors mb-3"
+            >
+              로그인하기 →
+            </Link>
+            <button
+              onClick={() => setShowLoginGate(false)}
+              className="text-[12px] text-dim hover:text-ink transition-colors"
+            >
+              계속 둘러보기
+            </button>
+          </div>
+          <div className="min-h-[320px]" />
+        </div>
+      )}
 
       <div className="mt-6">
         {/* 제품 검색 */}

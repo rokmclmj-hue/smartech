@@ -13,8 +13,9 @@ function parsePostFile(filename: string, content: string) {
   const categoryMatch = content.match(/## 주제 카테고리:\s*(.+)/);
   const category = categoryMatch ? categoryMatch[1].trim() : "일반";
 
-  const titleMatch = content.match(/\*\*제목:\*\*\s*(.+)/);
-  const seoTitle = titleMatch ? titleMatch[1].trim() : "";
+  const titleMatch = content.match(/\*\*제목:\*\*\s*(.+)/) ||
+                     content.match(/\*\*선정 주제:\*\*\s*"?([^"\n]+)"?\s*$/m);
+  const seoTitle = titleMatch ? titleMatch[1].trim().replace(/^"|"$/g, "") : "";
 
   const metaMatch = content.match(/\*\*메타설명:\*\*\s*(.+)/);
   const metaDesc = metaMatch ? metaMatch[1].trim() : "";
@@ -27,15 +28,24 @@ function parsePostFile(filename: string, content: string) {
 
   // 발행용 글 본문 추출
   let finalContent = "";
-  const publishMatch = content.match(/---발행용---\n([\s\S]+)$/);
+  const publishMatch = content.match(/---발행용---\n([\s\S]+?)(?=\n---네이버블로그---|$)/);
   if (publishMatch) {
     finalContent = publishMatch[1].trim();
   } else {
     const draftMatch = content.match(/## 최종 초안 \(2팀 반려[^)]*\)\n\n([\s\S]+)$/);
-    if (draftMatch) finalContent = draftMatch[1].trim();
+    if (draftMatch) {
+      finalContent = draftMatch[1].trim();
+    } else {
+      const simpleDraftMatch = content.match(/## 최종 초안\n\n([\s\S]+)$/);
+      if (simpleDraftMatch) finalContent = simpleDraftMatch[1].trim();
+    }
   }
 
-  return { filename, date, status, category, seoTitle, metaDesc, tags, rejectionReason, finalContent };
+  // 네이버 블로그 버전 추출
+  const naverMatch = content.match(/---네이버블로그---\n([\s\S]+)$/);
+  const naverContent = naverMatch ? naverMatch[1].trim() : "";
+
+  return { filename, date, status, category, seoTitle, metaDesc, tags, rejectionReason, finalContent, naverContent };
 }
 
 // GET: 파일 목록 또는 단일 파일 내용

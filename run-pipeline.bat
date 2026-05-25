@@ -8,5 +8,3 @@ node scripts/transcribe-recordings.mjs
 echo.
 echo  [2단계] AI 콘텐츠 파이프라인 실행 중...
 node scripts/ai-pipeline.mjs
-
-pause
