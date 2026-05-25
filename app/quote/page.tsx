@@ -12,10 +12,11 @@ type CartItem = {
 };
 
 const TIER_MULTIPLIERS: Record<string, number> = {
-  ENDUSER: 1.35,
-  OEM: 1.35,
+  ENDUSER: 1.40,
+  OEM: 1.25,
   DEALER: 1.20,
   KEY_DEALER: 1.15,
+  VIP_DEALER: 1.10,
   ADMIN: 1.00,
 };
 

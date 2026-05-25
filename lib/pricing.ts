@@ -1,16 +1,16 @@
 import { prisma } from "./db";
 
-export type Tier = "PENDING" | "ENDUSER" | "OEM" | "DEALER" | "KEY_DEALER" | "ADMIN" | "PUBLIC";
+export type Tier = "PENDING" | "ENDUSER" | "OEM" | "DEALER" | "KEY_DEALER" | "VIP_DEALER" | "ADMIN" | "PUBLIC";
 
 // 기본 배율 (원가 × multiplier = 표시 가격)
-// DEALER 20%, OEM 30%, ENDUSER·PUBLIC 40% 마진
 const DEFAULT_MULTIPLIERS: Record<string, number> = {
-  PUBLIC:     1.40, // 로그인 없음
-  ENDUSER:    1.40, // 일반 회원
-  PENDING:    1.40, // 승인 대기 (공개 가격과 동일)
-  OEM:        1.30,
+  PUBLIC:     1.40,
+  ENDUSER:    1.40,
+  PENDING:    1.40,
+  OEM:        1.25,
   DEALER:     1.20,
   KEY_DEALER: 1.15,
+  VIP_DEALER: 1.10,
   ADMIN:      1.00,
 };
 

@@ -62,6 +62,13 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
   const today = new Date();
   const isLoggedIn = !!session;
   const tierLabel = ((session?.user as any)?.tier ?? "PUBLIC").toUpperCase();
+
+  const DEALER_TIER_MULT: Record<string, number> = { DEALER: 1.20, KEY_DEALER: 1.15, VIP_DEALER: 1.10 };
+  const showSavingsBlock = ["DEALER", "KEY_DEALER", "VIP_DEALER"].includes(tierLabel);
+  const userTierMult = DEALER_TIER_MULT[tierLabel] ?? 1.40;
+  const listSubtotal = showSavingsBlock ? Math.round(subtotal * (1.40 / userTierMult)) : 0;
+  const savingsAmount = showSavingsBlock ? listSubtotal - subtotal : 0;
+  const savingsPct = listSubtotal > 0 ? Math.round((savingsAmount / listSubtotal) * 100) : 0;
   const userName = (session?.user as any)?.name ?? "";
   const userCompany = (session?.user as any)?.company ?? "";
   const userEmail = (session?.user as any)?.email ?? "";
@@ -261,21 +268,41 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
             <div className="hero">
               <div className="hero-total">
                 <div className="hero-eyebrow">
-                  <span>TOTAL · INCL. VAT</span>
+                  <span>SUPPLY · 공급가액</span>
                   <span className="ref">PREVIEW</span>
                 </div>
-                <div className="hero-bignum"><span className="won">₩</span>{fmt(grandTotal)}</div>
+                <div className="hero-bignum"><span className="won">₩</span>{fmt(subtotal)}</div>
                 <div className="hero-breakdown">
                   <div className="b"><div className="k">SUPPLY (공급가액)</div><div className="v">₩ {fmt(subtotal)}</div></div>
                   <div className="b"><div className="k">VAT (10%)</div><div className="v">₩ {fmt(vat)}</div></div>
                   <div className="b total"><div className="k">GRAND TOTAL</div><div className="v">₩ {fmt(grandTotal)}</div></div>
                 </div>
+                {showSavingsBlock && (
+                  <div className="savings-block">
+                    <div className="s-label">— PREFERRED PRICING · 우대 가격 적용</div>
+                    <div className="s-row">
+                      <span className="s-k">일반 공급가 (ENDUSER 기준)</span>
+                      <span className="s-v">₩ {fmt(listSubtotal)}</span>
+                    </div>
+                    <div className="s-row s-discount">
+                      <span className="s-k">우대 가격 적용</span>
+                      <span className="s-v">- ₩ {fmt(savingsAmount)}</span>
+                    </div>
+                    <div className="s-row s-final">
+                      <span className="s-k">귀사 적용가 · {tierLabel}</span>
+                      <span className="s-v">₩ {fmt(subtotal)}</span>
+                    </div>
+                    <div className="savings-badge">
+                      절감 {savingsPct}% &nbsp;·&nbsp; ₩ {fmt(savingsAmount)} 우대 적용
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="hero-side">
                 <div className="eyebrow">PREVIEW · QUOTE</div>
-                <p style={{ fontSize: 13, color: "var(--q-text-dim)", lineHeight: 1.6 }}>
+                <p style={{ fontSize: 14, color: "var(--q-text)", lineHeight: 1.6, whiteSpace: "pre-line" }}>
                   {isLoggedIn
-                    ? "우대 가격이 적용된 미리보기입니다.\n정식 견적서는 로그인 후 제출하세요."
+                    ? "우대 가격이 적용된 미리보기입니다.\nPDF 저장으로 공식 견적서를 발행하세요."
                     : "현재 공개가 기준입니다.\n로그인 시 우대 가격이 적용됩니다."}
                 </p>
                 <div className="meta-row" style={{ display:"flex", justifyContent:"space-between", paddingTop:8, borderTop:"1px dashed var(--q-line-soft)", fontFamily:"var(--q-mono)", fontSize:11, color:"var(--q-muted)" }}>
@@ -294,6 +321,18 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
                 <div className="row"><span>STATUS</span><span className="v" style={{ color: "var(--q-gold)" }}>PREVIEW</span></div>
               </div>
               <div className="summary-right">
+                {showSavingsBlock && (
+                  <>
+                    <div className="row">
+                      <span className="k">일반 공급가 (LIST)</span>
+                      <span className="v" style={{ color: "var(--q-muted)", textDecoration: "line-through" }}>₩ {fmt(listSubtotal)}</span>
+                    </div>
+                    <div className="row">
+                      <span className="k" style={{ color: "var(--q-success)" }}>우대 가격 적용</span>
+                      <span className="v" style={{ color: "var(--q-success)" }}>- ₩ {fmt(savingsAmount)} ({savingsPct}%)</span>
+                    </div>
+                  </>
+                )}
                 <div className="row"><span className="k">SUB-TOTAL</span><span className="v">₩ {fmt(subtotal)}</span></div>
                 <div className="row"><span className="k">VAT (10%)</span><span className="v">₩ {fmt(vat)}</span></div>
                 <div className="row grand"><span className="k">GRAND TOTAL · INCL. VAT</span><span className="v">₩ {fmt(grandTotal)}</span></div>
@@ -370,6 +409,12 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
             </tbody>
           </table>
           <div className="p-totals">
+            {showSavingsBlock && (
+              <>
+                <div className="row s-list"><span className="k">일반 공급가 (LIST)</span><span className="v">₩ {fmt(listSubtotal)}</span></div>
+                <div className="row s-discount"><span className="k">우대 할인 ({savingsPct}%)</span><span className="v">- ₩ {fmt(savingsAmount)}</span></div>
+              </>
+            )}
             <div className="row"><span className="k">Sub-Total</span><span className="v">₩ {fmt(subtotal)}</span></div>
             <div className="row"><span className="k">VAT (10%)</span><span className="v">₩ {fmt(vat)}</span></div>
             <div className="row grand"><span className="k">GRAND TOTAL</span><span className="v">₩ {fmt(grandTotal)}</span></div>

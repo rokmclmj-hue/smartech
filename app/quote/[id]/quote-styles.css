@@ -16,7 +16,7 @@
   --q-text: #E6EEF6;
   --q-text-dim: #B9C5D2;
   --q-critical: #E74C3C;
-  --q-success: #27AE60;
+  --q-success: #39D98A;
   --q-gold: #D4A537;
   --q-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
@@ -346,6 +346,44 @@
   letter-spacing: 0.1em; text-transform: uppercase;
   display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;
 }
+
+/* ── 절감액 블록 (딜러 등급 이상만) ─────────────── */
+.quote-page .savings-block {
+  margin-top: 18px; padding: 16px 20px;
+  border: 1px solid rgba(39,174,96,0.30);
+  background: rgba(39,174,96,0.04); font-family: var(--q-mono);
+}
+.quote-page .savings-block .s-label {
+  font-size: 9px; color: var(--q-success);
+  letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 12px;
+}
+.quote-page .savings-block .s-row {
+  display: grid; grid-template-columns: 1fr auto;
+  padding: 5px 0; font-size: 12px;
+  border-bottom: 1px dashed rgba(39,174,96,0.12);
+}
+.quote-page .savings-block .s-row:last-of-type { border-bottom: 0; }
+.quote-page .savings-block .s-k {
+  color: var(--q-muted); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+}
+.quote-page .savings-block .s-v { color: var(--q-text-dim); }
+.quote-page .savings-block .s-row.s-discount .s-k { color: var(--q-success); }
+.quote-page .savings-block .s-row.s-discount .s-v { color: var(--q-success); font-weight: 600; }
+.quote-page .savings-block .s-row.s-final {
+  border-top: 1px solid rgba(39,174,96,0.25);
+  margin-top: 6px; padding-top: 10px; border-bottom: 0;
+}
+.quote-page .savings-block .s-row.s-final .s-k { color: var(--q-accent); font-size: 11px; }
+.quote-page .savings-block .s-row.s-final .s-v { color: var(--q-accent); font-size: 15px; font-weight: 600; }
+.quote-page .savings-badge {
+  margin-top: 12px; display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(39,174,96,0.10); border: 1px solid rgba(39,174,96,0.35);
+  color: var(--q-success); font-size: 10px; letter-spacing: 0.12em;
+  text-transform: uppercase; padding: 4px 12px;
+}
+.quote-page .pdf-only .p-totals .row.s-list .v { color: #888; }
+.quote-page .pdf-only .p-totals .row.s-discount .k,
+.quote-page .pdf-only .p-totals .row.s-discount .v { color: #27AE60; font-weight: 600; }
 
 /* ── 반응형 ──────────────────────────────────── */
 @media (max-width: 900px) {

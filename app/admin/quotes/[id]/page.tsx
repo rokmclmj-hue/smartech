@@ -98,8 +98,11 @@ const ORDER_STATUS_LABEL: Record<string, string> = {
 
 const TIER_COLOR: Record<string, string> = {
   ADMIN: "border-edred text-edred",
-  VIP: "border-ink text-ink",
-  APPROVED: "border-ink/40 text-ink",
+  VIP_DEALER: "border-purple-500 text-purple-600",
+  KEY_DEALER: "border-blue-500 text-blue-600",
+  DEALER: "border-ink text-ink",
+  OEM: "border-ink/60 text-ink",
+  ENDUSER: "border-ink/40 text-ink",
   PENDING: "border-line text-dim",
   REJECTED: "border-line text-dim line-through",
 };

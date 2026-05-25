@@ -10,7 +10,7 @@ const TIER_CONFIG = [
     tier: "PUBLIC",
     label: "공개 가격",
     desc: "로그인하지 않은 방문자에게 표시되는 가격",
-    color: "text-gray-600",
+    color: "text-gray-500",
   },
   {
     tier: "ENDUSER",
@@ -21,14 +21,26 @@ const TIER_CONFIG = [
   {
     tier: "OEM",
     label: "OEM",
-    desc: "제조사 직납 고객 (관리자만 확인 가능)",
+    desc: "제조사 직납 고객 — 대량·반복 구매",
     color: "text-purple-600",
   },
   {
     tier: "DEALER",
     label: "딜러",
-    desc: "유통·판매 대리점 (관리자만 확인 가능)",
+    desc: "유통·판매 대리점",
     color: "text-blue-600",
+  },
+  {
+    tier: "KEY_DEALER",
+    label: "키딜러",
+    desc: "연간 1억~5억 파트너",
+    color: "text-blue-700",
+  },
+  {
+    tier: "VIP_DEALER",
+    label: "VIP 딜러",
+    desc: "연간 5억 이상 또는 독점 계약 파트너",
+    color: "text-indigo-700",
   },
 ];
 
@@ -63,7 +75,7 @@ export default function MarginSettings() {
   function getMultiplier(tier: string) {
     // DB 값 우선, 없으면 기본값
     const DEFAULTS: Record<string, number> = {
-      PUBLIC: 1.40, ENDUSER: 1.40, OEM: 1.30, DEALER: 1.20,
+      PUBLIC: 1.40, ENDUSER: 1.40, OEM: 1.25, DEALER: 1.20, KEY_DEALER: 1.15, VIP_DEALER: 1.10,
     };
     return rules[tier] ?? DEFAULTS[tier] ?? 1.40;
   }

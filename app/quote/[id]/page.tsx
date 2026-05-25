@@ -296,6 +296,13 @@ export default function QuoteDetailPage() {
   const userTier = ((session?.user as { tier?: string } | undefined)?.tier ?? "ENDUSER").toUpperCase();
   const showSavings = userTier !== "ENDUSER" && userTier !== "PENDING";
 
+  const DEALER_TIER_MULT: Record<string, number> = { DEALER: 1.20, KEY_DEALER: 1.15, VIP_DEALER: 1.10 };
+  const showSavingsBlock = ["DEALER", "KEY_DEALER", "VIP_DEALER"].includes(userTier);
+  const userTierMult = DEALER_TIER_MULT[userTier] ?? 1.40;
+  const listSubtotal = showSavingsBlock ? Math.round(subtotal * (1.40 / userTierMult)) : 0;
+  const savingsAmount = showSavingsBlock ? listSubtotal - subtotal : 0;
+  const savingsPct = listSubtotal > 0 ? Math.round((savingsAmount / listSubtotal) * 100) : 0;
+
   return (
     <div className="quote-page">
       {/* ─── 풀 버전 (화면용 다크) ────────────────────────────── */}
@@ -368,10 +375,10 @@ export default function QuoteDetailPage() {
           <div className="hero">
             <div className="hero-total">
               <div className="hero-eyebrow">
-                <span>TOTAL · INCL. VAT</span>
+                <span>SUPPLY · 공급가액</span>
                 <span className="ref">Q-REF {quoteRef}</span>
               </div>
-              <div className="hero-bignum"><span className="won">₩</span>{fmt(grandTotal)}</div>
+              <div className="hero-bignum"><span className="won">₩</span>{fmt(subtotal)}</div>
               <div className="hero-breakdown">
                 <div className="b">
                   <div className="k">SUPPLY (공급가액)</div>
@@ -386,6 +393,26 @@ export default function QuoteDetailPage() {
                   <div className="v">₩ {fmt(grandTotal)}</div>
                 </div>
               </div>
+              {showSavingsBlock && (
+                <div className="savings-block">
+                  <div className="s-label">— PREFERRED PRICING · 우대 가격 적용</div>
+                  <div className="s-row">
+                    <span className="s-k">일반 공급가 (ENDUSER 기준)</span>
+                    <span className="s-v">₩ {fmt(listSubtotal)}</span>
+                  </div>
+                  <div className="s-row s-discount">
+                    <span className="s-k">우대 가격 적용</span>
+                    <span className="s-v">- ₩ {fmt(savingsAmount)}</span>
+                  </div>
+                  <div className="s-row s-final">
+                    <span className="s-k">귀사 적용가 · {userTier}</span>
+                    <span className="s-v">₩ {fmt(subtotal)}</span>
+                  </div>
+                  <div className="savings-badge">
+                    절감 {savingsPct}% &nbsp;·&nbsp; ₩ {fmt(savingsAmount)} 우대 적용
+                  </div>
+                </div>
+              )}
             </div>
             <div className="hero-side">
               <div className="eyebrow">QUOTE · ACTIVE</div>
@@ -490,6 +517,18 @@ export default function QuoteDetailPage() {
               <div className="row"><span>TAX INVOICE</span><span className="v">{quote.taxInvoiceRequested ? "REQUESTED" : "NOT REQ."}</span></div>
             </div>
             <div className="summary-right">
+              {showSavingsBlock && (
+                <>
+                  <div className="row">
+                    <span className="k">일반 공급가 (LIST)</span>
+                    <span className="v" style={{ color: "var(--q-muted)", textDecoration: "line-through" }}>₩ {fmt(listSubtotal)}</span>
+                  </div>
+                  <div className="row">
+                    <span className="k" style={{ color: "var(--q-success)" }}>우대 가격 적용</span>
+                    <span className="v" style={{ color: "var(--q-success)" }}>- ₩ {fmt(savingsAmount)} ({savingsPct}%)</span>
+                  </div>
+                </>
+              )}
               <div className="row"><span className="k">SUB-TOTAL</span><span className="v">₩ {fmt(subtotal)}</span></div>
               <div className="row"><span className="k">VAT (10%)</span><span className="v">₩ {fmt(vat)}</span></div>
               <div className="row grand"><span className="k">GRAND TOTAL · INCL. VAT</span><span className="v">₩ {fmt(grandTotal)}</span></div>
@@ -634,6 +673,12 @@ export default function QuoteDetailPage() {
           </tbody>
         </table>
         <div className="p-totals">
+          {showSavingsBlock && (
+            <>
+              <div className="row s-list"><span className="k">일반 공급가 (LIST)</span><span className="v">₩ {fmt(listSubtotal)}</span></div>
+              <div className="row s-discount"><span className="k">우대 할인 ({savingsPct}%)</span><span className="v">- ₩ {fmt(savingsAmount)}</span></div>
+            </>
+          )}
           <div className="row"><span className="k">Sub-Total</span><span className="v">₩ {fmt(subtotal)}</span></div>
           <div className="row"><span className="k">VAT (10%)</span><span className="v">₩ {fmt(vat)}</span></div>
           <div className="row grand"><span className="k">GRAND TOTAL</span><span className="v">₩ {fmt(grandTotal)}</span></div>

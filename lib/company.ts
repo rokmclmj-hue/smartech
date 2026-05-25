@@ -10,7 +10,7 @@ export const SMARTECH_COMPANY = {
   english: "SMARTECH",
   englishLong: "Smartech Co., Ltd.",
   slogan: "Vacuum Components & Lines",
-  role: "Edwards Vacuum Korea Authorized Distributor",
+  role: "Edwards Korea Authorized Distributor",
   roleKo: "Edwards Vacuum 한국 공식 대리점",
   since: 2011,
 

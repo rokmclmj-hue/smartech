@@ -39,6 +39,7 @@ const TIER_LABEL: Record<string, string> = {
   OEM: "OEM",
   DEALER: "딜러",
   KEY_DEALER: "키딜러",
+  VIP_DEALER: "VIP 딜러",
 };
 
 function formatKRW(n: number): string {
