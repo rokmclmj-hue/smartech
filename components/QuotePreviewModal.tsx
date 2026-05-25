@@ -9,14 +9,20 @@ const SM = SMARTECH_COMPANY;
 
 type CartItem = { productId: number; partNo: string; description: string; quantity: number };
 type PricedItem = CartItem & { unitPrice: number | null };
-type Props = { open: boolean; onClose: () => void };
+type Props = { open: boolean; onClose: () => void; fullscreen?: boolean };
 
 function fmt(n: number) { return n.toLocaleString("ko-KR"); }
+function getDelivery(desc: string): string {
+  if (["RV", "nXDS", "E2M0.7", "E2M1.5", "EMF10", "EMF20"].some(k => desc.includes(k))) return "1 week";
+  if (["E2M40", "E2M80", "E2M175", "E2M275", "EH250", "EH500", "EH1200", "EH2600", "EH4200"].some(k => desc.includes(k))) return "8 ~ 10 weeks";
+  if (["GXS", "EXS", "EDS"].some(k => desc.includes(k))) return "12 ~ 14 weeks";
+  return "TBC";
+}
 function ymd(d: Date) {
   return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,"0")}.${String(d.getDate()).padStart(2,"0")}`;
 }
 
-export default function QuotePreviewModal({ open, onClose }: Props) {
+export default function QuotePreviewModal({ open, onClose, fullscreen = false }: Props) {
   const { data: session } = useSession();
   const [items, setItems] = useState<PricedItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -61,8 +67,8 @@ export default function QuotePreviewModal({ open, onClose }: Props) {
   const userEmail = (session?.user as any)?.email ?? "";
 
   return (
-    /* 왼쪽 패널 — QuotePanel(480px) 제외한 영역 */
-    <div className="fixed top-0 bottom-0 left-0 right-[480px] z-50 overflow-y-auto print-modal-wrapper">
+    /* 왼쪽 패널 — fullscreen 시 전체, 일반 시 QuotePanel(480px) 제외 */
+    <div className={`fixed top-0 bottom-0 left-0 z-50 overflow-y-auto print-modal-wrapper ${fullscreen ? "right-0" : "right-[480px]"}`}>
 
       {/* ── quote-page 다크 테마 래퍼 ── */}
       <div className="quote-page" style={{ minHeight: "100%" }}>
@@ -104,6 +110,9 @@ export default function QuotePreviewModal({ open, onClose }: Props) {
                       window.print();
                       hidden.forEach((el) => (el.style.display = ""));
                       document.body.classList.remove("printing-quote");
+                      localStorage.removeItem("quoteCart");
+                      window.dispatchEvent(new Event("quoteCartUpdated"));
+                      onClose();
                     }
                   }}
                 >
@@ -219,6 +228,7 @@ export default function QuotePreviewModal({ open, onClose }: Props) {
                         </div>
                         <div className="meta-line">
                           <div><div className="k">Quantity</div><div className="v">{item.quantity} EA</div></div>
+                          <div><div className="k">DELIVERY</div><div className="v">{getDelivery(item.description)}</div></div>
                           <div><div className="k">Warranty</div><div className="v">12 Months</div></div>
                         </div>
                         <div className="price-block">

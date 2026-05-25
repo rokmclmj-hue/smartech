@@ -6,6 +6,7 @@ import QuotePreviewModal from "./QuotePreviewModal";
 export default function QuoteBar() {
   const [count, setCount] = useState(0);
   const [open, setOpen] = useState(false);
+  const [fullscreenMode, setFullscreenMode] = useState(false);
 
   useEffect(() => {
     function readCount() {
@@ -16,12 +17,19 @@ export default function QuoteBar() {
         setCount(0);
       }
     }
+    function openFullscreen() {
+      readCount();
+      setFullscreenMode(true);
+      setOpen(true);
+    }
     readCount();
     window.addEventListener("quoteCartUpdated", readCount);
     window.addEventListener("storage", readCount);
+    window.addEventListener("openScanQuote", openFullscreen);
     return () => {
       window.removeEventListener("quoteCartUpdated", readCount);
       window.removeEventListener("storage", readCount);
+      window.removeEventListener("openScanQuote", openFullscreen);
     };
   }, []);
 
@@ -29,10 +37,14 @@ export default function QuoteBar() {
 
   return (
     <>
-      {/* 왼쪽: 화이트모드 견적서 미리보기 */}
-      <QuotePreviewModal open={open} onClose={() => setOpen(false)} />
-      {/* 오른쪽: 견적 카트 패널 */}
-      <QuotePanel open={open} onClose={() => setOpen(false)} />
+      {/* 왼쪽: 다크 견적서 미리보기 (fullscreen 시 전체화면) */}
+      <QuotePreviewModal
+        open={open}
+        onClose={() => { setOpen(false); setFullscreenMode(false); }}
+        fullscreen={fullscreenMode}
+      />
+      {/* 오른쪽: 견적 카트 패널 (fullscreen 스캔 모드일 때는 숨김) */}
+      {!fullscreenMode && <QuotePanel open={open} onClose={() => setOpen(false)} />}
 
       {/* 하단 플로팅 버튼 */}
       {count > 0 && !open && (

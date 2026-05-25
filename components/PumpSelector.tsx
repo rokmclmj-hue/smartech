@@ -535,7 +535,7 @@ export default function PumpSelector() {
         localStorage.setItem("quoteCart", JSON.stringify(cart));
       }
       window.dispatchEvent(new Event("quoteCartUpdated"));
-      window.dispatchEvent(new Event("openScanQuote"));
+      setTimeout(() => window.dispatchEvent(new Event("openScanQuote")), 2000);
 
       return { partNo: base.partNo, description: base.description, unitPrice: base.displayPrice, stock: base.stock ?? 0 };
     } catch {
@@ -568,7 +568,7 @@ export default function PumpSelector() {
           onClick={() => { setTab("search"); setSelectedCategory(null); setSearch(""); }}
           className={`flex flex-col items-center justify-center py-4 px-3 border transition-colors ${
             tab === "search"
-              ? "bg-ink text-paper border-ink"
+              ? "bg-paper text-ink border-ink hover:bg-ink hover:text-paper"
               : "bg-paper text-ink border-ink hover:bg-ink hover:text-paper"
           }`}
         >
@@ -580,30 +580,30 @@ export default function PumpSelector() {
           onClick={() => { setTab("scan"); setScanResult(null); }}
           className={`flex flex-col items-center justify-center py-4 px-3 border transition-colors ${
             tab === "scan"
-              ? "bg-ink text-paper border-ink"
-              : "bg-[#F6F4EF] text-ink border-ink hover:bg-ink hover:text-paper"
+              ? "bg-edred text-paper border-edred"
+              : "bg-edred text-paper border-edred hover:bg-ink hover:border-ink"
           }`}
         >
           <span className="text-[15px] font-semibold tracking-tight">AI 모델 인식</span>
-          <span className={`mono text-[10px] tracking-[0.06em] mt-0.5 ${tab === "scan" ? "text-paper/60" : "text-dim"}`}>
+          <span className="mono text-[10px] tracking-[0.06em] mt-0.5 text-paper/60">
             명판 사진으로 즉시 견적
           </span>
         </button>
 
-        {/* 펌프선정 시뮬레이션 */}
+        {/* 펌프선정 및 시뮬레이션 */}
         <button
           onClick={() => {
             if (!session) { setShowLoginGate(true); return; }
             setTab("selection"); setSelectedCategory(null);
           }}
-          className={`flex flex-col items-center justify-center py-4 px-3 border transition-colors ${
+          className={`group flex flex-col items-center justify-center py-4 px-3 border transition-colors ${
             tab === "selection"
-              ? "bg-edred text-paper border-edred"
-              : "bg-ink text-paper border-ink hover:bg-edred hover:border-edred"
+              ? "bg-paper text-ink border-ink"
+              : "bg-paper text-ink border-ink hover:bg-ink hover:text-paper"
           }`}
         >
-          <span className="text-[15px] font-semibold tracking-tight">펌프선정 시뮬레이션</span>
-          <span className={`mono text-[10px] tracking-[0.06em] mt-0.5 ${tab === "selection" ? "text-paper/70" : !session ? "text-paper/50" : "text-paper/60"}`}>
+          <span className="text-[15px] font-semibold tracking-tight">펌프선정 및 시뮬레이션</span>
+          <span className={`mono text-[10px] tracking-[0.06em] mt-0.5 group-hover:text-paper/60 ${tab === "selection" ? "text-ink/60" : !session ? "text-ink/50" : "text-ink/60"}`}>
             {!session ? "🔒 로그인 필요" : "공정 조건 기반 자동 선정"}
           </span>
         </button>
@@ -615,7 +615,7 @@ export default function PumpSelector() {
           <div className="absolute inset-0 z-10 bg-paper/95 backdrop-blur-sm flex flex-col items-center justify-center p-8 border hair min-h-[320px]">
             <div className="mono text-[10px] tracking-[0.16em] uppercase text-dim mb-4">로그인 필요</div>
             <h3 className="display text-[22px] leading-tight text-center mb-2">
-              펌프선정 시뮬레이션은<br />로그인 후 이용 가능합니다
+              펌프선정 및 시뮬레이션은<br />로그인 후 이용 가능합니다
             </h3>
             <p className="text-[12px] text-dim text-center mb-6">
               로그인하시면 공정 조건에 맞는 최적 펌프를<br />자동으로 시뮬레이션해 드립니다.
