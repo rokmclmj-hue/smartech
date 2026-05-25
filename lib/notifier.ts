@@ -40,7 +40,8 @@ export async function notifyUserApproved(
     tasks.push(sendSms(phone, message).catch((e) => console.error("[notifier] SMS 실패:", e)));
   }
 
-  if (email) {
+  // kakao.smartech는 가짜 도메인 — 실제 이메일만 발송
+  if (email && !email.endsWith("@kakao.smartech")) {
     const { sendApprovalNotice } = await import("./mailer");
     tasks.push(
       sendApprovalNotice(email, customerName, "").catch((e) =>

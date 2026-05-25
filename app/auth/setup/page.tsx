@@ -2,12 +2,11 @@
 
 import { useState } from "react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 
 export default function SetupPage() {
   const { update } = useSession();
-  const router = useRouter();
   const [company, setCompany] = useState("");
+  const [phone, setPhone] = useState("");
   const [saving, setSaving] = useState(false);
 
   async function handleSave(e: React.FormEvent) {
@@ -18,7 +17,7 @@ export default function SetupPage() {
       await fetch("/api/auth/setup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ company: company.trim() }),
+        body: JSON.stringify({ company: company.trim(), phone: phone.trim() }),
       });
       await update({ company: company.trim() });
       window.location.href = "/";
@@ -44,8 +43,8 @@ export default function SetupPage() {
           <div className="display text-[32px] tracking-[-0.045em] text-ink leading-none mb-1">
             Smartech<span style={{ color: "#c00020" }}>.</span>
           </div>
-          <p className="text-[14px] text-gray-500 mt-3">마지막으로 소속 회사명을 알려주세요.</p>
-          <p className="text-[12px] text-gray-400 mt-1">견적서 발행 및 담당자 확인에 사용됩니다.</p>
+          <p className="text-[14px] text-gray-500 mt-3">마지막으로 회사 정보를 알려주세요.</p>
+          <p className="text-[12px] text-gray-400 mt-1">견적서 발행 및 승인 알림에 사용됩니다.</p>
         </div>
 
         <form onSubmit={handleSave} className="space-y-3">
@@ -57,6 +56,16 @@ export default function SetupPage() {
             autoFocus
             className="w-full border border-gray-300 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
           />
+          <input
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="휴대폰 번호 입력 (예: 010-1234-5678)"
+            className="w-full border border-gray-300 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
+          />
+          <p className="text-[11px] text-gray-400 px-1">
+            ※ 관리자 승인 시 SMS 알림을 받을 번호입니다.
+          </p>
           <button
             type="submit"
             disabled={saving || !company.trim()}

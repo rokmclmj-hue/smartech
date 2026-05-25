@@ -6,7 +6,8 @@ import { compare } from "bcryptjs";
 import { prisma } from "./db";
 import { normalizePhone } from "./phone";
 
-async function findOrCreateOAuthUser(email: string, name: string) {
+async function findOrCreateOAuthUser(email: string, name: string, phone?: string | null) {
+  const normalizedPhone = phone ? (normalizePhone(phone) || null) : null;
   let user = await prisma.user.findFirst({ where: { email: email.toLowerCase() } });
   if (!user) {
     const { classifyCompany } = await import("./classify-company");
@@ -18,10 +19,17 @@ async function findOrCreateOAuthUser(email: string, name: string) {
         name: name || email.split("@")[0],
         company: "",
         passwordHash: "",
+        phone: normalizedPhone,
         tier,
         aiEstimatedTier: cls.tier,
         aiTypeReason: cls.source,
       },
+    });
+  } else if (normalizedPhone && !user.phone) {
+    // 기존 유저지만 전화번호가 없으면 업데이트
+    user = await prisma.user.update({
+      where: { id: user.id },
+      data: { phone: normalizedPhone },
     });
   }
   return user;
@@ -108,7 +116,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers,
   callbacks: {
-    async jwt({ token, user, account, trigger, session }) {
+    async jwt({ token, user, account, profile, trigger, session }) {
       // 세션 업데이트 (회사명 설정 후 갱신)
       if (trigger === "update" && session?.company !== undefined) {
         token.company = session.company;
@@ -117,7 +125,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
       // OAuth 로그인
       if (account && (account.provider === "kakao" || account.provider === "google")) {
-        // 카카오는 이메일 동의 없이도 로그인 가능 — Kakao ID로 식별
+        // 카카오: 이메일 동의 없이도 로그인 가능 — providerAccountId로 식별
+        // 카카오 프로필에서 실제 이메일/전화번호 추출
+        const kakaoProfile = account.provider === "kakao" ? (profile as any) : null;
+        const kakaoPhone = kakaoProfile?.kakao_account?.phone_number ?? null;
         const email =
           token.email ??
           (account.provider === "kakao" && account.providerAccountId
@@ -126,7 +137,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const name = token.name ?? "";
         if (email) {
           try {
-            const dbUser = await findOrCreateOAuthUser(email, name);
+            const dbUser = await findOrCreateOAuthUser(email, name, kakaoPhone);
             token.tier = dbUser.tier;
             token.company = dbUser.company;
             token.id = String(dbUser.id);

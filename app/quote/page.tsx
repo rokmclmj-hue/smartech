@@ -160,7 +160,7 @@ export default function QuotePage() {
       {cart.length === 0 ? (
         <div className="text-center py-20 bg-white border border-gray-200 rounded-2xl">
           <p className="text-gray-500 mb-4">견적 카트가 비어 있습니다.</p>
-          <Link href="/products" className="text-blue-600 hover:underline text-sm">
+          <Link href="/#products" className="text-blue-600 hover:underline text-sm">
             제품 보러 가기 →
           </Link>
         </div>
