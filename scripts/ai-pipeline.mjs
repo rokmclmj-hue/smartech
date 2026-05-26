@@ -217,10 +217,23 @@ const BRAND_RULES = `[필수 규칙]
 - "결론적으로 말씀드리면", "~라고 할 수 있습니다"
 - 고객사 실명 → 반드시 영문 이니셜 약자로 표기 (예: GR사, MH사, NT사)
 - 금액(원, 만원 등) 절대 언급 금지
+- "에드워즈" 절대 금지 → 반드시 "에드워드(Edwards)" (첫 언급), 이후 "에드워드"로만 표기
+
+[영문 병기 필수 — 첫 등장 시]
+- 에드워드(Edwards), 로터리 베인(Rotary Vane), 드라이 펌프(Dry Pump), 오버홀(Overhaul)
 
 [마무리 문장]
 반드시 이 패턴으로 끝낼 것:
 "[글의 핵심 주제] 관련하여 문의 사항이 있으시면 언제든지 스마텍으로 연락 부탁드립니다."`;
+
+// 네이버 블로그 표시용 카테고리명 (SEO 최적화)
+const CATEGORY_DISPLAY = {
+  '견적문의':  '납기·견적 안내',
+  '기술문의':  '기술자료·알람코드',
+  '단종문의':  '단종·후속 모델',
+  '수리문의':  '수리·오버홀',
+  '일반':      '일반',
+};
 
 const CATEGORY_RULES = {
   '견적문의': `[견적문의 특화]
@@ -255,7 +268,7 @@ async function runATeam(isMonday, keywords, recentEmails, callTranscripts) {
     // A1, A2, A3 병렬 실행
     const [a1, a2, a3] = await Promise.all([
       callAgent(
-        `당신은 스마텍(에드워즈 진공펌프 공식 대리점) A1 시장레이더입니다. 검색 데이터와 고객 이메일을 분석해 이번 주 블로그 주제 후보를 발굴합니다.`,
+        `당신은 스마텍(에드워드 진공펌프 공식 대리점) A1 시장레이더입니다. 검색 데이터와 고객 이메일을 분석해 이번 주 블로그 주제 후보를 발굴합니다.`,
         `[네이버 검색량 데이터]\n${keywordText}\n\n[고객 이메일 (최근 50건)]\n${recentEmails}${callInfo}\n\n이번 주 블로그 주제 후보 4개를 제안하세요.\n형식: [제목] | 카테고리: [...] | 타겟: [...] | 핵심키워드: [...]`,
         'A1 시장레이더', 1024
       ),
@@ -327,20 +340,23 @@ async function runATeam(isMonday, keywords, recentEmails, callTranscripts) {
 // B팀: 콘텐츠 작성 (직렬)
 // ===========================
 
-async function runBTeam(topicText, title, category, emailData) {
+async function runBTeam(topicText, title, category, emailData, callTranscripts) {
   const catRule = CATEGORY_RULES[category] || '';
+  const callInfo = callTranscripts
+    ? `\n\n[실제 통화 상담 기록 (최근)]\n${callTranscripts.slice(0, 2000)}`
+    : '';
 
   // B1: 기술 번역
   const b1 = await callAgent(
-    `당신은 스마텍 B1 기술번역 에이전트입니다. 에드워즈 공식 기술 문서를 고객이 이해할 수 있는 한국어로 번역·해석합니다. 영어 기술 용어는 반드시 한국어로 풀어쓰고 괄호로 원어를 병기합니다.`,
+    `당신은 스마텍 B1 기술번역 에이전트입니다. 에드워드 공식 기술 문서를 고객이 이해할 수 있는 한국어로 번역·해석합니다. 영어 기술 용어는 반드시 한국어로 풀어쓰고 괄호로 원어를 병기합니다.`,
     `다음 주제에 필요한 기술 내용을 정리하세요.\n\n주제: ${topicText}\n\n[고객 이메일 데이터]\n${emailData.slice(0, 3000)}\n\n핵심 기술 개념 5~7개를 각 2~3줄로 정리하세요:`,
     'B1 기술번역', 1024
   );
 
-  // B2: 스토리텔러
+  // B2: 스토리텔러 (이메일 + 통화기록 모두 활용)
   const b2 = await callAgent(
-    `당신은 스마텍 B2 스토리텔러입니다. 실제 고객 사례를 바탕으로 공감되는 이야기를 만듭니다. 고객사 실명은 반드시 영문 이니셜로 처리합니다. (예: 그린리소스→GR사, 미코하이테크→MH사)`,
-    `다음 기술 내용을 바탕으로 실제 현장 사례 스토리 2~3개를 작성하세요. 고객이 "맞아, 나도 이런 상황이었어"라고 느낄 수 있도록.\n\n주제: ${topicText}\n\n[B1 기술 내용]\n${b1}\n\n[고객 이메일 데이터]\n${emailData.slice(0, 3000)}\n\n현장 사례 스토리:`,
+    `당신은 스마텍 B2 스토리텔러입니다. 실제 고객 사례를 바탕으로 공감되는 이야기를 만듭니다. 고객사 실명은 반드시 영문 이니셜로 처리합니다. (예: 그린리소스→GR사, 미코하이테크→MH사)\n\n통화 상담 기록이 있으면 실제 대화 맥락을 최대한 살려 현장감 있게 작성하세요.`,
+    `다음 기술 내용을 바탕으로 실제 현장 사례 스토리 2~3개를 작성하세요. 고객이 "맞아, 나도 이런 상황이었어"라고 느낄 수 있도록.\n\n주제: ${topicText}\n\n[B1 기술 내용]\n${b1}\n\n[고객 이메일 데이터]\n${emailData.slice(0, 2000)}${callInfo}\n\n현장 사례 스토리:`,
     'B2 스토리텔러', 1024
   );
 
@@ -412,8 +428,10 @@ async function runCTeam(draft, referenceDB, allProductMaster) {
   );
 
   const passed = cLeader.includes('판정: 통과');
-  const feedbackMatch = cLeader.match(/수정 지시사항:\s*(.+?)(?=\n[가-힣]|\n\n|$)/s);
-  const feedback = feedbackMatch ? feedbackMatch[1].trim() : '';
+  const feedbackIdx = cLeader.indexOf('수정 지시사항:');
+  const feedback = feedbackIdx >= 0
+    ? cLeader.slice(feedbackIdx + '수정 지시사항:'.length).trim()
+    : '';
 
   console.log(`\n${passed ? '✅ C팀 판정: 통과' : '❌ C팀 판정: 반려'}`);
   if (!passed) console.log(`반려 사유: ${feedback}`);
@@ -430,11 +448,11 @@ async function reviseDraft(draft, feedback) {
 ${feedback}
 
 [추가 필수 확인 사항 — 반드시 지켜야 함]
-- "에드워즈(Edwards)" 첫 언급 시 반드시 영문 병기. 이후 "에드워즈"로만 표기
+- "에드워드(Edwards)" 첫 언급 시 반드시 영문 병기. 이후 "에드워드"로만 표기
 - "로터리 베인(Rotary Vane)", "드라이 펌프(Dry Pump)", "오버홀(Overhaul)" 첫 언급 시 영문 병기
 - 수리비·부품비·제품가격 등 모든 금액 표현 삭제 → "견적 문의 시 안내드립니다"로 교체
 - 고객사 실명 → 영문 이니셜로 교체 (예: GR사, MH사)
-- "에드워드" 표기 → 반드시 "에드워즈"로 수정
+- "에드워즈" 표기 → 반드시 "에드워드"로 수정
 
 [수정 전 초안]
 ${draft}
@@ -493,7 +511,7 @@ async function runETeam(draft, topicText, title, category, keywords) {
     ),
     callAgent(
       `당신은 네이버 SEO 전문가입니다. 메타 설명과 해시태그를 최적화합니다.`,
-      `다음 글의 메타 설명(160자 이내)과 해시태그 15개를 작성하세요.\n\n[글 내용]\n${draft.slice(0, 1500)}\n\n형식:\n메타설명: [160자 이내]\n해시태그: #에드워즈진공펌프 #진공펌프 ... (총 15개)`,
+      `다음 글의 메타 설명(160자 이내)과 해시태그 15개를 작성하세요.\n\n[글 내용]\n${draft.slice(0, 1500)}\n\n형식:\n메타설명: [160자 이내]\n해시태그: #에드워드진공펌프 #진공펌프 ... (총 15개)`,
       'E팀 SEO메타태그', 512
     ),
   ]);
@@ -532,7 +550,7 @@ async function runETeam(draft, topicText, title, category, keywords) {
         content: draft,
         metaDesc: seoMeta,
         tags: seoTags,
-        category,
+        category: CATEGORY_DISPLAY[category] || category,
         status: 'DRAFT',
         sourceFile: `ai-pipeline-${new Date().toISOString().slice(0, 10)}`,
       },
@@ -591,7 +609,7 @@ function saveOutput({ topicText, category, draft, cDetail, seoTitle, seoMeta, se
     '# 스마텍 AI 파이프라인 결과 (v2 — 15 에이전트)',
     '',
     `## 주제: ${topicText}`,
-    `## 카테고리: ${category}`,
+    `## 카테고리: ${CATEGORY_DISPLAY[category] || category}`,
     `## 생성 시각: ${ts}`,
     postId ? `## 홈페이지 DRAFT ID: ${postId}` : '## 홈페이지 저장: 실패 (파일만 저장됨)',
     '',
@@ -654,7 +672,7 @@ async function main() {
   const emailData = loadEmailsByCategory(category);
 
   // B팀: 콘텐츠 작성 (직렬 B1→B2→B3)
-  let draft = await runBTeam(topicText, title, category, emailData);
+  let draft = await runBTeam(topicText, title, category, emailData, callTranscripts);
 
   // C팀: 품질 검수 (최대 2회, 1회 반려 시 재작성)
   let passed = false;
