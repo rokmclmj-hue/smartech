@@ -62,8 +62,8 @@ const BASE_MARGIN = 1.4;  // 기본수리 마진
 const EXTRA_MARGIN = 1.2; // 추가항목 마진
 
 const PHOTO_SLOTS = [
-  { key: "nameplate", label: "명판 사진",       required: true,  hint: "제품에 붙어있는 모델명 스티커" },
-  { key: "side",      label: "옆면 전체 사진",  required: true,  hint: "펌프 측면 전체가 보이도록" },
+  { key: "nameplate", label: "명판 사진",       required: true,  hint: "모델명 스티커 — AI 인식 필수" },
+  { key: "side",      label: "옆면 전체 사진",  required: false, hint: "있으면 인식 정확도 높아짐" },
   { key: "front",     label: "정면 사진",       required: false, hint: "선택 사항" },
   { key: "back",      label: "뒷면 사진",       required: false, hint: "선택 사항" },
   { key: "top",       label: "윗면 사진",       required: false, hint: "선택 사항" },
@@ -93,6 +93,8 @@ export default function RepairPage() {
   const [repairNo, setRepairNo] = useState("");
   const [selectedExtras, setSelectedExtras] = useState<SelectedExtra[]>([]);
   const [showPartsDetail, setShowPartsDetail] = useState(false);
+  const [modelSearch, setModelSearch] = useState("");
+  const [modelSearchFocus, setModelSearchFocus] = useState(false);
 
   // 사진 상태
   const [photos, setPhotos] = useState<Record<string, PhotoFile | null>>({
@@ -213,7 +215,7 @@ export default function RepairPage() {
     }
   }
 
-  const requiredPhotos = ["nameplate", "side"];
+  const requiredPhotos = ["nameplate"];
   const hasRequired = requiredPhotos.every((k) => photos[k] !== null);
   const photoCount = Object.values(photos).filter(Boolean).length;
 
@@ -260,7 +262,7 @@ export default function RepairPage() {
   // ── 렌더링 ─────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-paper text-ink">
-      <main className="max-w-5xl mx-auto px-6 py-12">
+      <main className="max-w-5xl mx-auto px-6 py-12 repair-no-print">
         {/* 타이틀 */}
         <div className="mb-12">
           <p className="mono text-[11px] tracking-widest text-dim mb-3">REPAIR · A/S · OVERHAUL</p>
@@ -376,6 +378,52 @@ export default function RepairPage() {
                   </div>
                 );
               })}
+            </div>
+
+            {/* 모델명 직접 검색 (사진 없는 경우) */}
+            <div className="mb-6 relative">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="flex-1 h-px bg-line" />
+                <span className="text-[11px] text-dim">또는 모델명으로 직접 검색</span>
+                <div className="flex-1 h-px bg-line" />
+              </div>
+              <input
+                type="text"
+                value={modelSearch}
+                onChange={(e) => setModelSearch(e.target.value)}
+                onFocus={() => setModelSearchFocus(true)}
+                onBlur={() => setTimeout(() => setModelSearchFocus(false), 150)}
+                placeholder="예: nXDS10i, RV8, E2M18, EH500..."
+                className="w-full border border-line px-4 py-3 text-[14px] focus:outline-none focus:border-ink bg-paper"
+              />
+              {/* 검색 결과 드롭다운 */}
+              {modelSearchFocus && modelSearch.length >= 2 && (() => {
+                const matched = kits.filter(k =>
+                  k.pumpModel.toLowerCase().includes(modelSearch.toLowerCase())
+                ).slice(0, 6);
+                if (matched.length === 0) return null;
+                return (
+                  <div className="absolute left-0 right-0 z-20 border border-ink bg-paper shadow-lg">
+                    {matched.map(k => (
+                      <button
+                        key={k.id}
+                        onMouseDown={() => {
+                          setField("pumpModel", k.pumpModel);
+                          setField("selectedKitId", k.id);
+                          setField("pumpFamily", k.pumpFamily);
+                          setModelSearch(k.pumpModel);
+                          setAiDone(true);
+                          setAiResult(null);
+                        }}
+                        className="w-full text-left px-4 py-3 text-[13px] hover:bg-ink hover:text-paper border-b border-line last:border-0 flex items-center justify-between"
+                      >
+                        <span className="font-medium">{k.pumpModel}</span>
+                        <span className="text-[11px] text-dim">{k.pumpFamily}</span>
+                      </button>
+                    ))}
+                  </div>
+                );
+              })()}
             </div>
 
             {/* AI 인식 버튼 / 결과 */}
@@ -748,9 +796,9 @@ export default function RepairPage() {
                   )}
                 </div>
                 <div className="flex flex-col gap-2 items-end">
-                  {selectedKit && selectedKit.parts.length > 0 && (
+                  {selectedKit && (
                     <button
-                      onClick={() => { setShowPartsDetail(true); setTimeout(() => window.print(), 100); }}
+                      onClick={() => window.print()}
                       className="flex items-center gap-2 px-4 py-2.5 border border-ink text-[12px] font-medium hover:bg-ink hover:text-paper transition-all"
                     >
                       <span>견적서 PDF</span>
@@ -921,13 +969,119 @@ export default function RepairPage() {
         )}
       </main>
 
-      <footer className="border-t border-line mt-20 py-8">
+      <footer className="border-t border-line mt-20 py-8 repair-no-print">
         <div className="max-w-5xl mx-auto px-6 flex flex-wrap items-center justify-between gap-4 text-[11px] text-dim mono">
           <span>SMARTECH VACUUM · SINCE 2011</span>
           <span>031-204-7170 · 경기도 화성시</span>
           <span>EDWARDS KOREA OFFICIAL</span>
         </div>
       </footer>
+
+      {/* ── PDF 인쇄 전용 영역 ── */}
+      <div className="repair-pdf-only">
+        <div style={{ background: "#111", color: "#f5f3ef", minHeight: "100vh", padding: "16mm 14mm", fontFamily: "monospace", fontSize: "11pt" }}>
+          {/* 헤더 */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "10mm", borderBottom: "1px solid #444", paddingBottom: "6mm" }}>
+            <div>
+              <div style={{ fontSize: "8pt", color: "#888", letterSpacing: "0.15em", marginBottom: 4 }}>REPAIR ESTIMATE · 수리 견적서</div>
+              <div style={{ fontSize: "22pt", fontWeight: 700, letterSpacing: "-0.02em" }}>SMARTECH</div>
+              <div style={{ fontSize: "8pt", color: "#888", marginTop: 2 }}>Edwards Vacuum Korea Authorized Service Partner</div>
+            </div>
+            <div style={{ textAlign: "right", fontSize: "9pt", color: "#aaa" }}>
+              <div>발행일: {new Date().toLocaleDateString("ko-KR")}</div>
+              <div>031-204-7170</div>
+              <div>경기도 화성시</div>
+            </div>
+          </div>
+
+          {/* 장비 정보 */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4mm", marginBottom: "8mm", padding: "5mm", border: "1px solid #333" }}>
+            <div>
+              <div style={{ fontSize: "7pt", color: "#888", marginBottom: 2 }}>EQUIPMENT</div>
+              <div style={{ fontSize: "14pt", fontWeight: 700 }}>{form.pumpMaker} {form.pumpModel || "모델 미확인"}</div>
+              {form.pumpSerial && <div style={{ fontSize: "9pt", color: "#aaa" }}>S/N · {form.pumpSerial}</div>}
+            </div>
+            <div>
+              <div style={{ fontSize: "7pt", color: "#888", marginBottom: 2 }}>CONTACT</div>
+              <div style={{ fontSize: "10pt" }}>{form.contactName}</div>
+              <div style={{ fontSize: "9pt", color: "#aaa" }}>{form.company && `${form.company} · `}{form.contactPhone}</div>
+            </div>
+          </div>
+
+          {/* 기본수리 */}
+          {selectedKit && (
+            <div style={{ marginBottom: "6mm" }}>
+              <div style={{ fontSize: "7pt", color: "#888", letterSpacing: "0.1em", marginBottom: "3mm" }}>BASE REPAIR · 기본수리 (필수)</div>
+              <div style={{ border: "1px solid #333", overflow: "hidden" }}>
+                <div style={{ background: "#1a1a1a", padding: "3mm 4mm", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontWeight: 600 }}>기본수리 소모품 교체 일체</span>
+                  <span style={{ fontSize: "13pt", fontWeight: 700 }}>₩ {baseCustomerPrice.toLocaleString("ko-KR")}</span>
+                </div>
+                {selectedKit.parts.map((p, i) => (
+                  <div key={p.id} style={{ display: "flex", alignItems: "center", gap: "3mm", padding: "2mm 4mm", borderTop: "1px solid #222", fontSize: "9pt" }}>
+                    <span style={{ color: "#666", width: "5mm", textAlign: "right", flexShrink: 0 }}>{i + 1}</span>
+                    <span style={{ flex: 1 }}>{p.name}</span>
+                    {p.quantity && <span style={{ color: "#888" }}>{p.quantity}</span>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 추가 선택 항목 */}
+          {selectedExtras.length > 0 && (
+            <div style={{ marginBottom: "8mm" }}>
+              <div style={{ fontSize: "7pt", color: "#888", letterSpacing: "0.1em", marginBottom: "3mm" }}>ADDITIONAL ITEMS · 추가 선택 항목</div>
+              <div style={{ border: "1px solid #333" }}>
+                {selectedExtras.map((e, i) => (
+                  <div key={e.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "3mm 4mm", borderTop: i > 0 ? "1px solid #222" : undefined, fontSize: "10pt" }}>
+                    <div>
+                      <span style={{ fontWeight: 600 }}>{e.category}</span>
+                      <span style={{ color: "#aaa", marginLeft: "2mm", fontSize: "9pt" }}>{e.name}</span>
+                    </div>
+                    <span>₩ {Math.round(e.costPrice * EXTRA_MARGIN).toLocaleString("ko-KR")}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 합계 */}
+          <div style={{ border: "1px solid #555", padding: "5mm 6mm", marginBottom: "8mm" }}>
+            {selectedKit && (
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "9pt", color: "#aaa", marginBottom: "2mm" }}>
+                <span>기본수리</span><span>₩ {baseCustomerPrice.toLocaleString("ko-KR")}</span>
+              </div>
+            )}
+            {selectedExtras.length > 0 && (
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "9pt", color: "#aaa", marginBottom: "3mm" }}>
+                <span>추가항목 합계</span><span>₩ {extraCustomerTotal.toLocaleString("ko-KR")}</span>
+              </div>
+            )}
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "14pt", fontWeight: 700, borderTop: "1px solid #444", paddingTop: "3mm" }}>
+              <span>합계 (VAT 별도)</span>
+              <span>₩ {totalCustomerPrice.toLocaleString("ko-KR")}</span>
+            </div>
+          </div>
+
+          {/* 안내 */}
+          <div style={{ fontSize: "8pt", color: "#666", lineHeight: 1.8 }}>
+            <div>※ 본 견적서는 참고용이며, 분해 검사 후 정확한 금액이 확정됩니다.</div>
+            <div>※ VAT(10%) 별도 · 수리 완료 후 세금계산서 발행</div>
+            <div>※ 문의: 031-204-7170 · 스마텍 서비스센터</div>
+          </div>
+        </div>
+      </div>
+
+      <style>{`
+        .repair-pdf-only { display: none; }
+        @media print {
+          .repair-no-print, main, header, nav { display: none !important; }
+          .repair-pdf-only { display: block !important; }
+          body { background: #111 !important; margin: 0; padding: 0; }
+          @page { margin: 0; size: A4; }
+        }
+      `}</style>
     </div>
   );
 }
