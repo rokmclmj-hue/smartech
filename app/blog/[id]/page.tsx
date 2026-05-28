@@ -206,45 +206,80 @@ export default async function BlogPostPage({ params }: Props) {
           )}
         </header>
 
-        {/* 상단 사진 */}
-        {postPhotos[0] && (
-          <div className="mb-8 border-t hair pt-8">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={`/api/photos?serve=${encodeURIComponent(postPhotos[0])}`}
-              alt="현장 사진"
-              className="w-full object-cover max-h-[420px]"
-            />
-          </div>
-        )}
+        {/* 본문 — 사진을 실제 위치에 삽입 */}
+        <article className="border-t hair pt-8">
+          {/* 상단 사진 (글 시작 바로 아래) */}
+          {postPhotos[0] && (
+            <div className="mb-8">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={`/api/photos?serve=${encodeURIComponent(postPhotos[0])}`}
+                alt="현장 사진" className="w-full object-cover max-h-[420px]" />
+            </div>
+          )}
 
-        {/* 본문 */}
-        <article className={postPhotos[0] ? "pt-0" : "border-t hair pt-8"}>
-          {renderMarkdown(post.content)}
+          {/* 본문 앞부분 (첫 번째 ~ 두 번째 ## 소제목 전까지) */}
+          {renderMarkdown((() => {
+            if (!postPhotos[1] && !postPhotos[2]) return post.content;
+            const lines = post.content.split('\n');
+            let h2 = 0;
+            for (let i = 0; i < lines.length; i++) {
+              if (lines[i].startsWith('## ')) h2++;
+              if (h2 === 2) return lines.slice(0, i).join('\n');
+            }
+            return lines.slice(0, Math.floor(lines.length / 2)).join('\n');
+          })())}
 
-          {/* 중간 사진 — 본문 끝 1/3 지점에 삽입 */}
+          {/* 중간 사진 (두 번째 소제목 앞) */}
           {postPhotos[1] && (
             <div className="my-8">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={`/api/photos?serve=${encodeURIComponent(postPhotos[1])}`}
-                alt="현장 사진"
-                className="w-full object-cover max-h-[360px]"
-              />
+              <img src={`/api/photos?serve=${encodeURIComponent(postPhotos[1])}`}
+                alt="현장 사진" className="w-full object-cover max-h-[380px]" />
             </div>
           )}
 
-          {/* 하단 사진 */}
+          {/* 본문 뒷부분 */}
+          {(postPhotos[1] || postPhotos[2]) && renderMarkdown((() => {
+            const lines = post.content.split('\n');
+            let h2 = 0;
+            for (let i = 0; i < lines.length; i++) {
+              if (lines[i].startsWith('## ')) h2++;
+              if (h2 === 2) {
+                const rest = lines.slice(i);
+                if (!postPhotos[2]) return rest.join('\n');
+                // 하단 사진을 마지막 ## 앞에 삽입
+                let lastH2 = rest.length - 1;
+                for (let j = rest.length - 1; j >= 0; j--) {
+                  if (rest[j].startsWith('## ')) { lastH2 = j; break; }
+                }
+                return rest.slice(0, lastH2).join('\n');
+              }
+            }
+            return '';
+          })())}
+
+          {/* 하단 사진 (마지막 소제목 앞) */}
           {postPhotos[2] && (
-            <div className="mt-8 mb-4">
+            <div className="my-8">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={`/api/photos?serve=${encodeURIComponent(postPhotos[2])}`}
-                alt="현장 사진"
-                className="w-full object-cover max-h-[360px]"
-              />
+              <img src={`/api/photos?serve=${encodeURIComponent(postPhotos[2])}`}
+                alt="현장 사진" className="w-full object-cover max-h-[380px]" />
             </div>
           )}
+
+          {/* 본문 맨 끝부분 (마지막 소제목 이후) */}
+          {postPhotos[2] && renderMarkdown((() => {
+            const lines = post.content.split('\n');
+            let h2 = 0, split2 = 0;
+            for (let i = 0; i < lines.length; i++) {
+              if (lines[i].startsWith('## ')) { h2++; if (h2 === 2) split2 = i; }
+            }
+            const rest = lines.slice(split2);
+            for (let j = rest.length - 1; j >= 0; j--) {
+              if (rest[j].startsWith('## ')) return rest.slice(j).join('\n');
+            }
+            return '';
+          })())}
         </article>
 
         {/* 태그 */}
