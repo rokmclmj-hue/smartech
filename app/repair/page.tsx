@@ -60,8 +60,14 @@ const SYMPTOMS = [
 ];
 
 const STEPS = ["사진 업로드", "증상 입력", "수리 견적", "접수 완료"];
-const BASE_MARGIN = 1.4;  // 기본수리 마진
 const EXTRA_MARGIN = 1.2; // 추가항목 마진
+
+// 모델별 기본수리 마진 (nXDS·XDS35 계열 1.5, 그 외 1.8)
+function getBaseMargin(pumpModel: string): number {
+  const m = pumpModel.toLowerCase();
+  if (m.startsWith("nxds") || m.startsWith("xds35")) return 1.5;
+  return 1.8;
+}
 
 const PHOTO_SLOTS = [
   { key: "nameplate", label: "명판 사진",       required: true,  hint: "모델명 스티커 — AI 인식 필수" },
@@ -164,7 +170,8 @@ export default function RepairPage() {
     );
   }
 
-  const baseCustomerPrice = selectedKit ? Math.round(selectedKit.basePrice * BASE_MARGIN) : 0;
+  const baseMargin = getBaseMargin(form.pumpModel);
+  const baseCustomerPrice = selectedKit ? Math.round(selectedKit.basePrice * baseMargin) : 0;
   const extraCustomerTotal = selectedExtras.reduce(
     (sum, e) => sum + Math.round(e.costPrice * EXTRA_MARGIN), 0
   );
