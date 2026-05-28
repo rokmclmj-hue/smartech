@@ -1,7 +1,16 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["bcryptjs", "@prisma/client", "prisma"],
+  serverExternalPackages: ["bcryptjs", "@prisma/client", "prisma", "xlsx", "sharp"],
+  outputFileTracingExcludes: {
+    "*": [
+      "./data/**",
+      "./blog-agents/**",
+      "./smartech-cad/**",
+      "./scripts/**",
+      "./public/catalogs/**",
+    ],
+  },
   // Allow Cloudflare Tunnel (and any *.trycloudflare.com quick tunnels) to
   // reach dev-only resources like /_next/webpack-hmr, /__nextjs_font/*, etc.
   // Without this, the browser loading from the tunnel never receives client
