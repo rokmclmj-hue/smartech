@@ -175,22 +175,24 @@ function unitToMbar(val: number, unit: PressureUnit): number {
 
 function fmtPressure(mbar: number, unit: PressureUnit): string {
   const val = mbarToUnit(mbar, unit);
-  if (val >= 0.1) return `${+val.toPrecision(3)} ${unit}`;
-  const exp  = Math.floor(Math.log10(val));
-  const coef = val / Math.pow(10, exp);
-  if (Math.abs(coef - 1) < 0.05) return `10⁻${Math.abs(exp)} ${unit}`;
-  return `${coef.toFixed(1)}×10⁻${Math.abs(exp)} ${unit}`;
+  if (val === 0) return `0 ${unit}`;
+  if (val >= 0.001) return `${+val.toPrecision(3)} ${unit}`;
+  const decimals = Math.abs(Math.floor(Math.log10(val))) + 1;
+  const trimmed = val.toFixed(decimals + 1)
+    .replace(/(\.\d*[1-9])0+$/, '$1')
+    .replace(/\.0*$/, '');
+  return `${trimmed} ${unit}`;
 }
 
 // 압력 선택지 값은 항상 mbar 기준 내부값 — 라벨만 단위에 따라 동적 생성
-const TARGET_P_VALUES_MBAR = ["100","10","1","0.1","0.01","0.001","0.0001","0.00001","0.000001","0.0000001"];
+const TARGET_P_VALUES_MBAR = ["10","1","0.1","0.01","0.001","0.0001","0.00001","0.000001","0.0000001"];
 const TMP_TARGET_P_VALUES_MBAR = ["0.001","0.0001","0.00001","0.000001","0.0000001"];
 
 function getTargetPOptions(unit: PressureUnit) {
-  return TARGET_P_VALUES_MBAR.map((v) => ({
-    label: fmtPressure(parseFloat(v), unit),
+  return TARGET_P_VALUES_MBAR.map((v, i) => ({
+    label: fmtPressure(parseFloat(v), unit) + (i === TARGET_P_VALUES_MBAR.length - 1 ? ' (Max)' : ''),
     value: v,
-  })).concat([{ label: "기타", value: "기타" }]);
+  })).concat([{ label: '직접입력', value: '기타' }]);
 }
 
 function getTmpTargetPOptions(unit: PressureUnit) {
@@ -289,6 +291,7 @@ export default function PumpSelector() {
   const [panelItem, setPanelItem]       = useState<PanelItem | null>(null);
 
   const [results, setResults] = useState<PumpDownResult[] | null>(null);
+  const [calcTargetMbar, setCalcTargetMbar] = useState<number | null>(null);
   const [calcError, setCalcError] = useState("");
   const [isCalc, setIsCalc] = useState(false);
 
@@ -359,6 +362,7 @@ export default function PumpSelector() {
           seriesFilter
         );
         setResults(res);
+        setCalcTargetMbar(target);
       } catch {
         setCalcError("계산 중 오류가 발생했습니다.");
       } finally {
@@ -927,7 +931,7 @@ export default function PumpSelector() {
 
               {/* 사용공정 */}
               <div>
-                <label className="text-[10px] mono text-[#6A6660] uppercase tracking-wider">사용공정</label>
+                <label className="text-[10px] mono text-ink font-medium uppercase tracking-wider">사용공정</label>
                 <select
                   value={form.process}
                   onChange={(e) => setForm({ ...form, process: e.target.value })}
@@ -1061,31 +1065,31 @@ export default function PumpSelector() {
               {/* 챔버볼륨 + 목표압력 (같은 행) */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[10px] mono text-[#6A6660] uppercase tracking-wider">
+                  <label className="text-[10px] mono text-ink font-medium uppercase tracking-wider">
                     챔버볼륨 (L) <span className="text-[#c00020]">*</span>
                   </label>
                   <select
                     value={form.chamberVol}
                     onChange={(e) => { setForm({ ...form, chamberVol: e.target.value }); if (e.target.value !== "기타") setChamberVolCustom(""); }}
-                    className="mt-1 w-full border border-[#E3DFD6] px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-transparent"
+                    className={`mt-1 w-full border border-[#E3DFD6] px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-transparent${form.chamberVol === "기타" ? " text-[#9A9590]" : ""}`}
                   >
                     <option value="">선택</option>
-                    <option value="1">1L</option>
-                    {Array.from({ length: 40 }, (_, i) => `${(i + 1) * 5}`).map((v) => (
-                      <option key={v} value={v}>{v}L</option>
+                    {["1","10","100","1000","3000","5000","10000","20000","30000","50000"].map((v) => (
+                      <option key={v} value={v}>{Number(v).toLocaleString()}L</option>
                     ))}
-                    <option value="기타">기타</option>
+                    <option value="60000">60,000L (Max)</option>
+                    <option value="기타">직접입력</option>
                   </select>
                   {form.chamberVol === "기타" && (
                     <input type="text" placeholder="직접 입력 (L)"
                       value={chamberVolCustom} onChange={(e) => setChamberVolCustom(e.target.value)}
-                      className="mt-1.5 w-full border border-[#E3DFD6] px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-transparent"
+                      className="mt-1.5 w-full border border-ink px-3 py-2 text-[13px] text-ink focus:outline-none bg-transparent"
                     />
                   )}
                 </div>
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="text-[10px] mono text-[#6A6660] uppercase tracking-wider">
+                    <label className="text-[10px] mono text-ink font-medium uppercase tracking-wider">
                       목표 도달압력 <span className="text-[#c00020]">*</span>
                     </label>
                     <div className="flex gap-1">
@@ -1100,7 +1104,7 @@ export default function PumpSelector() {
                   <select
                     value={targetP}
                     onChange={(e) => { setTargetP(e.target.value); if (e.target.value !== "기타") setTargetPCustom(""); }}
-                    className="w-full border border-[#E3DFD6] px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-transparent"
+                    className={`w-full border border-[#E3DFD6] px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-transparent${targetP === "기타" ? " text-[#9A9590]" : ""}`}
                   >
                     <option value="">선택</option>
                     {getTargetPOptions(pressureUnit).map((o) => (
@@ -1110,7 +1114,7 @@ export default function PumpSelector() {
                   {targetP === "기타" && (
                     <input type="text" placeholder={`직접 입력 (${pressureUnit})`}
                       value={targetPCustom} onChange={(e) => setTargetPCustom(e.target.value)}
-                      className="mt-1.5 w-full border border-[#E3DFD6] px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-transparent"
+                      className="mt-1.5 w-full border border-ink px-3 py-2 text-[13px] text-ink focus:outline-none bg-transparent"
                     />
                   )}
                 </div>
@@ -1120,7 +1124,7 @@ export default function PumpSelector() {
               {pumpL1 !== "터보펌프" ? (
                 <div className="grid grid-cols-3 gap-3">
                   <div>
-                    <label className="text-[10px] mono text-[#6A6660] uppercase tracking-wider">
+                    <label className="text-[10px] mono text-ink font-medium uppercase tracking-wider">
                       배관규격 <span className="text-[#c00020]">*</span>
                     </label>
                     <select
@@ -1129,7 +1133,8 @@ export default function PumpSelector() {
                       className="mt-1 w-full border border-[#E3DFD6] px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-transparent"
                     >
                       <option value="">선택</option>
-                      {PIPE_SPEC_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
+                      {PIPE_SPEC_OPTIONS.filter(o => o !== "기타").map((o) => <option key={o} value={o}>{o}</option>)}
+                      <option value="기타">직접입력</option>
                     </select>
                     {form.pipeSpec === "기타" && (
                       <input type="text" placeholder="내경 mm"
@@ -1139,7 +1144,7 @@ export default function PumpSelector() {
                     )}
                   </div>
                   <div>
-                    <label className="text-[10px] mono text-[#6A6660] uppercase tracking-wider">
+                    <label className="text-[10px] mono text-ink font-medium uppercase tracking-wider">
                       배관길이 (m) <span className="text-[#c00020]">*</span>
                     </label>
                     <select
@@ -1151,7 +1156,7 @@ export default function PumpSelector() {
                       {["1","2","3","4","5","6","7","8","9","10"].map((v) => (
                         <option key={v} value={v}>{v}m</option>
                       ))}
-                      <option value="기타">기타</option>
+                      <option value="기타">직접입력</option>
                     </select>
                     {form.pipeLen === "기타" && (
                       <input type="text" placeholder="직접 입력 (m)"
@@ -1161,7 +1166,7 @@ export default function PumpSelector() {
                     )}
                   </div>
                   <div>
-                    <label className="text-[10px] mono text-[#6A6660] uppercase tracking-wider">꺾임 (회)</label>
+                    <label className="text-[10px] mono text-ink font-medium uppercase tracking-wider">꺾임 (회)</label>
                     <select
                       value={form.bends}
                       onChange={(e) => { setForm({ ...form, bends: e.target.value }); if (e.target.value !== "기타") setBendsCustom(""); }}
@@ -1171,7 +1176,7 @@ export default function PumpSelector() {
                       {["1","2","3","4","5"].map((v) => (
                         <option key={v} value={v}>{v}회</option>
                       ))}
-                      <option value="기타">기타</option>
+                      <option value="기타">직접입력</option>
                     </select>
                     {form.bends === "기타" && (
                       <input type="text" placeholder="직접 입력"
@@ -1342,7 +1347,7 @@ export default function PumpSelector() {
                       <span className="text-[11px] font-semibold mono uppercase tracking-wider">계산 결과</span>
                       <span className="ml-3 text-[10px] text-[#6A6660]">
                         목표 {fmtPressure(parseFloat(targetP === "기타" ? String(unitToMbar(parseFloat(targetPCustom), pressureUnit)) : targetP), pressureUnit)}
-                        {" · "}{form.chamberVol === "기타" ? chamberVolCustom : form.chamberVol}L
+                        {" · "}{Number(form.chamberVol === "기타" ? chamberVolCustom : form.chamberVol).toLocaleString()}L
                         {" · "}{form.pipeSpec === "기타" ? pipeSpecCustom : form.pipeSpec}
                         {" "}{form.pipeLen === "기타" ? pipeLenCustom : form.pipeLen}m
                       </span>
@@ -1352,7 +1357,7 @@ export default function PumpSelector() {
                       <div className="text-right">
                         <div className="text-[10px] font-semibold text-[#6A6660] uppercase tracking-wider">처리량</div>
                         <div className="text-[10px] text-[#6A6660]">
-                          @ {fmtPressure(parseFloat(targetP === "기타" ? String(unitToMbar(parseFloat(targetPCustom), pressureUnit)) : targetP), pressureUnit)}
+                          @ {calcTargetMbar != null ? fmtPressure(calcTargetMbar, pressureUnit) : ""}
                         </div>
                       </div>
                       {/* 구분선 */}
@@ -1379,10 +1384,7 @@ export default function PumpSelector() {
                   ) : (
                     <div className="divide-y divide-[#E3DFD6]">
                       {results.map((r, i) => {
-                        const targetMbar = targetP === "기타"
-                          ? unitToMbar(parseFloat(targetPCustom), pressureUnit)
-                          : parseFloat(targetP);
-                        const throughput = calcThroughputSlm(r.effectiveSpeed_m3h, targetMbar);
+                        const throughput = calcThroughputSlm(r.effectiveSpeed_m3h, calcTargetMbar ?? 0);
                         return (
                           <div key={r.model}
                             className={`flex items-center px-4 py-3 gap-3 ${i === 0 ? "bg-[#F6F4EF]" : "hover:bg-[#faf9f6]"} transition-colors`}

@@ -23,6 +23,8 @@ export type PumpModel = {
   speedCurve?: [number, number][];
   /** PumpCalc 보정계수: ODE 계산 결과에 곱해 PumpCalc 실측값에 맞춤 (미지정 시 1.0) */
   pumpCalcFactor?: number;
+  /** 챔버 부피 의존형 PumpCalc 보정: [{vol, k},...] — vol 오름차순, k = PumpCalc_time/ODE_time */
+  pumpCalcKV?: { vol: number; k: number }[];
 };
 
 export type TurboModel = {
@@ -633,7 +635,15 @@ const GXS_GXB: PumpModel[] = [
       [0.1521,666.53],[0.0754,520.19],[0.0385,436.73],[0.0187,401.18],
       [0.0095,385.86],[0.0048,348.4],[0.0024,246.53],[0.0012,33.7],[0.005,0.0],
     ],
-    pumpCalcFactor: 1.052, // PumpCalc 244s / 코드 232s (GXB VFD 저주파 보정)
+    pumpCalcFactor: 1.052, // 하위 호환 유지 (pumpCalcKV 없는 경로용)
+    pumpCalcKV: [
+      { vol: 1000,  k: 1.0115 },
+      { vol: 3000,  k: 1.0862 },
+      { vol: 10000, k: 1.1001 },
+      { vol: 20000, k: 1.0370 },
+      { vol: 30000, k: 0.9663 },
+      { vol: 40000, k: 0.8698 },
+    ],
   },
   {
     model:"GXS250/2600", series:"GXS+GXB", type:"dry_screw",
@@ -646,7 +656,16 @@ const GXS_GXB: PumpModel[] = [
       [0.1381,1120.12],[0.0694,859.68],[0.035,670.73],[0.0176,585.65],
       [0.009,556.45],[0.0045,513.06],[0.0022,378.24],[0.0011,36.12],[0.005,0.0],
     ],
-    pumpCalcFactor: 1.047, // PumpCalc 378s / 코드 361s (GXB VFD 저주파 보정)
+    pumpCalcFactor: 1.047,
+    pumpCalcKV: [
+      { vol: 1000,  k: 1.0320 },
+      { vol: 3000,  k: 1.0934 },
+      { vol: 10000, k: 1.1033 },
+      { vol: 20000, k: 1.0638 },
+      { vol: 30000, k: 1.0216 },
+      { vol: 40000, k: 0.9914 },
+      { vol: 50000, k: 0.9375 },
+    ],
   },
   {
     model:"GXS450/2600", series:"GXS+GXB", type:"dry_screw",
@@ -659,7 +678,16 @@ const GXS_GXB: PumpModel[] = [
       [0.0977,1545.98],[0.0517,1305.03],[0.0276,1028.74],[0.0145,798.14],
       [0.0074,659.59],[0.0039,562.03],[0.0021,386.82],[0.0011,36.19],[0.005,0.0],
     ],
-    pumpCalcFactor: 1.068, // PumpCalc 426s / 코드 399s (GXB VFD 저주파 보정)
+    pumpCalcFactor: 1.068,
+    pumpCalcKV: [
+      { vol: 1000,  k: 0.9780 },
+      { vol: 3000,  k: 0.9849 },
+      { vol: 10000, k: 1.0367 },
+      { vol: 20000, k: 1.0574 },
+      { vol: 30000, k: 1.0406 },
+      { vol: 40000, k: 1.0302 },
+      { vol: 50000, k: 1.0196 },
+    ],
   },
   {
     model:"GXS450/4200", series:"GXS+GXB", type:"dry_screw",
@@ -672,7 +700,16 @@ const GXS_GXB: PumpModel[] = [
       [0.076,1994.26],[0.0427,1833.48],[0.0229,1537.63],[0.0124,1148.08],
       [0.0067,832.88],[0.0035,649.36],[0.0019,434.69],[0.001,38.11],[0.005,0.0],
     ],
-    pumpCalcFactor: 1.113, // PumpCalc 423s / 코드 380s (GXB VFD 저주파 보정)
+    pumpCalcFactor: 1.113,
+    pumpCalcKV: [
+      { vol: 1000,  k: 1.1271 },
+      { vol: 3000,  k: 1.1109 },
+      { vol: 10000, k: 1.1782 },
+      { vol: 20000, k: 1.1687 },
+      { vol: 30000, k: 1.1570 },
+      { vol: 40000, k: 1.1221 },
+      { vol: 50000, k: 1.1082 },
+    ],
   },
   {
     model:"GXS750/2600", series:"GXS+GXB", type:"dry_screw",
@@ -688,7 +725,18 @@ const GXS_GXB: PumpModel[] = [
       [0.667,2142.7],[0.267,2026.7],[0.133,1922.9],[0.093,1859.9],[0.073,1811.5],
       [0.005,0.0],
     ],
-    pumpCalcFactor: 1.195, // PumpCalc 477s / 코드 399s (GXB VFD 저주파 보정)
+    pumpCalcFactor: 1.195,
+    // GXS750/2600: 속도 곡선이 고압 구간(>400mbar)을 커버하지 못해 ODE가 크게 과대 계산됨.
+    // k(V) 로 전 구간 보정. 기저 속도 곡선 개선은 별도 과제.
+    pumpCalcKV: [
+      { vol: 1000,  k: 0.1925 },
+      { vol: 3000,  k: 0.1970 },
+      { vol: 10000, k: 0.1747 },
+      { vol: 20000, k: 0.2391 },
+      { vol: 30000, k: 0.2795 },
+      { vol: 40000, k: 0.3075 },
+      { vol: 50000, k: 0.3289 },
+    ],
   },
   {
     model:"GXS750/4200", series:"GXS+GXB", type:"dry_screw",
@@ -701,7 +749,17 @@ const GXS_GXB: PumpModel[] = [
       [0.0672,2426.0],[0.0376,2241.75],[0.0199,1909.54],[0.011,1478.58],
       [0.0062,1095.04],[0.0035,795.78],[0.0019,493.9],[0.001,38.33],[0.005,0.0],
     ],
-    pumpCalcFactor: 1.132, // PumpCalc 590s / 코드 521s (GXB VFD 저주파 보정)
+    pumpCalcFactor: 1.132,
+    pumpCalcKV: [
+      { vol: 1000,  k: 1.2738 },
+      { vol: 3000,  k: 1.2322 },
+      { vol: 10000, k: 1.2719 },
+      { vol: 20000, k: 1.2519 },
+      { vol: 30000, k: 1.2364 },
+      { vol: 40000, k: 1.2038 },
+      { vol: 50000, k: 1.1910 },
+      { vol: 60000, k: 1.1706 },
+    ],
   },
 ];
 
@@ -1243,6 +1301,19 @@ function solvePumpInlet(
   return (lo + hi) / 2;
 }
 
+function interpolateKV(kv: { vol: number; k: number }[], vol_L: number): number {
+  if (!kv || kv.length === 0) return 1.0;
+  if (vol_L <= kv[0].vol) return kv[0].k;
+  if (vol_L >= kv[kv.length - 1].vol) return kv[kv.length - 1].k;
+  for (let i = 1; i < kv.length; i++) {
+    if (vol_L <= kv[i].vol) {
+      const t = (vol_L - kv[i - 1].vol) / (kv[i].vol - kv[i - 1].vol);
+      return kv[i - 1].k + t * (kv[i].k - kv[i - 1].k);
+    }
+  }
+  return kv[kv.length - 1].k;
+}
+
 /** speedCurve 기반 ODE 수치 적분 (Edwards PumpCalc 동등) */
 function calcPumpDownNumerical(input: PumpDownInput, pump: PumpModel): PumpDownResult {
   const {
@@ -1300,7 +1371,10 @@ function calcPumpDownNumerical(input: PumpDownInput, pump: PumpModel): PumpDownR
   const C_nom    = pipeConductance_m3h(pipeID_mm, pipeLength_m, pipeBends, 1.0);
   const S_eff_nom = S_nom > 0 && C_nom > 0 ? 1 / (1 / S_nom + 1 / C_nom) : S_nom;
 
-  const corrected_t_s = t_s * (pump.pumpCalcFactor ?? 1.0);
+  const kFactor = pump.pumpCalcKV
+    ? interpolateKV(pump.pumpCalcKV, chamberVol_L)
+    : (pump.pumpCalcFactor ?? 1.0);
+  const corrected_t_s = t_s * kFactor;
 
   return {
     model: pump.model,
