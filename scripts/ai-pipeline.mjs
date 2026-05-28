@@ -203,7 +203,9 @@ async function callAgent(system, user, label, maxTokens = 1024) {
 
 const BRAND_RULES = `[필수 규칙]
 - 분량: 900~1300자 (공백 포함)
-- 첫 문장: 고객이 주어. "많이들 문의하시는~", "주로 문의하시는~" 형태로 시작
+- 첫 줄: 이메일 소제목처럼 단독 표제 행으로 시작. 별표(*) 또는 괄호로 모델명·지역·업무유형을 간결하게 표현.
+  예) * RV 수리 * / * nXDS15i 납품(수원) * / 현장조치 (E2M0.7_안산) / * EH500 오버홀 *
+  표제는 단독 줄에 쓰고, 다음 줄부터 본문 시작. "많이들 문의하시는~" 같은 套型 금지.
 - 실제 모델명(iXH, EXS, nXDS 등), 구체적 수치(납기 주수 등) 반드시 포함
 - 소제목(##)으로 구조화
 
@@ -466,6 +468,81 @@ ${draft}
 // D팀: 비주얼
 // ===========================
 
+// 카테고리별 우선 사진 폴더 매핑
+const PHOTO_FOLDER_MAP = {
+  '수리문의':   ['04_수리정비', '01_장비외관'],
+  '견적문의':   ['02_납품출고', '01_장비외관'],
+  '기술문의':   ['01_장비외관', '06_비교도식'],
+  '단종문의':   ['01_장비외관', '06_비교도식'],
+  '일반':       ['07_기타',     '01_장비외관'],
+};
+
+// D1: 현장 사진 선정 (3장 — 상단·중간·하단)
+function runD1(category) {
+  const photoBase = path.join(root, 'data', '현장사진');
+  const folders = PHOTO_FOLDER_MAP[category] || ['01_장비외관'];
+  const exts = /\.(jpg|jpeg|png|webp)$/i;
+
+  let pool = [];
+  for (const folder of folders) {
+    try {
+      const files = fs.readdirSync(path.join(photoBase, folder))
+        .filter(f => exts.test(f))
+        .map(f => `${folder}/${f}`);
+      pool.push(...files);
+    } catch {}
+  }
+
+  if (pool.length === 0) return null;
+
+  // 무작위 3장 선정 (중복 없이)
+  const shuffled = pool.sort(() => Math.random() - 0.5);
+  const [top, mid, end] = shuffled;
+  return { top: top || null, mid: mid || null, end: end || null };
+}
+
+// 글 본문에 사진 자리표시자 삽입 (네이버 권장 배치)
+function insertPhotoPlaceholders(draft, photos) {
+  if (!photos) return draft;
+  const lines = draft.split('\n');
+
+  // 상단: 첫 번째 ## 소제목 바로 앞
+  let topIdx = lines.findIndex(l => l.startsWith('## '));
+  if (topIdx < 0) topIdx = 1;
+
+  // 중간: 두 번째 ## 소제목 바로 뒤
+  let h2count = 0;
+  let midIdx = -1;
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].startsWith('## ')) {
+      h2count++;
+      if (h2count === 2) { midIdx = i + 1; break; }
+    }
+  }
+  if (midIdx < 0) midIdx = Math.floor(lines.length / 2);
+
+  // 하단: 마지막 소제목 뒤, 끝에서 4번째 줄
+  let endIdx = lines.length - 4;
+  for (let i = lines.length - 1; i >= 0; i--) {
+    if (lines[i].startsWith('## ')) { endIdx = i + 1; break; }
+  }
+
+  const tag = (rel) => `\n[PHOTO: ${rel}]\n`;
+
+  // 뒤에서부터 삽입 (인덱스 밀림 방지)
+  const sorted = [
+    { idx: endIdx, tag: tag(photos.end || photos.top) },
+    { idx: midIdx, tag: tag(photos.mid || photos.top) },
+    { idx: topIdx, tag: tag(photos.top) },
+  ].filter(x => x.tag.includes('null') === false)
+   .sort((a, b) => b.idx - a.idx);
+
+  for (const { idx, tag: t } of sorted) {
+    lines.splice(idx, 0, t);
+  }
+  return lines.join('\n');
+}
+
 async function runD2(draft, topicText) {
   return await callAgent(
     `당신은 스마텍 D2 다이어그램 디자이너입니다. 블로그 글에 가장 적합한 시각 자료를 생성합니다.
@@ -598,7 +675,7 @@ function saveEscalation(draft, feedback, topicText) {
 // 결과물 저장
 // ===========================
 
-function saveOutput({ topicText, category, draft, cDetail, seoTitle, seoMeta, seoTags, naverContent, postId }) {
+function saveOutput({ topicText, category, draft, cDetail, seoTitle, seoMeta, seoTags, naverContent, postId, photos }) {
   const outputDir = path.join(root, 'data', '콘텐츠');
   if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
 
@@ -612,6 +689,10 @@ function saveOutput({ topicText, category, draft, cDetail, seoTitle, seoMeta, se
     `## 카테고리: ${CATEGORY_DISPLAY[category] || category}`,
     `## 생성 시각: ${ts}`,
     postId ? `## 홈페이지 DRAFT ID: ${postId}` : '## 홈페이지 저장: 실패 (파일만 저장됨)',
+    '',
+    photos ? `## 사진_상단: ${photos.top || ''}` : '',
+    photos ? `## 사진_중간: ${photos.mid || ''}` : '',
+    photos ? `## 사진_하단: ${photos.end || ''}` : '',
     '',
     '---',
     '',
@@ -704,9 +785,23 @@ async function main() {
     return;
   }
 
-  // D팀: 다이어그램 생성
+  // D1: 현장 사진 선정
+  console.log('\n📷 D1 사진 선정 중...');
+  const photos = runD1(category);
+  if (photos) {
+    console.log(`  상단: ${photos.top}`);
+    console.log(`  중간: ${photos.mid}`);
+    console.log(`  하단: ${photos.end}`);
+  } else {
+    console.log('  (해당 카테고리 사진 없음)');
+  }
+
+  // D2: 다이어그램 생성
   const diagram = await runD2(draft, topicText);
-  const draftWithDiagram = insertDiagram(draft, diagram);
+  let draftWithDiagram = insertDiagram(draft, diagram);
+
+  // D1 사진 자리표시자 삽입
+  draftWithDiagram = insertPhotoPlaceholders(draftWithDiagram, photos);
 
   // E팀: SEO + 홈페이지 DRAFT + 네이버 버전
   const eResult = await runETeam(draftWithDiagram, topicText, title, category, keywords);
@@ -716,6 +811,7 @@ async function main() {
     topicText, category,
     draft: draftWithDiagram,
     cDetail,
+    photos,
     ...eResult,
   });
 

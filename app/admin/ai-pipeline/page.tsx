@@ -16,6 +16,9 @@ type PostDetail = PostSummary & {
   tags: string;
   finalContent: string;
   naverContent: string;
+  photoTop: string;
+  photoMid: string;
+  photoEnd: string;
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -35,6 +38,10 @@ export default function AiPipelinePage() {
   const [publishing, setPublishing] = useState(false);
   const [publishedIds, setPublishedIds] = useState<Set<string>>(new Set());
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
+  // 사진 관련
+  const [photos, setPhotos] = useState<{ top: string; mid: string; end: string }>({ top: "", mid: "", end: "" });
+  const [folderFiles, setFolderFiles] = useState<string[]>([]);
+  const [photoPickSlot, setPhotoPickSlot] = useState<"top" | "mid" | "end" | null>(null);
 
   const showToast = (msg: string, ok: boolean) => {
     setToast({ msg, ok });
@@ -63,9 +70,18 @@ export default function AiPipelinePage() {
       if (!res.ok) throw new Error();
       const data = await res.json();
       setSelected(data);
+      setPhotos({ top: data.photoTop || "", mid: data.photoMid || "", end: data.photoEnd || "" });
+      setPhotoPickSlot(null);
     } finally {
       setDetailLoading(false);
     }
+  };
+
+  // 폴더 내 사진 목록 로드
+  const loadFolderPhotos = async (folder: string) => {
+    const res = await fetch(`/api/admin/photos?folder=${encodeURIComponent(folder)}`);
+    const data = await res.json();
+    setFolderFiles(data.files || []);
   };
 
   const handlePublish = async () => {
@@ -280,6 +296,77 @@ export default function AiPipelinePage() {
                     <p className="text-[13px] text-red-700">{selected.rejectionReason}</p>
                   </div>
                 )}
+
+                {/* D1 사진 선택 패널 */}
+                <div className="border hair p-4 space-y-3">
+                  <div className="mono text-[9px] tracking-[0.18em] dim uppercase">D1 사진 선택 (네이버 배치: 상단·중간·하단)</div>
+                  <div className="grid grid-cols-3 gap-3">
+                    {(["top", "mid", "end"] as const).map((slot) => {
+                      const label = slot === "top" ? "상단" : slot === "mid" ? "중간" : "하단";
+                      const rel = photos[slot];
+                      return (
+                        <div key={slot} className="space-y-1.5">
+                          <div className="mono text-[9px] dim uppercase">{label}</div>
+                          {rel ? (
+                            <div className="relative group">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={`/api/admin/photos?serve=${encodeURIComponent(rel)}`}
+                                alt={label}
+                                className="w-full aspect-video object-cover border hair"
+                              />
+                              <div className="absolute inset-0 bg-ink/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                <button
+                                  onClick={() => { setPhotoPickSlot(slot); loadFolderPhotos("01_장비외관"); }}
+                                  className="text-[10px] bg-paper text-ink px-2 py-1"
+                                >변경</button>
+                                <button onClick={() => setPhotos(p => ({ ...p, [slot]: "" }))}
+                                  className="text-[10px] bg-red-600 text-paper px-2 py-1">삭제</button>
+                              </div>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => { setPhotoPickSlot(slot); loadFolderPhotos("01_장비외관"); }}
+                              className="w-full aspect-video border border-dashed hair flex items-center justify-center text-[11px] dim hover:border-ink transition-colors"
+                            >+ 사진 선택</button>
+                          )}
+                          {rel && <div className="text-[9px] dim truncate">{rel.split("/").pop()}</div>}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* 폴더 브라우저 */}
+                  {photoPickSlot && (
+                    <div className="border hair p-3 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="mono text-[9px] dim uppercase">{photoPickSlot === "top" ? "상단" : photoPickSlot === "mid" ? "중간" : "하단"} 사진 선택</span>
+                        <button onClick={() => setPhotoPickSlot(null)} className="text-[10px] dim hover:text-ink">✕ 닫기</button>
+                      </div>
+                      <div className="flex gap-1.5 flex-wrap">
+                        {["01_장비외관","02_납품출고","03_현장설치","04_수리정비","05_알람고장","06_비교도식","07_기타"].map(f => (
+                          <button key={f} onClick={() => loadFolderPhotos(f)}
+                            className="text-[10px] border hair px-2 py-0.5 hover:border-ink hover:text-ink transition-colors dim">
+                            {f}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="grid grid-cols-4 gap-1.5 max-h-48 overflow-y-auto">
+                        {folderFiles.map(rel => (
+                          <button key={rel} onClick={() => { setPhotos(p => ({ ...p, [photoPickSlot]: rel })); setPhotoPickSlot(null); }}
+                            className="relative group border hair overflow-hidden hover:border-ink transition-colors">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={`/api/admin/photos?serve=${encodeURIComponent(rel)}`} alt=""
+                              className="w-full aspect-square object-cover" />
+                            <div className="absolute inset-0 bg-ink/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <span className="text-paper text-[9px]">선택</span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
 
                 {/* 본문 */}
                 {selected.finalContent && (

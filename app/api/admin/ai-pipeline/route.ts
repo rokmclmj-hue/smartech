@@ -45,7 +45,12 @@ function parsePostFile(filename: string, content: string) {
   const naverMatch = content.match(/---네이버블로그---\n([\s\S]+)$/);
   const naverContent = naverMatch ? naverMatch[1].trim() : "";
 
-  return { filename, date, status, category, seoTitle, metaDesc, tags, rejectionReason, finalContent, naverContent };
+  // D1 사진 메타데이터 추출
+  const photoTop = (content.match(/## 사진_상단:\s*(.+)/) || [])[1]?.trim() || "";
+  const photoMid = (content.match(/## 사진_중간:\s*(.+)/) || [])[1]?.trim() || "";
+  const photoEnd = (content.match(/## 사진_하단:\s*(.+)/) || [])[1]?.trim() || "";
+
+  return { filename, date, status, category, seoTitle, metaDesc, tags, rejectionReason, finalContent, naverContent, photoTop, photoMid, photoEnd };
 }
 
 // GET: 파일 목록 또는 단일 파일 내용
