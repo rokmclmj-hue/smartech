@@ -137,6 +137,20 @@ ${ceoVoice}
     `표제: ${headline}\n주제: ${topic}\n카테고리: ${category}\n\n위 표제와 주제로 블로그 1문단을 작성하세요.`
   , '글작성');
 
+  // ── 이니셜 변환 (회사명 자동 익명화) ──────────
+  const anonymized = await ask(
+    `당신은 텍스트 편집자입니다. 아래 글에서 회사명/업체명/기관명을 찾아 영문 첫 글자 이니셜 + "사" 형태로 바꾸세요.
+규칙:
+- 에어프로덕츠 → A사, 신진엠텍 → S사, 삼성 → S사, 미코하이테크 → M사 (이런 방식)
+- 회사명만 바꾸고 나머지는 절대 수정하지 마세요
+- 스마텍은 바꾸지 마세요 (당사)
+- 에드워즈(Edwards)는 바꾸지 마세요 (브랜드명)
+- 바꾼 내용만 출력하세요 (설명 없이 글 본문만)`,
+    `아래 글에서 회사명만 이니셜로 바꿔주세요:\n\n${content}`
+  , '이니셜변환');
+
+  const finalContent = anonymized || content;
+
   // ── 에이전트 3: 사진 선정 ──────────────────────
   console.log('[3/3] 사진 선정 중...');
   const photo = pickPhoto(category);
@@ -163,7 +177,7 @@ ${ceoVoice}
     '',
     '---',
     '',
-    content,
+    finalContent,
   ].join('\n');
   fs.writeFileSync(filePath, fileContent, 'utf8');
 
@@ -173,7 +187,7 @@ ${ceoVoice}
     const post = await prisma.blogPost.create({
       data: {
         title:      headline.replace(/\*/g, '').trim(),
-        content,
+        content:    finalContent,
         metaDesc:   topic,
         tags:       '',
         category,
