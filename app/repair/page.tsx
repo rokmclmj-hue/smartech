@@ -11,13 +11,13 @@ type RepairKit = {
   pumpMaker: string;
   pumpModel: string;
   modelGroup: string | null;
-  basePrice: number;
-  tier2Price: number;
-  tier3Price: number;
+  basePrice: number;   // 원가 (고객가 = × 1.4)
   description: string | null;
   parts: { id: number; name: string; quantity: string | null }[];
-  extraParts: { id: number; name: string; price: number }[];
+  extraParts: { id: number; category: string; name: string; price: number }[]; // price = 원가 (× 1.2)
 };
+
+type SelectedExtra = { id: number; category: string; name: string; costPrice: number };
 
 type PhotoFile = { file: File; preview: string; label: string };
 
@@ -42,7 +42,7 @@ type FormData = {
   contactPhone: string;
   contactEmail: string;
   company: string;
-  selectedTier: 1 | 2 | 3 | null;
+  isConsultRequest: boolean;
 };
 
 // ── 상수 ──────────────────────────────────────────────────
@@ -57,7 +57,9 @@ const SYMPTOMS = [
   { id: "other",         label: "기타 증상",           sub: "위 항목에 해당 없는 경우" },
 ];
 
-const STEPS = ["사진 업로드", "증상 입력", "견적 확인", "접수 완료"];
+const STEPS = ["사진 업로드", "증상 입력", "수리 견적", "접수 완료"];
+const BASE_MARGIN = 1.4;  // 기본수리 마진
+const EXTRA_MARGIN = 1.2; // 추가항목 마진
 
 const PHOTO_SLOTS = [
   { key: "nameplate", label: "명판 사진",       required: true,  hint: "제품에 붙어있는 모델명 스티커" },
@@ -89,6 +91,8 @@ export default function RepairPage() {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [repairNo, setRepairNo] = useState("");
+  const [selectedExtras, setSelectedExtras] = useState<SelectedExtra[]>([]);
+  const [showPartsDetail, setShowPartsDetail] = useState(false);
 
   // 사진 상태
   const [photos, setPhotos] = useState<Record<string, PhotoFile | null>>({
@@ -112,7 +116,7 @@ export default function RepairPage() {
     contactPhone: "",
     contactEmail: "",
     company: "",
-    selectedTier: null,
+    isConsultRequest: false,
   });
 
   useEffect(() => {
@@ -146,6 +150,20 @@ export default function RepairPage() {
         : [...f.symptoms, id],
     }));
   }
+
+  function toggleExtra(extra: SelectedExtra) {
+    setSelectedExtras((prev) =>
+      prev.find((e) => e.id === extra.id)
+        ? prev.filter((e) => e.id !== extra.id)
+        : [...prev, extra]
+    );
+  }
+
+  const baseCustomerPrice = selectedKit ? Math.round(selectedKit.basePrice * BASE_MARGIN) : 0;
+  const extraCustomerTotal = selectedExtras.reduce(
+    (sum, e) => sum + Math.round(e.costPrice * EXTRA_MARGIN), 0
+  );
+  const totalCustomerPrice = baseCustomerPrice + extraCustomerTotal;
 
   // 사진 선택
   function handlePhotoSelect(key: string, file: File) {
@@ -203,11 +221,6 @@ export default function RepairPage() {
   async function submit() {
     setLoading(true);
     try {
-      const baseAmount =
-        form.selectedTier === 1 ? (selectedKit?.basePrice ?? 0) :
-        form.selectedTier === 2 ? (selectedKit?.tier2Price ?? 0) :
-        form.selectedTier === 3 ? (selectedKit?.tier3Price ?? 0) : 0;
-
       const res = await fetch("/api/repair", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -219,8 +232,11 @@ export default function RepairPage() {
           kitId: form.selectedKitId,
           symptoms: form.symptoms,
           symptomNote: form.symptomNote || null,
-          baseAmount,
-          selectedTier: form.selectedTier,
+          baseAmount: baseCustomerPrice,
+          extraAmount: extraCustomerTotal,
+          totalAmount: totalCustomerPrice,
+          selectedExtrasJson: JSON.stringify(selectedExtras),
+          isConsultRequest: form.isConsultRequest,
           contactName: form.contactName,
           contactPhone: form.contactPhone,
           contactEmail: form.contactEmail || null,
@@ -565,96 +581,13 @@ export default function RepairPage() {
           </div>
         )}
 
-        {/* ── STEP 2: 3단계 견적 + 연락처 ── */}
+        {/* ── STEP 2: 수리 견적 (B안 — 체크박스 선택) ── */}
         {step === 2 && (
           <div className="max-w-3xl">
-            <h2 className="text-[22px] font-bold tracking-tight mb-2">수리 단계를 선택하세요</h2>
+            <h2 className="text-[22px] font-bold tracking-tight mb-1">수리 견적</h2>
             <p className="text-[13px] text-dim mb-8">
-              분해 검사 후 정확한 금액이 확정됩니다. 선택하신 단계는 참고 견적입니다.
+              기본수리는 필수 포함입니다. 추가 항목을 선택하시면 총 견적이 업데이트됩니다.
             </p>
-
-            {/* 3단계 견적 카드 */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
-              {/* Tier 1 */}
-              {[
-                {
-                  tier: 1 as const,
-                  title: "기본 수리",
-                  sub: "소모품 교체 + 기본 점검",
-                  price: selectedKit?.basePrice ?? 0,
-                  parts: selectedKit?.parts ?? [],
-                  tag: "기본",
-                },
-                {
-                  tier: 2 as const,
-                  title: "기본 수리 + 파트 교체",
-                  sub: "주요 파트 교체 포함",
-                  price: selectedKit?.tier2Price ?? 0,
-                  parts: [],
-                  tag: "표준",
-                },
-                {
-                  tier: 3 as const,
-                  title: "전체 수리",
-                  sub: "전체 분해 · 완전 오버홀",
-                  price: selectedKit?.tier3Price ?? 0,
-                  parts: [],
-                  tag: "완전",
-                },
-              ].map(({ tier, title, sub, price, parts, tag }) => {
-                const selected = form.selectedTier === tier;
-                const noPrice = price === 0;
-                return (
-                  <button
-                    key={tier}
-                    onClick={() => setField("selectedTier", tier)}
-                    className={`text-left border p-5 transition-all flex flex-col h-full ${
-                      selected
-                        ? "border-ink bg-ink text-paper"
-                        : "border-line hover:border-ink"
-                    }`}
-                  >
-                    <div className={`mono text-[9px] tracking-widest mb-2 ${selected ? "text-paper/50" : "text-dim"}`}>
-                      TIER {tier} · {tag}
-                    </div>
-                    <div className="text-[15px] font-bold mb-1">{title}</div>
-                    <div className={`text-[11px] mb-4 ${selected ? "text-paper/60" : "text-dim"}`}>{sub}</div>
-                    <div className="mt-auto">
-                      {noPrice ? (
-                        <div className={`text-[18px] font-bold ${selected ? "text-paper" : "text-edred"}`}>
-                          상담 후 확정
-                        </div>
-                      ) : (
-                        <>
-                          <div className="text-[22px] font-bold tabular">{formatPrice(price)}</div>
-                          <div className={`text-[10px] mt-0.5 ${selected ? "text-paper/50" : "text-dim"}`}>
-                            VAT 별도 · 파트비 포함
-                          </div>
-                        </>
-                      )}
-                    </div>
-                    {parts.length > 0 && (
-                      <div className={`mt-4 pt-3 border-t ${selected ? "border-paper/20" : "border-line"} space-y-1`}>
-                        {parts.slice(0, 4).map((p) => (
-                          <div key={p.id} className={`text-[11px] flex gap-1.5 ${selected ? "text-paper/70" : "text-dim"}`}>
-                            <span className="text-edred text-[8px] mt-0.5 shrink-0">●</span>
-                            {p.name} {p.quantity}
-                          </div>
-                        ))}
-                        {parts.length > 4 && (
-                          <div className={`text-[10px] ${selected ? "text-paper/50" : "text-dim"}`}>
-                            외 {parts.length - 4}종 포함
-                          </div>
-                        )}
-                      </div>
-                    )}
-                    {selected && (
-                      <div className="mt-3 text-paper text-[13px] font-semibold">✓ 선택됨</div>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
 
             {/* 모델 미인식 안내 */}
             {!form.pumpModel && (
@@ -666,57 +599,177 @@ export default function RepairPage() {
               </div>
             )}
 
-            {/* 연락처 */}
-            <div className="border border-line p-6 mb-8">
-              <div className="mono text-[10px] tracking-widest text-dim mb-5">연락처 정보</div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* ── 기본수리 블록 ── */}
+            <div className="border border-ink mb-3">
+              <div className="flex items-center justify-between px-5 py-4">
                 <div>
-                  <label className="text-[12px] font-medium block mb-1.5">
-                    담당자 이름 <span className="text-edred">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={form.contactName}
-                    onChange={(e) => setField("contactName", e.target.value)}
-                    placeholder="홍길동"
-                    className="w-full border border-line px-3 py-2.5 text-[14px] focus:outline-none focus:border-ink bg-paper"
-                  />
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-[10px] bg-ink text-paper px-1.5 py-0.5 font-medium tracking-wide">필수</span>
+                    <span className="text-[15px] font-bold">기본수리</span>
+                  </div>
+                  <div className="text-[11px] text-dim">소모품 교체 · 기본 분해점검 포함</div>
                 </div>
-                <div>
-                  <label className="text-[12px] font-medium block mb-1.5">
-                    연락처 <span className="text-edred">*</span>
-                  </label>
-                  <input
-                    type="tel"
-                    value={form.contactPhone}
-                    onChange={(e) => setField("contactPhone", phoneAutoFormat(e.target.value))}
-                    placeholder="010-0000-0000"
-                    className="w-full border border-line px-3 py-2.5 text-[14px] focus:outline-none focus:border-ink bg-paper tabular"
-                  />
-                </div>
-                <div>
-                  <label className="text-[12px] font-medium block mb-1.5">회사명</label>
-                  <input
-                    type="text"
-                    value={form.company}
-                    onChange={(e) => setField("company", e.target.value)}
-                    placeholder="(주)스마텍"
-                    className="w-full border border-line px-3 py-2.5 text-[14px] focus:outline-none focus:border-ink bg-paper"
-                  />
-                </div>
-                <div>
-                  <label className="text-[12px] font-medium block mb-1.5">이메일</label>
-                  <input
-                    type="email"
-                    value={form.contactEmail}
-                    onChange={(e) => setField("contactEmail", e.target.value)}
-                    placeholder="example@company.com"
-                    className="w-full border border-line px-3 py-2.5 text-[14px] focus:outline-none focus:border-ink bg-paper"
-                  />
+                <div className="text-right">
+                  {selectedKit ? (
+                    <>
+                      <div className="text-[22px] font-bold tabular">{formatPrice(baseCustomerPrice)}</div>
+                      <div className="text-[10px] text-dim">VAT 별도</div>
+                    </>
+                  ) : (
+                    <div className="text-[16px] font-bold text-edred">상담 후 확정</div>
+                  )}
                 </div>
               </div>
+
+              {/* 파트 전체보기 토글 */}
+              {selectedKit && selectedKit.parts.length > 0 && (
+                <>
+                  <button
+                    onClick={() => setShowPartsDetail((v) => !v)}
+                    className="w-full flex items-center justify-between px-5 py-2.5 border-t border-line text-[12px] text-dim hover:text-ink hover:bg-[#F6F4EF] transition-all"
+                  >
+                    <span>교체 파트 전체 보기 ({selectedKit.parts.length}종)</span>
+                    <span>{showPartsDetail ? "▲" : "▼"}</span>
+                  </button>
+
+                  {/* 다크모드 파트 목록 */}
+                  {showPartsDetail && (
+                    <div className="bg-ink text-paper">
+                      <div className="px-5 py-3 border-b border-paper/10 flex items-center justify-between">
+                        <div>
+                          <div className="mono text-[9px] tracking-widest text-paper/40 mb-0.5">REPLACEMENT PARTS</div>
+                          <div className="text-[14px] font-bold">
+                            {form.pumpMaker} {form.pumpModel || "—"} · 기본수리
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => window.print()}
+                          className="text-[11px] border border-paper/30 px-3 py-1.5 hover:bg-paper/10 transition"
+                        >
+                          PDF 저장
+                        </button>
+                      </div>
+                      <div className="px-5 py-4 space-y-2">
+                        {selectedKit.parts.map((p, i) => (
+                          <div key={p.id} className="flex items-center gap-3 py-1 border-b border-paper/5">
+                            <span className="text-[10px] text-paper/30 w-5 text-right shrink-0">{i + 1}</span>
+                            <span className="text-[13px] flex-1">{p.name}</span>
+                            {p.quantity && (
+                              <span className="text-[11px] text-paper/50 shrink-0">{p.quantity}</span>
+                            )}
+                          </div>
+                        ))}
+                        {selectedExtras.length > 0 && (
+                          <>
+                            <div className="pt-3 pb-1 text-[10px] text-paper/40 tracking-widest">추가 선택 항목</div>
+                            {selectedExtras.map((e) => (
+                              <div key={e.id} className="flex items-center gap-3 py-1 border-b border-paper/5">
+                                <span className="text-[10px] text-paper/30 w-5 shrink-0">+</span>
+                                <span className="text-[13px] flex-1">{e.name}</span>
+                                <span className="text-[11px] text-paper/50 shrink-0">{e.category}</span>
+                              </div>
+                            ))}
+                          </>
+                        )}
+                      </div>
+                      <div className="px-5 py-4 border-t border-paper/10 flex justify-between items-center">
+                        <div className="text-[11px] text-paper/40">참고 견적 · 분해검사 후 확정</div>
+                        <div className="text-right">
+                          <div className="text-[11px] text-paper/40">합계 (VAT 별도)</div>
+                          <div className="text-[20px] font-bold tabular">{formatPrice(totalCustomerPrice)}</div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
 
+            {/* ── 추가 선택 항목 ── */}
+            {selectedKit && selectedKit.extraParts.length > 0 && (
+              <div className="mb-6">
+                <div className="text-[11px] mono text-dim tracking-widest mb-3">추가 선택 항목 (선택 시 견적 합산)</div>
+                <div className="space-y-2">
+                  {selectedKit.extraParts.map((extra) => {
+                    const isSelected = selectedExtras.some((e) => e.id === extra.id);
+                    const customerPrice = Math.round(extra.price * EXTRA_MARGIN);
+                    return (
+                      <label
+                        key={extra.id}
+                        className={`flex items-center gap-4 border p-4 cursor-pointer transition-all ${
+                          isSelected ? "border-ink bg-ink/5" : "border-line hover:border-ink"
+                        }`}
+                      >
+                        <div className={`w-5 h-5 border-2 rounded-sm flex items-center justify-center shrink-0 transition-all ${
+                          isSelected ? "bg-ink border-ink" : "border-dim"
+                        }`}>
+                          {isSelected && <span className="text-paper text-[11px] font-bold">✓</span>}
+                        </div>
+                        <div className="flex-1">
+                          <div className="text-[13px] font-medium">{extra.category}</div>
+                          <div className="text-[11px] text-dim">{extra.name}</div>
+                        </div>
+                        <div className="text-right shrink-0">
+                          {extra.price > 0 ? (
+                            <>
+                              <div className="text-[15px] font-bold tabular">{formatPrice(customerPrice)}</div>
+                              <div className="text-[10px] text-dim">VAT 별도</div>
+                            </>
+                          ) : (
+                            <div className="text-[13px] text-dim">상담 후 확정</div>
+                          )}
+                        </div>
+                        <input
+                          type="checkbox"
+                          className="hidden"
+                          checked={isSelected}
+                          onChange={() => toggleExtra({ id: extra.id, category: extra.category, name: extra.name, costPrice: extra.price })}
+                        />
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* ── 총 견적 + 액션 버튼 ── */}
+            <div className="border border-ink p-5 mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <div className="text-[11px] text-dim mb-0.5">참고 견적 합계 (VAT 별도)</div>
+                  <div className="text-[28px] font-bold tabular">
+                    {selectedKit ? formatPrice(totalCustomerPrice) : "상담 후 확정"}
+                  </div>
+                  {selectedKit && (
+                    <div className="text-[11px] text-dim mt-0.5">
+                      기본수리 {formatPrice(baseCustomerPrice)}
+                      {selectedExtras.length > 0 && ` + 추가 ${formatPrice(extraCustomerTotal)}`}
+                    </div>
+                  )}
+                </div>
+                <div className="flex flex-col gap-2 items-end">
+                  {selectedKit && selectedKit.parts.length > 0 && (
+                    <button
+                      onClick={() => { setShowPartsDetail(true); setTimeout(() => window.print(), 100); }}
+                      className="flex items-center gap-2 px-4 py-2.5 border border-ink text-[12px] font-medium hover:bg-ink hover:text-paper transition-all"
+                    >
+                      <span>견적서 PDF</span>
+                    </button>
+                  )}
+                  <button
+                    onClick={() => { setField("isConsultRequest", true); setStep(3); }}
+                    className="flex items-center gap-2 px-4 py-2.5 bg-edred text-paper text-[12px] font-semibold hover:bg-ink transition-all"
+                  >
+                    <span>상담 요청</span>
+                  </button>
+                </div>
+              </div>
+              <p className="text-[10px] text-dim leading-relaxed">
+                ※ 분해 검사 후 정확한 금액이 확정됩니다. 본 견적은 참고용이며 실제 금액과 다를 수 있습니다.
+              </p>
+            </div>
+
+            {/* ── 이전 버튼 + 접수 버튼 ── */}
             <div className="flex gap-3">
               <button
                 onClick={() => setStep(1)}
@@ -725,27 +778,87 @@ export default function RepairPage() {
                 ← 이전
               </button>
               <button
-                disabled={!form.contactName || !form.contactPhone || !form.selectedTier || loading}
+                onClick={() => setStep(3)}
+                className="px-8 py-4 bg-ink text-paper text-[14px] font-semibold hover:bg-edred transition-all"
+              >
+                연락처 입력 →
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ── STEP 3: 연락처 + 접수 ── */}
+        {step === 3 && !submitted && (
+          <div className="max-w-3xl">
+            <h2 className="text-[22px] font-bold tracking-tight mb-2">연락처 입력</h2>
+            {form.isConsultRequest && (
+              <div className="border border-edred/30 bg-edred/5 px-4 py-3 mb-6 text-[13px] text-edred">
+                상담 요청으로 접수됩니다 — 담당자가 직접 연락드립니다.
+                <span className="ml-2 text-[11px]">
+                  {form.pumpModel && `(${form.pumpModel}`}
+                  {selectedExtras.length > 0 && ` · 추가항목 ${selectedExtras.length}건`}
+                  {form.pumpModel && ")"}
+                </span>
+              </div>
+            )}
+            <div className="border border-line p-6 mb-8">
+              <div className="mono text-[10px] tracking-widest text-dim mb-5">연락처 정보</div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[12px] font-medium block mb-1.5">
+                    담당자 이름 <span className="text-edred">*</span>
+                  </label>
+                  <input type="text" value={form.contactName}
+                    onChange={(e) => setField("contactName", e.target.value)}
+                    placeholder="홍길동"
+                    className="w-full border border-line px-3 py-2.5 text-[14px] focus:outline-none focus:border-ink bg-paper" />
+                </div>
+                <div>
+                  <label className="text-[12px] font-medium block mb-1.5">
+                    연락처 <span className="text-edred">*</span>
+                  </label>
+                  <input type="tel" value={form.contactPhone}
+                    onChange={(e) => setField("contactPhone", phoneAutoFormat(e.target.value))}
+                    placeholder="010-0000-0000"
+                    className="w-full border border-line px-3 py-2.5 text-[14px] focus:outline-none focus:border-ink bg-paper tabular" />
+                </div>
+                <div>
+                  <label className="text-[12px] font-medium block mb-1.5">회사명</label>
+                  <input type="text" value={form.company}
+                    onChange={(e) => setField("company", e.target.value)}
+                    placeholder="(주)스마텍"
+                    className="w-full border border-line px-3 py-2.5 text-[14px] focus:outline-none focus:border-ink bg-paper" />
+                </div>
+                <div>
+                  <label className="text-[12px] font-medium block mb-1.5">이메일</label>
+                  <input type="email" value={form.contactEmail}
+                    onChange={(e) => setField("contactEmail", e.target.value)}
+                    placeholder="example@company.com"
+                    className="w-full border border-line px-3 py-2.5 text-[14px] focus:outline-none focus:border-ink bg-paper" />
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button onClick={() => setStep(2)}
+                className="px-6 py-4 border border-line text-[14px] font-medium hover:border-ink transition">
+                ← 이전
+              </button>
+              <button
+                disabled={!form.contactName || !form.contactPhone || loading}
                 onClick={submit}
                 className="px-10 py-4 bg-edred text-paper text-[14px] font-semibold hover:bg-ink transition-all disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {loading ? (
-                  <>
-                    <span className="animate-spin inline-block w-4 h-4 border-2 border-paper/30 border-t-paper rounded-full" />
-                    접수 중...
-                  </>
+                  <><span className="animate-spin inline-block w-4 h-4 border-2 border-paper/30 border-t-paper rounded-full" />접수 중...</>
                 ) : (
-                  "수리 접수 완료 →"
+                  form.isConsultRequest ? "상담 접수 완료 →" : "수리 접수 완료 →"
                 )}
               </button>
             </div>
-            {!form.selectedTier && (
-              <p className="text-[11px] text-edred mt-2">수리 단계를 선택해 주세요.</p>
-            )}
           </div>
         )}
 
-        {/* ── STEP 3: 접수 완료 ── */}
+        {/* ── STEP 4: 접수 완료 ── */}
         {step === 3 && submitted && (
           <div className="max-w-2xl">
             <div className="border border-ink mb-10">

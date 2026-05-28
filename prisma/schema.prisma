@@ -163,8 +163,9 @@ model RepairKitPart {
 model RepairKitExtra {
   id        Int       @id @default(autoincrement())
   kitId     Int
-  name      String    // "Scroll", "Blade", "커플링" 등
-  price     Int       // 단가 (원)
+  category  String    @default("")  // "전장수리", "팬교체", "블레이드교체" 등
+  name      String    // "controller", "Fan", "Blade" 등
+  price     Int       // 원가 (고객가 = 원가 × 1.2)
   kit       RepairKit @relation(fields: [kitId], references: [id], onDelete: Cascade)
 }
 
@@ -204,8 +205,10 @@ model RepairRequest {
   aiConfidence  String?           // high | medium | low | null
   aiModelRaw    String?           // AI가 인식한 원본 모델명
 
-  // 선택 수리 단계
-  repairTier    Int?              // 1 | 2 | 3
+  // 선택 수리 단계 (레거시 — B안 전환 후 미사용)
+  repairTier    Int?
+  // 선택한 추가 항목 (B안: 체크박스 선택)
+  selectedExtrasJson String?     // JSON: [{category, name, costPrice}]
 
   // 관리자 메모 / 외주 배정
   adminNote     String?
