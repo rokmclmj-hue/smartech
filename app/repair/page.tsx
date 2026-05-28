@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { SMARTECH_COMPANY } from "@/lib/company";
+import "@/app/quote/[id]/quote-styles.css";
 
 // ── 타입 ──────────────────────────────────────────────────
 type RepairKit = {
@@ -84,7 +86,8 @@ function phoneAutoFormat(v: string) {
 // ── 컴포넌트 ──────────────────────────────────────────────
 export default function RepairPage() {
   const { data: session } = useSession();
-  const user = session?.user as { name?: string; email?: string; phone?: string } | undefined;
+  const user = session?.user as { name?: string; email?: string; phone?: string; company?: string; tier?: string } | undefined;
+  const isLoggedIn = !!user;
 
   const [step, setStep] = useState(0);
   const [kits, setKits] = useState<RepairKit[]>([]);
@@ -797,12 +800,21 @@ export default function RepairPage() {
                 </div>
                 <div className="flex flex-col gap-2 items-end">
                   {selectedKit && (
-                    <button
-                      onClick={() => window.print()}
-                      className="flex items-center gap-2 px-4 py-2.5 border border-ink text-[12px] font-medium hover:bg-ink hover:text-paper transition-all"
-                    >
-                      <span>견적서 PDF</span>
-                    </button>
+                    isLoggedIn ? (
+                      <button
+                        onClick={() => window.print()}
+                        className="flex items-center gap-2 px-4 py-2.5 border border-ink text-[12px] font-medium hover:bg-ink hover:text-paper transition-all"
+                      >
+                        견적서 PDF
+                      </button>
+                    ) : (
+                      <Link
+                        href="/login"
+                        className="flex items-center gap-2 px-4 py-2.5 border border-line text-[11px] text-dim hover:border-ink transition-all"
+                      >
+                        로그인 후 PDF 저장
+                      </Link>
+                    )
                   )}
                   <button
                     onClick={() => { setField("isConsultRequest", true); setStep(3); }}
@@ -977,104 +989,118 @@ export default function RepairPage() {
         </div>
       </footer>
 
-      {/* ── PDF 인쇄 전용 영역 ── */}
-      <div className="repair-pdf-only">
-        <div style={{ background: "#111", color: "#f5f3ef", minHeight: "100vh", padding: "16mm 14mm", fontFamily: "monospace", fontSize: "11pt" }}>
+      {/* ── PDF 인쇄 전용 영역 (화이트 · 판매견적서 동일 스타일) ── */}
+      <div className="repair-pdf-only quote-page">
+        <div className="pdf-only" style={{ display: "block" }}>
           {/* 헤더 */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "10mm", borderBottom: "1px solid #444", paddingBottom: "6mm" }}>
-            <div>
-              <div style={{ fontSize: "8pt", color: "#888", letterSpacing: "0.15em", marginBottom: 4 }}>REPAIR ESTIMATE · 수리 견적서</div>
-              <div style={{ fontSize: "22pt", fontWeight: 700, letterSpacing: "-0.02em" }}>SMARTECH</div>
-              <div style={{ fontSize: "8pt", color: "#888", marginTop: 2 }}>Edwards Vacuum Korea Authorized Service Partner</div>
+          <div className="p-top">
+            <div className="wm">
+              SMARTECH · REPAIR ESTIMATE
+              <small>수리 견적서</small>
             </div>
-            <div style={{ textAlign: "right", fontSize: "9pt", color: "#aaa" }}>
-              <div>발행일: {new Date().toLocaleDateString("ko-KR")}</div>
-              <div>031-204-7170</div>
-              <div>경기도 화성시</div>
-            </div>
-          </div>
-
-          {/* 장비 정보 */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4mm", marginBottom: "8mm", padding: "5mm", border: "1px solid #333" }}>
-            <div>
-              <div style={{ fontSize: "7pt", color: "#888", marginBottom: 2 }}>EQUIPMENT</div>
-              <div style={{ fontSize: "14pt", fontWeight: 700 }}>{form.pumpMaker} {form.pumpModel || "모델 미확인"}</div>
-              {form.pumpSerial && <div style={{ fontSize: "9pt", color: "#aaa" }}>S/N · {form.pumpSerial}</div>}
-            </div>
-            <div>
-              <div style={{ fontSize: "7pt", color: "#888", marginBottom: 2 }}>CONTACT</div>
-              <div style={{ fontSize: "10pt" }}>{form.contactName}</div>
-              <div style={{ fontSize: "9pt", color: "#aaa" }}>{form.company && `${form.company} · `}{form.contactPhone}</div>
+            <div className="meta pmono">
+              <span>DATE · {new Date().toLocaleDateString("ko-KR")}</span>
+              <span>EQUIPMENT · {form.pumpMaker} {form.pumpModel || "미확인"}</span>
+              {form.pumpSerial && <span>S/N · {form.pumpSerial}</span>}
             </div>
           </div>
 
-          {/* 기본수리 */}
-          {selectedKit && (
-            <div style={{ marginBottom: "6mm" }}>
-              <div style={{ fontSize: "7pt", color: "#888", letterSpacing: "0.1em", marginBottom: "3mm" }}>BASE REPAIR · 기본수리 (필수)</div>
-              <div style={{ border: "1px solid #333", overflow: "hidden" }}>
-                <div style={{ background: "#1a1a1a", padding: "3mm 4mm", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontWeight: 600 }}>기본수리 소모품 교체 일체</span>
-                  <span style={{ fontSize: "13pt", fontWeight: 700 }}>₩ {baseCustomerPrice.toLocaleString("ko-KR")}</span>
-                </div>
-                {selectedKit.parts.map((p, i) => (
-                  <div key={p.id} style={{ display: "flex", alignItems: "center", gap: "3mm", padding: "2mm 4mm", borderTop: "1px solid #222", fontSize: "9pt" }}>
-                    <span style={{ color: "#666", width: "5mm", textAlign: "right", flexShrink: 0 }}>{i + 1}</span>
-                    <span style={{ flex: 1 }}>{p.name}</span>
-                    {p.quantity && <span style={{ color: "#888" }}>{p.quantity}</span>}
-                  </div>
-                ))}
-              </div>
+          {/* 수신/발신 */}
+          <div className="p-parties">
+            <div>
+              <h5>TO · 수신처</h5>
+              <div className="row"><div className="k">Company</div><div className="v">{user?.company || form.company || "—"}</div></div>
+              <div className="row"><div className="k">Attn</div><div className="v">{user?.name || form.contactName || "—"}</div></div>
+              <div className="row"><div className="k">Tel</div><div className="v pmono">{user?.phone || form.contactPhone || "—"}</div></div>
+              <div className="row"><div className="k">Email</div><div className="v pmono">{user?.email || form.contactEmail || "—"}</div></div>
             </div>
-          )}
+            <div>
+              <h5>FROM · 발신처</h5>
+              <div className="row"><div className="k">Company</div><div className="v">{SMARTECH_COMPANY.name} · {SMARTECH_COMPANY.english}</div></div>
+              <div className="row"><div className="k">CEO</div><div className="v">{SMARTECH_COMPANY.ceo}</div></div>
+              <div className="row"><div className="k">Biz No</div><div className="v pmono">{SMARTECH_COMPANY.bizNo}</div></div>
+              <div className="row"><div className="k">Tel</div><div className="v pmono">{SMARTECH_COMPANY.officeTel}</div></div>
+              <div className="row"><div className="k">Email</div><div className="v pmono">{SMARTECH_COMPANY.email}</div></div>
+              <div className="row"><div className="k">Office</div><div className="v">{SMARTECH_COMPANY.headOfficeKo}</div></div>
+              <div className="row"><div className="k">A/S Ctr</div><div className="v">{SMARTECH_COMPANY.cheonanCenterKo}</div></div>
+            </div>
+          </div>
 
-          {/* 추가 선택 항목 */}
-          {selectedExtras.length > 0 && (
-            <div style={{ marginBottom: "8mm" }}>
-              <div style={{ fontSize: "7pt", color: "#888", letterSpacing: "0.1em", marginBottom: "3mm" }}>ADDITIONAL ITEMS · 추가 선택 항목</div>
-              <div style={{ border: "1px solid #333" }}>
-                {selectedExtras.map((e, i) => (
-                  <div key={e.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "3mm 4mm", borderTop: i > 0 ? "1px solid #222" : undefined, fontSize: "10pt" }}>
-                    <div>
-                      <span style={{ fontWeight: 600 }}>{e.category}</span>
-                      <span style={{ color: "#aaa", marginLeft: "2mm", fontSize: "9pt" }}>{e.name}</span>
-                    </div>
-                    <span>₩ {Math.round(e.costPrice * EXTRA_MARGIN).toLocaleString("ko-KR")}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          {/* 수리 항목 테이블 */}
+          <table className="p-table">
+            <thead>
+              <tr>
+                <th style={{ width: "8mm" }}>No</th>
+                <th>수리 항목 / 교체 파트</th>
+                <th style={{ width: "12mm", textAlign: "right" }}>수량</th>
+                <th style={{ width: "30mm", textAlign: "right" }}>공급가 (VAT 별도)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {/* 기본수리 */}
+              {selectedKit && (
+                <tr>
+                  <td className="pmono">01</td>
+                  <td>
+                    <strong>기본수리 — {form.pumpModel}</strong>
+                    <span className="desc-ko">
+                      {selectedKit.parts.map(p => p.name).join(" · ")}
+                    </span>
+                  </td>
+                  <td className="num-col">1식</td>
+                  <td className="num-col">₩ {baseCustomerPrice.toLocaleString("ko-KR")}</td>
+                </tr>
+              )}
+              {/* 추가 선택 항목 */}
+              {selectedExtras.map((e, i) => (
+                <tr key={e.id}>
+                  <td className="pmono">{String(i + 2).padStart(2, "0")}</td>
+                  <td>
+                    <strong>{e.category}</strong>
+                    <span className="desc-ko">{e.name}</span>
+                  </td>
+                  <td className="num-col">1식</td>
+                  <td className="num-col">₩ {Math.round(e.costPrice * EXTRA_MARGIN).toLocaleString("ko-KR")}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
 
           {/* 합계 */}
-          <div style={{ border: "1px solid #555", padding: "5mm 6mm", marginBottom: "8mm" }}>
-            {selectedKit && (
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "9pt", color: "#aaa", marginBottom: "2mm" }}>
-                <span>기본수리</span><span>₩ {baseCustomerPrice.toLocaleString("ko-KR")}</span>
-              </div>
-            )}
-            {selectedExtras.length > 0 && (
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "9pt", color: "#aaa", marginBottom: "3mm" }}>
-                <span>추가항목 합계</span><span>₩ {extraCustomerTotal.toLocaleString("ko-KR")}</span>
-              </div>
-            )}
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "14pt", fontWeight: 700, borderTop: "1px solid #444", paddingTop: "3mm" }}>
-              <span>합계 (VAT 별도)</span>
-              <span>₩ {totalCustomerPrice.toLocaleString("ko-KR")}</span>
+          <div className="p-totals">
+            <div className="row">
+              <span className="k">Sub-Total</span>
+              <span className="v">₩ {totalCustomerPrice.toLocaleString("ko-KR")}</span>
+            </div>
+            <div className="row">
+              <span className="k">VAT (10%)</span>
+              <span className="v">₩ {Math.round(totalCustomerPrice * 0.1).toLocaleString("ko-KR")}</span>
+            </div>
+            <div className="row grand">
+              <span className="k">GRAND TOTAL</span>
+              <span className="v">₩ {Math.round(totalCustomerPrice * 1.1).toLocaleString("ko-KR")}</span>
             </div>
           </div>
 
-          {/* 안내 */}
-          <div style={{ fontSize: "8pt", color: "#666", lineHeight: 1.8 }}>
-            <div>※ 본 견적서는 참고용이며, 분해 검사 후 정확한 금액이 확정됩니다.</div>
-            <div>※ VAT(10%) 별도 · 수리 완료 후 세금계산서 발행</div>
-            <div>※ 문의: 031-204-7170 · 스마텍 서비스센터</div>
+          {/* 거래 조건 */}
+          <div className="p-terms">
+            <div className="row"><span className="k">Payment</span><span className="v">수리 완료 후 세금계산서 발행 · 협의</span></div>
+            <div className="row"><span className="k">Warranty</span><span className="v">수리 후 3개월 보증</span></div>
+            <div className="row"><span className="k">A / S</span><span className="v">031-204-7170 · 스마텍 서비스센터 직접 응대</span></div>
+            <div className="row"><span className="k">Note</span><span className="v">본 견적은 참고용이며 분해 검사 후 정확한 금액이 확정됩니다.</span></div>
+          </div>
+
+          {/* 푸터 */}
+          <div className="p-footer">
+            <span>© {new Date().getFullYear()} SMARTECH CO., LTD. · Edwards Vacuum Korea Authorized Service Partner</span>
+            <span>PAGE 1 / 1</span>
           </div>
         </div>
       </div>
 
       <style>{`
         .repair-pdf-only { display: none; }
+        .repair-pdf-only .pdf-only { display: block !important; }
         @media print {
           body * { visibility: hidden !important; }
           .repair-pdf-only {
@@ -1083,10 +1109,10 @@ export default function RepairPage() {
             position: fixed !important;
             inset: 0 !important;
             z-index: 9999 !important;
-            background: #111 !important;
+            background: #fff !important;
           }
           .repair-pdf-only * { visibility: visible !important; }
-          @page { margin: 0; size: A4; }
+          @page { margin: 0; size: A4 portrait; }
         }
       `}</style>
     </div>
