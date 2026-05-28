@@ -11,9 +11,13 @@ export async function GET(req: Request) {
   const id = searchParams.get("id");
 
   if (id) {
-    const post = await prisma.blogPost.findUnique({ where: { id: Number(id) } });
-    if (!post) return NextResponse.json({ error: "글 없음" }, { status: 404 });
-    return NextResponse.json(post);
+    const rows = await prisma.$queryRaw<Record<string, unknown>[]>`
+      SELECT id, title, category, status, "metaDesc", tags, content, "sourceFile", photos,
+             "publishedAt", "createdAt", "updatedAt"
+      FROM "BlogPost" WHERE id = ${Number(id)}
+    `;
+    if (!rows.length) return NextResponse.json({ error: "글 없음" }, { status: 404 });
+    return NextResponse.json(rows[0]);
   }
 
   const statusFilter = searchParams.get("status");

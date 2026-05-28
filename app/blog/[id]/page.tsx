@@ -153,9 +153,20 @@ function renderMarkdown(text: string) {
 
 export default async function BlogPostPage({ params }: Props) {
   const { id } = await params;
-  const post = await prisma.blogPost.findUnique({
-    where: { id: Number(id), status: "PUBLISHED" },
-  });
+  const rows = await prisma.$queryRaw<Record<string, unknown>[]>`
+    SELECT id, title, category, status, "metaDesc", tags, content, photos,
+           "publishedAt", "createdAt", "updatedAt"
+    FROM "BlogPost" WHERE id = ${Number(id)} AND status = 'PUBLISHED'
+  `;
+  if (!rows.length) return notFound();
+  const post = rows[0] as {
+    id: number; title: string; category: string; status: string;
+    metaDesc: string; tags: string; content: string; photos: string | null;
+    publishedAt: Date | null; createdAt: Date; updatedAt: Date;
+  };
+
+  let postPhotos: string[] = [];
+  try { postPhotos = post.photos ? JSON.parse(post.photos) : []; } catch {}
 
   if (!post) return notFound();
 
@@ -195,9 +206,45 @@ export default async function BlogPostPage({ params }: Props) {
           )}
         </header>
 
+        {/* 상단 사진 */}
+        {postPhotos[0] && (
+          <div className="mb-8 border-t hair pt-8">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`/api/photos?serve=${encodeURIComponent(postPhotos[0])}`}
+              alt="현장 사진"
+              className="w-full object-cover max-h-[420px]"
+            />
+          </div>
+        )}
+
         {/* 본문 */}
-        <article className="border-t hair pt-8">
+        <article className={postPhotos[0] ? "pt-0" : "border-t hair pt-8"}>
           {renderMarkdown(post.content)}
+
+          {/* 중간 사진 — 본문 끝 1/3 지점에 삽입 */}
+          {postPhotos[1] && (
+            <div className="my-8">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={`/api/photos?serve=${encodeURIComponent(postPhotos[1])}`}
+                alt="현장 사진"
+                className="w-full object-cover max-h-[360px]"
+              />
+            </div>
+          )}
+
+          {/* 하단 사진 */}
+          {postPhotos[2] && (
+            <div className="mt-8 mb-4">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={`/api/photos?serve=${encodeURIComponent(postPhotos[2])}`}
+                alt="현장 사진"
+                className="w-full object-cover max-h-[360px]"
+              />
+            </div>
+          )}
         </article>
 
         {/* 태그 */}
