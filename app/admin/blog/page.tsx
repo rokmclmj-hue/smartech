@@ -51,6 +51,7 @@ export default function AdminBlogPage() {
   const [folderFiles, setFolderFiles] = useState<string[]>([]);
   const [photoPickSlot, setPhotoPickSlot] = useState<number | null>(null);
   const [savingPhotos, setSavingPhotos] = useState(false);
+  const [savingToDesktop, setSavingToDesktop] = useState(false);
 
   const showToast = (msg: string, ok: boolean) => {
     setToast({ msg, ok });
@@ -108,6 +109,20 @@ export default function AdminBlogPage() {
       if (res.ok) showToast("사진 저장 완료", true);
       else showToast("사진 저장 실패", false);
     } finally { setSavingPhotos(false); }
+  };
+
+  const saveToDesktop = async (photoPath: string) => {
+    setSavingToDesktop(true);
+    try {
+      const res = await fetch("/api/admin/photos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ photoPath }),
+      });
+      const data = await res.json();
+      if (res.ok) showToast(`바탕화면 네이버_사진 폴더에 저장됨 (${data.fileName})`, true);
+      else showToast("저장 실패", false);
+    } finally { setSavingToDesktop(false); }
   };
 
   const loadFolderPhotos = async (folder: string) => {
@@ -423,6 +438,25 @@ export default function AdminBlogPage() {
                       {savingPhotos ? "저장 중..." : "사진 저장"}
                     </button>
                   </div>
+
+                  {/* 네이버용 사진 바탕화면 저장 */}
+                  {postPhotos.filter(Boolean).length > 0 && (
+                    <div className="bg-[#F6F4EF] border hair px-3 py-2 flex items-center justify-between">
+                      <div>
+                        <div className="text-[11px] font-medium">네이버 업로드용 사진 저장</div>
+                        <div className="text-[10px] dim">바탕화면 &gt; 네이버_사진 폴더에 저장됩니다</div>
+                      </div>
+                      <div className="flex gap-1.5">
+                        {postPhotos.filter(Boolean).map((rel, i) => (
+                          <button key={i} onClick={() => saveToDesktop(rel)}
+                            disabled={savingToDesktop}
+                            className="text-[10px] border hair px-2.5 py-1.5 hover:border-ink hover:bg-ink hover:text-paper transition-all disabled:opacity-40">
+                            {i === 0 ? "상단" : i === 1 ? "중간" : "하단"} 저장
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* 3장 슬롯 */}
                   <div className="grid grid-cols-3 gap-2">

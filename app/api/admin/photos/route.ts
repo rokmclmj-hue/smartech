@@ -68,3 +68,23 @@ export async function GET(req: NextRequest) {
     : [];
   return NextResponse.json({ folders });
 }
+
+// POST /api/admin/photos — 바탕화면 네이버_사진 폴더에 저장
+export async function POST(req: NextRequest) {
+  const session = await auth();
+  if (!isAdmin(session)) return NextResponse.json({ error: "권한 없음" }, { status: 403 });
+
+  const { photoPath } = await req.json();
+  if (!photoPath) return NextResponse.json({ error: "photoPath 필수" }, { status: 400 });
+
+  const srcPath = path.join(PHOTO_BASE, photoPath.replace(/\.\./g, ""));
+  if (!fs.existsSync(srcPath)) return NextResponse.json({ error: "파일 없음" }, { status: 404 });
+
+  const destDir = path.join("C:", "Users", "rokmc", "Desktop", "네이버_사진");
+  if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
+
+  const fileName = path.basename(srcPath);
+  fs.copyFileSync(srcPath, path.join(destDir, fileName));
+
+  return NextResponse.json({ ok: true, fileName });
+}
