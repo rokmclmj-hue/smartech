@@ -97,6 +97,7 @@ export default function RepairPage() {
   const [aiResult, setAiResult] = useState<AiResult | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiDone, setAiDone] = useState(false);
+  const [dragOver, setDragOver] = useState<string | null>(null);
   const fileRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const [form, setForm] = useState<FormData>({
@@ -299,8 +300,19 @@ export default function RepairPage() {
                   <div key={slot.key} className="flex flex-col gap-1.5">
                     <div
                       onClick={() => fileRefs.current[slot.key]?.click()}
+                      onDragOver={(e) => { e.preventDefault(); setDragOver(slot.key); }}
+                      onDragEnter={(e) => { e.preventDefault(); setDragOver(slot.key); }}
+                      onDragLeave={() => setDragOver(null)}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        setDragOver(null);
+                        const file = e.dataTransfer.files[0];
+                        if (file && file.type.startsWith("image/")) handlePhotoSelect(slot.key, file);
+                      }}
                       className={`relative aspect-square border-2 cursor-pointer flex flex-col items-center justify-center transition-all overflow-hidden group ${
-                        photo
+                        dragOver === slot.key
+                          ? "border-edred bg-edred/5 scale-[1.03]"
+                          : photo
                           ? "border-ink"
                           : slot.required
                           ? "border-dashed border-edred/60 hover:border-edred"
@@ -323,12 +335,12 @@ export default function RepairPage() {
                           </div>
                         </>
                       ) : (
-                        <div className="text-center p-3">
-                          <div className={`text-[24px] mb-1 ${slot.required ? "text-edred/40" : "text-dim/40"}`}>
-                            +
+                        <div className="text-center p-3 pointer-events-none">
+                          <div className={`text-[24px] mb-1 ${dragOver === slot.key ? "text-edred" : slot.required ? "text-edred/40" : "text-dim/40"}`}>
+                            {dragOver === slot.key ? "↓" : "+"}
                           </div>
-                          <div className={`text-[11px] font-medium ${slot.required ? "text-edred/80" : "text-dim"}`}>
-                            {slot.required ? "필수" : "선택"}
+                          <div className={`text-[11px] font-medium ${dragOver === slot.key ? "text-edred" : slot.required ? "text-edred/80" : "text-dim"}`}>
+                            {dragOver === slot.key ? "놓으면 업로드" : slot.required ? "필수" : "선택"}
                           </div>
                         </div>
                       )}
