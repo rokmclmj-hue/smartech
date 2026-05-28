@@ -6,7 +6,13 @@ scripts/
 blog-agents/
 smartech-cad/
 
-# 용량 큰 정적 파일 (별도 CDN 사용)
+# 환경변수 파일 (Vercel 대시보드 env 사용)
+.env
+.env.local
+.env.production
+.env.development
+
+# 용량 큰 정적 파일
 public/catalogs/
 
 # 로컬 실행 파일
