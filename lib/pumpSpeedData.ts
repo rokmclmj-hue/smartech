@@ -1579,7 +1579,7 @@ export function calcTurboPumpDown(
 
   while (t2_s < maxT2) {
     const t_total = Math.max(t1_s + t2_s, 1);
-    const Q = Q_out * Math.max(1, 3600 / t_total);
+    const Q = Q_out * 3600 / Math.max(t_total, 1); // 1/t 감소 (floor 없음 — 장시간 펌핑 반영)
     const dPdt = (-Seff_s * P2 + Q) / V;
     const dt = dPdt < 0
       ? Math.min(60.0, Math.max(0.01, 0.02 * P2 / (-dPdt + 1e-30)))

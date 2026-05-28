@@ -1291,8 +1291,9 @@ export default function PumpSelector() {
                   </div>
                   {!turboResult.reachable ? (
                     <div className="px-4 py-4 text-[12px] text-[#6A6660] leading-relaxed">
-                      목표 압력에 도달할 수 없습니다.
-                      아웃게싱 한계: {fmtPressure(turboResult.ultimateSystem_mbar, pressureUnit)} — 목표 압력을 높이거나 챔버 면적 조건을 확인하세요.
+                      24시간 내 목표 압력 도달 어려움 —
+                      챔버가 크거나 목표 진공도가 매우 낮아 장시간 펌핑이 필요합니다.
+                      목표 압력을 높이거나 더 큰 TMP를 검토하세요.
                     </div>
                   ) : (
                     <div>
