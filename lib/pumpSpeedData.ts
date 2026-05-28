@@ -1082,8 +1082,8 @@ export const TURBO_PUMPS: TurboModel[] = [
   { model:"nEXT240D",  series:"nEXT", inletFlange:"ISO100",  fvFlange:"NW25", speedN2_Ls:240,  maxFVPressure_mbar:9.5,  ultimate_mbar:5e-10 },
   { model:"nEXT300D",  series:"nEXT", inletFlange:"ISO100",  fvFlange:"NW25", speedN2_Ls:300,  maxFVPressure_mbar:9.5,  ultimate_mbar:5e-10 },
   { model:"nEXT400D",  series:"nEXT", inletFlange:"ISO160",  fvFlange:"NW25", speedN2_Ls:400,  maxFVPressure_mbar:10.0, ultimate_mbar:5e-10 },
-  { model:"nEXT730D",  series:"nEXT", inletFlange:"ISO160",  fvFlange:"NW25", speedN2_Ls:730,  maxFVPressure_mbar:15.0, ultimate_mbar:5e-10 },
-  { model:"nEXT930D",  series:"nEXT", inletFlange:"ISO200",  fvFlange:"NW25", speedN2_Ls:925,  maxFVPressure_mbar:15.0, ultimate_mbar:5e-10 },
+  { model:"nEXT730D",  series:"nEXT", inletFlange:"ISO160",  fvFlange:"NW25", speedN2_Ls:730,  maxFVPressure_mbar:20.0, ultimate_mbar:5e-10 },
+  { model:"nEXT930D",  series:"nEXT", inletFlange:"ISO200",  fvFlange:"NW25", speedN2_Ls:925,  maxFVPressure_mbar:20.0, ultimate_mbar:5e-10 },
   { model:"nEXT1230H", series:"nEXT", inletFlange:"ISO200",  fvFlange:"NW40", speedN2_Ls:1250, maxFVPressure_mbar:15.0, ultimate_mbar:5e-10 },
   // 마그레브 베어링 — FV 제한 엄격 (1.4 mbar), GXS/EXS/iXH 필수
   { model:"nEXT2807M", series:"nEXT", inletFlange:"ISO250F", fvFlange:"NW40", speedN2_Ls:2350, maxFVPressure_mbar:1.4,  ultimate_mbar:5e-10 },
@@ -1464,16 +1464,19 @@ export function recommendPumps(
 // ─────────────────────────────────────────────────────
 // 2단 TMP 펌프다운 계산 엔진
 //
-// Stage 1 (러핑): 대기압 → tmp.maxFVPressure_mbar
+// Stage 1 (러핑): 대기압 → TMP_TURNON_MBAR (0.05 Torr = 0.0667 mbar)
 //   백킹펌프 단독 동작. calcPumpDown 재사용 (roughing 배관 조건)
+//   현장 경험상 0.05 Torr에서 TMP 기동 → 미세 리크 안전 마진 확보
 //
-// Stage 2 (TMP 고진공): tmp.maxFVPressure_mbar → 목표 압력
+// Stage 2 (TMP 고진공): TMP_TURNON_MBAR → 목표 압력
 //   TMP 유효 배기속도: Seff = 1/(1/S_TMP + 1/C_pipe)  [분자류]
 //   지수 감쇠: t = (V/Seff) × ln((P0-P_ult)/(Pt-P_ult))
 //   아웃게싱 한계: P_ult_sys = max(tmp.ultimate, Q_out/Seff)
 //
 // 주의: TMP 스핀업 시간(1~3분)은 포함되지 않음
 // ─────────────────────────────────────────────────────
+
+export const TMP_TURNON_MBAR = 0.05 * 1.33322; // 0.05 Torr → 0.06666 mbar
 
 export type TurboPumpDownInput = {
   chamberVol_L: number;
@@ -1523,7 +1526,7 @@ export function calcTurboPumpDown(
 ): TurboPumpDownResult {
   const {
     chamberVol_L,
-    outgassingRate = 1.3e-7,
+    outgassingRate = 1.9e-7,
     chamberSurface_cm2,
     startPressure_mbar = 1013,
     targetPressure_mbar,
@@ -1541,7 +1544,7 @@ export function calcTurboPumpDown(
   const Q_out   = outgassingRate * surface * 1e-3; // mbar·m³/s
 
   // ── Stage 1: 러핑 ───────────────────────────────────────────────
-  const tmpStart = tmp.maxFVPressure_mbar;
+  const tmpStart = TMP_TURNON_MBAR; // 0.05 Torr 고정 (tmp.maxFVPressure_mbar 미사용)
 
   const s1 = calcPumpDown(
     {

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import productData from "@/lib/productCatalog.json";
 import { addToCartByPartNo } from "@/lib/cartUtils";
-import { recommendPumps, TURBO_PUMPS, ALL_PUMPS, calcTurboPumpDown } from "@/lib/pumpSpeedData";
+import { recommendPumps, TURBO_PUMPS, ALL_PUMPS, calcTurboPumpDown, TMP_TURNON_MBAR } from "@/lib/pumpSpeedData";
 import type { PumpDownResult, TurboPumpDownResult, PumpModel } from "@/lib/pumpSpeedData";
 import ProductPanel from "@/components/ProductPanel";
 import type { PanelItem } from "@/components/ProductPanel";
@@ -298,7 +298,6 @@ export default function PumpSelector() {
   // ── 터보펌프 2단 계산 state ───────────────────────────────
   const [turboSeries, setTurboSeries] = useState("");
   const [turboTMP, setTurboTMP] = useState("");
-  const [turboBacking, setTurboBacking] = useState("");
   const [turboHvLen, setTurboHvLen] = useState("1");
   const [turboHvBends, setTurboHvBends] = useState("0");
   const [turboRoughLen, setTurboRoughLen] = useState("1");
@@ -309,14 +308,8 @@ export default function PumpSelector() {
   const [cartLoading, setCartLoading] = useState<string | null>(null);
   const [cartAdded, setCartAdded] = useState<Set<string>>(new Set());
 
-  // 선택된 TMP 객체 + 호환 백킹펌프 목록
+  // 선택된 TMP 객체
   const selectedTMPObj = TURBO_PUMPS.find(t => t.model === turboTMP) ?? null;
-  const compatiblePumps = selectedTMPObj && !selectedTMPObj.integrated
-    ? ALL_PUMPS.filter(p =>
-        p.type !== "booster" && p.speed60Hz > 0 && p.ultimate > 0 &&
-        p.ultimate < selectedTMPObj.maxFVPressure_mbar * 0.5
-      )
-    : [];
 
   // ── 계산 로직 ─────────────────────────────────────────────
   function handleCalculate() {
@@ -372,35 +365,22 @@ export default function PumpSelector() {
   }
 
   // ── 터보펌프 2단 계산 ────────────────────────────────────
-  function getTurboBackingPump(): PumpModel | null {
-    if (!selectedTMPObj) return null;
-    if (selectedTMPObj.integrated) {
-      const name = T_STATION_BACKING[selectedTMPObj.model];
-      if (!name) return null;
-      if (name === "XDD1") return XDD1_PROXY;
-      return ALL_PUMPS.find(p => p.model === name) ?? null;
-    }
-    return ALL_PUMPS.find(p => p.model === turboBacking) ?? null;
-  }
-
   function handleTurboCalc() {
     const tmp = selectedTMPObj;
     if (!tmp) { setTurboError("터보펌프 모델을 선택하세요."); return; }
-    const backing = getTurboBackingPump();
-    if (!backing) {
-      setTurboError(tmp.integrated
-        ? `내장 백킹펌프(${T_STATION_BACKING[tmp.model] ?? "?"}) 데이터를 찾을 수 없습니다.`
-        : "백킹펌프를 선택하세요.");
-      return;
-    }
-    const rawVol = form.chamberVol === "기타" ? chamberVolCustom : form.chamberVol;
-    const rawP   = targetP === "기타" ? targetPCustom : targetP;
-    const vol = parseFloat(rawVol);
-    const tP  = parseFloat(rawP);
+
+    const rawVol  = form.chamberVol === "기타" ? chamberVolCustom : form.chamberVol;
+    const rawP    = targetP === "기타" ? targetPCustom : targetP;
+    const rawSpec = form.pipeSpec === "기타" ? pipeSpecCustom : form.pipeSpec;
+
+    const vol    = parseFloat(rawVol);
+    const tP     = targetP === "기타" ? unitToMbar(parseFloat(rawP), pressureUnit) : parseFloat(rawP);
+    const roughID = rawSpec in PIPE_ID_MM ? PIPE_ID_MM[rawSpec] : (parseFloat(rawSpec) || 160);
+
     if (!vol || vol <= 0) { setTurboError("챔버 볼륨을 입력하세요."); return; }
     if (!tP  || tP  <= 0) { setTurboError("목표 압력을 입력하세요."); return; }
-    if (tP > tmp.maxFVPressure_mbar) {
-      setTurboError(`목표 압력(${tP} mbar)이 TMP 시동 압력(${tmp.maxFVPressure_mbar} mbar)보다 높습니다. 목표를 낮춰주세요.`);
+    if (tP >= TMP_TURNON_MBAR) {
+      setTurboError(`목표 압력이 TMP 시동 압력(0.05 Torr / ${TMP_TURNON_MBAR.toFixed(4)} mbar) 이상입니다. 더 낮은 목표 압력을 설정하세요.`);
       return;
     }
 
@@ -409,24 +389,47 @@ export default function PumpSelector() {
     const hvBends = parseInt(turboHvBends) || 0;
     const roughLen = parseFloat(turboRoughLen) || 1;
 
+    const calcInput = {
+      chamberVol_L: vol,
+      targetPressure_mbar: tP,
+      hvPipeID_mm: hvID,
+      hvPipeLength_m: hvLen,
+      hvPipeBends: hvBends,
+      roughPipeID_mm: roughID,
+      roughPipeLength_m: roughLen,
+    };
+
     setTurboError("");
     setTurboIsCalc(true);
     setTimeout(() => {
       try {
-        const r = calcTurboPumpDown(
-          {
-            chamberVol_L: vol,
-            targetPressure_mbar: tP,
-            hvPipeID_mm: hvID,
-            hvPipeLength_m: hvLen,
-            hvPipeBends: hvBends,
-            roughPipeID_mm: 40,
-            roughPipeLength_m: roughLen,
-          },
-          tmp,
-          backing,
-        );
-        setTurboResult(r);
+        if (tmp.integrated) {
+          // 일체형: 내장 백킹펌프 사용
+          const backingName = T_STATION_BACKING[tmp.model];
+          const backing = backingName === "XDD1" ? XDD1_PROXY
+            : ALL_PUMPS.find(p => p.model === backingName) ?? null;
+          if (!backing) {
+            setTurboError(`내장 백킹펌프(${backingName ?? "?"}) 데이터를 찾을 수 없습니다.`);
+            return;
+          }
+          setTurboResult(calcTurboPumpDown(calcInput, tmp, backing));
+        } else {
+          // 독립형: GXS 시리즈 전체 자동 비교 → 가장 빠른 모델 선정
+          const gxsPumps = ALL_PUMPS.filter(p =>
+            p.series === "GXS" || p.series === "GXS+GXB"
+          );
+          let best: TurboPumpDownResult | null = null;
+          let fallback: TurboPumpDownResult | null = null;
+          for (const pump of gxsPumps) {
+            const r = calcTurboPumpDown(calcInput, tmp, pump);
+            if (r.reachable) {
+              if (!best || r.totalTime_s < best.totalTime_s) best = r;
+            } else if (!fallback) {
+              fallback = r;
+            }
+          }
+          setTurboResult(best ?? fallback ?? calcTurboPumpDown(calcInput, tmp, gxsPumps[0]));
+        }
       } catch {
         setTurboError("계산 중 오류가 발생했습니다.");
       } finally {
@@ -589,7 +592,7 @@ export default function PumpSelector() {
           }`}
         >
           <span className="text-[15px] font-semibold tracking-tight">AI 모델 인식</span>
-          <span className="mono text-[10px] tracking-[0.06em] mt-0.5 text-paper/60">
+          <span className="mono text-[10px] tracking-[0.06em] mt-0.5 text-paper">
             명판 사진으로 즉시 견적
           </span>
         </button>
@@ -602,12 +605,12 @@ export default function PumpSelector() {
           }}
           className={`group flex flex-col items-center justify-center py-4 px-3 border transition-colors ${
             tab === "selection"
-              ? "bg-paper text-ink border-ink"
+              ? "bg-paper text-ink border-ink hover:bg-ink hover:text-paper"
               : "bg-paper text-ink border-ink hover:bg-ink hover:text-paper"
           }`}
         >
           <span className="text-[15px] font-semibold tracking-tight">펌프선정 및 시뮬레이션</span>
-          <span className={`mono text-[10px] tracking-[0.06em] mt-0.5 group-hover:text-paper/60 ${tab === "selection" ? "text-ink/60" : !session ? "text-ink/50" : "text-ink/60"}`}>
+          <span className={`mono text-[10px] tracking-[0.06em] mt-0.5 group-hover:text-paper ${tab === "selection" ? "text-ink" : !session ? "text-ink/70" : "text-ink"}`}>
             {!session ? "🔒 로그인 필요" : "공정 조건 기반 자동 선정"}
           </span>
         </button>
@@ -951,7 +954,7 @@ export default function PumpSelector() {
                     {pumpL2 && <><span>›</span><span className="font-medium text-ink">{pumpL2}</span></>}
                     {pumpL3 && <><span>›</span><span className="font-medium text-ink">{pumpL3}</span></>}
                     <button
-                      onClick={() => { setPumpL1(""); setPumpL2(""); setPumpL3(""); setTurboSeries(""); setTurboTMP(""); setTurboBacking(""); setTurboResult(null); }}
+                      onClick={() => { setPumpL1(""); setPumpL2(""); setPumpL3(""); setTurboSeries(""); setTurboTMP(""); setTurboResult(null); }}
                       className="ml-1 text-[10px] text-[#6A6660] hover:text-[#c00020] underline"
                     >초기화</button>
                   </div>
@@ -961,7 +964,7 @@ export default function PumpSelector() {
                   <div className="flex flex-wrap gap-1.5">
                     {PUMP_L1.map((opt) => (
                       <button key={opt}
-                        onClick={() => { setPumpL1(opt); setPumpL2(""); setPumpL3(""); setTurboSeries(""); setTurboTMP(""); setTurboBacking(""); setTurboResult(null); }}
+                        onClick={() => { setPumpL1(opt); setPumpL2(""); setPumpL3(""); setTurboSeries(""); setTurboTMP(""); setTurboResult(null); }}
                         className={`px-3 py-1.5 text-[12px] border transition-colors ${pumpL1 === opt ? "bg-ink text-paper border-ink" : "border-[#E3DFD6] text-[#3A3630] hover:border-ink"}`}
                       >{opt}</button>
                     ))}
@@ -1003,7 +1006,7 @@ export default function PumpSelector() {
                       <div className="flex flex-wrap gap-1.5">
                         {TMP_SERIES_ORDER.map(s => (
                           <button key={s}
-                            onClick={() => { setTurboSeries(s); setTurboTMP(""); setTurboBacking(""); setTurboResult(null); }}
+                            onClick={() => { setTurboSeries(s); setTurboTMP(""); setTurboResult(null); }}
                             className={`px-3 py-1.5 text-[12px] border transition-colors ${turboSeries === s ? "bg-ink text-paper border-ink" : "border-[#E3DFD6] text-[#3A3630] hover:border-ink"}`}
                           >{TMP_SERIES_LABELS[s]}</button>
                         ))}
@@ -1015,7 +1018,7 @@ export default function PumpSelector() {
                         <div className="grid grid-cols-2 gap-2">
                           {TURBO_PUMPS.filter(t => t.series === turboSeries).map(t => (
                             <button key={t.model}
-                              onClick={() => { setTurboTMP(t.model); setTurboBacking(""); setTurboResult(null); }}
+                              onClick={() => { setTurboTMP(t.model); setTurboResult(null); }}
                               className={`p-2.5 text-left border transition-all ${
                                 turboTMP === t.model
                                   ? "bg-ink text-paper border-ink"
@@ -1038,27 +1041,10 @@ export default function PumpSelector() {
                 )}
               </div>
 
-              {/* 백킹펌프 선택 (터보펌프 standalone) */}
+              {/* 백킹펌프: GXS 자동 선정 안내 (standalone TMP) */}
               {pumpL1 === "터보펌프" && selectedTMPObj && !selectedTMPObj.integrated && (
-                <div>
-                  <label className="text-[10px] mono text-[#6A6660] uppercase tracking-wider">
-                    백킹펌프 선택 <span className="text-[#c00020]">*</span>
-                    <span className="ml-1 normal-case text-[9px]">
-                      (ultimate &lt; {(selectedTMPObj.maxFVPressure_mbar * 0.5).toFixed(2)} mbar 자동 필터)
-                    </span>
-                  </label>
-                  <select
-                    value={turboBacking}
-                    onChange={e => { setTurboBacking(e.target.value); setTurboResult(null); }}
-                    className="mt-1 w-full border border-[#E3DFD6] px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-transparent"
-                  >
-                    <option value="">선택</option>
-                    {compatiblePumps.map(p => (
-                      <option key={p.model} value={p.model}>
-                        {p.model} ({p.series}) — {p.speed60Hz} m³/h · ult {p.ultimate} mbar
-                      </option>
-                    ))}
-                  </select>
+                <div className="border border-[#E3DFD6] px-3 py-2 bg-[#F6F4EF] text-[11px] text-[#6A6660] leading-relaxed">
+                  백킹펌프는 <span className="font-semibold text-ink">GXS 시리즈 자동 선정</span> — 챔버 조건에 최적인 모델이 계산 후 표시됩니다.
                 </div>
               )}
 
@@ -1222,8 +1208,10 @@ export default function PumpSelector() {
                       </div>
                       <div className="grid grid-cols-3 gap-3">
                         <div>
-                          <label className="text-[10px] text-[#6A6660]">규격 (기본)</label>
-                          <div className="mt-1 border border-[#E3DFD6] px-3 py-2 text-[13px] bg-[#F6F4EF] text-[#6A6660]">NW40</div>
+                          <label className="text-[10px] text-[#6A6660]">규격 (주배관 기준)</label>
+                          <div className="mt-1 border border-[#E3DFD6] px-3 py-2 text-[13px] bg-[#F6F4EF] text-[#6A6660]">
+                            {form.pipeSpec === "기타" ? (pipeSpecCustom || "—") : (form.pipeSpec || "—")}
+                          </div>
                         </div>
                         <div>
                           <label className="text-[10px] text-[#6A6660]">길이 (m)</label>
@@ -1263,11 +1251,18 @@ export default function PumpSelector() {
               {/* ── 계산 결과 (터보) ─────────────────────────── */}
               {pumpL1 === "터보펌프" && turboResult !== null && (
                 <div className="border border-[#E3DFD6] mt-2">
-                  <div className="px-4 py-2.5 bg-[#F6F4EF] border-b border-[#E3DFD6] flex items-baseline justify-between">
-                    <span className="text-[11px] font-semibold mono uppercase tracking-wider">계산 결과</span>
-                    <span className="text-[10px] text-[#6A6660]">
-                      {turboResult.turboModel} · {turboResult.backingModel}
-                    </span>
+                  <div className="px-4 py-2.5 bg-[#F6F4EF] border-b border-[#E3DFD6]">
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-[11px] font-semibold mono uppercase tracking-wider">계산 결과</span>
+                      <span className="text-[10px] text-[#6A6660]">{turboResult.turboModel}</span>
+                    </div>
+                    {selectedTMPObj && !selectedTMPObj.integrated && (
+                      <div className="mt-1.5 flex items-center gap-1.5">
+                        <span className="text-[9px] bg-ink text-paper px-1.5 py-0.5 font-medium tracking-wide">자동 선정</span>
+                        <span className="text-[12px] font-semibold text-ink">{turboResult.backingModel}</span>
+                        <span className="text-[10px] text-[#6A6660]">백킹펌프 (GXS 시리즈 중 최적)</span>
+                      </div>
+                    )}
                   </div>
                   {!turboResult.reachable ? (
                     <div className="px-4 py-4 text-[12px] text-[#6A6660] leading-relaxed">
@@ -1281,12 +1276,11 @@ export default function PumpSelector() {
                         <div className="flex-1">
                           <div className="text-[12px] font-medium">Stage 1 — 러핑</div>
                           <div className="text-[10px] text-[#6A6660] mono mt-0.5">
-                            대기압 → {turboResult.tmpStartPressure_mbar} mbar (TMP 시동)
+                            대기압 → 0.05 Torr ({TMP_TURNON_MBAR.toFixed(4)} mbar) · {turboResult.backingModel}
                           </div>
                         </div>
                         <div className="shrink-0 text-right">
                           <div className="text-[13px] font-semibold mono">{fmtTime(turboResult.stage1_s, timeUnit)}</div>
-                          <div className="text-[10px] text-[#6A6660]">{turboResult.backingModel}</div>
                         </div>
                       </div>
                       <div className="flex items-center px-4 py-3 border-b border-[#E3DFD6] gap-3">
@@ -1331,8 +1325,8 @@ export default function PumpSelector() {
                   )}
                   <div className="px-4 py-2.5 border-t border-[#E3DFD6] bg-[#F6F4EF]">
                     <p className="text-[10px] text-[#6A6660] leading-relaxed">
-                      ※ TMP 스핀업 시간(1~3분)은 포함되지 않습니다. SUS+Nitrile, 아웃게싱 1.3×10⁻⁷ mbar·L/s·cm² 기준.
-                      최종 선정은 스마텍 전문가 검토를 권장합니다.
+                      ※ TMP 스핀업 시간(1~3분)은 포함되지 않습니다. SUS, 아웃게싱 1.9×10⁻⁷ mbar·L/s·cm² 기준 (챔버 부피로 표면적 자동 추산).
+                      GXS 백킹펌프는 조건 최적 모델 자동 선정. 최종 선정은 스마텍 전문가 검토를 권장합니다.
                     </p>
                   </div>
                 </div>
