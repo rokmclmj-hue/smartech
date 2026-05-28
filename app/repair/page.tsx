@@ -1102,17 +1102,22 @@ export default function RepairPage() {
         .repair-pdf-only { display: none; }
         .repair-pdf-only .pdf-only { display: block !important; }
         @media print {
+          @page { margin: 0; size: A4 portrait; }
+          html, body {
+            height: 297mm !important;
+            overflow: hidden !important;
+            background: #fff !important;
+          }
           body * { visibility: hidden !important; }
           .repair-pdf-only {
             visibility: visible !important;
             display: block !important;
-            position: fixed !important;
-            inset: 0 !important;
+            position: absolute !important;
+            top: 0 !important; left: 0 !important; right: 0 !important;
             z-index: 9999 !important;
             background: #fff !important;
           }
           .repair-pdf-only * { visibility: visible !important; }
-          @page { margin: 0; size: A4 portrait; }
         }
       `}</style>
     </div>
