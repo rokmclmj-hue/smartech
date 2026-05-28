@@ -1,0 +1,13 @@
+# 로컬 전용 폴더
+data/
+.next/
+node_modules/
+scripts/
+blog-agents/
+smartech-cad/
+
+# 용량 큰 정적 파일 (별도 CDN 사용)
+public/catalogs/
+
+# 로컬 실행 파일
+*.bat
