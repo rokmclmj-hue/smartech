@@ -40,6 +40,20 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ files });
   }
 
+  // 사용된 사진 목록 (중복 방지용)
+  const usedParam = searchParams.get("used");
+  if (usedParam === "1") {
+    const { prisma } = await import("@/lib/db");
+    const posts = await prisma.blogPost.findMany({ select: { photos: true } });
+    const used: string[] = [];
+    for (const post of posts) {
+      if (post.photos) {
+        try { used.push(...JSON.parse(post.photos)); } catch {}
+      }
+    }
+    return NextResponse.json({ used: [...new Set(used)] });
+  }
+
   // 전체 폴더 목록
   const folders = fs.existsSync(PHOTO_BASE)
     ? fs.readdirSync(PHOTO_BASE, { withFileTypes: true })

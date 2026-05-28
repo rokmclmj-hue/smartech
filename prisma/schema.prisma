@@ -306,6 +306,7 @@ model BlogPost {
   category    String    @default("일반")
   status      String    @default("DRAFT") // DRAFT | PUBLISHED | ARCHIVED
   sourceFile  String?
+  photos      String?   // JSON: ["04_수리정비/xxx.jpg", ...] — 사용된 현장사진 경로
   publishedAt DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
