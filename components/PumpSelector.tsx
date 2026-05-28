@@ -148,6 +148,21 @@ const T_STATION_BACKING: Record<string, string> = {
   "TPS400 (ISO160)": "nXDS20i",
 };
 
+// TMP 시리즈/모델별 백킹펌프 후보 (고정 매핑 — 실제 운용 조합 기준)
+// model 키가 series 키보다 우선 적용됨
+const TMP_BACKING_MAP: Record<string, string[]> = {
+  "iS":        ["GXS160/1750", "GXS250/2600"],
+  "iXA":       ["GXS250/2600", "GXS450/4200", "GXS750/4200"],
+  "nEXT240D":  ["nXDS10i", "nXDS15i"],
+  "nEXT300D":  ["nXDS10i", "nXDS15i"],
+  "nEXT400D":  ["nXDS10i", "nXDS15i"],
+  "nEXT730D":  ["nXR120i"],
+  "nEXT930D":  ["nXR120i"],
+  "nEXT1230H": ["GXS160/1750"],
+  "nEXT2807M": ["GXS160/1750", "GXS250/2600"],
+  "nEXT3207M": ["GXS250/2600", "GXS450/4200"],
+};
+
 // XDD1 드라이 다이어프램 펌프 — ALL_PUMPS 미등재, 로컬 프록시
 const XDD1_PROXY: PumpModel = {
   model: "XDD1", series: "XDD", type: "dry_scroll",
@@ -414,13 +429,18 @@ export default function PumpSelector() {
           }
           setTurboResult(calcTurboPumpDown(calcInput, tmp, backing));
         } else {
-          // 독립형: GXS 시리즈 전체 자동 비교 → 가장 빠른 모델 선정
-          const gxsPumps = ALL_PUMPS.filter(p =>
-            p.series === "GXS" || p.series === "GXS+GXB"
-          );
+          // 독립형: TMP 모델/시리즈별 고정 백킹펌프 후보 → 가장 빠른 모델 자동 선정
+          const backingNames = TMP_BACKING_MAP[tmp.model] ?? TMP_BACKING_MAP[tmp.series] ?? [];
+          const candidates = backingNames
+            .map(name => ALL_PUMPS.find(p => p.model === name))
+            .filter((p): p is PumpModel => p != null);
+          if (candidates.length === 0) {
+            setTurboError("이 TMP 모델에 대한 백킹펌프 정보가 없습니다.");
+            return;
+          }
           let best: TurboPumpDownResult | null = null;
           let fallback: TurboPumpDownResult | null = null;
-          for (const pump of gxsPumps) {
+          for (const pump of candidates) {
             const r = calcTurboPumpDown(calcInput, tmp, pump);
             if (r.reachable) {
               if (!best || r.totalTime_s < best.totalTime_s) best = r;
@@ -428,7 +448,7 @@ export default function PumpSelector() {
               fallback = r;
             }
           }
-          setTurboResult(best ?? fallback ?? calcTurboPumpDown(calcInput, tmp, gxsPumps[0]));
+          setTurboResult(best ?? fallback ?? calcTurboPumpDown(calcInput, tmp, candidates[0]));
         }
       } catch {
         setTurboError("계산 중 오류가 발생했습니다.");
@@ -1041,12 +1061,17 @@ export default function PumpSelector() {
                 )}
               </div>
 
-              {/* 백킹펌프: GXS 자동 선정 안내 (standalone TMP) */}
-              {pumpL1 === "터보펌프" && selectedTMPObj && !selectedTMPObj.integrated && (
-                <div className="border border-[#E3DFD6] px-3 py-2 bg-[#F6F4EF] text-[11px] text-[#6A6660] leading-relaxed">
-                  백킹펌프는 <span className="font-semibold text-ink">GXS 시리즈 자동 선정</span> — 챔버 조건에 최적인 모델이 계산 후 표시됩니다.
-                </div>
-              )}
+              {/* 백킹펌프: 고정 후보 안내 (standalone TMP) */}
+              {pumpL1 === "터보펌프" && selectedTMPObj && !selectedTMPObj.integrated && (() => {
+                const names = TMP_BACKING_MAP[selectedTMPObj.model] ?? TMP_BACKING_MAP[selectedTMPObj.series] ?? [];
+                if (names.length === 0) return null;
+                return (
+                  <div className="border border-[#E3DFD6] px-3 py-2 bg-[#F6F4EF] text-[11px] text-[#6A6660] leading-relaxed">
+                    백킹펌프 후보: <span className="font-semibold text-ink">{names.join(" / ")}</span>
+                    {names.length > 1 && <span className="ml-1">— 계산 후 최적 모델 자동 선정</span>}
+                  </div>
+                );
+              })()}
 
               {/* 챔버볼륨 + 목표압력 (같은 행) */}
               <div className="grid grid-cols-2 gap-3">
@@ -1325,8 +1350,8 @@ export default function PumpSelector() {
                   )}
                   <div className="px-4 py-2.5 border-t border-[#E3DFD6] bg-[#F6F4EF]">
                     <p className="text-[10px] text-[#6A6660] leading-relaxed">
-                      ※ TMP 스핀업 시간(1~3분)은 포함되지 않습니다. SUS, 아웃게싱 1.9×10⁻⁷ mbar·L/s·cm² 기준 (챔버 부피로 표면적 자동 추산).
-                      GXS 백킹펌프는 조건 최적 모델 자동 선정. 최종 선정은 스마텍 전문가 검토를 권장합니다.
+                      ※ TMP 스핀업 시간(1~3분)은 포함되지 않습니다. SUS, 아웃게싱 시간 의존형 모델(1.9×10⁻⁷ mbar·L/s·cm² @ 1h 기준) 적용.
+                      백킹펌프는 TMP 모델별 실운용 조합 중 최적 자동 선정. 최종 선정은 스마텍 전문가 검토를 권장합니다.
                     </p>
                   </div>
                 </div>

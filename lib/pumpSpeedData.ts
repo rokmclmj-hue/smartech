@@ -393,7 +393,7 @@ const nXDS: PumpModel[] = [
   },
   {
     model:"nXDS15i", series:"nXDS", type:"dry_scroll",
-    speed50Hz:12.5, speed60Hz:15.0, ultimate:5e-3, motorKW_50Hz:0.40, inletFlange:"NW40",
+    speed50Hz:12.5, speed60Hz:15.0, ultimate:5e-3, motorKW_50Hz:0.40, inletFlange:"NW25",
     speedCurve: [
       [518.29899, 13.9954], [266.7463, 14.6436], [139.89973, 14.9467], [71.93699, 15.0463],
       [36.89131, 15.0245], [18.98006, 14.9918], [10.2239, 14.8413], [5.23432, 14.3405],
@@ -1570,16 +1570,29 @@ export function calcTurboPumpDown(
     : S_tmp_m3h;
   const Seff_s = Seff_m3h / 3600;
 
-  const P_ult_sys = Math.max(tmp.ultimate_mbar, Q_out / Seff_s);
-  const reachable = s1.reachable && targetPressure_mbar > P_ult_sys;
+  // Stage 2: 수치 ODE — 아웃게싱 시간 의존형, Stage 1 경과 시간 이어받기
+  // Q(t) = Q_out × max(1, 3600/t_total) — 펌핑 시간에 따라 아웃게싱 감소
+  const t1_s = s1.pumpDownTime_s;
+  let P2 = tmpStart;
+  let t2_s = 0;
+  const maxT2 = 86400; // 24h 상한
 
-  const P0 = tmpStart;
-  const Pt = Math.max(targetPressure_mbar, P_ult_sys * 1.001);
-  const stage2_s = reachable
-    ? Math.max(0, Math.round((V / Seff_s) * Math.log((P0 - P_ult_sys) / (Pt - P_ult_sys))))
-    : Infinity;
+  while (t2_s < maxT2) {
+    const t_total = Math.max(t1_s + t2_s, 1);
+    const Q = Q_out * Math.max(1, 3600 / t_total);
+    const dPdt = (-Seff_s * P2 + Q) / V;
+    const dt = dPdt < 0
+      ? Math.min(60.0, Math.max(0.01, 0.02 * P2 / (-dPdt + 1e-30)))
+      : 60.0; // 아웃게싱 우세 구간: 시간만 진행하여 Q 자연 감소 대기
+    if (dPdt < 0) P2 = Math.max(P2 + dPdt * dt, tmp.ultimate_mbar);
+    t2_s += dt;
+    if (P2 <= targetPressure_mbar || P2 <= tmp.ultimate_mbar) break;
+  }
 
-  const total_s = reachable ? s1.pumpDownTime_s + stage2_s : Infinity;
+  const stage2_s  = P2 <= targetPressure_mbar ? Math.round(t2_s) : Infinity;
+  const P_ult_sys = Math.max(tmp.ultimate_mbar, Q_out / Seff_s); // 1h 기준 시스템 한계 (표시용)
+  const reachable = s1.reachable && P2 <= targetPressure_mbar;
+  const total_s   = reachable ? s1.pumpDownTime_s + stage2_s : Infinity;
 
   return {
     turboModel:            tmp.model,
@@ -1587,8 +1600,8 @@ export function calcTurboPumpDown(
     stage1_s:              s1.pumpDownTime_s,
     stage1_min:            s1.pumpDownTime_min,
     tmpStartPressure_mbar: tmpStart,
-    stage2_s:              reachable ? stage2_s : Infinity,
-    stage2_min:            reachable ? Math.round(stage2_s / 60 * 10) / 10 : Infinity,
+    stage2_s,
+    stage2_min:            isFinite(stage2_s) ? Math.round(stage2_s / 60 * 10) / 10 : Infinity,
     tmpEffSpeed_Ls:        Math.round(Seff_m3h / 3.6 * 10) / 10,
     ultimateSystem_mbar:   P_ult_sys,
     totalTime_s:           reachable ? total_s : Infinity,
