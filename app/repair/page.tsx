@@ -1076,9 +1076,16 @@ export default function RepairPage() {
       <style>{`
         .repair-pdf-only { display: none; }
         @media print {
-          .repair-no-print, main, header, nav { display: none !important; }
-          .repair-pdf-only { display: block !important; }
-          body { background: #111 !important; margin: 0; padding: 0; }
+          body * { visibility: hidden !important; }
+          .repair-pdf-only {
+            visibility: visible !important;
+            display: block !important;
+            position: fixed !important;
+            inset: 0 !important;
+            z-index: 9999 !important;
+            background: #111 !important;
+          }
+          .repair-pdf-only * { visibility: visible !important; }
           @page { margin: 0; size: A4; }
         }
       `}</style>
