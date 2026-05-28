@@ -82,6 +82,12 @@ function loadBrandVoice() {
   return fs.readFileSync(path.join(root, 'data/brand/brand-voice.md'), 'utf8');
 }
 
+function loadCeoVoiceGuide() {
+  try {
+    return fs.readFileSync(path.join(root, 'data/brand/이명재_말투_가이드.md'), 'utf8');
+  } catch { return ''; }
+}
+
 function loadAllProductMaster() {
   const dir = path.join(root, 'data/Product_master_table');
   try {
@@ -342,8 +348,9 @@ async function runATeam(isMonday, keywords, recentEmails, callTranscripts) {
 // B팀: 콘텐츠 작성 (직렬)
 // ===========================
 
-async function runBTeam(topicText, title, category, emailData, callTranscripts) {
+async function runBTeam(topicText, title, category, emailData, callTranscripts, ceoVoice) {
   const catRule = CATEGORY_RULES[category] || '';
+  const ceoVoiceSection = ceoVoice ? `\n\n[대표 말투 가이드 — 이 스타일로 글 쓸 것]\n${ceoVoice.slice(0, 2000)}` : '';
   const callInfo = callTranscripts
     ? `\n\n[실제 통화 상담 기록 (최근)]\n${callTranscripts.slice(0, 2000)}`
     : '';
@@ -364,7 +371,7 @@ async function runBTeam(topicText, title, category, emailData, callTranscripts) 
 
   // B3: 네이버 작가
   const draft = await callAgent(
-    `당신은 스마텍 B3 네이버 작가입니다. B1의 기술 내용과 B2의 현장 사례를 통합해 완성도 높은 네이버 블로그 글을 작성합니다.\n\n${BRAND_RULES}\n\n${catRule}`,
+    `당신은 스마텍 B3 네이버 작가입니다. B1의 기술 내용과 B2의 현장 사례를 통합해 완성도 높은 네이버 블로그 글을 작성합니다.\n\n${BRAND_RULES}\n\n${catRule}${ceoVoiceSection}`,
     `다음 자료를 모두 활용해 완성된 블로그 글을 작성하세요.\n\n주제: ${topicText}\n\n[B1 기술 내용]\n${b1}\n\n[B2 현장 사례]\n${b2}\n\n[추가 규칙]\n- 글 분량: 900~1300자\n- 소제목(##)으로 구조화\n- 글 중간 적절한 위치에 [DIAGRAM] 자리표시자 1개 삽입\n\n완성된 블로그 글:`,
     'B3 네이버작가', 2048
   );
@@ -441,9 +448,10 @@ async function runCTeam(draft, referenceDB, allProductMaster) {
   return { passed, feedback, detail: `C1:\n${c1}\n\nC2:\n${c2}\n\nC3:\n${c3}\n\nC팀장:\n${cLeader}` };
 }
 
-async function reviseDraft(draft, feedback) {
+async function reviseDraft(draft, feedback, ceoVoice) {
+  const ceoVoiceSection = ceoVoice ? `\n\n[대표 말투 가이드]\n${ceoVoice.slice(0, 1500)}` : '';
   return await callAgent(
-    `당신은 스마텍 B3 네이버 작가입니다. C팀의 검수 피드백을 반영해 초안을 수정합니다.\n\n${BRAND_RULES}`,
+    `당신은 스마텍 B3 네이버 작가입니다. C팀의 검수 피드백을 반영해 초안을 수정합니다.\n\n${BRAND_RULES}${ceoVoiceSection}`,
     `다음 초안을 C팀 피드백에 따라 수정하세요.
 
 [C팀 수정 지시사항]
@@ -751,9 +759,10 @@ async function main() {
 
   // 카테고리별 이메일 로드
   const emailData = loadEmailsByCategory(category);
+  const ceoVoice = loadCeoVoiceGuide();
 
   // B팀: 콘텐츠 작성 (직렬 B1→B2→B3)
-  let draft = await runBTeam(topicText, title, category, emailData, callTranscripts);
+  let draft = await runBTeam(topicText, title, category, emailData, callTranscripts, ceoVoice);
 
   // C팀: 품질 검수 (최대 2회, 1회 반려 시 재작성)
   let passed = false;
@@ -771,7 +780,7 @@ async function main() {
 
     if (attempt === 1) {
       console.log('\n🔄 1회 반려 — B3 수정 재작성...');
-      draft = await reviseDraft(draft, cResult.feedback);
+      draft = await reviseDraft(draft, cResult.feedback, ceoVoice);
     } else {
       console.log('\n🚨 2회 연속 반려 — 에스컬레이션');
       saveEscalation(draft, cResult.feedback, topicText);
