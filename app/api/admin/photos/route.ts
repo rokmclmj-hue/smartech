@@ -40,15 +40,17 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ files });
   }
 
-  // 사용된 사진 목록 (중복 방지용)
+  // 사용된 사진 목록 (중복 방지용) — raw SQL (photos 필드 신규 추가)
   const usedParam = searchParams.get("used");
   if (usedParam === "1") {
     const { prisma } = await import("@/lib/db");
-    const posts = await prisma.blogPost.findMany({ select: { photos: true } });
+    const rows = await prisma.$queryRaw<{ photos: string | null }[]>`
+      SELECT photos FROM "BlogPost" WHERE photos IS NOT NULL AND photos != ''
+    `;
     const used: string[] = [];
-    for (const post of posts) {
-      if (post.photos) {
-        try { used.push(...JSON.parse(post.photos)); } catch {}
+    for (const row of rows) {
+      if (row.photos) {
+        try { used.push(...JSON.parse(row.photos)); } catch {}
       }
     }
     return NextResponse.json({ used: [...new Set(used)] });

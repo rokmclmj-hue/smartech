@@ -67,11 +67,21 @@ export async function PATCH(req: Request) {
     }
   }
 
-  const post = await prisma.blogPost.update({
-    where: { id: Number(id) },
-    data: updates,
-  });
-  return NextResponse.json({ id: post.id });
+  // photos 필드는 신규 추가 컬럼 — raw SQL로 별도 처리
+  if ("photos" in updates) {
+    const photosVal = updates.photos ?? null;
+    await prisma.$executeRaw`
+      UPDATE "BlogPost" SET photos = ${photosVal}, "updatedAt" = NOW() WHERE id = ${Number(id)}
+    `;
+    delete updates.photos;
+  }
+
+  // 나머지 필드 업데이트
+  if (Object.keys(updates).length > 0) {
+    await prisma.blogPost.update({ where: { id: Number(id) }, data: updates });
+  }
+
+  return NextResponse.json({ id: Number(id) });
 }
 
 // DELETE: 글 삭제
