@@ -77,6 +77,19 @@ export default function AiPipelinePage() {
     }
   };
 
+  // 파일 삭제
+  const deleteFile = async (filename: string) => {
+    if (!confirm(`"${filename}" 파일을 삭제하시겠습니까?`)) return;
+    const res = await fetch(`/api/admin/ai-pipeline?file=${encodeURIComponent(filename)}`, { method: "DELETE" });
+    if (res.ok) {
+      showToast("삭제되었습니다", true);
+      if (selected?.filename === filename) setSelected(null);
+      load();
+    } else {
+      showToast("삭제 실패", false);
+    }
+  };
+
   // 폴더 내 사진 목록 로드
   const loadFolderPhotos = async (folder: string) => {
     const res = await fetch(`/api/admin/photos?folder=${encodeURIComponent(folder)}`);
@@ -164,10 +177,10 @@ export default function AiPipelinePage() {
       ) : (
         <div className="space-y-2">
           {filtered.map((post) => (
+            <div key={post.filename} className="relative group/row border hair hover:border-ink/30 transition-colors">
             <button
-              key={post.filename}
               onClick={() => openDetail(post.filename)}
-              className="w-full text-left border hair px-5 py-4 hover:border-ink/30 hover:bg-ink/[0.02] transition-colors group"
+              className="w-full text-left px-5 py-4 hover:bg-ink/[0.02] transition-colors group"
             >
               <div className="flex items-start gap-3 md:gap-4">
                 {/* 상태 배지 */}
@@ -214,6 +227,12 @@ export default function AiPipelinePage() {
                 )}
               </div>
             </button>
+            {/* 삭제 버튼 */}
+            <button
+              onClick={(e) => { e.stopPropagation(); deleteFile(post.filename); }}
+              className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover/row:opacity-100 transition-opacity text-[10px] text-red-500 hover:text-red-700 border border-red-200 hover:border-red-400 px-2 py-1 bg-paper"
+            >삭제</button>
+            </div>
           ))}
         </div>
       )}

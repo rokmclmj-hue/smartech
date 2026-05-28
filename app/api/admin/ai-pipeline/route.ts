@@ -139,3 +139,24 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ id: post.id });
 }
+
+// DELETE: 파일 삭제 (에스컬레이션 or 통과 파일)
+export async function DELETE(req: Request) {
+  const session = await getAdminSession();
+  if (!session) return NextResponse.json({ error: "권한 없음" }, { status: 403 });
+
+  const { searchParams } = new URL(req.url);
+  const file = searchParams.get("file");
+  if (!file || !file.endsWith(".md")) {
+    return NextResponse.json({ error: "파일명 필수" }, { status: 400 });
+  }
+
+  const contentDir = path.join(process.cwd(), "data", "콘텐츠");
+  const filePath = path.join(contentDir, file);
+  if (!fs.existsSync(filePath)) {
+    return NextResponse.json({ error: "파일 없음" }, { status: 404 });
+  }
+
+  fs.unlinkSync(filePath);
+  return NextResponse.json({ ok: true });
+}

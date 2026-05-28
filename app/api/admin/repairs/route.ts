@@ -83,3 +83,15 @@ export async function PATCH(req: NextRequest) {
 
   return NextResponse.json({ repair: updated });
 }
+
+// DELETE /api/admin/repairs?id=X — 수리 접수 삭제
+export async function DELETE(req: NextRequest) {
+  const session = await auth();
+  if (!isAdmin(session)) return NextResponse.json({ error: "권한 없음" }, { status: 403 });
+
+  const id = Number(new URL(req.url).searchParams.get("id"));
+  if (!id) return NextResponse.json({ error: "id 필수" }, { status: 400 });
+
+  await prisma.repairRequest.delete({ where: { id } });
+  return NextResponse.json({ ok: true });
+}

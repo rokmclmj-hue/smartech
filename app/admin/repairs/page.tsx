@@ -115,6 +115,17 @@ export default function AdminRepairsPage() {
     loadFiles(r.id);
   }
 
+  async function deleteRepair(id: number, repairNo: string) {
+    if (!confirm(`${repairNo} 접수를 삭제하시겠습니까?\n삭제 후 복구할 수 없습니다.`)) return;
+    const res = await fetch(`/api/admin/repairs?id=${id}`, { method: "DELETE" });
+    if (res.ok) {
+      if (selected?.id === id) setSelected(null);
+      load();
+    } else {
+      alert("삭제 실패");
+    }
+  }
+
   async function saveModel() {
     if (!selected || !editModel.trim()) return;
     setSavingModel(true);
@@ -292,7 +303,7 @@ export default function AdminRepairsPage() {
                 <tr
                   key={r.id}
                   onClick={() => openDetail(r)}
-                  className="border-b border-line hover:bg-paper/80 cursor-pointer transition"
+                  className="border-b border-line hover:bg-paper/80 cursor-pointer transition group"
                 >
                   <td className="px-4 py-3 mono font-semibold text-[12px]">{r.repairNo}</td>
                   <td className="px-4 py-3">
@@ -344,7 +355,15 @@ export default function AdminRepairsPage() {
                       )}
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-dim text-[11px] mono">{formatDate(r.createdAt)}</td>
+                  <td className="px-4 py-3 text-dim text-[11px] mono">
+                    <div className="flex items-center gap-2">
+                      <span>{formatDate(r.createdAt)}</span>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); deleteRepair(r.id, r.repairNo); }}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity text-[10px] text-red-500 hover:text-red-700 border border-red-200 hover:border-red-400 px-1.5 py-0.5"
+                      >삭제</button>
+                    </div>
+                  </td>
                 </tr>
               );
             })}
