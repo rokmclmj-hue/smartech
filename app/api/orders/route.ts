@@ -4,6 +4,34 @@ import { prisma } from "@/lib/db";
 import { sendBusinessDocRequest } from "@/lib/mailer";
 import { notifyOrderConfirmed } from "@/lib/solapi";
 
+export async function GET() {
+  const session = await auth();
+  if (!session?.user) {
+    return NextResponse.json({ error: "로그인이 필요합니다." }, { status: 401 });
+  }
+
+  const userId = parseInt((session.user as any).id);
+  const tier = (session.user as any).tier as string;
+  const isAdmin = tier === "ADMIN";
+
+  const orders = await prisma.order.findMany({
+    where: isAdmin ? {} : { userId },
+    include: {
+      quote: {
+        include: {
+          items: {
+            include: { product: { select: { partNo: true, description: true } } },
+          },
+        },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+    take: 50,
+  });
+
+  return NextResponse.json({ orders });
+}
+
 export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user) {

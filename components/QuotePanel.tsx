@@ -18,6 +18,7 @@ type Props = {
 export default function QuotePanel({ open, onClose }: Props) {
   const { data: session } = useSession();
   const [items, setItems] = useState<CartItem[]>([]);
+  const [priceMap, setPriceMap] = useState<Map<number, number | null>>(new Map());
   const [showLoginGate, setShowLoginGate] = useState(false);
 
   function loadItems() {
@@ -29,12 +30,32 @@ export default function QuotePanel({ open, onClose }: Props) {
     }
   }
 
+  async function fetchPrices(cartItems: CartItem[]) {
+    if (cartItems.length === 0) return;
+    const ids = cartItems.map((i) => i.productId).join(",");
+    try {
+      const data = await fetch(`/api/products?ids=${ids}&limit=200`).then((r) => r.json());
+      const map = new Map<number, number | null>(
+        (data.products ?? []).map((p: any) => [p.id, p.displayPrice ?? null])
+      );
+      setPriceMap(map);
+    } catch {
+      setPriceMap(new Map());
+    }
+  }
+
   useEffect(() => {
     if (open) {
       loadItems();
       setShowLoginGate(false);
     }
   }, [open]);
+
+  useEffect(() => {
+    if (open && items.length > 0) {
+      fetchPrices(items);
+    }
+  }, [open, items.length]);
 
   useEffect(() => {
     window.addEventListener("quoteCartUpdated", loadItems);
@@ -131,35 +152,45 @@ export default function QuotePanel({ open, onClose }: Props) {
             <div className="p-6 text-center text-dim text-sm">담긴 제품이 없습니다.</div>
           ) : (
             <div className="divide-y hair">
-              {items.map((item) => (
-                <div key={item.productId} className="px-4 py-3 hover:bg-edred/[0.03] transition-colors">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex-1 min-w-0">
-                      <div className="mono text-[11px] text-dim">{item.partNo}</div>
-                      <div className="text-[13px] leading-snug mt-0.5">{item.description}</div>
-                    </div>
-                    <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
-                      <input
-                        type="number"
-                        min={1}
-                        value={item.quantity}
-                        onChange={(e) =>
-                          updateQty(item.productId, parseInt(e.target.value) || 1)
-                        }
-                        className="w-12 border hair px-1 py-1.5 text-[12px] text-center focus:outline-none focus:border-ink bg-transparent"
-                        aria-label="수량"
-                      />
-                      <button
-                        onClick={() => removeItem(item.productId)}
-                        className="px-2.5 py-1.5 text-[14px] border hair border-ink/20 hover:bg-edred hover:text-paper hover:border-edred transition-colors leading-none"
-                        aria-label="삭제"
-                      >
-                        ×
-                      </button>
+              {items.map((item) => {
+                const unitPrice = priceMap.get(item.productId) ?? null;
+                const lineSubtotal = unitPrice != null ? unitPrice * item.quantity : null;
+                return (
+                  <div key={item.productId} className="px-4 py-3 hover:bg-edred/[0.03] transition-colors">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="mono text-[11px] text-dim">{item.partNo}</div>
+                        <div className="text-[13px] leading-snug mt-0.5">{item.description}</div>
+                        {lineSubtotal != null && (
+                          <div className="mono text-[11px] text-dim mt-1">
+                            {unitPrice!.toLocaleString("ko-KR")}원 × {item.quantity} ={" "}
+                            <span className="text-ink font-semibold">{lineSubtotal.toLocaleString("ko-KR")}원</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
+                        <input
+                          type="number"
+                          min={1}
+                          value={item.quantity}
+                          onChange={(e) =>
+                            updateQty(item.productId, parseInt(e.target.value) || 1)
+                          }
+                          className="w-12 border hair px-1 py-1.5 text-[12px] text-center focus:outline-none focus:border-ink bg-transparent"
+                          aria-label="수량"
+                        />
+                        <button
+                          onClick={() => removeItem(item.productId)}
+                          className="px-2.5 py-1.5 text-[14px] border hair border-ink/20 hover:bg-edred hover:text-paper hover:border-edred transition-colors leading-none"
+                          aria-label="삭제"
+                        >
+                          ×
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -167,6 +198,21 @@ export default function QuotePanel({ open, onClose }: Props) {
         {/* 푸터 */}
         {items.length > 0 && (
           <div className="px-6 py-4 border-t hair shrink-0 space-y-2">
+            {/* 소계 합계 */}
+            {(() => {
+              const total = items.reduce((sum, item) => {
+                const up = priceMap.get(item.productId) ?? null;
+                return up != null ? sum + up * item.quantity : sum;
+              }, 0);
+              const hasPrices = items.some((item) => priceMap.get(item.productId) != null);
+              if (!hasPrices) return null;
+              return (
+                <div className="flex justify-between items-center py-2 border-b hair mb-1">
+                  <span className="text-[12px] text-dim">소계 (VAT 별도)</span>
+                  <span className="mono text-[14px] font-semibold">{total.toLocaleString("ko-KR")}원</span>
+                </div>
+              );
+            })()}
             <button
               onClick={handleSavePdf}
               className="w-full py-3 bg-edred text-paper text-[13px] mono tracking-wider hover:bg-ink transition-colors"

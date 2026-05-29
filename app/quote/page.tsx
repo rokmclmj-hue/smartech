@@ -25,6 +25,7 @@ export default function QuotePage() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [note, setNote] = useState("");
   const [taxInvoiceRequested, setTaxInvoiceRequested] = useState(false);
+  const [orderRequested, setOrderRequested] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState<number | null>(null);
 
@@ -43,12 +44,14 @@ export default function QuotePage() {
       .filter((i) => i.quantity > 0);
     setCart(updated);
     localStorage.setItem("quoteCart", JSON.stringify(updated));
+    window.dispatchEvent(new Event("quoteCartUpdated"));
   }
 
   function remove(productId: number) {
     const updated = cart.filter((i) => i.productId !== productId);
     setCart(updated);
     localStorage.setItem("quoteCart", JSON.stringify(updated));
+    window.dispatchEvent(new Event("quoteCartUpdated"));
   }
 
   /** 등급 배수로 단가 계산 (클라이언트 추정치, 실제는 서버에서 계산) */
@@ -77,13 +80,14 @@ export default function QuotePage() {
         body: JSON.stringify({
           items: cart.map((i) => ({ productId: i.productId, quantity: i.quantity })),
           taxInvoiceRequested,
-          note,
+          note: [orderRequested ? "[발주서 진행 요청]" : "", note].filter(Boolean).join(" "),
         }),
       });
       if (res.ok) {
         const data = await res.json();
         setDone(data.quoteId);
         localStorage.removeItem("quoteCart");
+        window.dispatchEvent(new Event("quoteCartUpdated"));
         setCart([]);
       } else {
         const err = await res.json().catch(() => ({}));
@@ -137,7 +141,7 @@ export default function QuotePage() {
             견적서 확인
           </Link>
           <Link
-            href="/products"
+            href="/#products"
             className="bg-gray-100 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-200 transition-colors"
           >
             제품 계속 보기
@@ -317,8 +321,22 @@ export default function QuotePage() {
             />
           </div>
 
-          {/* 세금계산서 신청 */}
+          {/* 발주서 요청 */}
           <div className="mt-4 flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3">
+            <input
+              type="checkbox"
+              id="orderRequest"
+              checked={orderRequested}
+              onChange={(e) => setOrderRequested(e.target.checked)}
+              className="w-4 h-4 text-blue-600 border-gray-300 rounded cursor-pointer"
+            />
+            <label htmlFor="orderRequest" className="text-sm text-gray-700 cursor-pointer">
+              발주서 진행을 요청합니다
+            </label>
+          </div>
+
+          {/* 세금계산서 신청 */}
+          <div className="mt-2 flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3">
             <input
               type="checkbox"
               id="taxInvoice"

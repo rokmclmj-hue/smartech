@@ -1,4 +1,5 @@
 import React from "react";
+import path from "path";
 import {
   Document,
   Page,
@@ -6,10 +7,19 @@ import {
   View,
   StyleSheet,
   renderToBuffer,
+  Font,
   type DocumentProps,
 } from "@react-pdf/renderer";
 import { VAT_RATE } from "./constants";
 import { SMARTECH_COMPANY } from "./company";
+
+Font.register({
+  family: "Pretendard",
+  fonts: [
+    { src: path.join(process.cwd(), "public", "fonts", "Pretendard-Regular.ttf"), fontWeight: 400 },
+    { src: path.join(process.cwd(), "public", "fonts", "Pretendard-Bold.ttf"),    fontWeight: 700 },
+  ],
+});
 
 export interface QuoteForPdf {
   id: number;
@@ -37,7 +47,7 @@ export interface QuoteForPdf {
 
 const S = StyleSheet.create({
   page: {
-    fontFamily: "Helvetica",
+    fontFamily: "Pretendard",
     fontSize: 9,
     paddingTop: 36,
     paddingBottom: 50,
@@ -59,7 +69,7 @@ const S = StyleSheet.create({
   topBarLeft: {
     color: "#ffffff",
     fontSize: 7,
-    fontFamily: "Helvetica",
+    fontFamily: "Pretendard",
     letterSpacing: 1,
   },
   topBarRight: {
@@ -81,7 +91,7 @@ const S = StyleSheet.create({
   titleLeft: {},
   quoteTitle: {
     fontSize: 26,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: "Pretendard", fontWeight: 700,
     color: "#111111",
     letterSpacing: 6,
   },
@@ -96,7 +106,7 @@ const S = StyleSheet.create({
   },
   quoteNo: {
     fontSize: 11,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: "Pretendard", fontWeight: 700,
     color: "#111111",
     letterSpacing: 1,
   },
@@ -115,7 +125,7 @@ const S = StyleSheet.create({
   },
   sectionLabel: {
     fontSize: 7,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: "Pretendard", fontWeight: 700,
     color: "#888888",
     letterSpacing: 2,
     marginBottom: 4,
@@ -137,14 +147,14 @@ const S = StyleSheet.create({
   },
   toFromLabel: {
     fontSize: 7,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: "Pretendard", fontWeight: 700,
     color: "#888888",
     letterSpacing: 2,
     marginBottom: 6,
   },
   toFromCompany: {
     fontSize: 11,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: "Pretendard", fontWeight: 700,
     color: "#111111",
     marginBottom: 3,
   },
@@ -177,7 +187,7 @@ const S = StyleSheet.create({
   },
   grandTotalAmount: {
     fontSize: 22,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: "Pretendard", fontWeight: 700,
     color: "#111111",
   },
   grandTotalSub: {
@@ -201,7 +211,7 @@ const S = StyleSheet.create({
   breakdownValue: {
     fontSize: 8,
     color: "#111111",
-    fontFamily: "Helvetica-Bold",
+    fontFamily: "Pretendard", fontWeight: 700,
   },
   taxBadge: {
     backgroundColor: "#111111",
@@ -229,7 +239,7 @@ const S = StyleSheet.create({
   },
   thCell: {
     color: "#ffffff",
-    fontFamily: "Helvetica-Bold",
+    fontFamily: "Pretendard", fontWeight: 700,
     fontSize: 7,
     letterSpacing: 1,
   },
@@ -254,8 +264,8 @@ const S = StyleSheet.create({
   colAmount: { width: "15%", textAlign: "right" },
 
   tdNormal: { fontSize: 8, color: "#222222" },
-  tdCode:   { fontSize: 7, color: "#333333", fontFamily: "Helvetica-Bold" },
-  tdAmount: { fontSize: 8, color: "#111111", fontFamily: "Helvetica-Bold" },
+  tdCode:   { fontSize: 7, color: "#333333", fontFamily: "Pretendard", fontWeight: 700 },
+  tdAmount: { fontSize: 8, color: "#111111", fontFamily: "Pretendard", fontWeight: 700 },
 
   // ── Section 04: 합계
   summaryArea: {
@@ -282,8 +292,8 @@ const S = StyleSheet.create({
   },
   sumLabel:  { fontSize: 8, color: "#555555" },
   sumValue:  { fontSize: 8, color: "#111111" },
-  sumTLabel: { fontSize: 10, fontFamily: "Helvetica-Bold", color: "#111111" },
-  sumTValue: { fontSize: 10, fontFamily: "Helvetica-Bold", color: "#111111" },
+  sumTLabel: { fontSize: 10, fontFamily: "Pretendard", fontWeight: 700, color: "#111111" },
+  sumTValue: { fontSize: 10, fontFamily: "Pretendard", fontWeight: 700, color: "#111111" },
 
   // ── Section 05: 신뢰 배지
   badgeRow: {
@@ -300,7 +310,7 @@ const S = StyleSheet.create({
   },
   badgeTitle: {
     fontSize: 7,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: "Pretendard", fontWeight: 700,
     color: "#111111",
     marginBottom: 2,
     textAlign: "center",
@@ -355,14 +365,14 @@ const S = StyleSheet.create({
   },
   sigLabel: {
     fontSize: 7,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: "Pretendard", fontWeight: 700,
     color: "#888888",
     letterSpacing: 1,
     marginBottom: 4,
   },
   sigName: {
     fontSize: 9,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: "Pretendard", fontWeight: 700,
     color: "#111111",
     marginBottom: 2,
   },
@@ -489,7 +499,7 @@ function QuoteDocument({ quote }: { quote: QuoteForPdf }) {
             el(Text, { style: S.breakdownValue }, fmt(vat))
           ),
           el(View, { style: { ...S.breakdownRow, borderTop: "1 solid #cccccc", paddingTop: 4, marginTop: 2 } },
-            el(Text, { style: { ...S.breakdownLabel, fontFamily: "Helvetica-Bold" } }, "합계 (Total)"),
+            el(Text, { style: { ...S.breakdownLabel, fontFamily: "Pretendard", fontWeight: 700 } }, "합계 (Total)"),
             el(Text, { style: { ...S.breakdownValue, fontSize: 10 } }, fmt(grand))
           )
         )
@@ -768,7 +778,7 @@ function DeliveryNoteDocument({ data }: { data: DeliveryNoteForPdf }) {
             el(Text, { style: S.breakdownValue }, fmt(totalVat))
           ),
           el(View, { style: { ...S.breakdownRow, borderTop: "1 solid #cccccc", paddingTop: 4, marginTop: 2 } },
-            el(Text, { style: { ...S.breakdownLabel, fontFamily: "Helvetica-Bold" } }, "합계 (Total)"),
+            el(Text, { style: { ...S.breakdownLabel, fontFamily: "Pretendard", fontWeight: 700 } }, "합계 (Total)"),
             el(Text, { style: { ...S.breakdownValue, fontSize: 10 } }, fmt(grand))
           )
         )
