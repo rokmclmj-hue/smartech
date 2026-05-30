@@ -1,5 +1,6 @@
 import { MetadataRoute } from "next";
 import { prisma } from "@/lib/db";
+import { INDUSTRIES } from "@/lib/industries";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +21,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
+  const industryEntries: MetadataRoute.Sitemap = INDUSTRIES.map((ind) => ({
+    url: `${BASE_URL}/industries/${ind.slug}`,
+    lastModified: new Date(),
+    changeFrequency: "monthly",
+    priority: 0.8,
+  }));
+
   return [
     // 홈
     { url: BASE_URL, lastModified: new Date(), changeFrequency: "weekly", priority: 1.0 },
@@ -29,6 +37,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/products`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
     // 수리 접수
     { url: `${BASE_URL}/repair`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
+    // 산업 분야 20개
+    ...industryEntries,
     // 개별 블로그 글
     ...blogEntries,
   ];
