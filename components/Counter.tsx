@@ -40,7 +40,7 @@ export default function Counter({
   }, []);
 
   if (!ready) {
-    return <span className={`tabular ${className}`}>0</span>;
+    return <span className={`tabular ${className}`}>{to.toLocaleString()}</span>;
   }
 
   return (
