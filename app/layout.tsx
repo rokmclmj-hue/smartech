@@ -23,10 +23,77 @@ export const metadata: Metadata = {
   },
 };
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://www.smartechvacuum.com/#organization",
+      "name": "(주)스마텍",
+      "alternateName": ["Smartech", "스마텍"],
+      "url": "https://www.smartechvacuum.com",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://www.smartechvacuum.com/icon.png",
+      },
+      "telephone": "031-204-7170",
+      "email": "rokmclmj@gmail.com",
+      "foundingDate": "2011",
+      "description": "Edwards Vacuum 한국 공식 대리점. 진공펌프 판매·수리·기술상담 토탈 솔루션. 2011년 창업, 30년 이상 Edwards 전문 기술력.",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "신원로55, 테크트리지식산업센터 907호",
+        "addressLocality": "수원시 영통구",
+        "addressRegion": "경기도",
+        "addressCountry": "KR",
+      },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "031-204-7170",
+        "contactType": "customer service",
+        "availableLanguage": "Korean",
+        "hoursAvailable": "Mo-Su 00:00-23:59",
+      },
+    },
+    {
+      "@type": "LocalBusiness",
+      "@id": "https://www.smartechvacuum.com/#local-suwon",
+      "name": "스마텍 본사",
+      "parentOrganization": { "@id": "https://www.smartechvacuum.com/#organization" },
+      "url": "https://www.smartechvacuum.com",
+      "telephone": "031-204-7170",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "신원로55, 테크트리지식산업센터 907호",
+        "addressLocality": "수원시 영통구",
+        "addressRegion": "경기도",
+        "addressCountry": "KR",
+      },
+    },
+    {
+      "@type": "LocalBusiness",
+      "@id": "https://www.smartechvacuum.com/#local-cheonan",
+      "name": "스마텍 천안수리센터",
+      "parentOrganization": { "@id": "https://www.smartechvacuum.com/#organization" },
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "두정공원 2길 49",
+        "addressLocality": "천안시 서북구",
+        "addressRegion": "충청남도",
+        "addressCountry": "KR",
+      },
+    },
+  ],
+};
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko">
       <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
