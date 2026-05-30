@@ -425,7 +425,7 @@ export default function Home() {
                 <a href="mailto:rokmclmj@gmail.com" className="block hover:text-edred transition-colors">✉ rokmclmj@gmail.com</a>
                 <a href="tel:031-204-7170" className="block hover:text-edred transition-colors">☏ 031-204-7170 <span className="text-edred">· 24/7</span></a>
                 <div>사업자번호 : 270-88-00854</div>
-                <div>수원사무소 : 경기도 수원시 영통구 신원로55, 테크트리 #907</div>
+                <div>수원사무소 : 경기 수원시 영통구 신원로55, 테크트리 #907</div>
                 <div>천안AS센터 : 충남 천안시 서북구 두정공원2길 49</div>
               </div>
             </div>
