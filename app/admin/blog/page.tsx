@@ -194,6 +194,17 @@ export default function AdminBlogPage() {
     }
   };
 
+  const copyForNaver = () => {
+    if (!selected) return;
+    const text = selected.content
+      .replace(/!\[.*?\]\(.*?\)/g, "\n[📷 사진 삽입 위치]\n")
+      .replace(/<figure[\s\S]*?<\/figure>/gi, "\n[📷 사진 삽입 위치]\n")
+      .replace(/<img[^>]*>/gi, "\n[📷 사진 삽입 위치]\n")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim();
+    navigator.clipboard.writeText(text).then(() => showToast("네이버용 텍스트 복사 완료 (사진 위치 표시됨)", true));
+  };
+
   const filtered = posts;
   const counts = {
     ALL: posts.length,
@@ -353,6 +364,12 @@ export default function AdminBlogPage() {
                     className="mono text-[10px] tracking-[0.1em] uppercase border hair text-dim px-4 py-2 hover:border-ink hover:text-ink transition-colors"
                   >
                     {editMode ? "취소" : "편집"}
+                  </button>
+                  <button
+                    onClick={copyForNaver}
+                    className="mono text-[10px] tracking-[0.1em] uppercase border hair text-dim px-4 py-2 hover:border-green-600 hover:text-green-700 transition-colors"
+                  >
+                    네이버 복사
                   </button>
                   <button
                     onClick={handleDelete}
