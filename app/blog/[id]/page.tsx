@@ -135,6 +135,20 @@ function renderMarkdown(text: string) {
       continue;
     }
 
+    // 이미지 ![alt](url)
+    if (/^!\[.*?\]\(https?:\/\//.test(line)) {
+      flushList();
+      const imgMatch = line.match(/^!\[([^\]]*)\]\(([^)]+)\)/);
+      if (imgMatch) {
+        elements.push(
+          <img key={`img-${i}`} src={imgMatch[2]} alt={imgMatch[1]}
+               className="w-full my-6 rounded-sm" />
+        );
+        i++;
+        continue;
+      }
+    }
+
     // 일반 단락
     flushList();
     elements.push(
