@@ -1,6 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      {
+        source: "/catalogs/:filename",
+        destination: "/api/catalog?file=:filename",
+        permanent: true,
+      },
+    ];
+  },
   serverExternalPackages: ["bcryptjs", "@prisma/client", "prisma", "xlsx", "sharp"],
   outputFileTracingExcludes: {
     "*": [
