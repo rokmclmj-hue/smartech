@@ -49,8 +49,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "다운로드 실패" }, { status: 502 });
   }
 
-  const buffer = await res.arrayBuffer();
-  return new NextResponse(buffer, {
+  return new NextResponse(res.body, {
     headers: {
       "Content-Type": "application/pdf",
       "Content-Disposition": `inline; filename="${encodeURIComponent(filename)}"`,
