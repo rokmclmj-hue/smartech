@@ -61,7 +61,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             <div className="mt-8 border-t pt-6">
               <h2 className="text-lg font-semibold mb-3">제품 카탈로그</h2>
               <a
-                href={`/api/catalog?file=${encodeURIComponent(product.pdfFile)}`}
+                href={`/catalogs/${encodeURIComponent(product.pdfFile)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg text-sm transition-colors"

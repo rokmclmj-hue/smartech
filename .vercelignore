@@ -12,8 +12,6 @@ smartech-cad/
 .env.production
 .env.development
 
-# 용량 큰 정적 파일
-public/catalogs/
 
 # 로컬 실행 파일
 *.bat
