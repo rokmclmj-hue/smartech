@@ -12,7 +12,7 @@ export async function GET(req: Request) {
 
   if (id) {
     const rows = await prisma.$queryRaw<Record<string, unknown>[]>`
-      SELECT id, title, category, status, "metaDesc", tags, content, "sourceFile", photos,
+      SELECT id, title, category, status, "metaDesc", tags, content, "naverContent", "sourceFile", photos,
              "publishedAt", "createdAt", "updatedAt"
       FROM "BlogPost" WHERE id = ${Number(id)}
     `;
