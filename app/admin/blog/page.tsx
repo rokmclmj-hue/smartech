@@ -14,6 +14,7 @@ type Post = {
 
 type PostDetail = Post & {
   content: string;
+  naverContent: string;
   metaDesc: string;
   tags: string;
   photos: string | null;
