@@ -23,9 +23,10 @@ export async function POST(req: NextRequest) {
   const filename = `${folder}/${Date.now()}-${file.name}`;
 
   const blob = await put(filename, buffer, {
-    access: "private",
+    access: "public",
     contentType: file.type || "image/png",
     addRandomSuffix: false,
+    token: process.env.BLOB_PUBLIC_READ_WRITE_TOKEN,
   });
 
   return NextResponse.json({ ok: true, url: blob.url });
