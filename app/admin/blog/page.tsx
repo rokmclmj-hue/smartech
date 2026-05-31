@@ -196,13 +196,15 @@ export default function AdminBlogPage() {
 
   const copyForNaver = () => {
     if (!selected) return;
-    const text = selected.content
+    const source = selected.naverContent || selected.content;
+    const text = source
       .replace(/!\[.*?\]\(.*?\)/g, "\n[📷 사진 삽입 위치]\n")
       .replace(/<figure[\s\S]*?<\/figure>/gi, "\n[📷 사진 삽입 위치]\n")
       .replace(/<img[^>]*>/gi, "\n[📷 사진 삽입 위치]\n")
       .replace(/\n{3,}/g, "\n\n")
       .trim();
-    navigator.clipboard.writeText(text).then(() => showToast("네이버용 텍스트 복사 완료 (사진 위치 표시됨)", true));
+    const label = selected.naverContent ? "네이버 전용 버전" : "홈페이지 버전 (naver.md 없음)";
+    navigator.clipboard.writeText(text).then(() => showToast(`네이버용 텍스트 복사 완료 — ${label}`, true));
   };
 
   const filtered = posts;
