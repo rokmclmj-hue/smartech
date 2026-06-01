@@ -311,12 +311,18 @@ export default async function BlogPostPage({ params }: Props) {
         <div className="mt-12 border hair px-6 py-8 bg-ink/[0.02]">
           <div className="mono text-[9px] tracking-[0.18em] dim uppercase mb-3">문의</div>
           <p className="text-[15px] leading-relaxed mb-5">
-            {post.category} 관련하여 문의 사항이 있으시면 언제든지 스마텍으로 연락 부탁드립니다.
+            진공펌프 관련 문의 사항이 있으시면 언제든지 스마텍으로 연락 부탁드립니다.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
-              href="/repair"
+              href="/#b2b"
               className="mono text-[11px] tracking-[0.1em] uppercase border border-edred text-edred px-5 py-2.5 hover:bg-edred hover:text-white transition-colors"
+            >
+              견적 문의 →
+            </Link>
+            <Link
+              href="/repair"
+              className="mono text-[11px] tracking-[0.1em] uppercase border hair text-dim px-5 py-2.5 hover:border-ink hover:text-ink transition-colors"
             >
               수리 문의 →
             </Link>
