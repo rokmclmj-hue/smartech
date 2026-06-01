@@ -1,0 +1,12 @@
+{
+  "_설명": "한 번 사용한 이미지는 다른 글에서 재사용 금지. image-maker 에이전트가 자동으로 관리.",
+  "현장사진": {
+    "그림1.png": "스퍼터 공정 에드워드 드라이진공펌프",
+    "그림3.png": "스퍼터 공정 에드워드 드라이진공펌프",
+    "ELD500W.jpg": "ELD500W-리크디텍터"
+  },
+  "AI생성이미지": {
+    "스퍼터 공정 에드워드 드라이진공펌프": ["thumbnail.png", "body-1.png", "body-2.png", "body-3.png", "body-4.png", "body-5.png"],
+    "ELD500W-리크디텍터": ["thumbnail.png", "field-1.png", "body-1.png", "body-2.png", "body-3.png"]
+  }
+}
