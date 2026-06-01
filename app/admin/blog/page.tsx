@@ -46,13 +46,6 @@ export default function AdminBlogPage() {
   const [editCategory, setEditCategory] = useState("");
   const [editMode, setEditMode] = useState(false);
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
-  // 사진 관련
-  const [postPhotos, setPostPhotos] = useState<string[]>([]); // 현재 글에 선택된 사진 (최대 3장)
-  const [usedPhotos, setUsedPhotos] = useState<string[]>([]);  // 다른 글에서 이미 사용된 사진
-  const [folderFiles, setFolderFiles] = useState<string[]>([]);
-  const [photoPickSlot, setPhotoPickSlot] = useState<number | null>(null);
-  const [savingPhotos, setSavingPhotos] = useState(false);
-  const [savingToDesktop, setSavingToDesktop] = useState(false);
 
   const showToast = (msg: string, ok: boolean) => {
     setToast({ msg, ok });
@@ -86,51 +79,11 @@ export default function AdminBlogPage() {
       setEditMeta(data.metaDesc);
       setEditTags(data.tags);
       setEditCategory(data.category);
-      // 사진 초기화
-      try { setPostPhotos(data.photos ? JSON.parse(data.photos) : []); } catch { setPostPhotos([]); }
-      setPhotoPickSlot(null);
-      setFolderFiles([]);
-      // 다른 글에서 사용된 사진 로드
-      fetch("/api/admin/photos?used=1").then(r => r.json()).then(d => setUsedPhotos(d.used || []));
     } finally {
       setDetailLoading(false);
     }
   };
 
-  // 사진 저장
-  const savePhotos = async () => {
-    if (!selected) return;
-    setSavingPhotos(true);
-    try {
-      const res = await fetch("/api/admin/blog", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: selected.id, photos: JSON.stringify(postPhotos) }),
-      });
-      if (res.ok) showToast("사진 저장 완료", true);
-      else showToast("사진 저장 실패", false);
-    } finally { setSavingPhotos(false); }
-  };
-
-  const saveToDesktop = async (photoPath: string) => {
-    setSavingToDesktop(true);
-    try {
-      const res = await fetch("/api/admin/photos", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ photoPath }),
-      });
-      const data = await res.json();
-      if (res.ok) showToast(`바탕화면 네이버_사진 폴더에 저장됨 (${data.fileName})`, true);
-      else showToast("저장 실패", false);
-    } finally { setSavingToDesktop(false); }
-  };
-
-  const loadFolderPhotos = async (folder: string) => {
-    const res = await fetch(`/api/admin/photos?folder=${encodeURIComponent(folder)}`);
-    const data = await res.json();
-    setFolderFiles(data.files || []);
-  };
 
   const handleSave = async () => {
     if (!selected) return;
@@ -198,14 +151,19 @@ export default function AdminBlogPage() {
   const copyForNaver = () => {
     if (!selected) return;
     const source = selected.naverContent || selected.content;
+    let imgCount = 0;
     const text = source
-      .replace(/!\[.*?\]\(.*?\)/g, "\n[📷 사진 삽입 위치]\n")
-      .replace(/<figure[\s\S]*?<\/figure>/gi, "\n[📷 사진 삽입 위치]\n")
-      .replace(/<img[^>]*>/gi, "\n[📷 사진 삽입 위치]\n")
+      .replace(/!\[([^\]]*)\]\([^)]*\)/g, (_, alt) => {
+        imgCount++;
+        const label = alt && alt.trim() ? alt.trim() : `이미지 ${imgCount}`;
+        return `\n\n[📷 사진 ${imgCount}번 — ${label}]\n\n`;
+      })
+      .replace(/<figure[\s\S]*?<\/figure>/gi, () => { imgCount++; return `\n\n[📷 사진 ${imgCount}번]\n\n`; })
+      .replace(/<img[^>]*alt="([^"]*)"[^>]*>/gi, (_, alt) => { imgCount++; return `\n\n[📷 사진 ${imgCount}번 — ${alt}]\n\n`; })
       .replace(/\n{3,}/g, "\n\n")
       .trim();
     const label = selected.naverContent ? "네이버 전용 버전" : "홈페이지 버전 (naver.md 없음)";
-    navigator.clipboard.writeText(text).then(() => showToast(`네이버용 텍스트 복사 완료 — ${label}`, true));
+    navigator.clipboard.writeText(text).then(() => showToast(`네이버용 텍스트 복사 완료 — ${label} (사진 ${imgCount}장)`, true));
   };
 
   const filtered = posts;
@@ -445,118 +403,6 @@ export default function AdminBlogPage() {
                 {selected.sourceFile && (
                   <div className="mono text-[9px] dim pt-1">원본: {selected.sourceFile}</div>
                 )}
-
-                {/* ── 사진 관리 패널 ── */}
-                <div className="border hair p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="mono text-[9px] tracking-[0.18em] dim uppercase">현장 사진 (네이버 배치: 상단·중간·하단)</span>
-                    <button
-                      onClick={savePhotos}
-                      disabled={savingPhotos}
-                      className="mono text-[9px] tracking-[0.1em] uppercase border hair text-dim px-3 py-1 hover:border-edred hover:text-edred transition-colors disabled:opacity-40"
-                    >
-                      {savingPhotos ? "저장 중..." : "사진 저장"}
-                    </button>
-                  </div>
-
-                  {/* 네이버용 사진 바탕화면 저장 */}
-                  {postPhotos.filter(Boolean).length > 0 && (
-                    <div className="bg-[#F6F4EF] border hair px-3 py-2 flex items-center justify-between">
-                      <div>
-                        <div className="text-[11px] font-medium">네이버 업로드용 사진 저장</div>
-                        <div className="text-[10px] dim">바탕화면 &gt; 네이버_사진 폴더에 저장됩니다</div>
-                      </div>
-                      <div className="flex gap-1.5">
-                        {postPhotos.filter(Boolean).map((rel, i) => (
-                          <button key={i} onClick={() => saveToDesktop(rel)}
-                            disabled={savingToDesktop}
-                            className="text-[10px] border hair px-2.5 py-1.5 hover:border-ink hover:bg-ink hover:text-paper transition-all disabled:opacity-40">
-                            {i === 0 ? "상단" : i === 1 ? "중간" : "하단"} 저장
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 3장 슬롯 */}
-                  <div className="grid grid-cols-3 gap-2">
-                    {[0, 1, 2].map((slot) => {
-                      const label = slot === 0 ? "상단" : slot === 1 ? "중간" : "하단";
-                      const rel = postPhotos[slot];
-                      return (
-                        <div key={slot} className="space-y-1">
-                          <div className="mono text-[8px] dim uppercase">{label}</div>
-                          {rel ? (
-                            <div className="relative group">
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img src={`/api/admin/photos?serve=${encodeURIComponent(rel)}`} alt={label}
-                                className="w-full aspect-video object-cover border hair" />
-                              <div className="absolute inset-0 bg-ink/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
-                                <button onClick={() => { setPhotoPickSlot(slot); loadFolderPhotos("01_장비외관"); }}
-                                  className="text-[9px] bg-paper text-ink px-1.5 py-0.5">변경</button>
-                                <button onClick={() => setPostPhotos(p => { const n = [...p]; n[slot] = ""; return n.filter(Boolean); })}
-                                  className="text-[9px] bg-red-600 text-paper px-1.5 py-0.5">삭제</button>
-                              </div>
-                            </div>
-                          ) : (
-                            <button
-                              onClick={() => { setPhotoPickSlot(slot); loadFolderPhotos("01_장비외관"); }}
-                              className="w-full aspect-video border border-dashed hair flex items-center justify-center text-[10px] dim hover:border-ink transition-colors"
-                            >+ 선택</button>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  {/* 폴더 브라우저 */}
-                  {photoPickSlot !== null && (
-                    <div className="border hair p-3 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="mono text-[9px] dim">{photoPickSlot === 0 ? "상단" : photoPickSlot === 1 ? "중간" : "하단"} 사진 선택</span>
-                        <button onClick={() => setPhotoPickSlot(null)} className="text-[10px] dim hover:text-ink">✕</button>
-                      </div>
-                      <div className="flex gap-1 flex-wrap">
-                        {["01_장비외관","02_납품출고","03_현장설치","04_수리정비","05_알람고장","06_비교도식","07_기타"].map(f => (
-                          <button key={f} onClick={() => loadFolderPhotos(f)}
-                            className="text-[9px] border hair px-1.5 py-0.5 dim hover:border-ink hover:text-ink transition-colors">
-                            {f}
-                          </button>
-                        ))}
-                      </div>
-                      <div className="grid grid-cols-5 gap-1 max-h-40 overflow-y-auto">
-                        {folderFiles.map(rel => {
-                          const alreadyUsed = usedPhotos.includes(rel);
-                          return (
-                            <button key={rel}
-                              onClick={() => {
-                                if (alreadyUsed) return;
-                                setPostPhotos(p => { const n = [...p]; n[photoPickSlot] = rel; return n; });
-                                setPhotoPickSlot(null);
-                              }}
-                              className={`relative group border hair overflow-hidden transition-colors ${alreadyUsed ? "opacity-30 cursor-not-allowed" : "hover:border-ink"}`}
-                              title={alreadyUsed ? "다른 글에서 이미 사용된 사진" : rel}
-                            >
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img src={`/api/admin/photos?serve=${encodeURIComponent(rel)}`} alt=""
-                                className="w-full aspect-square object-cover" />
-                              {alreadyUsed && (
-                                <div className="absolute inset-0 bg-ink/60 flex items-center justify-center">
-                                  <span className="text-paper text-[7px]">사용됨</span>
-                                </div>
-                              )}
-                              {!alreadyUsed && (
-                                <div className="absolute inset-0 bg-ink/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                  <span className="text-paper text-[9px]">선택</span>
-                                </div>
-                              )}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                </div>
 
               </div>
             ) : null}

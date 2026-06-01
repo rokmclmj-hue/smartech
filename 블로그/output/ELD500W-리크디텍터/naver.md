@@ -89,4 +89,8 @@ ELD500W는 버튼 하나로 두 가지 모드를 전환할 수 있습니다.
 
 ---
 
+Tel : 031 204 7170
+info@smartechvacuum.com
+www.smartechvacuum.com
+
 #리크디텍터 #ELD500W #Edwards진공펌프 #헬륨리크테스트 #진공누설검사 #반도체설비 #진공펌프수리 #에드워드리크디텍터 #스마텍 #진공장비
