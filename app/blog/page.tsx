@@ -21,18 +21,10 @@ function formatDate(d: Date) {
   return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
 }
 
-export default async function BlogListPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ category?: string }>;
-}) {
-  const { category } = await searchParams;
+export default async function BlogListPage() {
 
   const posts = await prisma.blogPost.findMany({
-    where: {
-      status: "PUBLISHED",
-      ...(category ? { category } : {}),
-    },
+    where: { status: "PUBLISHED" },
     orderBy: { publishedAt: "desc" },
     select: {
       id: true,
@@ -44,13 +36,6 @@ export default async function BlogListPage({
       createdAt: true,
     },
   });
-
-  // 카테고리 목록 (발행된 글 기준)
-  const allPosts = await prisma.blogPost.findMany({
-    where: { status: "PUBLISHED" },
-    select: { category: true },
-  });
-  const categories = [...new Set(allPosts.map((p) => p.category))].sort();
 
   return (
     <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-10 md:py-16">
@@ -66,35 +51,6 @@ export default async function BlogListPage({
           에드워드 진공펌프 30년 현장 경험을 바탕으로, 수리·납기·기술 정보를 정직하게 정리합니다.
         </p>
       </div>
-
-      {/* 카테고리 필터 */}
-      {categories.length > 1 && (
-        <div className="flex flex-wrap gap-2 mb-8">
-          <Link
-            href="/blog"
-            className={`mono text-[10px] tracking-[0.08em] px-3 py-1.5 border transition-colors ${
-              !category
-                ? "bg-edred text-white border-edred"
-                : "border-ink/20 text-dim hover:border-ink hover:text-ink"
-            }`}
-          >
-            전체
-          </Link>
-          {categories.map((cat) => (
-            <Link
-              key={cat}
-              href={`/blog?category=${encodeURIComponent(cat)}`}
-              className={`mono text-[10px] tracking-[0.08em] px-3 py-1.5 border transition-colors ${
-                category === cat
-                  ? "bg-edred text-white border-edred"
-                  : "border-ink/20 text-dim hover:border-ink hover:text-ink"
-              }`}
-            >
-              {cat}
-            </Link>
-          ))}
-        </div>
-      )}
 
       {/* 글 목록 */}
       {posts.length === 0 ? (
