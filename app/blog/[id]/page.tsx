@@ -301,7 +301,7 @@ export default async function BlogPostPage({ params }: Props) {
           <div className="mt-10 pt-6 border-t hair flex flex-wrap gap-2">
             {tags.map((tag) => (
               <span key={tag} className="mono text-[10px] tracking-[0.06em] border hair px-2.5 py-1 text-dim">
-                #{tag}
+                {tag}
               </span>
             ))}
           </div>
