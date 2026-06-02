@@ -991,7 +991,7 @@ export default function RepairPage() {
       <footer className="border-t border-line mt-20 py-8 repair-no-print">
         <div className="max-w-5xl mx-auto px-6 flex flex-wrap items-center justify-between gap-4 text-[11px] text-dim mono">
           <span>SMARTECH VACUUM · SINCE 2011</span>
-          <span>031-204-7170 · 경기도 화성시</span>
+          <span>031-204-7170 · 경기 수원시 영통구</span>
           <span>EDWARDS KOREA OFFICIAL</span>
         </div>
       </footer>

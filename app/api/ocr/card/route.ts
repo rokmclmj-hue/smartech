@@ -369,7 +369,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
 
     try {
-      const opusResult = await callModel("claude-opus-4-7", base64, mediaType);
+      const opusResult = await callModel("claude-opus-4-8", base64, mediaType);
       // Opus 결과도 동일하게 이름 2차 검증
       if (opusResult.name) {
         const ok = await verifyName(opusResult.name, base64, mediaType);
