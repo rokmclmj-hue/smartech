@@ -185,6 +185,14 @@ export default function RepairPage() {
     setAiResult(null);
   }
 
+  // 사진 삭제
+  function handlePhotoRemove(key: string) {
+    setPhotos((p) => ({ ...p, [key]: null }));
+    setAiDone(false);
+    setAiResult(null);
+    if (fileRefs.current[key]) fileRefs.current[key]!.value = "";
+  }
+
   // AI 모델 인식
   async function runAiIdentify() {
     const photoFiles = Object.values(photos).filter(Boolean) as PhotoFile[];
@@ -358,6 +366,13 @@ export default function RepairPage() {
                           <div className="absolute inset-0 bg-ink/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                             <span className="text-paper text-[12px] font-medium">변경</span>
                           </div>
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); handlePhotoRemove(slot.key); }}
+                            className="absolute top-1.5 left-1.5 w-6 h-6 bg-red-600 text-white text-[12px] font-bold rounded-full flex items-center justify-center hover:bg-red-700 transition-colors z-10"
+                          >
+                            ✕
+                          </button>
                           <div className="absolute top-1.5 right-1.5 bg-ink text-paper text-[10px] px-1.5 py-0.5 rounded">
                             ✓
                           </div>

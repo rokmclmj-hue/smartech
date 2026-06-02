@@ -88,14 +88,15 @@ Edwards 진공 펌프 주요 모델 계열: nXDS(scroll), XDS(scroll), RV(rotary
     const result = JSON.parse(jsonMatch[0]);
     return NextResponse.json(result);
   } catch (err) {
-    console.error("[repair/identify] error:", err);
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("[repair/identify] error:", msg);
     return NextResponse.json({
       confidence: "low",
       modelName: null,
       pumpFamily: "other",
       maker: "EDWARDS",
       serialNo: null,
-      notes: "처리 중 오류가 발생했습니다.",
+      notes: `처리 중 오류: ${msg.slice(0, 120)}`,
     });
   }
 }
