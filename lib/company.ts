@@ -26,7 +26,7 @@ export const SMARTECH_COMPANY = {
   officeTel: "031-204-7170",
   mobileTel: "010-3194-7170",
   fax: "031-206-7178",
-  email: "rokmclmj@gmail.com",
+  email: "info@smartechvacuum.com",
   hotline24h: true,
 
   // 영업 본사 (명함 — 수원)

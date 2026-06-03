@@ -37,7 +37,7 @@ const jsonLd = {
         "url": "https://www.smartechvacuum.com/icon.png",
       },
       "telephone": "031-204-7170",
-      "email": "rokmclmj@gmail.com",
+      "email": "info@smartechvacuum.com",
       "foundingDate": "2011",
       "description": "Edwards Vacuum 한국 공식 대리점. 진공펌프 판매·수리·기술상담 토탈 솔루션. 2011년 창업, 30년 이상 Edwards 전문 기술력.",
       "address": {

@@ -1479,7 +1479,7 @@ export default function PumpSelector() {
                     results && results.length > 0 ? `AI 추천 1위: ${results[0].model}` : "",
                   ].filter(Boolean).join("\n");
                   const body = encodeURIComponent(`${lines}\n\n담당자 검토 요청드립니다.`);
-                  window.open(`mailto:rokmclmj@gmail.com?subject=${sub}&body=${body}`, "_blank");
+                  window.open(`mailto:info@smartechvacuum.com?subject=${sub}&body=${body}`, "_blank");
                 }}
                 className="w-full border border-ink text-ink py-3 text-[13px] hover:bg-ink hover:text-paper transition-colors"
               >

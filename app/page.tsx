@@ -52,7 +52,7 @@ export default function Home() {
               <div className="mt-10 hidden md:flex flex-wrap items-center gap-x-6 gap-y-2 text-[12px] mono text-black hero-rise" style={{ ["--rd" as never]: ".9s" }}>
                 <a href="tel:031-204-7170" className="hover:text-edred transition-colors">CALL  031-204-7170</a>
                 <span>·</span>
-                <a href="mailto:rokmclmj@gmail.com" className="hover:text-edred transition-colors">MAIL  rokmclmj@gmail.com</a>
+                <a href="mailto:info@smartechvacuum.com" className="hover:text-edred transition-colors">MAIL  info@smartechvacuum.com</a>
               </div>
             </div>
 
@@ -344,20 +344,20 @@ export default function Home() {
           <div className="grid grid-cols-12 gap-6 mt-16">
             <div className="col-span-12 lg:col-span-7">
               <div className="border border-paper/20">
-                <div className="grid grid-cols-2 divide-x divide-paper/20">
-                  <a href="tel:031-204-7170" className="p-8 hover:bg-edred transition-colors group block">
+                <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-paper/20">
+                  <a href="tel:031-204-7170" className="p-6 md:p-8 hover:bg-edred transition-colors group block">
                     <div className="mono text-[11px] opacity-70 flex items-center gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-edred inline-block animate-pulse" />
                       CALL · 24/7
                     </div>
-                    <div className="display text-[36px] leading-none mt-3 tabular">031-204-7170</div>
+                    <div className="display text-[28px] md:text-[36px] leading-none mt-3 tabular">031-204-7170</div>
                   </a>
-                  <a href="mailto:rokmclmj@gmail.com" className="p-8 hover:bg-edred transition-colors group block">
+                  <a href="mailto:info@smartechvacuum.com" className="p-6 md:p-8 hover:bg-edred transition-colors group block">
                     <div className="mono text-[11px] opacity-70 flex items-center gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-edred inline-block animate-pulse" />
                       MAIL · 24/7
                     </div>
-                    <div className="display text-[28px] leading-none mt-3">rokmclmj@gmail.com</div>
+                    <div className="display text-[20px] md:text-[28px] leading-none mt-3 break-all">info@smartechvacuum.com</div>
                   </a>
                 </div>
               </div>
@@ -419,14 +419,14 @@ export default function Home() {
                 <Link href="/blog" className="block hover:text-edred transition-colors">기술 블로그</Link>
               </div>
             </div>
-            <div className="col-span-6 md:col-span-3">
+            <div className="col-span-12 md:col-span-3">
               <div className="mono text-[11px] dim mb-3">CONTACT</div>
               <div className="space-y-2">
-                <a href="mailto:rokmclmj@gmail.com" className="block hover:text-edred transition-colors">✉ rokmclmj@gmail.com</a>
+                <a href="mailto:info@smartechvacuum.com" className="block hover:text-edred transition-colors break-all">✉ info@smartechvacuum.com</a>
                 <a href="tel:031-204-7170" className="block hover:text-edred transition-colors">☏ 031-204-7170 <span className="text-edred">· 24/7</span></a>
                 <div>사업자번호 : 270-88-00854</div>
-                <div>수원사무소 : 경기 수원시 영통구 신원로55, 테크트리 907호</div>
-                <div>천안AS센터 : 충남 천안시 서북구 두정공원2길 49</div>
+                <div className="break-keep">수원사무소 : 경기 수원시 영통구 신원로55, 테크트리 907호</div>
+                <div className="break-keep">천안AS센터 : 충남 천안시 서북구 두정공원2길 49</div>
               </div>
             </div>
           </div>

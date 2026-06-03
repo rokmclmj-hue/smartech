@@ -295,25 +295,25 @@ export default function RepairPage() {
 
         {/* 스텝 바 */}
         {!submitted && (
-          <div className="flex items-center gap-0 mb-12 max-w-2xl">
+          <div className="flex items-center gap-0 mb-12 w-full max-w-2xl">
             {STEPS.map((label, i) => (
-              <div key={i} className="flex items-center flex-1">
-                <div className="flex flex-col items-center">
-                  <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-[12px] font-bold transition-all ${
+              <div key={i} className="flex items-center flex-1 min-w-0">
+                <div className="flex flex-col items-center min-w-0">
+                  <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-[12px] font-bold transition-all shrink-0 ${
                     i < step ? "bg-ink border-ink text-paper"
                     : i === step ? "border-edred text-edred bg-paper"
                     : "border-line text-dim bg-paper"
                   }`}>
                     {i < step ? "✓" : i + 1}
                   </div>
-                  <span className={`text-[13px] mt-1.5 tracking-wide whitespace-nowrap font-bold ${
+                  <span className={`text-[11px] sm:text-[13px] mt-1.5 tracking-wide font-bold text-center leading-tight ${
                     i === step ? "text-[#000000]" : "text-[#1a1a1a]"
                   }`}>
                     {label}
                   </span>
                 </div>
                 {i < STEPS.length - 1 && (
-                  <div className={`flex-1 h-[1px] mx-2 mb-5 transition-all ${i < step ? "bg-ink" : "bg-line"}`} />
+                  <div className={`flex-1 h-[1px] mx-1 sm:mx-2 mb-5 transition-all shrink ${i < step ? "bg-ink" : "bg-line"}`} />
                 )}
               </div>
             ))}

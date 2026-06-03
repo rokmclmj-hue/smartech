@@ -441,15 +441,15 @@ function CatalogTable({ groups }: { groups: [string, Product[]][] }) {
             </span>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-[13px] md:text-[12.5px]">
+          <div className="overflow-x-auto -mx-2 px-2">
+            <table className="w-full text-[12px] md:text-[12.5px] min-w-[480px]">
               <thead>
                 <tr className="text-left mono text-[9.5px] tracking-[0.14em] uppercase text-dim">
-                  <th className="py-2 pr-3 w-8"></th>
-                  <th className="py-2 pr-3 w-[140px]">PART NO</th>
-                  <th className="py-2 pr-3">DESCRIPTION</th>
-                  <th className="py-2 pr-3 w-[170px] text-right">PRICE (KRW)</th>
-                  <th className="py-2 pr-3 w-[60px]"></th>
+                  <th className="py-2 pr-2 w-6 hidden sm:table-cell"></th>
+                  <th className="py-2 pr-2 w-[120px] md:w-[140px]">PART NO</th>
+                  <th className="py-2 pr-2">DESCRIPTION</th>
+                  <th className="py-2 pr-2 w-[120px] md:w-[170px] text-right">PRICE</th>
+                  <th className="py-2 w-[30px]"></th>
                 </tr>
               </thead>
               <tbody>
@@ -458,48 +458,38 @@ function CatalogTable({ groups }: { groups: [string, Product[]][] }) {
                     key={p.id}
                     className="border-b hair hover:bg-edred/[0.03] transition group"
                   >
-                    <td className="py-2 pr-3 align-middle">
+                    <td className="py-2 pr-2 align-middle hidden sm:table-cell">
                       {p.isImportant ? (
-                        <span
-                          aria-label="주요 제품"
-                          title="주요 제품"
-                          className="inline-block w-1.5 h-1.5 rounded-full bg-edred"
-                        />
+                        <span aria-label="주요 제품" title="주요 제품" className="inline-block w-1.5 h-1.5 rounded-full bg-edred" />
                       ) : (
                         <span className="inline-block w-1.5 h-1.5 rounded-full bg-line" />
                       )}
                     </td>
-                    <td className="py-2 pr-3 align-middle">
+                    <td className="py-2 pr-2 align-middle">
                       <Link
                         href={`/products/${encodeURIComponent(p.partNo)}`}
-                        className="mono text-[12px] text-ink group-hover:text-edred underline decoration-transparent group-hover:decoration-edred underline-offset-2"
+                        className="mono text-[11px] md:text-[12px] text-ink group-hover:text-edred underline decoration-transparent group-hover:decoration-edred underline-offset-2 break-all"
                       >
                         {p.partNo}
                       </Link>
                     </td>
-                    <td className="py-2 pr-3 align-middle text-ink/90">
-                      <Link
-                        href={`/products/${encodeURIComponent(p.partNo)}`}
-                        className="hover:text-edred"
-                      >
+                    <td className="py-2 pr-2 align-middle text-ink/90">
+                      <Link href={`/products/${encodeURIComponent(p.partNo)}`} className="hover:text-edred">
                         {p.description}
                       </Link>
                     </td>
-                    <td className="py-2 pr-3 align-middle text-right tabular">
+                    <td className="py-2 pr-2 align-middle text-right tabular">
                       {p.priceStatus === "visible" && p.displayPrice ? (
-                        <span className="font-semibold text-ink">{formatKRW(p.displayPrice)}</span>
+                        <span className="font-semibold text-ink text-[11px] md:text-[12px]">{formatKRW(p.displayPrice)}</span>
                       ) : p.priceStatus === "pending" ? (
-                        <span className="text-[11px] text-dim">승인 대기</span>
+                        <span className="text-[10px] text-dim">승인 대기</span>
                       ) : (
-                        <Link
-                          href="/auth/login"
-                          className="text-[11px] text-dim hover:text-edred underline-red pb-0.5"
-                        >
+                        <Link href="/auth/login" className="text-[10px] text-dim hover:text-edred underline-red pb-0.5">
                           로그인 후 확인
                         </Link>
                       )}
                     </td>
-                    <td className="py-2 pr-3 align-middle text-right">
+                    <td className="py-2 align-middle text-right">
                       <Link
                         href={`/products/${encodeURIComponent(p.partNo)}`}
                         className="mono text-[10px] tracking-wider text-dim group-hover:text-edred"
