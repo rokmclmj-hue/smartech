@@ -119,6 +119,12 @@ export default async function BlogListPage() {
           >
             수리 문의 →
           </Link>
+          <a
+            href="tel:031-204-7170"
+            className="mono text-[11px] tracking-[0.1em] uppercase border border-black bg-edred text-white px-5 py-2.5 hover:bg-black transition-colors"
+          >
+            031-204-7170
+          </a>
         </div>
       </div>
     </div>
