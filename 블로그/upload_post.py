@@ -136,6 +136,17 @@ if field_photos:
                 content, flags=re.MULTILINE
             )
 
+# ── frontmatter 파싱 (category 추출 후 제거) ──────────
+category = "기술문의"
+if content.startswith("---"):
+    end = content.find("---", 3)
+    if end != -1:
+        frontmatter = content[3:end].strip()
+        for line in frontmatter.splitlines():
+            if line.startswith("category:"):
+                category = line.split(":", 1)[1].strip()
+        content = content[end + 3:].lstrip("\n")
+
 # ── 제목·태그·메타 추출 ────────────────────────────────
 title_match = re.search(r"^#\s+(.+)$", content, re.MULTILINE)
 title = title_match.group(1).strip() if title_match else topic
@@ -150,14 +161,14 @@ naver_path = os.path.join(BLOG_FOLDER, "naver.md")
 naver_content = open(naver_path, encoding="utf-8").read().strip() if os.path.exists(naver_path) else ""
 
 # ── API 전송 ───────────────────────────────────────────
-print("\n=== 홈페이지 업로드 ===")
+print(f"\n=== 홈페이지 업로드 (카테고리: {category}) ===")
 payload = {
     "title":        title,
     "content":      content,
     "naverContent": naver_content,
     "metaDesc":     meta_desc,
     "tags":         tags,
-    "category":     "AI콘텐츠",
+    "category":     category,
     "sourceFile":   topic,
 }
 data = json.dumps(payload, ensure_ascii=False).encode("utf-8")

@@ -99,19 +99,27 @@ export default async function BlogListPage() {
       )}
 
       {/* 문의 유도 */}
-      <div className="mt-16 border hair px-6 md:px-10 py-8 md:py-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      <div className="mt-16 border border-black px-6 md:px-10 py-8 md:py-10 bg-ink/[0.02] flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div>
-          <div className="mono text-[10px] tracking-[0.18em] dim uppercase mb-2">Contact</div>
-          <p className="text-[16px] font-medium tracking-tight">
+          <div className="mono text-[9px] tracking-[0.18em] dim uppercase mb-2">문의</div>
+          <p className="text-[15px] leading-relaxed">
             진공펌프 관련 문의 사항이 있으시면 언제든지 스마텍으로 연락 부탁드립니다.
           </p>
         </div>
-        <Link
-          href="/repair"
-          className="shrink-0 mono text-[11px] tracking-[0.1em] uppercase border border-edred text-edred px-6 py-3 hover:bg-edred hover:text-white transition-colors"
-        >
-          문의하기 →
-        </Link>
+        <div className="flex flex-wrap gap-3 shrink-0">
+          <Link
+            href="/#b2b"
+            className="mono text-[11px] tracking-[0.1em] uppercase border border-black bg-white text-black px-5 py-2.5 hover:bg-black hover:text-white transition-colors"
+          >
+            견적 문의 →
+          </Link>
+          <Link
+            href="/repair"
+            className="mono text-[11px] tracking-[0.1em] uppercase border border-black bg-white text-black px-5 py-2.5 hover:bg-black hover:text-white transition-colors"
+          >
+            수리 문의 →
+          </Link>
+        </div>
       </div>
     </div>
   );

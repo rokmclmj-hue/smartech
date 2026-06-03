@@ -25,7 +25,7 @@ export async function POST(req: Request) {
       naverContent: naverContent ?? "",
       metaDesc:     metaDesc     ?? "",
       tags:         tags         ?? "",
-      category:     category     ?? "AI콘텐츠",
+      category:     category     ?? "기술문의",
       status:       "PUBLISHED",
       publishedAt:  new Date(),
       sourceFile:   sourceFile   ?? null,
