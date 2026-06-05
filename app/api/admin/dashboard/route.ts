@@ -81,7 +81,7 @@ export async function GET() {
           lastLoginAt: { gte: todayStart },
           tier: { notIn: ["ADMIN", "PENDING"] },
         },
-        select: { id: true, name: true, company: true, tier: true, lastLoginAt: true, loginCount: true },
+        select: { id: true, name: true, company: true, tier: true, phone: true, lastLoginAt: true, loginCount: true },
         orderBy: { lastLoginAt: "desc" },
       }),
 
@@ -91,9 +91,20 @@ export async function GET() {
           lastLoginAt: { gte: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000) },
           tier: { notIn: ["ADMIN", "PENDING"] },
         },
-        select: { id: true, name: true, company: true, tier: true, lastLoginAt: true },
+        select: { id: true, name: true, company: true, tier: true, phone: true, lastLoginAt: true, loginCount: true },
         orderBy: { lastLoginAt: "desc" },
-        take: 30,
+        take: 50,
+      }),
+
+      // 이번 달 로그인한 업체
+      prisma.user.findMany({
+        where: {
+          lastLoginAt: { gte: monthStart },
+          tier: { notIn: ["ADMIN", "PENDING"] },
+        },
+        select: { id: true, name: true, company: true, tier: true, phone: true, lastLoginAt: true, loginCount: true },
+        orderBy: { lastLoginAt: "desc" },
+        take: 100,
       }),
     ]);
   }
@@ -122,6 +133,7 @@ export async function GET() {
     lowStockProducts,
     todayVisitors,
     weekVisitors,
+    monthVisitors,
   ] = results;
 
   // 매출 계산
@@ -164,15 +176,22 @@ export async function GET() {
     recentOrders: formattedOrders,
     lowStockProducts,
     todayVisitors: todayVisitors.map((u) => ({
-      id: u.id, name: u.name, company: u.company,
+      id: u.id, name: u.name, company: u.company, phone: u.phone ?? null,
       tier: u.tier, tierLabel: TIER_LABEL[u.tier] ?? u.tier,
       lastLoginAt: u.lastLoginAt?.toISOString() ?? null,
       loginCount: u.loginCount,
     })),
     weekVisitors: weekVisitors.map((u) => ({
-      id: u.id, name: u.name, company: u.company,
+      id: u.id, name: u.name, company: u.company, phone: u.phone ?? null,
       tier: u.tier, tierLabel: TIER_LABEL[u.tier] ?? u.tier,
       lastLoginAt: u.lastLoginAt?.toISOString() ?? null,
+      loginCount: u.loginCount,
+    })),
+    monthVisitors: monthVisitors.map((u) => ({
+      id: u.id, name: u.name, company: u.company, phone: u.phone ?? null,
+      tier: u.tier, tierLabel: TIER_LABEL[u.tier] ?? u.tier,
+      lastLoginAt: u.lastLoginAt?.toISOString() ?? null,
+      loginCount: u.loginCount,
     })),
   });
 }

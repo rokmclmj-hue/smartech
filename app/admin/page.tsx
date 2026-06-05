@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { matchPartner } from "@/lib/partners";
 
@@ -21,6 +21,7 @@ type VisitorItem = {
   id: number;
   name: string;
   company: string;
+  phone: string | null;
   tier: string;
   tierLabel: string;
   lastLoginAt: string | null;
@@ -36,6 +37,7 @@ type DashboardStats = {
   staleQuotes: number;
   todayVisitors: VisitorItem[];
   weekVisitors: VisitorItem[];
+  monthVisitors: VisitorItem[];
 };
 
 // ─── 미처리 견적 알림 띠 (3일 이상 미응답 PENDING) ──────────
@@ -64,83 +66,138 @@ function StaleQuotesAlert({ count }: { count: number }) {
   );
 }
 
-// ─── 방문 업체 섹션 ───────────────────────────────────────
+// ─── 방문 업체 섹션 (탭 + 연락완료 체크) ─────────────────
+
 const TIER_COLOR: Record<string, string> = {
-  DEALER: "bg-blue-100 text-blue-700",
-  KEY_DEALER: "bg-blue-100 text-blue-700",
-  VIP_DEALER: "bg-blue-100 text-blue-700",
-  OEM: "bg-purple-100 text-purple-700",
+  DEALER: "bg-blue-50 text-blue-700 border border-blue-200",
+  KEY_DEALER: "bg-blue-50 text-blue-700 border border-blue-200",
+  VIP_DEALER: "bg-blue-50 text-blue-700 border border-blue-200",
+  OEM: "bg-purple-50 text-purple-700 border border-purple-200",
 };
 
+type VisitorTab = "today" | "week" | "month";
+
 function VisitorSection({ stats }: { stats: DashboardStats }) {
+  const [tab, setTab] = useState<VisitorTab>("today");
+  // 연락완료: localStorage에 userId set으로 저장
+  const [contacted, setContacted] = useState<Set<number>>(new Set());
+  const storageKey = "visitor_contacted";
+
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(storageKey) ?? "[]");
+      setContacted(new Set(saved));
+    } catch { /* ignore */ }
+  }, []);
+
+  function toggleContact(id: number) {
+    setContacted((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      localStorage.setItem(storageKey, JSON.stringify([...next]));
+      return next;
+    });
+  }
+
+  const TAB_LIST: { key: VisitorTab; label: string; visitors: VisitorItem[] }[] = [
+    { key: "today", label: `오늘 ${stats.todayVisitors.length}`, visitors: stats.todayVisitors },
+    { key: "week",  label: `이번 주 ${stats.weekVisitors.length}`, visitors: stats.weekVisitors },
+    { key: "month", label: `이번 달 ${stats.monthVisitors.length}`, visitors: stats.monthVisitors },
+  ];
+
+  const current = TAB_LIST.find((t) => t.key === tab)!;
+  const pending = current.visitors.filter((v) => !contacted.has(v.id));
+  const done    = current.visitors.filter((v) => contacted.has(v.id));
+
+  function formatTime(iso: string | null) {
+    if (!iso) return "—";
+    const d = new Date(iso);
+    if (tab === "today") return d.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
+    return d.toLocaleDateString("ko-KR", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  }
+
   return (
-    <div className="grid sm:grid-cols-2 gap-4">
-      {/* 오늘 방문 */}
-      <div className="border hair bg-paper p-5">
-        <div className="mono text-[10px] tracking-[0.15em] uppercase dim mb-1">TODAY · 오늘 방문</div>
-        <div className="text-[20px] font-bold text-ink mb-4">
-          {stats.todayVisitors.length > 0
-            ? <><span className="text-edred">{stats.todayVisitors.length}개사</span> 방문</>
-            : <span className="text-[16px] dim font-normal">오늘 방문 없음</span>}
+    <div className="border hair bg-paper">
+      {/* 헤더 + 탭 */}
+      <div className="flex items-center justify-between px-5 pt-4 pb-0 border-b hair">
+        <div className="mono text-[10px] tracking-[0.15em] uppercase dim pb-3">
+          VISITORS · 방문 업체
         </div>
-        {stats.todayVisitors.length > 0 ? (
-          <div className="space-y-2">
-            {stats.todayVisitors.map((v) => (
-              <div key={v.id} className="flex items-center justify-between py-2 border-b hair last:border-0">
+        <div className="flex text-[11px] mono">
+          {TAB_LIST.map((t) => (
+            <button key={t.key} onClick={() => setTab(t.key)}
+              className={`px-4 py-2.5 border-b-2 transition-colors ${
+                tab === t.key ? "border-edred text-edred font-semibold" : "border-transparent dim hover:text-ink"
+              }`}>
+              {t.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* 목록 */}
+      <div className="divide-y hair max-h-[400px] overflow-auto">
+        {current.visitors.length === 0 ? (
+          <div className="py-10 text-center text-[13px] dim">방문 기록이 없습니다</div>
+        ) : (
+          <>
+            {/* 미처리 */}
+            {pending.map((v) => (
+              <div key={v.id} className="flex items-center gap-3 px-5 py-3 hover:bg-ink/[0.02]">
+                {/* 연락완료 체크 */}
+                <button onClick={() => toggleContact(v.id)}
+                  className="shrink-0 w-5 h-5 border-2 border-ink/30 rounded hover:border-edred transition-colors flex items-center justify-center">
+                </button>
+                {/* 업체 정보 */}
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <span className="text-[14px] font-medium text-ink truncate">{v.company}</span>
-                    <span className={`mono text-[9px] tracking-[0.1em] px-1.5 py-[1px] rounded shrink-0 ${TIER_COLOR[v.tier] ?? "bg-gray-100 text-gray-600"}`}>
+                    <span className={`mono text-[9px] px-1.5 py-[1px] rounded shrink-0 ${TIER_COLOR[v.tier] ?? "bg-gray-100 text-gray-600"}`}>
                       {v.tierLabel}
                     </span>
                   </div>
-                  <div className="text-[11px] dim">{v.name}</div>
+                  <div className="text-[11px] dim">{v.name}{v.phone ? ` · ${v.phone}` : ""}</div>
                 </div>
-                <div className="text-right shrink-0 ml-3">
-                  <div className="mono text-[11px] text-ink">
-                    {v.lastLoginAt ? new Date(v.lastLoginAt).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" }) : "—"}
-                  </div>
-                  {v.loginCount && v.loginCount > 1 && (
-                    <div className="mono text-[10px] dim">{v.loginCount}회 누적</div>
+                {/* 시간 */}
+                <div className="mono text-[11px] dim shrink-0">{formatTime(v.lastLoginAt)}</div>
+                {/* 빠른 액션 */}
+                <div className="flex gap-1.5 shrink-0">
+                  {v.phone && (
+                    <a href={`tel:${v.phone}`}
+                      className="mono text-[10px] border hair rounded px-2 py-1 dim hover:text-edred hover:border-edred transition-colors">
+                      전화
+                    </a>
                   )}
+                  <Link href={`/admin/proxy-quotes?company=${encodeURIComponent(v.company)}`}
+                    className="mono text-[10px] border hair rounded px-2 py-1 dim hover:text-edred hover:border-edred transition-colors">
+                    견적
+                  </Link>
                 </div>
               </div>
             ))}
-          </div>
-        ) : (
-          <div className="py-4 text-center text-[12px] dim">오늘 로그인한 업체가 없습니다</div>
-        )}
-      </div>
 
-      {/* 이번 주 방문 */}
-      <div className="border hair bg-paper p-5">
-        <div className="mono text-[10px] tracking-[0.15em] uppercase dim mb-1">THIS WEEK · 이번 주 방문</div>
-        <div className="text-[20px] font-bold text-ink mb-4">
-          {stats.weekVisitors.length > 0
-            ? <><span className="text-edred">{stats.weekVisitors.length}개사</span> 방문</>
-            : <span className="text-[16px] dim font-normal">이번 주 방문 없음</span>}
-        </div>
-        {stats.weekVisitors.length > 0 ? (
-          <div className="space-y-2 max-h-[280px] overflow-auto">
-            {stats.weekVisitors.map((v) => (
-              <div key={v.id} className="flex items-center justify-between py-2 border-b hair last:border-0">
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[13px] font-medium text-ink truncate">{v.company}</span>
-                    <span className={`mono text-[9px] tracking-[0.1em] px-1.5 py-[1px] rounded shrink-0 ${TIER_COLOR[v.tier] ?? "bg-gray-100 text-gray-600"}`}>
-                      {v.tierLabel}
-                    </span>
+            {/* 연락완료 */}
+            {done.length > 0 && (
+              <>
+                <div className="px-5 py-2 bg-ink/[0.02]">
+                  <span className="mono text-[10px] tracking-[0.1em] dim uppercase">✓ 연락완료 {done.length}건</span>
+                </div>
+                {done.map((v) => (
+                  <div key={v.id} className="flex items-center gap-3 px-5 py-2.5 opacity-40">
+                    <button onClick={() => toggleContact(v.id)}
+                      className="shrink-0 w-5 h-5 border-2 border-edred rounded bg-edred/10 flex items-center justify-center text-edred text-[10px]">
+                      ✓
+                    </button>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-[13px] font-medium text-ink line-through truncate">{v.company}</div>
+                      <div className="text-[11px] dim">{v.name}</div>
+                    </div>
+                    <div className="mono text-[11px] dim shrink-0">{formatTime(v.lastLoginAt)}</div>
                   </div>
-                  <div className="text-[11px] dim">{v.name}</div>
-                </div>
-                <div className="mono text-[11px] dim shrink-0 ml-3">
-                  {v.lastLoginAt ? new Date(v.lastLoginAt).toLocaleDateString("ko-KR", { month: "short", day: "numeric" }) : "—"}
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="py-4 text-center text-[12px] dim">이번 주 방문한 업체가 없습니다</div>
+                ))}
+              </>
+            )}
+          </>
         )}
       </div>
     </div>
