@@ -1,9 +1,11 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import QuotePanel from "./QuotePanel";
 import QuotePreviewModal from "./QuotePreviewModal";
 
 export default function QuoteBar() {
+  const { status } = useSession();
   const [count, setCount] = useState(0);
   const [open, setOpen] = useState(false);
   const [fullscreenMode, setFullscreenMode] = useState(false);
@@ -33,6 +35,8 @@ export default function QuoteBar() {
     };
   }, []);
 
+  // 비로그인 시 숨김
+  if (status === "unauthenticated") return null;
   if (count === 0 && !open) return null;
 
   return (

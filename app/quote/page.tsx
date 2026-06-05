@@ -33,10 +33,35 @@ export default function QuotePage() {
   const showPrice = tier && tier !== "PENDING" && tier !== "ADMIN" ? true : tier === "ADMIN";
   const isPending = tier === "PENDING";
 
+  // 장바구니 로드
   useEffect(() => {
     const stored = JSON.parse(localStorage.getItem("quoteCart") ?? "[]");
     setCart(stored);
   }, []);
+
+  // 로그인 후 서버에서 등급별 단가 자동 조회
+  useEffect(() => {
+    if (!showPrice || cart.length === 0) return;
+    const ids = cart.map((i) => i.productId);
+    fetch("/api/products/prices", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ productIds: ids }),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        if (!data.prices) return;
+        setCart((prev) =>
+          prev.map((item) =>
+            data.prices[item.productId] != null
+              ? { ...item, unitPrice: data.prices[item.productId] }
+              : item
+          )
+        );
+      })
+      .catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status, tier]);
 
   function updateQty(productId: number, qty: number) {
     const updated = cart
