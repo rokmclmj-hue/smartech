@@ -67,3 +67,77 @@
 - 수직 슬라이스 1개 완성 시 즉시 멈추고 사용자 승인을 받는다.
 - 30~60분 내 데모 불가 시, 과도한 작업으로 간주하고 되돌린다.
 - 두 턴 연속 작업 지속 시도 시, 무한루프로 간주하고 중단한다.
+
+---
+
+## 디자인 시스템 — 변경 금지
+
+### 색상 토큰 (`app/globals.css` @theme 블록 수정 금지)
+Tailwind 클래스로 `bg-edred`, `text-ink` 형태로 사용. 값 임의 변경 금지.
+
+| 토큰 | 값 | 용도 |
+|------|----|------|
+| `ink` | `#0B0B0C` | 기본 텍스트·다크 배경 |
+| `paper` | `#F6F4EF` | 밝은 배경 |
+| `edred` | `#c00020` | 브랜드 레드 (메인) |
+| `edred2` | `#E46F75` | 연한 레드 |
+| `edred3` | `#621318` | 진한 레드 |
+| `smblue` | `#0d3a8a` | 스마텍 블루 |
+| `line` | `#E3DFD6` | 구분선 |
+| `dim` | `#6A6660` | 흐린 텍스트 |
+
+### 폰트 규칙
+- 본문 (`font-sans`): `Inter, Pretendard Variable, Pretendard`
+- 코드·모노 (`font-mono` / `mono`): `JetBrains Mono`
+- 위 폰트 외 새 웹폰트 추가 금지.
+
+### Tailwind 버전
+- **Tailwind v4** 사용 중. `tailwind.config.js` 없음. CSS `@theme {}` 방식만 사용.
+- `tailwind.config.js` 생성 또는 `@apply` 방식으로 전환 금지.
+
+---
+
+## 핵심 파일 — 승인 없이 수정 금지
+
+아래 파일은 사용자의 명시적 승인 없이 절대 수정하지 않는다.
+
+| 파일 | 이유 |
+|------|------|
+| `app/globals.css` | 디자인 토큰(@theme) 정의 |
+| `prisma/schema.prisma` | DB 구조. 변경 시 `npx prisma db push` 필수 |
+| `next.config.ts` | Vercel 빌드·외부 패키지 설정 |
+| `vercel.json` | 배포 설정 |
+| `tsconfig.json` | TypeScript 설정 |
+| `package.json` | 패키지 목록 |
+| `lib/auth.ts` | 로그인·인증 핵심 로직 |
+| `.claude/settings.json` | Claude 훅 설정 |
+| `app/api/chat/route.ts` | 실시간 AI 문의란 스트리밍 처리. API 응답 포맷 변경 금지 |
+| `components/FloatingChat.tsx` | 챗봇 팝업 UI. 구조 변경 금지 |
+
+---
+
+## 기술 스택 제한
+
+- **프레임워크**: Next.js 16.2.4 (App Router) + React 19.2.4 고정
+- **새 npm 패키지 추가 금지** (사용자 승인 필요). 현재 허용된 패키지:
+  `@anthropic-ai/sdk`, `@prisma/client`, `@react-pdf/renderer`, `@vercel/blob`,
+  `bcryptjs`, `next-auth`, `nodemailer`, `solapi`, `xlsx`, `react-countup`
+- **새 라이브러리로 교체 금지**: 예) axios 도입, Zustand 도입, date-fns 도입 등
+
+---
+
+## 운영 수칙
+
+### Vercel 자동 배포 주의
+- **`main` 브랜치 직접 push 금지.** `main`에 push하면 실제 고객이 사용하는 라이브 서버가 즉시 업데이트된다.
+- 모든 수정은 `feature/` 브랜치에서 작업 → Vercel Preview URL(미리보기 주소)에서 기능 테스트 → PR(Pull Request)로만 `main`에 반영.
+
+---
+
+## 보안 수칙
+
+- **`.env` 파일 수정 금지.** 환경 변수는 Vercel 대시보드에서만 관리.
+- **하드코딩 절대 금지.** 아래 키를 소스 코드 내에 직접 작성하지 않는다:
+  `ANTHROPIC_API_KEY`, `DATABASE_URL`, `SOLAPI_*`, `VERCEL_BLOB_*`,
+  `KAKAO_CLIENT_SECRET`, `GOOGLE_CLIENT_SECRET`, `GMAIL_*`, `NEXTAUTH_SECRET`
+- 코드 리뷰 중 위 패턴이 발견되면 즉시 경고하고 작업을 중단한다.
