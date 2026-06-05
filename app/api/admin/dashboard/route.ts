@@ -49,11 +49,14 @@ export async function GET() {
       // 승인 대기 회원 수
       prisma.user.count({ where: { tier: "PENDING" } }),
 
-      // 미처리 견적 — 3일 이상 지났으나 주문으로 이어지지 않은 견적
+      // 미처리 견적 — 등록 고객의 견적 중 3일 이상 지났으나 주문으로 이어지지 않은 것
+      // (대행견적/proxy는 온라인 주문 확정 없이 전화·메일로 처리되므로 제외)
       prisma.quote.count({
         where: {
           createdAt: { lte: threeDaysAgo },
           order: { is: null },
+          userId: { not: null },      // 등록 고객 견적만
+          createdByAdminId: null,     // 관리자 대행 견적 제외
         },
       }),
 
