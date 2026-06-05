@@ -355,28 +355,15 @@ export default function AdminDashboard() {
           <KpiPanels stats={stats} pendingCount={users.length} />
         </div>
 
-        <div className="border hair bg-paper px-4 sm:px-6 py-10 sm:py-16 text-center mb-6">
-          <div className="mono text-[10px] tracking-[0.18em] uppercase text-edred mb-4">
-            ● ALL CLEAR
+        <div className="flex items-center justify-between px-4 py-2.5 border hair bg-paper mb-6">
+          <div className="flex items-center gap-2">
+            <span className="mono text-[10px] tracking-[0.12em] text-green-600">● ALL CLEAR</span>
+            <span className="text-[13px] dim">승인 대기 회원 없음</span>
           </div>
-          <div className="display text-[48px] sm:text-[64px] leading-none text-ink mb-4 tabular">0</div>
-          <h2 className="text-[18px] sm:text-[20px] font-semibold text-ink mb-3">
-            승인 대기 회원이 없습니다
-          </h2>
-          <p className="dim text-[13px] leading-[1.6] max-w-md mx-auto">
-            모든 가입 신청이 처리되었습니다.<br />
-            새 가입 신청이 들어오면 자동으로 이곳에 표시됩니다.
-          </p>
-          <div className="mt-8 flex gap-3 justify-center flex-wrap">
-            <Link href="/admin/users"
-              className="mono text-[11px] tracking-[0.12em] uppercase border border-ink text-ink px-5 py-2.5 hover:bg-ink hover:text-paper transition-colors">
-              [ 전체 회원 보기 → ]
-            </Link>
-            <Link href="/admin/orders"
-              className="mono text-[11px] tracking-[0.12em] uppercase border border-line text-dim px-5 py-2.5 hover:border-ink hover:text-ink transition-colors">
-              [ 주문 관리 → ]
-            </Link>
-          </div>
+          <Link href="/admin/users"
+            className="mono text-[10px] tracking-[0.1em] uppercase dim hover:text-edred transition-colors">
+            전체 회원 →
+          </Link>
         </div>
 
         {/* 오늘 / 이번 주 방문 업체 */}
