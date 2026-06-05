@@ -87,7 +87,12 @@ export async function POST(
     return NextResponse.json({ error: "견적을 찾을 수 없습니다" }, { status: 404 });
   }
 
-  if (!quote.user.email) {
+  // 등록 고객 또는 비회원(guest) 이메일 결정
+  const recipientEmail = quote.user?.email ?? quote.guestEmail ?? null;
+  const recipientName = quote.user?.name ?? quote.guestName ?? "담당자";
+  const recipientCompany = quote.user?.company ?? quote.guestCompany ?? "";
+
+  if (!recipientEmail) {
     return NextResponse.json(
       { error: "수신자 이메일이 없습니다" },
       { status: 400 }
@@ -122,18 +127,18 @@ export async function POST(
       totalAmount: quote.totalAmount,
       note: quote.note,
       user: {
-        name: quote.user.name,
-        company: quote.user.company,
-        email: quote.user.email,
-        phone: quote.user.phone,
+        name: recipientName,
+        company: recipientCompany,
+        email: recipientEmail,
+        phone: quote.user?.phone ?? quote.guestPhone ?? null,
       },
       items: quote.items.map((it) => ({
         quantity: it.quantity,
         unitPrice: it.unitPrice,
         product: {
-          partNo: it.product.partNo,
-          description: it.product.description,
-          category: it.product.category,
+          partNo: it.customPartNo ?? it.product?.partNo ?? "",
+          description: it.customDescription ?? it.product?.description ?? "",
+          category: it.product?.category ?? null,
         },
       })),
     };
@@ -152,11 +157,11 @@ export async function POST(
       quote.totalAmount ?? subtotal + Math.round(subtotal * VAT_RATE);
 
     try {
-      await sendQuotePdf(quote.user.email, pdfBuffer, quoteNo, {
+      await sendQuotePdf(recipientEmail, pdfBuffer, quoteNo, {
         html: buildHtmlBody({
           quoteNo,
-          company: quote.user.company,
-          contactName: quote.user.name,
+          company: recipientCompany,
+          contactName: recipientName,
           grandTotal,
           expiresAt: quote.expiresAt,
         }),
@@ -186,7 +191,7 @@ export async function POST(
       console.error("[quote send / status update]", e);
       return NextResponse.json({
         ok: true,
-        sentTo: quote.user.email,
+        sentTo: recipientEmail,
         quoteNo,
         warning: "메일은 발송됐으나 견적 상태 업데이트에 실패했습니다",
       });
@@ -199,13 +204,13 @@ export async function POST(
       target: "Quote",
       targetId: quoteId,
       payload: {
-        to: quote.user.email,
+        to: recipientEmail,
         sendCount: newSendCount,
         force: !!force,
       },
     });
 
-    return NextResponse.json({ ok: true, sentTo: quote.user.email, quoteNo });
+    return NextResponse.json({ ok: true, sentTo: recipientEmail, quoteNo });
   } catch (e: unknown) {
     console.error("[quote send]", e);
     const err = e as { message?: string };

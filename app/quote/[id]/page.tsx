@@ -12,7 +12,10 @@ interface QuoteItem {
   id: number;
   quantity: number;
   unitPrice: number;
-  product: { partNo: string; description: string };
+  leadTime: string | null;
+  customPartNo: string | null;
+  customDescription: string | null;
+  product: { partNo: string; description: string } | null;
 }
 interface QuoteDetail {
   id: number;
@@ -449,13 +452,15 @@ export default function QuoteDetailPage() {
           </div>
           <div className="items">
             {quote.items.map((item, idx) => {
-              const iconUrl = getProductIconUrl(item.product.partNo, item.product.description);
+              const partNo = item.customPartNo ?? item.product?.partNo ?? "";
+              const description = item.customDescription ?? item.product?.description ?? "";
+              const iconUrl = getProductIconUrl(partNo, description);
               const lineSubtotal = item.unitPrice * item.quantity;
               return (
                 <article key={item.id} className="card">
                   <div className="ill">
                     <div className="ill-label">
-                      {String(idx + 1).padStart(2, "0")} / {String(quote.items.length).padStart(2, "0")} · {item.product.partNo}
+                      {String(idx + 1).padStart(2, "0")} / {String(quote.items.length).padStart(2, "0")} · {partNo || "CUSTOM"}
                     </div>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={iconUrl} alt="" className="icon-img" />
@@ -468,8 +473,8 @@ export default function QuoteDetailPage() {
                   <div className="card-data">
                     <div className="card-head">
                       <div>
-                        <div className="partno">PART NO · {item.product.partNo}</div>
-                        <div className="model">{item.product.description}</div>
+                        <div className="partno">PART NO · {partNo || "—"}</div>
+                        <div className="model">{description}</div>
                       </div>
                       <span className="badge-genuine">● Edwards Genuine</span>
                     </div>
@@ -479,8 +484,8 @@ export default function QuoteDetailPage() {
                         <div className="v">{item.quantity} EA</div>
                       </div>
                       <div>
-                        <div className="k">Warranty</div>
-                        <div className="v">12 Months</div>
+                        <div className="k">납기 · Delivery</div>
+                        <div className="v">{item.leadTime ?? "협의"}</div>
                       </div>
                     </div>
                     <div className="price-block">
@@ -499,7 +504,7 @@ export default function QuoteDetailPage() {
                     </div>
                     <div className="status-line">
                       <span className="ok">● Edwards 정품</span>
-                      <span>출고 · 협의</span>
+                      <span>출고 · {item.leadTime ?? "협의"}</span>
                     </div>
                   </div>
                 </article>
@@ -654,7 +659,8 @@ export default function QuoteDetailPage() {
               <th style={{ width: "8mm" }}>No</th>
               <th style={{ width: "26mm" }}>Part NO</th>
               <th>Description</th>
-              <th style={{ width: "14mm", textAlign: "right" }}>Qty</th>
+              <th style={{ width: "14mm", textAlign: "center" }}>납기</th>
+              <th style={{ width: "12mm", textAlign: "right" }}>Qty</th>
               <th style={{ width: "26mm", textAlign: "right" }}>Unit Price</th>
               <th style={{ width: "28mm", textAlign: "right" }}>Subtotal</th>
             </tr>
@@ -663,8 +669,9 @@ export default function QuoteDetailPage() {
             {quote.items.map((item, idx) => (
               <tr key={item.id}>
                 <td className="pmono">{String(idx + 1).padStart(2, "0")}</td>
-                <td className="partno">{item.product.partNo}</td>
-                <td>{item.product.description}</td>
+                <td className="partno">{item.customPartNo ?? item.product?.partNo ?? "—"}</td>
+                <td>{item.customDescription ?? item.product?.description ?? ""}</td>
+                <td style={{ textAlign: "center" }}>{item.leadTime ?? "협의"}</td>
                 <td className="num-col">{item.quantity} EA</td>
                 <td className="num-col">₩ {fmt(item.unitPrice)}</td>
                 <td className="num-col">₩ {fmt(item.unitPrice * item.quantity)}</td>

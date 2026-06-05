@@ -74,6 +74,7 @@ export async function GET(req: NextRequest) {
       company: o.user.company,
       contactName: o.contactName ?? o.user.name,
       contactPhone: o.contactPhone ?? o.user.phone,
+      email: o.user.email,
       amount,
       taxInvoiceRequested: o.quote.taxInvoiceRequested,
       deliveryIssue: o.deliveryIssue,
@@ -82,6 +83,10 @@ export async function GET(req: NextRequest) {
       createdAt: o.createdAt.toISOString(),
       deliveryNoteIssuedAt: o.deliveryNoteIssuedAt?.toISOString() ?? null,
       deliveryNoteCount: o.deliveryNoteCount,
+      paymentConfirmedAt: o.paymentConfirmedAt?.toISOString() ?? null,
+      shippedAt: o.shippedAt?.toISOString() ?? null,
+      deliveryEmailSentAt: o.deliveryEmailSentAt?.toISOString() ?? null,
+      deliveryEmailCount: o.deliveryEmailCount,
     };
   });
 
@@ -105,7 +110,7 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: "orderId와 action이 필요합니다" }, { status: 400 });
   }
 
-  const validActions = ["confirm", "cancel", "taxInvoiceDone"];
+  const validActions = ["confirm", "cancel", "taxInvoiceDone", "confirmPayment"];
   if (!validActions.includes(action)) {
     return NextResponse.json({ error: "유효하지 않은 action" }, { status: 400 });
   }
@@ -140,8 +145,9 @@ export async function PATCH(req: NextRequest) {
           );
         }
 
-        // 3. 재고 충분 여부 체크
+        // 3. 재고 충분 여부 체크 (등록 제품만 — 직접 추가 품목은 재고 무관)
         for (const item of order.quote.items) {
+          if (!item.product) continue;
           if (item.product.stock < item.quantity) {
             throw Object.assign(
               new Error("재고 부족"),
@@ -155,8 +161,9 @@ export async function PATCH(req: NextRequest) {
           }
         }
 
-        // 4. 재고 차감
+        // 4. 재고 차감 (등록 제품만)
         for (const item of order.quote.items) {
+          if (!item.product) continue;
           await tx.product.update({
             where: { id: item.product.id },
             data: { stock: { decrement: item.quantity } },
@@ -179,7 +186,7 @@ export async function PATCH(req: NextRequest) {
         return {
           orderId,
           items: order.quote.items.map((i) => ({
-            partNo: i.product.partNo,
+            partNo: i.customPartNo ?? i.product?.partNo ?? "",
             qty: i.quantity,
           })),
         };
@@ -277,6 +284,19 @@ export async function PATCH(req: NextRequest) {
     });
 
     return NextResponse.json({ ok: true, orderId, status: "TAX_INVOICE_DONE" });
+  }
+
+  // ── confirmPayment ────────────────────────────
+  if (action === "confirmPayment") {
+    await prisma.order.update({
+      where: { id: orderId },
+      data: { paymentConfirmedAt: new Date() },
+    });
+    await logAudit({
+      userId: admin.userId, action: "order.payment_confirmed",
+      target: "order", targetId: orderId,
+    });
+    return NextResponse.json({ ok: true, orderId });
   }
 
   return NextResponse.json({ error: "처리 실패" }, { status: 500 });

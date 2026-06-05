@@ -69,9 +69,9 @@ export async function GET(
         quantity: it.quantity,
         unitPrice: it.unitPrice,
         product: {
-          partNo: it.product.partNo,
-          description: it.product.description,
-          category: it.product.category,
+          partNo: it.customPartNo ?? it.product?.partNo ?? "",
+          description: it.customDescription ?? it.product?.description ?? "",
+          category: it.product?.category ?? null,
         },
       })),
     };

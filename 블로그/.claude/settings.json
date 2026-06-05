@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx vercel ls *)",
+      "Bash(npx vercel ls)",
+      "Bash(npx vercel ls --prod *)",
+      "Bash(npx vercel domains ls *)",
+      "Bash(npx vercel inspect *)",
+      "Bash(npx vercel project ls *)"
+    ]
+  }
+}

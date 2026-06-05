@@ -10,6 +10,8 @@ export type AuditAction =
   | "order.cancel"
   | "order.tax_invoice_done"
   | "order.delivery_pdf"
+  | "order.payment_confirmed"
+  | "order.ship"
   | "user.approve"
   | "user.reject"
   | "user.tier_change"

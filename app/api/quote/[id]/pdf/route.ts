@@ -48,16 +48,16 @@ export async function GET(
       totalAmount: quote.totalAmount,
       note: quote.note,
       user: {
-        name: quote.user.name,
-        company: quote.user.company,
-        email: quote.user.email ?? '',
+        name: quote.user?.name ?? quote.guestName ?? "",
+        company: quote.user?.company ?? quote.guestCompany ?? "",
+        email: quote.user?.email ?? quote.guestEmail ?? "",
       },
       items: quote.items.map((item) => ({
         quantity: item.quantity,
         unitPrice: item.unitPrice,
         product: {
-          partNo: item.product.partNo,
-          description: item.product.description,
+          partNo: item.customPartNo ?? item.product?.partNo ?? "",
+          description: item.customDescription ?? item.product?.description ?? "",
         },
       })),
     });

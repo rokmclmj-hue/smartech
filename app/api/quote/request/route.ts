@@ -98,7 +98,21 @@ export async function POST(req: NextRequest) {
   try {
     const pdfBuffer = await generateQuotePdf({
       ...quote,
-      user: { ...quote.user, email: quote.user.email ?? '' },
+      user: {
+        name: quote.user?.name ?? "",
+        company: quote.user?.company ?? "",
+        email: quote.user?.email ?? "",
+        phone: quote.user?.phone ?? null,
+      },
+      items: quote.items.map((it) => ({
+        quantity: it.quantity,
+        unitPrice: it.unitPrice,
+        product: {
+          partNo: it.customPartNo ?? it.product?.partNo ?? "",
+          description: it.customDescription ?? it.product?.description ?? "",
+          category: it.product?.category ?? null,
+        },
+      })),
     });
     const quoteNo = `Q-${quote.id}-${formatDate(quote.createdAt)}`;
     if (userEmail) {

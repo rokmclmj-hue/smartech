@@ -52,7 +52,7 @@ model PriceRule {
 
 model Quote {
   id                  Int         @id @default(autoincrement())
-  userId              Int
+  userId              Int?
   status              String      @default("DRAFT")
   note                String?
   createdAt           DateTime    @default(now())
@@ -62,36 +62,48 @@ model Quote {
   sentAt              DateTime?
   sendCount           Int         @default(0)
   createdByAdminId    Int?
-  user                User        @relation(fields: [userId], references: [id])
+  guestName           String?
+  guestCompany        String?
+  guestEmail          String?
+  guestPhone          String?
+  guestTier           String?
+  user                User?       @relation(fields: [userId], references: [id])
   createdByAdmin      User?       @relation("QuoteCreatedBy", fields: [createdByAdminId], references: [id])
   items               QuoteItem[]
   order               Order?
 }
 
 model QuoteItem {
-  id        Int     @id @default(autoincrement())
-  quoteId   Int
-  productId Int
-  quantity  Int
-  unitPrice Float
-  product   Product @relation(fields: [productId], references: [id])
-  quote     Quote   @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  id                Int      @id @default(autoincrement())
+  quoteId           Int
+  productId         Int?
+  quantity          Int
+  unitPrice         Float
+  leadTime          String?
+  customPartNo      String?
+  customDescription String?
+  product           Product? @relation(fields: [productId], references: [id])
+  quote             Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
 }
 
 model Order {
-  id                   Int       @id @default(autoincrement())
-  quoteId              Int       @unique
-  userId               Int
-  status               String    @default("PENDING")
-  contactName          String?
-  contactPhone         String?
-  deliveryIssue        Boolean   @default(false)
-  confirmedAt          DateTime?
-  createdAt            DateTime  @default(now())
-  deliveryNoteIssuedAt DateTime?
-  deliveryNoteCount    Int       @default(0)
-  quote                Quote     @relation(fields: [quoteId], references: [id])
-  user                 User      @relation(fields: [userId], references: [id])
+  id                      Int       @id @default(autoincrement())
+  quoteId                 Int       @unique
+  userId                  Int
+  status                  String    @default("PENDING")
+  contactName             String?
+  contactPhone            String?
+  deliveryIssue           Boolean   @default(false)
+  confirmedAt             DateTime?
+  createdAt               DateTime  @default(now())
+  deliveryNoteIssuedAt    DateTime?
+  deliveryNoteCount       Int       @default(0)
+  paymentConfirmedAt      DateTime?
+  shippedAt               DateTime?
+  deliveryEmailSentAt     DateTime?
+  deliveryEmailCount      Int       @default(0)
+  quote                   Quote     @relation(fields: [quoteId], references: [id])
+  user                    User      @relation(fields: [userId], references: [id])
 }
 
 model AuditLog {
@@ -282,18 +294,34 @@ model UploadToken {
 // ─────────────────────────────────────────────────
 // 기존 거래처 화이트리스트 — 엑셀 임포트 or 수동 등록
 model KnownCompany {
-  id          Int      @id @default(autoincrement())
+  id          Int            @id @default(autoincrement())
   companyName String
   phone       String?
   email       String?
-  tier        String   // DEALER | OEM | ENDUSER
-  source      String   @default("excel") // excel | manual
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  tier        String         // DEALER | OEM | ENDUSER | KEY_DEALER | VIP_DEALER
+  source      String         @default("excel") // excel | manual | html_backup
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  contacts    KnownContact[]
 
   @@index([phone])
   @@index([email])
   @@index([companyName])
+}
+
+// 거래처별 담당자 목록
+model KnownContact {
+  id        Int          @id @default(autoincrement())
+  companyId Int
+  name      String
+  title     String?
+  tel       String?
+  mobile    String?
+  email     String?
+  createdAt DateTime     @default(now())
+  company   KnownCompany @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
 }
 
 // 블로그 게시글 (AI 파이프라인 생성 + 직접 작성)

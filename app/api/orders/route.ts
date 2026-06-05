@@ -110,8 +110,9 @@ export async function POST(req: NextRequest) {
         data: { status: "CONFIRMED" },
       });
 
-      // 재고 차감
+      // 재고 차감 (등록 제품만)
       for (const item of quote.items) {
+        if (!item.productId) continue;
         await tx.product.update({
           where: { id: item.productId },
           data: { stock: { decrement: item.quantity } },

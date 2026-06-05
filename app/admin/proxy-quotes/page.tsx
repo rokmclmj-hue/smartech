@@ -1,17 +1,19 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { useToast } from "@/lib/toast";
 
-type Customer = {
+// ── 타입 ────────────────────────────────────────────────────────────────────
+
+type CustomerResult = {
+  source: "user" | "known";
   id: number;
-  name: string;
   company: string;
-  phone: string | null;
+  name: string;
+  phone: string;
   email: string;
-  businessNo: string | null;
   tier: string;
+  contacts: { name: string; title: string | null; mobile: string | null; email: string | null }[];
 };
 
 type ProductHit = {
@@ -20,19 +22,62 @@ type ProductHit = {
   description: string;
   category: string | null;
   stock: number;
-  imageUrl: string | null;
-  costPrice: number;
   unitPrice: number;
 };
 
 type LineItem = {
-  productId: number;
+  key: string;
+  productId: number | null;
   partNo: string;
   description: string;
   quantity: number;
   unitPrice: number;
   defaultUnitPrice: number;
+  leadTime: string;
 };
+
+type GuestForm = {
+  name: string;
+  company: string;
+  email: string;
+  phone: string;
+  tier: string;
+};
+
+type KnownContact = {
+  id: number;
+  name: string;
+  title: string | null;
+  tel: string | null;
+  mobile: string | null;
+  email: string | null;
+};
+
+type KnownCompanyHit = {
+  id: number;
+  companyName: string;
+  phone: string | null;
+  email: string | null;
+  tier: string;
+  contacts: KnownContact[];
+};
+
+type HistoryItem = {
+  id: number;
+  quoteNo: string;
+  createdAt: string;
+  company: string;
+  contactName: string;
+  email: string | null;
+  phone: string | null;
+  tier: string;
+  isGuest: boolean;
+  subtotal: number;
+  itemCount: number;
+  previewItems: { partNo: string; description: string; quantity: number; unitPrice: number; leadTime?: string }[];
+};
+
+// ── 상수 ────────────────────────────────────────────────────────────────────
 
 const TIER_LABEL: Record<string, string> = {
   ENDUSER: "엔드유저",
@@ -42,32 +87,51 @@ const TIER_LABEL: Record<string, string> = {
   VIP_DEALER: "VIP 딜러",
 };
 
-function formatKRW(n: number): string {
+const TIER_OPTIONS = ["ENDUSER", "OEM", "DEALER", "KEY_DEALER", "VIP_DEALER"];
+
+function fmt(n: number) {
   return new Intl.NumberFormat("ko-KR").format(Math.round(n)) + "원";
 }
 
 function useDebounce<T>(value: T, delay = 250): T {
-  const [debounced, setDebounced] = useState(value);
+  const [dv, setDv] = useState(value);
   useEffect(() => {
-    const id = setTimeout(() => setDebounced(value), delay);
+    const id = setTimeout(() => setDv(value), delay);
     return () => clearTimeout(id);
   }, [value, delay]);
-  return debounced;
+  return dv;
 }
+
+// ── 컴포넌트 ─────────────────────────────────────────────────────────────────
 
 export default function AdminProxyQuotesPage() {
   const toast = useToast();
-  const router = useRouter();
-  const [submitting, setSubmitting] = useState(false);
 
-  // 고객 검색
+  // 통합 고객 검색
   const [customerQ, setCustomerQ] = useState("");
-  const debouncedCustomerQ = useDebounce(customerQ);
-  const [customerHits, setCustomerHits] = useState<Customer[]>([]);
+  const debouncedQ = useDebounce(customerQ);
+  const [customerHits, setCustomerHits] = useState<CustomerResult[]>([]);
   const [customerOpen, setCustomerOpen] = useState(false);
   const [customerLoading, setCustomerLoading] = useState(false);
-  const [customer, setCustomer] = useState<Customer | null>(null);
   const customerBoxRef = useRef<HTMLDivElement>(null);
+
+  // 선택된 고객 (회원 or 거래처)
+  const [selectedCustomer, setSelectedCustomer] = useState<CustomerResult | null>(null);
+
+  // 직접 입력 (수동)
+  const [showDirect, setShowDirect] = useState(false);
+  const [guest, setGuest] = useState<GuestForm>({
+    name: "", company: "", email: "", phone: "", tier: "ENDUSER",
+  });
+  const [selectedContacts, setSelectedContacts] = useState<KnownContact[]>([]);
+
+  // 이력 불러오기 모달
+  const [showHistory, setShowHistory] = useState(false);
+  const [historyQ, setHistoryQ] = useState("");
+  const debouncedHistoryQ = useDebounce(historyQ);
+  const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [selectedCompanyName, setSelectedCompanyName] = useState<string | null>(null);
 
   // 상품 검색
   const [productQ, setProductQ] = useState("");
@@ -77,403 +141,819 @@ export default function AdminProxyQuotesPage() {
   const [productLoading, setProductLoading] = useState(false);
   const productBoxRef = useRef<HTMLDivElement>(null);
 
+  // 붙여넣기 입력
+  const [showPaste, setShowPaste] = useState(false);
+  const [pasteText, setPasteText] = useState("");
+  const [pasteLoading, setPasteLoading] = useState(false);
+  const [pasteErrors, setPasteErrors] = useState<string[]>([]);
+
   // 견적 품목
   const [lines, setLines] = useState<LineItem[]>([]);
 
-  // 외부 클릭 시 자동완성 닫기
+  // 발행 결과
+  const [submitting, setSubmitting] = useState(false);
+  const [doneQuoteId, setDoneQuoteId] = useState<number | null>(null);
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+
+  // 현재 활성 tier / 고객 확정 여부
+  const activeTier = selectedCustomer?.tier ?? guest.tier ?? "ENDUSER";
+  const hasCustomer = !!selectedCustomer || (showDirect && !!guest.company.trim());
+
+  // ── 외부 클릭 닫기 ──────────────────────────────────────
+
   useEffect(() => {
-    function onMouseDown(e: MouseEvent) {
-      if (customerBoxRef.current && !customerBoxRef.current.contains(e.target as Node)) {
+    function onDown(e: MouseEvent) {
+      if (customerBoxRef.current && !customerBoxRef.current.contains(e.target as Node))
         setCustomerOpen(false);
-      }
-      if (productBoxRef.current && !productBoxRef.current.contains(e.target as Node)) {
+      if (productBoxRef.current && !productBoxRef.current.contains(e.target as Node))
         setProductOpen(false);
-      }
     }
-    document.addEventListener("mousedown", onMouseDown);
-    return () => document.removeEventListener("mousedown", onMouseDown);
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
   }, []);
 
-  // 고객 검색 fetch
+  // ── 통합 고객 검색 ────────────────────────────────────────
+
   useEffect(() => {
-    const q = debouncedCustomerQ.trim();
-    if (q.length === 0) {
-      setCustomerHits([]);
-      return;
-    }
+    const q = debouncedQ.trim();
+    if (!q) { setCustomerHits([]); return; }
     let abort = false;
     setCustomerLoading(true);
-    fetch(`/api/admin/customers/search?q=${encodeURIComponent(q)}`)
+    fetch(`/api/admin/customers/unified-search?q=${encodeURIComponent(q)}`)
       .then((r) => r.json())
-      .then((d) => {
-        if (!abort) setCustomerHits(d.items ?? []);
-      })
-      .catch(() => {
-        if (!abort) setCustomerHits([]);
-      })
-      .finally(() => {
-        if (!abort) setCustomerLoading(false);
-      });
-    return () => {
-      abort = true;
-    };
-  }, [debouncedCustomerQ]);
+      .then((d) => { if (!abort) setCustomerHits(d.items ?? []); })
+      .catch(() => { if (!abort) setCustomerHits([]); })
+      .finally(() => { if (!abort) setCustomerLoading(false); });
+    return () => { abort = true; };
+  }, [debouncedQ]);
 
-  // 상품 검색 fetch
+  // ── 이력 불러오기 ─────────────────────────────────────────
+
+  useEffect(() => {
+    if (!showHistory) return;
+    let abort = false;
+    setHistoryLoading(true);
+    fetch(`/api/admin/proxy-quotes/history?q=${encodeURIComponent(debouncedHistoryQ)}`)
+      .then((r) => r.json())
+      .then((d) => { if (!abort) setHistoryItems(d.items ?? []); })
+      .catch(() => { if (!abort) setHistoryItems([]); })
+      .finally(() => { if (!abort) setHistoryLoading(false); });
+    return () => { abort = true; };
+  }, [showHistory, debouncedHistoryQ]);
+
+  // ── 상품 검색 ────────────────────────────────────────────
+
+  const canSearchProduct = hasCustomer;
+
   useEffect(() => {
     const q = debouncedProductQ.trim();
-    if (q.length === 0 || !customer) {
-      setProductHits([]);
-      return;
-    }
+    if (!q || !canSearchProduct) { setProductHits([]); return; }
     let abort = false;
     setProductLoading(true);
-    fetch(
-      `/api/admin/products/search?q=${encodeURIComponent(q)}&tier=${encodeURIComponent(customer.tier)}`
-    )
+    fetch(`/api/admin/products/search?q=${encodeURIComponent(q)}&tier=${encodeURIComponent(activeTier)}`)
       .then((r) => r.json())
-      .then((d) => {
-        if (!abort) setProductHits(d.items ?? []);
-      })
-      .catch(() => {
-        if (!abort) setProductHits([]);
-      })
-      .finally(() => {
-        if (!abort) setProductLoading(false);
-      });
-    return () => {
-      abort = true;
-    };
-  }, [debouncedProductQ, customer]);
+      .then((d) => { if (!abort) setProductHits(d.items ?? []); })
+      .catch(() => { if (!abort) setProductHits([]); })
+      .finally(() => { if (!abort) setProductLoading(false); });
+    return () => { abort = true; };
+  }, [debouncedProductQ, canSearchProduct, activeTier]);
 
-  function selectCustomer(c: Customer) {
-    setCustomer(c);
+  // ── 고객 조작 ────────────────────────────────────────────
+
+  function selectCustomer(c: CustomerResult) {
+    setSelectedCustomer(c);
     setCustomerQ("");
     setCustomerOpen(false);
-    if (lines.length > 0) {
-      toast.info("고객이 변경되어 단가는 그대로 유지됩니다. 필요 시 수정하세요.");
-    }
+    setShowDirect(false);
+    setSelectedContacts(c.contacts as KnownContact[]);
+    setSelectedCompanyName(c.source === "known" ? c.company : null);
+    setGuest({ company: c.company, name: c.name, phone: c.phone, email: c.email, tier: c.tier });
   }
 
   function clearCustomer() {
-    setCustomer(null);
+    setSelectedCustomer(null);
     setCustomerQ("");
     setLines([]);
+    setSelectedContacts([]);
+    setSelectedCompanyName(null);
+    setShowDirect(false);
+    setGuest({ name: "", company: "", email: "", phone: "", tier: "ENDUSER" });
   }
+
+  function selectContact(ct: KnownContact) {
+    setGuest((g) => ({
+      ...g,
+      name: ct.name,
+      phone: ct.mobile ?? ct.tel ?? g.phone,
+      email: ct.email ?? g.email,
+    }));
+    if (selectedCustomer) {
+      setSelectedCustomer({
+        ...selectedCustomer,
+        name: ct.name,
+        phone: ct.mobile ?? ct.tel ?? selectedCustomer.phone,
+        email: ct.email ?? selectedCustomer.email,
+      });
+    }
+  }
+
+  function openHistoryForCompany(companyName: string) {
+    setHistoryQ(companyName);
+    setShowHistory(true);
+  }
+
+  function openHistoryAll() {
+    setHistoryQ("");
+    setShowHistory(true);
+  }
+
+  function loadFromHistory(h: HistoryItem) {
+    // 고객 정보 복원
+    setShowDirect(false);
+    setGuest({ company: h.company, name: h.contactName, email: h.email ?? "", phone: h.phone ?? "", tier: h.tier });
+    setSelectedCustomer({ source: "known", id: 0, company: h.company, name: h.contactName, phone: h.phone ?? "", email: h.email ?? "", tier: h.tier, contacts: [] });
+    setSelectedCompanyName(h.company);
+    // 품목 복원
+    const restoredLines: LineItem[] = h.previewItems.map((item, idx) => ({
+      key: `hist_${h.id}_${idx}`,
+      productId: null,
+      partNo: item.partNo,
+      description: item.description,
+      quantity: item.quantity,
+      unitPrice: item.unitPrice,
+      defaultUnitPrice: item.unitPrice,
+      leadTime: item.leadTime ?? "",
+    }));
+    setLines(restoredLines);
+    setShowHistory(false);
+    toast.info(`"${h.company}" 견적을 불러왔습니다. 필요한 부분만 수정 후 발행하세요.`);
+  }
+
+  // ── 상품 조작 ────────────────────────────────────────────
 
   function addProduct(p: ProductHit) {
     setLines((prev) => {
-      const existing = prev.find((l) => l.productId === p.id);
-      if (existing) {
-        return prev.map((l) =>
-          l.productId === p.id ? { ...l, quantity: l.quantity + 1 } : l
-        );
-      }
-      return [
-        ...prev,
-        {
-          productId: p.id,
-          partNo: p.partNo,
-          description: p.description,
-          quantity: 1,
-          unitPrice: p.unitPrice,
-          defaultUnitPrice: p.unitPrice,
-        },
-      ];
+      const ex = prev.find((l) => l.productId === p.id);
+      if (ex) return prev.map((l) => l.productId === p.id ? { ...l, quantity: l.quantity + 1 } : l);
+      return [...prev, {
+        key: String(p.id), productId: p.id, partNo: p.partNo, description: p.description,
+        quantity: 1, unitPrice: p.unitPrice, defaultUnitPrice: p.unitPrice, leadTime: "",
+      }];
     });
     setProductQ("");
     setProductOpen(false);
   }
 
-  function updateQuantity(id: number, qty: number) {
+  function addCustomLine() {
+    const key = `custom_${Date.now()}`;
+    setLines((prev) => [...prev, {
+      key, productId: null, partNo: "", description: "",
+      quantity: 1, unitPrice: 0, defaultUnitPrice: 0, leadTime: "",
+    }]);
+  }
+
+  function updateQty(key: string, qty: number) {
     if (!Number.isFinite(qty) || qty < 1) qty = 1;
-    setLines((prev) =>
-      prev.map((l) => (l.productId === id ? { ...l, quantity: qty } : l))
-    );
+    setLines((prev) => prev.map((l) => l.key === key ? { ...l, quantity: qty } : l));
   }
 
-  function updateUnitPrice(id: number, price: number) {
+  function updatePrice(key: string, price: number) {
     if (!Number.isFinite(price) || price < 0) price = 0;
-    setLines((prev) =>
-      prev.map((l) => (l.productId === id ? { ...l, unitPrice: price } : l))
-    );
+    setLines((prev) => prev.map((l) => l.key === key ? { ...l, unitPrice: price } : l));
   }
 
-  function removeLine(id: number) {
-    setLines((prev) => prev.filter((l) => l.productId !== id));
+  function updateDescription(key: string, desc: string) {
+    setLines((prev) => prev.map((l) => l.key === key ? { ...l, description: desc } : l));
   }
 
-  const subtotal = lines.reduce((sum, l) => sum + l.unitPrice * l.quantity, 0);
+  function updatePartNo(key: string, partNo: string) {
+    setLines((prev) => prev.map((l) => l.key === key ? { ...l, partNo } : l));
+  }
+
+  function updateLeadTime(key: string, leadTime: string) {
+    setLines((prev) => prev.map((l) => l.key === key ? { ...l, leadTime } : l));
+  }
+
+  function removeLine(key: string) {
+    setLines((prev) => prev.filter((l) => l.key !== key));
+  }
+
+  // ── 붙여넣기 입력 파서 ────────────────────────────────────
+  // 형식: 한 줄에 "파트번호 수량" 또는 "파트번호, 수량" 또는 파트번호만
+
+  async function parsePaste() {
+    const raw = pasteText.trim();
+    if (!raw) return;
+    setPasteLoading(true);
+    setPasteErrors([]);
+
+    const parsed: { partNo: string; qty: number }[] = [];
+    for (const line of raw.split("\n")) {
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+      // 탭, 콤마, 공백으로 분리
+      const parts = trimmed.split(/[\t,]+/).map((s) => s.trim()).filter(Boolean);
+      const partNo = parts[0].toUpperCase();
+      // 마지막 숫자 토큰을 수량으로
+      const qtyStr = parts.slice(1).reverse().find((p) => /^\d+$/.test(p));
+      const qty = qtyStr ? parseInt(qtyStr) : 1;
+      parsed.push({ partNo, qty });
+    }
+
+    if (!parsed.length) { setPasteLoading(false); return; }
+
+    try {
+      const res = await fetch("/api/admin/products/lookup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ partNos: parsed.map((p) => p.partNo), tier: activeTier }),
+      });
+      const data = await res.json();
+      const found: ProductHit[] = data.found ?? [];
+      const notFound: string[] = data.notFound ?? [];
+
+      // 찾은 품목 추가
+      setLines((prev) => {
+        let next = [...prev];
+        for (const p of found) {
+          const qtyRow = parsed.find((r) => r.partNo === p.partNo);
+          const qty = qtyRow?.qty ?? 1;
+          const ex = next.find((l) => l.productId === p.id);
+          if (ex) {
+            next = next.map((l) => l.productId === p.id ? { ...l, quantity: l.quantity + qty } : l);
+          } else {
+            next.push({
+              key: String(p.id), productId: p.id, partNo: p.partNo, description: p.description,
+              quantity: qty, unitPrice: p.unitPrice, defaultUnitPrice: p.unitPrice, leadTime: "",
+            });
+          }
+        }
+        return next;
+      });
+
+      if (notFound.length > 0) {
+        setPasteErrors(notFound);
+        toast.info(`${found.length}건 추가됨. ${notFound.length}건 미조회: ${notFound.join(", ")}`);
+      } else {
+        toast.success(`${found.length}건 추가됐습니다.`);
+        setPasteText("");
+        setShowPaste(false);
+      }
+    } catch {
+      toast.error("조회 중 오류가 발생했습니다.");
+    } finally {
+      setPasteLoading(false);
+    }
+  }
+
+  // ── 견적 발행 ────────────────────────────────────────────
+
+  const subtotal = lines.reduce((s, l) => s + l.unitPrice * l.quantity, 0);
   const vat = Math.round(subtotal * 0.1);
   const total = subtotal + vat;
 
   async function submitQuote() {
-    if (!customer) {
-      toast.error("고객을 먼저 선택해주세요.");
-      return;
-    }
-    if (lines.length === 0) {
-      toast.error("상품을 1개 이상 추가해주세요.");
-      return;
-    }
+    if (lines.length === 0) { toast.error("상품을 1개 이상 추가해주세요."); return; }
+    if (!hasCustomer) { toast.error("고객을 먼저 선택해주세요."); return; }
+    if (!guest.company.trim()) { toast.error("상호를 입력해주세요."); return; }
+
     setSubmitting(true);
     try {
+      const itemsPayload = lines.map((l) => ({
+        productId: l.productId,
+        quantity: l.quantity,
+        unitPrice: l.unitPrice,
+        leadTime: l.leadTime || undefined,
+        customPartNo: l.partNo || undefined,
+        customDescription: l.description || undefined,
+      }));
+      // 홈페이지 등록 회원이면 customerId, 거래처/직접입력이면 guest
+      const body =
+        selectedCustomer?.source === "user"
+          ? { customerId: selectedCustomer.id, items: itemsPayload }
+          : { guest, items: itemsPayload };
+
       const res = await fetch("/api/admin/proxy-quotes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          customerId: customer.id,
-          items: lines.map((l) => ({
-            productId: l.productId,
-            quantity: l.quantity,
-            unitPrice: l.unitPrice,
-          })),
-        }),
+        body: JSON.stringify(body),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        toast.error(data.error ?? "견적서 발행에 실패했습니다.");
-        setSubmitting(false);
-        return;
-      }
-      router.push(`/quote/${data.quoteId}`);
+      if (!res.ok) { toast.error(data.error ?? "견적서 발행에 실패했습니다."); return; }
+      setDoneQuoteId(data.quoteId);
     } catch {
       toast.error("네트워크 오류가 발생했습니다.");
+    } finally {
       setSubmitting(false);
     }
   }
 
+  // ── 메일 발송 ────────────────────────────────────────────
+
+  async function sendMail() {
+    if (!doneQuoteId) return;
+    setSending(true);
+    try {
+      const res = await fetch(`/api/admin/quotes/${doneQuoteId}/send`, { method: "POST" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { toast.error(data.error ?? "메일 발송에 실패했습니다."); return; }
+      setSent(true);
+      toast.success(`견적서를 ${data.sentTo}로 발송했습니다.`);
+    } catch {
+      toast.error("네트워크 오류가 발생했습니다.");
+    } finally {
+      setSending(false);
+    }
+  }
+
+  // ── 발행 완료 화면 ────────────────────────────────────────
+
+  if (doneQuoteId) {
+    const recipientEmail = selectedCustomer?.email ?? guest.email;
+    const recipientName = selectedCustomer?.company ?? guest.company;
+
+    return (
+      <div className="px-4 sm:px-6 py-10 max-w-[700px] mx-auto">
+        <div className="border hair rounded-md p-8 text-center space-y-6">
+          <div className="mono text-[11px] tracking-[0.15em] text-edred uppercase">
+            ● 견적서 발행 완료
+          </div>
+          <div>
+            <div className="text-[28px] font-bold text-ink">
+              SMT-{new Date().getFullYear()}-Q-{String(doneQuoteId).padStart(6, "0")}
+            </div>
+            <div className="text-[13px] dim mt-1">{recipientName}</div>
+          </div>
+
+          <div className="flex flex-col gap-3 max-w-[320px] mx-auto">
+            {/* 메일 발송 */}
+            {recipientEmail ? (
+              sent ? (
+                <div className="border border-green-500/40 rounded-md px-4 py-3 text-[13px] text-green-600">
+                  ✓ {recipientEmail} 발송 완료
+                </div>
+              ) : (
+                <button
+                  onClick={sendMail}
+                  disabled={sending}
+                  className="bg-edred text-white px-4 py-3 rounded-md text-[14px] font-semibold hover:brightness-110 disabled:opacity-40 transition-all"
+                >
+                  {sending ? "발송 중…" : `📧 메일 발송 → ${recipientEmail}`}
+                </button>
+              )
+            ) : (
+              <div className="border hair rounded-md px-4 py-3 text-[12px] dim text-center">
+                이메일 미입력 — 메일 발송 불가
+              </div>
+            )}
+
+            {/* 견적서 보기 */}
+            <a
+              href={`/quote/${doneQuoteId}`}
+              target="_blank"
+              rel="noreferrer"
+              className="border hair rounded-md px-4 py-3 text-[13px] text-center text-ink hover:border-edred transition-colors"
+            >
+              견적서 보기 →
+            </a>
+
+            {/* 새 견적 작성 */}
+            <button
+              onClick={() => {
+                setDoneQuoteId(null); setSent(false);
+                setLines([]); clearCustomer();
+              }}
+              className="text-[12px] dim hover:text-ink transition-colors"
+            >
+              + 새 견적서 작성
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── 메인 폼 ──────────────────────────────────────────────
+
   return (
     <div className="px-4 sm:px-6 py-6 sm:py-10 max-w-[1400px] mx-auto">
-      {/* 헤더 — 다른 admin 페이지와 동일한 패턴 (NEW 뱃지만 유지) */}
-      <div className="mb-8 sm:mb-10">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="mono text-[11px] dim tracking-[0.15em] uppercase">
+
+      {/* 헤더 */}
+      <div className="mb-8 sm:mb-10 flex items-start justify-between gap-4">
+        <div>
+          <div className="mono text-[11px] dim tracking-[0.15em] uppercase mb-3">
             — 06 · PROXY QUOTES
           </div>
-          <span className="mono text-[9px] font-bold tracking-[0.15em] bg-edred text-white px-1.5 py-[2px] rounded">
-            NEW
-          </span>
+          <h1 className="display text-[28px] sm:text-[40px] leading-none text-ink">
+            대행 <span className="italic text-edred">견적서</span>
+          </h1>
+          <p className="dim text-[13px] mt-3">
+            고객을 선택하거나 직접 입력 후 상품을 추가하면 등급별 단가로 자동 계산됩니다.
+          </p>
         </div>
-        <h1 className="display text-[28px] sm:text-[40px] leading-none text-ink">
-          대행 <span className="italic text-edred">견적서</span>
-        </h1>
-        <p className="dim text-[13px] mt-3">
-          고객을 검색하고 상품을 추가하면 등급별 단가로 자동 계산됩니다.
-        </p>
+        <button
+          type="button"
+          onClick={openHistoryAll}
+          className="shrink-0 mt-2 border hair rounded-md px-4 py-2.5 text-[13px] dim hover:text-ink hover:border-edred transition-colors"
+        >
+          📋 이력 불러오기
+        </button>
       </div>
 
-      {/* 검색 영역 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        {/* 고객 검색 */}
-        <div ref={customerBoxRef} className="relative">
-          <label className="mono text-[10px] tracking-[0.18em] uppercase dim mb-2 block">
-            01 / 고객
-          </label>
-
-          {customer ? (
-            <div className="border-2 border-edred rounded-md p-4 bg-edred/5">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="text-[16px] font-semibold text-ink mb-1 truncate">
-                    {customer.company}
-                  </div>
-                  <div className="text-[13px] text-dim truncate">
-                    {customer.name} · {customer.phone ?? "—"}
-                  </div>
-                  <div className="mt-2 inline-block mono text-[10px] tracking-[0.15em] bg-edred text-white px-2 py-[3px] rounded">
-                    {TIER_LABEL[customer.tier] ?? customer.tier}
-                  </div>
-                </div>
+      {/* 이력 불러오기 모달 */}
+      {showHistory && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-16 px-4">
+          <div className="w-full max-w-2xl bg-paper border hair rounded-lg shadow-2xl flex flex-col max-h-[75vh]">
+            {/* 모달 헤더 */}
+            <div className="flex items-center justify-between px-5 py-4 border-b hair">
+              <div>
+                <div className="mono text-[10px] tracking-[0.15em] uppercase dim mb-1">QUOTE HISTORY</div>
+                <h2 className="text-[18px] font-bold text-ink">
+                  견적 이력 불러오기
+                  {historyQ && (
+                    <span className="ml-2 text-[13px] font-normal text-edred">— {historyQ}</span>
+                  )}
+                </h2>
+              </div>
+              <button onClick={() => setShowHistory(false)} className="dim hover:text-edred text-[20px]">✕</button>
+            </div>
+            {/* 검색 */}
+            <div className="px-5 py-3 border-b hair flex gap-2">
+              <input
+                type="text"
+                value={historyQ}
+                onChange={(e) => setHistoryQ(e.target.value)}
+                placeholder="업체명 또는 담당자로 검색"
+                className="flex-1 border hair rounded-md px-3 py-2 text-[14px] focus:outline-none focus:border-edred"
+                autoFocus
+              />
+              {historyQ && (
                 <button
-                  onClick={clearCustomer}
-                  className="text-[12px] text-dim hover:text-edred transition-colors shrink-0"
+                  type="button"
+                  onClick={() => setHistoryQ("")}
+                  className="shrink-0 border hair rounded-md px-3 py-2 text-[12px] dim hover:text-ink transition-colors"
                 >
-                  변경
+                  전체 보기
+                </button>
+              )}
+            </div>
+            {/* 목록 */}
+            <div className="overflow-auto flex-1">
+              {historyLoading ? (
+                <div className="px-5 py-8 text-center text-[13px] dim">불러오는 중…</div>
+              ) : historyItems.length === 0 ? (
+                <div className="px-5 py-8 text-center text-[13px] dim">견적 이력이 없습니다.</div>
+              ) : historyItems.map((h) => (
+                <button
+                  key={h.id}
+                  type="button"
+                  onClick={() => loadFromHistory(h)}
+                  className="w-full text-left px-5 py-4 border-b hair last:border-b-0 hover:bg-edred/5 transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-baseline gap-2 mb-1">
+                        <span className="text-[15px] font-semibold text-ink truncate">{h.company}</span>
+                        <span className="mono text-[9px] tracking-[0.12em] text-edred shrink-0">
+                          {TIER_LABEL[h.tier] ?? h.tier}
+                        </span>
+                      </div>
+                      <div className="text-[12px] dim mb-1.5">
+                        {h.contactName} · {h.quoteNo} · {new Date(h.createdAt).toLocaleDateString("ko-KR")}
+                      </div>
+                      <div className="text-[11px] dim truncate">
+                        {h.previewItems.slice(0, 3).map((i) => i.description || i.partNo).join(" / ")}
+                        {h.itemCount > 3 && ` 외 ${h.itemCount - 3}건`}
+                      </div>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <div className="text-[14px] font-bold text-edred">{fmt(h.subtotal)}</div>
+                      <div className="mono text-[10px] dim">{h.itemCount}개 품목</div>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 01 / 고객 */}
+      <div className="mb-8">
+        <label className="mono text-[10px] tracking-[0.18em] uppercase dim mb-3 block">
+          01 / 고객
+        </label>
+
+        {/* 선택된 고객 카드 */}
+        {selectedCustomer ? (
+          <div className="border-2 border-edred rounded-md p-4 bg-edred/5 space-y-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[16px] font-semibold text-ink truncate">{selectedCustomer.company}</span>
+                  <span className={`mono text-[9px] tracking-[0.12em] px-1.5 py-[2px] rounded shrink-0 ${
+                    selectedCustomer.source === "user" ? "bg-blue-600 text-white" : "bg-edred text-white"
+                  }`}>
+                    {selectedCustomer.source === "user" ? "회원" : "거래처"}
+                  </span>
+                  <span className="mono text-[9px] tracking-[0.12em] border hair px-1.5 py-[2px] rounded shrink-0">
+                    {TIER_LABEL[selectedCustomer.tier] ?? selectedCustomer.tier}
+                  </span>
+                </div>
+                <div className="text-[13px] dim">
+                  {selectedCustomer.name}
+                  {selectedCustomer.phone && ` · ${selectedCustomer.phone}`}
+                  {selectedCustomer.email && ` · ${selectedCustomer.email}`}
+                </div>
+              </div>
+              <button onClick={clearCustomer} className="text-[12px] dim hover:text-edred shrink-0">변경</button>
+            </div>
+
+            {/* 담당자 여러 명 선택 */}
+            {selectedContacts.length > 1 && (
+              <div>
+                <div className="mono text-[9px] tracking-[0.12em] dim uppercase mb-1.5">담당자 선택</div>
+                <div className="flex flex-wrap gap-2">
+                  {selectedContacts.map((ct, idx) => (
+                    <button key={idx} type="button" onClick={() => selectContact(ct)}
+                      className={`text-[12px] border rounded px-3 py-1 transition-colors ${
+                        selectedCustomer.name === ct.name ? "bg-edred text-white border-edred" : "hair dim hover:text-ink"
+                      }`}>
+                      {ct.name}{ct.title ? ` (${ct.title})` : ""}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 이전 견적 보기 */}
+            {selectedCompanyName && (
+              <div className="flex justify-end">
+                <button type="button" onClick={() => openHistoryForCompany(selectedCompanyName)}
+                  className="mono text-[10px] tracking-[0.1em] border hair rounded px-3 py-1.5 hover:text-edred hover:border-edred transition-colors">
+                  📋 이전 견적 보기
                 </button>
               </div>
-            </div>
-          ) : (
-            <>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {/* 통합 검색 */}
+            <div ref={customerBoxRef} className="relative">
               <input
                 type="text"
                 value={customerQ}
-                onChange={(e) => {
-                  setCustomerQ(e.target.value);
-                  setCustomerOpen(true);
-                }}
+                onChange={(e) => { setCustomerQ(e.target.value); setCustomerOpen(true); }}
                 onFocus={() => setCustomerOpen(true)}
-                placeholder="상호 · 이름 · 연락처 · 초성 검색 (예: ㅎㄷ)"
+                placeholder="회원·거래처 통합 검색 — 상호·담당자·연락처·초성"
                 className="w-full border hair rounded-md px-4 py-3 text-[14px] focus:outline-none focus:border-edred"
               />
-              {customerOpen && customerQ.trim().length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-1 border hair rounded-md bg-paper shadow-lg z-20 max-h-[320px] overflow-auto">
+              {customerOpen && customerQ.trim() && (
+                <div className="absolute top-full left-0 right-0 mt-1 border hair rounded-md bg-paper shadow-lg z-20 max-h-[360px] overflow-auto">
                   {customerLoading ? (
                     <div className="px-4 py-3 text-[12px] dim">검색 중…</div>
                   ) : customerHits.length === 0 ? (
-                    <div className="px-4 py-3 text-[12px] dim">검색 결과 없음</div>
-                  ) : (
-                    customerHits.map((c) => (
-                      <button
-                        key={c.id}
-                        type="button"
-                        onClick={() => selectCustomer(c)}
-                        className="w-full text-left px-4 py-3 hover:bg-edred/5 border-b hair last:border-b-0 transition-colors"
-                      >
-                        <div className="flex items-baseline gap-2 mb-0.5">
-                          <span className="text-[14px] font-medium text-ink truncate">
-                            {c.company}
-                          </span>
-                          <span className="mono text-[9px] tracking-[0.15em] text-edred shrink-0">
-                            {TIER_LABEL[c.tier] ?? c.tier}
-                          </span>
-                        </div>
-                        <div className="text-[12px] text-dim truncate">
-                          {c.name} · {c.phone ?? "—"}
-                        </div>
-                      </button>
-                    ))
-                  )}
+                    <div className="px-4 py-3 text-[12px] dim">검색 결과 없음 — 아래 직접 입력 사용</div>
+                  ) : customerHits.map((c, idx) => (
+                    <button key={`${c.source}-${c.id}-${idx}`} type="button" onClick={() => selectCustomer(c)}
+                      className="w-full text-left px-4 py-3 hover:bg-edred/5 border-b hair last:border-b-0 transition-colors">
+                      <div className="flex items-baseline gap-2 mb-0.5">
+                        <span className="text-[14px] font-medium text-ink truncate">{c.company}</span>
+                        <span className={`mono text-[8px] tracking-[0.12em] px-1.5 py-[1px] rounded shrink-0 ${
+                          c.source === "user" ? "bg-blue-100 text-blue-700" : "bg-red-50 text-edred border border-edred/30"
+                        }`}>
+                          {c.source === "user" ? "회원" : "거래처"}
+                        </span>
+                        <span className="mono text-[9px] text-dim shrink-0">{TIER_LABEL[c.tier] ?? c.tier}</span>
+                      </div>
+                      <div className="text-[12px] dim truncate">
+                        {c.name}{c.phone ? ` · ${c.phone}` : ""}
+                      </div>
+                    </button>
+                  ))}
                 </div>
               )}
-            </>
-          )}
-        </div>
-
-        {/* 상품 검색 */}
-        <div ref={productBoxRef} className="relative">
-          <label className="mono text-[10px] tracking-[0.18em] uppercase dim mb-2 block">
-            02 / 상품 추가
-          </label>
-          <input
-            type="text"
-            value={productQ}
-            onChange={(e) => {
-              setProductQ(e.target.value);
-              setProductOpen(true);
-            }}
-            onFocus={() => setProductOpen(true)}
-            disabled={!customer}
-            placeholder={
-              customer
-                ? "파트번호 · 제품명 · 초성 검색"
-                : "고객을 먼저 선택해주세요"
-            }
-            className="w-full border hair rounded-md px-4 py-3 text-[14px] focus:outline-none focus:border-edred disabled:bg-ink/5 disabled:cursor-not-allowed"
-          />
-          {productOpen && productQ.trim().length > 0 && customer && (
-            <div className="absolute top-full left-0 right-0 mt-1 border hair rounded-md bg-paper shadow-lg z-20 max-h-[320px] overflow-auto">
-              {productLoading ? (
-                <div className="px-4 py-3 text-[12px] dim">검색 중…</div>
-              ) : productHits.length === 0 ? (
-                <div className="px-4 py-3 text-[12px] dim">검색 결과 없음</div>
-              ) : (
-                productHits.map((p) => (
-                  <button
-                    key={p.id}
-                    type="button"
-                    onClick={() => addProduct(p)}
-                    className="w-full text-left px-4 py-3 hover:bg-edred/5 border-b hair last:border-b-0 transition-colors"
-                  >
-                    <div className="flex items-baseline justify-between gap-3">
-                      <div className="min-w-0 flex-1">
-                        <div className="text-[14px] font-medium text-ink truncate">
-                          {p.description}
-                        </div>
-                        <div className="mono text-[11px] dim">
-                          {p.partNo} · 재고 {p.stock}
-                        </div>
-                      </div>
-                      <div className="text-[14px] font-semibold text-edred shrink-0">
-                        {formatKRW(p.unitPrice)}
-                      </div>
-                    </div>
-                  </button>
-                ))
-              )}
             </div>
-          )}
-        </div>
+
+            {/* 직접 입력 토글 */}
+            <button type="button" onClick={() => setShowDirect((v) => !v)}
+              className="text-[12px] dim hover:text-edred transition-colors">
+              {showDirect ? "▲ 직접 입력 닫기" : "▼ 목록에 없으면 직접 입력"}
+            </button>
+
+            {/* 직접 입력 폼 */}
+            {showDirect && (
+              <div className="border hair rounded-md p-4 space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {[
+                    { label: "상호 *", key: "company", type: "text", placeholder: "회사명" },
+                    { label: "담당자", key: "name", type: "text", placeholder: "담당자 이름" },
+                    { label: "연락처", key: "phone", type: "tel", placeholder: "010-0000-0000" },
+                    { label: "이메일", key: "email", type: "email", placeholder: "example@company.com" },
+                  ].map(({ label, key, type, placeholder }) => (
+                    <div key={key}>
+                      <label className="mono text-[10px] tracking-[0.15em] uppercase dim mb-1 block">{label}</label>
+                      <input type={type} value={guest[key as keyof GuestForm]}
+                        onChange={(e) => { setGuest((g) => ({ ...g, [key]: e.target.value })); setSelectedCustomer({ source: "known", id: 0, company: guest.company, name: guest.name, phone: guest.phone, email: guest.email, tier: guest.tier, contacts: [] }); }}
+                        placeholder={placeholder}
+                        className="w-full border hair rounded-md px-3 py-2.5 text-[14px] focus:outline-none focus:border-edred" />
+                    </div>
+                  ))}
+                </div>
+                <div>
+                  <label className="mono text-[10px] tracking-[0.15em] uppercase dim mb-1.5 block">고객 유형</label>
+                  <div className="flex flex-wrap gap-2">
+                    {TIER_OPTIONS.map((t) => (
+                      <button key={t} type="button" onClick={() => setGuest((g) => ({ ...g, tier: t }))}
+                        className={`mono text-[10px] tracking-[0.12em] px-3 py-1.5 rounded border transition-colors ${
+                          guest.tier === t ? "bg-edred text-white border-edred" : "hair dim hover:text-ink"
+                        }`}>
+                        {TIER_LABEL[t]}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* 견적 품목 */}
-      <div>
-        <div className="flex items-baseline justify-between mb-3">
-          <label className="mono text-[10px] tracking-[0.18em] uppercase dim">
-            03 / 견적 품목 ({lines.length}건)
-          </label>
+      {/* 02 / 상품 추가 */}
+      <div className="mb-8">
+        <label className="mono text-[10px] tracking-[0.18em] uppercase dim mb-3 block">
+          02 / 상품 추가
+        </label>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {/* 검색 */}
+          <div ref={productBoxRef} className="relative">
+            <input
+              type="text"
+              value={productQ}
+              onChange={(e) => { setProductQ(e.target.value); setProductOpen(true); }}
+              onFocus={() => setProductOpen(true)}
+              disabled={!canSearchProduct}
+              placeholder={canSearchProduct ? "파트번호 · 제품명 검색" : "고객 정보를 먼저 입력해주세요"}
+              className="w-full border hair rounded-md px-4 py-3 text-[14px] focus:outline-none focus:border-edred disabled:bg-ink/5 disabled:cursor-not-allowed"
+            />
+            {productOpen && productQ.trim() && canSearchProduct && (
+              <div className="absolute top-full left-0 right-0 mt-1 border hair rounded-md bg-paper shadow-lg z-20 max-h-[320px] overflow-auto">
+                {productLoading ? (
+                  <div className="px-4 py-3 text-[12px] dim">검색 중…</div>
+                ) : productHits.length === 0 ? (
+                  <div className="px-4 py-3 text-[12px] dim">검색 결과 없음</div>
+                ) : productHits.map((p) => (
+                  <button key={p.id} type="button" onClick={() => addProduct(p)}
+                    className="w-full text-left px-4 py-3 hover:bg-edred/5 border-b hair last:border-b-0 transition-colors">
+                    <div className="flex items-baseline justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <div className="text-[14px] font-medium text-ink truncate">{p.description}</div>
+                        <div className="mono text-[11px] dim">{p.partNo} · 재고 {p.stock}</div>
+                      </div>
+                      <div className="text-[14px] font-semibold text-edred shrink-0">{fmt(p.unitPrice)}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* 붙여넣기 입력 버튼 */}
+          <button
+            type="button"
+            onClick={() => setShowPaste((v) => !v)}
+            disabled={!canSearchProduct}
+            className="border hair rounded-md px-4 py-3 text-[13px] dim hover:text-ink hover:border-edred transition-colors text-left disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            📋 붙여넣기 입력 {showPaste ? "닫기" : "열기"}
+            <span className="block mono text-[10px] mt-0.5">파트번호 수량 형식으로 여러 품목 한 번에 추가</span>
+          </button>
         </div>
+
+        {/* 붙여넣기 패널 */}
+        {showPaste && (
+          <div className="mt-3 border hair rounded-md p-4 space-y-3 bg-ink/[0.02]">
+            <div className="mono text-[10px] tracking-[0.12em] dim uppercase">
+              붙여넣기 입력 — 한 줄에 하나씩 (파트번호, 수량)
+            </div>
+            <textarea
+              value={pasteText}
+              onChange={(e) => setPasteText(e.target.value)}
+              placeholder={"A532-01-880  2\nH034-01-480, 1\nA532-00-264"}
+              rows={5}
+              className="w-full border hair rounded-md px-3 py-2 text-[13px] font-mono focus:outline-none focus:border-edred resize-none"
+            />
+            {pasteErrors.length > 0 && (
+              <div className="text-[12px] text-amber-600">
+                미조회 파트번호: {pasteErrors.join(", ")}
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={parsePaste}
+              disabled={pasteLoading || !pasteText.trim()}
+              className="bg-ink text-paper px-4 py-2 rounded-md text-[13px] font-semibold hover:brightness-110 disabled:opacity-40 transition-all"
+            >
+              {pasteLoading ? "조회 중…" : "품목 추가"}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* 03 / 견적 품목 */}
+      <div className="mb-8">
+        <label className="mono text-[10px] tracking-[0.18em] uppercase dim mb-3 block">
+          03 / 견적 품목 ({lines.length}건)
+        </label>
         <div className="border hair rounded-md overflow-hidden">
-          <div className="grid grid-cols-[120px_1fr_90px_140px_140px_44px] gap-3 px-4 py-3 border-b hair bg-ink/5 mono text-[10px] tracking-[0.15em] uppercase dim">
+          {/* 헤더 */}
+          <div className="grid grid-cols-[100px_1fr_90px_80px_120px_120px_36px] gap-2 px-3 py-2.5 border-b hair bg-ink/5 mono text-[9px] tracking-[0.15em] uppercase dim">
             <div>파트번호</div>
             <div>제품명</div>
+            <div className="text-center">납기</div>
             <div className="text-right">수량</div>
             <div className="text-right">단가</div>
             <div className="text-right">소계</div>
-            <div></div>
+            <div />
           </div>
+
+          {/* 품목 행 */}
           {lines.length === 0 ? (
-            <div className="px-4 py-12 text-center text-[13px] dim">
-              {customer
-                ? "상품을 검색해 추가해주세요."
-                : "고객을 선택하면 상품을 추가할 수 있습니다."}
+            <div className="px-4 py-10 text-center text-[13px] dim">
+              상품을 검색하거나 아래 버튼으로 추가해주세요.
             </div>
-          ) : (
-            lines.map((l) => {
-              const lineTotal = l.unitPrice * l.quantity;
-              const overridden = l.unitPrice !== l.defaultUnitPrice;
-              return (
-                <div
-                  key={l.productId}
-                  className="grid grid-cols-[120px_1fr_90px_140px_140px_44px] gap-3 px-4 py-3 border-b hair last:border-b-0 items-center"
-                >
-                  <div className="mono text-[12px] text-ink truncate">
-                    {l.partNo}
+          ) : lines.map((l) => {
+            const lineTotal = l.unitPrice * l.quantity;
+            const priceOverridden = l.unitPrice !== l.defaultUnitPrice;
+            return (
+              <div key={l.key}
+                className="grid grid-cols-[100px_1fr_90px_80px_120px_120px_36px] gap-2 px-3 py-2 border-b hair last:border-b-0 items-center">
+                {/* 파트번호 — 항상 수정 가능 */}
+                <input type="text" value={l.partNo} placeholder="파트번호"
+                  onChange={(e) => updatePartNo(l.key, e.target.value)}
+                  className="w-full border hair rounded px-2 py-1 text-[11px] font-mono focus:outline-none focus:border-edred bg-transparent" />
+                {/* 제품명 */}
+                <input type="text" value={l.description} placeholder="제품명"
+                  onChange={(e) => updateDescription(l.key, e.target.value)}
+                  className="w-full border hair rounded px-2 py-1 text-[13px] focus:outline-none focus:border-edred bg-transparent" />
+                {/* 납기 */}
+                <div className="relative">
+                  <input type="text" value={l.leadTime} placeholder="납기"
+                    onChange={(e) => updateLeadTime(l.key, e.target.value)}
+                    className="w-full border hair rounded px-2 py-1 text-[12px] text-center focus:outline-none focus:border-edred bg-transparent" />
+                  {/* 빠른 선택 드롭다운 */}
+                  <div className="absolute top-full left-0 right-0 z-10 hidden group-focus-within:flex flex-col">
                   </div>
-                  <div className="text-[13px] text-ink truncate">
-                    {l.description}
-                  </div>
-                  <input
-                    type="number"
-                    min={1}
-                    value={l.quantity}
-                    onChange={(e) =>
-                      updateQuantity(l.productId, parseInt(e.target.value) || 1)
-                    }
-                    className="w-full text-right border hair rounded px-2 py-1 text-[13px] focus:outline-none focus:border-edred"
-                  />
-                  <div className="relative">
-                    <input
-                      type="number"
-                      min={0}
-                      value={l.unitPrice}
-                      onChange={(e) =>
-                        updateUnitPrice(l.productId, parseInt(e.target.value) || 0)
-                      }
-                      className={`w-full text-right border rounded px-2 py-1 text-[13px] focus:outline-none focus:border-edred ${
-                        overridden ? "border-edred" : "hair"
-                      }`}
-                    />
-                    {overridden && (
-                      <span className="absolute -top-2 right-1 mono text-[8px] bg-edred text-white px-1 rounded tracking-wider">
-                        수정
-                      </span>
-                    )}
-                  </div>
-                  <div className="text-right text-[13px] font-medium text-ink">
-                    {formatKRW(lineTotal)}
-                  </div>
-                  <button
-                    onClick={() => removeLine(l.productId)}
-                    className="text-dim hover:text-edred text-[14px]"
-                    aria-label="삭제"
-                  >
-                    ✕
-                  </button>
                 </div>
-              );
-            })
+                {/* 수량 */}
+                <input type="number" min={1} value={l.quantity}
+                  onChange={(e) => updateQty(l.key, parseInt(e.target.value) || 1)}
+                  className="w-full text-right border hair rounded px-2 py-1 text-[13px] focus:outline-none focus:border-edred" />
+                {/* 단가 */}
+                <div className="relative">
+                  <input type="number" min={0} value={l.unitPrice}
+                    onChange={(e) => updatePrice(l.key, parseInt(e.target.value) || 0)}
+                    className={`w-full text-right border rounded px-2 py-1 text-[13px] focus:outline-none focus:border-edred ${priceOverridden ? "border-edred" : "hair"}`} />
+                  {priceOverridden && (
+                    <span className="absolute -top-2 right-1 mono text-[8px] bg-edred text-white px-1 rounded tracking-wider">수정</span>
+                  )}
+                </div>
+                {/* 소계 */}
+                <div className="text-right text-[13px] font-medium text-ink">{fmt(lineTotal)}</div>
+                <button onClick={() => removeLine(l.key)} className="dim hover:text-edred text-[14px] text-center">✕</button>
+              </div>
+            );
+          })}
+
+          {/* 납기 빠른 선택 행 */}
+          {lines.length > 0 && (
+            <div className="px-3 py-2 border-t hair bg-ink/[0.02]">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="mono text-[9px] dim tracking-[0.12em] uppercase">납기 빠른 입력:</span>
+                {["즉시", "1주", "2주", "4주", "협의"].map((v) => (
+                  <button key={v} type="button"
+                    onClick={() => {
+                      // 납기가 비어있는 항목에만 일괄 적용
+                      setLines((prev) => prev.map((l) => l.leadTime ? l : { ...l, leadTime: v }));
+                    }}
+                    className="mono text-[10px] border hair rounded px-2 py-0.5 dim hover:text-edred hover:border-edred transition-colors">
+                    {v}
+                  </button>
+                ))}
+                <span className="text-[10px] dim">← 빈 칸에 일괄 적용</span>
+              </div>
+            </div>
           )}
+
+          {/* 하단 품목 추가 버튼 */}
+          <button
+            type="button"
+            onClick={addCustomLine}
+            className="w-full px-4 py-3 text-[13px] dim hover:text-edred hover:bg-edred/5 transition-colors border-t hair text-left"
+          >
+            + 품목 추가
+          </button>
         </div>
 
         {/* 합계 */}
@@ -482,16 +962,14 @@ export default function AdminProxyQuotesPage() {
             <div className="w-full max-w-[360px] border hair rounded-md p-4 bg-ink/[0.02]">
               <div className="text-[13px] space-y-1.5">
                 <div className="flex justify-between">
-                  <span className="dim">공급가액</span>
-                  <span className="text-ink">{formatKRW(subtotal)}</span>
+                  <span className="dim">공급가액</span><span className="text-ink">{fmt(subtotal)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="dim">부가세 (10%)</span>
-                  <span className="text-ink">{formatKRW(vat)}</span>
+                  <span className="dim">부가세 (10%)</span><span className="text-ink">{fmt(vat)}</span>
                 </div>
                 <div className="flex justify-between pt-2 mt-2 border-t hair text-[16px]">
                   <span className="font-semibold text-ink">합계</span>
-                  <span className="font-bold text-edred">{formatKRW(total)}</span>
+                  <span className="font-bold text-edred">{fmt(total)}</span>
                 </div>
               </div>
             </div>
@@ -500,11 +978,11 @@ export default function AdminProxyQuotesPage() {
       </div>
 
       {/* 발행 버튼 */}
-      <div className="mt-10 flex justify-end">
+      <div className="flex justify-end">
         <button
           type="button"
           onClick={submitQuote}
-          disabled={submitting || !customer || lines.length === 0}
+          disabled={submitting || lines.length === 0 || !hasCustomer}
           className="bg-edred text-white px-6 py-3 rounded-md text-[14px] font-semibold tracking-tight hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
         >
           {submitting ? "발행 중…" : "견적서 발행 →"}

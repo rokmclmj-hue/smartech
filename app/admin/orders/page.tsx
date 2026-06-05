@@ -9,6 +9,7 @@ type OrderItem = {
   company: string;
   contactName: string | null;
   contactPhone: string | null;
+  email: string | null;
   amount: number;
   taxInvoiceRequested: boolean;
   deliveryIssue: boolean;
@@ -17,12 +18,17 @@ type OrderItem = {
   createdAt: string;
   deliveryNoteIssuedAt: string | null;
   deliveryNoteCount: number;
+  paymentConfirmedAt: string | null;
+  shippedAt: string | null;
+  deliveryEmailSentAt: string | null;
+  deliveryEmailCount: number;
 };
 
 const STATUS_OPTIONS = [
   { value: "ALL", label: "전체" },
   { value: "PENDING", label: "대기" },
   { value: "CONFIRMED", label: "확정" },
+  { value: "SHIPPED", label: "출고완료" },
   { value: "CANCELLED", label: "취소" },
   { value: "DELIVERY_INQUIRY", label: "납기문의" },
 ];
@@ -30,6 +36,7 @@ const STATUS_OPTIONS = [
 const STATUS_LABEL: Record<string, string> = {
   PENDING: "대기",
   CONFIRMED: "확정",
+  SHIPPED: "출고완료",
   CANCELLED: "취소",
   DELIVERY_INQUIRY: "납기문의",
 };
@@ -37,6 +44,7 @@ const STATUS_LABEL: Record<string, string> = {
 const STATUS_COLOR: Record<string, string> = {
   PENDING: "border-ink/40 text-ink",
   CONFIRMED: "border-edred text-edred",
+  SHIPPED: "border-green-600 text-green-600 bg-green-50",
   CANCELLED: "border-line text-dim line-through",
   DELIVERY_INQUIRY: "border-ink bg-ink text-paper",
 };
@@ -217,6 +225,39 @@ export default function AdminOrdersPage() {
   function downloadDeliveryPdf(orderId: number) {
     window.open(`/api/admin/orders/${orderId}/delivery-pdf`, "_blank");
     success("거래명세표가 다운로드됩니다");
+  }
+
+  async function doConfirmPayment(orderId: number) {
+    setActionLoading(orderId);
+    try {
+      const res = await fetch("/api/admin/orders", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId, action: "confirmPayment" }),
+      });
+      if (!res.ok) { toastError("처리 실패"); return; }
+      success("입금 확인 완료");
+      fetchOrders(filter, search, page);
+    } catch { toastError("오류가 발생했습니다"); }
+    finally { setActionLoading(null); }
+  }
+
+  async function doShip(orderId: number, email: string | null) {
+    if (!email) { toastError("이메일 주소가 없어 발송할 수 없습니다."); return; }
+    const ok = await confirm({
+      message: "출고 완료 처리하겠습니까?",
+      detail: `거래명세표가 ${email}로 자동 발송됩니다.`,
+    });
+    if (!ok) return;
+    setActionLoading(orderId);
+    try {
+      const res = await fetch(`/api/admin/orders/${orderId}/ship`, { method: "POST" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { toastError(data.error ?? "출고 처리 실패"); return; }
+      success(`거래명세표를 ${data.sentTo}로 발송했습니다.`);
+      fetchOrders(filter, search, page);
+    } catch { toastError("오류가 발생했습니다"); }
+    finally { setActionLoading(null); }
   }
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_LIMIT));
@@ -424,39 +465,58 @@ export default function AdminOrdersPage() {
                         {/* 액션 */}
                         <td className="px-4 py-3">
                           <div className="flex gap-1.5 flex-wrap">
+                            {/* 주문 확정 */}
                             {o.status === "PENDING" && (
-                              <button
-                                onClick={() => doConfirm(o.id)}
-                                disabled={actionLoading === o.id}
-                                className="mono text-[10px] tracking-[0.1em] uppercase bg-edred text-paper px-2.5 py-1 hover:bg-edred2 disabled:opacity-40 transition-colors"
-                              >
+                              <button onClick={() => doConfirm(o.id)} disabled={actionLoading === o.id}
+                                className="mono text-[10px] tracking-[0.1em] uppercase bg-edred text-paper px-2.5 py-1 hover:brightness-110 disabled:opacity-40 transition-colors">
                                 확정
                               </button>
                             )}
-                            {o.status !== "CANCELLED" &&
-                              o.status !== "CONFIRMED" && (
-                                <button
-                                  onClick={() => doCancel(o.id)}
-                                  disabled={actionLoading === o.id}
-                                  className="mono text-[10px] tracking-[0.1em] uppercase border border-line text-dim px-2.5 py-1 hover:border-ink hover:text-ink disabled:opacity-40 transition-colors"
-                                >
-                                  취소
+
+                            {/* 입금 확인 */}
+                            {o.status === "CONFIRMED" && (
+                              o.paymentConfirmedAt ? (
+                                <span className="mono text-[10px] tracking-[0.08em] text-green-600 px-2 py-1">
+                                  ✓ 입금
+                                </span>
+                              ) : (
+                                <button onClick={() => doConfirmPayment(o.id)} disabled={actionLoading === o.id}
+                                  className="mono text-[10px] tracking-[0.1em] uppercase border border-green-500 text-green-600 px-2.5 py-1 hover:bg-green-50 disabled:opacity-40 transition-colors">
+                                  입금확인
                                 </button>
-                              )}
-                            <button
-                              onClick={() => downloadDeliveryPdf(o.id)}
-                              disabled={o.status !== "CONFIRMED"}
-                              title={
-                                o.status !== "CONFIRMED"
-                                  ? "확정된 주문만 발행 가능"
-                                  : "거래명세표 PDF 다운로드"
-                              }
-                              className="mono text-[10px] tracking-[0.1em] uppercase border border-ink text-ink px-2.5 py-1 hover:bg-ink hover:text-paper disabled:border-line disabled:text-dim disabled:cursor-not-allowed disabled:hover:bg-transparent transition-colors"
-                            >
-                              {o.deliveryNoteCount > 0
-                                ? `명세표 (${o.deliveryNoteCount}x)`
-                                : "명세표"}
-                            </button>
+                              )
+                            )}
+
+                            {/* 출고완료 + 거래명세표 자동발송 */}
+                            {o.status === "CONFIRMED" && (
+                              o.shippedAt ? (
+                                <span className="mono text-[10px] tracking-[0.08em] text-green-600 px-2 py-1">
+                                  ✓ 출고 {o.deliveryEmailCount > 0 && `(발송${o.deliveryEmailCount}x)`}
+                                </span>
+                              ) : (
+                                <button onClick={() => doShip(o.id, o.email)} disabled={actionLoading === o.id}
+                                  className="mono text-[10px] tracking-[0.1em] uppercase bg-green-600 text-white px-2.5 py-1 hover:brightness-110 disabled:opacity-40 transition-colors">
+                                  출고완료 →
+                                </button>
+                              )
+                            )}
+
+                            {/* 명세표 다운로드 (재발행용) */}
+                            {(o.status === "CONFIRMED" || o.status === "SHIPPED") && (
+                              <button onClick={() => downloadDeliveryPdf(o.id)} disabled={actionLoading === o.id}
+                                title="거래명세표 PDF 다운로드"
+                                className="mono text-[10px] tracking-[0.1em] border border-ink/40 text-dim px-2.5 py-1 hover:border-ink hover:text-ink disabled:opacity-40 transition-colors">
+                                ↓ 명세표
+                              </button>
+                            )}
+
+                            {/* 취소 */}
+                            {o.status === "PENDING" && (
+                              <button onClick={() => doCancel(o.id)} disabled={actionLoading === o.id}
+                                className="mono text-[10px] tracking-[0.1em] uppercase border border-line text-dim px-2.5 py-1 hover:border-ink hover:text-ink disabled:opacity-40 transition-colors">
+                                취소
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>

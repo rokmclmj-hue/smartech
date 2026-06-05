@@ -34,9 +34,20 @@ export async function GET(
     return NextResponse.json({ error: "견적을 찾을 수 없습니다." }, { status: 404 });
   }
 
+  // 관리자는 모든 견적 접근 가능, 일반 사용자는 본인 견적만
   if (!isAdmin && quote.userId !== userId) {
     return NextResponse.json({ error: "접근 권한이 없습니다." }, { status: 403 });
   }
 
-  return NextResponse.json(quote);
+  // guest 견적은 user 필드를 guest 정보로 채워서 반환
+  const responseQuote = {
+    ...quote,
+    user: quote.user ?? {
+      name: quote.guestName ?? "담당자",
+      company: quote.guestCompany ?? "",
+      email: quote.guestEmail ?? "",
+    },
+  };
+
+  return NextResponse.json(responseQuote);
 }

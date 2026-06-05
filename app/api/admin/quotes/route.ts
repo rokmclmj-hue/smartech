@@ -61,9 +61,9 @@ export async function GET(req: NextRequest) {
     const isExpired = q.expiresAt ? q.expiresAt < now : false;
     return {
       id: q.id,
-      company: q.user.company,
-      contactName: q.user.name,
-      email: q.user.email,
+      company: q.user?.company ?? q.guestCompany ?? "",
+      contactName: q.user?.name ?? q.guestName ?? "",
+      email: q.user?.email ?? q.guestEmail ?? "",
       amount,
       status: q.status,
       expiresAt: q.expiresAt?.toISOString() ?? null,

@@ -8,6 +8,7 @@
   "AI생성이미지": {
     "스퍼터 공정 에드워드 드라이진공펌프": ["thumbnail.png", "body-1.png", "body-2.png", "body-3.png", "body-4.png", "body-5.png"],
     "ELD500W-리크디텍터": ["thumbnail.png", "field-1.png", "body-1.png", "body-2.png", "body-3.png"],
-    "가스 발라스트": ["thumbnail.png", "image-01.png", "image-02.png", "image-03.png", "image-04.png"]
+    "가스 발라스트": ["thumbnail.png", "image-01.png", "image-02.png", "image-03.png", "image-04.png"],
+    "진공게이지 종류": ["thumbnail.png", "image-01.png", "image-02.png", "image-03.png", "image-04.png", "image-05.png"]
   }
 }

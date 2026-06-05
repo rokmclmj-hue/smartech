@@ -85,6 +85,43 @@ export async function sendMagicLink(to: string, magicUrl: string): Promise<void>
 }
 
 /**
+ * 거래명세표 PDF를 첨부하여 이메일로 발송합니다.
+ */
+export async function sendDeliveryNotePdf(
+  to: string,
+  pdfBuffer: Buffer,
+  noteNo: string,
+  opts: { company: string; contactName: string; grandTotal: number }
+): Promise<void> {
+  const fmt = (n: number) => "₩" + n.toLocaleString("ko-KR");
+  await transporter.sendMail({
+    from: `"스마텍" <${process.env.GMAIL_USER}>`,
+    to,
+    subject: `[스마텍] 거래명세표 #${noteNo} 입니다.`,
+    html: `<div style="font-family:'Malgun Gothic','Apple SD Gothic Neo',Arial,sans-serif;color:#222;line-height:1.7;font-size:14px">
+  <p>${opts.company} ${opts.contactName} 님, 안녕하세요. <strong>(주)스마텍</strong>입니다.</p>
+  <p>출고가 완료되어 거래명세표를 첨부하여 드립니다.</p>
+  <table style="border-collapse:collapse;margin:18px 0;font-size:13px">
+    <tr><td style="padding:6px 12px;color:#666;border:1px solid #ddd">명세표 번호</td>
+        <td style="padding:6px 12px;border:1px solid #ddd"><strong>${noteNo}</strong></td></tr>
+    <tr><td style="padding:6px 12px;color:#666;border:1px solid #ddd">공급가액 (VAT 포함)</td>
+        <td style="padding:6px 12px;border:1px solid #ddd"><strong>${fmt(opts.grandTotal)}</strong></td></tr>
+  </table>
+  <p style="color:#555;font-size:13px">세금계산서는 별도 안내드리겠습니다.</p>
+  <p style="margin-top:20px">감사합니다.<br><strong>(주)스마텍 영업팀</strong><br>
+  <span style="font-size:12px;color:#888">031-204-7170 · info@smartechvacuum.com</span></p>
+</div>`,
+    attachments: [
+      {
+        filename: `거래명세표_${noteNo}.pdf`,
+        content: pdfBuffer,
+        contentType: "application/pdf",
+      },
+    ],
+  });
+}
+
+/**
  * 등급 승인 완료 이메일을 발송합니다.
  */
 export async function sendApprovalNotice(

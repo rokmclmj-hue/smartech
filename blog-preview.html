@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>스마텍 블로그 미리보기</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #e8e8e8; font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; display: flex; justify-content: center; align-items: flex-start; padding: 40px 20px; min-height: 100vh; }
+
+  .blog-wrap {
+    width: 966px;
+    border: 2px solid #ccc;
+    background: #fff;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+  }
+
+  /* 헤더 이미지 자리 — 사진 박스 */
+  .blog-header {
+    width: 100%;
+    height: 280px;
+    background: #d4d0c8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid #bbb;
+    position: relative;
+  }
+  .blog-header .photo-label {
+    font-size: 18px;
+    color: #888;
+    letter-spacing: 0.05em;
+  }
+  .blog-header .photo-size {
+    position: absolute;
+    bottom: 10px;
+    right: 14px;
+    font-size: 11px;
+    color: #aaa;
+  }
+
+  /* 버튼 4개 */
+  .cta-buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-bottom: 2px solid #e0e0e0;
+  }
+  .cta-btn {
+    display: block;
+    padding: 22px 18px;
+    text-decoration: none;
+    border-right: 1px solid #e0e0e0;
+    cursor: pointer;
+    transition: filter 0.15s;
+  }
+  .cta-btn:last-child { border-right: none; }
+  .cta-btn:hover { filter: brightness(0.93); }
+  .cta-btn .label-small {
+    font-size: 10px;
+    color: #999;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 7px;
+  }
+  .cta-btn .label-main {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 5px;
+  }
+  .cta-btn .label-sub {
+    font-size: 11px;
+    color: #888;
+  }
+  .cta-btn.red { background: #d10000; }
+  .cta-btn.red .label-small,
+  .cta-btn.red .label-main,
+  .cta-btn.red .label-sub { color: #fff; }
+  .cta-btn.dark { background: #1a1a1a; }
+  .cta-btn.dark .label-small,
+  .cta-btn.dark .label-main,
+  .cta-btn.dark .label-sub { color: #fff; }
+
+  /* 블로그 글 목록 */
+  .blog-posts { padding: 28px 24px; }
+  .section-title {
+    font-size: 11px;
+    color: #aaa;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+  }
+  .post-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid #f4f4f4;
+  }
+  .post-item .post-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #222;
+  }
+  .post-item .post-date {
+    font-size: 11px;
+    color: #bbb;
+    white-space: nowrap;
+    margin-left: 12px;
+  }
+
+  .note {
+    text-align: center;
+    padding: 10px;
+    background: #fffbe6;
+    border-top: 1px solid #ffe58f;
+    font-size: 11px;
+    color: #aaa;
+  }
+</style>
+</head>
+<body>
+
+<div class="blog-wrap">
+
+  <!-- 헤더: 사진 자리 표시 -->
+  <div class="blog-header">
+    <span class="photo-label">사진</span>
+    <span class="photo-size">966 × 280px</span>
+  </div>
+
+  <!-- 클릭 버튼 4개 -->
+  <div class="cta-buttons">
+    <a class="cta-btn" href="https://www.smartechvacuum.com/#contact" target="_blank">
+      <div class="label-small">DIRECT QUOTE</div>
+      <div class="label-main">견적 문의</div>
+      <div class="label-sub">제품 검색 →</div>
+    </a>
+    <a class="cta-btn red" href="https://www.smartechvacuum.com/#contact" target="_blank">
+      <div class="label-small">REPAIR</div>
+      <div class="label-main">수리 문의</div>
+      <div class="label-sub">A/S · 오버홀 →</div>
+    </a>
+    <a class="cta-btn" href="https://www.smartechvacuum.com/#b2b" target="_blank">
+      <div class="label-small">PUMP SELECTOR</div>
+      <div class="label-main">펌프선정</div>
+      <div class="label-sub">펌프 시뮬레이션 →</div>
+    </a>
+    <a class="cta-btn dark" href="https://www.smartechvacuum.com/#ai" target="_blank">
+      <div class="label-small">AI CONSULT</div>
+      <div class="label-main">AI 상담</div>
+      <div class="label-sub">공정 조건 상담 →</div>
+    </a>
+  </div>
+
+  <!-- 블로그 글 목록 -->
+  <div class="blog-posts">
+    <div class="section-title">블로그 글 목록</div>
+    <div class="post-item">
+      <div class="post-title">E.A사 RV12 기본수리 완료 후 납품 및 검사성적서 전달</div>
+      <div class="post-date">2026.05.28</div>
+    </div>
+    <div class="post-item">
+      <div class="post-title">Edwards XDS35i 오버홀 완료 — 반도체 공정 복귀</div>
+      <div class="post-date">2026.05.22</div>
+    </div>
+    <div class="post-item">
+      <div class="post-title">nXDS15i 정기점검 및 소모품 교체 안내</div>
+      <div class="post-date">2026.05.15</div>
+    </div>
+  </div>
+
+  <div class="note">※ 미리보기 화면입니다. 실제 네이버 블로그와 다소 다를 수 있어요.</div>
+</div>
+
+</body>
+</html>
