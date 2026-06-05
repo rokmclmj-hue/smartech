@@ -33,16 +33,14 @@ export default function QuotePage() {
   const showPrice = tier && tier !== "PENDING" && tier !== "ADMIN" ? true : tier === "ADMIN";
   const isPending = tier === "PENDING";
 
-  // 장바구니 로드
+  // 장바구니 로드 + 로그인 시 단가 자동 조회 (한 번에)
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem("quoteCart") ?? "[]");
+    const stored: CartItem[] = JSON.parse(localStorage.getItem("quoteCart") ?? "[]");
     setCart(stored);
-  }, []);
 
-  // 로그인 후 서버에서 등급별 단가 자동 조회
-  useEffect(() => {
-    if (!showPrice || cart.length === 0) return;
-    const ids = cart.map((i) => i.productId);
+    // 로그인 확인 후 가격 조회
+    if (status !== "authenticated" || !showPrice || stored.length === 0) return;
+    const ids = stored.map((i) => i.productId);
     fetch("/api/products/prices", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

@@ -64,6 +64,89 @@ function StaleQuotesAlert({ count }: { count: number }) {
   );
 }
 
+// ─── 방문 업체 섹션 ───────────────────────────────────────
+const TIER_COLOR: Record<string, string> = {
+  DEALER: "bg-blue-100 text-blue-700",
+  KEY_DEALER: "bg-blue-100 text-blue-700",
+  VIP_DEALER: "bg-blue-100 text-blue-700",
+  OEM: "bg-purple-100 text-purple-700",
+};
+
+function VisitorSection({ stats }: { stats: DashboardStats }) {
+  return (
+    <div className="grid sm:grid-cols-2 gap-4">
+      {/* 오늘 방문 */}
+      <div className="border hair bg-paper p-5">
+        <div className="mono text-[10px] tracking-[0.15em] uppercase dim mb-1">TODAY · 오늘 방문</div>
+        <div className="text-[20px] font-bold text-ink mb-4">
+          {stats.todayVisitors.length > 0
+            ? <><span className="text-edred">{stats.todayVisitors.length}개사</span> 방문</>
+            : <span className="text-[16px] dim font-normal">오늘 방문 없음</span>}
+        </div>
+        {stats.todayVisitors.length > 0 ? (
+          <div className="space-y-2">
+            {stats.todayVisitors.map((v) => (
+              <div key={v.id} className="flex items-center justify-between py-2 border-b hair last:border-0">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[14px] font-medium text-ink truncate">{v.company}</span>
+                    <span className={`mono text-[9px] tracking-[0.1em] px-1.5 py-[1px] rounded shrink-0 ${TIER_COLOR[v.tier] ?? "bg-gray-100 text-gray-600"}`}>
+                      {v.tierLabel}
+                    </span>
+                  </div>
+                  <div className="text-[11px] dim">{v.name}</div>
+                </div>
+                <div className="text-right shrink-0 ml-3">
+                  <div className="mono text-[11px] text-ink">
+                    {v.lastLoginAt ? new Date(v.lastLoginAt).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" }) : "—"}
+                  </div>
+                  {v.loginCount && v.loginCount > 1 && (
+                    <div className="mono text-[10px] dim">{v.loginCount}회 누적</div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="py-4 text-center text-[12px] dim">오늘 로그인한 업체가 없습니다</div>
+        )}
+      </div>
+
+      {/* 이번 주 방문 */}
+      <div className="border hair bg-paper p-5">
+        <div className="mono text-[10px] tracking-[0.15em] uppercase dim mb-1">THIS WEEK · 이번 주 방문</div>
+        <div className="text-[20px] font-bold text-ink mb-4">
+          {stats.weekVisitors.length > 0
+            ? <><span className="text-edred">{stats.weekVisitors.length}개사</span> 방문</>
+            : <span className="text-[16px] dim font-normal">이번 주 방문 없음</span>}
+        </div>
+        {stats.weekVisitors.length > 0 ? (
+          <div className="space-y-2 max-h-[280px] overflow-auto">
+            {stats.weekVisitors.map((v) => (
+              <div key={v.id} className="flex items-center justify-between py-2 border-b hair last:border-0">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[13px] font-medium text-ink truncate">{v.company}</span>
+                    <span className={`mono text-[9px] tracking-[0.1em] px-1.5 py-[1px] rounded shrink-0 ${TIER_COLOR[v.tier] ?? "bg-gray-100 text-gray-600"}`}>
+                      {v.tierLabel}
+                    </span>
+                  </div>
+                  <div className="text-[11px] dim">{v.name}</div>
+                </div>
+                <div className="mono text-[11px] dim shrink-0 ml-3">
+                  {v.lastLoginAt ? new Date(v.lastLoginAt).toLocaleDateString("ko-KR", { month: "short", day: "numeric" }) : "—"}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="py-4 text-center text-[12px] dim">이번 주 방문한 업체가 없습니다</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── KPI 4 패널 (회원승인·발주·견적·매출) ─────────────────
 function KpiPanels({
   stats,
@@ -215,7 +298,7 @@ export default function AdminDashboard() {
           <KpiPanels stats={stats} pendingCount={users.length} />
         </div>
 
-        <div className="border hair bg-paper px-4 sm:px-6 py-10 sm:py-16 text-center">
+        <div className="border hair bg-paper px-4 sm:px-6 py-10 sm:py-16 text-center mb-6">
           <div className="mono text-[10px] tracking-[0.18em] uppercase text-edred mb-4">
             ● ALL CLEAR
           </div>
@@ -228,20 +311,19 @@ export default function AdminDashboard() {
             새 가입 신청이 들어오면 자동으로 이곳에 표시됩니다.
           </p>
           <div className="mt-8 flex gap-3 justify-center flex-wrap">
-            <Link
-              href="/admin/users"
-              className="mono text-[11px] tracking-[0.12em] uppercase border border-ink text-ink px-5 py-2.5 hover:bg-ink hover:text-paper transition-colors"
-            >
+            <Link href="/admin/users"
+              className="mono text-[11px] tracking-[0.12em] uppercase border border-ink text-ink px-5 py-2.5 hover:bg-ink hover:text-paper transition-colors">
               [ 전체 회원 보기 → ]
             </Link>
-            <Link
-              href="/admin/orders"
-              className="mono text-[11px] tracking-[0.12em] uppercase border border-line text-dim px-5 py-2.5 hover:border-ink hover:text-ink transition-colors"
-            >
+            <Link href="/admin/orders"
+              className="mono text-[11px] tracking-[0.12em] uppercase border border-line text-dim px-5 py-2.5 hover:border-ink hover:text-ink transition-colors">
               [ 주문 관리 → ]
             </Link>
           </div>
         </div>
+
+        {/* 오늘 / 이번 주 방문 업체 */}
+        <VisitorSection stats={stats} />
       </div>
     );
   }
@@ -292,95 +374,8 @@ export default function AdminDashboard() {
       {/* KPI 4 패널 */}
       <KpiPanels stats={stats} pendingCount={users.length} />
 
-      {/* 오늘 방문 업체 */}
-      <div className="grid sm:grid-cols-2 gap-4">
-        {/* 오늘 로그인 */}
-        <div className="border hair bg-paper p-5">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <div className="mono text-[10px] tracking-[0.15em] uppercase dim mb-1">TODAY · 오늘 방문</div>
-              <div className="text-[20px] font-bold text-ink">
-                {stats.todayVisitors.length > 0
-                  ? <><span className="text-edred">{stats.todayVisitors.length}개사</span> 방문</>
-                  : <span className="text-[16px] dim font-normal">오늘 방문 없음</span>
-                }
-              </div>
-            </div>
-          </div>
-          {stats.todayVisitors.length > 0 ? (
-            <div className="space-y-2">
-              {stats.todayVisitors.map((v) => (
-                <div key={v.id} className="flex items-center justify-between py-2 border-b hair last:border-0">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[14px] font-medium text-ink truncate">{v.company}</span>
-                      <span className={`mono text-[9px] tracking-[0.1em] px-1.5 py-[1px] rounded shrink-0 ${
-                        ["DEALER","KEY_DEALER","VIP_DEALER"].includes(v.tier)
-                          ? "bg-blue-100 text-blue-700"
-                          : v.tier === "OEM" ? "bg-purple-100 text-purple-700"
-                          : "bg-gray-100 text-gray-600"
-                      }`}>{v.tierLabel}</span>
-                    </div>
-                    <div className="text-[11px] dim">{v.name}</div>
-                  </div>
-                  <div className="text-right shrink-0 ml-3">
-                    <div className="mono text-[11px] text-ink">
-                      {v.lastLoginAt ? new Date(v.lastLoginAt).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" }) : "—"}
-                    </div>
-                    {v.loginCount && v.loginCount > 1 && (
-                      <div className="mono text-[10px] dim">{v.loginCount}회 누적</div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="py-6 text-center text-[12px] dim">
-              오늘 로그인한 업체가 없습니다
-            </div>
-          )}
-        </div>
-
-        {/* 이번 주 로그인 */}
-        <div className="border hair bg-paper p-5">
-          <div className="mb-4">
-            <div className="mono text-[10px] tracking-[0.15em] uppercase dim mb-1">THIS WEEK · 이번 주 방문</div>
-            <div className="text-[20px] font-bold text-ink">
-              {stats.weekVisitors.length > 0
-                ? <><span className="text-edred">{stats.weekVisitors.length}개사</span> 방문</>
-                : <span className="text-[16px] dim font-normal">이번 주 방문 없음</span>
-              }
-            </div>
-          </div>
-          {stats.weekVisitors.length > 0 ? (
-            <div className="space-y-2 max-h-[280px] overflow-auto">
-              {stats.weekVisitors.map((v) => (
-                <div key={v.id} className="flex items-center justify-between py-2 border-b hair last:border-0">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[13px] font-medium text-ink truncate">{v.company}</span>
-                      <span className={`mono text-[9px] tracking-[0.1em] px-1.5 py-[1px] rounded shrink-0 ${
-                        ["DEALER","KEY_DEALER","VIP_DEALER"].includes(v.tier)
-                          ? "bg-blue-100 text-blue-700"
-                          : v.tier === "OEM" ? "bg-purple-100 text-purple-700"
-                          : "bg-gray-100 text-gray-600"
-                      }`}>{v.tierLabel}</span>
-                    </div>
-                    <div className="text-[11px] dim">{v.name}</div>
-                  </div>
-                  <div className="mono text-[11px] dim shrink-0 ml-3">
-                    {v.lastLoginAt ? new Date(v.lastLoginAt).toLocaleDateString("ko-KR", { month: "short", day: "numeric" }) : "—"}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="py-6 text-center text-[12px] dim">
-              이번 주 방문한 업체가 없습니다
-            </div>
-          )}
-        </div>
-      </div>
+      {/* 오늘 / 이번 주 방문 업체 */}
+      <VisitorSection stats={stats} />
 
       {/* 미리보기 카드 */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
