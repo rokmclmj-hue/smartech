@@ -35,8 +35,8 @@ export default function QuoteBar() {
     };
   }, []);
 
-  // 비로그인 시 숨김
-  if (status === "unauthenticated") return null;
+  // 비로그인 / 로딩 중 숨김
+  if (status !== "authenticated") return null;
   if (count === 0 && !open) return null;
 
   return (
