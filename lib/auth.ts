@@ -8,6 +8,27 @@ import { normalizePhone } from "./phone";
 
 const NOTIFY_TIERS = ["DEALER", "KEY_DEALER", "VIP_DEALER", "OEM"];
 
+// KnownContact에서 직함 조회 (phone 또는 email 매칭)
+async function lookupTitle(phone?: string | null, email?: string | null): Promise<string | null> {
+  try {
+    if (phone) {
+      const contact = await prisma.knownContact.findFirst({
+        where: { OR: [{ mobile: phone }, { tel: phone }] },
+        select: { title: true },
+      });
+      if (contact?.title) return contact.title;
+    }
+    if (email) {
+      const contact = await prisma.knownContact.findFirst({
+        where: { email: email.toLowerCase() },
+        select: { title: true },
+      });
+      if (contact?.title) return contact.title;
+    }
+  } catch { /* 조회 실패 시 무시 */ }
+  return null;
+}
+
 async function recordLogin(userId: number, company: string, name: string, tier: string) {
   try {
     await prisma.user.update({
@@ -160,6 +181,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             token.company = dbUser.company;
             token.id = String(dbUser.id);
             token.phone = dbUser.phone ?? null;
+            token.title = (dbUser as any).title ?? await lookupTitle(dbUser.phone, dbUser.email) ?? null;
             // 로그인 기록 (비동기)
             recordLogin(dbUser.id, dbUser.company, dbUser.name, dbUser.tier);
           } catch (err) {
@@ -175,6 +197,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.company = (user as any).company;
         token.id = user.id;
         token.phone = (user as any).phone ?? null;
+        token.title = (user as any).title ?? await lookupTitle((user as any).phone, user.email as string | null) ?? null;
         // 로그인 기록 (관리자 제외, 비동기)
         const tier = (user as any).tier;
         if (tier !== "ADMIN" && user.id) {
@@ -194,6 +217,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         (session.user as any).company = token.company;
         (session.user as any).id = token.id;
         (session.user as any).phone = token.phone ?? null;
+        (session.user as any).title = token.title ?? null;
       }
       return session;
     },

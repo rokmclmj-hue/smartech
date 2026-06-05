@@ -2,6 +2,7 @@
 import { SessionProvider as NextAuthSessionProvider, useSession } from "next-auth/react";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
+import FloatingChat from "@/components/FloatingChat";
 
 function SetupGuard({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
@@ -29,6 +30,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   return (
     <NextAuthSessionProvider>
       <SetupGuard>{children}</SetupGuard>
+      <FloatingChat />
     </NextAuthSessionProvider>
   );
 }
