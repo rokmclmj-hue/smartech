@@ -38,6 +38,8 @@ model User {
   aiEstimatedTier  String?
   aiConfidence     Int?
   aiTypeReason     String?
+  lastLoginAt      DateTime?
+  loginCount       Int             @default(0)
   quotes           Quote[]
   orders           Order[]
   createdQuotes    Quote[]         @relation("QuoteCreatedBy")

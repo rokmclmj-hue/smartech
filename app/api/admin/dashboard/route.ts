@@ -74,6 +74,27 @@ export async function GET() {
         orderBy: { stock: "asc" },
         take: 20,
       }),
+
+      // 오늘 로그인한 업체
+      prisma.user.findMany({
+        where: {
+          lastLoginAt: { gte: todayStart },
+          tier: { notIn: ["ADMIN", "PENDING"] },
+        },
+        select: { id: true, name: true, company: true, tier: true, lastLoginAt: true, loginCount: true },
+        orderBy: { lastLoginAt: "desc" },
+      }),
+
+      // 이번 주 로그인한 업체 (7일)
+      prisma.user.findMany({
+        where: {
+          lastLoginAt: { gte: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000) },
+          tier: { notIn: ["ADMIN", "PENDING"] },
+        },
+        select: { id: true, name: true, company: true, tier: true, lastLoginAt: true },
+        orderBy: { lastLoginAt: "desc" },
+        take: 30,
+      }),
     ]);
   }
 
@@ -99,6 +120,8 @@ export async function GET() {
     staleQuotes,
     recentOrders,
     lowStockProducts,
+    todayVisitors,
+    weekVisitors,
   ] = results;
 
   // 매출 계산
@@ -126,6 +149,11 @@ export async function GET() {
     };
   });
 
+  const TIER_LABEL: Record<string, string> = {
+    ENDUSER: "일반", OEM: "OEM", DEALER: "딜러",
+    KEY_DEALER: "키딜러", VIP_DEALER: "VIP딜러",
+  };
+
   return NextResponse.json({
     todayQuotes,
     monthQuotes,
@@ -135,5 +163,16 @@ export async function GET() {
     staleQuotes,
     recentOrders: formattedOrders,
     lowStockProducts,
+    todayVisitors: todayVisitors.map((u) => ({
+      id: u.id, name: u.name, company: u.company,
+      tier: u.tier, tierLabel: TIER_LABEL[u.tier] ?? u.tier,
+      lastLoginAt: u.lastLoginAt?.toISOString() ?? null,
+      loginCount: u.loginCount,
+    })),
+    weekVisitors: weekVisitors.map((u) => ({
+      id: u.id, name: u.name, company: u.company,
+      tier: u.tier, tierLabel: TIER_LABEL[u.tier] ?? u.tier,
+      lastLoginAt: u.lastLoginAt?.toISOString() ?? null,
+    })),
   });
 }

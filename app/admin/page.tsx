@@ -17,6 +17,16 @@ type UserItem = {
   cardImageUrl: string | null;
 };
 
+type VisitorItem = {
+  id: number;
+  name: string;
+  company: string;
+  tier: string;
+  tierLabel: string;
+  lastLoginAt: string | null;
+  loginCount?: number;
+};
+
 type DashboardStats = {
   todayQuotes: number;
   monthQuotes: number;
@@ -24,6 +34,8 @@ type DashboardStats = {
   monthRevenue: number;
   pendingUsers: number;
   staleQuotes: number;
+  todayVisitors: VisitorItem[];
+  weekVisitors: VisitorItem[];
 };
 
 // ─── 미처리 견적 알림 띠 (3일 이상 미응답 PENDING) ──────────
@@ -279,6 +291,96 @@ export default function AdminDashboard() {
 
       {/* KPI 4 패널 */}
       <KpiPanels stats={stats} pendingCount={users.length} />
+
+      {/* 오늘 방문 업체 */}
+      <div className="grid sm:grid-cols-2 gap-4">
+        {/* 오늘 로그인 */}
+        <div className="border hair bg-paper p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <div className="mono text-[10px] tracking-[0.15em] uppercase dim mb-1">TODAY · 오늘 방문</div>
+              <div className="text-[20px] font-bold text-ink">
+                {stats.todayVisitors.length > 0
+                  ? <><span className="text-edred">{stats.todayVisitors.length}개사</span> 방문</>
+                  : <span className="text-[16px] dim font-normal">오늘 방문 없음</span>
+                }
+              </div>
+            </div>
+          </div>
+          {stats.todayVisitors.length > 0 ? (
+            <div className="space-y-2">
+              {stats.todayVisitors.map((v) => (
+                <div key={v.id} className="flex items-center justify-between py-2 border-b hair last:border-0">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[14px] font-medium text-ink truncate">{v.company}</span>
+                      <span className={`mono text-[9px] tracking-[0.1em] px-1.5 py-[1px] rounded shrink-0 ${
+                        ["DEALER","KEY_DEALER","VIP_DEALER"].includes(v.tier)
+                          ? "bg-blue-100 text-blue-700"
+                          : v.tier === "OEM" ? "bg-purple-100 text-purple-700"
+                          : "bg-gray-100 text-gray-600"
+                      }`}>{v.tierLabel}</span>
+                    </div>
+                    <div className="text-[11px] dim">{v.name}</div>
+                  </div>
+                  <div className="text-right shrink-0 ml-3">
+                    <div className="mono text-[11px] text-ink">
+                      {v.lastLoginAt ? new Date(v.lastLoginAt).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" }) : "—"}
+                    </div>
+                    {v.loginCount && v.loginCount > 1 && (
+                      <div className="mono text-[10px] dim">{v.loginCount}회 누적</div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-6 text-center text-[12px] dim">
+              오늘 로그인한 업체가 없습니다
+            </div>
+          )}
+        </div>
+
+        {/* 이번 주 로그인 */}
+        <div className="border hair bg-paper p-5">
+          <div className="mb-4">
+            <div className="mono text-[10px] tracking-[0.15em] uppercase dim mb-1">THIS WEEK · 이번 주 방문</div>
+            <div className="text-[20px] font-bold text-ink">
+              {stats.weekVisitors.length > 0
+                ? <><span className="text-edred">{stats.weekVisitors.length}개사</span> 방문</>
+                : <span className="text-[16px] dim font-normal">이번 주 방문 없음</span>
+              }
+            </div>
+          </div>
+          {stats.weekVisitors.length > 0 ? (
+            <div className="space-y-2 max-h-[280px] overflow-auto">
+              {stats.weekVisitors.map((v) => (
+                <div key={v.id} className="flex items-center justify-between py-2 border-b hair last:border-0">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[13px] font-medium text-ink truncate">{v.company}</span>
+                      <span className={`mono text-[9px] tracking-[0.1em] px-1.5 py-[1px] rounded shrink-0 ${
+                        ["DEALER","KEY_DEALER","VIP_DEALER"].includes(v.tier)
+                          ? "bg-blue-100 text-blue-700"
+                          : v.tier === "OEM" ? "bg-purple-100 text-purple-700"
+                          : "bg-gray-100 text-gray-600"
+                      }`}>{v.tierLabel}</span>
+                    </div>
+                    <div className="text-[11px] dim">{v.name}</div>
+                  </div>
+                  <div className="mono text-[11px] dim shrink-0 ml-3">
+                    {v.lastLoginAt ? new Date(v.lastLoginAt).toLocaleDateString("ko-KR", { month: "short", day: "numeric" }) : "—"}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-6 text-center text-[12px] dim">
+              이번 주 방문한 업체가 없습니다
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* 미리보기 카드 */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">

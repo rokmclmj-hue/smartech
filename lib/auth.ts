@@ -6,6 +6,24 @@ import { compare } from "bcryptjs";
 import { prisma } from "./db";
 import { normalizePhone } from "./phone";
 
+const NOTIFY_TIERS = ["DEALER", "KEY_DEALER", "VIP_DEALER", "OEM"];
+
+async function recordLogin(userId: number, company: string, name: string, tier: string) {
+  try {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { lastLoginAt: new Date(), loginCount: { increment: 1 } },
+    });
+    // 딜러/OEM 로그인 시 관리자 SMS
+    if (NOTIFY_TIERS.includes(tier)) {
+      const { notifyDealerLogin } = await import("./solapi");
+      notifyDealerLogin(company, name, tier).catch(() => {});
+    }
+  } catch (e) {
+    console.error("[auth] recordLogin failed:", e);
+  }
+}
+
 async function findOrCreateOAuthUser(email: string, name: string, phone?: string | null) {
   const normalizedPhone = phone ? (normalizePhone(phone) || null) : null;
   let user = await prisma.user.findFirst({ where: { email: email.toLowerCase() } });
@@ -142,6 +160,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             token.company = dbUser.company;
             token.id = String(dbUser.id);
             token.phone = dbUser.phone ?? null;
+            // 로그인 기록 (비동기)
+            recordLogin(dbUser.id, dbUser.company, dbUser.name, dbUser.tier);
           } catch (err) {
             console.error("[auth] OAuth user lookup failed:", err);
           }
@@ -155,6 +175,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.company = (user as any).company;
         token.id = user.id;
         token.phone = (user as any).phone ?? null;
+        // 로그인 기록 (관리자 제외, 비동기)
+        const tier = (user as any).tier;
+        if (tier !== "ADMIN" && user.id) {
+          recordLogin(
+            parseInt(user.id),
+            (user as any).company ?? "",
+            user.name ?? "",
+            tier
+          );
+        }
       }
       return token;
     },

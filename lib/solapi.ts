@@ -101,6 +101,26 @@ export async function notifyNewMember(
 }
 
 /**
+ * 딜러/OEM 고객 로그인 시 관리자에게 SMS 알림.
+ */
+export async function notifyDealerLogin(
+  company: string,
+  name: string,
+  tier: string
+): Promise<void> {
+  const service = getService();
+  const adminPhone = getAdminPhone();
+  const tierLabel: Record<string, string> = {
+    DEALER: "딜러", KEY_DEALER: "키딜러", VIP_DEALER: "VIP딜러", OEM: "OEM",
+  };
+  await service.send({
+    to: adminPhone,
+    from: adminPhone,
+    text: `[스마텍] ${tierLabel[tier] ?? tier} 로그인\n${company} ${name}\n지금 홈페이지 방문 중입니다.`,
+  });
+}
+
+/**
  * 새 수리 접수 시 관리자에게 SMS 알림.
  */
 export async function notifyNewRepair(
