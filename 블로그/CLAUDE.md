@@ -90,18 +90,25 @@
 ## 폴더 구조
 
 ```
-블로그/agents/       서브 에이전트 정의 파일
-블로그/guides/       각 에이전트가 참고하는 가이드 (SEO, 문체, 이미지)
-블로그/output/       산출물 (주제별 폴더로 분리)
+블로그/agents/              서브 에이전트 정의 파일
+블로그/guides/              각 에이전트가 참고하는 가이드 (SEO, 문체, 이미지)
+블로그/output/
+  !processed-images/        현장사진 블러 처리 결과 (항상 최상단)
+  !user-images/             사용자 제공 원본 사진 (항상 최상단)
+  2026-06/                  월별 폴더 (YYYY-MM 형식)
+    주제-슬러그-YYYYMMDD/   글 폴더 — 날짜순 자동 정렬
+  2026-07/                  다음 달 폴더 (글 쓸 때 자동 생성)
 ```
+
+> **월별 폴더 생성 규칙**: 글 생성 시 해당 월의 폴더가 없으면 먼저 생성 후 그 안에 글 폴더를 만든다.
 
 ---
 
 ## 사용자가 주제를 주면 따라야 할 단계
 
 **Step 1 — 리서치** (`블로그/agents/research.md`)
-- 산출물: `블로그/output/[주제]-YYYYMMDD/research.md`
-- **폴더명 규칙**: 주제 슬러그 뒤에 반드시 작성 날짜를 붙인다. 예: `실험실-진공펌프-오일-선택법-20260606`
+- 산출물: `블로그/output/YYYY-MM/[주제]-YYYYMMDD/research.md`
+- **폴더명 규칙**: 월별 폴더(YYYY-MM) 아래에 주제 슬러그-날짜 형식으로 생성. 예: `output/2026-06/실험실-진공펌프-오일-선택법-20260606`
 
 **Step 2 — 글쓰기** (`블로그/agents/writer.md`)
 - research.md + 블로그/guides/seo-guide.md + 블로그/guides/style-guide.md + 블로그/guides/company-info.md 기반
@@ -176,7 +183,7 @@ upload-queue.json 업데이트 완료.
 ### 1. 이미지 폴더 자동 열기
 아래 명령으로 사진 폴더를 파일 탐색기에서 바로 연다:
 ```
-explorer "C:\Users\rokmc\smartech\블로그\output\[주제]\images"
+explorer "C:\Users\rokmc\smartech\블로그\output\YYYY-MM\[주제]\images"
 ```
 
 ### 2. 홈페이지 업로드 시도
@@ -189,7 +196,7 @@ upload_post.py 자동 실행을 시도한다.
 ✅ 완료!
 
 🌐 홈페이지: https://www.smartechvacuum.com/blog/[id]
-📝 네이버 복사: 블로그\output\[주제]\naver.md
+📝 네이버 복사: 블로그\output\YYYY-MM\[주제]\naver.md
 📁 사진 폴더: 파일 탐색기에서 열렸습니다
 ```
 

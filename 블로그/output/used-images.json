@@ -3,12 +3,22 @@
   "현장사진": {
     "그림1.png": "스퍼터 공정 에드워드 드라이진공펌프",
     "그림3.png": "스퍼터 공정 에드워드 드라이진공펌프",
-    "ELD500W.jpg": "ELD500W-리크디텍터"
+    "ELD500W.jpg": "ELD500W-리크디텍터",
+    "EXS450+EH2600_현장설치사진.jpg": "진공펌프-루츠부스터-조합",
+    "[크기변환]KakaoTalk_20260429_111055435_03.jpg": "실험실-진공펌프-오일-선택법",
+    "[크기변환]KakaoTalk_20260429_111055435_05.jpg": "실험실-진공펌프-오일-선택법",
+    "[크기변환]KakaoTalk_20260429_111055435_08.jpg": "실험실-진공펌프-오일-선택법",
+    "20200824_095211.jpg": "RV-오일로터리펌프-유지관리-20260606",
+    "20200824_095654.jpg": "이차전지-PFPE-오일-선택법-20260606"
   },
   "AI생성이미지": {
     "스퍼터 공정 에드워드 드라이진공펌프": ["thumbnail.png", "body-1.png", "body-2.png", "body-3.png", "body-4.png", "body-5.png"],
     "ELD500W-리크디텍터": ["thumbnail.png", "field-1.png", "body-1.png", "body-2.png", "body-3.png"],
     "가스 발라스트": ["thumbnail.png", "image-01.png", "image-02.png", "image-03.png", "image-04.png"],
-    "진공게이지 종류": ["thumbnail.png", "image-01.png", "image-02.png", "image-03.png", "image-04.png", "image-05.png"]
+    "진공게이지 종류": ["thumbnail.png", "image-01.png", "image-02.png", "image-03.png", "image-04.png", "image-05.png"],
+    "진공펌프-루츠부스터-조합": ["thumbnail.png", "field-1.png", "image-01.png", "image-02.png", "image-03.png", "image-04.png"],
+    "실험실-진공펌프-오일-선택법": ["thumbnail.png", "field-1.png", "field-2.png", "field-3.png", "image-01.png", "image-02.png"],
+    "RV-오일로터리펌프-유지관리-20260606": ["thumbnail.png", "image-01.png", "image-02.png"],
+    "이차전지-PFPE-오일-선택법-20260606": ["thumbnail.png", "field-1.png", "image-01.png", "image-02.png"]
   }
 }

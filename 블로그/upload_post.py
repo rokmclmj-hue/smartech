@@ -38,7 +38,15 @@ if not SECRET:
 # ── 경로 설정 ──────────────────────────────────────────
 OUTPUT_DIR  = os.path.join(os.path.dirname(__file__), "output")
 topic       = sys.argv[1] if len(sys.argv) > 1 else "스퍼터 공정 에드워드 드라이진공펌프"
+
+# "2026-06/폴더명" 형식이면 그대로, 아니면 월별 서브폴더 자동 탐색
 BLOG_FOLDER = os.path.join(OUTPUT_DIR, topic)
+if not os.path.isdir(BLOG_FOLDER):
+    for entry in os.listdir(OUTPUT_DIR):
+        candidate = os.path.join(OUTPUT_DIR, entry, topic)
+        if os.path.isdir(candidate):
+            BLOG_FOLDER = candidate
+            break
 IMAGES_DIR  = os.path.join(BLOG_FOLDER, "images")
 
 print(f"주제: {topic}")
@@ -115,26 +123,20 @@ if field_photos:
         except Exception as e:
             print(f"  [ERROR] {fname}: {e}")
 
-    # 삽입 규칙: 1번째 → thumbnail 뒤, 2번째 → body-2 뒤
-    insert_after = [
-        r'(!\[대표 이미지\]\([^)]+\))',
-        r'(!\[GXS 펌핑 속도 및 에너지 성능\]\([^)]+\))',
-    ]
+    # 삽입 규칙: 1번째 → 첫 번째 이미지 뒤, 나머지 → 본문 끝
     for idx, (fname, url) in enumerate(field_urls):
         alt = fname.replace("-", " ").replace(".png", "").replace(".jpg", "")
-        if idx < len(insert_after):
+        if idx == 0:
+            # 첫 번째 현장사진 → 본문 첫 번째 이미지 태그 바로 뒤에 삽입
             content = re.sub(
-                insert_after[idx],
+                r'(!\[[^\]]*\]\(https?://[^\)]+\))',
                 r'\1\n\n![' + alt + '](' + url + ')',
-                content
+                content,
+                count=1
             )
         else:
-            # 남는 현장사진은 본문 끝 해시태그 앞에 추가
-            content = re.sub(
-                r'(\n#[^\n]+$)',
-                f'\n\n![{alt}]({url})' + r'\1',
-                content, flags=re.MULTILINE
-            )
+            # 나머지 현장사진은 본문 끝에 추가
+            content = content.rstrip() + f'\n\n![{alt}]({url})\n'
 
 # ── frontmatter 파싱 (category 추출 후 제거) ──────────
 category = "기술문의"
