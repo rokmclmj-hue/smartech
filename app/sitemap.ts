@@ -4,7 +4,7 @@ import { INDUSTRIES } from "@/lib/industries";
 
 export const dynamic = "force-dynamic";
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.smartechvacuum.com";
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://smartechvacuum.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 발행된 블로그 글
