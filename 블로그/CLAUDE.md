@@ -100,7 +100,8 @@
 ## 사용자가 주제를 주면 따라야 할 단계
 
 **Step 1 — 리서치** (`블로그/agents/research.md`)
-- 산출물: `블로그/output/[주제]/research.md`
+- 산출물: `블로그/output/[주제]-YYYYMMDD/research.md`
+- **폴더명 규칙**: 주제 슬러그 뒤에 반드시 작성 날짜를 붙인다. 예: `실험실-진공펌프-오일-선택법-20260606`
 
 **Step 2 — 글쓰기** (`블로그/agents/writer.md`)
 - research.md + 블로그/guides/seo-guide.md + 블로그/guides/style-guide.md + 블로그/guides/company-info.md 기반

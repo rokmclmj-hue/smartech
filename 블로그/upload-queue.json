@@ -1,8 +1,8 @@
 {
-  "_week": "",
-  "_created": "",
+  "_week": "2026-W24",
+  "_created": "2026-06-06",
   "_note": "토/일에 Claude가 자동으로 채워줌. 직접 수정 금지.",
-  "day1": { "folder": "", "title": "", "uploaded": false },
-  "day2": { "folder": "", "title": "", "uploaded": false },
-  "day3": { "folder": "", "title": "", "uploaded": false }
+  "day1": { "folder": "실험실-진공펌프-오일-선택법-20260606", "title": "실험실 진공펌프 오일 종류와 교환 시기", "uploaded": false },
+  "day2": { "folder": "RV-오일로터리펌프-유지관리-20260606", "title": "분석 장비 RV 오일로터리펌프 유지관리 핵심 3가지", "uploaded": false },
+  "day3": { "folder": "이차전지-PFPE-오일-선택법-20260606", "title": "배터리 제조 공정에 PFPE 오일이 필요한 이유", "uploaded": false }
 }
