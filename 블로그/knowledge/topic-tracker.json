@@ -1,0 +1,17 @@
+{
+  "_comment": "블로그 주제 선정 로테이션 상태 추적 파일. 주제 선정 후 반드시 업데이트할 것.",
+  "_last_updated": "2026-06-06",
+
+  "current_industry_index": 1,
+
+  "completed_topics": [
+    { "industry": "반도체/코팅", "product": "A.드라이펌프", "title": "스퍼터 공정 에드워드 드라이진공펌프", "folder": "스퍼터 공정 에드워드 드라이진공펌프" },
+    { "industry": "공통/기술문의", "product": "C.진공게이지", "title": "진공게이지 종류", "folder": "진공게이지 종류" },
+    { "industry": "공통/기술문의", "product": "A.드라이펌프", "title": "가스 발라스트", "folder": "가스 발라스트" },
+    { "industry": "공통/수리문의", "product": "A.드라이펌프", "title": "진공펌프 수리 시 주의사항", "folder": "진공펌프 수리 시 주의사항" },
+    { "industry": "공통/기술문의", "product": "A.드라이펌프+루츠부스터", "title": "진공펌프 루츠부스터 조합 선택법", "folder": "진공펌프-루츠부스터-조합" },
+    { "industry": "공통", "product": "기타", "title": "ELD500W 리크디텍터", "folder": "ELD500W-리크디텍터" }
+  ],
+
+  "used_consultation_records": []
+}

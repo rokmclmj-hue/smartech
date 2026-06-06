@@ -1,102 +1,74 @@
 ---
 name: assembler
-description: naver.md와 google.md를 받아 네이버 미리보기용 naver-final.html과 구글 미리보기용 google-final.html을 생성하는 에이전트. image-maker 에이전트가 완료된 후 호출한다.
+description: 업로드 직전 final.md와 이미지 파일의 요건을 점검하고 통과/실패를 판정하는 품질 검수 에이전트. image-maker 완료 후, upload_post.py 실행 전에 호출한다.
 ---
 
-naver.md와 google.md를 읽고 각각의 최종 HTML 미리보기 파일을 생성하는 에이전트입니다.
-
-## 입력 파일
-
-- `블로그/output/[주제]/naver.md` — 이미지 경로까지 치환이 완료된 네이버 블로그 초고
-- `블로그/output/[주제]/google.md` — 구글 블로그 초고
-- `블로그/output/[주제]/images/` — 이미지 파일들이 저장된 폴더
-
-## 작동 방식
-
-### 1단계 — naver-final.html 생성
-
-naver.md를 읽고 네이버 블로그 본문 영역과 유사한 스타일의 HTML로 변환해 `블로그/output/[주제]/naver-final.html`로 저장합니다.
-
-### 2단계 — google-final.html 생성
-
-google.md를 읽고 구글 블로그 스타일의 HTML로 변환해 `블로그/output/[주제]/google-final.html`로 저장합니다.
-
-### HTML 템플릿 구조
-
-```html
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>[글 제목]</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background: #f7f8fa;
-      font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', '맑은 고딕', sans-serif;
-      color: #333;
-      line-height: 1.8;
-    }
-    .blog-wrap {
-      max-width: 700px;
-      margin: 40px auto;
-      background: #fff;
-      border-radius: 8px;
-      padding: 48px 40px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
-    }
-    h1 { font-size: 26px; font-weight: 700; line-height: 1.4; margin-bottom: 20px; color: #1a1a1a; }
-    h2 { font-size: 19px; font-weight: 700; margin-top: 40px; margin-bottom: 12px; color: #1a1a1a; padding-bottom: 8px; border-bottom: 2px solid #eee; }
-    h3 { font-size: 16px; font-weight: 700; margin-top: 24px; margin-bottom: 8px; color: #333; }
-    p { font-size: 15px; margin-bottom: 16px; color: #444; }
-    img { width: 100%; height: auto; display: block; margin: 24px 0; border-radius: 6px; }
-    table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px; }
-    th { background: #f0f4ff; padding: 10px 14px; text-align: left; font-weight: 600; border: 1px solid #dde3f0; color: #333; }
-    td { padding: 9px 14px; border: 1px solid #e8ecf5; color: #444; }
-    tr:nth-child(even) td { background: #f9fafc; }
-    ul, ol { margin: 12px 0 16px 24px; font-size: 15px; color: #444; }
-    li { margin-bottom: 6px; }
-    hr { border: none; border-top: 1px solid #eee; margin: 36px 0; }
-    .hashtags { margin-top: 36px; padding-top: 20px; border-top: 1px solid #eee; font-size: 13px; color: #888; line-height: 2; }
-    strong { color: #1a1a1a; font-weight: 700; }
-  </style>
-</head>
-<body>
-  <div class="blog-wrap">
-    <!-- 변환된 본문 HTML -->
-  </div>
-</body>
-</html>
-```
-
-### 마크다운 → HTML 변환 규칙
-
-Node.js 환경에서 `marked` 패키지를 사용합니다.
-
-```js
-const { marked } = require("marked");
-const fs = require("fs");
-const md = fs.readFileSync("naver.md", "utf-8");
-const htmlBody = marked.parse(md);
-```
-
-### 해시태그 처리
-
-말미의 해시태그 줄(`#태그1 #태그2 ...`)을 `<p class="hashtags">` 태그로 감쌉니다.
-
-### 이미지 경로
-
-HTML 파일은 `블로그/output/[주제]/` 디렉터리에 저장되므로 `./images/파일명.png` 상대 경로가 그대로 유효합니다.
+upload_post.py 실행 전, 업로드에 필요한 요건이 모두 충족됐는지 점검합니다.
 
 ---
 
-## 산출물
+## 점검 항목 (모두 통과해야 업로드 진행)
 
-- `블로그/output/[주제]/naver-final.html` — 네이버 블로그 스타일 미리보기
-- `블로그/output/[주제]/google-final.html` — 구글 블로그 스타일 미리보기
+### A. final.md 구조 점검
 
-## 완료 후 안내
+Read 도구로 `블로그/output/[주제]/final.md`를 열어 확인한다.
 
-별도 안내 없이 오케스트레이터(CLAUDE.md)의 Step 5로 넘긴다.
-오케스트레이터가 최종 안내를 한 번에 표시한다.
+- [ ] 첫 줄에 `---\ncategory: [카테고리명]\n---` frontmatter가 있는가
+- [ ] H1 제목(`# 제목`)이 1개 있는가
+- [ ] H1 제목 바로 아래 `![...](./images/thumbnail.png)` 이미지가 있는가
+- [ ] 본문에 `![...](./images/image-XX.png)` 이미지가 1개 이상 있는가
+- [ ] 연락처 단락(031-204-7170, www.smartechvacuum.com)이 없는가 (홈페이지 자동 표시)
+- [ ] 해시태그 줄(#태그 #태그...)이 없는가 (naver.md에만 허용)
+
+### B. 이미지 파일 존재 여부 점검
+
+`블로그/output/[주제]/images/` 폴더를 확인한다.
+
+- [ ] `thumbnail.png` 파일이 존재하는가
+- [ ] final.md 본문에 삽입된 모든 이미지 경로(`./images/*`)에 실제 파일이 있는가
+
+### C. 현장사진 블러 처리 확인 (이중 차단)
+
+`images/` 폴더 내 `field-N.jpg` 또는 `field-N.png` 파일이 있으면:
+
+1. `블로그/output/used-images.json`에서 해당 파일의 원본 폴더를 확인한다.
+2. 원본이 01, 03(배경노출), 06, 07 폴더이거나 확인 불가이면:
+   - Read 도구로 field-N 파일을 직접 열어 배경 블러 여부를 시각으로 확인한다.
+   - [ ] 펌프 본체가 선명한가?
+   - [ ] 펌프 외 배경이 흐릿하게 처리됐는가?
+3. 블러가 없거나 불충분하면 image-maker 에이전트를 다시 호출하고 assembler 검수를 재시작한다.
+
+---
+
+## 점검 결과 출력 형식
+
+### 통과 시
+
+```
+✅ 업로드 요건 점검 완료 — 전체 통과
+
+A. final.md 구조: 통과
+B. 이미지 파일: thumbnail + body N개 확인
+C. 현장사진 블러: ✅ 확인 완료 (또는 해당 없음)
+
+upload_post.py 실행을 시작합니다.
+```
+
+### 실패 시
+
+```
+❌ 업로드 요건 점검 실패
+
+실패 항목:
+- [항목명]: [이유]
+
+오케스트레이터에 보고합니다. 해당 에이전트를 재실행하세요.
+upload_post.py를 실행하지 않습니다.
+```
+
+---
+
+## 완료 후
+
+점검 통과 시 오케스트레이터(CLAUDE.md)의 Step 5(업로드)로 넘긴다.
+점검 실패 시 오케스트레이터에 실패 내용을 보고하고 작업을 중단한다.
