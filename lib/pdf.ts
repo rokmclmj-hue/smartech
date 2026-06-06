@@ -571,7 +571,7 @@ function QuoteDocument({ quote }: { quote: QuoteForPdf }) {
       el(View, { style: S.termsRow },
         el(View, { style: S.termItem },
           el(Text, { style: S.termLabel }, "PAYMENT"),
-          el(Text, { style: S.termValue }, "세금계산서 발행 · 익월 말 결제")
+          el(Text, { style: S.termValue }, "납품 전 현금결제")
         ),
         el(View, { style: S.termItem },
           el(Text, { style: S.termLabel }, "DELIVERY"),
