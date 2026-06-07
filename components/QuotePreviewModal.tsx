@@ -98,7 +98,7 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
               <div className="right">
                 <span>
                   <span className="pulse-dot" />
-                  {isLoggedIn ? `${tierLabel} · 확정가` : "PUBLIC · 공개가"}
+                  {isLoggedIn ? "우대적용 · 확정가" : "PUBLIC · 공개가"}
                 </span>
                 <button
                   type="button"
@@ -156,7 +156,7 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
                 <div className="cell"><div className="k">DATE</div><div className="v">{ymd(today)}</div></div>
                 <div className="cell"><div className="k">ITEMS</div><div className="v">{items.length} LINES</div></div>
                 <div className="cell"><div className="k">CURRENCY</div><div className="v">KRW (₩)</div></div>
-                <div className="cell"><div className="k">PRICE BASIS</div><div className="v">{isLoggedIn ? tierLabel : "PUBLIC"}</div></div>
+                <div className="cell"><div className="k">PRICE BASIS</div><div className="v">{isLoggedIn ? "우대적용" : "PUBLIC"}</div></div>
                 <div className="cell"><div className="k">STATUS</div><div className="v">PREVIEW</div></div>
               </div>
             </div>
@@ -171,7 +171,6 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
                     <div className="party-row"><div className="lbl">Company</div><div className="val">{userCompany || "—"}</div></div>
                     <div className="party-row"><div className="lbl">Attn</div><div className="val">{userName || "—"}</div></div>
                     <div className="party-row"><div className="lbl">Email</div><div className="val qmono">{userEmail}</div></div>
-                    <div className="party-row"><div className="lbl">Grade</div><div className="val qmono">{tierLabel}</div></div>
                   </>
                 ) : (
                   <div className="party-row">
@@ -289,7 +288,7 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
                       <span className="s-v">- ₩ {fmt(savingsAmount)}</span>
                     </div>
                     <div className="s-row s-final">
-                      <span className="s-k">귀사 적용가 · {tierLabel}</span>
+                      <span className="s-k">귀사 적용가</span>
                       <span className="s-v">₩ {fmt(subtotal)}</span>
                     </div>
                     <div className="savings-badge">
@@ -317,7 +316,7 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
               <div className="summary-left">
                 <div className="row"><span>ITEMS</span><span className="v">{items.length} LINES · {totalQty} EA</span></div>
                 <div className="row"><span>CURRENCY</span><span className="v">KRW (₩)</span></div>
-                <div className="row"><span>PRICE BASIS</span><span className="v">{isLoggedIn ? tierLabel : "PUBLIC"}</span></div>
+                <div className="row"><span>PRICE BASIS</span><span className="v">{isLoggedIn ? "우대적용" : "PUBLIC"}</span></div>
                 <div className="row"><span>STATUS</span><span className="v" style={{ color: "var(--q-gold)" }}>PREVIEW</span></div>
               </div>
               <div className="summary-right">
@@ -357,7 +356,7 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
             <div className="meta">
               <span>DATE · {ymd(today)}</span>
               <span>ITEMS · {items.length} LINES</span>
-              <span>BASIS · {isLoggedIn ? tierLabel : "PUBLIC"}</span>
+              <span>BASIS · {isLoggedIn ? "우대적용" : "PUBLIC"}</span>
             </div>
           </div>
           <div className="p-parties">
@@ -368,7 +367,6 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
                   <div className="row"><div className="k">Company</div><div className="v">{userCompany || "—"}</div></div>
                   <div className="row"><div className="k">Attn</div><div className="v">{userName || "—"}</div></div>
                   <div className="row"><div className="k">Email</div><div className="v pmono">{userEmail}</div></div>
-                  <div className="row"><div className="k">Grade</div><div className="v pmono">{tierLabel}</div></div>
                 </>
               ) : (
                 <div className="row"><div className="k">Notice</div><div className="v">공개가(PUBLIC) 기준</div></div>
@@ -420,7 +418,7 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
             <div className="row grand"><span className="k">GRAND TOTAL</span><span className="v">₩ {fmt(grandTotal)}</span></div>
           </div>
           <div className="p-terms">
-            <div className="row"><span className="k">Payment</span><span className="v">세금계산서 발행 · 익월 말 결제 (협의)</span></div>
+            <div className="row"><span className="k">Payment</span><span className="v">납품 전 현금결제</span></div>
             <div className="row"><span className="k">Delivery</span><span className="v">국내 재고분 D+1 / 해외 발주분 D+14 (협의)</span></div>
             <div className="row"><span className="k">Warranty</span><span className="v">12개월 · Edwards 정품 보증</span></div>
             <div className="row"><span className="k">A / S</span><span className="v">24/7 콜 응대 · 현장 엔지니어 출동</span></div>

@@ -1,0 +1,54 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "실험실 진공펌프 오일은 얼마나 자주 교환해야 하나요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Edwards 공식 지침 기준으로 3~6개월마다 교환이 권장됩니다. 간헐적으로 사용하고 청정 가스를 처리하는 경부하 환경에서는 6개월마다, 일상적인 실험실 사용의 중부하 환경에서는 3개월마다, 연속 가동하거나 응축성 가스를 다루는 고부하 환경에서는 3개월 미만으로 수시 육안 점검을 병행해야 합니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Edwards RV12 진공펌프에 맞는 오일은 무엇인가요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Edwards RV12는 출하 시 Ultragrade Performance 19(광물유)가 기본으로 충전됩니다. 오일 용량은 최대 1.00L이며, 이 오일을 사용할 때 도달진공도는 총압 기준 2.0×10⁻³ mbar입니다. RV3, RV5, RV8도 동일하게 Ultragrade 19를 사용합니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "진공펌프에 PFPE(Fomblin) 오일을 쓰면 도달진공도가 달라지나요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "네, 크게 달라집니다. RV 계열 기준으로 Ultragrade 19 사용 시 도달진공도는 2.0×10⁻³ mbar이지만, Fomblin(PFPE) 오일로 교체하면 2.0×10⁻² mbar로 약 10배 낮아집니다. 실험 조건에 도달진공도가 중요한 경우 반드시 사전에 확인해야 합니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "진공펌프 오일 교환이 필요한 징후는 무엇인가요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Edwards 공식 자료에서 명시한 교환 필요 징후는 다음과 같습니다: 오일 색상이 어두워짐(열화·오염 신호), 사이트 글라스에서 오일 레벨 감소, 도달진공도 저하 또는 배기속도 감소, 비정상적으로 높은 운전 온도, 과도한 진동 발생. 이 중 하나라도 나타나면 즉시 오일 상태를 점검하고 교환을 검토해야 합니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "광물유와 PFPE 오일을 섞어 써도 되나요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "절대 혼용하면 안 됩니다. Ultragrade 광물유(15/19/70 계열)와 Fomblin® YVAC(PFPE 불소계 합성유)는 화학적으로 호환되지 않아 혼용 시 펌프 손상으로 이어질 수 있습니다. 오일 교환 시에는 기존 오일을 완전히 배출한 뒤 신유를 충전해야 합니다. PFPE 오일이 필요한 환경에서는 PFPE 사전처리 전용 모델을 별도로 주문해야 합니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "E2M 중대형 펌프와 nES 산업용 펌프에는 어떤 오일을 써야 하나요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "E2M40/80/175/275 중대형 계열과 nES40~nES750 산업용 펌프에는 Ultragrade Performance 70(광물유, 점도 70 cSt @ 40°C, 인화점 230°C)이 표준 오일입니다. nES 시리즈의 경우 연속 가동이나 서비스 간격 연장이 필요한 환경에서는 Ultragrade Endurance Extend 110(합성유)을 대안으로 선택할 수 있습니다."
+      }
+    }
+  ]
+}
