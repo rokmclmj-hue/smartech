@@ -5,8 +5,8 @@ import { usePathname } from "next/navigation";
 import QuotePanel from "./QuotePanel";
 import QuotePreviewModal from "./QuotePreviewModal";
 
-// 플로팅 버튼을 표시할 페이지 목록
-const QUOTE_ALLOWED_PATHS = ["/products", "/"];
+// 플로팅 버튼을 표시할 페이지 목록 (홈페이지 전용 — 블로그·수리접수 등은 숨김)
+const QUOTE_ALLOWED_PATHS = ["/"];
 
 export default function QuoteBar() {
   const { status } = useSession();

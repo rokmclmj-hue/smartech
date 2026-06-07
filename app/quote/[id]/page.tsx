@@ -567,7 +567,7 @@ export default function QuoteDetailPage() {
           {/* SECTION 06 · TERMS */}
           <div className="section-label">— SECTION 06 · TERMS</div>
           <div className="terms">
-            <div className="row"><span className="k">PAYMENT</span><span className="v">납품 전 현금결제</span></div>
+            <div className="row"><span className="k">PAYMENT</span><span className="v">{quote.taxInvoiceRequested ? "세금계산서 발행 · 익월 말 결제" : "납품 전 현금결제"}</span></div>
             <div className="row"><span className="k">DELIVERY</span><span className="v">국내 재고분 D+1 / 해외 발주분 D+14 (협의)</span></div>
             <div className="row"><span className="k">SHIPPING</span><span className="v">별도 (실비 청구) · 수도권 무료 옵션</span></div>
             <div className="row"><span className="k">INSTALL</span><span className="v">별도 견적 · 시운전 패키지 가능</span></div>
@@ -689,7 +689,7 @@ export default function QuoteDetailPage() {
           <div className="row grand"><span className="k">GRAND TOTAL</span><span className="v">₩ {fmt(grandTotal)}</span></div>
         </div>
         <div className="p-terms">
-          <div className="row"><span className="k">Payment</span><span className="v">납품 전 현금결제</span></div>
+          <div className="row"><span className="k">Payment</span><span className="v">{quote.taxInvoiceRequested ? "세금계산서 발행 · 익월 말 결제" : "납품 전 현금결제"}</span></div>
           <div className="row"><span className="k">Delivery</span><span className="v">국내 재고분 D+1 / 해외 발주분 D+14 (협의)</span></div>
           <div className="row"><span className="k">Shipping</span><span className="v">별도 (실비 청구) · 수도권 무료 옵션</span></div>
           <div className="row"><span className="k">Install</span><span className="v">별도 견적 · 시운전 패키지 가능</span></div>

@@ -114,12 +114,17 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
                         if (el) { el.style.display = "none"; hidden.push(el); }
                       });
                       document.body.classList.add("printing-quote");
+                      // 인쇄 완료 후에만 카트 초기화 (취소 시 유지)
+                      const clearCart = () => {
+                        localStorage.removeItem("quoteCart");
+                        window.dispatchEvent(new Event("quoteCartUpdated"));
+                        onClose();
+                        window.removeEventListener("afterprint", clearCart);
+                      };
+                      window.addEventListener("afterprint", clearCart);
                       window.print();
                       hidden.forEach((el) => (el.style.display = ""));
                       document.body.classList.remove("printing-quote");
-                      localStorage.removeItem("quoteCart");
-                      window.dispatchEvent(new Event("quoteCartUpdated"));
-                      onClose();
                     }
                   }}
                 >
