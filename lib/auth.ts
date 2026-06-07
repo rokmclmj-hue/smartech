@@ -198,6 +198,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.id = user.id;
         token.phone = (user as any).phone ?? null;
         token.title = (user as any).title ?? await lookupTitle((user as any).phone, user.email as string | null) ?? null;
+        token.tierCheckedAt = Date.now();
         // 로그인 기록 (관리자 제외, 비동기)
         const tier = (user as any).tier;
         if (tier !== "ADMIN" && user.id) {
@@ -209,6 +210,23 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           );
         }
       }
+
+      // 1분마다 DB에서 tier 재확인 (관리자 승인 즉시 반영)
+      if (!account && !user && token.id) {
+        const now = Date.now();
+        const lastChecked = (token.tierCheckedAt as number) ?? 0;
+        if (now - lastChecked > 60 * 1000) {
+          try {
+            const dbUser = await prisma.user.findUnique({
+              where: { id: parseInt(token.id as string) },
+              select: { tier: true },
+            });
+            if (dbUser) token.tier = dbUser.tier;
+          } catch { /* DB 조회 실패 시 기존 tier 유지 */ }
+          token.tierCheckedAt = now;
+        }
+      }
+
       return token;
     },
     async session({ session, token }) {
