@@ -40,6 +40,38 @@ type DashboardStats = {
   monthVisitors: VisitorItem[];
 };
 
+// ─── GA 방문자 분석 섹션 ─────────────────────────────────────
+function GaSection() {
+  return (
+    <div className="border hair bg-paper">
+      <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b hair">
+        <div className="mono text-[10px] tracking-[0.15em] uppercase dim">
+          GA · 방문자 분석
+        </div>
+        <a
+          href="https://analytics.google.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mono text-[10px] tracking-[0.1em] dim hover:text-edred transition-colors"
+        >
+          GA4 열기 →
+        </a>
+      </div>
+      <div className="w-full overflow-hidden">
+        <iframe
+          width="100%"
+          height="450"
+          src="https://datastudio.google.com/embed/reporting/6b12df3e-99c8-4d13-a85c-19b925484c44/page/z6W0F"
+          frameBorder="0"
+          style={{ border: 0 }}
+          allowFullScreen
+          sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+        />
+      </div>
+    </div>
+  );
+}
+
 // ─── 미처리 견적 알림 띠 (3일 이상 미응답 PENDING) ──────────
 function StaleQuotesAlert({ count }: { count: number }) {
   if (count <= 0) return null;
@@ -368,6 +400,9 @@ export default function AdminDashboard() {
 
         {/* 오늘 / 이번 주 방문 업체 */}
         <VisitorSection stats={stats} />
+
+        {/* GA 방문자 분석 */}
+        <GaSection />
       </div>
     );
   }
@@ -495,6 +530,9 @@ export default function AdminDashboard() {
           </Link>
         </div>
       )}
+
+      {/* GA 방문자 분석 */}
+      <GaSection />
     </div>
   );
 }
