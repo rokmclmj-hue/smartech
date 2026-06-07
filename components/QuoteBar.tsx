@@ -35,8 +35,8 @@ export default function QuoteBar() {
     };
   }, []);
 
-  // 비로그인 / 로딩 중 숨김
-  if (status !== "authenticated") return null;
+  // next-auth 초기화 중 깜빡임 방지
+  if (status === "loading") return null;
   if (count === 0 && !open) return null;
 
   return (
