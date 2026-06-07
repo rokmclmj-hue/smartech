@@ -41,15 +41,13 @@ export default function QuoteBar() {
 
   return (
     <>
-      {/* fullscreen 스캔 모드 전용 미리보기 */}
-      {fullscreenMode && (
-        <QuotePreviewModal
-          open={open}
-          onClose={() => { setOpen(false); setFullscreenMode(false); }}
-          fullscreen={true}
-        />
-      )}
-      {/* 견적 카트 패널 (일반 모드) */}
+      {/* 다크 견적서 미리보기 (fullscreen 시 전체화면) */}
+      <QuotePreviewModal
+        open={open}
+        onClose={() => { setOpen(false); setFullscreenMode(false); }}
+        fullscreen={fullscreenMode}
+      />
+      {/* 오른쪽 견적 카트 패널 (fullscreen 모드일 때 숨김) */}
       {!fullscreenMode && <QuotePanel open={open} onClose={() => setOpen(false)} />}
 
       {/* 하단 플로팅 버튼 */}
@@ -59,7 +57,7 @@ export default function QuoteBar() {
             onClick={() => setOpen(true)}
             className="pointer-events-auto flex items-center gap-3 bg-edred text-paper px-7 py-3.5 shadow-2xl hover:bg-ink transition-colors border border-white/10"
           >
-            <span className="text-[13px] font-medium tracking-tight">견적카트</span>
+            <span className="text-[13px] font-medium tracking-tight">견적서 미리보기</span>
             <span className="w-px h-3.5 bg-white/30" aria-hidden="true" />
             <span className="mono text-[13px] font-semibold">{count}종</span>
             <span className="text-[11px] opacity-60 ml-1">→</span>
