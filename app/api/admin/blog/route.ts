@@ -85,6 +85,21 @@ export async function PATCH(req: Request) {
     await prisma.blogPost.update({ where: { id: Number(id) }, data: updates });
   }
 
+  // 발행 시 IndexNow로 빙에 즉시 알림 (챗GPT 크롤링 촉진)
+  if (updates.status === "PUBLISHED") {
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://smartechvacuum.com";
+    fetch("https://www.bing.com/indexnow", {
+      method: "POST",
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+      body: JSON.stringify({
+        host: "smartechvacuum.com",
+        key: "f868dd92e4a94e2cb6ec60c397058e84",
+        keyLocation: `${siteUrl}/f868dd92e4a94e2cb6ec60c397058e84.txt`,
+        urlList: [`${siteUrl}/blog/${id}`],
+      }),
+    }).catch(() => {}); // 실패해도 발행은 정상 처리
+  }
+
   return NextResponse.json({ id: Number(id) });
 }
 
