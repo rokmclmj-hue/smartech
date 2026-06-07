@@ -170,7 +170,7 @@ export default function Home() {
                 <span className="opacity-30">·</span>
                 <span>04 of 24</span>
               </span>
-              <Link href="/products" className="hover:text-edred underline-red pb-0.5">
+              <Link href="/#products" className="hover:text-edred underline-red pb-0.5">
                 ALL CATALOGS →
               </Link>
             </div>

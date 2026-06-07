@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
-import Link from "next/link";
 import ProductPanel, { type PanelItem } from "./ProductPanel";
+import { CATALOG_MAP } from "@/lib/catalogs";
 
 const ITEMS = [
   { category: "오일펌프(소형 RV)",        code: "RV 시리즈",           title: "오일 로터리 베인 펌프 (소형)",       image: "/images/products/rv.jpeg" },
@@ -41,7 +41,11 @@ export default function ProductCategories() {
 
   return (
     <>
-      <ProductPanel item={panelItem} onClose={() => setPanelItem(null)} />
+      <ProductPanel
+        item={panelItem}
+        onClose={() => setPanelItem(null)}
+        catalogUrl={panelItem ? (CATALOG_MAP[panelItem.category] ?? undefined) : undefined}
+      />
 
       <div>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
