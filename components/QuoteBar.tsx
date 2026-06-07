@@ -1,11 +1,16 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
+import { usePathname } from "next/navigation";
 import QuotePanel from "./QuotePanel";
 import QuotePreviewModal from "./QuotePreviewModal";
 
+// 플로팅 버튼을 표시할 페이지 목록
+const QUOTE_ALLOWED_PATHS = ["/products", "/"];
+
 export default function QuoteBar() {
   const { status } = useSession();
+  const pathname = usePathname();
   const [count, setCount] = useState(0);
   const [open, setOpen] = useState(false);
   const [fullscreenMode, setFullscreenMode] = useState(false);
@@ -35,23 +40,30 @@ export default function QuoteBar() {
     };
   }, []);
 
+  // 허용 페이지에서만 열림 상태 유지 (비허용 페이지에서는 파생값으로 자동 닫힘)
+  const isAllowed = QUOTE_ALLOWED_PATHS.some((p) =>
+    p === "/" ? pathname === "/" : pathname.startsWith(p)
+  );
+  const effectiveOpen = isAllowed ? open : false;
+  const effectiveFullscreen = isAllowed ? fullscreenMode : false;
+
   // next-auth 초기화 중 깜빡임 방지
   if (status === "loading") return null;
-  if (count === 0 && !open) return null;
+  if (count === 0 && !effectiveOpen) return null;
 
   return (
     <>
       {/* 다크 견적서 미리보기 (fullscreen 시 전체화면) */}
       <QuotePreviewModal
-        open={open}
+        open={effectiveOpen}
         onClose={() => { setOpen(false); setFullscreenMode(false); }}
-        fullscreen={fullscreenMode}
+        fullscreen={effectiveFullscreen}
       />
       {/* 오른쪽 견적 카트 패널 (fullscreen 모드일 때 숨김) */}
-      {!fullscreenMode && <QuotePanel open={open} onClose={() => setOpen(false)} />}
+      {!effectiveFullscreen && <QuotePanel open={effectiveOpen} onClose={() => setOpen(false)} />}
 
-      {/* 하단 플로팅 버튼 */}
-      {count > 0 && !open && (
+      {/* 하단 플로팅 버튼: 허용 페이지에서만 표시 */}
+      {count > 0 && !effectiveOpen && isAllowed && (
         <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-60 pointer-events-none">
           <button
             onClick={() => setOpen(true)}
