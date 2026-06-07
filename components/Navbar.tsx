@@ -80,8 +80,8 @@ export default function Navbar() {
             <div className="display text-[28px] md:text-[32px] tracking-[-0.045em]">
               Smartech<span style={{ color: "#c00020" }}>.</span>
             </div>
-            <span className="hidden sm:block w-px h-6 bg-ink/60" aria-hidden />
-            <div className="hidden sm:block text-[10px] mono tracking-[0.22em] dim uppercase">
+            <span className="hidden md:block w-px h-6 bg-ink/60" aria-hidden />
+            <div className="hidden md:block text-[10px] mono tracking-[0.22em] dim uppercase">
               Vacuum · Since 2011
             </div>
           </Link>
@@ -103,19 +103,19 @@ export default function Navbar() {
           <div className="flex items-center gap-2">
             {session ? (
               <>
-                <span className="hidden sm:block text-[11px] mono dim">
+                <span className="hidden md:block text-[11px] mono dim">
                   {(session.user as { company?: string })?.company}
                 </span>
                 {/* 견적 카트 아이콘 + 뱃지 */}
                 <Link
                   href="/mypage"
-                  className="hidden sm:inline-flex chip !border-ink/60 hover:bg-ink hover:text-paper transition text-[11px]"
+                  className="hidden md:inline-flex chip !border-ink/60 hover:bg-ink hover:text-paper transition text-[11px]"
                 >
                   마이페이지
                 </Link>
                 <Link
                   href="/quote"
-                  className="hidden sm:inline-flex relative chip !border-ink/60 hover:bg-ink hover:text-paper transition text-[11px]"
+                  className="hidden md:inline-flex relative chip !border-ink/60 hover:bg-ink hover:text-paper transition text-[11px]"
                   aria-label={`견적 카트 ${cartCount}개`}
                 >
                   견적 카트
@@ -127,17 +127,17 @@ export default function Navbar() {
                 </Link>
                 <button
                   onClick={() => signOut()}
-                  className="hidden sm:inline-flex chip !border-ink/30 text-[11px] hover:bg-ink hover:text-paper transition"
+                  className="hidden md:inline-flex chip !border-ink/30 text-[11px] hover:bg-ink hover:text-paper transition"
                 >
                   로그아웃
                 </button>
               </>
             ) : (
               <>
-                <Link href="/repair" className="hidden sm:inline-flex chip !border-ink hover:bg-ink hover:text-paper transition">
+                <Link href="/repair" className="hidden md:inline-flex chip !border-ink hover:bg-ink hover:text-paper transition">
                   견적 문의 →
                 </Link>
-                <Link href="/auth/login" className="hidden sm:inline-flex chip !border-edred bg-edred text-paper text-[11px] hover:bg-edred/90 transition">
+                <Link href="/auth/login" className="hidden md:inline-flex chip !border-edred bg-edred text-paper text-[11px] hover:bg-edred/90 transition">
                   로그인
                 </Link>
               </>
