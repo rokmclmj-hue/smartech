@@ -42,6 +42,7 @@ model User {
   lastLoginAt      DateTime?
   loginCount       Int             @default(0)
   quotes           Quote[]
+  chatLogs         ChatLog[]
   orders           Order[]
   createdQuotes    Quote[]         @relation("QuoteCreatedBy")
   auditLogs        AuditLog[]
@@ -352,4 +353,21 @@ model SiteSetting {
   key       String   @id
   value     String
   updatedAt DateTime @updatedAt
+}
+
+// AI 챗봇 대화 기록
+model ChatLog {
+  id          Int      @id @default(autoincrement())
+  userId      Int?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  company     String?
+  userName    String?
+  userTier    String?
+  userEmail   String?
+  userMessage String   @db.Text
+  aiResponse  String   @db.Text
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
 }

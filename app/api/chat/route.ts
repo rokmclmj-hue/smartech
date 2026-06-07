@@ -804,18 +804,39 @@ ${productContext}`;
     messages,
   });
 
+  const lastUserMsg = [...messages].reverse().find((m: { role: string }) => m.role === "user");
+  const userMessageText: string =
+    typeof lastUserMsg?.content === "string"
+      ? lastUserMsg.content
+      : (lastUserMsg?.content as { text?: string }[])?.[0]?.text ?? "";
+
   const encoder = new TextEncoder();
   const readable = new ReadableStream({
     async start(controller) {
+      let fullResponse = "";
       for await (const chunk of stream) {
         if (
           chunk.type === "content_block_delta" &&
           chunk.delta.type === "text_delta"
         ) {
+          fullResponse += chunk.delta.text;
           controller.enqueue(encoder.encode(chunk.delta.text));
         }
       }
       controller.close();
+
+      // 대화 기록 저장 (스트리밍 완료 후 비동기 — 응답에 영향 없음)
+      prisma.chatLog.create({
+        data: {
+          userId: userId ? Number(userId) : null,
+          company: company ?? null,
+          userName: userName ?? null,
+          userTier: tier ?? null,
+          userEmail: userEmail ?? null,
+          userMessage: userMessageText,
+          aiResponse: fullResponse,
+        },
+      }).catch(() => {});
     },
   });
 
