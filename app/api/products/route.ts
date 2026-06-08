@@ -20,10 +20,18 @@ export async function GET(req: NextRequest) {
     if (ids.length > 0) where.id = { in: ids };
   }
   if (q) {
-    where.OR = [
-      { partNo: { contains: q } },
-      { description: { contains: q } },
-    ];
+    // 공백·하이픈·슬래시를 제거한 정규화 버전도 함께 검색
+    // 예: "AIM200 S NW25" → "AIM200-S-NW25" 도 찾음, "tstation" → "T-Station" 도 찾음
+    const normalize = (s: string) => s.replace(/[\s\-\/]/g, "").toLowerCase();
+    const qNorm = normalize(q);
+    const qHyphen = q.replace(/\s+/g, "-");   // 공백 → 하이픈
+    const qSpace  = q.replace(/[-\/]/g, " ");  // 하이픈/슬래시 → 공백
+
+    const searchVariants = Array.from(new Set([q, qHyphen, qSpace, qNorm]));
+    where.OR = searchVariants.flatMap((v) => [
+      { partNo:      { contains: v, mode: "insensitive" as const } },
+      { description: { contains: v, mode: "insensitive" as const } },
+    ]);
   }
   if (category) where.category = category;
   if (importantOnly) where.isImportant = true;
