@@ -572,7 +572,7 @@ export default function QuoteDetailPage() {
             <div className="row"><span className="k">SHIPPING</span><span className="v">별도 (실비 청구) · 수도권 무료 옵션</span></div>
             <div className="row"><span className="k">INSTALL</span><span className="v">별도 견적 · 시운전 패키지 가능</span></div>
             <div className="row"><span className="k">WARRANTY</span><span className="v">12개월 · Edwards 정품 보증</span></div>
-            <div className="row"><span className="k">A / S</span><span className="v">24/7 콜 응대 · 현장 엔지니어 출동</span></div>
+            <div className="row"><span className="k">A / S</span><span className="v">현장 서비스 · 기술지원</span></div>
             {quote.note && (
               <div className="row"><span className="k">NOTE</span><span className="v">{quote.note}</span></div>
             )}
@@ -694,7 +694,7 @@ export default function QuoteDetailPage() {
           <div className="row"><span className="k">Shipping</span><span className="v">별도 (실비 청구) · 수도권 무료 옵션</span></div>
           <div className="row"><span className="k">Install</span><span className="v">별도 견적 · 시운전 패키지 가능</span></div>
           <div className="row"><span className="k">Warranty</span><span className="v">12개월 · Edwards 정품 보증</span></div>
-          <div className="row"><span className="k">A / S</span><span className="v">24/7 콜 응대 · 현장 엔지니어 출동</span></div>
+          <div className="row"><span className="k">A / S</span><span className="v">현장 서비스 · 기술지원</span></div>
           {quote.note && (
             <div className="row"><span className="k">Note</span><span className="v">{quote.note}</span></div>
           )}

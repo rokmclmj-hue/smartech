@@ -426,7 +426,7 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
             <div className="row"><span className="k">Payment</span><span className="v">납품 전 현금결제</span></div>
             <div className="row"><span className="k">Delivery</span><span className="v">국내 재고분 D+1 / 해외 발주분 D+14 (협의)</span></div>
             <div className="row"><span className="k">Warranty</span><span className="v">12개월 · Edwards 정품 보증</span></div>
-            <div className="row"><span className="k">A / S</span><span className="v">24/7 콜 응대 · 현장 엔지니어 출동</span></div>
+            <div className="row"><span className="k">A / S</span><span className="v">현장 서비스 · 기술지원</span></div>
           </div>
           <div className="p-footer">
             <span>© {today.getFullYear()} SMARTECH CO., LTD. · Edwards Vacuum Korea Authorized Distributor</span>
