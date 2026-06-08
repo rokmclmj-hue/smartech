@@ -103,7 +103,7 @@ function LoginContent() {
             <div className="py-3 text-center">
               <p className="text-sm font-semibold text-green-700">이메일을 확인해 주세요</p>
               <p className="text-xs text-green-600 mt-1">{magicEmail}으로 링크를 보냈습니다.</p>
-              <p className="text-xs text-green-500 mt-0.5">15분 안에 클릭하면 바로 로그인됩니다.</p>
+              <p className="text-xs text-green-500 mt-0.5">링크를 클릭한 기기에서 로그인됩니다. 이 화면은 닫으셔도 됩니다.</p>
               <button
                 onClick={() => { setMagicSent(false); setMagicEmail(""); }}
                 className="mt-3 text-xs text-green-700 underline"
