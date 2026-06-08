@@ -64,6 +64,10 @@ async function findOrCreateOAuthUser(email: string, name: string, phone?: string
         aiTypeReason: cls.source,
       },
     });
+    if (tier === "PENDING") {
+      const { notifyNewMember } = await import("./solapi");
+      notifyNewMember(user.name, email, "PENDING — 신규 (소셜 로그인)").catch(() => {});
+    }
   } else if (normalizedPhone && !user.phone) {
     // 기존 유저지만 전화번호가 없으면 업데이트
     user = await prisma.user.update({
@@ -115,6 +119,10 @@ const providers: any[] = [
                 aiTypeReason: cls.source,
               },
             });
+            if (tier === "PENDING") {
+              const { notifyNewMember } = await import("./solapi");
+              notifyNewMember(user.name, token.email, "PENDING — 신규 (매직링크)").catch(() => {});
+            }
           }
           return { id: String(user.id), email: user.email, name: user.name, tier: user.tier, company: user.company };
         }

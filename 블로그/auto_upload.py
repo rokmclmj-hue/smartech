@@ -4,9 +4,10 @@ Windows 작업 스케줄러가 월/수/금에 자동 실행함.
 Claude 없이 독립 실행 가능. Python만 있으면 됨.
 
 사용법:
-  python auto_upload.py --slot day1   (월요일)
-  python auto_upload.py --slot day2   (수요일)
-  python auto_upload.py --slot day3   (금요일)
+  python auto_upload.py --slot day1              (월요일, 실제 업로드)
+  python auto_upload.py --slot day2              (수요일, 실제 업로드)
+  python auto_upload.py --slot day3              (금요일, 실제 업로드)
+  python auto_upload.py --slot day1 --dry-run   (연결만 확인, 업로드 안 함)
 """
 
 import json
@@ -37,6 +38,8 @@ def log(msg):
 
 def main():
     slot = None
+    dry_run = "--dry-run" in sys.argv
+
     if "--slot" in sys.argv:
         idx = sys.argv.index("--slot")
         if idx + 1 < len(sys.argv):
@@ -47,7 +50,8 @@ def main():
         sys.exit(1)
 
     label = SLOT_LABEL[slot]
-    log(f"--- 자동 업로드 시작: {label} ({slot}) ---")
+    mode = "[테스트]" if dry_run else ""
+    log(f"--- 자동 업로드 시작{mode}: {label} ({slot}) ---")
 
     if not os.path.exists(QUEUE_FILE):
         log("❌ upload-queue.json 파일 없음. 주말에 Claude로 주제 생성 먼저 필요.")
@@ -66,6 +70,25 @@ def main():
 
     if post.get("uploaded"):
         log(f"✅ [{label}] 이미 업로드 완료: {title}")
+        sys.exit(0)
+
+    if dry_run:
+        import urllib.request
+        env_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
+        api_url = "https://smartechvacuum.com/api/upload-blog"
+        if os.path.exists(env_file):
+            with open(env_file, "r", encoding="utf-8") as ef:
+                for line in ef:
+                    if line.startswith("API_URL="):
+                        api_url = line.strip().split("=", 1)[1]
+        try:
+            req = urllib.request.Request(api_url, method="HEAD")
+            urllib.request.urlopen(req, timeout=5)
+            log(f"✅ [테스트] 연결 성공: {api_url}")
+        except Exception as e:
+            log(f"❌ [테스트] 연결 실패: {api_url} → {e}")
+            sys.exit(1)
+        log(f"ℹ️ [테스트] 실제 업로드는 하지 않았습니다. --dry-run 모드.")
         sys.exit(0)
 
     log(f"📤 [{label}] 업로드 시작: {title} (폴더: {folder})")
