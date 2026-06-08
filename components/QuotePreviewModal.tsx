@@ -62,6 +62,8 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
   const today = new Date();
   const isLoggedIn = !!session;
   const tierLabel = ((session?.user as any)?.tier ?? "PUBLIC").toUpperCase();
+  const userPhone = (session?.user as any)?.phone ?? null;
+  const showSavings = isLoggedIn && tierLabel !== "ENDUSER" && tierLabel !== "PENDING" && tierLabel !== "ADMIN";
 
   const DEALER_TIER_MULT: Record<string, number> = { DEALER: 1.20, KEY_DEALER: 1.15, VIP_DEALER: 1.10 };
   const showSavingsBlock = ["DEALER", "KEY_DEALER", "VIP_DEALER"].includes(tierLabel);
@@ -161,7 +163,6 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
                 <div className="cell"><div className="k">DATE</div><div className="v">{ymd(today)}</div></div>
                 <div className="cell"><div className="k">ITEMS</div><div className="v">{items.length} LINES</div></div>
                 <div className="cell"><div className="k">CURRENCY</div><div className="v">KRW (₩)</div></div>
-                <div className="cell"><div className="k">PRICE BASIS</div><div className="v">{isLoggedIn ? "우대적용" : "PUBLIC"}</div></div>
                 <div className="cell"><div className="k">STATUS</div><div className="v">PREVIEW</div></div>
               </div>
             </div>
@@ -175,6 +176,9 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
                   <>
                     <div className="party-row"><div className="lbl">Company</div><div className="val">{userCompany || "—"}</div></div>
                     <div className="party-row"><div className="lbl">Attn</div><div className="val">{userName || "—"}</div></div>
+                    {userPhone && (
+                      <div className="party-row"><div className="lbl">Tel</div><div className="val qmono">{userPhone}</div></div>
+                    )}
                     <div className="party-row"><div className="lbl">Email</div><div className="val qmono">{userEmail}</div></div>
                   </>
                 ) : (
@@ -357,11 +361,10 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
             ══════════════════════════════════ */}
         <div className="pdf-only">
           <div className="p-top">
-            <div className="wm">SMARTECH · QUOTATION<small>견적서</small></div>
+            <div className="wm">SMARTECH · QUOTATION</div>
             <div className="meta">
               <span>DATE · {ymd(today)}</span>
               <span>ITEMS · {items.length} LINES</span>
-              <span>BASIS · {isLoggedIn ? "우대적용" : "PUBLIC"}</span>
             </div>
           </div>
           <div className="p-parties">
@@ -371,6 +374,9 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
                 <>
                   <div className="row"><div className="k">Company</div><div className="v">{userCompany || "—"}</div></div>
                   <div className="row"><div className="k">Attn</div><div className="v">{userName || "—"}</div></div>
+                  {userPhone && (
+                    <div className="row"><div className="k">Tel</div><div className="v pmono">{userPhone}</div></div>
+                  )}
                   <div className="row"><div className="k">Email</div><div className="v pmono">{userEmail}</div></div>
                 </>
               ) : (
@@ -412,6 +418,9 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
             </tbody>
           </table>
           <div className="p-totals">
+            {showSavings && (
+              <div className="row"><span className="k">Price Basis</span><span className="v">우대적용</span></div>
+            )}
             {showSavingsBlock && (
               <>
                 <div className="row s-list"><span className="k">일반 공급가 (LIST)</span><span className="v">₩ {fmt(listSubtotal)}</span></div>

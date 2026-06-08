@@ -25,7 +25,7 @@ export async function GET(
     where: { id: quoteId },
     include: {
       items: { include: { product: true } },
-      user: { select: { name: true, company: true, email: true } },
+      user: { select: { name: true, company: true, email: true, phone: true } },
       order: { select: { id: true, status: true } },
     },
   });
