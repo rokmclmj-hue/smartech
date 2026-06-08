@@ -25,7 +25,7 @@ interface QuoteDetail {
   taxInvoiceRequested: boolean;
   totalAmount: number | null;
   note: string | null;
-  user: { name: string; company: string; email: string };
+  user: { name: string; company: string; email: string; phone: string | null };
   items: QuoteItem[];
   order: { id: number; status: string } | null;
 }
@@ -354,6 +354,9 @@ export default function QuoteDetailPage() {
               <h4><span>TO · 수신처</span><span className="tag">[ CLIENT ]</span></h4>
               <div className="party-row"><div className="lbl">Company</div><div className="val">{quote.user.company}</div></div>
               <div className="party-row"><div className="lbl">Attn</div><div className="val">{quote.user.name}</div></div>
+              {quote.user.phone && (
+                <div className="party-row"><div className="lbl">Tel</div><div className="val qmono">{quote.user.phone}</div></div>
+              )}
               <div className="party-row"><div className="lbl">Email</div><div className="val qmono">{quote.user.email}</div></div>
             </div>
             <div className="party">
@@ -626,7 +629,7 @@ export default function QuoteDetailPage() {
       {/* ─── PDF 출력 전용 영역 (window.print() 시 표시) ──────── */}
       <div className="pdf-only">
         <div className="p-top">
-          <div className="wm">SMARTECH · QUOTATION<small>견적서</small></div>
+          <div className="wm">SMARTECH · QUOTATION</div>
           <div className="meta">
             <span>Q-REF · {quoteRef}</span>
             <span>ISSUED · {yyyymmdd(issuedDate)}</span>
@@ -638,6 +641,9 @@ export default function QuoteDetailPage() {
             <h5>TO · 수신처</h5>
             <div className="row"><div className="k">Company</div><div className="v">{quote.user.company}</div></div>
             <div className="row"><div className="k">Attn</div><div className="v">{quote.user.name}</div></div>
+            {quote.user.phone && (
+              <div className="row"><div className="k">Tel</div><div className="v pmono">{quote.user.phone}</div></div>
+            )}
             <div className="row"><div className="k">Email</div><div className="v pmono">{quote.user.email}</div></div>
           </div>
           <div>
@@ -678,6 +684,9 @@ export default function QuoteDetailPage() {
           </tbody>
         </table>
         <div className="p-totals">
+          {showSavings && (
+            <div className="row"><span className="k">Price Basis</span><span className="v">우대적용</span></div>
+          )}
           {showSavingsBlock && (
             <>
               <div className="row s-list"><span className="k">일반 공급가 (LIST)</span><span className="v">₩ {fmt(listSubtotal)}</span></div>
