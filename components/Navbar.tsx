@@ -103,44 +103,46 @@ export default function Navbar() {
           <div className="flex items-center gap-2">
             {session ? (
               <>
-                <span className="hidden md:block text-[11px] mono dim">
-                  {(session.user as { company?: string })?.company}
-                </span>
-                {/* 견적 카트 아이콘 + 뱃지 */}
-                <Link
-                  href="/mypage"
-                  className="hidden md:inline-flex chip !border-ink/60 hover:bg-ink hover:text-paper transition text-[11px]"
-                >
-                  마이페이지
-                </Link>
-                <Link
-                  href="/quote"
-                  className="hidden md:inline-flex relative chip !border-ink/60 hover:bg-ink hover:text-paper transition text-[11px]"
-                  aria-label={`견적 카트 ${cartCount}개`}
-                >
-                  견적 카트
-                  {cartCount > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-0.5 bg-edred text-paper text-[9px] font-bold rounded-full flex items-center justify-center leading-none">
-                      {cartCount > 99 ? "99+" : cartCount}
-                    </span>
-                  )}
-                </Link>
-                <button
-                  onClick={() => signOut()}
-                  className="hidden md:inline-flex chip !border-ink/30 text-[11px] hover:bg-ink hover:text-paper transition"
-                >
-                  로그아웃
-                </button>
+                {/* 데스크탑 전용 버튼 묶음 — wrapper로 hidden 처리해야 chip 클래스와 충돌 없음 */}
+                <div className="hidden md:flex items-center gap-2">
+                  <span className="text-[11px] mono dim">
+                    {(session.user as { company?: string })?.company}
+                  </span>
+                  <Link
+                    href="/mypage"
+                    className="chip !border-ink/60 hover:bg-ink hover:text-paper transition text-[11px]"
+                  >
+                    마이페이지
+                  </Link>
+                  <Link
+                    href="/quote"
+                    className="relative chip !border-ink/60 hover:bg-ink hover:text-paper transition text-[11px]"
+                    aria-label={`견적 카트 ${cartCount}개`}
+                  >
+                    견적 카트
+                    {cartCount > 0 && (
+                      <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-0.5 bg-edred text-paper text-[9px] font-bold rounded-full flex items-center justify-center leading-none">
+                        {cartCount > 99 ? "99+" : cartCount}
+                      </span>
+                    )}
+                  </Link>
+                  <button
+                    onClick={() => signOut()}
+                    className="chip !border-ink/30 text-[11px] hover:bg-ink hover:text-paper transition"
+                  >
+                    로그아웃
+                  </button>
+                </div>
               </>
             ) : (
-              <>
-                <Link href="/repair" className="hidden md:inline-flex chip !border-ink hover:bg-ink hover:text-paper transition">
+              <div className="hidden md:flex items-center gap-2">
+                <Link href="/repair" className="chip !border-ink hover:bg-ink hover:text-paper transition">
                   견적 문의 →
                 </Link>
-                <Link href="/auth/login" className="hidden md:inline-flex chip !border-edred bg-edred text-paper text-[11px] hover:bg-edred/90 transition">
+                <Link href="/auth/login" className="chip !border-edred bg-edred text-paper text-[11px] hover:bg-edred/90 transition">
                   로그인
                 </Link>
-              </>
+              </div>
             )}
 
             {/* 모바일: 견적 카트 아이콘 (항상 표시) */}
