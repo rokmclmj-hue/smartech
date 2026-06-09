@@ -130,6 +130,7 @@ export default function QuotePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           items: cart.map((i) => ({
+            productId: i.productId,
             partNo: i.partNo,
             description: i.description,
             quantity: i.quantity,

@@ -668,7 +668,13 @@ export async function POST(req: NextRequest) {
   if (userId) {
     const [recentQuotes, recentOrders, recentRepairs] = await Promise.all([
       prisma.quote.findMany({
-        where: { userId: Number(userId), status: { not: "DRAFT" } },
+        where: {
+          userId: Number(userId),
+          OR: [
+            { status: { not: "DRAFT" } },
+            { status: "DRAFT", note: "[PDF저장]" },
+          ],
+        },
         orderBy: { createdAt: "desc" },
         take: 5,
         include: {
@@ -713,7 +719,8 @@ export async function POST(req: NextRequest) {
             : `${i.customPartNo ?? "미상"}×${i.quantity}`
         )
         .join(", ");
-      return `  · 견적 #${q.id} (${q.createdAt.toLocaleDateString("ko-KR")}) — ${items || "품목 없음"} [${q.status}]`;
+      const label = q.status === "DRAFT" ? "PDF저장" : "발주요청";
+      return `  · ${label} #${q.id} (${q.createdAt.toLocaleDateString("ko-KR")}) — ${items || "품목 없음"}`;
     });
 
     const orderLines = recentOrders.map((o: any) => {
