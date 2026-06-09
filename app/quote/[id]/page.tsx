@@ -572,8 +572,6 @@ export default function QuoteDetailPage() {
           <div className="terms">
             <div className="row"><span className="k">PAYMENT</span><span className="v">{quote.taxInvoiceRequested ? "세금계산서 발행 · 익월 말 결제" : "납품 전 현금결제"}</span></div>
             <div className="row"><span className="k">DELIVERY</span><span className="v">국내 재고분 D+1 / 해외 발주분 D+14 (협의)</span></div>
-            <div className="row"><span className="k">SHIPPING</span><span className="v">별도 (실비 청구) · 수도권 무료 옵션</span></div>
-            <div className="row"><span className="k">INSTALL</span><span className="v">별도 견적 · 시운전 패키지 가능</span></div>
             <div className="row"><span className="k">WARRANTY</span><span className="v">12개월 · Edwards 정품 보증</span></div>
             <div className="row"><span className="k">A / S</span><span className="v">현장 서비스 · 기술지원</span></div>
             {quote.note && (
@@ -700,8 +698,6 @@ export default function QuoteDetailPage() {
         <div className="p-terms">
           <div className="row"><span className="k">Payment</span><span className="v">{quote.taxInvoiceRequested ? "세금계산서 발행 · 익월 말 결제" : "납품 전 현금결제"}</span></div>
           <div className="row"><span className="k">Delivery</span><span className="v">국내 재고분 D+1 / 해외 발주분 D+14 (협의)</span></div>
-          <div className="row"><span className="k">Shipping</span><span className="v">별도 (실비 청구) · 수도권 무료 옵션</span></div>
-          <div className="row"><span className="k">Install</span><span className="v">별도 견적 · 시운전 패키지 가능</span></div>
           <div className="row"><span className="k">Warranty</span><span className="v">12개월 · Edwards 정품 보증</span></div>
           <div className="row"><span className="k">A / S</span><span className="v">현장 서비스 · 기술지원</span></div>
           {quote.note && (
