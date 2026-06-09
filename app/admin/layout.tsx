@@ -20,6 +20,7 @@ const NAV_ITEMS = [
   { href: "/admin/quick", label: "빠른링크", num: "09" },
   { href: "/admin/settings", label: "설정", num: "10" },
   { href: "/admin/blog", label: "블로그", num: "11" },
+  { href: "/admin/email-inbox", label: "이메일수신함", num: "12" },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

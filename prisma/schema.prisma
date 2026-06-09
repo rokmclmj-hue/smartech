@@ -355,6 +355,44 @@ model SiteSetting {
   updatedAt DateTime @updatedAt
 }
 
+// ─────────────────────────────────────────────────
+// 이메일 자동화 — 수신 이메일 처리 대기열
+// ─────────────────────────────────────────────────
+model EmailTask {
+  id             Int       @id @default(autoincrement())
+  gmailMessageId String    @unique  // 중복 수신 방지
+
+  // 발신자
+  fromEmail      String
+  fromName       String?
+  subject        String
+  bodyText       String    @db.Text
+  receivedAt     DateTime
+
+  // AI 분류
+  // QUOTE_INQUIRY | ECOUNT_ORDER | ECOUNT_PRICE_REQUEST | OTHER
+  emailType      String    @default("OTHER")
+  aiConfidence   Int?                        // 0~100
+  parsedData     Json?                       // 품목·수량 등 구조화 데이터
+  aiDraft        String?   @db.Text          // AI 초안 답변
+
+  // 관리자 처리
+  // PENDING | APPROVED | REJECTED | IGNORED
+  status         String    @default("PENDING")
+  adminNote      String?
+  approvedAt     DateTime?
+
+  // 연결 레코드
+  quoteId        Int?      // 이 이메일로 생성된 견적 ID
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([status])
+  @@index([emailType])
+  @@index([receivedAt])
+}
+
 // AI 챗봇 대화 기록
 model ChatLog {
   id          Int      @id @default(autoincrement())
