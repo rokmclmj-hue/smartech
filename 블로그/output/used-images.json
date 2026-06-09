@@ -9,7 +9,8 @@
     "[크기변환]KakaoTalk_20260429_111055435_05.jpg": "실험실-진공펌프-오일-선택법",
     "[크기변환]KakaoTalk_20260429_111055435_08.jpg": "실험실-진공펌프-오일-선택법",
     "20200824_095211.jpg": "RV-오일로터리펌프-유지관리-20260606",
-    "20200824_095654.jpg": "이차전지-PFPE-오일-선택법-20260606"
+    "20200824_095654.jpg": "이차전지-PFPE-오일-선택법-20260606",
+    "EXS450_Water line_20260604_095324.jpg": "수소-에너지-드라이펌프-20260610"
   },
   "AI생성이미지": {
     "스퍼터 공정 에드워드 드라이진공펌프": ["thumbnail.png", "body-1.png", "body-2.png", "body-3.png", "body-4.png", "body-5.png"],
@@ -19,6 +20,7 @@
     "진공펌프-루츠부스터-조합": ["thumbnail.png", "field-1.png", "image-01.png", "image-02.png", "image-03.png", "image-04.png"],
     "실험실-진공펌프-오일-선택법": ["thumbnail.png", "field-1.png", "field-2.png", "field-3.png", "image-01.png", "image-02.png"],
     "RV-오일로터리펌프-유지관리-20260606": ["thumbnail.png", "image-01.png", "image-02.png"],
-    "이차전지-PFPE-오일-선택법-20260606": ["thumbnail.png", "field-1.png", "image-01.png", "image-02.png"]
+    "이차전지-PFPE-오일-선택법-20260606": ["thumbnail.png", "field-1.png", "image-01.png", "image-02.png"],
+    "수소-에너지-드라이펌프-20260610": ["thumbnail.png", "field-1.png", "image-01.png", "image-02.png", "image-03.png"]
   }
 }

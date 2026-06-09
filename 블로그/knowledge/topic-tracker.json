@@ -1,8 +1,8 @@
 {
   "_comment": "블로그 주제 선정 로테이션 상태 추적 파일. 주제 선정 후 반드시 업데이트할 것.",
-  "_last_updated": "2026-06-06",
+  "_last_updated": "2026-06-10",
 
-  "current_industry_index": 4,
+  "current_industry_index": 5,
 
   "completed_topics": [
     { "industry": "반도체/코팅", "product": "A.드라이펌프", "title": "스퍼터 공정 에드워드 드라이진공펌프", "folder": "2026-06/스퍼터-공정-에드워드-드라이진공펌프-20260601" },
@@ -13,7 +13,8 @@
     { "industry": "공통", "product": "기타", "title": "ELD500W 리크디텍터", "folder": "2026-06/ELD500W-리크디텍터-20260601" },
     { "industry": "실험실/분석장비", "product": "D.오일/소모품", "title": "실험실 진공펌프 오일 종류와 교환 시기", "folder": "2026-06/실험실-진공펌프-오일-선택법-20260606" },
     { "industry": "실험실/분석장비", "product": "B.오일로터리펌프", "title": "분석 장비 RV 오일로터리펌프 유지관리 핵심 3가지", "folder": "2026-06/RV-오일로터리펌프-유지관리-20260606" },
-    { "industry": "이차전지/배터리", "product": "D.오일/소모품", "title": "배터리 제조 공정에서 PFPE 오일 진공펌프가 필요한 이유", "folder": "2026-06/이차전지-PFPE-오일-선택법-20260606" }
+    { "industry": "이차전지/배터리", "product": "D.오일/소모품", "title": "배터리 제조 공정에서 PFPE 오일 진공펌프가 필요한 이유", "folder": "2026-06/이차전지-PFPE-오일-선택법-20260606" },
+    { "industry": "수소에너지", "product": "A.드라이펌프", "title": "수소 충전소·연료전지 설비를 위한 진공펌프 선택 가이드", "folder": "2026-06/수소-에너지-드라이펌프-20260610" }
   ],
 
   "used_consultation_records": []
