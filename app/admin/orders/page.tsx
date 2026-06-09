@@ -167,6 +167,37 @@ export default function AdminOrdersPage() {
     }
   }
 
+  async function doDelete(orderId: number) {
+    const ok = await confirm({
+      message: "이 주문을 삭제하시겠습니까?",
+      detail: "삭제 후 복구할 수 없습니다.",
+      confirmLabel: "삭제",
+      destructive: true,
+    });
+    if (!ok) return;
+
+    setActionLoading(orderId);
+    try {
+      const res = await fetch("/api/admin/orders", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId }),
+      });
+      if (res.status === 409) {
+        const body = (await res.json()) as { error: string };
+        toastError(body.error);
+        return;
+      }
+      if (!res.ok) { toastError("삭제 실패"); return; }
+      success(`주문 #${orderId} 삭제 완료`);
+      fetchOrders(filter, search, page);
+    } catch {
+      toastError("오류가 발생했습니다");
+    } finally {
+      setActionLoading(null);
+    }
+  }
+
   async function doCancel(orderId: number) {
     const ok = await confirm({
       message: "이 주문을 취소하시겠습니까?",
@@ -515,6 +546,13 @@ export default function AdminOrdersPage() {
                               <button onClick={() => doCancel(o.id)} disabled={actionLoading === o.id}
                                 className="mono text-[10px] tracking-[0.1em] uppercase border border-line text-dim px-2.5 py-1 hover:border-ink hover:text-ink disabled:opacity-40 transition-colors">
                                 취소
+                              </button>
+                            )}
+                            {/* 삭제 (PENDING·CANCELLED만) */}
+                            {(o.status === "PENDING" || o.status === "CANCELLED") && (
+                              <button onClick={() => doDelete(o.id)} disabled={actionLoading === o.id}
+                                className="mono text-[10px] tracking-[0.1em] uppercase border border-edred/40 text-edred/70 px-2.5 py-1 hover:border-edred hover:text-edred disabled:opacity-40 transition-colors">
+                                삭제
                               </button>
                             )}
                           </div>

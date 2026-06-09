@@ -8,6 +8,7 @@ export type AuditAction =
   | "quote.cancel"
   | "order.confirm"
   | "order.cancel"
+  | "order.delete"
   | "order.tax_invoice_done"
   | "order.delivery_pdf"
   | "order.payment_confirmed"
@@ -37,7 +38,9 @@ export async function logAudit(entry: AuditEntry): Promise<void> {
         action: entry.action,
         target: entry.target,
         targetId: entry.targetId ?? null,
-        payload: (entry.payload as any) ?? undefined,
+        payload: entry.payload
+          ? (JSON.parse(JSON.stringify(entry.payload)) as object)
+          : undefined,
       },
     });
   } catch (e) {

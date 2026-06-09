@@ -12,8 +12,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "로그인이 필요합니다." }, { status: 401 });
   }
 
-  const userId = parseInt((session.user as any).id);
-  const tier = (session.user as any).tier as string;
+  type SessionUser = { id: string; tier: string };
+  const { id: sessionId, tier } = session.user as SessionUser;
+  const userId = parseInt(sessionId);
   const userName = session.user.name ?? "고객";
   const userEmail = session.user.email ?? "";
 
@@ -121,6 +122,15 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.error("[Quote PDF/Mail] 오류:", err);
   }
+
+  // Order(PENDING) 자동 생성 — 주문 관리에 즉시 표시
+  await prisma.order.create({
+    data: {
+      quoteId: quote.id,
+      userId,
+      status: "PENDING",
+    },
+  });
 
   // 관리자 알림톡 (발주 요청)
   try {
