@@ -122,10 +122,9 @@ export async function POST(req: NextRequest) {
     console.error("[Quote PDF/Mail] 오류:", err);
   }
 
-  // 관리자 알림톡
+  // 관리자 알림톡 (발주 요청)
   try {
-    const isOrderRequest = note?.includes("[발주서 진행 요청]") ?? false;
-    await notifyNewQuote(quote.id, userName, totalAmount, isOrderRequest);
+    await notifyNewQuote(quote.id, userName, totalAmount, true);
   } catch (err) {
     console.error("[Quote SMS] 알림 오류:", err);
   }
