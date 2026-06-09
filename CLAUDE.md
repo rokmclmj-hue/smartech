@@ -6,8 +6,10 @@
 
 1. `C:\Users\rokmc\.claude\projects\C--Users-rokmc-smartech\memory\MEMORY.md` 를 읽는다.
 2. MEMORY.md에 링크된 관련 메모리 파일들을 읽는다.
-3. 현재 작업과 관련된 프로젝트 상태를 파악한 후 사용자에게 한 줄로 요약한다.
-4. 그 후 사용자의 요청을 처리한다.
+3. `git log --oneline master..HEAD` 를 실행해 **미머지 커밋**이 있는지 확인한다.
+   - 미머지 커밋이 있으면 사용자에게 반드시 먼저 알린다: "⚠️ 라이브에 반영 안 된 작업이 N개 있어요. 먼저 머지할까요?"
+4. 현재 작업과 관련된 프로젝트 상태를 파악한 후 사용자에게 한 줄로 요약한다.
+5. 그 후 사용자의 요청을 처리한다.
 
 > 이 규칙은 생략 불가. 메모리를 읽지 않으면 이전 논의를 반복하게 되어 사용자에게 불필요한 번거로움을 준다.
 
@@ -160,8 +162,20 @@ Tailwind 클래스로 `bg-edred`, `text-ink` 형태로 사용. 값 임의 변경
 ## 운영 수칙
 
 ### Vercel 자동 배포 주의
-- **`main` 브랜치 직접 push 금지.** `main`에 push하면 실제 고객이 사용하는 라이브 서버가 즉시 업데이트된다.
-- 모든 수정은 `feature/` 브랜치에서 작업 → Vercel Preview URL(미리보기 주소)에서 기능 테스트 → PR(Pull Request)로만 `main`에 반영.
+- **`master` 브랜치 직접 push 금지.** `master`에 push하면 실제 고객이 사용하는 라이브 서버가 즉시 업데이트된다.
+- 모든 수정은 `feature/` 또는 `fix/` 브랜치에서 작업 → Vercel Preview URL(미리보기 주소)에서 기능 테스트 → PR(Pull Request)로만 `master`에 반영.
+
+### 🚀 세션 마무리 규칙 — 작업 종료 전 반드시 실행
+
+작업이 완료됐다고 판단되면 아래 3단계를 반드시 순서대로 진행한다.
+
+1. **커밋 확인**: `git log --oneline master..HEAD` 로 미머지 커밋 목록 확인
+2. **PR 생성**: 미머지 커밋이 있으면 GitHub에서 PR을 만들도록 사용자에게 안내한다
+   - `git push origin 브랜치명` 실행 후 GitHub URL을 안내한다
+   - PR 제목과 설명 초안을 제공한다
+3. **머지 확인**: 사용자가 "머지완료" 하면 `git fetch origin && git log --oneline origin/master | head -3` 으로 반영 여부를 확인한다
+
+> 커밋만 하고 PR·머지 없이 세션을 끝내면 작업이 라이브에 반영되지 않는다. 이 규칙은 생략 불가.
 
 ---
 
