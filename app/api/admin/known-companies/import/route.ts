@@ -82,14 +82,18 @@ export async function POST(req: NextRequest) {
       ).trim();
       if (!companyName) continue;
 
-      const phone = normalizePhone(r["핸드폰"] ?? r["전화"] ?? r["phone"] ?? r["Phone"]);
+      // 회사 전화: 별도 전화 컬럼이 있으면 우선, 없으면 핸드폰을 회사전화로 사용
+      const phone = normalizePhone(r["전화"] ?? r["phone"] ?? r["Phone"] ?? r["핸드폰"]);
       const email = normalizeEmail(r["이메일"] ?? r["email"] ?? r["Email"]);
 
       const contactName = String(r["담당자"] ?? r["담당자명"] ?? r["성명"] ?? "").trim() || null;
-      const contactTitle = String(r["직급"] ?? r["직위"] ?? r["직함"] ?? "").trim() || null;
+      // 직책/직급/직위/직함 모두 인식
+      const contactTitle = String(r["직책"] ?? r["직급"] ?? r["직위"] ?? r["직함"] ?? "").trim() || null;
       const contactTel = normalizePhone(r["직통"] ?? r["직통전화"] ?? r["내선"]);
-      const contactMobile = normalizePhone(r["담당자핸드폰"] ?? r["담당자휴대폰"] ?? r["모바일"]);
-      const contactEmail = normalizeEmail(r["담당자이메일"] ?? r["담당이메일"]);
+      // 담당자 모바일: 전용 컬럼 없으면 핸드폰 컬럼 사용
+      const contactMobile = normalizePhone(r["담당자핸드폰"] ?? r["담당자휴대폰"] ?? r["모바일"] ?? r["핸드폰"]);
+      // 담당자 이메일: 전용 컬럼 없으면 이메일 컬럼 사용
+      const contactEmail = normalizeEmail(r["담당자이메일"] ?? r["담당이메일"] ?? r["이메일"] ?? r["email"] ?? r["Email"]);
 
       rows.push({ companyName, phone, email, tier, contactName, contactTitle, contactTel, contactMobile, contactEmail });
     }
@@ -102,13 +106,17 @@ export async function POST(req: NextRequest) {
   let created = 0;
   let updated = 0;
 
+  // 같은 임포트 내 회사명 → id 캐시 (같은 회사 여러 행 처리용)
+  const companyCache = new Map<string, number>();
+
   for (const row of rows) {
-    // 전화번호로 기존 항목 검색 (가장 신뢰도 높음)
-    const existing = row.phone
-      ? await prisma.knownCompany.findFirst({ where: { phone: row.phone } })
-      : row.email
-      ? await prisma.knownCompany.findFirst({ where: { email: row.email } })
-      : null;
+    // 회사명으로 먼저 찾기 (동일 회사에 담당자 여러 명인 경우 대비)
+    const existing =
+      companyCache.has(row.companyName)
+        ? await prisma.knownCompany.findFirst({ where: { id: companyCache.get(row.companyName) } })
+        : await prisma.knownCompany.findFirst({ where: { companyName: row.companyName } })
+          ?? (row.phone ? await prisma.knownCompany.findFirst({ where: { phone: row.phone } }) : null)
+          ?? (row.email ? await prisma.knownCompany.findFirst({ where: { email: row.email } }) : null);
 
     let companyId: number;
 
@@ -124,6 +132,7 @@ export async function POST(req: NextRequest) {
         },
       });
       companyId = existing.id;
+      companyCache.set(row.companyName, companyId);
       updated++;
     } else {
       const created_ = await prisma.knownCompany.create({
@@ -136,6 +145,7 @@ export async function POST(req: NextRequest) {
         },
       });
       companyId = created_.id;
+      companyCache.set(row.companyName, companyId);
       created++;
     }
 
