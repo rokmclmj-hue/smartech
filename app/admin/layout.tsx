@@ -10,17 +10,15 @@ import RedTape from "@/components/RedTape";
 const NAV_ITEMS = [
   { href: "/admin", label: "대시보드", num: "01", exact: true },
   { href: "/admin/repairs", label: "수리접수", num: "02", highlight: true },
-  { href: "/admin/repair-kits", label: "수리키트", num: "02b" },
   { href: "/admin/orders", label: "주문", num: "03" },
   { href: "/admin/products", label: "제품", num: "04" },
   { href: "/admin/quotes", label: "견적", num: "05" },
   { href: "/admin/users", label: "고객", num: "06" },
   { href: "/admin/proxy-quotes", label: "대행견적서", num: "07" },
   { href: "/admin/companies", label: "거래처", num: "08" },
-  { href: "/admin/quick", label: "빠른링크", num: "09" },
-  { href: "/admin/settings", label: "설정", num: "10" },
-  { href: "/admin/blog", label: "블로그", num: "11" },
-  { href: "/admin/email-inbox", label: "이메일수신함", num: "12" },
+  { href: "/admin/settings", label: "설정", num: "09" },
+  { href: "/admin/blog", label: "블로그", num: "10" },
+  { href: "/admin/email-inbox", label: "이메일수신함", num: "11" },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

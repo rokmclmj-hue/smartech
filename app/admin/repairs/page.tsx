@@ -248,12 +248,20 @@ export default function AdminRepairsPage() {
           <h1 className="text-[22px] font-bold tracking-tight">수리 접수 현황</h1>
           <p className="text-[13px] text-dim mt-0.5">총 {total}건</p>
         </div>
-        <button
-          onClick={load}
-          className="text-[12px] border border-line px-3 py-1.5 hover:border-ink transition mono"
-        >
-          새로고침
-        </button>
+        <div className="flex items-center gap-2">
+          <a
+            href="/admin/repair-kits"
+            className="text-[12px] border border-line px-3 py-1.5 hover:border-ink transition mono text-dim"
+          >
+            수리키트 설정 →
+          </a>
+          <button
+            onClick={load}
+            className="text-[12px] border border-line px-3 py-1.5 hover:border-ink transition mono"
+          >
+            새로고침
+          </button>
+        </div>
       </div>
 
       {/* 상태 필터 */}

@@ -4,6 +4,77 @@ import { useEffect, useState } from "react";
 import { SMARTECH_COMPANY } from "@/lib/company";
 import MarginSettings from "@/components/MarginSettings";
 
+function formatPhone(v: string) {
+  const digits = v.replace(/\D/g, "").slice(0, 11);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+}
+
+function QuickSmsSection() {
+  const [phone, setPhone] = useState("");
+  const [sending, setSending] = useState(false);
+  const [result, setResult] = useState<"ok" | "error" | null>(null);
+  const [message, setMessage] = useState("");
+  const baseUrl = typeof window !== "undefined" ? `${window.location.protocol}//${window.location.host}` : "";
+  const quoteLink = `${baseUrl}/products`;
+
+  async function handleSend() {
+    const digits = phone.replace(/\D/g, "");
+    if (digits.length < 10) { setMessage("전화번호를 정확히 입력해주세요"); setResult("error"); return; }
+    setSending(true); setResult(null); setMessage("");
+    try {
+      const res = await fetch("/api/admin/quick-sms", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: digits }),
+      });
+      if (res.ok) {
+        setResult("ok"); setMessage(`${phone} 으로 링크를 발송했습니다.`); setPhone("");
+      } else {
+        const data = (await res.json()) as { error?: string };
+        setResult("error"); setMessage(data.error ?? "발송에 실패했습니다.");
+      }
+    } catch { setResult("error"); setMessage("서버 오류가 발생했습니다."); }
+    finally { setSending(false); }
+  }
+
+  return (
+    <div className="px-5 py-5 space-y-4">
+      <p className="text-[13px] text-dim leading-[1.6]">
+        고객 전화번호를 입력하면 로그인 링크를 문자로 발송합니다. (60분 유효)
+      </p>
+      <div className="flex gap-2 max-w-md">
+        <input
+          type="tel" inputMode="numeric" value={phone}
+          onChange={(e) => setPhone(formatPhone(e.target.value))}
+          onKeyDown={(e) => e.key === "Enter" && handleSend()}
+          placeholder="010-0000-0000"
+          className="flex-1 border hair px-3 py-2 text-[14px] mono tracking-widest focus:outline-none focus:border-ink"
+        />
+        <button
+          onClick={handleSend}
+          disabled={sending || phone.replace(/\D/g, "").length < 10}
+          className="bg-edred text-paper px-4 py-2 text-[13px] font-semibold hover:bg-edred/90 transition-colors disabled:opacity-40"
+        >
+          {sending ? "발송 중..." : "문자 보내기"}
+        </button>
+      </div>
+      {result && (
+        <div className={`px-4 py-2.5 text-[13px] max-w-md ${result === "ok" ? "bg-green-50 border border-green-200 text-green-700" : "bg-red-50 border border-red-200 text-red-600"}`}>
+          {result === "ok" ? "✓ " : "✗ "}{message}
+        </div>
+      )}
+      <div className="border-t hair pt-4 max-w-md">
+        <div className="mono text-[10px] dim tracking-[0.1em] uppercase mb-2">링크 직접 복사</div>
+        <div className="flex gap-2">
+          <div className="flex-1 bg-ink/[0.03] border hair px-3 py-2 text-[11px] mono dim truncate">{quoteLink}</div>
+          <button onClick={() => navigator.clipboard.writeText(quoteLink)} className="border hair px-3 py-2 text-[11px] mono hover:bg-ink/5 transition-colors shrink-0">복사</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── 표시용 그룹 정의 ────────────────────────────────────────
 type Row = { label: string; value: string; mono?: boolean; highlight?: boolean };
 type Section = { title: string; rows: Row[] };
@@ -170,7 +241,7 @@ export default function AdminSettingsPage() {
       {/* 헤더 */}
       <div>
         <div className="mono text-[11px] dim tracking-[0.15em] uppercase mb-3">
-          — 07 · SETTINGS
+          — 09 · SETTINGS
         </div>
         <h1 className="display text-[28px] sm:text-[40px] leading-none text-ink">
           회사 <span className="italic text-edred">설정</span>
@@ -254,6 +325,15 @@ export default function AdminSettingsPage() {
         <div className="px-5 py-5">
           <MarginSettings />
         </div>
+      </div>
+
+      {/* 빠른 링크 발송 */}
+      <div className="border hair bg-paper">
+        <div className="px-5 py-3 border-b hair flex items-center justify-between">
+          <h2 className="text-[14px] font-semibold text-ink tracking-tight">빠른 링크 발송 (SMS)</h2>
+          <span className="mono text-[10px] dim tracking-[0.12em] uppercase">SOLAPI</span>
+        </div>
+        <QuickSmsSection />
       </div>
 
       {/* 사용처 안내 */}
