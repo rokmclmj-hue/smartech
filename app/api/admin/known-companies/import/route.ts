@@ -5,7 +5,7 @@ import * as XLSX from "xlsx";
 
 async function requireAdmin() {
   const session = await auth();
-  return (session?.user as any)?.tier === "ADMIN";
+  return (session?.user as { tier?: string } | undefined)?.tier === "ADMIN";
 }
 
 // 전화번호 정규화: 숫자만, 010xxxxxxxx 형식
@@ -38,6 +38,11 @@ type ImportRow = {
   phone: string | null;
   email: string | null;
   tier: "DEALER" | "OEM" | "ENDUSER";
+  contactName: string | null;
+  contactTitle: string | null;
+  contactTel: string | null;
+  contactMobile: string | null;
+  contactEmail: string | null;
 };
 
 export async function POST(req: NextRequest) {
@@ -80,7 +85,13 @@ export async function POST(req: NextRequest) {
       const phone = normalizePhone(r["핸드폰"] ?? r["전화"] ?? r["phone"] ?? r["Phone"]);
       const email = normalizeEmail(r["이메일"] ?? r["email"] ?? r["Email"]);
 
-      rows.push({ companyName, phone, email, tier });
+      const contactName = String(r["담당자"] ?? r["담당자명"] ?? r["성명"] ?? "").trim() || null;
+      const contactTitle = String(r["직급"] ?? r["직위"] ?? r["직함"] ?? "").trim() || null;
+      const contactTel = normalizePhone(r["직통"] ?? r["직통전화"] ?? r["내선"]);
+      const contactMobile = normalizePhone(r["담당자핸드폰"] ?? r["담당자휴대폰"] ?? r["모바일"]);
+      const contactEmail = normalizeEmail(r["담당자이메일"] ?? r["담당이메일"]);
+
+      rows.push({ companyName, phone, email, tier, contactName, contactTitle, contactTel, contactMobile, contactEmail });
     }
   }
 
@@ -99,6 +110,8 @@ export async function POST(req: NextRequest) {
       ? await prisma.knownCompany.findFirst({ where: { email: row.email } })
       : null;
 
+    let companyId: number;
+
     if (existing) {
       await prisma.knownCompany.update({
         where: { id: existing.id },
@@ -110,9 +123,10 @@ export async function POST(req: NextRequest) {
           source: "excel",
         },
       });
+      companyId = existing.id;
       updated++;
     } else {
-      await prisma.knownCompany.create({
+      const created_ = await prisma.knownCompany.create({
         data: {
           companyName: row.companyName,
           phone: row.phone,
@@ -121,7 +135,37 @@ export async function POST(req: NextRequest) {
           source: "excel",
         },
       });
+      companyId = created_.id;
       created++;
+    }
+
+    // 담당자 정보가 있으면 upsert (이름 기준 중복 방지)
+    if (row.contactName) {
+      const existingContact = await prisma.knownContact.findFirst({
+        where: { companyId, name: row.contactName },
+      });
+      if (existingContact) {
+        await prisma.knownContact.update({
+          where: { id: existingContact.id },
+          data: {
+            title: row.contactTitle ?? existingContact.title,
+            tel: row.contactTel ?? existingContact.tel,
+            mobile: row.contactMobile ?? existingContact.mobile,
+            email: row.contactEmail ?? existingContact.email,
+          },
+        });
+      } else {
+        await prisma.knownContact.create({
+          data: {
+            companyId,
+            name: row.contactName,
+            title: row.contactTitle,
+            tel: row.contactTel,
+            mobile: row.contactMobile,
+            email: row.contactEmail,
+          },
+        });
+      }
     }
   }
 

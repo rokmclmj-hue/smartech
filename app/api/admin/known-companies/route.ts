@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db";
 
 async function requireAdmin() {
   const session = await auth();
-  return (session?.user as any)?.tier === "ADMIN";
+  return (session?.user as { tier?: string } | undefined)?.tier === "ADMIN";
 }
 
 // GET /api/admin/known-companies — 목록 + 통계
@@ -13,13 +13,16 @@ export async function GET() {
     return NextResponse.json({ error: "권한 없음" }, { status: 403 });
 
   const [companies, counts] = await Promise.all([
-    prisma.knownCompany.findMany({ orderBy: { companyName: "asc" } }),
+    prisma.knownCompany.findMany({
+      orderBy: { companyName: "asc" },
+      include: { contacts: { orderBy: { createdAt: "asc" } } },
+    }),
     prisma.knownCompany.groupBy({ by: ["tier"], _count: { tier: true } }),
   ]);
 
-  const stats = { DEALER: 0, OEM: 0, ENDUSER: 0, total: companies.length };
+  const stats: Record<string, number> = { DEALER: 0, OEM: 0, ENDUSER: 0, total: companies.length };
   for (const c of counts) {
-    if (c.tier in stats) (stats as any)[c.tier] = c._count.tier;
+    if (c.tier in stats) stats[c.tier] = c._count.tier;
   }
 
   return NextResponse.json({ companies, stats });
