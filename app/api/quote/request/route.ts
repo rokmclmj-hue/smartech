@@ -124,7 +124,8 @@ export async function POST(req: NextRequest) {
 
   // 관리자 알림톡
   try {
-    await notifyNewQuote(quote.id, userName, totalAmount);
+    const isOrderRequest = note?.includes("[발주서 진행 요청]") ?? false;
+    await notifyNewQuote(quote.id, userName, totalAmount, isOrderRequest);
   } catch (err) {
     console.error("[Quote SMS] 알림 오류:", err);
   }
