@@ -31,7 +31,9 @@ type Repair = {
 type QuoteItem = {
   quantity: number;
   unitPrice: number;
-  product: { partNo: string; description: string };
+  customPartNo: string | null;
+  customDescription: string | null;
+  product: { partNo: string; description: string } | null;
 };
 type Quote = {
   id: number;
@@ -253,7 +255,7 @@ export default function MypagePage() {
                         <div className="mono text-[11px] text-dim mb-0.5">{quoteNo}</div>
                         <div className="font-semibold text-[15px]">
                           {q.items.length > 0
-                            ? q.items[0].product.description + (q.items.length > 1 ? ` 외 ${q.items.length - 1}종` : "")
+                            ? (q.items[0].product?.description ?? q.items[0].customDescription ?? "기타 품목") + (q.items.length > 1 ? ` 외 ${q.items.length - 1}종` : "")
                             : "품목 없음"}
                         </div>
                         <div className="text-[12px] text-dim mt-0.5">
@@ -297,8 +299,8 @@ export default function MypagePage() {
                         <div key={idx} className="flex items-center justify-between text-[12px]">
                           <div className="flex items-center gap-2 min-w-0">
                             <span className="mono text-dim shrink-0">{String(idx + 1).padStart(2, "0")}</span>
-                            <span className="truncate text-dim font-mono text-[11px]">{item.product.partNo}</span>
-                            <span className="truncate">{item.product.description}</span>
+                            <span className="truncate text-dim font-mono text-[11px]">{item.product?.partNo ?? item.customPartNo ?? "-"}</span>
+                            <span className="truncate">{item.product?.description ?? item.customDescription ?? "-"}</span>
                           </div>
                           <span className="shrink-0 ml-2 text-dim">{item.quantity} EA</span>
                         </div>
@@ -373,7 +375,7 @@ export default function MypagePage() {
                         <div className="mono text-[11px] text-dim mb-0.5">{orderNo}</div>
                         <div className="font-semibold text-[15px]">
                           {order.quote.items.length > 0
-                            ? order.quote.items[0].product.description + (order.quote.items.length > 1 ? ` 외 ${order.quote.items.length - 1}종` : "")
+                            ? (order.quote.items[0].product?.description ?? order.quote.items[0].customDescription ?? "기타 품목") + (order.quote.items.length > 1 ? ` 외 ${order.quote.items.length - 1}종` : "")
                             : "품목 없음"}
                         </div>
                         <div className="text-[12px] text-dim mt-0.5">
@@ -445,8 +447,8 @@ export default function MypagePage() {
                         <div key={idx} className="flex items-center justify-between text-[12px]">
                           <div className="flex items-center gap-2 min-w-0">
                             <span className="mono text-dim shrink-0">{String(idx + 1).padStart(2, "0")}</span>
-                            <span className="mono text-dim text-[11px] shrink-0">{item.product.partNo}</span>
-                            <span className="truncate">{item.product.description}</span>
+                            <span className="mono text-dim text-[11px] shrink-0">{item.product?.partNo ?? item.customPartNo ?? "-"}</span>
+                            <span className="truncate">{item.product?.description ?? item.customDescription ?? "-"}</span>
                           </div>
                           <span className="shrink-0 ml-2 text-dim">{item.quantity} EA</span>
                         </div>
