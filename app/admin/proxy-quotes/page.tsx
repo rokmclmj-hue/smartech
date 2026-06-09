@@ -1,6 +1,8 @@
 "use client";
 
+import { Suspense } from "react";
 import { useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/lib/toast";
 
 // ── 타입 ────────────────────────────────────────────────────────────────────
@@ -105,7 +107,17 @@ function useDebounce<T>(value: T, delay = 250): T {
 // ── 컴포넌트 ─────────────────────────────────────────────────────────────────
 
 export default function AdminProxyQuotesPage() {
+  return (
+    <Suspense>
+      <AdminProxyQuotesInner />
+    </Suspense>
+  );
+}
+
+function AdminProxyQuotesInner() {
   const toast = useToast();
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   // 통합 고객 검색
   const [customerQ, setCustomerQ] = useState("");
@@ -150,9 +162,12 @@ export default function AdminProxyQuotesPage() {
   // 견적 품목
   const [lines, setLines] = useState<LineItem[]>([]);
 
-  // 발행 결과
+  // 발행 결과 — URL ?done=N 으로도 복원 가능
   const [submitting, setSubmitting] = useState(false);
-  const [doneQuoteId, setDoneQuoteId] = useState<number | null>(null);
+  const doneParam = searchParams.get("done");
+  const [doneQuoteId, setDoneQuoteId] = useState<number | null>(
+    doneParam ? parseInt(doneParam) : null
+  );
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
 
@@ -445,6 +460,7 @@ export default function AdminProxyQuotesPage() {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) { toast.error(data.error ?? "견적서 발행에 실패했습니다."); return; }
       setDoneQuoteId(data.quoteId);
+      router.replace(`/admin/proxy-quotes?done=${data.quoteId}`);
     } catch {
       toast.error("네트워크 오류가 발생했습니다.");
     } finally {
@@ -526,6 +542,7 @@ export default function AdminProxyQuotesPage() {
               onClick={() => {
                 setDoneQuoteId(null); setSent(false);
                 setLines([]); clearCustomer();
+                router.replace("/admin/proxy-quotes");
               }}
               className="text-[12px] dim hover:text-ink transition-colors"
             >
