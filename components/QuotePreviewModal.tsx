@@ -175,7 +175,7 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
                 {isLoggedIn ? (
                   <>
                     <div className="party-row"><div className="lbl">Company</div><div className="val">{userCompany || "—"}</div></div>
-                    <div className="party-row"><div className="lbl">Attn</div><div className="val">{userName || "—"}</div></div>
+                    <div className="party-row"><div className="lbl">Attn</div><div className="val">{userName ? `${userName}님` : "—"}</div></div>
                     {userPhone && (
                       <div className="party-row"><div className="lbl">Tel</div><div className="val qmono">{userPhone}</div></div>
                     )}
@@ -373,7 +373,7 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
               {isLoggedIn ? (
                 <>
                   <div className="row"><div className="k">Company</div><div className="v">{userCompany || "—"}</div></div>
-                  <div className="row"><div className="k">Attn</div><div className="v">{userName || "—"}</div></div>
+                  <div className="row"><div className="k">Attn</div><div className="v">{userName ? `${userName}님` : "—"}</div></div>
                   {userPhone && (
                     <div className="row"><div className="k">Tel</div><div className="v pmono">{userPhone}</div></div>
                   )}

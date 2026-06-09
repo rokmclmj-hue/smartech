@@ -1056,8 +1056,11 @@ function AdminProxyQuotesInner() {
                   {guest.company || selectedCustomer?.company || "—"}
                 </div>
                 <div className="text-[13px] dim mt-1">
-                  {guest.name || selectedCustomer?.name || ""}
-                  {guest.title && ` (${guest.title})`}
+                  {(() => {
+                    const name = guest.name || selectedCustomer?.name || "";
+                    if (!name) return "";
+                    return guest.title ? `${name} (${guest.title}님)` : `${name}님`;
+                  })()}
                   {(guest.phone || selectedCustomer?.phone) && ` · ${guest.phone || selectedCustomer?.phone}`}
                 </div>
                 {(guest.email || selectedCustomer?.email) && (
