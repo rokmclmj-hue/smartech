@@ -48,6 +48,7 @@ export default function EmailInboxPage() {
   const [adminNote, setAdminNote] = useState("");
   const [syncing, setSyncing] = useState(false);
   const [acting, setActing] = useState(false);
+  const [classifying, setClassifying] = useState(false);
   const [syncMsg, setSyncMsg] = useState("");
 
   const load = useCallback(async () => {
@@ -59,10 +60,35 @@ export default function EmailInboxPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  function selectTask(task: EmailTask) {
+  async function selectTask(task: EmailTask) {
     setSelected(task);
     setDraft(task.aiDraft ?? "");
     setAdminNote(task.adminNote ?? "");
+
+    // AI 분류 안 된 이메일이면 클릭 시 분류 요청
+    if (!task.aiDraft && task.status === "PENDING") {
+      setClassifying(true);
+      try {
+        const res = await fetch("/api/admin/email-inbox/classify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: task.id }),
+        });
+        const data = await res.json();
+        if (data.task) {
+          setSelected(data.task);
+          setDraft(data.task.aiDraft ?? "");
+          // 목록도 갱신
+          setTasks((prev) =>
+            prev.map((t) => (t.id === data.task.id ? data.task : t))
+          );
+        }
+      } catch {
+        // 분류 실패해도 이메일은 볼 수 있음
+      } finally {
+        setClassifying(false);
+      }
+    }
   }
 
   async function handleSync() {
@@ -246,6 +272,16 @@ export default function EmailInboxPage() {
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-[13px] text-amber-800">
                 ECOUNT 발주서입니다. 아래 발주 내용은 수신 링크에서 직접 확인해 주세요.<br />
                 확인 후 발주를 등록하려면 <a href="/admin/orders" className="underline">주문 관리</a>에서 진행해 주세요.
+              </div>
+            )}
+
+            {/* AI 분류 중 */}
+            {classifying && (
+              <div className="flex items-center gap-2 py-3 px-4 bg-smblue/5 rounded-xl text-[13px] text-smblue">
+                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                AI가 이메일을 분석하고 초안을 작성 중입니다...
               </div>
             )}
 
