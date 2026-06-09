@@ -156,6 +156,9 @@ export default function AdminProxyQuotesPage() {
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
 
+  // 미리보기 모달
+  const [showPreview, setShowPreview] = useState(false);
+
   // 현재 활성 tier / 고객 확정 여부
   const activeTier = selectedCustomer?.tier ?? guest.tier ?? "ENDUSER";
   const hasCustomer = !!selectedCustomer || (showDirect && !!guest.company.trim());
@@ -508,14 +511,14 @@ export default function AdminProxyQuotesPage() {
               </div>
             )}
 
-            {/* 견적서 보기 */}
+            {/* 견적서 보기 + PDF 저장 */}
             <a
               href={`/quote/${doneQuoteId}`}
               target="_blank"
               rel="noreferrer"
               className="border hair rounded-md px-4 py-3 text-[13px] text-center text-ink hover:border-edred transition-colors"
             >
-              견적서 보기 →
+              📄 견적서 보기 · PDF 저장 →
             </a>
 
             {/* 새 견적 작성 */}
@@ -978,7 +981,15 @@ export default function AdminProxyQuotesPage() {
       </div>
 
       {/* 발행 버튼 */}
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-3">
+        <button
+          type="button"
+          onClick={() => setShowPreview(true)}
+          disabled={lines.length === 0 || !hasCustomer}
+          className="border hair px-6 py-3 rounded-md text-[14px] text-ink hover:border-edred hover:text-edred disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+        >
+          미리보기
+        </button>
         <button
           type="button"
           onClick={submitQuote}
@@ -988,6 +999,104 @@ export default function AdminProxyQuotesPage() {
           {submitting ? "발행 중…" : "견적서 발행 →"}
         </button>
       </div>
+
+      {/* 미리보기 모달 */}
+      {showPreview && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+          <div className="w-full max-w-2xl bg-paper border hair rounded-lg shadow-2xl flex flex-col max-h-[90vh]">
+            {/* 헤더 */}
+            <div className="px-6 py-4 border-b hair flex items-center justify-between shrink-0">
+              <div>
+                <div className="mono text-[10px] tracking-[0.15em] uppercase dim mb-1">QUOTE PREVIEW</div>
+                <div className="text-[16px] font-semibold text-ink">발행 전 최종 확인</div>
+              </div>
+              <button onClick={() => setShowPreview(false)} className="dim hover:text-edred text-[20px]">✕</button>
+            </div>
+
+            {/* 내용 */}
+            <div className="overflow-auto flex-1 px-6 py-5 space-y-5">
+              {/* 수신처 */}
+              <div className="border hair rounded-md p-4 bg-ink/[0.02]">
+                <div className="mono text-[9px] tracking-[0.15em] uppercase dim mb-2">수신처</div>
+                <div className="text-[16px] font-semibold text-ink">
+                  {guest.company || selectedCustomer?.company || "—"}
+                </div>
+                <div className="text-[13px] dim mt-1">
+                  {guest.name || selectedCustomer?.name || ""}
+                  {(guest.phone || selectedCustomer?.phone) && ` · ${guest.phone || selectedCustomer?.phone}`}
+                </div>
+                {(guest.email || selectedCustomer?.email) && (
+                  <div className="text-[12px] dim mt-0.5">
+                    {guest.email || selectedCustomer?.email}
+                  </div>
+                )}
+              </div>
+
+              {/* 품목 목록 */}
+              <div>
+                <div className="mono text-[9px] tracking-[0.15em] uppercase dim mb-2">
+                  견적 품목 ({lines.length}건)
+                </div>
+                <div className="border hair rounded-md overflow-hidden">
+                  <div className="grid grid-cols-[1fr_50px_90px_90px] gap-2 px-3 py-2 border-b hair bg-ink/5 mono text-[9px] tracking-[0.12em] uppercase dim">
+                    <div>제품명</div>
+                    <div className="text-center">수량</div>
+                    <div className="text-right">단가</div>
+                    <div className="text-right">소계</div>
+                  </div>
+                  {lines.map((l) => (
+                    <div key={l.key} className="grid grid-cols-[1fr_50px_90px_90px] gap-2 px-3 py-3 border-b hair last:border-b-0 items-center">
+                      <div>
+                        <div className="text-[13px] font-medium text-ink">{l.description || "—"}</div>
+                        {l.partNo && <div className="mono text-[10px] dim">{l.partNo}</div>}
+                        {l.leadTime && <div className="mono text-[10px] dim">납기 {l.leadTime}</div>}
+                      </div>
+                      <div className="text-center text-[13px] text-ink">{l.quantity}</div>
+                      <div className="text-right text-[13px] text-ink">{fmt(l.unitPrice)}</div>
+                      <div className="text-right text-[13px] font-semibold text-ink">{fmt(l.unitPrice * l.quantity)}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* 합계 */}
+              <div className="border hair rounded-md p-4">
+                <div className="space-y-2 text-[13px]">
+                  <div className="flex justify-between">
+                    <span className="dim">공급가액</span>
+                    <span className="text-ink">{fmt(subtotal)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="dim">부가세 (10%)</span>
+                    <span className="text-ink">{fmt(vat)}</span>
+                  </div>
+                  <div className="flex justify-between pt-3 border-t hair text-[15px]">
+                    <span className="font-semibold text-ink">합계</span>
+                    <span className="font-bold text-edred">{fmt(total)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 하단 버튼 */}
+            <div className="px-6 py-4 border-t hair flex gap-3 shrink-0">
+              <button
+                onClick={() => setShowPreview(false)}
+                className="flex-1 border hair px-4 py-3 rounded-md text-[14px] text-ink hover:border-edred hover:text-edred transition-colors"
+              >
+                ← 수정하기
+              </button>
+              <button
+                onClick={() => { setShowPreview(false); submitQuote(); }}
+                disabled={submitting}
+                className="flex-1 bg-edred text-white px-4 py-3 rounded-md text-[14px] font-semibold hover:brightness-110 disabled:opacity-40 transition-all"
+              >
+                {submitting ? "발행 중…" : "견적서 발행 →"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
