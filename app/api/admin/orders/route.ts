@@ -301,3 +301,47 @@ export async function PATCH(req: NextRequest) {
 
   return NextResponse.json({ error: "처리 실패" }, { status: 500 });
 }
+
+// ──────────────────────────────────────────────
+// DELETE /api/admin/orders
+// Body: { orderId: number }
+// PENDING·CANCELLED 상태만 삭제 가능
+// ──────────────────────────────────────────────
+export async function DELETE(req: NextRequest) {
+  const admin = await getAdminSession();
+  if (!admin) {
+    return NextResponse.json({ error: "권한 없음" }, { status: 403 });
+  }
+
+  const { orderId } = (await req.json()) as { orderId: number };
+  if (!orderId) {
+    return NextResponse.json({ error: "orderId가 필요합니다" }, { status: 400 });
+  }
+
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    select: { status: true },
+  });
+
+  if (!order) {
+    return NextResponse.json({ error: "주문을 찾을 수 없습니다" }, { status: 404 });
+  }
+
+  if (!["PENDING", "CANCELLED"].includes(order.status)) {
+    return NextResponse.json(
+      { error: "확정·출고된 주문은 삭제할 수 없습니다" },
+      { status: 409 }
+    );
+  }
+
+  await prisma.order.delete({ where: { id: orderId } });
+
+  await logAudit({
+    userId: admin.userId,
+    action: "order.delete",
+    target: "order",
+    targetId: orderId,
+  });
+
+  return NextResponse.json({ ok: true, orderId });
+}
