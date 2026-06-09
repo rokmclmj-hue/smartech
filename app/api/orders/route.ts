@@ -4,14 +4,16 @@ import { prisma } from "@/lib/db";
 import { sendBusinessDocRequest } from "@/lib/mailer";
 import { notifyOrderConfirmed } from "@/lib/solapi";
 
+type SessionUser = { id: string; tier: string };
+
 export async function GET() {
   const session = await auth();
   if (!session?.user) {
     return NextResponse.json({ error: "로그인이 필요합니다." }, { status: 401 });
   }
 
-  const userId = parseInt((session.user as any).id);
-  const tier = (session.user as any).tier as string;
+  const { id, tier } = session.user as SessionUser;
+  const userId = parseInt(id);
   const isAdmin = tier === "ADMIN";
 
   const orders = await prisma.order.findMany({
@@ -20,7 +22,13 @@ export async function GET() {
       quote: {
         include: {
           items: {
-            include: { product: { select: { partNo: true, description: true } } },
+            select: {
+              quantity: true,
+              unitPrice: true,
+              customPartNo: true,
+              customDescription: true,
+              product: { select: { partNo: true, description: true } },
+            },
           },
         },
       },
@@ -38,7 +46,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "로그인이 필요합니다." }, { status: 401 });
   }
 
-  const userId = parseInt((session.user as any).id);
+  const userId = parseInt((session.user as SessionUser).id);
   const userName = session.user.name ?? "고객";
   const userEmail = session.user.email ?? "";
 

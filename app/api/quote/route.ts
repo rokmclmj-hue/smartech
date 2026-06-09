@@ -3,12 +3,14 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getMultiplier } from "@/lib/pricing";
 
+type SessionUser = { id: string; tier: string };
+
 export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user) return NextResponse.json({ error: "로그인 필요" }, { status: 401 });
 
-  const userId = parseInt((session.user as any).id);
-  const tier = (session.user as any).tier;
+  const { id, tier } = session.user as SessionUser;
+  const userId = parseInt(id);
   const { items, note } = await req.json();
 
   if (!items?.length) return NextResponse.json({ error: "품목이 없습니다" }, { status: 400 });
@@ -38,19 +40,27 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ quoteId: quote.id });
 }
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   const session = await auth();
   if (!session?.user) return NextResponse.json({ error: "로그인 필요" }, { status: 401 });
 
-  const userId = parseInt((session.user as any).id);
-  const tier = (session.user as any).tier;
+  const { id, tier } = session.user as SessionUser;
+  const userId = parseInt(id);
   const isAdmin = tier === "ADMIN";
 
   const quotes = await prisma.quote.findMany({
     where: isAdmin ? {} : { userId },
     include: {
       user: { select: { name: true, company: true, email: true } },
-      items: { include: { product: { select: { partNo: true, description: true } } } },
+      items: {
+        select: {
+          quantity: true,
+          unitPrice: true,
+          customPartNo: true,
+          customDescription: true,
+          product: { select: { partNo: true, description: true } },
+        },
+      },
     },
     orderBy: { createdAt: "desc" },
     take: 50,
