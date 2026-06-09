@@ -137,7 +137,7 @@ export default function AdminQuoteDetailPage() {
   const [quote, setQuote] = useState<QuoteDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
-  const [actionLoading, setActionLoading] = useState<"send" | "duplicate" | null>(null);
+  const [actionLoading, setActionLoading] = useState<"send" | "duplicate" | "confirm" | null>(null);
 
   const loadQuote = useCallback(() => {
     setLoading(true);
@@ -226,6 +226,40 @@ export default function AdminQuoteDetailPage() {
       if (!res.ok) throw new Error(data.error ?? "복제 실패");
       success(`새 견적 #${data.quoteId} 가 생성되었습니다`);
       router.push(`/admin/quotes/${data.quoteId}`);
+    } catch (e) {
+      toastError(e instanceof Error ? e.message : "오류가 발생했습니다");
+    } finally {
+      setActionLoading(null);
+    }
+  }
+
+  // ── 발주 확정 ─────────────────────────────────────────────
+  async function handleConfirm() {
+    if (!quote) return;
+    const ok = await confirm({
+      message: "이 견적을 발주 확정 처리하시겠습니까?",
+      detail: `${quote.user.company} · ${fmtKRW(quote.grandTotal)} (VAT 포함)\n확정 후 재고가 차감되고 주문이 생성됩니다.`,
+      confirmLabel: "발주 확정",
+      destructive: true,
+    });
+    if (!ok) return;
+
+    setActionLoading("confirm");
+    try {
+      const res = await fetch(`/api/admin/quotes/${id}/confirm`, { method: "POST" });
+      const data = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        orderId?: number;
+        error?: string;
+      };
+      if (res.status === 409) {
+        toastError("이미 발주가 확정된 견적입니다");
+        loadQuote();
+        return;
+      }
+      if (!res.ok) throw new Error(data.error ?? "확정 실패");
+      success(`주문 #${data.orderId} 발주 확정 완료`);
+      loadQuote();
     } catch (e) {
       toastError(e instanceof Error ? e.message : "오류가 발생했습니다");
     } finally {
@@ -499,6 +533,16 @@ export default function AdminQuoteDetailPage() {
           — 06 · 액션
         </div>
         <div className="flex gap-3 flex-wrap">
+          {/* 발주 확정 — 주문 없을 때만 표시 */}
+          {!quote.order && (
+            <button
+              onClick={handleConfirm}
+              disabled={actionLoading !== null}
+              className="mono text-[11px] tracking-[0.1em] uppercase border border-edred bg-edred text-paper px-5 py-2.5 hover:bg-edred3 hover:border-edred3 disabled:opacity-40 transition-colors"
+            >
+              {actionLoading === "confirm" ? "처리 중..." : "발주 확정"}
+            </button>
+          )}
           <button
             onClick={() => handleSend()}
             disabled={actionLoading !== null}
