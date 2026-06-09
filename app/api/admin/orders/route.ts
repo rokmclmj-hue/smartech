@@ -145,21 +145,21 @@ export async function PATCH(req: NextRequest) {
           );
         }
 
-        // 3. 재고 충분 여부 체크 (등록 제품만 — 직접 추가 품목은 재고 무관)
-        for (const item of order.quote.items) {
-          if (!item.product) continue;
-          if (item.product.stock < item.quantity) {
-            throw Object.assign(
-              new Error("재고 부족"),
-              {
-                code: "STOCK_SHORT",
-                partNo: item.product.partNo,
-                requested: item.quantity,
-                available: item.product.stock,
-              }
-            );
-          }
-        }
+        // 3. 재고 충분 여부 체크 — 실제 재고 입력 완료 후 활성화
+        // for (const item of order.quote.items) {
+        //   if (!item.product) continue;
+        //   if (item.product.stock < item.quantity) {
+        //     throw Object.assign(
+        //       new Error("재고 부족"),
+        //       {
+        //         code: "STOCK_SHORT",
+        //         partNo: item.product.partNo,
+        //         requested: item.quantity,
+        //         available: item.product.stock,
+        //       }
+        //     );
+        //   }
+        // }
 
         // 4. 재고 차감 (등록 제품만)
         for (const item of order.quote.items) {
