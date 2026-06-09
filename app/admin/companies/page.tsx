@@ -17,6 +17,7 @@ type KnownCompany = {
   phone: string | null;
   email: string | null;
   tier: string;
+  paymentTerm: string | null;
   source: string;
   createdAt: string;
   contacts: KnownContact[];
@@ -41,6 +42,14 @@ const TIER_COLOR: Record<string, string> = {
 };
 
 const EMPTY_FORM = { name: "", title: "", tel: "", mobile: "", email: "" };
+
+const PAY_OPTIONS = [
+  { value: "a", label: "납품 전 현금" },
+  { value: "b", label: "계약30%/납품전70%" },
+  { value: "d", label: "계약30%/익월말일70%" },
+  { value: "e", label: "정기결제(익월말일)" },
+  { value: "c", label: "직접 입력" },
+];
 
 export default function AdminCompaniesPage() {
   const [companies, setCompanies] = useState<KnownCompany[]>([]);
@@ -170,6 +179,19 @@ export default function AdminCompaniesPage() {
     setEditingId(null);
     setAddingContact(false);
     setForm(EMPTY_FORM);
+  }
+
+  async function savePaymentTerm(term: string | null) {
+    if (!selected) return;
+    const res = await fetch(`/api/admin/known-companies?id=${selected.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ paymentTerm: term }),
+    });
+    if (res.ok) {
+      setSelected((s) => s ? { ...s, paymentTerm: term } : s);
+      setCompanies((cs) => cs.map((c) => c.id === selected.id ? { ...c, paymentTerm: term } : c));
+    }
   }
 
   const filtered = companies.filter((c) => {
@@ -342,6 +364,25 @@ export default function AdminCompaniesPage() {
                     {TIER_LABEL[selected.tier] ?? selected.tier}
                   </span>
                   {selected.phone && <span className="mono text-[11px] dim">{selected.phone}</span>}
+                </div>
+                <div className="mt-2.5">
+                  <div className="mono text-[9px] tracking-[0.12em] uppercase dim mb-1.5">결제조건</div>
+                  <div className="flex flex-wrap gap-1">
+                    {PAY_OPTIONS.map((o) => (
+                      <button
+                        key={o.value}
+                        type="button"
+                        onClick={() => savePaymentTerm(selected.paymentTerm === o.value ? null : o.value)}
+                        className={`mono text-[9px] tracking-[0.04em] border px-2 py-0.5 rounded transition-colors ${
+                          selected.paymentTerm === o.value
+                            ? "bg-smblue text-white border-smblue"
+                            : "hair dim hover:text-ink"
+                        }`}
+                      >
+                        {o.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
               <button onClick={() => { setSelected(null); cancelForm(); }} className="dim hover:text-edred text-[18px] ml-3 shrink-0">✕</button>

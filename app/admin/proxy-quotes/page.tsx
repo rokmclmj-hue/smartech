@@ -15,6 +15,7 @@ type CustomerResult = {
   phone: string;
   email: string;
   tier: string;
+  paymentTerm: string | null;
   contacts: { name: string; title: string | null; mobile: string | null; email: string | null }[];
 };
 
@@ -92,6 +93,14 @@ const TIER_LABEL: Record<string, string> = {
 };
 
 const TIER_OPTIONS = ["ENDUSER", "OEM", "DEALER", "KEY_DEALER", "VIP_DEALER"];
+
+const PAY_OPTIONS = [
+  { value: "a", label: "납품 전 현금" },
+  { value: "b", label: "계약30%/납품전70%" },
+  { value: "d", label: "계약30%/익월말일70%" },
+  { value: "e", label: "정기결제(익월말일)" },
+  { value: "c", label: "직접 입력" },
+];
 
 function fmt(n: number) {
   return new Intl.NumberFormat("ko-KR").format(Math.round(n)) + "원";
@@ -173,6 +182,9 @@ function AdminProxyQuotesInner() {
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
 
+  // 결제조건
+  const [paymentTerm, setPaymentTerm] = useState<string | null>(null);
+
   // 미리보기 모달
   const [showPreview, setShowPreview] = useState(false);
 
@@ -249,6 +261,7 @@ function AdminProxyQuotesInner() {
     setSelectedContacts(c.contacts as KnownContact[]);
     setSelectedCompanyName(c.source === "known" ? c.company : null);
     setGuest({ company: c.company, name: c.name, title: "", phone: c.phone, email: c.email, tier: c.tier });
+    setPaymentTerm(c.paymentTerm ?? null);
   }
 
   function clearCustomer() {
@@ -259,6 +272,7 @@ function AdminProxyQuotesInner() {
     setSelectedCompanyName(null);
     setShowDirect(false);
     setGuest({ name: "", title: "", company: "", email: "", phone: "", tier: "ENDUSER" });
+    setPaymentTerm(null);
   }
 
   function selectContact(ct: KnownContact) {
@@ -293,7 +307,7 @@ function AdminProxyQuotesInner() {
     // 고객 정보 복원
     setShowDirect(false);
     setGuest({ company: h.company, name: h.contactName, title: h.contactTitle ?? "", email: h.email ?? "", phone: h.phone ?? "", tier: h.tier });
-    setSelectedCustomer({ source: "known", id: 0, company: h.company, name: h.contactName, phone: h.phone ?? "", email: h.email ?? "", tier: h.tier, contacts: [] });
+    setSelectedCustomer({ source: "known", id: 0, company: h.company, name: h.contactName, phone: h.phone ?? "", email: h.email ?? "", tier: h.tier, paymentTerm: null, contacts: [] });
     setSelectedCompanyName(h.company);
     // 품목 복원
     const restoredLines: LineItem[] = h.previewItems.map((item, idx) => ({
@@ -452,8 +466,8 @@ function AdminProxyQuotesInner() {
       // 홈페이지 등록 회원이면 customerId, 거래처/직접입력이면 guest
       const body =
         selectedCustomer?.source === "user"
-          ? { customerId: selectedCustomer.id, items: itemsPayload }
-          : { guest, items: itemsPayload };
+          ? { customerId: selectedCustomer.id, items: itemsPayload, paymentTerm: paymentTerm ?? undefined }
+          : { guest, items: itemsPayload, paymentTerm: paymentTerm ?? undefined };
 
       const res = await fetch("/api/admin/proxy-quotes", {
         method: "POST",
@@ -792,7 +806,7 @@ function AdminProxyQuotesInner() {
                     <div key={key}>
                       <label className="mono text-[10px] tracking-[0.15em] uppercase dim mb-1 block">{label}</label>
                       <input type={type} value={guest[key as keyof GuestForm]}
-                        onChange={(e) => { setGuest((g) => ({ ...g, [key]: e.target.value })); setSelectedCustomer({ source: "known", id: 0, company: guest.company, name: guest.name, phone: guest.phone, email: guest.email, tier: guest.tier, contacts: [] }); }}
+                        onChange={(e) => { setGuest((g) => ({ ...g, [key]: e.target.value })); setSelectedCustomer({ source: "known", id: 0, company: guest.company, name: guest.name, phone: guest.phone, email: guest.email, tier: guest.tier, paymentTerm: null, contacts: [] }); }}
                         placeholder={placeholder}
                         className="w-full border hair rounded-md px-3 py-2.5 text-[14px] focus:outline-none focus:border-edred" />
                     </div>
@@ -1014,6 +1028,38 @@ function AdminProxyQuotesInner() {
         )}
       </div>
 
+      {/* 04 / 결제조건 */}
+      <div className="mb-8">
+        <label className="mono text-[10px] tracking-[0.18em] uppercase dim mb-3 block">
+          04 / 결제조건 <span className="normal-case text-[10px]">(선택)</span>
+        </label>
+        <div className="flex flex-wrap gap-2">
+          {PAY_OPTIONS.map((o) => (
+            <button
+              key={o.value}
+              type="button"
+              onClick={() => setPaymentTerm(paymentTerm === o.value ? null : o.value)}
+              className={`mono text-[11px] tracking-[0.06em] border px-3 py-2 rounded-md transition-colors ${
+                paymentTerm === o.value
+                  ? "bg-smblue text-white border-smblue"
+                  : "hair dim hover:text-ink"
+              }`}
+            >
+              {o.label}
+            </button>
+          ))}
+          {paymentTerm && (
+            <button
+              type="button"
+              onClick={() => setPaymentTerm(null)}
+              className="mono text-[10px] dim hover:text-edred transition-colors px-2"
+            >
+              초기화
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* 발행 버튼 */}
       <div className="flex justify-end gap-3">
         <button
@@ -1114,6 +1160,16 @@ function AdminProxyQuotesInner() {
                   </div>
                 </div>
               </div>
+
+              {/* 결제조건 */}
+              {paymentTerm && (
+                <div className="border hair rounded-md p-4">
+                  <div className="mono text-[9px] tracking-[0.15em] uppercase dim mb-1">결제조건</div>
+                  <div className="text-[14px] font-medium text-ink">
+                    {PAY_OPTIONS.find((o) => o.value === paymentTerm)?.label ?? paymentTerm}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* 하단 버튼 */}
