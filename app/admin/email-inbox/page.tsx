@@ -49,6 +49,7 @@ export default function EmailInboxPage() {
   const [syncing, setSyncing] = useState(false);
   const [acting, setActing] = useState(false);
   const [classifying, setClassifying] = useState(false);
+  const [cleaning, setCleaning] = useState(false);
   const [syncMsg, setSyncMsg] = useState("");
 
   const load = useCallback(async () => {
@@ -149,6 +150,20 @@ export default function EmailInboxPage() {
           {syncMsg && (
             <span className="text-[12px] text-dim">{syncMsg}</span>
           )}
+          <button
+            onClick={async () => {
+              setCleaning(true);
+              const res = await fetch("/api/admin/email-inbox", { method: "DELETE" });
+              const data = await res.json();
+              setSyncMsg(`불필요한 메일 ${data.deleted}건 삭제됨`);
+              setCleaning(false);
+              load();
+            }}
+            disabled={cleaning}
+            className="flex items-center gap-2 px-4 py-2 border border-line text-dim text-[13px] font-medium rounded-lg hover:border-ink/30 hover:text-ink disabled:opacity-50 transition-colors"
+          >
+            {cleaning ? "정리 중..." : "불필요 메일 정리"}
+          </button>
           <button
             onClick={handleSync}
             disabled={syncing}

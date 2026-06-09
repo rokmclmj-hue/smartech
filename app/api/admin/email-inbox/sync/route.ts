@@ -35,6 +35,29 @@ export async function POST() {
     "mjlee@smartechvacuum.com",
   ].map((e) => e.toLowerCase());
 
+  // 차단 도메인 · 주소 패턴
+  const BLOCK_DOMAINS = [
+    "hometax.go.kr",       // 국세청
+    "google.com",          // Google 시스템
+    "edwardsvacuum.com",   // Edwards 공급사
+    "ecount.com",          // ECOUNT 시스템 (별도 처리)
+    "accounts.google.com",
+  ];
+  const BLOCK_PREFIXES = [
+    "noreply", "no-reply", "donotreply", "do-not-reply",
+    "notify-noreply", "noreply-accounts",
+    "mailer-daemon", "postmaster",
+  ];
+
+  function isBlocked(email: string): boolean {
+    const lower = email.toLowerCase();
+    const [local, domain] = lower.split("@");
+    if (!domain) return false;
+    if (BLOCK_DOMAINS.some((d) => domain === d || domain.endsWith("." + d))) return true;
+    if (BLOCK_PREFIXES.some((p) => local.startsWith(p))) return true;
+    return false;
+  }
+
   let created = 0;
   let skipped = 0;
 
@@ -47,6 +70,9 @@ export async function POST() {
 
     // 자기 자신이 보낸 이메일 제외
     if (ownEmails.includes(raw.fromEmail.toLowerCase())) { skipped++; continue; }
+
+    // 차단 목록
+    if (isBlocked(raw.fromEmail)) { skipped++; continue; }
 
     // AI 분류 없이 일단 저장 (분류는 클릭 시 on-demand)
     await prisma.emailTask.create({
