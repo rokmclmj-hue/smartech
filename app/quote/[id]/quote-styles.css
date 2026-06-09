@@ -475,7 +475,7 @@
   text-align: left; font-family: 'JetBrains Mono', monospace; font-size: 8pt;
   letter-spacing: 0.1em; text-transform: uppercase; background: #F4F6F8; font-weight: 600;
 }
-.quote-page .pdf-only .p-table .num-col { text-align: right; font-family: 'JetBrains Mono', monospace; }
+.quote-page .pdf-only .p-table .num-col { text-align: right; font-family: 'JetBrains Mono', monospace; white-space: nowrap; }
 .quote-page .pdf-only .p-table .desc-ko { color: #555; font-size: 8.5pt; display: block; margin-top: 0.5mm; }
 .quote-page .pdf-only .p-table td.partno { font-family: 'JetBrains Mono', monospace; font-size: 8.5pt; }
 

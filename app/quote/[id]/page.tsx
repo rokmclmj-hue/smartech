@@ -687,7 +687,7 @@ export default function QuoteDetailPage() {
               <th>Description</th>
               <th style={{ width: "14mm", textAlign: "center" }}>납기</th>
               <th style={{ width: "12mm", textAlign: "right" }}>Qty</th>
-              <th style={{ width: "26mm", textAlign: "right" }}>Unit Price</th>
+              <th style={{ width: "28mm", textAlign: "right" }}>Unit Price</th>
               <th style={{ width: "28mm", textAlign: "right" }}>Subtotal</th>
             </tr>
           </thead>
