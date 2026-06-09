@@ -33,6 +33,17 @@ interface QuoteDetail {
 // 발신자(스마텍) 정보는 lib/company.ts 단일 출처에서 가져옴
 const SMARTECH = SMARTECH_COMPANY;
 
+function fmtPhone(p: string): string {
+  const d = p.replace(/\D/g, "");
+  if (d.startsWith("02")) {
+    if (d.length === 9) return `${d.slice(0, 2)}-${d.slice(2, 5)}-${d.slice(5)}`;
+    return `${d.slice(0, 2)}-${d.slice(2, 6)}-${d.slice(6)}`;
+  }
+  if (d.length === 10) return `${d.slice(0, 3)}-${d.slice(3, 6)}-${d.slice(6)}`;
+  if (d.length === 11) return `${d.slice(0, 3)}-${d.slice(3, 7)}-${d.slice(7)}`;
+  return p;
+}
+
 // ─── 납기 모달 ─────────────────────────────────────────────────────────────
 function DeliveryModal({
   onClose,
@@ -355,7 +366,7 @@ export default function QuoteDetailPage() {
               <div className="party-row"><div className="lbl">Company</div><div className="val">{quote.user.company}</div></div>
               <div className="party-row"><div className="lbl">Attn</div><div className="val">{quote.user.title ? `${quote.user.name} (${quote.user.title}님)` : `${quote.user.name}님`}</div></div>
               {quote.user.phone && (
-                <div className="party-row"><div className="lbl">Tel</div><div className="val qmono">{quote.user.phone}</div></div>
+                <div className="party-row"><div className="lbl">Tel</div><div className="val qmono">{fmtPhone(quote.user.phone)}</div></div>
               )}
               <div className="party-row"><div className="lbl">Email</div><div className="val qmono">{quote.user.email}</div></div>
             </div>
@@ -640,7 +651,7 @@ export default function QuoteDetailPage() {
             <div className="row"><div className="k">Company</div><div className="v">{quote.user.company}</div></div>
             <div className="row"><div className="k">Attn</div><div className="v">{quote.user.title ? `${quote.user.name} (${quote.user.title}님)` : `${quote.user.name}님`}</div></div>
             {quote.user.phone && (
-              <div className="row"><div className="k">Tel</div><div className="v pmono">{quote.user.phone}</div></div>
+              <div className="row"><div className="k">Tel</div><div className="v pmono">{fmtPhone(quote.user.phone)}</div></div>
             )}
             <div className="row"><div className="k">Email</div><div className="v pmono">{quote.user.email}</div></div>
           </div>
