@@ -16,6 +16,7 @@ type GuestInput = {
   company: string;
   email: string;
   phone?: string;
+  title?: string;
   tier: string;
 };
 
@@ -134,6 +135,7 @@ export async function POST(req: NextRequest) {
         guestCompany: g.company.trim(),
         guestEmail: g.email?.trim() || null,
         guestPhone: g.phone?.trim() || null,
+        guestTitle: g.title?.trim() || null,
         guestTier: g.tier || "ENDUSER",
         items: { create: itemData },
       },

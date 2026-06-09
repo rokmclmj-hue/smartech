@@ -18,8 +18,9 @@ export async function GET(
     return NextResponse.json({ error: "잘못된 견적 ID입니다." }, { status: 400 });
   }
 
-  const userId = parseInt((session.user as any).id);
-  const tier = (session.user as any).tier as string;
+  const su = session.user as { id?: string; tier?: string };
+  const userId = parseInt(su.id ?? "0");
+  const tier = su.tier ?? "";
   const isAdmin = tier === "ADMIN";
 
   const quote = await prisma.quote.findUnique({
@@ -51,6 +52,8 @@ export async function GET(
         name: quote.user?.name ?? quote.guestName ?? "",
         company: quote.user?.company ?? quote.guestCompany ?? "",
         email: quote.user?.email ?? quote.guestEmail ?? "",
+        phone: quote.user?.phone ?? quote.guestPhone ?? null,
+        title: quote.guestTitle ?? null,
       },
       items: quote.items.map((item) => ({
         quantity: item.quantity,

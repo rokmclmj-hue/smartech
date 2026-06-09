@@ -46,6 +46,8 @@ export async function GET(
       name: quote.guestName ?? "담당자",
       company: quote.guestCompany ?? "",
       email: quote.guestEmail ?? "",
+      phone: quote.guestPhone ?? null,
+      title: quote.guestTitle ?? null,
     },
   };
 

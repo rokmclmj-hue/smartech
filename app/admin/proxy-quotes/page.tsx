@@ -40,6 +40,7 @@ type LineItem = {
 
 type GuestForm = {
   name: string;
+  title: string;
   company: string;
   email: string;
   phone: string;
@@ -70,6 +71,7 @@ type HistoryItem = {
   createdAt: string;
   company: string;
   contactName: string;
+  contactTitle: string | null;
   email: string | null;
   phone: string | null;
   tier: string;
@@ -133,7 +135,7 @@ function AdminProxyQuotesInner() {
   // 직접 입력 (수동)
   const [showDirect, setShowDirect] = useState(false);
   const [guest, setGuest] = useState<GuestForm>({
-    name: "", company: "", email: "", phone: "", tier: "ENDUSER",
+    name: "", title: "", company: "", email: "", phone: "", tier: "ENDUSER",
   });
   const [selectedContacts, setSelectedContacts] = useState<KnownContact[]>([]);
 
@@ -246,7 +248,7 @@ function AdminProxyQuotesInner() {
     setShowDirect(false);
     setSelectedContacts(c.contacts as KnownContact[]);
     setSelectedCompanyName(c.source === "known" ? c.company : null);
-    setGuest({ company: c.company, name: c.name, phone: c.phone, email: c.email, tier: c.tier });
+    setGuest({ company: c.company, name: c.name, title: "", phone: c.phone, email: c.email, tier: c.tier });
   }
 
   function clearCustomer() {
@@ -256,13 +258,14 @@ function AdminProxyQuotesInner() {
     setSelectedContacts([]);
     setSelectedCompanyName(null);
     setShowDirect(false);
-    setGuest({ name: "", company: "", email: "", phone: "", tier: "ENDUSER" });
+    setGuest({ name: "", title: "", company: "", email: "", phone: "", tier: "ENDUSER" });
   }
 
   function selectContact(ct: KnownContact) {
     setGuest((g) => ({
       ...g,
       name: ct.name,
+      title: ct.title ?? g.title,
       phone: ct.mobile ?? ct.tel ?? g.phone,
       email: ct.email ?? g.email,
     }));
@@ -289,7 +292,7 @@ function AdminProxyQuotesInner() {
   function loadFromHistory(h: HistoryItem) {
     // 고객 정보 복원
     setShowDirect(false);
-    setGuest({ company: h.company, name: h.contactName, email: h.email ?? "", phone: h.phone ?? "", tier: h.tier });
+    setGuest({ company: h.company, name: h.contactName, title: h.contactTitle ?? "", email: h.email ?? "", phone: h.phone ?? "", tier: h.tier });
     setSelectedCustomer({ source: "known", id: 0, company: h.company, name: h.contactName, phone: h.phone ?? "", email: h.email ?? "", tier: h.tier, contacts: [] });
     setSelectedCompanyName(h.company);
     // 품목 복원
@@ -625,34 +628,47 @@ function AdminProxyQuotesInner() {
               ) : historyItems.length === 0 ? (
                 <div className="px-5 py-8 text-center text-[13px] dim">견적 이력이 없습니다.</div>
               ) : historyItems.map((h) => (
-                <button
-                  key={h.id}
-                  type="button"
-                  onClick={() => loadFromHistory(h)}
-                  className="w-full text-left px-5 py-4 border-b hair last:border-b-0 hover:bg-edred/5 transition-colors"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-baseline gap-2 mb-1">
-                        <span className="text-[15px] font-semibold text-ink truncate">{h.company}</span>
-                        <span className="mono text-[9px] tracking-[0.12em] text-edred shrink-0">
-                          {TIER_LABEL[h.tier] ?? h.tier}
-                        </span>
+                <div key={h.id} className="flex items-stretch border-b hair last:border-b-0 group">
+                  <button
+                    type="button"
+                    onClick={() => loadFromHistory(h)}
+                    className="flex-1 text-left px-5 py-4 hover:bg-edred/5 transition-colors"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-baseline gap-2 mb-1">
+                          <span className="text-[15px] font-semibold text-ink truncate">{h.company}</span>
+                          <span className="mono text-[9px] tracking-[0.12em] text-edred shrink-0">
+                            {TIER_LABEL[h.tier] ?? h.tier}
+                          </span>
+                        </div>
+                        <div className="text-[12px] dim mb-1.5">
+                          {h.contactName}{h.contactTitle ? ` (${h.contactTitle})` : ""} · {h.quoteNo} · {new Date(h.createdAt).toLocaleDateString("ko-KR")}
+                        </div>
+                        <div className="text-[11px] dim truncate">
+                          {h.previewItems.slice(0, 3).map((i) => i.description || i.partNo).join(" / ")}
+                          {h.itemCount > 3 && ` 외 ${h.itemCount - 3}건`}
+                        </div>
                       </div>
-                      <div className="text-[12px] dim mb-1.5">
-                        {h.contactName} · {h.quoteNo} · {new Date(h.createdAt).toLocaleDateString("ko-KR")}
-                      </div>
-                      <div className="text-[11px] dim truncate">
-                        {h.previewItems.slice(0, 3).map((i) => i.description || i.partNo).join(" / ")}
-                        {h.itemCount > 3 && ` 외 ${h.itemCount - 3}건`}
+                      <div className="shrink-0 text-right">
+                        <div className="text-[14px] font-bold text-edred">{fmt(h.subtotal)}</div>
+                        <div className="mono text-[10px] dim">{h.itemCount}개 품목</div>
                       </div>
                     </div>
-                    <div className="shrink-0 text-right">
-                      <div className="text-[14px] font-bold text-edred">{fmt(h.subtotal)}</div>
-                      <div className="mono text-[10px] dim">{h.itemCount}개 품목</div>
-                    </div>
-                  </div>
-                </button>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (!confirm(`"${h.company}" 견적 이력을 삭제할까요?`)) return;
+                      await fetch(`/api/admin/proxy-quotes/history?id=${h.id}`, { method: "DELETE" });
+                      setHistoryItems((prev) => prev.filter((x) => x.id !== h.id));
+                    }}
+                    className="px-3 text-[11px] text-red-400 hover:text-red-600 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all border-l hair"
+                    title="이력 삭제"
+                  >
+                    삭제
+                  </button>
+                </div>
               ))}
             </div>
           </div>
@@ -769,6 +785,7 @@ function AdminProxyQuotesInner() {
                   {[
                     { label: "상호 *", key: "company", type: "text", placeholder: "회사명" },
                     { label: "담당자", key: "name", type: "text", placeholder: "담당자 이름" },
+                    { label: "직급", key: "title", type: "text", placeholder: "부장, 대표 등" },
                     { label: "연락처", key: "phone", type: "tel", placeholder: "010-0000-0000" },
                     { label: "이메일", key: "email", type: "email", placeholder: "example@company.com" },
                   ].map(({ label, key, type, placeholder }) => (

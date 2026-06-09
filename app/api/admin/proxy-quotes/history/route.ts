@@ -44,6 +44,7 @@ export async function GET(req: NextRequest) {
       contactName,
       email: (q.user as { email?: string | null } | null)?.email ?? q.guestEmail ?? null,
       phone: q.guestPhone ?? null,
+      contactTitle: q.guestTitle ?? null,
       tier: q.guestTier ?? "ENDUSER",
       isGuest: q.userId === null,
       subtotal,
@@ -59,4 +60,15 @@ export async function GET(req: NextRequest) {
   });
 
   return NextResponse.json({ items });
+}
+
+export async function DELETE(req: NextRequest) {
+  const admin = await getAdminSession();
+  if (!admin) return NextResponse.json({ error: "권한 없음" }, { status: 403 });
+
+  const id = new URL(req.url).searchParams.get("id");
+  if (!id) return NextResponse.json({ error: "id 필수" }, { status: 400 });
+
+  await prisma.quote.delete({ where: { id: Number(id) } });
+  return NextResponse.json({ ok: true });
 }

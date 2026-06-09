@@ -33,6 +33,7 @@ export interface QuoteForPdf {
     company: string;
     email: string;
     phone?: string | null;
+    title?: string | null;
   };
   items: {
     quantity: number;
@@ -268,7 +269,7 @@ function QuoteDocument({ quote }: { quote: QuoteForPdf }) {
           ),
           el(View, { style: S.partyRow },
             el(Text, { style: S.partyKey }, "Attn"),
-            el(Text, { style: S.partyVal }, quote.user.name)
+            el(Text, { style: S.partyVal }, quote.user.title ? `${quote.user.name} (${quote.user.title})` : quote.user.name)
           ),
           quote.user.phone
             ? el(View, { style: S.partyRow },

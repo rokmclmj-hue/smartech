@@ -25,7 +25,7 @@ interface QuoteDetail {
   taxInvoiceRequested: boolean;
   totalAmount: number | null;
   note: string | null;
-  user: { name: string; company: string; email: string; phone: string | null };
+  user: { name: string; company: string; email: string; phone: string | null; title?: string | null };
   items: QuoteItem[];
   order: { id: number; status: string } | null;
 }
@@ -353,7 +353,7 @@ export default function QuoteDetailPage() {
             <div className="party">
               <h4><span>TO · 수신처</span><span className="tag">[ CLIENT ]</span></h4>
               <div className="party-row"><div className="lbl">Company</div><div className="val">{quote.user.company}</div></div>
-              <div className="party-row"><div className="lbl">Attn</div><div className="val">{quote.user.name}</div></div>
+              <div className="party-row"><div className="lbl">Attn</div><div className="val">{quote.user.name}{quote.user.title ? ` (${quote.user.title})` : ""}</div></div>
               {quote.user.phone && (
                 <div className="party-row"><div className="lbl">Tel</div><div className="val qmono">{quote.user.phone}</div></div>
               )}
@@ -638,7 +638,7 @@ export default function QuoteDetailPage() {
           <div>
             <h5>TO · 수신처</h5>
             <div className="row"><div className="k">Company</div><div className="v">{quote.user.company}</div></div>
-            <div className="row"><div className="k">Attn</div><div className="v">{quote.user.name}</div></div>
+            <div className="row"><div className="k">Attn</div><div className="v">{quote.user.name}{quote.user.title ? ` (${quote.user.title})` : ""}</div></div>
             {quote.user.phone && (
               <div className="row"><div className="k">Tel</div><div className="v pmono">{quote.user.phone}</div></div>
             )}

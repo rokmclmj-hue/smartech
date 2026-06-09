@@ -70,6 +70,7 @@ model Quote {
   guestCompany        String?
   guestEmail          String?
   guestPhone          String?
+  guestTitle          String?
   guestTier           String?
   user                User?       @relation(fields: [userId], references: [id])
   createdByAdmin      User?       @relation("QuoteCreatedBy", fields: [createdByAdminId], references: [id])
