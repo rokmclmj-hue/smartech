@@ -23,14 +23,16 @@ function getAdminPhone(): string {
 export async function notifyNewQuote(
   quoteId: number,
   customerName: string,
-  totalAmount: number
+  totalAmount: number,
+  orderRequested = false
 ): Promise<void> {
   const service = getService();
   const adminPhone = getAdminPhone();
+  const prefix = orderRequested ? "[스마텍] 🔴 발주 요청" : "[스마텍] 새 견적";
   await service.send({
     to: adminPhone,
     from: adminPhone,
-    text: `[스마텍] 새 견적 #${quoteId}\n고객: ${customerName}\n금액: ${totalAmount.toLocaleString("ko-KR")}원`,
+    text: `${prefix} #${quoteId}\n고객: ${customerName}\n금액: ${totalAmount.toLocaleString("ko-KR")}원${orderRequested ? "\n▶ 발주서 진행 요청 포함" : ""}`,
   });
 }
 

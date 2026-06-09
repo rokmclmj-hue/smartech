@@ -24,9 +24,8 @@ export default function QuotePage() {
   const { data: session, status } = useSession();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [note, setNote] = useState("");
-  const [taxInvoiceRequested, setTaxInvoiceRequested] = useState(false);
-  const [orderRequested, setOrderRequested] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [savingPdf, setSavingPdf] = useState(false);
   const [done, setDone] = useState<number | null>(null);
 
   const tier = (session?.user as any)?.tier as string | undefined;
@@ -102,8 +101,7 @@ export default function QuotePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           items: cart.map((i) => ({ productId: i.productId, quantity: i.quantity })),
-          taxInvoiceRequested,
-          note: [orderRequested ? "[발주서 진행 요청]" : "", note].filter(Boolean).join(" "),
+          note: note || null,
         }),
       });
       if (res.ok) {
@@ -120,6 +118,38 @@ export default function QuotePage() {
       alert("네트워크 오류가 발생했습니다. 다시 시도해 주세요.");
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function savePdf() {
+    if (!hasPriceData) return;
+    setSavingPdf(true);
+    try {
+      const res = await fetch("/api/quote/pdf-preview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: cart.map((i) => ({
+            partNo: i.partNo,
+            description: i.description,
+            quantity: i.quantity,
+            unitPrice: i.unitPrice ?? 0,
+          })),
+          note: note || null,
+        }),
+      });
+      if (!res.ok) { alert("PDF 생성에 실패했습니다."); return; }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `견적서_${new Date().toISOString().slice(0, 10)}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      alert("PDF 생성 중 오류가 발생했습니다.");
+    } finally {
+      setSavingPdf(false);
     }
   }
 
@@ -153,15 +183,15 @@ export default function QuotePage() {
     return (
       <div className="max-w-2xl mx-auto px-6 py-20 text-center">
         <div className="text-5xl mb-4">✅</div>
-        <h2 className="text-2xl font-bold text-slate-800 mb-3">견적이 접수되었습니다</h2>
-        <p className="text-gray-500 mb-2">견적번호: #{done}</p>
-        <p className="text-gray-500 mb-4">담당자가 검토 후 연락드리겠습니다.</p>
+        <h2 className="text-2xl font-bold text-slate-800 mb-3">발주 요청이 접수되었습니다</h2>
+        <p className="text-gray-500 mb-2">접수번호: #{done}</p>
+        <p className="text-gray-500 mb-4">담당자가 확인 후 연락드리겠습니다.</p>
         <div className="flex gap-3 justify-center">
           <Link
-            href={`/quote/${done}`}
+            href="/mypage"
             className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-500 transition-colors"
           >
-            견적서 확인
+            진행 상황 확인
           </Link>
           <Link
             href="/#products"
@@ -344,42 +374,23 @@ export default function QuotePage() {
             />
           </div>
 
-          {/* 발주서 요청 */}
-          <div className="mt-4 flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3">
-            <input
-              type="checkbox"
-              id="orderRequest"
-              checked={orderRequested}
-              onChange={(e) => setOrderRequested(e.target.checked)}
-              className="w-4 h-4 text-blue-600 border-gray-300 rounded cursor-pointer"
-            />
-            <label htmlFor="orderRequest" className="text-sm text-gray-700 cursor-pointer">
-              발주서 진행을 요청합니다
-            </label>
+          {/* 버튼 2개 */}
+          <div className="mt-4 flex gap-3">
+            <button
+              onClick={savePdf}
+              disabled={savingPdf || !hasPriceData || cart.length === 0}
+              className="flex-1 bg-white border border-gray-300 hover:border-gray-400 disabled:opacity-50 text-gray-700 font-semibold py-3 rounded-lg transition-colors"
+            >
+              {savingPdf ? "생성 중..." : "PDF 저장"}
+            </button>
+            <button
+              onClick={submitQuote}
+              disabled={submitting || cart.length === 0}
+              className="flex-1 bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white font-semibold py-3 rounded-lg transition-colors"
+            >
+              {submitting ? "접수 중..." : "발주 요청하기"}
+            </button>
           </div>
-
-          {/* 세금계산서 신청 */}
-          <div className="mt-2 flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3">
-            <input
-              type="checkbox"
-              id="taxInvoice"
-              checked={taxInvoiceRequested}
-              onChange={(e) => setTaxInvoiceRequested(e.target.checked)}
-              className="w-4 h-4 text-blue-600 border-gray-300 rounded cursor-pointer"
-            />
-            <label htmlFor="taxInvoice" className="text-sm text-gray-700 cursor-pointer">
-              세금계산서 발행을 신청합니다
-            </label>
-          </div>
-
-          {/* 견적 요청 버튼 */}
-          <button
-            onClick={submitQuote}
-            disabled={submitting || cart.length === 0}
-            className="mt-4 w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-semibold py-3 rounded-lg transition-colors"
-          >
-            {submitting ? "접수 중..." : "견적서 요청"}
-          </button>
         </>
       )}
     </div>
