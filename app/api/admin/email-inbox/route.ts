@@ -42,6 +42,39 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ tasks, total, page, limit });
 }
 
+// ─── DELETE: 차단 도메인 이메일 일괄 정리 ───────────
+export async function DELETE() {
+  const session = await auth();
+  if ((session?.user as { tier?: string })?.tier !== "ADMIN") {
+    return NextResponse.json({ error: "권한 없음" }, { status: 403 });
+  }
+
+  const BLOCK_DOMAINS = [
+    "hometax.go.kr", "google.com", "edwardsvacuum.com",
+    "ecount.com", "accounts.google.com",
+  ];
+  const BLOCK_PREFIXES = [
+    "noreply", "no-reply", "donotreply", "do-not-reply",
+    "notify-noreply", "noreply-accounts", "mailer-daemon", "postmaster",
+  ];
+
+  const all = await prisma.emailTask.findMany({ select: { id: true, fromEmail: true } });
+  const toDelete = all.filter(({ fromEmail }) => {
+    const lower = fromEmail.toLowerCase();
+    const [local, domain] = lower.split("@");
+    if (!domain) return false;
+    if (BLOCK_DOMAINS.some((d) => domain === d || domain.endsWith("." + d))) return true;
+    if (BLOCK_PREFIXES.some((p) => local.startsWith(p))) return true;
+    return false;
+  });
+
+  if (toDelete.length > 0) {
+    await prisma.emailTask.deleteMany({ where: { id: { in: toDelete.map((t) => t.id) } } });
+  }
+
+  return NextResponse.json({ deleted: toDelete.length });
+}
+
 // ─── PATCH: 승인 / 반려 / 무시 ──────────────────────
 export async function PATCH(req: NextRequest) {
   if (!(await requireAdmin())) {
