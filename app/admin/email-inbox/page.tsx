@@ -35,6 +35,7 @@ const TYPE_COLOR: Record<string, string> = {
 const STATUS_LABEL: Record<string, string> = {
   PENDING: "대기중",
   APPROVED: "발송완료",
+  DONE: "처리완료",
   REJECTED: "반려",
   IGNORED: "무시",
 };
@@ -111,7 +112,7 @@ export default function EmailInboxPage() {
     }
   }
 
-  async function handleAction(action: "approve" | "reject" | "ignore") {
+  async function handleAction(action: "approve" | "done" | "reject" | "ignore") {
     if (!selected) return;
     setActing(true);
     try {
@@ -179,7 +180,7 @@ export default function EmailInboxPage() {
 
       {/* 상태 필터 */}
       <div className="flex gap-2 mb-5 flex-wrap">
-        {["PENDING", "APPROVED", "REJECTED", "IGNORED", "ALL"].map((s) => (
+        {["PENDING", "APPROVED", "DONE", "REJECTED", "IGNORED", "ALL"].map((s) => (
           <button
             key={s}
             onClick={() => setStatusFilter(s)}
@@ -332,13 +333,21 @@ export default function EmailInboxPage() {
 
             {/* 액션 버튼 */}
             {selected.status === "PENDING" && (
-              <div className="flex gap-3 pt-2">
+              <div className="flex gap-3 pt-2 flex-wrap">
                 <button
                   onClick={() => handleAction("approve")}
                   disabled={acting}
                   className="flex-1 py-3 bg-ink text-white text-[14px] font-semibold rounded-xl hover:bg-ink/80 disabled:opacity-50 transition-colors"
                 >
                   {acting ? "처리 중..." : "승인 · 발송"}
+                </button>
+                <button
+                  onClick={() => handleAction("done")}
+                  disabled={acting}
+                  className="px-5 py-3 bg-green-600 text-white text-[13px] font-medium rounded-xl hover:bg-green-700 disabled:opacity-50 transition-colors"
+                  title="시스템 밖에서 이미 처리된 경우"
+                >
+                  처리완료
                 </button>
                 <button
                   onClick={() => handleAction("ignore")}

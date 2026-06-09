@@ -121,6 +121,14 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ ok: true });
   }
 
+  if (action === "done") {
+    await prisma.emailTask.update({
+      where: { id: Number(id) },
+      data: { status: "DONE", adminNote: adminNote ?? null, approvedAt: new Date() },
+    });
+    return NextResponse.json({ ok: true });
+  }
+
   if (action === "ignore") {
     await prisma.emailTask.update({
       where: { id: Number(id) },
