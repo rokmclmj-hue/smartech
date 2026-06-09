@@ -23,6 +23,7 @@ interface QuoteDetail {
   createdAt: string;
   expiresAt: string | null;
   taxInvoiceRequested: boolean;
+  paymentTerm: string | null;
   totalAmount: number | null;
   note: string | null;
   user: { name: string; company: string; email: string; phone: string | null; title?: string | null };
@@ -32,6 +33,18 @@ interface QuoteDetail {
 
 // 발신자(스마텍) 정보는 lib/company.ts 단일 출처에서 가져옴
 const SMARTECH = SMARTECH_COMPANY;
+
+const PAY_LABELS: Record<string, string> = {
+  a: "납품 전 현금결제",
+  b: "계약금 30% · 납품 전 70%",
+  d: "계약금 30% · 익월 말일 70%",
+  e: "정기결제 (익월 말일)",
+  c: "담당자 협의",
+};
+function paymentLabel(term: string | null, taxInvoice: boolean): string {
+  if (term && PAY_LABELS[term]) return PAY_LABELS[term];
+  return taxInvoice ? "세금계산서 발행 · 익월 말 결제" : "납품 전 현금결제";
+}
 
 function fmtPhone(p: string): string {
   const d = p.replace(/\D/g, "");
@@ -581,7 +594,7 @@ export default function QuoteDetailPage() {
           {/* SECTION 06 · TERMS */}
           <div className="section-label">— SECTION 06 · TERMS</div>
           <div className="terms">
-            <div className="row"><span className="k">PAYMENT</span><span className="v">{quote.taxInvoiceRequested ? "세금계산서 발행 · 익월 말 결제" : "납품 전 현금결제"}</span></div>
+            <div className="row"><span className="k">PAYMENT</span><span className="v">{paymentLabel(quote.paymentTerm, quote.taxInvoiceRequested)}</span></div>
             <div className="row"><span className="k">DELIVERY</span><span className="v">국내 재고분 D+1 / 해외 발주분 D+14 (협의)</span></div>
             <div className="row"><span className="k">WARRANTY</span><span className="v">12개월 · Edwards 정품 보증</span></div>
             <div className="row"><span className="k">A / S</span><span className="v">현장 서비스 · 기술지원</span></div>
@@ -707,7 +720,7 @@ export default function QuoteDetailPage() {
           <div className="row grand"><span className="k">GRAND TOTAL</span><span className="v">₩ {fmt(grandTotal)}</span></div>
         </div>
         <div className="p-terms">
-          <div className="row"><span className="k">Payment</span><span className="v">{quote.taxInvoiceRequested ? "세금계산서 발행 · 익월 말 결제" : "납품 전 현금결제"}</span></div>
+          <div className="row"><span className="k">Payment</span><span className="v">{paymentLabel(quote.paymentTerm, quote.taxInvoiceRequested)}</span></div>
           <div className="row"><span className="k">Delivery</span><span className="v">국내 재고분 D+1 / 해외 발주분 D+14 (협의)</span></div>
           <div className="row"><span className="k">Warranty</span><span className="v">12개월 · Edwards 정품 보증</span></div>
           <div className="row"><span className="k">A / S</span><span className="v">현장 서비스 · 기술지원</span></div>
