@@ -8,18 +8,22 @@ datasource db {
 }
 
 model Product {
-  id          Int         @id @default(autoincrement())
-  partNo      String      @unique
-  description String
-  costPrice   Float
-  isImportant Boolean     @default(false)
-  category    String?
-  pdfFile     String?
-  createdAt   DateTime    @default(now())
+  id             Int         @id @default(autoincrement())
+  partNo         String      @unique
+  description    String
+  costPrice      Float
+  isImportant    Boolean     @default(false)
+  category       String?
+  pdfFile        String?
+  createdAt      DateTime    @default(now())
   stock          Int         @default(0)
   isDiscontinued Boolean     @default(false)
-  imageUrl    String?
-  quoteItems  QuoteItem[]
+  imageUrl       String?
+  department     String?     // IV | SV | AK
+  minStock       Int         @default(0)
+  orderQty       Int         @default(0)
+  supplierName   String?
+  quoteItems     QuoteItem[]
 }
 
 model User {
@@ -394,6 +398,129 @@ model EmailTask {
   @@index([status])
   @@index([emailType])
   @@index([receivedAt])
+}
+
+// ─────────────────────────────────────────────────
+// 부서별 담당자 설정 (IV / SV / AK)
+// ─────────────────────────────────────────────────
+model DepartmentContact {
+  id             Int      @id @default(autoincrement())
+  code           String   @unique  // IV | SV | AK
+  contactName    String
+  contactEmail   String
+  ccEmails       String?           // 쉼표 구분 참조 이메일
+  defaultMessage String?  @db.Text // 기본 발주 문구 (수정 가능)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+// ─────────────────────────────────────────────────
+// 수동 거래명세표
+// ─────────────────────────────────────────────────
+model ManualDeliveryNote {
+  id              Int      @id @default(autoincrement())
+  noteNo          String   @unique  // SMT-YYYY-D-NNNNNN
+  status          String   @default("DRAFT")  // DRAFT | SENT
+
+  // 수신자 정보 (발행 시점 스냅샷)
+  toCompany       String
+  toName          String?
+  toEmail         String?
+  toPhone         String?
+  toBizNo         String?
+
+  // 내부 메모 (PDF 미출력 — 납품처·참고사항 등 내부 기록용)
+  memo            String?
+
+  // 통장사본 포함 여부
+  includeBankInfo Boolean  @default(true)
+
+  // 금액 스냅샷
+  totalSupply     Float    @default(0)
+  totalVat        Float    @default(0)
+  totalAmount     Float    @default(0)
+
+  // 발송 이력
+  sentAt          DateTime?
+  sentTo          String?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  items           ManualDeliveryNoteItem[]
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model ManualDeliveryNoteItem {
+  id          Int                @id @default(autoincrement())
+  noteId      Int
+  note        ManualDeliveryNote @relation(fields: [noteId], references: [id], onDelete: Cascade)
+
+  // 발행 시점 스냅샷 (제품 변경돼도 이력 불변)
+  partNo      String
+  description String
+  quantity    Int
+  unitPrice   Float
+
+  // 원본 제품 참조 (선택 — 스냅샷이 실제 값)
+  productId   Int?
+  sortOrder   Int    @default(0)
+
+  @@index([noteId])
+}
+
+// ─────────────────────────────────────────────────
+// 수동 발주서 (스마텍 → 공급업체)
+// ─────────────────────────────────────────────────
+model ManualPurchaseOrder {
+  id              Int      @id @default(autoincrement())
+  orderNo         String   @unique  // SMT-YYYY-P-NNNNNN
+  status          String   @default("DRAFT")  // DRAFT | SENT
+
+  // 담당 부서
+  department      String   // IV | SV | AK
+
+  // 공급업체 정보 (발행 시점 스냅샷)
+  toCompany       String
+  toName          String?
+  toEmail         String
+  ccEmails        String?  // 쉼표 구분 참조 이메일
+
+  // 발주 정보
+  orderDate       DateTime @default(now())   // 발주일
+  requestedDate   DateTime?                  // 납기 요청일
+  message         String?  @db.Text          // 발주 문구 (기본값 from DepartmentContact)
+  memo            String?                    // 내부 메모
+
+  // 발송 이력
+  sentAt          DateTime?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  items           ManualPurchaseOrderItem[]
+
+  @@index([status])
+  @@index([department])
+  @@index([createdAt])
+}
+
+model ManualPurchaseOrderItem {
+  id          Int                 @id @default(autoincrement())
+  orderId     Int
+  order       ManualPurchaseOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  // 발행 시점 스냅샷
+  partNo      String
+  description String
+  quantity    Int
+  unitPrice   Float               // 발주서는 단가 필수
+
+  // 원본 제품 참조 (선택)
+  productId   Int?
+  sortOrder   Int    @default(0)
+
+  @@index([orderId])
 }
 
 // AI 챗봇 대화 기록

@@ -136,3 +136,53 @@ export async function sendApprovalNotice(
     text: `${customerName} 고객님, 안녕하세요.\n\n고객님의 스마텍 계정이 ${tier} 등급으로 승인되었습니다.\n이제 해당 등급의 가격 정책이 적용됩니다.\n\n감사합니다.`,
   });
 }
+
+export async function sendManualDeliveryNote(opts: {
+  to: string;
+  pdfBuffer: Buffer;
+  noteNo: string;
+  toCompany: string;
+  bodyText?: string;
+}): Promise<void> {
+  await transporter.sendMail({
+    from: `"스마텍" <${process.env.GMAIL_USER}>`,
+    to: opts.to,
+    subject: `[스마텍] 거래명세표 ${opts.noteNo} 발송드립니다.`,
+    text:
+      opts.bodyText ??
+      `${opts.toCompany} 담당자님, 안녕하세요.\n\n스마텍입니다.\n거래명세표(${opts.noteNo})를 첨부하여 드립니다.\n궁금하신 사항이 있으시면 언제든 연락 주세요.\n\n감사합니다.\n(주)스마텍`,
+    attachments: [
+      {
+        filename: `거래명세표_${opts.noteNo}.pdf`,
+        content: opts.pdfBuffer,
+        contentType: "application/pdf",
+      },
+    ],
+  });
+}
+
+export async function sendManualPurchaseOrder(opts: {
+  to: string;
+  cc?: string[];
+  pdfBuffer: Buffer;
+  orderNo: string;
+  toCompany: string;
+  bodyText?: string;
+}): Promise<void> {
+  await transporter.sendMail({
+    from: `"스마텍" <${process.env.GMAIL_USER}>`,
+    to: opts.to,
+    cc: opts.cc?.length ? opts.cc : undefined,
+    subject: `[스마텍] 발주서 ${opts.orderNo} 발송드립니다.`,
+    text:
+      opts.bodyText ??
+      `${opts.toCompany} 담당자님, 안녕하세요.\n\n스마텍입니다.\n발주서(${opts.orderNo})를 첨부하여 드립니다.\n납기 확인 후 회신 부탁드립니다.\n\n감사합니다.\n(주)스마텍`,
+    attachments: [
+      {
+        filename: `발주서_${opts.orderNo}.pdf`,
+        content: opts.pdfBuffer,
+        contentType: "application/pdf",
+      },
+    ],
+  });
+}
