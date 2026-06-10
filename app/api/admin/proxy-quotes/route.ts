@@ -150,23 +150,24 @@ export async function POST(req: NextRequest) {
         where: { companyName: g.company.trim() },
       });
       if (!existing) {
-        await prisma.knownCompany.create({
-          data: {
-            companyName: g.company.trim(),
-            phone: g.phone?.trim() || null,
-            email: g.email?.trim() || null,
-            tier: g.tier || "ENDUSER",
-            source: "manual",
-            contacts: g.name.trim() ? {
-              create: {
-                name: g.name.trim(),
-                title: g.title?.trim() || null,
-                mobile: g.phone?.trim() || null,
-                email: g.email?.trim() || null,
-              },
-            } : undefined,
-          },
-        });
+        const companyData: Parameters<typeof prisma.knownCompany.create>[0]["data"] = {
+          companyName: g.company.trim(),
+          phone: g.phone?.trim() || null,
+          email: g.email?.trim() || null,
+          tier: g.tier || "ENDUSER",
+          source: "manual",
+        };
+        if (g.name.trim()) {
+          companyData.contacts = {
+            create: {
+              name: g.name.trim(),
+              title: g.title?.trim() || null,
+              mobile: g.phone?.trim() || null,
+              email: g.email?.trim() || null,
+            },
+          };
+        }
+        await prisma.knownCompany.create({ data: companyData });
       }
     }
 
