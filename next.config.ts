@@ -10,6 +10,10 @@ const nextConfig: NextConfig = {
     ];
   },
   serverExternalPackages: ["bcryptjs", "@prisma/client", "prisma", "xlsx", "sharp"],
+  outputFileTracingIncludes: {
+    "/api/admin/delivery-notes": ["./public/bank-account.png"],
+    "/api/admin/delivery-notes/[id]/pdf": ["./public/bank-account.png"],
+  },
   outputFileTracingExcludes: {
     "*": [
       "./data/**",

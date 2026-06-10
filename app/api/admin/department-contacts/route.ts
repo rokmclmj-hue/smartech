@@ -12,6 +12,9 @@ const DEFAULT_MESSAGES: Record<string, string> = {
 
 // GET — 전체 조회 (없으면 기본값으로 초기화)
 export async function GET() {
+  if (!(await getAdminSession()))
+    return NextResponse.json({ error: "권한 없음" }, { status: 403 });
+
   const existing = await prisma.departmentContact.findMany({
     orderBy: { code: "asc" },
   });

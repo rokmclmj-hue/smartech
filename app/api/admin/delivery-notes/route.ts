@@ -33,36 +33,39 @@ export async function POST(req: NextRequest) {
   const totalVat = Math.round(totalSupply * 0.1);
   const totalAmount = totalSupply + totalVat;
 
-  // 임시 noteNo로 먼저 생성 (ID 확보 후 업데이트)
-  const note = await prisma.manualDeliveryNote.create({
-    data: {
-      noteNo: "TEMP",
-      toCompany: body.toCompany.trim(),
-      toName: body.toName?.trim() || null,
-      toEmail: body.toEmail?.trim() || null,
-      toPhone: body.toPhone?.trim() || null,
-      toBizNo: body.toBizNo?.trim() || null,
-      memo: body.memo?.trim() || null,
-      includeBankInfo: body.includeBankInfo !== false,
-      totalSupply,
-      totalVat,
-      totalAmount,
-      items: {
-        create: items.map((item, idx) => ({
-          partNo: item.partNo,
-          description: item.description,
-          quantity: Number(item.quantity),
-          unitPrice: Number(item.unitPrice),
-          productId: item.productId ?? null,
-          sortOrder: item.sortOrder ?? idx,
-        })),
+  const year = new Date().getFullYear();
+
+  // 트랜잭션으로 TEMP 생성 → 실제 번호 업데이트를 원자적으로 처리
+  const [, updated] = await prisma.$transaction(async (tx) => {
+    const note = await tx.manualDeliveryNote.create({
+      data: {
+        noteNo: "TEMP",
+        toCompany: body.toCompany.trim(),
+        toName: body.toName?.trim() || null,
+        toEmail: body.toEmail?.trim() || null,
+        toPhone: body.toPhone?.trim() || null,
+        toBizNo: body.toBizNo?.trim() || null,
+        memo: body.memo?.trim() || null,
+        includeBankInfo: body.includeBankInfo !== false,
+        totalSupply,
+        totalVat,
+        totalAmount,
+        items: {
+          create: items.map((item, idx) => ({
+            partNo: item.partNo,
+            description: item.description,
+            quantity: Number(item.quantity),
+            unitPrice: Number(item.unitPrice),
+            productId: item.productId ?? null,
+            sortOrder: item.sortOrder ?? idx,
+          })),
+        },
       },
-    },
+    });
+    const noteNo = `SMT-${year}-D-${String(note.id).padStart(6, "0")}`;
+    const u = await tx.manualDeliveryNote.update({ where: { id: note.id }, data: { noteNo } });
+    return [note, u] as const;
   });
 
-  const year = new Date().getFullYear();
-  const noteNo = `SMT-${year}-D-${String(note.id).padStart(6, "0")}`;
-  await prisma.manualDeliveryNote.update({ where: { id: note.id }, data: { noteNo } });
-
-  return NextResponse.json({ id: note.id, noteNo });
+  return NextResponse.json({ id: updated.id, noteNo: updated.noteNo });
 }

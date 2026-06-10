@@ -36,38 +36,40 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "모든 품목에 단가를 입력해주세요." }, { status: 400 });
   }
 
-  // 두 단계 발주서 번호 생성: TEMP → SMT-YYYY-P-NNNNNN
-  const order = await prisma.manualPurchaseOrder.create({
-    data: {
-      orderNo: "TEMP",
-      department: department.trim(),
-      toCompany: toCompany.trim(),
-      toName: toName?.trim() ?? null,
-      toEmail: toEmail?.trim() ?? null,
-      ccEmails: ccEmails?.trim() ?? null,
-      orderDate: orderDate ? new Date(orderDate) : new Date(),
-      requestedDate: requestedDate ? new Date(requestedDate) : null,
-      message: message?.trim() ?? null,
-      memo: memo?.trim() ?? null,
-      items: {
-        create: items.map((item: { partNo?: string; description?: string; quantity?: number; unitPrice: number; productId?: number; sortOrder?: number }, idx: number) => ({
-          partNo: item.partNo?.trim() ?? "",
-          description: item.description?.trim() ?? "",
-          quantity: Number(item.quantity ?? 1),
-          unitPrice: Number(item.unitPrice),
-          productId: item.productId ?? null,
-          sortOrder: item.sortOrder ?? idx,
-        })),
-      },
-    },
-  });
-
   const year = new Date().getFullYear();
-  const finalOrderNo = `SMT-${year}-P-${String(order.id).padStart(6, "0")}`;
-  const updated = await prisma.manualPurchaseOrder.update({
-    where: { id: order.id },
-    data: { orderNo: finalOrderNo },
-    include: { items: { orderBy: { sortOrder: "asc" } } },
+
+  // 트랜잭션으로 TEMP 생성 → 실제 번호 업데이트를 원자적으로 처리
+  const updated = await prisma.$transaction(async (tx) => {
+    const order = await tx.manualPurchaseOrder.create({
+      data: {
+        orderNo: "TEMP",
+        department: department.trim(),
+        toCompany: toCompany.trim(),
+        toName: toName?.trim() || null,
+        toEmail: toEmail?.trim() || null,
+        ccEmails: ccEmails?.trim() || null,
+        orderDate: orderDate ? new Date(orderDate) : new Date(),
+        requestedDate: requestedDate ? new Date(requestedDate) : null,
+        message: message?.trim() || null,
+        memo: memo?.trim() || null,
+        items: {
+          create: items.map((item: { partNo?: string; description?: string; quantity?: number; unitPrice: number; productId?: number; sortOrder?: number }, idx: number) => ({
+            partNo: item.partNo?.trim() ?? "",
+            description: item.description?.trim() ?? "",
+            quantity: Number(item.quantity ?? 1),
+            unitPrice: Number(item.unitPrice),
+            productId: item.productId ?? null,
+            sortOrder: item.sortOrder ?? idx,
+          })),
+        },
+      },
+    });
+    const finalOrderNo = `SMT-${year}-P-${String(order.id).padStart(6, "0")}`;
+    return tx.manualPurchaseOrder.update({
+      where: { id: order.id },
+      data: { orderNo: finalOrderNo },
+      include: { items: { orderBy: { sortOrder: "asc" } } },
+    });
   });
 
   return NextResponse.json(updated, { status: 201 });

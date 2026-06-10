@@ -484,7 +484,7 @@ model ManualPurchaseOrder {
   // 공급업체 정보 (발행 시점 스냅샷)
   toCompany       String
   toName          String?
-  toEmail         String
+  toEmail         String?  // 발주 초기엔 이메일 미확정일 수 있음
   ccEmails        String?  // 쉼표 구분 참조 이메일
 
   // 발주 정보

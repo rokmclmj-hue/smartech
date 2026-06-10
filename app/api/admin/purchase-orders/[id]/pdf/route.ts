@@ -10,8 +10,11 @@ export async function GET(req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: "권한 없음" }, { status: 403 });
 
   const { id } = await params;
+  const nId = parseInt(id);
+  if (isNaN(nId)) return NextResponse.json({ error: "잘못된 ID" }, { status: 400 });
+
   const order = await prisma.manualPurchaseOrder.findUnique({
-    where: { id: parseInt(id) },
+    where: { id: nId },
     include: { items: { orderBy: { sortOrder: "asc" } } },
   });
   if (!order) return NextResponse.json({ error: "찾을 수 없음" }, { status: 404 });
