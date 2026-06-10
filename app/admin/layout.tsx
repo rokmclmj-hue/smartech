@@ -68,15 +68,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </Link>
 
           {/* 데스크톱 네비 */}
-          <nav className="hidden lg:flex items-center gap-1">
-            {NAV_ITEMS.map((item) => {
+          <nav className="hidden lg:flex items-center">
+            {NAV_ITEMS.map((item, index) => {
               const active = isActive(item);
+              const prev = NAV_ITEMS[index - 1];
+              const showSep = index > 0 && !item.highlight && !prev?.highlight;
               if (item.highlight) {
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`group relative ml-2 px-3 py-1.5 rounded-md transition-all ${
+                    className={`group relative mx-2 px-3 py-1.5 rounded-md transition-all ${
                       active
                         ? "bg-edred text-white shadow-sm"
                         : "bg-edred text-white hover:brightness-110 shadow-sm"
@@ -94,20 +96,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 );
               }
               return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`group relative px-3 py-2 transition-colors ${
-                    active ? "text-ink" : "text-dim hover:text-ink"
-                  }`}
-                >
-                  <span className="text-[14px] font-medium tracking-tight">
-                    {item.label}
-                  </span>
-                  {active && (
-                    <span className="absolute left-3 right-3 -bottom-px h-0.5 bg-edred" />
-                  )}
-                </Link>
+                <div key={item.href} className="flex items-center">
+                  {showSep && <span className="w-px h-3.5 bg-ink/15 shrink-0" aria-hidden />}
+                  <Link
+                    href={item.href}
+                    className={`group relative px-3 py-2 transition-colors ${
+                      active ? "text-ink" : "text-dim hover:text-ink"
+                    }`}
+                  >
+                    <span className="text-[14px] font-medium tracking-tight">
+                      {item.label}
+                    </span>
+                    {active && (
+                      <span className="absolute left-3 right-3 -bottom-px h-0.5 bg-edred" />
+                    )}
+                  </Link>
+                </div>
               );
             })}
           </nav>
