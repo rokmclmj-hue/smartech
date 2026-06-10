@@ -185,6 +185,9 @@ function AdminProxyQuotesInner() {
   // 결제조건
   const [paymentTerm, setPaymentTerm] = useState<string | null>(null);
 
+  // 거래처 저장 옵션
+  const [saveToCompany, setSaveToCompany] = useState(true);
+
   // 미리보기 모달
   const [showPreview, setShowPreview] = useState(false);
 
@@ -467,7 +470,7 @@ function AdminProxyQuotesInner() {
       const body =
         selectedCustomer?.source === "user"
           ? { customerId: selectedCustomer.id, items: itemsPayload, paymentTerm: paymentTerm ?? undefined }
-          : { guest, items: itemsPayload, paymentTerm: paymentTerm ?? undefined };
+          : { guest, items: itemsPayload, paymentTerm: paymentTerm ?? undefined, saveToCompany: showDirect ? saveToCompany : false };
 
       const res = await fetch("/api/admin/proxy-quotes", {
         method: "POST",
@@ -825,6 +828,19 @@ function AdminProxyQuotesInner() {
                     ))}
                   </div>
                 </div>
+
+                {/* 거래처 저장 옵션 */}
+                <label className="flex items-center gap-2.5 cursor-pointer select-none group">
+                  <input
+                    type="checkbox"
+                    checked={saveToCompany}
+                    onChange={(e) => setSaveToCompany(e.target.checked)}
+                    className="w-4 h-4 accent-edred cursor-pointer"
+                  />
+                  <span className="text-[13px] text-ink group-hover:text-edred transition-colors">
+                    거래처에 저장 <span className="dim text-[11px]">— 다음 견적부터 검색 가능</span>
+                  </span>
+                </label>
               </div>
             )}
           </div>

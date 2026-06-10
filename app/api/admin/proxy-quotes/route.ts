@@ -34,6 +34,7 @@ export async function POST(req: NextRequest) {
   const items = body.items as LineInput[] | undefined;
   const note = typeof body.note === "string" ? body.note : null;
   const taxInvoiceRequested = Boolean(body.taxInvoiceRequested);
+  const paymentTerm = typeof body.paymentTerm === "string" ? body.paymentTerm : null;
 
   if (!items || items.length === 0) {
     return NextResponse.json({ error: "품목이 없습니다." }, { status: 400 });
@@ -108,6 +109,7 @@ export async function POST(req: NextRequest) {
         status: "SENT",
         note,
         taxInvoiceRequested,
+        paymentTerm,
         totalAmount,
         expiresAt,
         items: { create: itemData },
@@ -129,6 +131,7 @@ export async function POST(req: NextRequest) {
         status: "SENT",
         note,
         taxInvoiceRequested,
+        paymentTerm,
         totalAmount,
         expiresAt,
         guestName: g.name.trim(),
@@ -140,6 +143,33 @@ export async function POST(req: NextRequest) {
         items: { create: itemData },
       },
     });
+
+    // 거래처 자동 등록
+    if (body.saveToCompany) {
+      const existing = await prisma.knownCompany.findFirst({
+        where: { companyName: g.company.trim() },
+      });
+      if (!existing) {
+        await prisma.knownCompany.create({
+          data: {
+            companyName: g.company.trim(),
+            phone: g.phone?.trim() || null,
+            email: g.email?.trim() || null,
+            tier: g.tier || "ENDUSER",
+            source: "manual",
+            contacts: g.name.trim() ? {
+              create: {
+                name: g.name.trim(),
+                title: g.title?.trim() || null,
+                mobile: g.phone?.trim() || null,
+                email: g.email?.trim() || null,
+              },
+            } : undefined,
+          },
+        });
+      }
+    }
+
     return NextResponse.json({ quoteId: quote.id });
   }
 
