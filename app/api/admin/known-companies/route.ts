@@ -28,6 +28,30 @@ export async function GET() {
   return NextResponse.json({ companies, stats });
 }
 
+// PATCH /api/admin/known-companies?id=N — 회사 정보 수정
+export async function PATCH(req: NextRequest) {
+  if (!(await requireAdmin()))
+    return NextResponse.json({ error: "권한 없음" }, { status: 403 });
+
+  const id = parseInt(new URL(req.url).searchParams.get("id") ?? "");
+  if (!id) return NextResponse.json({ error: "id 필요" }, { status: 400 });
+
+  const body = await req.json().catch(() => null);
+  if (!body) return NextResponse.json({ error: "잘못된 요청" }, { status: 400 });
+
+  const updated = await prisma.knownCompany.update({
+    where: { id },
+    data: {
+      ...(body.companyName !== undefined && { companyName: body.companyName }),
+      ...(body.phone !== undefined && { phone: body.phone }),
+      ...(body.email !== undefined && { email: body.email }),
+      ...(body.tier !== undefined && { tier: body.tier }),
+      ...(body.paymentTerm !== undefined && { paymentTerm: body.paymentTerm }),
+    },
+  });
+  return NextResponse.json({ ok: true, company: updated });
+}
+
 // DELETE /api/admin/known-companies — 전체 초기화 (재임포트 전 사용)
 export async function DELETE(req: NextRequest) {
   if (!(await requireAdmin()))

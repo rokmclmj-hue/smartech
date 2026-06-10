@@ -33,6 +33,7 @@ export async function GET(req: NextRequest) {
       phone: u.phone ?? "",
       email: u.email ?? "",
       tier: u.tier,
+      paymentTerm: null as string | null,
       contacts: [] as { name: string; title: string | null; mobile: string | null; email: string | null }[],
     }));
 
@@ -56,6 +57,7 @@ export async function GET(req: NextRequest) {
       phone: c.contacts[0]?.mobile ?? c.contacts[0]?.tel ?? c.phone ?? "",
       email: c.contacts[0]?.email ?? c.email ?? "",
       tier: c.tier,
+      paymentTerm: c.paymentTerm ?? null,
       contacts: c.contacts.map((ct) => ({
         name: ct.name, title: ct.title,
         mobile: ct.mobile, email: ct.email,

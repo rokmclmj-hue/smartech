@@ -72,6 +72,7 @@ model Quote {
   guestPhone          String?
   guestTitle          String?
   guestTier           String?
+  paymentTerm         String?
   user                User?       @relation(fields: [userId], references: [id])
   createdByAdmin      User?       @relation("QuoteCreatedBy", fields: [createdByAdminId], references: [id])
   items               QuoteItem[]
@@ -304,6 +305,7 @@ model KnownCompany {
   phone       String?
   email       String?
   tier        String         // DEALER | OEM | ENDUSER | KEY_DEALER | VIP_DEALER
+  paymentTerm String?        // a=납품전현금 b=계약30%납품전70% d=계약30%익월말일70% e=정기결제 c=직접입력
   source      String         @default("excel") // excel | manual | html_backup
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
