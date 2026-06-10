@@ -4,6 +4,149 @@ import { useEffect, useState } from "react";
 import { SMARTECH_COMPANY } from "@/lib/company";
 import MarginSettings from "@/components/MarginSettings";
 
+// ─── 부서 담당자 설정 ────────────────────────────────────────
+type DeptContact = {
+  id: number;
+  code: string;
+  contactName: string;
+  contactEmail: string;
+  ccEmails: string | null;
+  defaultMessage: string | null;
+};
+
+const DEPT_LABELS: Record<string, string> = { IV: "이온 진공 (IV)", SV: "표준 진공 (SV)", AK: "AK 부서" };
+
+function DepartmentContactSettings() {
+  const [contacts, setContacts] = useState<DeptContact[]>([]);
+  const [edits, setEdits] = useState<Record<string, DeptContact>>({});
+  const [saving, setSaving] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ code: string; ok: boolean } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/admin/department-contacts")
+      .then((r) => r.json())
+      .then((data: DeptContact[]) => {
+        setContacts(data);
+        const map: Record<string, DeptContact> = {};
+        data.forEach((d) => (map[d.code] = { ...d }));
+        setEdits(map);
+      });
+  }, []);
+
+  const handleSave = async (code: string) => {
+    setSaving(code);
+    try {
+      const res = await fetch("/api/admin/department-contacts", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(edits[code]),
+      });
+      if (res.ok) {
+        setContacts((prev) => prev.map((c) => (c.code === code ? edits[code] : c)));
+        setToast({ code, ok: true });
+      } else {
+        setToast({ code, ok: false });
+      }
+    } finally {
+      setSaving(null);
+      setTimeout(() => setToast(null), 3000);
+    }
+  };
+
+  const update = (code: string, field: keyof DeptContact, value: string) => {
+    setEdits((prev) => ({ ...prev, [code]: { ...prev[code], [field]: value } }));
+  };
+
+  const isDirty = (code: string) => {
+    const orig = contacts.find((c) => c.code === code);
+    if (!orig) return false;
+    const e = edits[code];
+    return (
+      e.contactName !== orig.contactName ||
+      e.contactEmail !== orig.contactEmail ||
+      (e.ccEmails ?? "") !== (orig.ccEmails ?? "") ||
+      (e.defaultMessage ?? "") !== (orig.defaultMessage ?? "")
+    );
+  };
+
+  if (contacts.length === 0)
+    return <div className="mono text-[11px] dim tracking-[0.12em] uppercase py-8 text-center">— Loading</div>;
+
+  return (
+    <div className="divide-y hair">
+      {contacts.map((c) => {
+        const e = edits[c.code] ?? c;
+        const dirty = isDirty(c.code);
+        const t = toast?.code === c.code ? toast : null;
+        return (
+          <div key={c.code} className="px-5 py-5 space-y-3">
+            <div className="flex items-center gap-3">
+              <span className="mono text-[11px] font-bold tracking-[0.12em] bg-ink text-paper px-2 py-0.5">{c.code}</span>
+              <span className="text-[13px] font-semibold text-ink">{DEPT_LABELS[c.code] ?? c.code}</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl">
+              <div>
+                <div className="mono text-[10px] dim tracking-[0.08em] uppercase mb-1">담당자 이름</div>
+                <input
+                  value={e.contactName}
+                  onChange={(ev) => update(c.code, "contactName", ev.target.value)}
+                  placeholder="홍길동"
+                  className="w-full border hair px-3 py-1.5 text-[13px] focus:outline-none focus:border-ink"
+                />
+              </div>
+              <div>
+                <div className="mono text-[10px] dim tracking-[0.08em] uppercase mb-1">담당자 이메일</div>
+                <input
+                  type="email"
+                  value={e.contactEmail}
+                  onChange={(ev) => update(c.code, "contactEmail", ev.target.value)}
+                  placeholder="contact@supplier.com"
+                  className="w-full border hair px-3 py-1.5 text-[13px] mono focus:outline-none focus:border-ink"
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <div className="mono text-[10px] dim tracking-[0.08em] uppercase mb-1">
+                  참조(CC) 이메일 <span className="normal-case text-[10px]">— 쉼표로 구분</span>
+                </div>
+                <input
+                  value={e.ccEmails ?? ""}
+                  onChange={(ev) => update(c.code, "ccEmails", ev.target.value)}
+                  placeholder="cc1@example.com, cc2@example.com"
+                  className="w-full border hair px-3 py-1.5 text-[13px] mono focus:outline-none focus:border-ink"
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <div className="mono text-[10px] dim tracking-[0.08em] uppercase mb-1">기본 발주 문구</div>
+                <textarea
+                  value={e.defaultMessage ?? ""}
+                  onChange={(ev) => update(c.code, "defaultMessage", ev.target.value)}
+                  rows={4}
+                  className="w-full border hair px-3 py-2 text-[13px] focus:outline-none focus:border-ink resize-y"
+                />
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => handleSave(c.code)}
+                disabled={saving === c.code || !dirty}
+                className="mono text-[10px] tracking-[0.1em] uppercase bg-edred text-white px-4 py-2 hover:brightness-110 transition-all disabled:opacity-40"
+              >
+                {saving === c.code ? "저장 중..." : "저장"}
+              </button>
+              {dirty && <span className="mono text-[10px] text-yellow-600 tracking-[0.06em]">저장되지 않은 변경사항</span>}
+              {t && (
+                <span className={`mono text-[10px] tracking-[0.06em] ${t.ok ? "text-green-600" : "text-red-600"}`}>
+                  {t.ok ? "✓ 저장됐어요" : "✗ 저장 실패"}
+                </span>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function formatPhone(v: string) {
   const digits = v.replace(/\D/g, "").slice(0, 11);
   if (digits.length <= 3) return digits;
@@ -325,6 +468,18 @@ export default function AdminSettingsPage() {
         <div className="px-5 py-5">
           <MarginSettings />
         </div>
+      </div>
+
+      {/* 부서 담당자 설정 */}
+      <div className="border hair bg-paper">
+        <div className="px-5 py-3 border-b hair flex items-center justify-between">
+          <h2 className="text-[14px] font-semibold text-ink tracking-tight">부서별 발주 담당자 설정</h2>
+          <span className="mono text-[10px] text-edred tracking-[0.12em] uppercase">IV · SV · AK</span>
+        </div>
+        <p className="px-5 pt-4 pb-2 text-[13px] dim leading-[1.6]">
+          발주서 작성 시 자동으로 불러올 공급업체 담당자 정보와 기본 발주 문구를 설정합니다.
+        </p>
+        <DepartmentContactSettings />
       </div>
 
       {/* 빠른 링크 발송 */}
