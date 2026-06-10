@@ -65,10 +65,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="display text-[28px] md:text-[32px] tracking-[-0.045em]">
               Smartech<span style={{ color: "#c00020" }}>.</span>
             </div>
-            <span className="hidden sm:block w-px h-6 bg-ink/60" aria-hidden />
-            <div className="hidden sm:block text-[10px] mono tracking-[0.22em] dim uppercase">
-              Admin
-            </div>
           </Link>
 
           {/* 데스크톱 네비 */}
