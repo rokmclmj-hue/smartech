@@ -85,7 +85,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     }`}
                   >
                     <span className="flex items-center gap-1.5">
-                      <span className="text-[14px] font-semibold tracking-tight">
+                      <span className="text-[15px] font-semibold tracking-tight">
                         {item.label}
                       </span>
                       <span className="mono text-[9px] font-bold tracking-[0.15em] bg-white text-edred px-1.5 py-[2px] rounded">
@@ -104,7 +104,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                       active ? "text-ink" : "text-dim hover:text-ink"
                     }`}
                   >
-                    <span className="text-[14px] font-medium tracking-tight">
+                    <span className="text-[15px] font-medium tracking-tight">
                       {item.label}
                     </span>
                     {active && (
@@ -175,7 +175,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                       onClick={() => setMobileOpen(false)}
                       className="flex items-center gap-3 my-2 px-3 py-3 rounded-md bg-edred text-white shadow-sm"
                     >
-                      <span className="text-[14px] font-semibold tracking-tight">
+                      <span className="text-[15px] font-semibold tracking-tight">
                         {item.label}
                       </span>
                       <span className="ml-auto mono text-[9px] font-bold tracking-[0.15em] bg-white text-edred px-1.5 py-[2px] rounded">
@@ -193,7 +193,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                       active ? "text-ink" : "text-dim"
                     }`}
                   >
-                    <span className="text-[14px] font-medium tracking-tight">
+                    <span className="text-[15px] font-medium tracking-tight">
                       {item.label}
                     </span>
                     {active && (
