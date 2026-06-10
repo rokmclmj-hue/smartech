@@ -57,7 +57,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     pdfBuffer: pdf,
     orderNo: order.orderNo,
     toCompany: order.toCompany,
-    bodyText: body.bodyText ?? undefined,
+    bodyText: body.bodyText ?? order.message ?? undefined,
   });
 
   await prisma.manualPurchaseOrder.update({

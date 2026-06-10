@@ -5,9 +5,15 @@ import { getAdminSession } from "@/lib/admin-auth";
 const DEPT_CODES = ["IV", "SV", "AK"] as const;
 
 const DEFAULT_MESSAGES: Record<string, string> = {
-  IV: `안녕하세요.\n(주)스마텍 영업팀입니다.\n\n아래와 같이 발주 드리오니 검토 후 납기 회신 부탁드립니다.\n\n감사합니다.`,
-  SV: `안녕하세요.\n(주)스마텍 영업팀입니다.\n\n아래와 같이 발주 드리오니 검토 후 납기 회신 부탁드립니다.\n\n감사합니다.`,
-  AK: `안녕하세요.\n(주)스마텍 영업팀입니다.\n\n아래와 같이 발주 드리오니 검토 후 납기 회신 부탁드립니다.\n\n감사합니다.`,
+  IV: `안녕하세요 이종원 수석님,\n\n첨부와 같이 발주서를 송부하오니 진행부탁드립니다.\n\n감사합니다.`,
+  SV: `안녕하세요 현지선 수석님,\n\n첨부와 같이 발주서를 송부하오니 진행부탁드립니다.\n\n감사합니다.`,
+  AK: `안녕하세요 정재희 차장님,\n\n첨부와 같이 발주서를 송부하오니 진행부탁드립니다.\n\n감사합니다.`,
+};
+
+const DEFAULT_CONTACTS: Record<string, { contactName: string; contactEmail: string; ccEmails: string | null }> = {
+  IV: { contactName: "이종원 수석부장님", contactEmail: "patrick.lee@edwardsvacuum.com", ccEmails: null },
+  SV: { contactName: "현지선 수석부장님", contactEmail: "Monica.hyun@edwardsvacuum.com", ccEmails: null },
+  AK: { contactName: "정재희 차장님", contactEmail: "Jenny.Jung@edwardsvacuum.com", ccEmails: "anthony.kim@edwardsvacuum.com" },
 };
 
 // GET — 전체 조회 (없으면 기본값으로 초기화)
@@ -26,16 +32,34 @@ export async function GET() {
     await prisma.departmentContact.createMany({
       data: missing.map((code) => ({
         code,
-        contactName: "",
-        contactEmail: "",
+        contactName: DEFAULT_CONTACTS[code]?.contactName ?? "",
+        contactEmail: DEFAULT_CONTACTS[code]?.contactEmail ?? "",
+        ccEmails: DEFAULT_CONTACTS[code]?.ccEmails ?? null,
         defaultMessage: DEFAULT_MESSAGES[code],
       })),
     });
-    const all = await prisma.departmentContact.findMany({ orderBy: { code: "asc" } });
-    return NextResponse.json(all);
   }
 
-  return NextResponse.json(existing);
+  // contactEmail이 비어있는 레코드는 기본값으로 업데이트
+  const needsUpdate = existing.filter((d) => !d.contactEmail);
+  if (needsUpdate.length > 0) {
+    await Promise.all(
+      needsUpdate.map((d) =>
+        prisma.departmentContact.update({
+          where: { code: d.code },
+          data: {
+            contactName: DEFAULT_CONTACTS[d.code]?.contactName ?? d.contactName,
+            contactEmail: DEFAULT_CONTACTS[d.code]?.contactEmail ?? d.contactEmail,
+            ccEmails: DEFAULT_CONTACTS[d.code]?.ccEmails ?? d.ccEmails,
+            defaultMessage: d.defaultMessage || DEFAULT_MESSAGES[d.code] || d.defaultMessage,
+          },
+        })
+      )
+    );
+  }
+
+  const all = await prisma.departmentContact.findMany({ orderBy: { code: "asc" } });
+  return NextResponse.json(all);
 }
 
 // PATCH — 단건 수정

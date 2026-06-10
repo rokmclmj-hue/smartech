@@ -1001,15 +1001,7 @@ function ManualPurchaseOrderDocument({ data }: { data: ManualPurchaseOrderForPdf
         )
       ),
 
-      // Section 02: 발주 문구
-      data.message
-        ? el(View, { style: PO.messageBox },
-            el(Text, { style: PO.messageLabel }, "— 발주 내용"),
-            el(Text, { style: PO.messageText }, data.message)
-          )
-        : null,
-
-      // Section 03: 품목 테이블
+      // Section 02: 품목 테이블
       el(Text, { style: PO.sectionLabel }, `— 02  발주 품목 (${data.items.length} LINES · ${totalQty} EA)`),
       el(View, { style: S.table },
         el(View, { style: PO.tableHeader },
