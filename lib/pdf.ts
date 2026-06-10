@@ -5,6 +5,7 @@ import {
   Page,
   Text,
   View,
+  Image,
   StyleSheet,
   renderToBuffer,
   Font,
@@ -687,6 +688,203 @@ export async function generateDeliveryNotePdf(
   data: DeliveryNoteForPdf
 ): Promise<Buffer> {
   const doc = React.createElement(DeliveryNoteDocument, { data });
+  const arrayBuffer = await renderToBuffer(doc as React.ReactElement<DocumentProps>);
+  return Buffer.from(arrayBuffer);
+}
+
+// ─────────────────────────────────────────────────
+// 수동 거래명세표 PDF
+// ─────────────────────────────────────────────────
+export interface ManualDeliveryNoteItemForPdf {
+  partNo: string;
+  description: string;
+  quantity: number;
+  unitPrice: number;
+}
+
+export interface ManualDeliveryNoteForPdf {
+  noteNo: string;
+  createdAt: Date;
+  toCompany: string;
+  toName?: string | null;
+  toEmail?: string | null;
+  toPhone?: string | null;
+  toBizNo?: string | null;
+  includeBankInfo: boolean;
+  items: ManualDeliveryNoteItemForPdf[];
+}
+
+function ManualDeliveryNoteDocument({ data }: { data: ManualDeliveryNoteForPdf }) {
+  const el = React.createElement;
+  const issued = new Date(data.createdAt);
+
+  const totalSupply = data.items.reduce((s, i) => s + i.unitPrice * i.quantity, 0);
+  const totalVat = Math.round(totalSupply * VAT_RATE);
+  const grand = totalSupply + totalVat;
+  const totalQty = data.items.reduce((s, i) => s + i.quantity, 0);
+
+  const bankImgPath = path.join(process.cwd(), "public", "bank-account.png");
+
+  const pages = [
+    // ── 1페이지: 거래명세표 본문 ──
+    el(Page, { key: "main", size: "A4", style: S.page },
+      el(View, { style: DS.topBar },
+        el(Text, { style: DS.topBarLeft }, `${data.noteNo}  ·  SMARTECH DELIVERY NOTE`),
+        el(Text, { style: DS.topBarRight }, `ISSUED · ${fmtDate(issued)}`)
+      ),
+      el(View, { style: DS.titleArea },
+        el(View, { style: DS.titleLeft },
+          el(Text, { style: DS.noteTitle }, "거 래 명 세 표"),
+          el(Text, { style: DN.noteSubtitle }, "DELIVERY NOTE  ·  공급자 보관용 / 공급받는자 인수용")
+        ),
+        el(View, { style: DS.titleRight },
+          el(Text, { style: DS.noteNo }, data.noteNo),
+          el(Text, { style: DS.noteStatus }, `발행일 ${fmtDate(issued)}`)
+        )
+      ),
+
+      // Section 01: 거래처 정보
+      el(Text, { style: DS.sectionLabel }, "— 01  거래처 정보"),
+      el(View, { style: DS.toFromRow },
+        el(View, { style: DS.toBox },
+          el(Text, { style: DS.toFromLabel }, "공급받는자  ·  TO"),
+          el(Text, { style: DS.toFromCompany }, `${data.toCompany} 귀중`),
+          data.toBizNo ? el(Text, { style: DS.toFromLine }, `사업자번호: ${data.toBizNo}`) : null,
+          data.toName  ? el(Text, { style: DS.toFromLine }, `담당자: ${data.toName}`) : null,
+          data.toEmail ? el(Text, { style: DS.toFromLine }, `E-mail: ${data.toEmail}`) : null,
+          data.toPhone ? el(Text, { style: DS.toFromLine }, `Tel: ${data.toPhone}`) : null,
+        ),
+        el(View, { style: DS.fromBox },
+          el(Text, { style: DS.toFromLabel }, "공급자  ·  FROM"),
+          el(Text, { style: DS.toFromCompany }, SMARTECH_COMPANY.name),
+          el(Text, { style: DS.toFromLine }, SMARTECH_COMPANY.role),
+          el(Text, { style: DS.toFromLineGray }, `사업자번호: ${SMARTECH_COMPANY.bizNo}  /  법인번호: ${SMARTECH_COMPANY.corpNo}`),
+          el(Text, { style: DS.toFromLineGray }, `대표자: ${SMARTECH_COMPANY.ceo}`),
+          el(Text, { style: DS.toFromLineGray }, `영업본사: ${SMARTECH_COMPANY.headOfficeKo}`),
+          el(Text, { style: DS.toFromLineGray }, `TEL: ${SMARTECH_COMPANY.officeTel}  /  M: ${SMARTECH_COMPANY.mobileTel}`),
+          el(Text, { style: DS.toFromLineGray }, `E-mail: ${SMARTECH_COMPANY.email}  /  Web: ${SMARTECH_COMPANY.website}`)
+        )
+      ),
+
+      // Section 02: 금액 요약
+      el(Text, { style: DS.sectionLabel }, "— 02  금액 요약"),
+      el(View, { style: DS.amountArea },
+        el(View, null,
+          el(Text, { style: DS.grandTotalLabel }, "GRAND TOTAL  ·  총액 (VAT 포함)"),
+          el(Text, { style: DS.grandTotalAmount }, fmt(grand)),
+          el(Text, { style: DS.grandTotalSub }, `ITEMS: ${data.items.length}종  ·  ${totalQty} EA`)
+        ),
+        el(View, { style: DS.amountBreakdown },
+          el(View, { style: DS.breakdownRow },
+            el(Text, { style: DS.breakdownLabel }, "공급가액 (Supply)"),
+            el(Text, { style: DS.breakdownValue }, fmt(totalSupply))
+          ),
+          el(View, { style: DS.breakdownRow },
+            el(Text, { style: DS.breakdownLabel }, "부가세 10% (VAT)"),
+            el(Text, { style: DS.breakdownValue }, fmt(totalVat))
+          ),
+          el(View, { style: { ...DS.breakdownRow, borderTop: "1 solid #cccccc", paddingTop: 4, marginTop: 2 } },
+            el(Text, { style: { ...DS.breakdownLabel, fontFamily: "Pretendard", fontWeight: 700 } }, "합계 (Total)"),
+            el(Text, { style: { ...DS.breakdownValue, fontSize: 10 } }, fmt(grand))
+          )
+        )
+      ),
+
+      // Section 03: 품목 테이블
+      el(Text, { style: DS.sectionLabel }, `— 03  납품 품목 (${data.items.length} LINES · ${totalQty} EA)`),
+      el(View, { style: S.table },
+        el(View, { style: DS.tableHeader },
+          el(Text, { style: [DS.thCell, DN.colNoD] }, "No"),
+          el(Text, { style: [DS.thCell, DN.colCodeD] }, "PART NO"),
+          el(Text, { style: [DS.thCell, DN.colDescD] }, "DESCRIPTION"),
+          el(Text, { style: [DS.thCell, DN.colSpecD] }, "SPEC"),
+          el(Text, { style: [DS.thCell, DN.colQtyD] }, "QTY"),
+          el(Text, { style: [DS.thCell, DN.colPriceD] }, "UNIT"),
+          el(Text, { style: [DS.thCell, DN.colSupplyD] }, "공급가액"),
+          el(Text, { style: [DS.thCell, DN.colVatD] }, "세액")
+        ),
+        ...data.items.map((item, idx) => {
+          const lineSupply = item.unitPrice * item.quantity;
+          const lineVat = Math.round(lineSupply * VAT_RATE);
+          return el(View, { key: String(idx), style: idx % 2 === 0 ? DS.tableRow : DS.tableRowAlt },
+            el(Text, { style: [DS.tdNormal, DN.colNoD] }, String(idx + 1).padStart(2, "0")),
+            el(Text, { style: [DS.tdCode, DN.colCodeD] }, item.partNo),
+            el(Text, { style: [DS.tdNormal, DN.colDescD] }, item.description),
+            el(Text, { style: [DS.tdNormal, DN.colSpecD] }, "-"),
+            el(Text, { style: [DS.tdNormal, DN.colQtyD] }, `${item.quantity}`),
+            el(Text, { style: [DS.tdNormal, DN.colPriceD] }, fmt(item.unitPrice)),
+            el(Text, { style: [DS.tdAmount, DN.colSupplyD] }, fmt(lineSupply)),
+            el(Text, { style: [DS.tdNormal, DN.colVatD] }, fmt(lineVat))
+          );
+        })
+      ),
+
+      // Section 04: 합계
+      el(View, { style: DS.summaryArea },
+        el(View, { style: DS.summaryBox },
+          el(View, { style: DS.summaryRow },
+            el(Text, { style: DS.sumLabel }, "공급가액 합계"),
+            el(Text, { style: DS.sumValue }, fmt(totalSupply))
+          ),
+          el(View, { style: DS.summaryRow },
+            el(Text, { style: DS.sumLabel }, "세액 합계 (VAT 10%)"),
+            el(Text, { style: DS.sumValue }, fmt(totalVat))
+          ),
+          el(View, { style: DS.summaryTotalRow },
+            el(Text, { style: DS.sumTLabel }, "총 합계"),
+            el(Text, { style: DS.sumTValue }, fmt(grand))
+          )
+        )
+      ),
+
+      // Section 05: 서명
+      el(Text, { style: DS.sectionLabel }, "— 05  인수 확인"),
+      el(View, { style: DS.sigRow },
+        el(View, { style: DS.sigBox },
+          el(Text, { style: DS.sigLabel }, "공급자  ·  ISSUED BY"),
+          el(Text, { style: DS.sigName }, "(주)스마텍 영업팀"),
+          el(View, { style: DS.sigLine },
+            el(Text, { style: DS.sigLineText }, "SMARTECH  /  SEAL & SIGNATURE")
+          )
+        ),
+        el(View, { style: DS.sigBoxRight },
+          el(Text, { style: DS.sigLabel }, "인수자  ·  ACKNOWLEDGED BY"),
+          el(Text, { style: DS.sigName }, data.toCompany),
+          el(View, { style: DS.sigLine },
+            el(Text, { style: DS.sigLineText }, `${data.toName ?? "담당자"}  /  인수일자: ____.__.__`)
+          )
+        )
+      ),
+
+      // 푸터
+      el(View, { style: DS.footer },
+        el(Text, { style: DS.footerText },
+          `본 거래명세표는 발행일 기준 정식 납품 증빙입니다.  |  ${data.noteNo}`
+        ),
+        el(Text, { style: DS.footerText }, "스마텍  ·  (주)SMARTECH")
+      )
+    ) as React.ReactElement,
+  ];
+
+  // ── 2페이지: 통장사본 (선택) ──
+  if (data.includeBankInfo) {
+    pages.push(
+      el(Page, { key: "bank", size: "A4", style: { ...S.page, padding: 30, alignItems: "center", justifyContent: "center" } },
+        el(Text, { style: { fontSize: 13, fontFamily: "Pretendard", fontWeight: 700, marginBottom: 20, letterSpacing: 2, color: "#111111" } },
+          "입금 계좌 안내  ·  BANK ACCOUNT"
+        ),
+        el(Image, { src: bankImgPath, style: { width: "100%", maxHeight: 600, objectFit: "contain" } } as React.ComponentProps<typeof Image>)
+      ) as React.ReactElement
+    );
+  }
+
+  return el(Document, { title: `거래명세표 ${data.noteNo}` }, ...pages);
+}
+
+export async function generateManualDeliveryNotePdf(
+  data: ManualDeliveryNoteForPdf
+): Promise<Buffer> {
+  const doc = React.createElement(ManualDeliveryNoteDocument, { data });
   const arrayBuffer = await renderToBuffer(doc as React.ReactElement<DocumentProps>);
   return Buffer.from(arrayBuffer);
 }

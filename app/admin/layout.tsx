@@ -15,6 +15,8 @@ const NAV_ITEMS = [
   { href: "/admin/quotes", label: "견적" },
   { href: "/admin/users", label: "고객" },
   { href: "/admin/proxy-quotes", label: "대행견적" },
+  { href: "/admin/delivery-notes", label: "거래명세표" },
+  { href: "/admin/purchase-orders", label: "발주서" },
   { href: "/admin/companies", label: "거래처" },
   { href: "/admin/settings", label: "설정" },
   { href: "/admin/blog", label: "블로그" },
