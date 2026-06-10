@@ -8,17 +8,17 @@ import { ToastProvider } from "@/lib/toast";
 import RedTape from "@/components/RedTape";
 
 const NAV_ITEMS = [
-  { href: "/admin", label: "대시보드", num: "01", exact: true },
-  { href: "/admin/repairs", label: "수리접수", num: "02", highlight: true },
-  { href: "/admin/orders", label: "주문", num: "03" },
-  { href: "/admin/products", label: "제품", num: "04" },
-  { href: "/admin/quotes", label: "견적", num: "05" },
-  { href: "/admin/users", label: "고객", num: "06" },
-  { href: "/admin/proxy-quotes", label: "대행견적서", num: "07" },
-  { href: "/admin/companies", label: "거래처", num: "08" },
-  { href: "/admin/settings", label: "설정", num: "09" },
-  { href: "/admin/blog", label: "블로그", num: "10" },
-  { href: "/admin/email-inbox", label: "이메일수신함", num: "11" },
+  { href: "/admin", label: "대시보드", exact: true },
+  { href: "/admin/repairs", label: "수리접수", highlight: true },
+  { href: "/admin/orders", label: "주문" },
+  { href: "/admin/products", label: "제품" },
+  { href: "/admin/quotes", label: "견적" },
+  { href: "/admin/users", label: "고객" },
+  { href: "/admin/proxy-quotes", label: "대행견적" },
+  { href: "/admin/companies", label: "거래처" },
+  { href: "/admin/settings", label: "설정" },
+  { href: "/admin/blog", label: "블로그" },
+  { href: "/admin/email-inbox", label: "이메일" },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -82,10 +82,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         : "bg-edred text-white hover:brightness-110 shadow-sm"
                     }`}
                   >
-                    <span className="flex items-center gap-2">
-                      <span className="mono text-[10px] tracking-[0.1em] text-white/80">
-                        {item.num}
-                      </span>
+                    <span className="flex items-center gap-1.5">
                       <span className="text-[14px] font-semibold tracking-tight">
                         {item.label}
                       </span>
@@ -100,24 +97,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`group relative px-4 py-2 transition-colors ${
+                  className={`group relative px-3 py-2 transition-colors ${
                     active ? "text-ink" : "text-dim hover:text-ink"
                   }`}
                 >
-                  <span className="flex items-baseline gap-1.5">
-                    <span
-                      className={`mono text-[10px] tracking-[0.1em] ${
-                        active ? "text-edred" : "dim group-hover:text-edred"
-                      }`}
-                    >
-                      {item.num}
-                    </span>
-                    <span className="text-[14px] font-medium tracking-tight">
-                      {item.label}
-                    </span>
+                  <span className="text-[14px] font-medium tracking-tight">
+                    {item.label}
                   </span>
                   {active && (
-                    <span className="absolute left-4 right-4 -bottom-px h-0.5 bg-edred" />
+                    <span className="absolute left-3 right-3 -bottom-px h-0.5 bg-edred" />
                   )}
                 </Link>
               );
@@ -183,9 +171,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                       onClick={() => setMobileOpen(false)}
                       className="flex items-center gap-3 my-2 px-3 py-3 rounded-md bg-edred text-white shadow-sm"
                     >
-                      <span className="mono text-[10px] tracking-[0.1em] text-white/80">
-                        {item.num}
-                      </span>
                       <span className="text-[14px] font-semibold tracking-tight">
                         {item.label}
                       </span>
@@ -204,13 +189,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                       active ? "text-ink" : "text-dim"
                     }`}
                   >
-                    <span
-                      className={`mono text-[10px] tracking-[0.1em] ${
-                        active ? "text-edred" : "dim"
-                      }`}
-                    >
-                      {item.num}
-                    </span>
                     <span className="text-[14px] font-medium tracking-tight">
                       {item.label}
                     </span>
