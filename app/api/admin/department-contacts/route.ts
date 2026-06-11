@@ -40,8 +40,10 @@ export async function GET() {
     });
   }
 
-  // contactEmail이 비어있는 레코드는 기본값으로 업데이트
-  const needsUpdate = existing.filter((d) => !d.contactEmail);
+  // contactEmail이 비어있거나 이전 기본 문구인 레코드 업데이트
+  const needsUpdate = existing.filter(
+    (d) => !d.contactEmail || d.defaultMessage?.includes("(주)스마텍 영업팀입니다")
+  );
   if (needsUpdate.length > 0) {
     await Promise.all(
       needsUpdate.map((d) =>
@@ -51,7 +53,7 @@ export async function GET() {
             contactName: DEFAULT_CONTACTS[d.code]?.contactName ?? d.contactName,
             contactEmail: DEFAULT_CONTACTS[d.code]?.contactEmail ?? d.contactEmail,
             ccEmails: DEFAULT_CONTACTS[d.code]?.ccEmails ?? d.ccEmails,
-            defaultMessage: d.defaultMessage || DEFAULT_MESSAGES[d.code] || d.defaultMessage,
+            defaultMessage: DEFAULT_MESSAGES[d.code] ?? d.defaultMessage,
           },
         })
       )

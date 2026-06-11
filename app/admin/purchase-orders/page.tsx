@@ -146,32 +146,39 @@ function OrderForm({ onSaved }: { onSaved: () => void }) {
   const totalVat = Math.round(totalSupply * 0.1);
   const totalAmount = totalSupply + totalVat;
 
-  async function handleSave() {
-    setError("");
-    if (!department) { setError("부서를 선택해주세요."); return; }
-    if (!toCompany.trim()) { setError("수신처명을 입력해주세요."); return; }
+  async function doSave() {
+    if (!department) { setError("부서를 선택해주세요."); return null; }
+    if (!toCompany.trim()) { setError("수신처명을 입력해주세요."); return null; }
     if (items.length === 0 || items.every(i => !i.partNo.trim() && !i.description.trim())) {
-      setError("품목을 1개 이상 입력해주세요."); return;
+      setError("품목을 1개 이상 입력해주세요."); return null;
     }
     const hasNoPrice = items.some(i => !i.partNo.trim() ? false : Number(i.unitPrice) === 0);
-    if (hasNoPrice && !confirm("단가가 0원인 품목이 있습니다. 계속 저장할까요?")) return;
+    if (hasNoPrice && !confirm("단가가 0원인 품목이 있습니다. 계속 저장할까요?")) return null;
 
+    const res = await fetch("/api/admin/purchase-orders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        department, toCompany, toName, toEmail, ccEmails,
+        orderDate, requestedDate: requestedDate || null,
+        message, memo,
+        items: items
+          .filter(i => i.partNo.trim() || i.description.trim())
+          .map((it, idx) => ({ ...it, quantity: Number(it.quantity), unitPrice: Number(it.unitPrice), sortOrder: idx })),
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) { setError(data.error ?? "오류가 발생했습니다."); return null; }
+    return data;
+  }
+
+  async function handleSave() {
+    setError("");
     setSaving(true);
     try {
-      const res = await fetch("/api/admin/purchase-orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          department, toCompany, toName, toEmail, ccEmails,
-          orderDate, requestedDate: requestedDate || null,
-          message, memo,
-          items: items
-            .filter(i => i.partNo.trim() || i.description.trim())
-            .map((it, idx) => ({ ...it, quantity: Number(it.quantity), unitPrice: Number(it.unitPrice), sortOrder: idx })),
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) { setError(data.error ?? "오류가 발생했습니다."); return; }
+      const data = await doSave();
+      if (!data) return;
+      window.open(`/api/admin/purchase-orders/${data.id}/pdf`, "_blank");
       onSaved();
     } finally {
       setSaving(false);
@@ -180,31 +187,11 @@ function OrderForm({ onSaved }: { onSaved: () => void }) {
 
   async function handleSaveAndSend() {
     setError("");
-    if (!department) { setError("부서를 선택해주세요."); return; }
-    if (!toCompany.trim()) { setError("수신처명을 입력해주세요."); return; }
     if (!toEmail.trim()) { setError("수신 이메일을 입력해주세요."); return; }
-    if (items.length === 0 || items.every(i => !i.partNo.trim() && !i.description.trim())) {
-      setError("품목을 1개 이상 입력해주세요."); return;
-    }
-    const hasNoPrice = items.some(i => !i.partNo.trim() ? false : Number(i.unitPrice) === 0);
-    if (hasNoPrice && !confirm("단가가 0원인 품목이 있습니다. 계속 진행할까요?")) return;
-
     setSavingAndSend(true);
     try {
-      const saveRes = await fetch("/api/admin/purchase-orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          department, toCompany, toName, toEmail, ccEmails,
-          orderDate, requestedDate: requestedDate || null,
-          message, memo,
-          items: items
-            .filter(i => i.partNo.trim() || i.description.trim())
-            .map((it, idx) => ({ ...it, quantity: Number(it.quantity), unitPrice: Number(it.unitPrice), sortOrder: idx })),
-        }),
-      });
-      const saveData = await saveRes.json();
-      if (!saveRes.ok) { setError(saveData.error ?? "저장 오류가 발생했습니다."); return; }
+      const saveData = await doSave();
+      if (!saveData) return;
 
       const sendRes = await fetch(`/api/admin/purchase-orders/${saveData.id}/send`, {
         method: "POST",
@@ -393,7 +380,7 @@ function OrderForm({ onSaved }: { onSaved: () => void }) {
       <div className="flex gap-3 flex-wrap">
         <button onClick={handleSave} disabled={saving || savingAndSend}
           className="border hair px-6 py-2.5 text-[13px] font-semibold hover:bg-ink/5 transition-all disabled:opacity-50">
-          {saving ? "저장 중..." : "저장만"}
+          {saving ? "저장 중..." : "PDF 저장"}
         </button>
         <button onClick={handleSaveAndSend} disabled={saving || savingAndSend}
           className="bg-smblue text-paper px-6 py-2.5 text-[13px] font-semibold hover:brightness-110 transition-all disabled:opacity-50">
