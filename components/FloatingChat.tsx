@@ -5,10 +5,9 @@ import { sendChatEmail } from "@/lib/chatEmailAction";
 
 type Message = { role: "user" | "assistant"; content: string };
 
-function buildGreeting(user: any): string {
+function buildGreeting(user: { name?: string; title?: string }): string {
   const name = user.name || "";
   const title = user.title || "";
-  // "홍길동 차장님" 또는 "홍길동님"
   const salutation = title ? `${name} ${title}님` : `${name}님`;
   return `${salutation}, 안녕하세요!\n스마텍 AI 상담원입니다.\n가격·납기·기술 상담까지 무엇이든 편하게 물어보세요.`;
 }
@@ -22,55 +21,48 @@ const TIER_LABEL: Record<string, string> = {
   ADMIN: "관리자",
   PENDING: "회원",
 };
+// TIER_LABEL은 향후 등급 표시용으로 유지
+void TIER_LABEL;
 
 export default function FloatingChat() {
   const { data: session, status } = useSession();
-  const user = session?.user as any;
+  const user = session?.user as { id?: string; name?: string; title?: string; tier?: string; company?: string; email?: string } | undefined;
 
   const [isOpen, setIsOpen] = useState(false);
-  const [isVisible, setIsVisible] = useState(false); // 구석 버튼 표시 여부
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
-  const [pendingEmail, setPendingEmail] = useState(false); // [[SEND_EMAIL]] 감지
+  const [pendingEmail, setPendingEmail] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
+  const tooltipShownRef = useRef(false);
   const logRef = useRef<HTMLDivElement>(null);
 
-  // 로그인 시 자동 팝업 (세션당 1회)
+  // 스크롤 30% 이상 → 툴팁 1회 표시 (3초 후 사라짐)
   useEffect(() => {
-    if (status !== "authenticated" || !user?.id) return;
-    const tier = user.tier ?? "";
-    if (tier === "PENDING" || tier === "ADMIN") return;
-
-    const key = `chat_opened_${user.id}`;
-    const alreadyOpened = sessionStorage.getItem(key);
-    if (!alreadyOpened) {
-      const greeting = buildGreeting(user);
-      setMessages([
-        {
-          role: "assistant",
-          content: greeting,
-        },
-      ]);
-      setIsOpen(true);
-      setIsVisible(true);
-      sessionStorage.setItem(key, "1");
-    } else {
-      // 이미 열었던 세션 → 구석 버튼만 표시
-      setIsVisible(true);
-    }
-  }, [status, user?.id]);
+    if (status !== "authenticated") return;
+    const onScroll = () => {
+      if (tooltipShownRef.current || isOpen) return;
+      const total = document.body.scrollHeight - window.innerHeight;
+      if (total > 0 && window.scrollY / total > 0.3) {
+        tooltipShownRef.current = true;
+        setShowTooltip(true);
+        setTimeout(() => setShowTooltip(false), 3000);
+      }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [status, isOpen]);
 
   useEffect(() => {
     if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
   }, [messages]);
 
-  const close = useCallback(() => {
-    setIsOpen(false);
-  }, []);
+  const close = useCallback(() => setIsOpen(false), []);
 
   const open = useCallback(() => {
+    setShowTooltip(false);
     if (messages.length === 0 && user) {
       setMessages([{ role: "assistant", content: buildGreeting(user) }]);
     }
@@ -120,7 +112,6 @@ export default function FloatingChat() {
         });
       }
 
-      // 이메일 발송 마커 감지
       if (acc.includes("[[SEND_EMAIL]]")) {
         setMessages((prev) => {
           const next = [...prev];
@@ -173,18 +164,28 @@ export default function FloatingChat() {
     }
   }
 
-  // 로그인 안 했거나 PENDING/ADMIN이면 렌더 안 함
+  // 로그인 안 했거나 ADMIN/PENDING이면 렌더 안 함
   if (status !== "authenticated" || !user?.id) return null;
   const tier = user.tier ?? "";
-  if (tier === "ADMIN" || !isVisible) return null;
+  if (tier === "ADMIN") return null;
 
   return (
     <>
-      {/* ── 구석 버튼 (팝업 닫혀 있을 때) ── */}
+      {/* ── 툴팁 ── */}
+      {showTooltip && !isOpen && (
+        <div className="fixed bottom-24 right-6 z-50 pointer-events-none">
+          <div className="bg-ink text-paper text-[12px] px-3 py-2 shadow-lg whitespace-nowrap rounded-sm animate-fade-in">
+            견적 문의하기 →
+          </div>
+          <div className="absolute bottom-[-4px] right-5 w-2 h-2 bg-ink rotate-45" />
+        </div>
+      )}
+
+      {/* ── 플로팅 버튼 ── */}
       {!isOpen && (
         <button
           onClick={open}
-          className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-edred text-white rounded-full shadow-lg flex items-center justify-center hover:bg-[#a00018] transition-colors"
+          className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-edred text-white rounded-full shadow-lg flex items-center justify-center hover:bg-edred3 transition-colors"
           aria-label="AI 상담 열기"
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -194,20 +195,24 @@ export default function FloatingChat() {
         </button>
       )}
 
-      {/* ── 팝업 챗봇 ── */}
+      {/* ── 챗봇 패널 ── */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 z-50 w-[380px] max-w-[calc(100vw-24px)] bg-white border hair shadow-2xl flex flex-col"
-          style={{ maxHeight: "calc(100vh - 48px)" }}>
-
+        <div
+          className="fixed z-50 bg-white border hair shadow-2xl flex flex-col
+            bottom-0 right-0 w-full
+            sm:bottom-6 sm:right-6 sm:w-[380px] sm:max-w-[calc(100vw-24px)]"
+          style={{ maxHeight: "calc(100vh - 0px)", height: "100svh" }}
+        >
           {/* 헤더 */}
-          <div className="px-4 py-3 border-b hair flex items-center justify-between bg-ink text-paper text-[12px] mono shrink-0">
+          <div className="px-4 py-3 border-b hair flex items-center justify-between bg-ink text-paper text-[12px] mono shrink-0"
+            style={{ maxHeight: "calc(100vh - 0px)" }}>
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 bg-green-400 rounded-full inline-block" />
               <span>AI 상담 · {user.company || user.name}</span>
             </div>
             <button
               onClick={close}
-              className="opacity-60 hover:opacity-100 transition-opacity text-[16px] leading-none"
+              className="opacity-60 hover:opacity-100 transition-opacity text-[20px] leading-none px-1"
               aria-label="닫기"
             >
               ×
@@ -218,7 +223,6 @@ export default function FloatingChat() {
           <div
             ref={logRef}
             className="flex-1 p-4 space-y-3 overflow-y-auto text-[13px]"
-            style={{ minHeight: 240, maxHeight: 400 }}
           >
             {messages.map((m, i) => (
               <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
@@ -247,16 +251,15 @@ export default function FloatingChat() {
               <button
                 onClick={handleSendEmail}
                 disabled={sendingEmail}
-                className="bg-edred text-white px-3 py-1.5 text-[12px] hover:bg-[#a00018] transition-colors disabled:opacity-50 shrink-0"
+                className="bg-edred text-white px-3 py-1.5 text-[12px] hover:bg-edred3 transition-colors disabled:opacity-50 shrink-0"
               >
                 {sendingEmail ? "발송 중..." : "이메일 발송 →"}
               </button>
             </div>
           )}
 
-          {/* 이메일 없는 경우 경고 */}
           {pendingEmail && !user?.email && (
-            <div className="px-4 py-2 border-t hair bg-[#FFF8F0] text-[12px] text-[#c00020] shrink-0">
+            <div className="px-4 py-2 border-t hair bg-[#FFF8F0] text-[12px] text-edred shrink-0">
               등록된 이메일이 없습니다. 마이페이지에서 이메일을 등록해 주세요.
             </div>
           )}
