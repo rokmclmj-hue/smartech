@@ -21,6 +21,7 @@ type Job = {
   receivedDate: string; requestedDate: string | null;
   uploadToken: string | null; tokenExpiresAt: string | null; uploadedAt: string | null;
   memo: string | null; createdAt: string;
+  repairCost: number | null; repairPartsText: string | null; inspectorName: string | null;
   inspectionItems: InspectionItem[];
   files: RepairFile[];
 };
@@ -249,6 +250,12 @@ function JobRow({ job, onRefresh }: { job: Job; onRefresh: () => void }) {
   const [editItems, setEditItems] = useState<InspectionItem[]>(job.inspectionItems);
   const [savingItems, setSavingItems] = useState(false);
   const [statusChanging, setStatusChanging] = useState(false);
+  const [repairCost, setRepairCost] = useState(job.repairCost != null ? String(job.repairCost) : "");
+  const [repairPartsText, setRepairPartsText] = useState(job.repairPartsText ?? "");
+  const [inspectorName, setInspectorName] = useState(job.inspectorName ?? "");
+  const [savingQuote, setSavingQuote] = useState(false);
+  const [sendEmail, setSendEmail] = useState(job.contactEmail ?? "");
+  const [sending, setSending] = useState(false);
 
   const uploadUrl = job.uploadToken
     ? `${typeof window !== "undefined" ? window.location.origin : ""}/repair/offline-upload/${job.uploadToken}`
@@ -282,6 +289,37 @@ function JobRow({ job, onRefresh }: { job: Job; onRefresh: () => void }) {
       });
       if (res.ok) { showToast("검사항목 저장됨"); onRefresh(); }
     } finally { setSavingItems(false); }
+  }
+
+  async function handleSaveQuote() {
+    setSavingQuote(true);
+    try {
+      const res = await fetch(`/api/admin/offline-repairs/${job.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          repairCost: repairCost ? Number(repairCost) : null,
+          repairPartsText: repairPartsText || null,
+          inspectorName: inspectorName || null,
+        }),
+      });
+      if (res.ok) { showToast("견적 정보 저장됨"); onRefresh(); }
+    } finally { setSavingQuote(false); }
+  }
+
+  async function handleSendQuote() {
+    if (!sendEmail) { showToast("이메일 주소를 입력해주세요"); return; }
+    setSending(true);
+    try {
+      const res = await fetch(`/api/admin/offline-repairs/${job.id}/send-quote`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: sendEmail }),
+      });
+      const data = await res.json();
+      if (res.ok) { showToast("이메일 발송 완료"); onRefresh(); }
+      else showToast(data.error ?? "발송 오류");
+    } finally { setSending(false); }
   }
 
   async function handleStatusChange(status: string) {
@@ -422,6 +460,75 @@ function JobRow({ job, onRefresh }: { job: Job; onRefresh: () => void }) {
               </button>
             </div>
           )}
+
+          {/* 수리 견적 입력 */}
+          <div className="space-y-2">
+            <div className="mono text-[10px] dim tracking-[0.1em]">— 수리견적서 작성</div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <div className="mono text-[10px] dim mb-1">견적금액 (원, 공급가)</div>
+                <input
+                  type="number" value={repairCost}
+                  onChange={e => setRepairCost(e.target.value)}
+                  placeholder="예: 850000"
+                  className="w-full border hair px-3 py-1.5 text-[13px] mono focus:outline-none focus:border-ink"
+                />
+              </div>
+              <div>
+                <div className="mono text-[10px] dim mb-1">검사자 이름</div>
+                <input
+                  value={inspectorName} onChange={e => setInspectorName(e.target.value)}
+                  placeholder="홍길동"
+                  className="w-full border hair px-3 py-1.5 text-[13px] focus:outline-none focus:border-ink"
+                />
+              </div>
+            </div>
+            <div>
+              <div className="mono text-[10px] dim mb-1">교체 부품 내역 (자유 입력)</div>
+              <textarea
+                value={repairPartsText} onChange={e => setRepairPartsText(e.target.value)}
+                rows={3} placeholder={"Tip Seal Kit × 1\nShaft Seal × 1"}
+                className="w-full border hair px-3 py-2 text-[13px] font-mono focus:outline-none focus:border-ink resize-none"
+              />
+            </div>
+            <button onClick={handleSaveQuote} disabled={savingQuote}
+              className="border hair px-4 py-1.5 text-[12px] hover:bg-ink/5 transition-colors disabled:opacity-50">
+              {savingQuote ? "저장 중..." : "견적 정보 저장"}
+            </button>
+          </div>
+
+          {/* PDF 저장 + 이메일 발송 */}
+          <div className="space-y-2">
+            <div className="mono text-[10px] dim tracking-[0.1em]">— PDF 저장 · 이메일 발송</div>
+            <div className="flex gap-2 flex-wrap">
+              <a
+                href={`/api/admin/offline-repairs/${job.id}/inspection-pdf`}
+                target="_blank" rel="noopener noreferrer"
+                className="border hair px-4 py-1.5 text-[12px] hover:bg-ink/5 transition-colors"
+              >
+                검사성적서 PDF ↓
+              </a>
+              <a
+                href={`/api/admin/offline-repairs/${job.id}/quote-pdf`}
+                target="_blank" rel="noopener noreferrer"
+                className="border hair px-4 py-1.5 text-[12px] hover:bg-ink/5 transition-colors"
+              >
+                수리견적서 PDF ↓
+              </a>
+            </div>
+            <div className="flex gap-2 items-center flex-wrap">
+              <input
+                type="email" value={sendEmail} onChange={e => setSendEmail(e.target.value)}
+                placeholder="수신 이메일"
+                className="border hair px-3 py-1.5 text-[13px] mono focus:outline-none focus:border-ink w-60"
+              />
+              <button onClick={handleSendQuote} disabled={sending}
+                className="bg-smblue text-paper px-4 py-1.5 text-[12px] font-semibold hover:brightness-110 transition-all disabled:opacity-50">
+                {sending ? "발송 중..." : "견적서 + 성적서 이메일 발송"}
+              </button>
+            </div>
+            <p className="text-[11px] dim">· 수리견적서 + 검사성적서 PDF 2개가 첨부됩니다. 발송 시 상태가 "견적발송"으로 변경됩니다.</p>
+          </div>
 
           {toast && <p className="mono text-[12px] text-green-600">{toast}</p>}
         </div>
