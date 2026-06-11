@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/db";
-import { randomUUID } from "crypto";
-
-const EXPIRES_MINUTES = 60;
 
 async function requireAdmin() {
   const session = await auth();
-  return (session?.user as any)?.tier === "ADMIN";
+  return (session?.user as { tier?: string })?.tier === "ADMIN";
 }
 
 export async function POST(req: NextRequest) {
@@ -25,25 +21,12 @@ export async function POST(req: NextRequest) {
     process.env.SOLAPI_API_SECRET &&
     (process.env.SOLAPI_SENDER ?? process.env.ADMIN_PHONE);
 
-  // 기존 미사용 토큰 만료
-  await prisma.magicLinkToken.updateMany({
-    where: { phone: digits, usedAt: null, expiresAt: { gt: new Date() } },
-    data: { expiresAt: new Date() },
-  });
-
-  // 새 토큰 생성 (60분 유효)
-  const token = randomUUID();
-  const expiresAt = new Date(Date.now() + EXPIRES_MINUTES * 60 * 1000);
-  await prisma.magicLinkToken.create({
-    data: { phone: digits, token, expiresAt },
-  });
-
   const baseUrl = req.headers.get("origin") ?? process.env.AUTH_URL ?? "http://localhost:3000";
-  const magicUrl = `${baseUrl}/auth/magic?token=${token}`;
+  const loginUrl = `${baseUrl}/auth/login`;
 
   if (!hasSolapi) {
-    console.log(`[quick-sms] 개발 모드 — 링크: ${magicUrl}`);
-    return NextResponse.json({ ok: true, devLink: magicUrl });
+    console.log(`[quick-sms] 개발 모드 — 링크: ${loginUrl}`);
+    return NextResponse.json({ ok: true, devLink: loginUrl });
   }
 
   try {
@@ -53,11 +36,12 @@ export async function POST(req: NextRequest) {
       process.env.SOLAPI_API_SECRET!
     );
     const sender = (process.env.SOLAPI_SENDER ?? process.env.ADMIN_PHONE)!;
-    await service.send({
+    const msg = {
       to: digits,
       from: sender,
-      text: `[스마텍] 로그인 링크입니다.\n${magicUrl}\n(60분 유효, 1회 사용)`,
-    } as any);
+      text: `[스마텍] 로그인 페이지입니다.\n${loginUrl}\n카카오·구글로 간편 로그인 가능합니다.`,
+    };
+    await service.send(msg as Parameters<typeof service.send>[0]);
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("[quick-sms] SMS 발송 실패:", err);
