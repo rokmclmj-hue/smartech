@@ -9,7 +9,8 @@ import RedTape from "@/components/RedTape";
 
 const NAV_ITEMS = [
   { href: "/admin", label: "대시보드", exact: true },
-  { href: "/admin/repairs", label: "수리접수", highlight: true },
+  { href: "/admin/offline-repairs", label: "수리접수", highlight: true },
+  { href: "/admin/repairs", label: "온라인수리" },
   { href: "/admin/orders", label: "주문" },
   { href: "/admin/products", label: "제품" },
   { href: "/admin/quotes", label: "견적" },
