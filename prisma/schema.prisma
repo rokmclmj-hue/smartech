@@ -304,16 +304,17 @@ model UploadToken {
 // ─────────────────────────────────────────────────
 // 기존 거래처 화이트리스트 — 엑셀 임포트 or 수동 등록
 model KnownCompany {
-  id          Int            @id @default(autoincrement())
-  companyName String
-  phone       String?
-  email       String?
-  tier        String         // DEALER | OEM | ENDUSER | KEY_DEALER | VIP_DEALER
-  paymentTerm String?        // a=납품전현금 b=계약30%납품전70% d=계약30%익월말일70% e=정기결제 c=직접입력
-  source      String         @default("excel") // excel | manual | html_backup
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-  contacts    KnownContact[]
+  id            Int                @id @default(autoincrement())
+  companyName   String
+  phone         String?
+  email         String?
+  tier          String             // DEALER | OEM | ENDUSER | KEY_DEALER | VIP_DEALER
+  paymentTerm   String?            // a=납품전현금 b=계약30%납품전70% d=계약30%익월말일70% e=정기결제 c=직접입력
+  source        String             @default("excel") // excel | manual | html_backup
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  contacts      KnownContact[]
+  offlineRepairs OfflineRepairJob[]
 
   @@index([phone])
   @@index([email])
@@ -524,6 +525,84 @@ model ManualPurchaseOrderItem {
 }
 
 // AI 챗봇 대화 기록
+// ─────────────────────────────────────────────────
+// 오프라인 수리 접수 시스템
+// ─────────────────────────────────────────────────
+
+model OfflineRepairJob {
+  id              Int       @id @default(autoincrement())
+  jobNo           String    @unique // SMT-YYYY-R-NNNNNN
+  status          String    @default("RECEIVED")
+  // RECEIVED → SENT_TO_SUB → WORKING → UPLOADED → QUOTE_SENT → CONFIRMED → DELIVERED
+
+  // 거래처 연결
+  companyId       Int?
+  company         KnownCompany? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  contactName     String?
+  contactEmail    String?
+  contactPhone    String?
+
+  // 장비 정보
+  pumpMaker       String    @default("EDWARDS")
+  pumpModel       String
+  serialNo        String?
+  voltage         String?
+  repairReason    String?   // 정기 | 고장 | 기타
+
+  // 외주 협력사
+  subName         String?
+
+  // 업로드 토큰 (협력사 전용 링크)
+  uploadToken     String?   @unique
+  tokenExpiresAt  DateTime?
+  uploadedAt      DateTime?
+
+  // 날짜
+  receivedDate    DateTime  @default(now())
+  requestedDate   DateTime?
+
+  memo            String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  inspectionItems OfflineRepairInspectionItem[]
+  files           OfflineRepairFile[]
+
+  @@index([companyId])
+  @@index([status])
+  @@index([uploadToken])
+}
+
+model OfflineRepairInspectionItem {
+  id          Int              @id @default(autoincrement())
+  jobId       Int
+  job         OfflineRepairJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  sortOrder   Int              @default(0)
+  itemLabel   String           // "Vacuum (Scroll)"
+  unit        String?          // "Torr"
+  spec        String?          // "≤9.0×10⁻²"
+  value       String?          // 협력사 입력값
+  isNA        Boolean          @default(false)
+  pass        Boolean?
+  remark      String?
+
+  @@index([jobId])
+}
+
+model OfflineRepairFile {
+  id          Int              @id @default(autoincrement())
+  jobId       Int
+  job         OfflineRepairJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  fileType    String           // PHOTO | PHOTO_ZIP
+  fileName    String
+  fileUrl     String
+  fileSize    Int?
+  isSelected  Boolean          @default(false) // PDF 삽입 사진 선택 여부
+  uploadedAt  DateTime         @default(now())
+
+  @@index([jobId])
+}
+
 model ChatLog {
   id          Int      @id @default(autoincrement())
   userId      Int?
