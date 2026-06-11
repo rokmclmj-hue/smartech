@@ -72,7 +72,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     return NextResponse.json({ isSelected: updated.isSelected });
   }
 
-  // 상태·기본정보 수정
+  // 상태·기본정보·견적 수정
   const updated = await prisma.offlineRepairJob.update({
     where: { id: nId },
     data: {
@@ -80,6 +80,10 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       ...(body.memo !== undefined && { memo: body.memo }),
       ...(body.contactEmail !== undefined && { contactEmail: body.contactEmail }),
       ...(body.requestedDate !== undefined && { requestedDate: body.requestedDate ? new Date(body.requestedDate) : null }),
+      // 수리 견적 필드 (Phase 2)
+      ...(body.repairCost !== undefined && { repairCost: body.repairCost }),
+      ...(body.repairPartsText !== undefined && { repairPartsText: body.repairPartsText }),
+      ...(body.inspectorName !== undefined && { inspectorName: body.inspectorName }),
     },
   });
   return NextResponse.json(updated);

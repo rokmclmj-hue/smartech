@@ -562,6 +562,12 @@ model OfflineRepairJob {
   requestedDate   DateTime?
 
   memo            String?
+
+  // 수리 견적 (Phase 2)
+  repairCost      Int?
+  repairPartsText String?
+  inspectorName   String?
+
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
