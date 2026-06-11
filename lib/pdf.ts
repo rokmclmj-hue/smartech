@@ -1058,3 +1058,358 @@ export async function generateManualPurchaseOrderPdf(
   const arrayBuffer = await renderToBuffer(doc as React.ReactElement<DocumentProps>);
   return Buffer.from(arrayBuffer);
 }
+
+// ─────────────────────────────────────────────────
+// 수리 검사성적서 PDF
+// ─────────────────────────────────────────────────
+export interface RepairInspectionItem {
+  itemLabel: string;
+  unit: string | null;
+  spec: string | null;
+  value: string | null;
+  isNA: boolean;
+  pass: boolean | null;
+}
+
+export interface RepairPhotoFile {
+  fileName: string;
+  fileUrl: string;
+}
+
+export interface RepairInspectionForPdf {
+  jobNo: string;
+  pumpMaker: string;
+  pumpModel: string;
+  serialNo: string | null;
+  voltage: string | null;
+  receivedDate: Date;
+  companyName: string | null;
+  contactName: string | null;
+  inspectorName: string | null;
+  inspectionItems: RepairInspectionItem[];
+  selectedPhotos: RepairPhotoFile[];
+}
+
+const IR = StyleSheet.create({
+  topBar: { backgroundColor: "#c00020", paddingVertical: 8, paddingHorizontal: 14, flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  topLeft: { color: "#ffffff", fontSize: 7, fontFamily: "Pretendard", fontWeight: 700, letterSpacing: 1 },
+  topRight: { color: "#ffbbbb", fontSize: 7 },
+  titleArea: { borderBottom: "2 solid #c00020", paddingBottom: 6, marginBottom: 10, flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", marginTop: 8 },
+  docTitle: { fontSize: 22, fontFamily: "Pretendard", fontWeight: 700, color: "#c00020", letterSpacing: 4 },
+  docSub: { fontSize: 7, color: "#666666", marginTop: 2, letterSpacing: 2 },
+  jobNo: { fontSize: 10, fontFamily: "Pretendard", fontWeight: 700, color: "#c00020" },
+  jobMeta: { fontSize: 7, color: "#666666", marginTop: 2 },
+  secLabel: { fontSize: 7, fontFamily: "Pretendard", fontWeight: 700, color: "#444444", letterSpacing: 2, marginTop: 10, marginBottom: 3, textTransform: "uppercase" },
+  infoRow: { flexDirection: "row", gap: 10, marginBottom: 8 },
+  infoBox: { flex: 1, borderLeft: "3 solid #c00020", paddingLeft: 6 },
+  infoLabel: { fontSize: 6, color: "#999999", letterSpacing: 1, marginBottom: 1 },
+  infoVal: { fontSize: 10, fontFamily: "Pretendard", fontWeight: 700, color: "#111111" },
+  infoSub: { fontSize: 7, color: "#555555", marginTop: 1 },
+  tHead: { flexDirection: "row", backgroundColor: "#c00020", paddingVertical: 4, paddingHorizontal: 3 },
+  tRow: { flexDirection: "row", borderBottom: "1 solid #eeeeee", paddingVertical: 2.5, paddingHorizontal: 3 },
+  tRowAlt: { flexDirection: "row", borderBottom: "1 solid #eeeeee", paddingVertical: 2.5, paddingHorizontal: 3, backgroundColor: "#fafafa" },
+  th: { fontSize: 6, color: "#ffffff", fontFamily: "Pretendard", fontWeight: 700, letterSpacing: 0.5 },
+  td: { fontSize: 7, color: "#333333" },
+  tdBold: { fontSize: 7, fontFamily: "Pretendard", fontWeight: 700 },
+  cItem: { width: "28%" },
+  cUnit: { width: "11%" },
+  cSpec: { width: "18%" },
+  cVal:  { width: "22%" },
+  cNA:   { width: "8%", textAlign: "center" },
+  cPass: { width: "13%", textAlign: "center" },
+  photoGrid: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 4 },
+  photoWrap: { width: "48%" },
+  photoImg: { width: "100%", height: 150 },
+  photoName: { fontSize: 6, color: "#999999", marginTop: 1, textAlign: "center" },
+  sigRow: { flexDirection: "row", gap: 16, marginTop: 12 },
+  sigBox: { flex: 1, borderTop: "1 solid #cccccc", paddingTop: 6 },
+  sigLabel: { fontSize: 6, color: "#999999", letterSpacing: 1, marginBottom: 10 },
+  sigName: { fontSize: 8, color: "#111111" },
+  footer: { position: "absolute", bottom: 20, left: 32, right: 32, borderTop: "1 solid #dddddd", paddingTop: 3 },
+  footerTxt: { fontSize: 6, color: "#aaaaaa", textAlign: "center" },
+});
+
+function InspectionReportDocument({ data }: { data: RepairInspectionForPdf }) {
+  const el = React.createElement;
+  const photosOnly = data.selectedPhotos.filter(f => /\.(jpe?g|png|gif|webp)$/i.test(f.fileName));
+
+  function passLabel(pass: boolean | null, isNA: boolean) {
+    if (isNA) return "-";
+    if (pass === true) return "PASS";
+    if (pass === false) return "FAIL";
+    return "";
+  }
+  function passColor(pass: boolean | null, isNA: boolean) {
+    if (isNA || pass === null) return "#888888";
+    return pass ? "#007700" : "#cc0000";
+  }
+
+  const pages: React.ReactElement[] = [
+    el(Page, { key: "p1", size: "A4", style: S.page },
+      el(View, { style: IR.topBar },
+        el(Text, { style: IR.topLeft }, `${data.jobNo}  ·  SMARTECH — INSPECTION REPORT`),
+        el(Text, { style: IR.topRight }, fmtDate(data.receivedDate))
+      ),
+      el(View, { style: IR.titleArea },
+        el(View, null,
+          el(Text, { style: IR.docTitle }, "검 사 성 적 서"),
+          el(Text, { style: IR.docSub }, "FINAL INSPECTION REPORT  ·  (주)스마텍")
+        ),
+        el(View, { style: { textAlign: "right" } },
+          el(Text, { style: IR.jobNo }, data.jobNo),
+          el(Text, { style: IR.jobMeta }, `발행일: ${fmtDate(new Date())}`)
+        )
+      ),
+
+      el(Text, { style: IR.secLabel }, "— 01  장비 정보"),
+      el(View, { style: IR.infoRow },
+        el(View, { style: IR.infoBox },
+          el(Text, { style: IR.infoLabel }, "고객사  ·  CUSTOMER"),
+          el(Text, { style: IR.infoVal }, data.companyName ?? "—"),
+          data.contactName ? el(Text, { style: IR.infoSub }, `담당자: ${data.contactName}`) : null
+        ),
+        el(View, { style: IR.infoBox },
+          el(Text, { style: IR.infoLabel }, "장비  ·  EQUIPMENT"),
+          el(Text, { style: IR.infoVal }, `${data.pumpMaker} ${data.pumpModel}`),
+          data.serialNo ? el(Text, { style: IR.infoSub }, `S/N: ${data.serialNo}`) : null,
+          data.voltage ? el(Text, { style: IR.infoSub }, `전압: ${data.voltage}`) : null
+        )
+      ),
+
+      el(Text, { style: IR.secLabel }, "— 02  검사 결과"),
+      el(View, null,
+        el(View, { style: IR.tHead },
+          el(Text, { style: [IR.th, IR.cItem] }, "검사 항목"),
+          el(Text, { style: [IR.th, IR.cUnit] }, "단위"),
+          el(Text, { style: [IR.th, IR.cSpec] }, "기준값"),
+          el(Text, { style: [IR.th, IR.cVal] }, "측정값"),
+          el(Text, { style: [IR.th, IR.cNA] }, "N/A"),
+          el(Text, { style: [IR.th, IR.cPass] }, "판정")
+        ),
+        ...data.inspectionItems.map((item, idx) =>
+          el(View, { key: String(idx), style: idx % 2 === 0 ? IR.tRow : IR.tRowAlt },
+            el(Text, { style: [IR.td, IR.cItem] }, item.itemLabel),
+            el(Text, { style: [IR.td, IR.cUnit] }, item.unit ?? ""),
+            el(Text, { style: [IR.td, IR.cSpec] }, item.spec ?? ""),
+            el(Text, { style: [IR.td, IR.cVal] }, item.isNA ? "—" : (item.value ?? "")),
+            el(Text, { style: [IR.td, IR.cNA] }, item.isNA ? "✓" : ""),
+            el(Text, { style: [IR.tdBold, IR.cPass, { color: passColor(item.pass, item.isNA) }] },
+              passLabel(item.pass, item.isNA)
+            )
+          )
+        )
+      ),
+
+      el(Text, { style: IR.secLabel }, "— 03  검사자 확인"),
+      el(View, { style: IR.sigRow },
+        el(View, { style: IR.sigBox },
+          el(Text, { style: IR.sigLabel }, "검사자  ·  INSPECTOR"),
+          el(Text, { style: IR.sigName }, data.inspectorName ?? "(주)스마텍 서비스팀"),
+          el(View, { style: { borderBottom: "1 solid #999999", marginTop: 16 } })
+        ),
+        el(View, { style: IR.sigBox },
+          el(Text, { style: IR.sigLabel }, "확인일  ·  DATE"),
+          el(Text, { style: IR.sigName }, fmtDate(new Date())),
+          el(View, { style: { borderBottom: "1 solid #999999", marginTop: 16 } })
+        )
+      ),
+
+      el(View, { style: IR.footer },
+        el(Text, { style: IR.footerTxt },
+          `본 검사성적서는 (주)스마텍이 검사 완료 후 발행한 공식 문서입니다.  |  ${data.jobNo}`
+        )
+      )
+    ) as React.ReactElement,
+  ];
+
+  if (photosOnly.length > 0) {
+    const chunks: RepairPhotoFile[][] = [];
+    for (let i = 0; i < photosOnly.length; i += 4) chunks.push(photosOnly.slice(i, i + 4));
+    chunks.forEach((chunk, ci) => {
+      pages.push(
+        el(Page, { key: `photos-${ci}`, size: "A4", style: S.page },
+          el(View, { style: IR.topBar },
+            el(Text, { style: IR.topLeft }, `${data.jobNo}  ·  분해사진 — DISASSEMBLY PHOTOS`),
+            el(Text, { style: IR.topRight }, `${ci + 1}/${chunks.length}`)
+          ),
+          el(View, { style: { marginTop: 12 } },
+            el(View, { style: IR.photoGrid },
+              ...chunk.map((photo, pi) =>
+                el(View, { key: String(pi), style: IR.photoWrap },
+                  el(Image, { src: photo.fileUrl, style: IR.photoImg } as React.ComponentProps<typeof Image>),
+                  el(Text, { style: IR.photoName }, photo.fileName)
+                )
+              )
+            )
+          ),
+          el(View, { style: IR.footer },
+            el(Text, { style: IR.footerTxt }, `분해사진  |  ${data.jobNo}`)
+          )
+        ) as React.ReactElement
+      );
+    });
+  }
+
+  return el(Document, { title: `검사성적서_${data.jobNo}` }, ...pages);
+}
+
+export async function generateRepairInspectionPdf(data: RepairInspectionForPdf): Promise<Buffer> {
+  const doc = React.createElement(InspectionReportDocument, { data });
+  const arrayBuffer = await renderToBuffer(doc as React.ReactElement<DocumentProps>);
+  return Buffer.from(arrayBuffer);
+}
+
+// ─────────────────────────────────────────────────
+// 수리견적서 PDF
+// ─────────────────────────────────────────────────
+export interface RepairQuoteForPdf {
+  jobNo: string;
+  pumpMaker: string;
+  pumpModel: string;
+  serialNo: string | null;
+  voltage: string | null;
+  repairReason: string | null;
+  receivedDate: Date;
+  requestedDate: Date | null;
+  companyName: string | null;
+  contactName: string | null;
+  contactEmail: string | null;
+  repairCost: number | null;
+  repairPartsText: string | null;
+  inspectorName: string | null;
+}
+
+const RQ = StyleSheet.create({
+  topBar: { backgroundColor: "#0B0B0C", paddingVertical: 8, paddingHorizontal: 14, flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  topLeft: { color: "#ffffff", fontSize: 7, fontFamily: "Pretendard", fontWeight: 700, letterSpacing: 1 },
+  topRight: { color: "#aaaaaa", fontSize: 7 },
+  titleArea: { borderBottom: "2 solid #0B0B0C", paddingBottom: 6, marginBottom: 10, flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", marginTop: 8 },
+  docTitle: { fontSize: 22, fontFamily: "Pretendard", fontWeight: 700, color: "#0B0B0C", letterSpacing: 4 },
+  docSub: { fontSize: 7, color: "#666666", marginTop: 2, letterSpacing: 2 },
+  jobNo: { fontSize: 10, fontFamily: "Pretendard", fontWeight: 700, color: "#0B0B0C" },
+  jobMeta: { fontSize: 7, color: "#666666", marginTop: 2 },
+  secLabel: { fontSize: 7, fontFamily: "Pretendard", fontWeight: 700, color: "#444444", letterSpacing: 2, marginTop: 12, marginBottom: 4, textTransform: "uppercase" },
+  infoRow: { flexDirection: "row", gap: 10, marginBottom: 8 },
+  infoBox: { flex: 1, borderLeft: "3 solid #0B0B0C", paddingLeft: 6 },
+  infoLabel: { fontSize: 6, color: "#999999", letterSpacing: 1, marginBottom: 1 },
+  infoVal: { fontSize: 10, fontFamily: "Pretendard", fontWeight: 700, color: "#111111" },
+  infoSub: { fontSize: 7, color: "#555555", marginTop: 1 },
+  costBox: { backgroundColor: "#f4f4f2", border: "1 solid #dddddd", padding: 12, marginBottom: 10, flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  costLabel: { fontSize: 9, color: "#555555", letterSpacing: 1 },
+  costValue: { fontSize: 20, fontFamily: "Pretendard", fontWeight: 700, color: "#0B0B0C" },
+  costVat: { fontSize: 7, color: "#888888", marginTop: 2, textAlign: "right" },
+  partsBox: { border: "1 solid #eeeeee", padding: 10, backgroundColor: "#ffffff" },
+  partsLabel: { fontSize: 7, color: "#999999", letterSpacing: 1, marginBottom: 6 },
+  partsText: { fontSize: 9, color: "#333333", lineHeight: 1.7 },
+  noteBox: { borderLeft: "3 solid #c00020", paddingLeft: 8, marginTop: 10 },
+  noteText: { fontSize: 8, color: "#555555", lineHeight: 1.6 },
+  sigRow: { flexDirection: "row", gap: 16, marginTop: 16 },
+  sigBox: { flex: 1, borderTop: "1 solid #cccccc", paddingTop: 6 },
+  sigLabel: { fontSize: 6, color: "#999999", letterSpacing: 1, marginBottom: 10 },
+  sigName: { fontSize: 8, color: "#111111" },
+  footer: { position: "absolute", bottom: 20, left: 32, right: 32, borderTop: "1 solid #dddddd", paddingTop: 3 },
+  footerTxt: { fontSize: 6, color: "#aaaaaa", textAlign: "center" },
+});
+
+function RepairQuoteDocument({ data }: { data: RepairQuoteForPdf }) {
+  const el = React.createElement;
+  const vat = data.repairCost ? Math.round(data.repairCost * VAT_RATE) : 0;
+  const total = (data.repairCost ?? 0) + vat;
+
+  return el(
+    Document,
+    { title: `수리견적서_${data.jobNo}` },
+    el(Page, { size: "A4", style: S.page },
+      el(View, { style: RQ.topBar },
+        el(Text, { style: RQ.topLeft }, `${data.jobNo}  ·  SMARTECH REPAIR QUOTATION`),
+        el(Text, { style: RQ.topRight }, `발행일 · ${fmtDate(new Date())}`)
+      ),
+      el(View, { style: RQ.titleArea },
+        el(View, null,
+          el(Text, { style: RQ.docTitle }, "수 리 견 적 서"),
+          el(Text, { style: RQ.docSub }, "REPAIR QUOTATION  ·  (주)스마텍")
+        ),
+        el(View, { style: { textAlign: "right" } },
+          el(Text, { style: RQ.jobNo }, data.jobNo),
+          el(Text, { style: RQ.jobMeta },
+            `입고일: ${fmtDate(data.receivedDate)}` +
+            (data.requestedDate ? `  |  납기요청: ${fmtDate(new Date(data.requestedDate))}` : "")
+          )
+        )
+      ),
+
+      el(Text, { style: RQ.secLabel }, "— 01  고객 및 장비 정보"),
+      el(View, { style: RQ.infoRow },
+        el(View, { style: RQ.infoBox },
+          el(Text, { style: RQ.infoLabel }, "고객사  ·  CUSTOMER"),
+          el(Text, { style: RQ.infoVal }, data.companyName ?? "—"),
+          data.contactName ? el(Text, { style: RQ.infoSub }, `담당자: ${data.contactName}`) : null,
+          data.contactEmail ? el(Text, { style: RQ.infoSub }, data.contactEmail) : null
+        ),
+        el(View, { style: RQ.infoBox },
+          el(Text, { style: RQ.infoLabel }, "장비  ·  EQUIPMENT"),
+          el(Text, { style: RQ.infoVal }, `${data.pumpMaker} ${data.pumpModel}`),
+          data.serialNo ? el(Text, { style: RQ.infoSub }, `S/N: ${data.serialNo}`) : null,
+          data.voltage ? el(Text, { style: RQ.infoSub }, `전압: ${data.voltage}`) : null,
+          data.repairReason ? el(Text, { style: RQ.infoSub }, `수리사유: ${data.repairReason}`) : null
+        )
+      ),
+
+      el(Text, { style: RQ.secLabel }, "— 02  수리 비용"),
+      el(View, { style: RQ.costBox },
+        el(View, null,
+          el(Text, { style: RQ.costLabel }, "수리견적 금액 (공급가액)"),
+          el(Text, { style: { fontSize: 7, color: "#c00020", marginTop: 2 } }, "* 부가세 별도")
+        ),
+        el(View, { style: { alignItems: "flex-end" } },
+          el(Text, { style: RQ.costValue },
+            data.repairCost != null ? `₩ ${fmt(data.repairCost)}` : "협의"
+          ),
+          data.repairCost ? el(Text, { style: RQ.costVat }, `VAT: ${fmt(vat)}  /  합계: ${fmt(total)}`) : null
+        )
+      ),
+
+      data.repairPartsText ? el(View, null,
+        el(Text, { style: RQ.secLabel }, "— 03  교체 부품 내역"),
+        el(View, { style: RQ.partsBox },
+          el(Text, { style: RQ.partsLabel }, "REPLACEMENT PARTS"),
+          el(Text, { style: RQ.partsText }, data.repairPartsText)
+        )
+      ) : null,
+
+      el(Text, { style: RQ.secLabel }, "— 04  안내 사항"),
+      el(View, { style: RQ.noteBox },
+        el(Text, { style: RQ.noteText },
+          "· 본 견적서의 유효기간은 발행일로부터 30일입니다.\n" +
+          "· 부품 수급 상황에 따라 금액이 변동될 수 있습니다.\n" +
+          "· 수리 확정 후 착수하며, 완료 시 검사성적서를 함께 발송합니다."
+        )
+      ),
+
+      el(View, { style: RQ.sigRow },
+        el(View, { style: RQ.sigBox },
+          el(Text, { style: RQ.sigLabel }, "서비스 담당  ·  SERVICE ENGINEER"),
+          el(Text, { style: RQ.sigName }, data.inspectorName ?? "(주)스마텍 서비스팀"),
+          el(View, { style: { borderBottom: "1 solid #999999", marginTop: 14 } })
+        ),
+        el(View, { style: RQ.sigBox },
+          el(Text, { style: RQ.sigLabel }, "수신처  ·  CUSTOMER ACKNOWLEDGEMENT"),
+          el(Text, { style: RQ.sigName }, data.companyName ?? ""),
+          el(View, { style: { borderBottom: "1 solid #999999", marginTop: 14 } })
+        )
+      ),
+
+      el(View, { style: RQ.footer },
+        el(Text, { style: RQ.footerTxt },
+          `본 수리견적서는 (주)스마텍이 공식 발행한 문서입니다.  |  ${data.jobNo}  |  ${SMARTECH_COMPANY.officeTel}`
+        )
+      )
+    )
+  );
+}
+
+export async function generateRepairQuotePdf(data: RepairQuoteForPdf): Promise<Buffer> {
+  const doc = React.createElement(RepairQuoteDocument, { data });
+  const arrayBuffer = await renderToBuffer(doc as React.ReactElement<DocumentProps>);
+  return Buffer.from(arrayBuffer);
+}
