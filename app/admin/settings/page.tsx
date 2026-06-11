@@ -14,7 +14,7 @@ type DeptContact = {
   defaultMessage: string | null;
 };
 
-const DEPT_LABELS: Record<string, string> = { IV: "이온 진공 (IV)", SV: "표준 진공 (SV)", AK: "AK 부서" };
+const DEPT_LABELS: Record<string, string> = { IV: "IV Industrial Vacuum", SV: "SV Scientific Vacuum", AK: "AK Service" };
 
 function DepartmentContactSettings() {
   const [contacts, setContacts] = useState<DeptContact[]>([]);
