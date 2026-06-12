@@ -76,7 +76,18 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
   const userEmail = (session?.user as any)?.email ?? "";
 
   return (
-    /* 왼쪽 패널 — fullscreen 시 전체, 일반 시 데스크톱만 QuotePanel(480px) 제외 */
+    <>
+    {/* 인쇄 전용 CSS — quote-styles.css는 /quote/[id]에서만 로드되므로 모달에 직접 포함 */}
+    <style>{`
+      @media print {
+        body.printing-quote .quote-page { background: #fff !important; color: #111 !important; }
+        body.printing-quote .quote-page .full-version { display: none !important; }
+        body.printing-quote .quote-page .pdf-only { display: block !important; padding: 15mm !important; min-height: 0 !important; }
+        body.printing-quote .quote-page .util,
+        body.printing-quote .quote-page .btn-export { display: none !important; }
+      }
+    `}</style>
+    {/* 왼쪽 패널 — fullscreen 시 전체, 일반 시 데스크톱만 QuotePanel(480px) 제외 */}
     <div className={`fixed top-0 bottom-0 left-0 z-50 overflow-y-auto print-modal-wrapper ${fullscreen ? "right-0" : "right-0 md:right-[480px]"}`}>
 
       {/* ── quote-page 다크 테마 래퍼 ── */}
@@ -116,21 +127,22 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
                         if (el) { el.style.display = "none"; hidden.push(el); }
                       });
                       document.body.classList.add("printing-quote");
-                      // 인쇄 완료 후 카트 초기화 (iOS Safari는 afterprint 미발생 → 타임아웃 대비)
+                      // 모바일에서 window.print()는 비동기(즉시 반환)이므로
+                      // 복원 코드를 afterprint 안으로 이동 — 인쇄 전 복원 방지
                       let fallbackTimer: ReturnType<typeof setTimeout> | null = null;
-                      const clearCart = () => {
+                      const restore = () => {
                         if (fallbackTimer) clearTimeout(fallbackTimer);
+                        hidden.forEach((el) => (el.style.display = ""));
+                        document.body.classList.remove("printing-quote");
                         localStorage.removeItem("quoteCart");
                         window.dispatchEvent(new Event("quoteCartUpdated"));
                         onClose();
-                        window.removeEventListener("afterprint", clearCart);
+                        window.removeEventListener("afterprint", restore);
                       };
-                      window.addEventListener("afterprint", clearCart);
+                      window.addEventListener("afterprint", restore);
                       window.print();
-                      hidden.forEach((el) => (el.style.display = ""));
-                      document.body.classList.remove("printing-quote");
-                      // 모바일 Safari afterprint 미발생 대비: 800ms 후 강제 닫기
-                      fallbackTimer = setTimeout(clearCart, 800);
+                      // iOS/Android: afterprint 미발생 대비 — 2초 후 강제 복원
+                      fallbackTimer = setTimeout(restore, 2000);
                     }
                   }}
                 >
@@ -480,5 +492,6 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
         )}
       </div>
     </div>
+    </>
   );
 }
