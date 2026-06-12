@@ -36,7 +36,7 @@ export default function HeroCtaCards() {
       >
         <div className="hidden sm:block text-[9px] mono tracking-widest opacity-50">PUMP SELECTOR</div>
         <div className="text-center sm:text-left">
-          <div className="text-[18px] sm:text-[20px] display leading-tight tracking-tight break-keep">펌프선정</div>
+          <div className="text-[18px] sm:text-[20px] display leading-tight tracking-tight break-keep">펌프 선정</div>
           <div className="hidden sm:block mt-1.5 text-[11px] opacity-60 group-hover:opacity-80">펌프 시뮬레이션 →</div>
         </div>
       </div>
@@ -51,7 +51,7 @@ export default function HeroCtaCards() {
       >
         <div className="hidden sm:block text-[9px] mono tracking-widest opacity-50">AI CONSULT</div>
         <div className="text-center sm:text-left">
-          <div className="text-[18px] sm:text-[20px] display leading-tight tracking-tight break-keep">AI 상담</div>
+          <div className="text-[18px] sm:text-[20px] display leading-tight tracking-tight break-keep">AI<br className="sm:hidden" /> 상담</div>
           <div className="hidden sm:block mt-1.5 text-[11px] opacity-60 group-hover:opacity-80">공정 조건 상담 →</div>
         </div>
       </div>
