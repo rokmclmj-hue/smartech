@@ -298,12 +298,14 @@ function JobRow({ job, onRefresh }: { job: Job; onRefresh: () => void }) {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          repairCost: repairCost ? Number(repairCost) : null,
+          repairCost: repairCost !== "" ? Math.round(Number(repairCost)) : null,
           repairPartsText: repairPartsText || null,
           inspectorName: inspectorName || null,
         }),
       });
+      const data = await res.json().catch(() => ({}));
       if (res.ok) { showToast("견적 정보 저장됨"); onRefresh(); }
+      else showToast((data as { error?: string }).error ?? "저장 오류");
     } finally { setSavingQuote(false); }
   }
 

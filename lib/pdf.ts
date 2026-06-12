@@ -1313,7 +1313,7 @@ const RQ = StyleSheet.create({
 
 function RepairQuoteDocument({ data }: { data: RepairQuoteForPdf }) {
   const el = React.createElement;
-  const vat = data.repairCost ? Math.round(data.repairCost * VAT_RATE) : 0;
+  const vat = data.repairCost != null ? Math.round(data.repairCost * VAT_RATE) : 0;
   const total = (data.repairCost ?? 0) + vat;
 
   return el(
@@ -1365,7 +1365,7 @@ function RepairQuoteDocument({ data }: { data: RepairQuoteForPdf }) {
           el(Text, { style: RQ.costValue },
             data.repairCost != null ? `₩ ${fmt(data.repairCost)}` : "협의"
           ),
-          data.repairCost ? el(Text, { style: RQ.costVat }, `VAT: ${fmt(vat)}  /  합계: ${fmt(total)}`) : null
+          data.repairCost != null ? el(Text, { style: RQ.costVat }, `VAT: ${fmt(vat)}  /  합계: ${fmt(total)}`) : null
         )
       ),
 

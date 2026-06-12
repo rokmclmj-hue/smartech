@@ -81,7 +81,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       ...(body.contactEmail !== undefined && { contactEmail: body.contactEmail }),
       ...(body.requestedDate !== undefined && { requestedDate: body.requestedDate ? new Date(body.requestedDate) : null }),
       // 수리 견적 필드 (Phase 2)
-      ...(body.repairCost !== undefined && { repairCost: body.repairCost }),
+      ...(body.repairCost !== undefined && { repairCost: body.repairCost != null ? Math.round(Number(body.repairCost)) : null }),
       ...(body.repairPartsText !== undefined && { repairPartsText: body.repairPartsText }),
       ...(body.inspectorName !== undefined && { inspectorName: body.inspectorName }),
     },
