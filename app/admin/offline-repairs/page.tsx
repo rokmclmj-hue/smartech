@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 
 type Company = { id: number; companyName: string };
 type InspectionItem = {
@@ -51,7 +51,7 @@ function fmtDate(s: string) {
 }
 
 // ── 수리접수 작성 폼 ──────────────────────────────
-function JobForm({ onSaved }: { onSaved: () => void }) {
+function JobForm({ onSaved }: { onSaved: (newJobId: number) => void }) {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [companyQ, setCompanyQ] = useState("");
   const [companyResults, setCompanyResults] = useState<Company[]>([]);
@@ -103,7 +103,7 @@ function JobForm({ onSaved }: { onSaved: () => void }) {
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? "오류 발생"); return; }
-      onSaved();
+      onSaved(data.id);
     } finally {
       setSaving(false);
     }
@@ -243,8 +243,18 @@ function JobForm({ onSaved }: { onSaved: () => void }) {
 }
 
 // ── 수리접수 이력 행 ──────────────────────────────
-function JobRow({ job, onRefresh }: { job: Job; onRefresh: () => void }) {
+function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone }: {
+  job: Job; onRefresh: () => void; autoOpen?: boolean; onAutoOpenDone?: () => void;
+}) {
   const [open, setOpen] = useState(false);
+  const rowRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!autoOpen) return;
+    setOpen(true);
+    setTimeout(() => rowRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
+    onAutoOpenDone?.();
+  }, [autoOpen, onAutoOpenDone]);
   const [genToken, setGenToken] = useState(false);
   const [toast, setToast] = useState("");
   const [editItems, setEditItems] = useState<InspectionItem[]>(job.inspectionItems);
@@ -400,7 +410,7 @@ function JobRow({ job, onRefresh }: { job: Job; onRefresh: () => void }) {
   }
 
   return (
-    <div className="border hair bg-paper">
+    <div ref={rowRef} className="border hair bg-paper">
       <div className="p-4 flex items-start justify-between gap-4 cursor-pointer" onClick={() => setOpen(!open)}>
         <div className="space-y-0.5 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
@@ -610,18 +620,23 @@ export default function OfflineRepairsPage() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [autoOpenId, setAutoOpenId] = useState<number | null>(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const load = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const res = await fetch("/api/admin/offline-repairs");
       if (res.ok) setJobs(await res.json());
-    } finally { setLoading(false); }
+    } finally { if (!silent) setLoading(false); }
   }, []);
 
   useEffect(() => { load(); }, [load]);
 
-  function handleSaved() { setShowForm(false); load(); }
+  function handleSaved(newJobId: number) {
+    setShowForm(false);
+    setAutoOpenId(newJobId);
+    load(true);
+  }
 
   return (
     <div className="px-4 sm:px-6 py-6 sm:py-10 max-w-[1200px] mx-auto space-y-6">
@@ -658,7 +673,15 @@ export default function OfflineRepairsPage() {
           </div>
         ) : (
           <div className="space-y-3">
-            {jobs.map(j => <JobRow key={j.id} job={j} onRefresh={load} />)}
+            {jobs.map(j => (
+              <JobRow
+                key={j.id}
+                job={j}
+                onRefresh={() => load(true)}
+                autoOpen={autoOpenId === j.id}
+                onAutoOpenDone={() => setAutoOpenId(null)}
+              />
+            ))}
           </div>
         )}
       </div>
