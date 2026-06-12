@@ -102,7 +102,8 @@ def replace_ai_image(match):
         print(f"  [ERROR] {filename}: {e}")
         return match.group(0)
 
-content = re.sub(r"!\[([^\]]*)\]\(\./images/([^)]+)\)", replace_ai_image, content)
+# field-*.png는 아래 현장사진 섹션에서 별도 처리 (중복 방지)
+content = re.sub(r"!\[([^\]]*)\]\(\./images/((?!field-)[^)]+)\)", replace_ai_image, content)
 
 # ── 현장사진 업로드 및 삽입 ────────────────────────────
 field_photos = sorted([
@@ -123,20 +124,20 @@ if field_photos:
         except Exception as e:
             print(f"  [ERROR] {fname}: {e}")
 
-    # 삽입 규칙: 1번째 → 첫 번째 이미지 뒤, 나머지 → 본문 끝
-    for idx, (fname, url) in enumerate(field_urls):
+    for fname, url in field_urls:
         alt = fname.replace("-", " ").replace(".png", "").replace(".jpg", "")
-        if idx == 0:
-            # 첫 번째 현장사진 → 본문 첫 번째 이미지 태그 바로 뒤에 삽입
+        # final.md에 이미 참조된 경우 → 경로만 교체 (중복 삽입 방지)
+        pattern = r"!\[([^\]]*)\]\(\./images/" + re.escape(fname) + r"\)"
+        if re.search(pattern, content):
+            content = re.sub(pattern, lambda m, u=url: f"![{m.group(1)}]({u})", content)
+        else:
+            # 참조 없는 경우 → 첫 번째 이미지 뒤에 삽입
             content = re.sub(
                 r'(!\[[^\]]*\]\(https?://[^\)]+\))',
                 r'\1\n\n![' + alt + '](' + url + ')',
                 content,
                 count=1
             )
-        else:
-            # 나머지 현장사진은 본문 끝에 추가
-            content = content.rstrip() + f'\n\n![{alt}]({url})\n'
 
 # ── frontmatter 파싱 (category 추출 후 제거) ──────────
 category = "기술문의"
