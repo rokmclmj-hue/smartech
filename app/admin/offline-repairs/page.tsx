@@ -256,10 +256,59 @@ function JobRow({ job, onRefresh }: { job: Job; onRefresh: () => void }) {
   const [savingQuote, setSavingQuote] = useState(false);
   const [sendEmail, setSendEmail] = useState(job.contactEmail ?? "");
   const [sending, setSending] = useState(false);
+  const [kitLoaded, setKitLoaded] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const uploadUrl = job.uploadToken
     ? `${typeof window !== "undefined" ? window.location.origin : ""}/repair/offline-upload/${job.uploadToken}`
     : null;
+
+  // 패널 열릴 때 교체부품 비어있으면 수리 키트에서 자동 채우기
+  useEffect(() => {
+    if (!open || kitLoaded) return;
+    setKitLoaded(true);
+    if (repairPartsText) return;
+    fetch("/api/repair/kits")
+      .then(r => r.json())
+      .then(({ kits }: { kits: Array<{ pumpModel: string; parts: Array<{ name: string; quantity: string | null }> }> }) => {
+        const model = job.pumpModel.toLowerCase();
+        const matched = kits.find(k =>
+          model.includes(k.pumpModel.toLowerCase()) || k.pumpModel.toLowerCase().includes(model)
+        );
+        if (matched?.parts.length) {
+          setRepairPartsText(matched.parts.map(p => `${p.name}${p.quantity ? " × " + p.quantity : ""}`).join("\n"));
+        }
+      })
+      .catch(() => {});
+  }, [open, kitLoaded, repairPartsText, job.pumpModel]);
+
+  async function loadKitParts() {
+    try {
+      const { kits } = await fetch("/api/repair/kits").then(r => r.json()) as
+        { kits: Array<{ pumpModel: string; parts: Array<{ name: string; quantity: string | null }> }> };
+      const model = job.pumpModel.toLowerCase();
+      const matched = kits.find(k =>
+        model.includes(k.pumpModel.toLowerCase()) || k.pumpModel.toLowerCase().includes(model)
+      );
+      if (matched?.parts.length) {
+        setRepairPartsText(matched.parts.map(p => `${p.name}${p.quantity ? " × " + p.quantity : ""}`).join("\n"));
+        showToast("기본 파트 불러왔습니다");
+      } else {
+        showToast("해당 모델 기본 파트 없음");
+      }
+    } catch { showToast("불러오기 실패"); }
+  }
+
+  async function handleDelete(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!confirm(`${job.pumpMaker} ${job.pumpModel} (${job.jobNo}) 수리접수를 삭제하시겠습니까?`)) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/admin/offline-repairs/${job.id}`, { method: "DELETE" });
+      if (res.ok) onRefresh();
+      else showToast("삭제 실패");
+    } finally { setDeleting(false); }
+  }
 
   async function handleGenerateToken() {
     setGenToken(true);
@@ -368,7 +417,16 @@ function JobRow({ job, onRefresh }: { job: Job; onRefresh: () => void }) {
             <span>{fmtDate(job.receivedDate)}</span>
           </div>
         </div>
-        <span className="text-[18px] dim shrink-0">{open ? "▲" : "▼"}</span>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={handleDelete}
+            disabled={deleting}
+            className="mono text-[10px] text-edred/50 hover:text-edred border border-transparent hover:border-edred/30 px-2 py-1 transition-colors disabled:opacity-40"
+          >
+            {deleting ? "..." : "삭제"}
+          </button>
+          <span className="text-[18px] dim">{open ? "▲" : "▼"}</span>
+        </div>
       </div>
 
       {open && (
@@ -486,10 +544,18 @@ function JobRow({ job, onRefresh }: { job: Job; onRefresh: () => void }) {
               </div>
             </div>
             <div>
-              <div className="mono text-[10px] dim mb-1">교체 부품 내역 (자유 입력)</div>
+              <div className="flex items-center justify-between mb-1">
+                <div className="mono text-[10px] dim">교체 부품 내역 (자유 입력)</div>
+                <button
+                  onClick={loadKitParts}
+                  className="mono text-[9px] text-smblue hover:underline"
+                >
+                  기본 파트 불러오기 ↺
+                </button>
+              </div>
               <textarea
                 value={repairPartsText} onChange={e => setRepairPartsText(e.target.value)}
-                rows={3} placeholder={"Tip Seal Kit × 1\nShaft Seal × 1"}
+                rows={4} placeholder={"Tip Seal Kit × 1\nShaft Seal × 1"}
                 className="w-full border hair px-3 py-2 text-[13px] font-mono focus:outline-none focus:border-ink resize-none"
               />
             </div>

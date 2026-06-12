@@ -1332,7 +1332,7 @@ function RepairQuoteDocument({ data }: { data: RepairQuoteForPdf }) {
         el(View, { style: { textAlign: "right" } },
           el(Text, { style: RQ.jobNo }, data.jobNo),
           el(Text, { style: RQ.jobMeta },
-            `입고일: ${fmtDate(data.receivedDate)}` +
+            `입고일: ${fmtDate(new Date(data.receivedDate))}` +
             (data.requestedDate ? `  |  납기요청: ${fmtDate(new Date(data.requestedDate))}` : "")
           )
         )
