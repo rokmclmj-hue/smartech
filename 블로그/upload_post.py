@@ -157,7 +157,14 @@ tags_match = re.search(r"(#\S+(?:\s+#\S+)+)\s*$", content, re.MULTILINE)
 tags = tags_match.group(1).strip() if tags_match else ""
 
 meta_path = os.path.join(BLOG_FOLDER, "meta.txt")
-meta_desc = open(meta_path, encoding="utf-8").read().strip() if os.path.exists(meta_path) else ""
+meta_desc = ""
+if os.path.exists(meta_path):
+    for line in open(meta_path, encoding="utf-8"):
+        if line.strip().lower().startswith("description:"):
+            meta_desc = line.split(":", 1)[1].strip()
+            # 전화번호(031-...) 등 연락처 제거 — 리드 문장으로만 사용
+            meta_desc = re.sub(r"\s*031-\d{3}-\d{4}", "", meta_desc).strip().rstrip(".")
+            break
 
 naver_path = os.path.join(BLOG_FOLDER, "naver.md")
 naver_content = open(naver_path, encoding="utf-8").read().strip() if os.path.exists(naver_path) else ""
