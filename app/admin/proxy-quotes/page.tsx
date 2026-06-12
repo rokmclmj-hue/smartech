@@ -809,7 +809,7 @@ function AdminProxyQuotesInner() {
                     <div key={key}>
                       <label className="mono text-[10px] tracking-[0.15em] uppercase dim mb-1 block">{label}</label>
                       <input type={type} value={guest[key as keyof GuestForm]}
-                        onChange={(e) => { setGuest((g) => ({ ...g, [key]: e.target.value })); setSelectedCustomer({ source: "known", id: 0, company: guest.company, name: guest.name, phone: guest.phone, email: guest.email, tier: guest.tier, paymentTerm: null, contacts: [] }); }}
+                        onChange={(e) => setGuest((g) => ({ ...g, [key]: e.target.value }))}
                         placeholder={placeholder}
                         className="w-full border hair rounded-md px-3 py-2.5 text-[14px] focus:outline-none focus:border-edred" />
                     </div>
