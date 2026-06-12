@@ -98,7 +98,7 @@ www.smartechvacuum.com
 
 > **용어 정리**: google.md는 초안, final.md는 최종 업로드본. writer 에이전트는 google.md(초안)를 작성하고, assembler 에이전트가 검수 후 final.md로 확정한다. 실제로는 내용이 동일하므로 google.md를 final.md로 복사해 frontmatter만 추가하면 된다.
 
-- **분량**: 800~1,200자
+- **분량**: 1,500~2,000자
 - **구조**: H1 제목 → 도입 → H2 소제목 2~4개 → 결론 + CTA
 - **CTA**: 마지막에 "문의: 031-204-7170 / www.smartechvacuum.com" 포함
 - **문체**: 네이버보다 간결하고 직접적. 정보 전달 위주.
