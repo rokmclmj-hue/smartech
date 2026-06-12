@@ -1279,130 +1279,159 @@ export interface RepairQuoteForPdf {
   inspectorName: string | null;
 }
 
-const RQ = StyleSheet.create({
-  topBar: { backgroundColor: "#0B0B0C", paddingVertical: 8, paddingHorizontal: 14, flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  topLeft: { color: "#ffffff", fontSize: 7, fontFamily: "Pretendard", fontWeight: 700, letterSpacing: 1 },
-  topRight: { color: "#aaaaaa", fontSize: 7 },
-  titleArea: { borderBottom: "2 solid #0B0B0C", paddingBottom: 6, marginBottom: 10, flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", marginTop: 8 },
-  docTitle: { fontSize: 22, fontFamily: "Pretendard", fontWeight: 700, color: "#0B0B0C", letterSpacing: 4 },
-  docSub: { fontSize: 7, color: "#666666", marginTop: 2, letterSpacing: 2 },
-  jobNo: { fontSize: 10, fontFamily: "Pretendard", fontWeight: 700, color: "#0B0B0C" },
-  jobMeta: { fontSize: 7, color: "#666666", marginTop: 2 },
-  secLabel: { fontSize: 7, fontFamily: "Pretendard", fontWeight: 700, color: "#444444", letterSpacing: 2, marginTop: 12, marginBottom: 4, textTransform: "uppercase" },
-  infoRow: { flexDirection: "row", gap: 10, marginBottom: 8 },
-  infoBox: { flex: 1, borderLeft: "3 solid #0B0B0C", paddingLeft: 6 },
-  infoLabel: { fontSize: 6, color: "#999999", letterSpacing: 1, marginBottom: 1 },
-  infoVal: { fontSize: 10, fontFamily: "Pretendard", fontWeight: 700, color: "#111111" },
-  infoSub: { fontSize: 7, color: "#555555", marginTop: 1 },
-  costBox: { backgroundColor: "#f4f4f2", border: "1 solid #dddddd", padding: 12, marginBottom: 10, flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  costLabel: { fontSize: 9, color: "#555555", letterSpacing: 1 },
-  costValue: { fontSize: 20, fontFamily: "Pretendard", fontWeight: 700, color: "#0B0B0C" },
-  costVat: { fontSize: 7, color: "#888888", marginTop: 2, textAlign: "right" },
-  partsBox: { border: "1 solid #eeeeee", padding: 10, backgroundColor: "#ffffff" },
-  partsLabel: { fontSize: 7, color: "#999999", letterSpacing: 1, marginBottom: 6 },
-  partsText: { fontSize: 9, color: "#333333", lineHeight: 1.7 },
-  noteBox: { borderLeft: "3 solid #c00020", paddingLeft: 8, marginTop: 10 },
-  noteText: { fontSize: 8, color: "#555555", lineHeight: 1.6 },
-  sigRow: { flexDirection: "row", gap: 16, marginTop: 16 },
-  sigBox: { flex: 1, borderTop: "1 solid #cccccc", paddingTop: 6 },
-  sigLabel: { fontSize: 6, color: "#999999", letterSpacing: 1, marginBottom: 10 },
-  sigName: { fontSize: 8, color: "#111111" },
-  footer: { position: "absolute", bottom: 20, left: 32, right: 32, borderTop: "1 solid #dddddd", paddingTop: 3 },
-  footerTxt: { fontSize: 6, color: "#aaaaaa", textAlign: "center" },
-});
-
 function RepairQuoteDocument({ data }: { data: RepairQuoteForPdf }) {
   const el = React.createElement;
+  const issued = new Date();
+  const year = issued.getFullYear();
   const vat = data.repairCost != null ? Math.round(data.repairCost * VAT_RATE) : 0;
   const total = (data.repairCost ?? 0) + vat;
+
+  const partsOneLine = data.repairPartsText
+    ?.split("\n")
+    .map(l => l.trim())
+    .filter(Boolean)
+    .join("  ·  ") ?? "";
 
   return el(
     Document,
     { title: `수리견적서_${data.jobNo}` },
     el(Page, { size: "A4", style: S.page },
-      el(View, { style: RQ.topBar },
-        el(Text, { style: RQ.topLeft }, `${data.jobNo}  ·  SMARTECH REPAIR QUOTATION`),
-        el(Text, { style: RQ.topRight }, `발행일 · ${fmtDate(new Date())}`)
-      ),
-      el(View, { style: RQ.titleArea },
-        el(View, null,
-          el(Text, { style: RQ.docTitle }, "수 리 견 적 서"),
-          el(Text, { style: RQ.docSub }, "REPAIR QUOTATION  ·  (주)스마텍")
+
+      // ── 헤더
+      el(View, { style: S.header },
+        el(View, { style: { flexDirection: "row", alignItems: "baseline", gap: 8 } },
+          el(Text, { style: S.headerTitle }, "SMARTECH · REPAIR ESTIMATE"),
+          el(Text, { style: { fontSize: 11, fontFamily: "Pretendard", fontWeight: 700, color: "#111111" } }, "수리 견적서")
         ),
-        el(View, { style: { textAlign: "right" } },
-          el(Text, { style: RQ.jobNo }, data.jobNo),
-          el(Text, { style: RQ.jobMeta },
-            `입고일: ${fmtDate(new Date(data.receivedDate))}` +
-            (data.requestedDate ? `  |  납기요청: ${fmtDate(new Date(data.requestedDate))}` : "")
+        el(View, { style: S.headerMeta },
+          el(Text, { style: S.headerMetaLine }, `DATE · ${fmtDate(issued)}`),
+          el(Text, { style: S.headerMetaLine }, `EQUIPMENT · ${data.pumpMaker} ${data.pumpModel}`)
+        )
+      ),
+
+      // ── TO / FROM
+      el(View, { style: S.partiesBox },
+        el(View, { style: S.toBox },
+          el(Text, { style: S.partyLabel }, "TO · 수신처"),
+          el(View, { style: S.partyRow },
+            el(Text, { style: S.partyKey }, "COMPANY"),
+            el(Text, { style: S.partyVal }, data.companyName ?? "—")
+          ),
+          el(View, { style: S.partyRow },
+            el(Text, { style: S.partyKey }, "ATTN"),
+            el(Text, { style: S.partyVal }, data.contactName ?? "—")
+          ),
+          el(View, { style: S.partyRow },
+            el(Text, { style: S.partyKey }, "TEL"),
+            el(Text, { style: S.partyVal }, "—")
+          ),
+          el(View, { style: S.partyRow },
+            el(Text, { style: S.partyKey }, "EMAIL"),
+            el(Text, { style: S.partyVal }, data.contactEmail ?? "—")
+          )
+        ),
+        el(View, { style: S.fromBox },
+          el(Text, { style: S.partyLabel }, "FROM · 발신처"),
+          el(View, { style: S.partyRow },
+            el(Text, { style: S.partyKey }, "COMPANY"),
+            el(Text, { style: S.partyVal }, `${SMARTECH_COMPANY.name} · ${SMARTECH_COMPANY.english}`)
+          ),
+          el(View, { style: S.partyRow },
+            el(Text, { style: S.partyKey }, "CEO"),
+            el(Text, { style: S.partyVal }, SMARTECH_COMPANY.ceo)
+          ),
+          el(View, { style: S.partyRow },
+            el(Text, { style: S.partyKey }, "BIZ NO"),
+            el(Text, { style: S.partyVal }, SMARTECH_COMPANY.bizNo)
+          ),
+          el(View, { style: S.partyRow },
+            el(Text, { style: S.partyKey }, "TEL"),
+            el(Text, { style: S.partyVal }, SMARTECH_COMPANY.officeTel)
+          ),
+          el(View, { style: S.partyRow },
+            el(Text, { style: S.partyKey }, "EMAIL"),
+            el(Text, { style: S.partyVal }, SMARTECH_COMPANY.email)
+          ),
+          el(View, { style: S.partyRow },
+            el(Text, { style: S.partyKey }, "OFFICE"),
+            el(Text, { style: S.partyVal }, SMARTECH_COMPANY.headOfficeKo)
+          ),
+          el(View, { style: S.partyRow },
+            el(Text, { style: S.partyKey }, "A/S CTR"),
+            el(Text, { style: S.partyVal }, SMARTECH_COMPANY.cheonanCenterKo)
           )
         )
       ),
 
-      el(Text, { style: RQ.secLabel }, "— 01  고객 및 장비 정보"),
-      el(View, { style: RQ.infoRow },
-        el(View, { style: RQ.infoBox },
-          el(Text, { style: RQ.infoLabel }, "고객사  ·  CUSTOMER"),
-          el(Text, { style: RQ.infoVal }, data.companyName ?? "—"),
-          data.contactName ? el(Text, { style: RQ.infoSub }, `담당자: ${data.contactName}`) : null,
-          data.contactEmail ? el(Text, { style: RQ.infoSub }, data.contactEmail) : null
+      // ── 품목 테이블
+      el(View, { style: S.table },
+        el(View, { style: S.tableHeader },
+          el(Text, { style: [S.thCell, { width: "6%", textAlign: "center" }] }, "NO"),
+          el(Text, { style: [S.thCell, { width: "62%", paddingRight: 4 }] }, "수리 항목  /  교체 파트"),
+          el(Text, { style: [S.thCell, { width: "10%", textAlign: "center" }] }, "수량"),
+          el(Text, { style: [S.thCell, { width: "22%", textAlign: "right" }] }, "공급가  (VAT 별도)")
         ),
-        el(View, { style: RQ.infoBox },
-          el(Text, { style: RQ.infoLabel }, "장비  ·  EQUIPMENT"),
-          el(Text, { style: RQ.infoVal }, `${data.pumpMaker} ${data.pumpModel}`),
-          data.serialNo ? el(Text, { style: RQ.infoSub }, `S/N: ${data.serialNo}`) : null,
-          data.voltage ? el(Text, { style: RQ.infoSub }, `전압: ${data.voltage}`) : null,
-          data.repairReason ? el(Text, { style: RQ.infoSub }, `수리사유: ${data.repairReason}`) : null
-        )
-      ),
-
-      el(Text, { style: RQ.secLabel }, "— 02  수리 비용"),
-      el(View, { style: RQ.costBox },
-        el(View, null,
-          el(Text, { style: RQ.costLabel }, "수리견적 금액 (공급가액)"),
-          el(Text, { style: { fontSize: 7, color: "#c00020", marginTop: 2 } }, "* 부가세 별도")
-        ),
-        el(View, { style: { alignItems: "flex-end" } },
-          el(Text, { style: RQ.costValue },
-            data.repairCost != null ? `₩ ${fmt(data.repairCost)}` : "협의"
+        el(View, { style: S.tableRow },
+          el(Text, { style: [S.tdNormal, { width: "6%", textAlign: "center" }] }, "01"),
+          el(View, { style: { width: "62%", paddingRight: 8 } },
+            el(Text, { style: { fontSize: 9, fontFamily: "Pretendard", fontWeight: 700, color: "#111111", marginBottom: 4 } },
+              `기본수리 — ${data.pumpModel}`
+            ),
+            partsOneLine
+              ? el(Text, { style: { fontSize: 7, color: "#555555", lineHeight: 1.6 } }, partsOneLine)
+              : null
           ),
-          data.repairCost != null ? el(Text, { style: RQ.costVat }, `VAT: ${fmt(vat)}  /  합계: ${fmt(total)}`) : null
+          el(Text, { style: [S.tdNormal, { width: "10%", textAlign: "center" }] }, "1식"),
+          el(Text, { style: [S.tdAmount, { width: "22%", textAlign: "right" }] },
+            data.repairCost != null ? fmt(data.repairCost) : "협의"
+          )
         )
       ),
 
-      data.repairPartsText ? el(View, null,
-        el(Text, { style: RQ.secLabel }, "— 03  교체 부품 내역"),
-        el(View, { style: RQ.partsBox },
-          el(Text, { style: RQ.partsLabel }, "REPLACEMENT PARTS"),
-          el(Text, { style: RQ.partsText }, data.repairPartsText)
-        )
-      ) : null,
-
-      el(Text, { style: RQ.secLabel }, "— 04  안내 사항"),
-      el(View, { style: RQ.noteBox },
-        el(Text, { style: RQ.noteText },
-          "· 본 견적서의 유효기간은 발행일로부터 30일입니다.\n" +
-          "· 부품 수급 상황에 따라 금액이 변동될 수 있습니다.\n" +
-          "· 수리 확정 후 착수하며, 완료 시 검사성적서를 함께 발송합니다."
+      // ── 합계
+      el(View, { style: S.summaryArea },
+        el(View, { style: S.summaryBox },
+          el(View, { style: S.summaryRow },
+            el(Text, { style: S.sumLabel }, "SUB-TOTAL"),
+            el(Text, { style: S.sumValue }, data.repairCost != null ? fmt(data.repairCost) : "—")
+          ),
+          el(View, { style: S.summaryRow },
+            el(Text, { style: S.sumLabel }, "VAT (10%)"),
+            el(Text, { style: S.sumValue }, data.repairCost != null ? fmt(vat) : "—")
+          ),
+          el(View, { style: S.summaryTotalRow },
+            el(Text, { style: S.sumTLabel }, "GRAND TOTAL"),
+            el(Text, { style: S.sumTValue }, data.repairCost != null ? fmt(total) : "협의")
+          )
         )
       ),
 
-      el(View, { style: RQ.sigRow },
-        el(View, { style: RQ.sigBox },
-          el(Text, { style: RQ.sigLabel }, "서비스 담당  ·  SERVICE ENGINEER"),
-          el(Text, { style: RQ.sigName }, data.inspectorName ?? "(주)스마텍 서비스팀"),
-          el(View, { style: { borderBottom: "1 solid #999999", marginTop: 14 } })
+      // ── 거래 조건
+      el(View, { style: S.termsBox },
+        el(View, { style: S.termRow },
+          el(Text, { style: S.termLabel }, "PAYMENT"),
+          el(Text, { style: S.termValue }, "수리 완료 후 세금계산서 발행 · 협의")
         ),
-        el(View, { style: RQ.sigBox },
-          el(Text, { style: RQ.sigLabel }, "수신처  ·  CUSTOMER ACKNOWLEDGEMENT"),
-          el(Text, { style: RQ.sigName }, data.companyName ?? ""),
-          el(View, { style: { borderBottom: "1 solid #999999", marginTop: 14 } })
+        el(View, { style: S.termRow },
+          el(Text, { style: S.termLabel }, "WARRANTY"),
+          el(Text, { style: S.termValue }, "수리 후 3개월 보증")
+        ),
+        el(View, { style: S.termRow },
+          el(Text, { style: S.termLabel }, "A / S"),
+          el(Text, { style: S.termValue }, `${SMARTECH_COMPANY.officeTel} · 스마텍 서비스센터 직접 응대`)
+        ),
+        el(View, { style: { ...S.termRow, marginBottom: 0 } },
+          el(Text, { style: S.termLabel }, "NOTE"),
+          el(Text, { style: S.termValue }, "본 견적은 참고용이며 분해 검사 후 정확한 금액이 확정됩니다.")
         )
       ),
 
-      el(View, { style: RQ.footer },
-        el(Text, { style: RQ.footerTxt },
-          `본 수리견적서는 (주)스마텍이 공식 발행한 문서입니다.  |  ${data.jobNo}  |  ${SMARTECH_COMPANY.officeTel}`
-        )
+      // ── 푸터
+      el(View, { style: S.footer },
+        el(Text, { style: S.footerText },
+          `© ${year} SMARTECH CO., LTD.  ·  EDWARDS VACUUM KOREA AUTHORIZED SERVICE PARTNER`
+        ),
+        el(Text, { style: S.footerText }, "PAGE 1 / 1")
       )
     )
   );
