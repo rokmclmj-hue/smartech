@@ -1,4 +1,4 @@
-name: 코드 리뷰 PR 자동 생성
+name: Auto Review PR
 
 on:
   push:
@@ -9,53 +9,40 @@ permissions:
   pull-requests: write
 
 jobs:
-  auto-review-pr:
+  create-pr:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: reviewed 브랜치 없으면 생성
+      - name: Fetch reviewed branch
+        run: git fetch origin reviewed
+
+      - name: Count new commits
+        id: count
+        run: |
+          N=$(git rev-list --count origin/reviewed..HEAD)
+          echo "n=$N" >> "$GITHUB_OUTPUT"
+          echo "New commits: $N"
+
+      - name: Create PR
+        if: ${{ steps.count.outputs.n != '0' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if ! git ls-remote --exit-code origin reviewed; then
-            git checkout -b reviewed
-            git push origin reviewed
-            git checkout master
+          N="${{ steps.count.outputs.n }}"
+          TODAY=$(date '+%Y-%m-%d')
+          LOG=$(git log origin/reviewed..HEAD --oneline | awk '{print "- " $0}')
+
+          OPEN=$(gh pr list --base reviewed --head master --state open --json number -q '.[0].number')
+          if [ -n "$OPEN" ]; then
+            echo "PR #$OPEN already open"
+            exit 0
           fi
 
-      - name: 새 커밋 수 확인
-        id: diff
-        run: |
-          git fetch origin reviewed
-          COUNT=$(git log origin/reviewed..HEAD --oneline | wc -l | tr -d ' ')
-          echo "count=$COUNT" >> $GITHUB_OUTPUT
-
-      - name: PR 생성 또는 업데이트
-        if: steps.diff.outputs.count > 0
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          COUNT=${{ steps.diff.outputs.count }}
-          DATE=$(date '+%Y-%m-%d')
-          COMMITS=$(git log origin/reviewed..HEAD --oneline | sed 's/^/- /')
-
-          TITLE="코드 리뷰 — 커밋 ${COUNT}개 · ${DATE}"
-          BODY="## 리뷰 대상 커밋 (${COUNT}개)
-
-${COMMITS}
-
----
-**리뷰 방법:** \`/code-review ultra <이 PR 번호>\` 입력
-**리뷰 완료 후:** PR을 Close하면 다음 번에 새 PR이 자동 생성됩니다."
-
-          EXISTING=$(gh pr list --base reviewed --head master --state open --json number --jq '.[0].number')
-
-          if [ -z "$EXISTING" ]; then
-            gh pr create --base reviewed --head master --title "$TITLE" --body "$BODY"
-          else
-            gh pr edit "$EXISTING" --title "$TITLE" --body "$BODY"
-            echo "PR #$EXISTING 업데이트됨"
-          fi
+          gh pr create \
+            --base reviewed \
+            --head master \
+            --title "Code Review: ${N} commits (${TODAY})" \
+            --body "$(printf '## New commits (%s)\n\n%s\n\n---\nRun `/code-review ultra <PR number>` to review.' "$N" "$LOG")"
