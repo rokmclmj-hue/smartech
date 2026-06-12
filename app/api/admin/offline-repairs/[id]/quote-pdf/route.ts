@@ -16,27 +16,35 @@ export async function GET(_req: NextRequest, { params }: Params) {
   });
   if (!job) return NextResponse.json({ error: "찾을 수 없음" }, { status: 404 });
 
-  const pdfBuffer = await generateRepairQuotePdf({
-    jobNo: job.jobNo,
-    pumpMaker: job.pumpMaker,
-    pumpModel: job.pumpModel,
-    serialNo: job.serialNo,
-    voltage: job.voltage,
-    repairReason: job.repairReason,
-    receivedDate: job.receivedDate,
-    requestedDate: job.requestedDate,
-    companyName: job.company?.companyName ?? null,
-    contactName: job.contactName,
-    contactEmail: job.contactEmail,
-    repairCost: job.repairCost,
-    repairPartsText: job.repairPartsText,
-    inspectorName: job.inspectorName,
-  });
+  try {
+    const pdfBuffer = await generateRepairQuotePdf({
+      jobNo: job.jobNo,
+      pumpMaker: job.pumpMaker,
+      pumpModel: job.pumpModel,
+      serialNo: job.serialNo,
+      voltage: job.voltage,
+      repairReason: job.repairReason,
+      receivedDate: job.receivedDate,
+      requestedDate: job.requestedDate,
+      companyName: job.company?.companyName ?? null,
+      contactName: job.contactName,
+      contactEmail: job.contactEmail,
+      repairCost: job.repairCost,
+      repairPartsText: job.repairPartsText,
+      inspectorName: job.inspectorName,
+    });
 
-  return new Response(new Uint8Array(pdfBuffer), {
-    headers: {
-      "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="수리견적서_${job.jobNo}.pdf"`,
-    },
-  });
+    return new NextResponse(Buffer.from(pdfBuffer).buffer as ArrayBuffer, {
+      status: 200,
+      headers: {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `attachment; filename="repair-quote_${job.jobNo}.pdf"`,
+        "Content-Length": String(pdfBuffer.length),
+      },
+    });
+  } catch (err) {
+    console.error("[수리견적서 PDF 오류]", err);
+    const msg = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
 }
