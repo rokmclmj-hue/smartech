@@ -76,8 +76,8 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
   const userEmail = (session?.user as any)?.email ?? "";
 
   return (
-    /* 왼쪽 패널 — fullscreen 시 전체, 일반 시 QuotePanel(480px) 제외 */
-    <div className={`fixed top-0 bottom-0 left-0 z-50 overflow-y-auto print-modal-wrapper ${fullscreen ? "right-0" : "right-[480px]"}`}>
+    /* 왼쪽 패널 — fullscreen 시 전체, 일반 시 데스크톱만 QuotePanel(480px) 제외 */
+    <div className={`fixed top-0 bottom-0 left-0 z-50 overflow-y-auto print-modal-wrapper ${fullscreen ? "right-0" : "right-0 md:right-[480px]"}`}>
 
       {/* ── quote-page 다크 테마 래퍼 ── */}
       <div className="quote-page" style={{ minHeight: "100%" }}>
@@ -116,8 +116,10 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
                         if (el) { el.style.display = "none"; hidden.push(el); }
                       });
                       document.body.classList.add("printing-quote");
-                      // 인쇄 완료 후에만 카트 초기화 (취소 시 유지)
+                      // 인쇄 완료 후 카트 초기화 (iOS Safari는 afterprint 미발생 → 타임아웃 대비)
+                      let fallbackTimer: ReturnType<typeof setTimeout> | null = null;
                       const clearCart = () => {
+                        if (fallbackTimer) clearTimeout(fallbackTimer);
                         localStorage.removeItem("quoteCart");
                         window.dispatchEvent(new Event("quoteCartUpdated"));
                         onClose();
@@ -127,6 +129,8 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
                       window.print();
                       hidden.forEach((el) => (el.style.display = ""));
                       document.body.classList.remove("printing-quote");
+                      // 모바일 Safari afterprint 미발생 대비: 800ms 후 강제 닫기
+                      fallbackTimer = setTimeout(clearCart, 800);
                     }
                   }}
                 >
