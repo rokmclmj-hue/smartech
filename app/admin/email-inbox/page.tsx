@@ -126,6 +126,28 @@ export default function EmailInboxPage() {
     }
   }
 
+  async function handleDelete() {
+    if (!selected) return;
+    if (!confirm("이 이메일을 삭제할까요? Gmail 휴지통으로 이동되며 30일 후 자동 삭제됩니다.")) return;
+    setActing(true);
+    try {
+      const res = await fetch("/api/admin/email-inbox", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: selected.id, action: "delete" }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setSelected(null);
+        load();
+      } else {
+        alert(data.error ?? "삭제 실패");
+      }
+    } finally {
+      setActing(false);
+    }
+  }
+
   async function handleAction(action: "approve" | "done" | "reject" | "ignore") {
     if (!selected) return;
     setActing(true);
@@ -377,14 +399,32 @@ export default function EmailInboxPage() {
                 >
                   반려
                 </button>
+                <button
+                  onClick={handleDelete}
+                  disabled={acting}
+                  className="px-5 py-3 bg-edred text-white text-[13px] rounded-xl hover:bg-edred3 disabled:opacity-50 transition-colors"
+                  title="Gmail 휴지통으로 이동"
+                >
+                  삭제
+                </button>
               </div>
             )}
 
-            {/* 처리 완료 표시 */}
+            {/* 처리 완료 표시 + 삭제 버튼 */}
             {selected.status !== "PENDING" && (
-              <div className="flex items-center gap-2 py-3 px-4 bg-paper rounded-xl text-[13px] text-dim">
-                <span className="w-2 h-2 rounded-full bg-green-400" />
-                {STATUS_LABEL[selected.status]} {selected.approvedAt && `· ${new Date(selected.approvedAt).toLocaleString("ko-KR")}`}
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 py-3 px-4 bg-paper rounded-xl text-[13px] text-dim flex-1">
+                  <span className="w-2 h-2 rounded-full bg-green-400" />
+                  {STATUS_LABEL[selected.status]} {selected.approvedAt && `· ${new Date(selected.approvedAt).toLocaleString("ko-KR")}`}
+                </div>
+                <button
+                  onClick={handleDelete}
+                  disabled={acting}
+                  className="px-4 py-3 bg-edred text-white text-[13px] rounded-xl hover:bg-edred3 disabled:opacity-50 transition-colors shrink-0"
+                  title="Gmail 휴지통으로 이동"
+                >
+                  삭제
+                </button>
               </div>
             )}
 

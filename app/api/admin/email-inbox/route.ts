@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import nodemailer from "nodemailer";
+import { trashEmail } from "@/lib/gmail-imap";
 
 async function requireAdmin() {
   const session = await auth();
@@ -42,35 +43,37 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ tasks, total, page, limit });
 }
 
-// ─── DELETE: 차단 도메인 이메일 일괄 정리 ───────────
+// ─── DELETE: 불필요 메일 일괄 정리 ─────────────────
+// 견적문의·발주서·단가요청 제외한 "기타" PENDING 메일을 삭제
 export async function DELETE() {
   const session = await auth();
   if ((session?.user as { tier?: string })?.tier !== "ADMIN") {
     return NextResponse.json({ error: "권한 없음" }, { status: 403 });
   }
 
-  const BLOCK_DOMAINS = [
-    "hometax.go.kr", "google.com", "edwardsvacuum.com",
-    "ecount.com", "accounts.google.com",
-  ];
-  const BLOCK_PREFIXES = [
-    "noreply", "no-reply", "donotreply", "do-not-reply",
-    "notify-noreply", "noreply-accounts", "mailer-daemon", "postmaster",
-  ];
+  // 비즈니스 이메일 유형 — 삭제 제외
+  const KEEP_TYPES = ["QUOTE_INQUIRY", "ECOUNT_ORDER", "ECOUNT_PRICE_REQUEST"];
 
-  const all = await prisma.emailTask.findMany({ select: { id: true, fromEmail: true } });
-  const toDelete = all.filter(({ fromEmail }) => {
-    const lower = fromEmail.toLowerCase();
-    const [local, domain] = lower.split("@");
-    if (!domain) return false;
-    if (BLOCK_DOMAINS.some((d) => domain === d || domain.endsWith("." + d))) return true;
-    if (BLOCK_PREFIXES.some((p) => local.startsWith(p))) return true;
-    return false;
+  const toDelete = await prisma.emailTask.findMany({
+    where: {
+      emailType: { notIn: KEEP_TYPES },
+      status: { in: ["PENDING", "IGNORED"] },
+    },
+    select: { id: true, gmailMessageId: true },
   });
 
-  if (toDelete.length > 0) {
-    await prisma.emailTask.deleteMany({ where: { id: { in: toDelete.map((t) => t.id) } } });
+  if (toDelete.length === 0) {
+    return NextResponse.json({ deleted: 0 });
   }
+
+  // Gmail 휴지통 이동 (실패해도 DB는 삭제)
+  await Promise.allSettled(
+    toDelete.map((t) => trashEmail(t.gmailMessageId))
+  );
+
+  await prisma.emailTask.deleteMany({
+    where: { id: { in: toDelete.map((t) => t.id) } },
+  });
 
   return NextResponse.json({ deleted: toDelete.length });
 }
@@ -134,6 +137,13 @@ export async function PATCH(req: NextRequest) {
       where: { id: Number(id) },
       data: { status: "IGNORED", adminNote: adminNote ?? null },
     });
+    return NextResponse.json({ ok: true });
+  }
+
+  if (action === "delete") {
+    // Gmail 휴지통 이동 후 DB 삭제
+    await trashEmail(task.gmailMessageId).catch(() => {});
+    await prisma.emailTask.delete({ where: { id: Number(id) } });
     return NextResponse.json({ ok: true });
   }
 

@@ -90,6 +90,38 @@ export async function fetchNewEmails(sinceDate: Date): Promise<RawEmail[]> {
 }
 
 /**
+ * Gmail 받은편지함에서 특정 메시지를 휴지통으로 이동한다.
+ * 복구는 Gmail에서 30일 이내 가능.
+ */
+export async function trashEmail(messageId: string): Promise<boolean> {
+  const client = new ImapFlow({
+    host: "imap.gmail.com",
+    port: 993,
+    secure: true,
+    auth: {
+      user: process.env.GMAIL_USER!,
+      pass: process.env.GMAIL_APP_PASSWORD!,
+    },
+    logger: false,
+  });
+
+  await client.connect();
+  try {
+    const lock = await client.getMailboxLock("INBOX");
+    try {
+      const uids = await client.search({ header: { "Message-ID": messageId } });
+      if (!uids || uids.length === 0) return false;
+      await client.messageMove(uids, "[Gmail]/Trash");
+      return true;
+    } finally {
+      lock.release();
+    }
+  } finally {
+    await client.logout();
+  }
+}
+
+/**
  * 이메일 원문(raw)에서 텍스트 본문을 추출한다.
  * HTML 태그 제거, base64 디코딩 시도.
  */
