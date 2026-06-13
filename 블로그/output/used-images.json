@@ -12,6 +12,9 @@
     "20200824_095654.jpg": "이차전지-PFPE-오일-선택법-20260606(구버전-수리사진-교체됨)",
     "iXL500Q_현장설치사진.jpg": "이차전지-PFPE-오일-선택법-20260606(구버전-교체됨)",
     "20230622_094250.jpg": "이차전지-PFPE-오일-선택법-20260606",
+    "20210128_152853.jpg": "진공건조-드라이펌프-선택기준-20260613",
+    "20200506_100006.jpg": "동결건조-드라이펌프-선택기준-20260613",
+    "20210305_152723.jpg": "연구용-피라니-이온게이지-비교-20260613"
   },
   "AI생성이미지": {
     "스퍼터 공정 에드워드 드라이진공펌프": ["thumbnail.png", "body-1.png", "body-2.png", "body-3.png", "body-4.png", "body-5.png"],
@@ -22,6 +25,9 @@
     "실험실-진공펌프-오일-선택법": ["thumbnail.png", "field-1.png", "field-2.png", "field-3.png", "image-01.png", "image-02.png"],
     "RV-오일로터리펌프-유지관리-20260606": ["thumbnail.png", "image-01.png", "image-02.png"],
     "이차전지-PFPE-오일-선택법-20260606": ["thumbnail.png", "field-1.png", "image-01.png", "image-02.png"],
-    "수소-에너지-드라이펌프-20260610": ["thumbnail.png", "image-01.png", "image-02.png", "image-03.png"]
+    "수소-에너지-드라이펌프-20260610": ["thumbnail.png", "image-01.png", "image-02.png", "image-03.png"],
+    "진공건조-드라이펌프-선택기준-20260613": ["thumbnail.png", "field-1.png", "image-01.png", "image-02.png"],
+    "동결건조-드라이펌프-선택기준-20260613": ["thumbnail.png", "field-1.png", "image-01.png", "image-02.png"],
+    "연구용-피라니-이온게이지-비교-20260613": ["thumbnail.png", "field-1.png", "image-01.png", "image-02.png"]
   }
 }
