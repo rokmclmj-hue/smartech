@@ -12,7 +12,7 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json();
-  const { title, content, naverContent, metaDesc, tags, category, sourceFile } = body;
+  const { title, content, naverContent, metaDesc, tags, category, sourceFile, faqSchema } = body;
 
   if (!title || !content) {
     return NextResponse.json({ error: "title과 content는 필수입니다" }, { status: 400 });
@@ -26,6 +26,7 @@ export async function POST(req: Request) {
       metaDesc:     metaDesc     ?? "",
       tags:         tags         ?? "",
       category:     category     ?? "기술문의",
+      faqSchema:    faqSchema    ?? "",
       status:       "PUBLISHED",
       publishedAt:  new Date(),
       sourceFile:   sourceFile   ?? null,

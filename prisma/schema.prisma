@@ -348,6 +348,7 @@ model BlogPost {
   status       String    @default("DRAFT") // DRAFT | PUBLISHED | ARCHIVED
   sourceFile   String?
   photos       String?   // JSON: ["04_수리정비/xxx.jpg", ...] — 사용된 현장사진 경로
+  faqSchema    String    @default("")  // JSON-LD FAQPage 구조화 데이터 (faq.json)
   publishedAt  DateTime?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt

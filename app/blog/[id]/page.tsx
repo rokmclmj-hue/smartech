@@ -169,14 +169,14 @@ export default async function BlogPostPage({ params }: Props) {
   const { id } = await params;
   const rows = await prisma.$queryRaw<Record<string, unknown>[]>`
     SELECT id, title, category, status, "metaDesc", tags, content, photos,
-           "publishedAt", "createdAt", "updatedAt"
+           "faqSchema", "publishedAt", "createdAt", "updatedAt"
     FROM "BlogPost" WHERE id = ${Number(id)} AND status = 'PUBLISHED'
   `;
   if (!rows.length) return notFound();
   const post = rows[0] as {
     id: number; title: string; category: string; status: string;
     metaDesc: string; tags: string; content: string; photos: string | null;
-    publishedAt: Date | null; createdAt: Date; updatedAt: Date;
+    faqSchema: string; publishedAt: Date | null; createdAt: Date; updatedAt: Date;
   };
 
   let postPhotos: string[] = [];
@@ -187,6 +187,13 @@ export default async function BlogPostPage({ params }: Props) {
   const tags = post.tags ? post.tags.split(/[,\s]+/).filter(Boolean) : [];
 
   return (
+    <>
+    {post.faqSchema && (
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: post.faqSchema }}
+      />
+    )}
     <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-10 md:py-16">
       <div className="max-w-3xl mx-auto">
         {/* 브레드크럼 */}
@@ -346,5 +353,6 @@ export default async function BlogPostPage({ params }: Props) {
         </div>
       </div>
     </div>
+    </>
   );
 }

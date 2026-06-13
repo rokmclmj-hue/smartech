@@ -170,6 +170,12 @@ if os.path.exists(meta_path):
 naver_path = os.path.join(BLOG_FOLDER, "naver.md")
 naver_content = open(naver_path, encoding="utf-8").read().strip() if os.path.exists(naver_path) else ""
 
+faq_path = os.path.join(BLOG_FOLDER, "faq.json")
+faq_schema = ""
+if os.path.exists(faq_path):
+    faq_schema = open(faq_path, encoding="utf-8").read().strip()
+    print(f"  FAQ 스키마 로드: {faq_path}")
+
 # ── API 전송 ───────────────────────────────────────────
 print(f"\n=== 홈페이지 업로드 (카테고리: {category}) ===")
 payload = {
@@ -179,6 +185,7 @@ payload = {
     "metaDesc":     meta_desc,
     "tags":         tags,
     "category":     category,
+    "faqSchema":    faq_schema,
     "sourceFile":   topic,
 }
 data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
