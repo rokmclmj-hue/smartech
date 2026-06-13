@@ -4,19 +4,29 @@ import { prisma } from "@/lib/db";
 import { fetchNewEmails } from "@/lib/gmail-imap";
 
 // AI 분류 없이 IMAP 수신만 — 10초 제한 안에 완료
-export async function POST() {
+export async function POST(req: Request) {
   const session = await auth();
   if ((session?.user as { tier?: string })?.tier !== "ADMIN") {
     return NextResponse.json({ error: "권한 없음" }, { status: 403 });
   }
 
+  // ?days=N 파라미터로 N일 전부터 재동기화 가능
+  const url = new URL(req.url);
+  const daysParam = parseInt(url.searchParams.get("days") ?? "0");
+
   const setting = await prisma.siteSetting.findUnique({
     where: { key: "gmail_last_sync" },
   });
 
-  const sinceDate = setting?.value
-    ? new Date(setting.value)
-    : new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+  let sinceDate: Date;
+  if (daysParam > 0) {
+    // 강제 재동기화: N일 전부터
+    sinceDate = new Date(Date.now() - daysParam * 24 * 60 * 60 * 1000);
+  } else {
+    sinceDate = setting?.value
+      ? new Date(setting.value)
+      : new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+  }
 
   let rawEmails;
   try {

@@ -107,11 +107,14 @@ export default function EmailInboxPage() {
     }
   }
 
-  async function handleSync() {
+  async function handleSync(days = 0) {
     setSyncing(true);
     setSyncMsg("");
     try {
-      const res = await fetch("/api/admin/email-inbox/sync", { method: "POST" });
+      const url = days > 0
+        ? `/api/admin/email-inbox/sync?days=${days}`
+        : "/api/admin/email-inbox/sync";
+      const res = await fetch(url, { method: "POST" });
       const data = await res.json();
       if (data.error) {
         setSyncMsg(`오류: ${data.error}`);
@@ -217,7 +220,15 @@ export default function EmailInboxPage() {
             {cleaning ? "정리 중..." : "불필요 메일 정리"}
           </button>
           <button
-            onClick={handleSync}
+            onClick={() => handleSync(30)}
+            disabled={syncing}
+            className="flex items-center gap-2 px-4 py-2 border border-line text-dim text-[13px] font-medium rounded-lg hover:border-ink/30 hover:text-ink disabled:opacity-50 transition-colors"
+            title="DB에서 삭제된 이메일을 30일치 다시 불러옵니다"
+          >
+            30일 재동기화
+          </button>
+          <button
+            onClick={() => handleSync(0)}
             disabled={syncing}
             className="flex items-center gap-2 px-4 py-2 bg-ink text-white text-[13px] font-medium rounded-lg hover:bg-ink/80 disabled:opacity-50 transition-colors"
           >
