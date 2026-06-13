@@ -19,30 +19,45 @@ export async function GET(req: NextRequest, { params }: Params) {
   });
   if (!note) return NextResponse.json({ error: "찾을 수 없음" }, { status: 404 });
 
-  const pdf = await generateManualDeliveryNotePdf({
-    noteNo: note.noteNo,
-    createdAt: note.createdAt,
-    toCompany: note.toCompany,
-    toName: note.toName,
-    toEmail: note.toEmail,
-    toPhone: note.toPhone,
-    toBizNo: note.toBizNo,
-    includeBankInfo: note.includeBankInfo,
-    items: note.items.map((i) => ({
-      partNo: i.partNo,
-      description: i.description,
-      quantity: i.quantity,
-      unitPrice: i.unitPrice,
-    })),
-  });
+  try {
+    const pdfBuffer = await generateManualDeliveryNotePdf({
+      noteNo: note.noteNo,
+      createdAt: note.createdAt,
+      toCompany: note.toCompany,
+      toName: note.toName,
+      toEmail: note.toEmail,
+      toPhone: note.toPhone,
+      toBizNo: note.toBizNo,
+      includeBankInfo: note.includeBankInfo,
+      items: note.items.map((i) => ({
+        partNo: i.partNo,
+        description: i.description,
+        quantity: i.quantity,
+        unitPrice: i.unitPrice,
+      })),
+    });
 
-  const preview = req.nextUrl.searchParams.get("preview") === "1";
-  return new Response(new Uint8Array(pdf), {
-    headers: {
-      "Content-Type": "application/pdf",
-      "Content-Disposition": preview
-        ? `inline; filename="거래명세표_${note.noteNo}.pdf"`
-        : `attachment; filename="거래명세표_${note.noteNo}.pdf"`,
-    },
-  });
+    const preview = req.nextUrl.searchParams.get("preview") === "1";
+    const arrayBuf = pdfBuffer.buffer.slice(
+      pdfBuffer.byteOffset,
+      pdfBuffer.byteOffset + pdfBuffer.byteLength
+    ) as ArrayBuffer;
+
+    return new NextResponse(arrayBuf, {
+      status: 200,
+      headers: {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": preview
+          ? `inline; filename="DN_${note.noteNo}.pdf"`
+          : `attachment; filename="DN_${note.noteNo}.pdf"`,
+        "Content-Length": String(pdfBuffer.length),
+      },
+    });
+  } catch (e) {
+    console.error("[delivery-note pdf] 생성 실패:", e);
+    return NextResponse.json(
+      { error: "PDF 생성 실패", detail: String(e) },
+      { status: 500 }
+    );
+  }
 }
