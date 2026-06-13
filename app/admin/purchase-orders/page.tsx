@@ -459,6 +459,7 @@ function OrderRow({ order, onDelete }: { order: PurchaseOrder; onDelete: () => v
   const [toast, setToast] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [showSend, setShowSend] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   useEffect(() => {
     setSendEmail(order.toEmail ?? "");
@@ -468,8 +469,13 @@ function OrderRow({ order, onDelete }: { order: PurchaseOrder; onDelete: () => v
   const totalSupply = order.items.reduce((s, i) => s + i.unitPrice * i.quantity, 0);
   const grand = Math.round(totalSupply * 1.1);
 
+  function handleOpenPreview() {
+    if (!sendEmail.trim()) { setToast("수신 이메일을 입력해주세요."); setTimeout(() => setToast(null), 3000); return; }
+    setPreviewOpen(true);
+  }
+
   async function handleSend() {
-    if (!sendEmail.trim()) return;
+    setPreviewOpen(false);
     setSending(true);
     try {
       const res = await fetch(`/api/admin/purchase-orders/${order.id}/send`, {
@@ -562,10 +568,59 @@ function OrderRow({ order, onDelete }: { order: PurchaseOrder; onDelete: () => v
               placeholder="cc1@example.com, cc2@example.com"
               className="flex-1 border hair px-3 py-1.5 text-[13px] mono focus:outline-none focus:border-ink" />
           </div>
-          <button onClick={handleSend} disabled={sending || !sendEmail.trim()}
+          <button onClick={handleOpenPreview} disabled={sending}
             className="bg-smblue text-paper px-5 py-1.5 text-[12px] hover:brightness-110 transition-all disabled:opacity-40">
-            {sending ? "발송 중..." : "발송"}
+            미리보기 · 발송
           </button>
+        </div>
+      )}
+
+      {/* 이메일 미리보기 모달 */}
+      {previewOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40">
+          <div className="bg-paper border hair shadow-xl w-full max-w-lg mx-4 p-6 space-y-4">
+            <div className="mono text-[10px] dim tracking-[0.12em] uppercase">— 이메일 미리보기</div>
+            <div className="space-y-2 text-[13px]">
+              <div className="flex gap-3 border-b hair pb-2">
+                <span className="mono text-[10px] dim w-12 shrink-0 mt-0.5">발신</span>
+                <span className="mono">info@smartechvacuum.com</span>
+              </div>
+              <div className="flex gap-3 border-b hair pb-2">
+                <span className="mono text-[10px] dim w-12 shrink-0 mt-0.5">수신</span>
+                <span className="mono text-smblue">{sendEmail}</span>
+              </div>
+              {ccInput.trim() && (
+                <div className="flex gap-3 border-b hair pb-2">
+                  <span className="mono text-[10px] dim w-12 shrink-0 mt-0.5">참조</span>
+                  <span className="mono text-[12px]">{ccInput}</span>
+                </div>
+              )}
+              <div className="flex gap-3 border-b hair pb-2">
+                <span className="mono text-[10px] dim w-12 shrink-0 mt-0.5">제목</span>
+                <span className="font-medium">[스마텍] 발주서 송부 — {order.toCompany}{order.toName ? ` ${order.toName} 님` : ""}</span>
+              </div>
+              <div className="flex gap-3 border-b hair pb-2">
+                <span className="mono text-[10px] dim w-12 shrink-0 mt-0.5">첨부</span>
+                <span className="mono text-[12px] text-dim">발주서 PDF (자동 첨부)</span>
+              </div>
+              <div className="flex gap-3">
+                <span className="mono text-[10px] dim w-12 shrink-0 mt-0.5">본문</span>
+                <pre className="text-[12px] whitespace-pre-wrap leading-relaxed flex-1 max-h-32 overflow-y-auto">
+                  {order.message || "(본문 없음 — 새 발주서 작성 시 발주 문구 입력)"}
+                </pre>
+              </div>
+            </div>
+            <div className="flex gap-3 pt-2">
+              <button onClick={() => setPreviewOpen(false)}
+                className="flex-1 border hair px-4 py-2 text-[13px] hover:bg-ink/5 transition-colors">
+                취소
+              </button>
+              <button onClick={handleSend} disabled={sending}
+                className="flex-1 bg-smblue text-paper px-4 py-2 text-[13px] font-semibold hover:brightness-110 transition-all disabled:opacity-50">
+                {sending ? "발송 중..." : "확인 · 발송"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
