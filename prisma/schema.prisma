@@ -525,6 +525,29 @@ model ManualPurchaseOrderItem {
   @@index([orderId])
 }
 
+// 재고 관리
+// ─────────────────────────────────────────────────
+model InventoryItem {
+  id           Int      @id @default(autoincrement())
+  category     String                      // Pump, Filter, Gauge, Oil, etc.
+  department   String                      // SV | AK
+  partNo       String   @unique
+  name         String
+  currentStock Int      @default(0)
+  minStock     Int      @default(0)
+  orderQty     Int      @default(1)
+  unitPrice    Float    @default(0)
+  leadTime     String?                     // "4주"
+  supplier     String?                     // "에드워드코리아"
+  memo         String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([department])
+  @@index([isActive])
+}
+
 // AI 챗봇 대화 기록
 // ─────────────────────────────────────────────────
 // 오프라인 수리 접수 시스템

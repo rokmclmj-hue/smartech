@@ -20,6 +20,7 @@ const NAV_ITEMS = [
   { href: "/admin/purchase-orders", label: "발주서" },
   { href: "/admin/companies", label: "거래처" },
   { href: "/admin/settings", label: "설정" },
+  { href: "/admin/inventory", label: "재고" },
   { href: "/admin/blog", label: "블로그" },
   { href: "/admin/email-inbox", label: "이메일", badge: true },
 ];
