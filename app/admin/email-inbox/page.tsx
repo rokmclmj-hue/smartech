@@ -220,12 +220,12 @@ export default function EmailInboxPage() {
             {cleaning ? "정리 중..." : "불필요 메일 정리"}
           </button>
           <button
-            onClick={() => handleSync(30)}
+            onClick={() => handleSync(14)}
             disabled={syncing}
             className="flex items-center gap-2 px-4 py-2 border border-line text-dim text-[13px] font-medium rounded-lg hover:border-ink/30 hover:text-ink disabled:opacity-50 transition-colors"
-            title="DB에서 삭제된 이메일을 30일치 다시 불러옵니다"
+            title="DB에서 삭제된 이메일을 14일치 다시 불러옵니다"
           >
-            30일 재동기화
+            14일 재동기화
           </button>
           <button
             onClick={() => handleSync(0)}
