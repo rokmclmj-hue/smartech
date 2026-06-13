@@ -19,9 +19,8 @@ export async function GET(req: NextRequest, { params }: Params) {
   });
   if (!order) return NextResponse.json({ error: "찾을 수 없음" }, { status: 404 });
 
-  let pdf: Buffer;
   try {
-    pdf = await generateManualPurchaseOrderPdf({
+    const pdfBuffer = await generateManualPurchaseOrderPdf({
       orderNo: order.orderNo,
       department: order.department,
       orderDate: order.orderDate,
@@ -36,25 +35,28 @@ export async function GET(req: NextRequest, { params }: Params) {
         unitPrice: i.unitPrice,
       })),
     });
+
+    const preview = req.nextUrl.searchParams.get("preview") === "1";
+    const arrayBuf = pdfBuffer.buffer.slice(
+      pdfBuffer.byteOffset,
+      pdfBuffer.byteOffset + pdfBuffer.byteLength
+    ) as ArrayBuffer;
+
+    return new NextResponse(arrayBuf, {
+      status: 200,
+      headers: {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": preview
+          ? `inline; filename="발주서_${order.orderNo}.pdf"`
+          : `attachment; filename="발주서_${order.orderNo}.pdf"`,
+        "Content-Length": String(pdfBuffer.length),
+      },
+    });
   } catch (e) {
     console.error("[purchase-order pdf] 생성 실패:", e);
-    const msg = e instanceof Error
-      ? `${e.message}\n\n${e.stack ?? ""}`
-      : String(e);
-    // 200 + text/html 로 반환해야 Edge가 자체 오류 화면을 덮어쓰지 않음 (디버그용)
-    return new Response(
-      `<!DOCTYPE html><html><head><meta charset="utf-8"><title>PDF 오류</title></head><body><pre style="font-size:14px;padding:24px;white-space:pre-wrap">[발주서 PDF 오류 — 이 내용을 복사해서 알려주세요]\n\n${msg}</pre></body></html>`,
-      { status: 200, headers: { "Content-Type": "text/html; charset=utf-8" } }
+    return NextResponse.json(
+      { error: "PDF 생성 실패", detail: String(e) },
+      { status: 500 }
     );
   }
-
-  const preview = req.nextUrl.searchParams.get("preview") === "1";
-  return new Response(new Uint8Array(pdf), {
-    headers: {
-      "Content-Type": "application/pdf",
-      "Content-Disposition": preview
-        ? `inline; filename="발주서_${order.orderNo}.pdf"`
-        : `attachment; filename="발주서_${order.orderNo}.pdf"`,
-    },
-  });
 }
