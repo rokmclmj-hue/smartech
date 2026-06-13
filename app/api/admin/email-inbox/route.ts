@@ -80,7 +80,7 @@ export async function DELETE() {
   const toDelete = candidates.filter(
     (t) =>
       isBlockedSender(t.fromEmail) ||
-      (t.emailType === "OTHER" && t.aiDraft !== null)
+      (t.emailType === "OTHER" && t.aiDraft !== null && t.aiDraft !== "")
   );
 
   if (toDelete.length === 0) {

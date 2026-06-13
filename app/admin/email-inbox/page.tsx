@@ -157,12 +157,15 @@ export default function EmailInboxPage() {
   async function handleDeleteCard(task: EmailTask, e: React.MouseEvent) {
     e.stopPropagation();
     if (!confirm(`"${task.subject}" 을(를) 삭제할까요?`)) return;
+    setActing(true);
     try {
       await deleteById(task.id);
       if (selected?.id === task.id) setSelected(null);
       load();
-    } catch (e) {
-      alert(String(e));
+    } catch (err) {
+      alert(String(err));
+    } finally {
+      setActing(false);
     }
   }
 

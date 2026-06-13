@@ -114,12 +114,13 @@ function ReorderTab() {
   async function hideItem(id: number, name: string) {
     if (!confirm(`"${name}" 품목을 발주 대기함에서 제외할까요?\n재고 목록에서 숨김 처리됩니다. (재고 목록 > 숨긴 품목 보기에서 복원 가능)`)) return;
     setHiding(id);
-    await fetch(`/api/admin/inventory/${id}`, {
+    const res = await fetch(`/api/admin/inventory/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ isActive: false }),
     });
     setHiding(null);
+    if (!res.ok) { alert("제외 처리 실패. 다시 시도해주세요."); return; }
     load();
   }
 

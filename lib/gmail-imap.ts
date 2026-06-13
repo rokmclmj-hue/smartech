@@ -33,8 +33,7 @@ export async function fetchNewEmails(sinceDate: Date): Promise<RawEmail[]> {
     const lock = await client.getMailboxLock("INBOX");
     try {
       // 날짜 이후 수신된 이메일 검색
-      const since = sinceDate.toDateString(); // "Mon Jan 01 2026"
-      const searchResult = await client.search({ since: new Date(since) });
+      const searchResult = await client.search({ since: sinceDate });
       const uids = Array.isArray(searchResult) ? searchResult : [];
 
       if (uids.length === 0) {
