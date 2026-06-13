@@ -86,6 +86,7 @@ function OrderForm({ onSaved }: { onSaved: () => void }) {
   const [saving, setSaving] = useState(false);
   const [savingAndSend, setSavingAndSend] = useState(false);
   const [error, setError] = useState("");
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   // 부서 담당자 목록 로드
   useEffect(() => {
@@ -185,9 +186,19 @@ function OrderForm({ onSaved }: { onSaved: () => void }) {
     }
   }
 
-  async function handleSaveAndSend() {
+  function handleOpenPreview() {
     setError("");
+    if (!department) { setError("부서를 선택해주세요."); return; }
+    if (!toCompany.trim()) { setError("수신처명을 입력해주세요."); return; }
     if (!toEmail.trim()) { setError("수신 이메일을 입력해주세요."); return; }
+    if (items.length === 0 || items.every(i => !i.partNo.trim() && !i.description.trim())) {
+      setError("품목을 1개 이상 입력해주세요."); return;
+    }
+    setPreviewOpen(true);
+  }
+
+  async function handleSaveAndSend() {
+    setPreviewOpen(false);
     setSavingAndSend(true);
     try {
       const saveData = await doSave();
@@ -382,11 +393,60 @@ function OrderForm({ onSaved }: { onSaved: () => void }) {
           className="border hair px-6 py-2.5 text-[13px] font-semibold hover:bg-ink/5 transition-all disabled:opacity-50">
           {saving ? "저장 중..." : "PDF 저장"}
         </button>
-        <button onClick={handleSaveAndSend} disabled={saving || savingAndSend}
+        <button onClick={handleOpenPreview} disabled={saving || savingAndSend}
           className="bg-smblue text-paper px-6 py-2.5 text-[13px] font-semibold hover:brightness-110 transition-all disabled:opacity-50">
-          {savingAndSend ? "저장 + 발송 중..." : "저장 + 메일 송부"}
+          {savingAndSend ? "발송 중..." : "저장 + 메일 송부"}
         </button>
       </div>
+
+      {/* 이메일 미리보기 모달 */}
+      {previewOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40">
+          <div className="bg-paper border hair shadow-xl w-full max-w-lg mx-4 p-6 space-y-4">
+            <div className="mono text-[10px] dim tracking-[0.12em] uppercase">— 이메일 미리보기</div>
+            <div className="space-y-2 text-[13px]">
+              <div className="flex gap-3 border-b hair pb-2">
+                <span className="mono text-[10px] dim w-12 shrink-0 mt-0.5">발신</span>
+                <span className="mono">info@smartechvacuum.com</span>
+              </div>
+              <div className="flex gap-3 border-b hair pb-2">
+                <span className="mono text-[10px] dim w-12 shrink-0 mt-0.5">수신</span>
+                <span className="mono text-smblue">{toEmail}</span>
+              </div>
+              {ccEmails.trim() && (
+                <div className="flex gap-3 border-b hair pb-2">
+                  <span className="mono text-[10px] dim w-12 shrink-0 mt-0.5">참조</span>
+                  <span className="mono text-[12px]">{ccEmails}</span>
+                </div>
+              )}
+              <div className="flex gap-3 border-b hair pb-2">
+                <span className="mono text-[10px] dim w-12 shrink-0 mt-0.5">제목</span>
+                <span className="font-medium">[스마텍] 발주서 송부 — {toCompany}{toName ? ` ${toName} 님` : ""}</span>
+              </div>
+              <div className="flex gap-3 border-b hair pb-2">
+                <span className="mono text-[10px] dim w-12 shrink-0 mt-0.5">첨부</span>
+                <span className="mono text-[12px] text-dim">발주서 PDF (자동 첨부)</span>
+              </div>
+              <div className="flex gap-3">
+                <span className="mono text-[10px] dim w-12 shrink-0 mt-0.5">본문</span>
+                <pre className="text-[12px] whitespace-pre-wrap leading-relaxed flex-1 max-h-32 overflow-y-auto">
+                  {message || "(본문 없음)"}
+                </pre>
+              </div>
+            </div>
+            <div className="flex gap-3 pt-2">
+              <button onClick={() => setPreviewOpen(false)}
+                className="flex-1 border hair px-4 py-2 text-[13px] hover:bg-ink/5 transition-colors">
+                취소
+              </button>
+              <button onClick={handleSaveAndSend} disabled={savingAndSend}
+                className="flex-1 bg-smblue text-paper px-4 py-2 text-[13px] font-semibold hover:brightness-110 transition-all disabled:opacity-50">
+                {savingAndSend ? "발송 중..." : "확인 · 발송"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
