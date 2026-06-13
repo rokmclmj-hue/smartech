@@ -41,10 +41,11 @@ export async function GET(req: NextRequest, { params }: Params) {
     const msg = e instanceof Error
       ? `${e.message}\n\n${e.stack ?? ""}`
       : String(e);
-    return new Response(`[발주서 PDF 오류]\n\n${msg}`, {
-      status: 500,
-      headers: { "Content-Type": "text/plain; charset=utf-8" },
-    });
+    // 200 + text/html 로 반환해야 Edge가 자체 오류 화면을 덮어쓰지 않음 (디버그용)
+    return new Response(
+      `<!DOCTYPE html><html><head><meta charset="utf-8"><title>PDF 오류</title></head><body><pre style="font-size:14px;padding:24px;white-space:pre-wrap">[발주서 PDF 오류 — 이 내용을 복사해서 알려주세요]\n\n${msg}</pre></body></html>`,
+      { status: 200, headers: { "Content-Type": "text/html; charset=utf-8" } }
+    );
   }
 
   const preview = req.nextUrl.searchParams.get("preview") === "1";
