@@ -62,6 +62,20 @@ export default function EmailInboxPage() {
 
   useEffect(() => { load(); }, [load]);
 
+  // 페이지 열릴 때 자동 동기화 (1회)
+  useEffect(() => {
+    fetch("/api/admin/email-inbox/sync", { method: "POST" })
+      .then(r => r.json())
+      .then(d => {
+        if (d.created > 0) {
+          setSyncMsg(`자동 동기화 — 새 이메일 ${d.created}건`);
+          load();
+        }
+      })
+      .catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   async function selectTask(task: EmailTask) {
     setSelected(task);
     setDraft(task.aiDraft ?? "");

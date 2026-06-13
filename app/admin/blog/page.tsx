@@ -2,6 +2,60 @@
 
 import { useEffect, useState, useCallback } from "react";
 
+type BlogStats = {
+  published: number;
+  draft: number;
+  faqCount: number;
+  daysSince: number | null;
+  byCat: { category: string; _count: number }[];
+};
+
+function StatsBar() {
+  const [stats, setStats] = useState<BlogStats | null>(null);
+  useEffect(() => {
+    fetch("/api/admin/blog/stats").then(r => r.json()).then(setStats);
+  }, []);
+  if (!stats) return null;
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+      <div className="border hair bg-paper px-4 py-3">
+        <div className="mono text-[9px] tracking-[0.14em] dim uppercase mb-1">발행됨</div>
+        <div className="text-[24px] font-semibold tracking-tight">{stats.published}</div>
+      </div>
+      <div className="border hair bg-paper px-4 py-3">
+        <div className="mono text-[9px] tracking-[0.14em] dim uppercase mb-1">임시저장</div>
+        <div className="text-[24px] font-semibold tracking-tight">{stats.draft}</div>
+      </div>
+      <div className="border hair bg-paper px-4 py-3">
+        <div className="mono text-[9px] tracking-[0.14em] dim uppercase mb-1">FAQ 적용</div>
+        <div className="text-[24px] font-semibold tracking-tight">
+          {stats.faqCount}
+          <span className="text-[14px] dim font-normal ml-1">/ {stats.published}</span>
+        </div>
+      </div>
+      <div className="border hair bg-paper px-4 py-3">
+        <div className="mono text-[9px] tracking-[0.14em] dim uppercase mb-1">마지막 발행</div>
+        <div className="text-[24px] font-semibold tracking-tight">
+          {stats.daysSince === 0 ? "오늘" : stats.daysSince === null ? "—" : `${stats.daysSince}일 전`}
+        </div>
+      </div>
+      {stats.byCat.length > 0 && (
+        <div className="col-span-2 md:col-span-4 border hair bg-paper px-4 py-3">
+          <div className="mono text-[9px] tracking-[0.14em] dim uppercase mb-2">카테고리별</div>
+          <div className="flex flex-wrap gap-3">
+            {stats.byCat.sort((a, b) => b._count - a._count).map(c => (
+              <div key={c.category} className="flex items-center gap-2">
+                <span className="text-[13px] font-medium">{c.category}</span>
+                <span className="mono text-[11px] dim">{c._count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 type Post = {
   id: number;
   title: string;
@@ -181,6 +235,9 @@ export default function AdminBlogPage() {
         <h1 className="display text-[28px] md:text-[32px] tracking-[-0.03em]">블로그</h1>
         <span className="mono text-[10px] tracking-[0.18em] dim uppercase">Content</span>
       </div>
+
+      {/* 통계 */}
+      <StatsBar />
 
       {/* 필터 탭 */}
       <div className="flex items-center gap-1 mb-6 border-b hair">

@@ -21,7 +21,7 @@ const NAV_ITEMS = [
   { href: "/admin/companies", label: "거래처" },
   { href: "/admin/settings", label: "설정" },
   { href: "/admin/blog", label: "블로그" },
-  { href: "/admin/email-inbox", label: "이메일" },
+  { href: "/admin/email-inbox", label: "이메일", badge: true },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -29,6 +29,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState(0);
+
+  useEffect(() => {
+    fetch("/api/admin/email-inbox?status=PENDING")
+      .then(r => r.json())
+      .then(d => setPendingEmail(d.total ?? 0))
+      .catch(() => {});
+  }, [pathname]);
 
   const tier = (session?.user as any)?.tier;
 
@@ -107,8 +115,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                       active ? "text-ink" : "text-dim hover:text-ink"
                     }`}
                   >
-                    <span className="text-[15px] font-medium tracking-tight">
+                    <span className="flex items-center gap-1.5 text-[15px] font-medium tracking-tight">
                       {item.label}
+                      {item.badge && pendingEmail > 0 && (
+                        <span className="mono text-[9px] font-bold bg-edred text-white px-1.5 py-px rounded-full">
+                          {pendingEmail}
+                        </span>
+                      )}
                     </span>
                     {active && (
                       <span className="absolute left-3 right-3 -bottom-px h-0.5 bg-edred" />
@@ -196,8 +209,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                       active ? "text-ink" : "text-dim"
                     }`}
                   >
-                    <span className="text-[15px] font-medium tracking-tight">
+                    <span className="flex items-center gap-2 text-[15px] font-medium tracking-tight">
                       {item.label}
+                      {item.badge && pendingEmail > 0 && (
+                        <span className="mono text-[9px] font-bold bg-edred text-white px-1.5 py-px rounded-full">
+                          {pendingEmail}
+                        </span>
+                      )}
                     </span>
                     {active && (
                       <span className="ml-auto w-1.5 h-1.5 rounded-full bg-edred" />

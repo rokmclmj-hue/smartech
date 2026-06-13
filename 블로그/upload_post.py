@@ -154,6 +154,9 @@ if content.startswith("---"):
 title_match = re.search(r"^#\s+(.+)$", content, re.MULTILINE)
 title = title_match.group(1).strip() if title_match else topic
 
+naver_path = os.path.join(BLOG_FOLDER, "naver.md")
+naver_content = open(naver_path, encoding="utf-8").read().strip() if os.path.exists(naver_path) else ""
+
 # final.md에는 해시태그 금지 → naver.md에서 추출
 tags = ""
 if naver_content:
@@ -169,9 +172,6 @@ if os.path.exists(meta_path):
             # 전화번호(031-...) 등 연락처 제거 — 리드 문장으로만 사용
             meta_desc = re.sub(r"\s*031-\d{3}-\d{4}", "", meta_desc).strip().rstrip(".")
             break
-
-naver_path = os.path.join(BLOG_FOLDER, "naver.md")
-naver_content = open(naver_path, encoding="utf-8").read().strip() if os.path.exists(naver_path) else ""
 
 faq_path = os.path.join(BLOG_FOLDER, "faq.json")
 faq_schema = ""
