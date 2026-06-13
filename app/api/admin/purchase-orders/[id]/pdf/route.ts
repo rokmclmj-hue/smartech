@@ -47,8 +47,8 @@ export async function GET(req: NextRequest, { params }: Params) {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": preview
-          ? `inline; filename="발주서_${order.orderNo}.pdf"`
-          : `attachment; filename="발주서_${order.orderNo}.pdf"`,
+          ? `inline; filename="PO_${order.orderNo}.pdf"`
+          : `attachment; filename="PO_${order.orderNo}.pdf"`,
         "Content-Length": String(pdfBuffer.length),
       },
     });
