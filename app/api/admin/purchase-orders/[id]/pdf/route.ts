@@ -38,10 +38,13 @@ export async function GET(req: NextRequest, { params }: Params) {
     });
   } catch (e) {
     console.error("[purchase-order pdf] 생성 실패:", e);
-    return NextResponse.json(
-      { error: "PDF 생성 실패", detail: String(e) },
-      { status: 500 }
-    );
+    const msg = e instanceof Error
+      ? `${e.message}\n\n${e.stack ?? ""}`
+      : String(e);
+    return new Response(`[발주서 PDF 오류]\n\n${msg}`, {
+      status: 500,
+      headers: { "Content-Type": "text/plain; charset=utf-8" },
+    });
   }
 
   const preview = req.nextUrl.searchParams.get("preview") === "1";
