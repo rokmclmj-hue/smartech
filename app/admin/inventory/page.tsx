@@ -527,8 +527,28 @@ export default function InventoryPage() {
                             <span className="mono text-[13px] text-dim">{item.currentStock}</span>
                           )}
                         </td>
-                        <td className="px-4 py-2.5 text-right mono text-dim">{item.minStock}</td>
-                        <td className="px-4 py-2.5 text-right mono">{item.orderQty}</td>
+                        <td className="px-4 py-2.5 text-right">
+                          {item.isActive ? (
+                            <StockCell
+                              value={item.minStock}
+                              min={-1}
+                              onSave={(v) => patchItem(item.id, { minStock: v })}
+                            />
+                          ) : (
+                            <span className="mono text-[13px] text-dim">{item.minStock}</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-2.5 text-right">
+                          {item.isActive ? (
+                            <StockCell
+                              value={item.orderQty}
+                              min={-1}
+                              onSave={(v) => patchItem(item.id, { orderQty: v })}
+                            />
+                          ) : (
+                            <span className="mono text-[13px] text-dim">{item.orderQty}</span>
+                          )}
+                        </td>
                         <td className="px-4 py-2.5 text-right mono text-dim">
                           {item.unitPrice > 0 ? fmt(item.unitPrice) : "—"}
                         </td>
