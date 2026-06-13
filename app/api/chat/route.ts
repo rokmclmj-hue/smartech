@@ -1,9 +1,24 @@
 import { NextRequest } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
+import fs from "fs";
+import path from "path";
 import { prisma } from "@/lib/db";
 import { getMultiplier, formatKRW } from "@/lib/pricing";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+// ─── 시뮬레이션 케이스 로드 (콜드 스타트 1회) ───────────
+function loadSimulationCases(): string {
+  const dir = path.join(process.cwd(), "data", "simulation-cases");
+  if (!fs.existsSync(dir)) return "";
+  const files = fs.readdirSync(dir).filter((f) => f.endsWith(".md")).sort();
+  if (files.length === 0) return "";
+  const body = files
+    .map((f) => fs.readFileSync(path.join(dir, f), "utf-8").trim())
+    .join("\n\n---\n\n");
+  return `\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n[S] 실제 시스템 구성 레퍼런스 케이스\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n※ Edwards 공식 시뮬레이션 기반 익명화 사례. 유사 조건 상담 시 참고용.\n\n${body}\n`;
+}
+const SIMULATION_CONTEXT = loadSimulationCases();
 
 // ─── 스펙 섹션 (정적 — 프롬프트 캐시 대상) ───────────
 const SPEC_CONTEXT = `
@@ -796,7 +811,7 @@ Edwards Vacuum 한국 공식 대리점에서 20년 이상 진공펌프 설계·�
 
 ${pricingInstruction}
 
-${SPEC_CONTEXT}
+${SPEC_CONTEXT}${SIMULATION_CONTEXT}
 ${userContext}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
