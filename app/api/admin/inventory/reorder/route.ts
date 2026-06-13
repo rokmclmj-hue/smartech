@@ -47,6 +47,17 @@ export async function POST(req: NextRequest) {
     AK: "에드워드코리아AK",
   };
 
+  // 같은 부서 DRAFT 초안이 이미 있으면 삭제 (중복 방지)
+  const existingDrafts = await prisma.manualPurchaseOrder.findMany({
+    where: { department: dept, status: "DRAFT" },
+    select: { id: true },
+  });
+  if (existingDrafts.length > 0) {
+    await prisma.manualPurchaseOrder.deleteMany({
+      where: { id: { in: existingDrafts.map((d) => d.id) } },
+    });
+  }
+
   // 발주서 번호: 트랜잭션으로 생성
   const order = await prisma.$transaction(async (tx) => {
     const po = await tx.manualPurchaseOrder.create({

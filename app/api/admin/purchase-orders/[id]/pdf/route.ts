@@ -19,21 +19,30 @@ export async function GET(req: NextRequest, { params }: Params) {
   });
   if (!order) return NextResponse.json({ error: "찾을 수 없음" }, { status: 404 });
 
-  const pdf = await generateManualPurchaseOrderPdf({
-    orderNo: order.orderNo,
-    department: order.department,
-    orderDate: order.orderDate,
-    requestedDate: order.requestedDate,
-    toCompany: order.toCompany,
-    toName: order.toName,
-    message: order.message,
-    items: order.items.map((i) => ({
-      partNo: i.partNo,
-      description: i.description,
-      quantity: i.quantity,
-      unitPrice: i.unitPrice,
-    })),
-  });
+  let pdf: Buffer;
+  try {
+    pdf = await generateManualPurchaseOrderPdf({
+      orderNo: order.orderNo,
+      department: order.department,
+      orderDate: order.orderDate,
+      requestedDate: order.requestedDate,
+      toCompany: order.toCompany,
+      toName: order.toName,
+      message: order.message,
+      items: order.items.map((i) => ({
+        partNo: i.partNo,
+        description: i.description,
+        quantity: i.quantity,
+        unitPrice: i.unitPrice,
+      })),
+    });
+  } catch (e) {
+    console.error("[purchase-order pdf] 생성 실패:", e);
+    return NextResponse.json(
+      { error: "PDF 생성 실패", detail: String(e) },
+      { status: 500 }
+    );
+  }
 
   const preview = req.nextUrl.searchParams.get("preview") === "1";
   return new Response(new Uint8Array(pdf), {
