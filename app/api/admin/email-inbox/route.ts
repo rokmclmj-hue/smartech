@@ -44,36 +44,51 @@ export async function GET(req: NextRequest) {
 }
 
 // ─── DELETE: 불필요 메일 일괄 정리 ─────────────────
-// 견적문의·발주서·단가요청 제외한 "기타" PENDING 메일을 삭제
+// 삭제 기준 A: 자동화 발신자 도메인/프리픽스 (GitHub, 세금계산서 등)
+// 삭제 기준 B: AI가 분류 완료(aiDraft 존재)했는데 "기타"로 판정된 것
+// → 클릭 안 한 비즈니스 이메일(aiDraft=null)은 절대 삭제하지 않음
 export async function DELETE() {
   const session = await auth();
   if ((session?.user as { tier?: string })?.tier !== "ADMIN") {
     return NextResponse.json({ error: "권한 없음" }, { status: 403 });
   }
 
-  // 비즈니스 이메일 유형 — 삭제 제외
-  const KEEP_TYPES = ["QUOTE_INQUIRY", "ECOUNT_ORDER", "ECOUNT_PRICE_REQUEST"];
+  const BLOCK_DOMAINS = [
+    "github.com", "hometax.go.kr", "accounts.google.com",
+    "edwardsvacuum.com", "ecount.com",
+  ];
+  const BLOCK_PREFIXES = [
+    "noreply", "no-reply", "notifications", "mailer-daemon",
+    "bounce", "postmaster", "donotreply",
+  ];
 
-  const toDelete = await prisma.emailTask.findMany({
-    where: {
-      emailType: { notIn: KEEP_TYPES },
-      status: { in: ["PENDING", "IGNORED"] },
-    },
-    select: { id: true, gmailMessageId: true },
+  function isBlockedSender(email: string): boolean {
+    const parts = email.toLowerCase().split("@");
+    if (parts.length < 2) return false;
+    const [prefix, domain] = parts;
+    return (
+      BLOCK_DOMAINS.some((d) => domain === d || domain.endsWith(`.${d}`)) ||
+      BLOCK_PREFIXES.some((p) => prefix === p || prefix.startsWith(`${p}.`) || prefix.startsWith(`${p}+`))
+    );
+  }
+
+  const candidates = await prisma.emailTask.findMany({
+    where: { status: { in: ["PENDING", "IGNORED"] } },
+    select: { id: true, gmailMessageId: true, fromEmail: true, emailType: true, aiDraft: true },
   });
+
+  const toDelete = candidates.filter(
+    (t) =>
+      isBlockedSender(t.fromEmail) ||
+      (t.emailType === "OTHER" && t.aiDraft !== null)
+  );
 
   if (toDelete.length === 0) {
     return NextResponse.json({ deleted: 0 });
   }
 
-  // Gmail 휴지통 이동 (실패해도 DB는 삭제)
-  await Promise.allSettled(
-    toDelete.map((t) => trashEmail(t.gmailMessageId))
-  );
-
-  await prisma.emailTask.deleteMany({
-    where: { id: { in: toDelete.map((t) => t.id) } },
-  });
+  await Promise.allSettled(toDelete.map((t) => trashEmail(t.gmailMessageId)));
+  await prisma.emailTask.deleteMany({ where: { id: { in: toDelete.map((t) => t.id) } } });
 
   return NextResponse.json({ deleted: toDelete.length });
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 
 interface EmailTask {
   id: number;
@@ -126,25 +126,40 @@ export default function EmailInboxPage() {
     }
   }
 
+  async function deleteById(id: number) {
+    const res = await fetch("/api/admin/email-inbox", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, action: "delete" }),
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error ?? "삭제 실패");
+  }
+
   async function handleDelete() {
     if (!selected) return;
     if (!confirm("이 이메일을 삭제할까요? Gmail 휴지통으로 이동되며 30일 후 자동 삭제됩니다.")) return;
     setActing(true);
     try {
-      const res = await fetch("/api/admin/email-inbox", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: selected.id, action: "delete" }),
-      });
-      const data = await res.json();
-      if (data.ok) {
-        setSelected(null);
-        load();
-      } else {
-        alert(data.error ?? "삭제 실패");
-      }
+      await deleteById(selected.id);
+      setSelected(null);
+      load();
+    } catch (e) {
+      alert(String(e));
     } finally {
       setActing(false);
+    }
+  }
+
+  async function handleDeleteCard(task: EmailTask, e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!confirm(`"${task.subject}" 을(를) 삭제할까요?`)) return;
+    try {
+      await deleteById(task.id);
+      if (selected?.id === task.id) setSelected(null);
+      load();
+    } catch (e) {
+      alert(String(e));
     }
   }
 
@@ -243,10 +258,10 @@ export default function EmailInboxPage() {
             </div>
           )}
           {tasks.map((task) => (
-            <button
+            <div
               key={task.id}
               onClick={() => selectTask(task)}
-              className={`w-full text-left p-4 rounded-xl border transition-all ${
+              className={`relative w-full text-left p-4 rounded-xl border transition-all cursor-pointer group ${
                 selected?.id === task.id
                   ? "border-ink bg-ink/5"
                   : "border-line hover:border-ink/30 bg-white"
@@ -256,9 +271,20 @@ export default function EmailInboxPage() {
                 <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium tracking-wide ${TYPE_COLOR[task.emailType] ?? TYPE_COLOR.OTHER}`}>
                   {TYPE_LABEL[task.emailType] ?? "기타"}
                 </span>
-                <span className="text-[11px] text-dim shrink-0">
-                  {new Date(task.receivedAt).toLocaleDateString("ko-KR", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] text-dim shrink-0">
+                    {new Date(task.receivedAt).toLocaleDateString("ko-KR", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                  </span>
+                  <button
+                    onClick={(e) => handleDeleteCard(task, e)}
+                    className="opacity-0 group-hover:opacity-100 p-1 rounded text-dim hover:text-edred hover:bg-edred/10 transition-all"
+                    title="삭제 (Gmail 휴지통)"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
               </div>
               <div className="text-[13px] font-medium text-ink truncate">{task.subject}</div>
               <div className="text-[11px] text-dim mt-0.5 truncate">
@@ -269,7 +295,7 @@ export default function EmailInboxPage() {
                   AI 신뢰도 {task.aiConfidence}%
                 </div>
               )}
-            </button>
+            </div>
           ))}
         </div>
 
