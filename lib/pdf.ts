@@ -1274,6 +1274,7 @@ export interface RepairQuoteForPdf {
   companyName: string | null;
   contactName: string | null;
   contactEmail: string | null;
+  contactPhone: string | null;
   repairCost: number | null;
   repairPartsText: string | null;
   inspectorName: string | null;
@@ -1304,6 +1305,7 @@ function RepairQuoteDocument({ data }: { data: RepairQuoteForPdf }) {
           el(Text, { style: { fontSize: 11, fontFamily: "Pretendard", fontWeight: 700, color: "#111111" } }, "수리 견적서")
         ),
         el(View, { style: S.headerMeta },
+          el(Text, { style: S.headerMetaLine }, `NO · ${data.jobNo}`),
           el(Text, { style: S.headerMetaLine }, `DATE · ${fmtDate(issued)}`),
           el(Text, { style: S.headerMetaLine }, `EQUIPMENT · ${data.pumpMaker} ${data.pumpModel}`)
         )
@@ -1323,7 +1325,7 @@ function RepairQuoteDocument({ data }: { data: RepairQuoteForPdf }) {
           ),
           el(View, { style: S.partyRow },
             el(Text, { style: S.partyKey }, "TEL"),
-            el(Text, { style: S.partyVal }, "—")
+            el(Text, { style: S.partyVal }, data.contactPhone ?? "—")
           ),
           el(View, { style: S.partyRow },
             el(Text, { style: S.partyKey }, "EMAIL"),

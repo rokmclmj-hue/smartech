@@ -41,6 +41,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         companyName: job.company?.companyName ?? null,
         contactName: job.contactName,
         contactEmail: job.contactEmail,
+        contactPhone: job.contactPhone,
         repairCost: job.repairCost,
         repairPartsText: job.repairPartsText,
         inspectorName: job.inspectorName,
