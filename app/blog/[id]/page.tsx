@@ -11,13 +11,34 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const post = await prisma.blogPost.findUnique({
     where: { id: Number(id), status: "PUBLISHED" },
-    select: { title: true, metaDesc: true, tags: true },
+    select: { title: true, metaDesc: true, tags: true, content: true, publishedAt: true },
   });
   if (!post) return { title: "스마텍 블로그" };
+
+  const ogImage =
+    post.content.match(/!\[[^\]]*\]\((https?:\/\/[^\)]+)\)/)?.[1] ??
+    "https://www.smartechvacuum.com/og-default.png";
+
   return {
     title: `${post.title} — 스마텍`,
     description: post.metaDesc || undefined,
     keywords: post.tags || undefined,
+    openGraph: {
+      title: `${post.title} — 스마텍`,
+      description: post.metaDesc || undefined,
+      url: `https://www.smartechvacuum.com/blog/${id}`,
+      type: "article",
+      publishedTime: post.publishedAt?.toISOString(),
+      images: [{ url: ogImage, alt: post.title }],
+      siteName: "스마텍",
+      locale: "ko_KR",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${post.title} — 스마텍`,
+      description: post.metaDesc || undefined,
+      images: [ogImage],
+    },
   };
 }
 
@@ -183,6 +204,13 @@ export default async function BlogPostPage({ params }: Props) {
   try { postPhotos = post.photos ? JSON.parse(post.photos) : []; } catch {}
 
   if (!post) return notFound();
+
+  const relatedPosts = await prisma.blogPost.findMany({
+    where: { category: post.category, id: { not: post.id }, status: "PUBLISHED" },
+    orderBy: { publishedAt: "desc" },
+    take: 3,
+    select: { id: true, title: true, metaDesc: true, publishedAt: true, createdAt: true },
+  });
 
   const tags = post.tags ? post.tags.split(/[,\s]+/).filter(Boolean) : [];
 
@@ -354,6 +382,30 @@ export default async function BlogPostPage({ params }: Props) {
             </a>
           </div>
         </div>
+
+        {/* 관련 글 */}
+        {relatedPosts.length > 0 && (
+          <div className="mt-12 pt-8 border-t hair">
+            <div className="mono text-[9px] tracking-[0.18em] dim uppercase mb-5">관련 글</div>
+            <div className="flex flex-col gap-3">
+              {relatedPosts.map((r) => (
+                <Link
+                  key={r.id}
+                  href={`/blog/${r.id}`}
+                  className="group flex flex-col gap-1.5 border hair p-4 hover:border-ink/30 transition-colors"
+                >
+                  <span className="text-[14px] font-semibold leading-snug group-hover:text-edred transition-colors">
+                    {r.title}
+                  </span>
+                  {r.metaDesc && (
+                    <span className="text-[12px] dim leading-relaxed line-clamp-2">{r.metaDesc}</span>
+                  )}
+                  <span className="mono text-[10px] dim">{formatDate(r.publishedAt ?? r.createdAt)}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* 목록으로 */}
         <div className="mt-8 pt-6 border-t hair">

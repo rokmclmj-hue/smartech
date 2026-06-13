@@ -154,8 +154,11 @@ if content.startswith("---"):
 title_match = re.search(r"^#\s+(.+)$", content, re.MULTILINE)
 title = title_match.group(1).strip() if title_match else topic
 
-tags_match = re.search(r"(#\S+(?:\s+#\S+)+)\s*$", content, re.MULTILINE)
-tags = tags_match.group(1).strip() if tags_match else ""
+# final.md에는 해시태그 금지 → naver.md에서 추출
+tags = ""
+if naver_content:
+    tags_match = re.search(r"(#\S+(?:\s+#\S+)+)\s*$", naver_content, re.MULTILINE)
+    tags = tags_match.group(1).strip() if tags_match else ""
 
 meta_path = os.path.join(BLOG_FOLDER, "meta.txt")
 meta_desc = ""
