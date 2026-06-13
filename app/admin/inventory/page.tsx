@@ -98,6 +98,7 @@ function ReorderTab() {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState<"SV" | "AK" | null>(null);
   const [msg, setMsg] = useState("");
+  const [hiding, setHiding] = useState<number | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -109,6 +110,18 @@ function ReorderTab() {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  async function hideItem(id: number, name: string) {
+    if (!confirm(`"${name}" 품목을 발주 대기함에서 제외할까요?\n재고 목록에서 숨김 처리됩니다. (재고 목록 > 숨긴 품목 보기에서 복원 가능)`)) return;
+    setHiding(id);
+    await fetch(`/api/admin/inventory/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ isActive: false }),
+    });
+    setHiding(null);
+    load();
+  }
 
   async function generate(dept: "SV" | "AK") {
     setGenerating(dept);
@@ -201,6 +214,7 @@ function ReorderTab() {
                         <th className="text-right px-4 py-2 font-medium">최소</th>
                         <th className="text-right px-4 py-2 font-medium">발주수량</th>
                         <th className="text-right px-4 py-2 font-medium">단가</th>
+                        <th className="px-4 py-2" />
                       </tr>
                     </thead>
                     <tbody>
@@ -214,6 +228,16 @@ function ReorderTab() {
                           <td className="px-4 py-2.5 text-right mono font-semibold">{item.orderQty}</td>
                           <td className="px-4 py-2.5 text-right mono text-dim">
                             {item.unitPrice > 0 ? fmt(item.unitPrice) + " 원" : "—"}
+                          </td>
+                          <td className="px-4 py-2.5 text-right">
+                            <button
+                              onClick={() => hideItem(item.id, item.name)}
+                              disabled={hiding === item.id}
+                              className="mono text-[10px] text-dim hover:text-edred border hair px-2 py-0.5 hover:border-edred/30 transition-colors disabled:opacity-40"
+                              title="이 품목을 발주 대기함에서 제외 (재고 목록에서 숨김)"
+                            >
+                              {hiding === item.id ? "…" : "제외"}
+                            </button>
                           </td>
                         </tr>
                       ))}
