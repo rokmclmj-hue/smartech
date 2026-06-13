@@ -1,0 +1,85 @@
+[2026-06-08 09:11:22] --- 자동 업로드 시작: 월요일 (day1) ---
+[2026-06-08 09:11:22] 📤 [월요일] 업로드 시작: 실험실 진공펌프 오일 종류와 교환 시기 (폴더: 2026-06/실험실-진공펌프-오일-선택법-20260606)
+[2026-06-08 09:11:23] 주제: 2026-06/실험실-진공펌프-오일-선택법-20260606
+=== AI 생성 이미지 업로드 ===
+  업로드: thumbnail.png
+  [ERROR] thumbnail.png: ImageUpload 308: Redirecting...
+
+  업로드: image-01.png
+  [ERROR] image-01.png: ImageUpload 308: Redirecting...
+
+  업로드: image-02.png
+  [ERROR] image-02.png: ImageUpload 308: Redirecting...
+
+  업로드: field-3.png
+  [ERROR] field-3.png: ImageUpload 308: Redirecting...
+
+
+=== 현장사진 업로드 ===
+  업로드: field-2.png
+  [ERROR] field-2.png: ImageUpload 308: Redirecting...
+
+  업로드: field-3.png
+  [ERROR] field-3.png: ImageUpload 308: Redirecting...
+
+
+=== 홈페이지 업로드 (카테고리: 기술문의) ===
+[HTTP 308] Redirecting...
+[2026-06-08 09:11:24] ✅ [월요일] 업로드 완료: 실험실 진공펌프 오일 종류와 교환 시기
+[2026-06-08 10:29:28] --- 자동 업로드 시작: 월요일 (day1) ---
+[2026-06-08 10:29:28] ✅ [월요일] 이미 업로드 완료: 실험실 진공펌프 오일 종류와 교환 시기
+[2026-06-08 10:29:34] --- 자동 업로드 시작: 수요일 (day2) ---
+[2026-06-08 10:29:34] 📤 [수요일] 업로드 시작: 분석 장비 RV 오일로터리펌프 유지관리 핵심 3가지 (폴더: 2026-06/RV-오일로터리펌프-유지관리-20260606)
+[2026-06-08 10:29:41] 주제: 2026-06/RV-오일로터리펌프-유지관리-20260606
+=== AI 생성 이미지 업로드 ===
+  업로드: thumbnail.png
+  완료:   https://k1bzaxgjue0tdirt.public.blob.vercel-storage.com/blog/1780882179315-thumbnail.png
+  업로드: image-01.png
+  완료:   https://k1bzaxgjue0tdirt.public.blob.vercel-storage.com/blog/1780882182487-image-01.png
+  업로드: image-02.png
+  완료:   https://k1bzaxgjue0tdirt.public.blob.vercel-storage.com/blog/1780882183317-image-02.png
+
+=== 홈페이지 업로드 (카테고리: 기술문의) ===
+[SUCCESS] id=33
+[URL]     https://www.smartechvacuum.com/blog/33
+[2026-06-08 10:29:41] ✅ [수요일] 업로드 완료: 분석 장비 RV 오일로터리펌프 유지관리 핵심 3가지
+[2026-06-08 10:29:51] --- 자동 업로드 시작: 금요일 (day3) ---
+[2026-06-08 10:29:51] 📤 [금요일] 업로드 시작: 배터리 제조 공정에 PFPE 오일이 필요한 이유 (폴더: 2026-06/이차전지-PFPE-오일-선택법-20260606)
+[2026-06-08 10:29:56] 주제: 2026-06/이차전지-PFPE-오일-선택법-20260606
+=== AI 생성 이미지 업로드 ===
+  업로드: thumbnail.png
+  완료:   https://k1bzaxgjue0tdirt.public.blob.vercel-storage.com/blog/1780882195196-thumbnail.png
+  업로드: image-01.png
+  완료:   https://k1bzaxgjue0tdirt.public.blob.vercel-storage.com/blog/1780882196122-image-01.png
+  업로드: image-02.png
+  완료:   https://k1bzaxgjue0tdirt.public.blob.vercel-storage.com/blog/1780882196684-image-02.png
+
+=== 현장사진 업로드 ===
+  업로드: field-1.png
+  완료:   https://k1bzaxgjue0tdirt.public.blob.vercel-storage.com/blog/1780882197665-field-1.png
+
+=== 홈페이지 업로드 (카테고리: 기술문의) ===
+[SUCCESS] id=34
+[URL]     https://www.smartechvacuum.com/blog/34
+[2026-06-08 10:29:56] ✅ [금요일] 업로드 완료: 배터리 제조 공정에 PFPE 오일이 필요한 이유
+[2026-06-10 09:00:00] --- 자동 업로드 시작: 수요일 (day2) ---
+[2026-06-10 09:00:01] ✅ [수요일] 이미 업로드 완료: 분석 장비 RV 오일로터리펌프 유지관리 핵심 3가지
+[2026-06-12 09:16:24] --- 자동 업로드 시작: 금요일 (day3) ---
+[2026-06-12 09:16:24] 📤 [금요일] 업로드 시작: 배터리 제조 공정에 PFPE 오일이 필요한 이유 (폴더: 2026-06/이차전지-PFPE-오일-선택법-20260606)
+[2026-06-12 09:16:33] 주제: 2026-06/이차전지-PFPE-오일-선택법-20260606
+=== AI 생성 이미지 업로드 ===
+  업로드: thumbnail.png
+  완료:   https://k1bzaxgjue0tdirt.public.blob.vercel-storage.com/blog/1781223390449-thumbnail.png
+  업로드: image-01.png
+  완료:   https://k1bzaxgjue0tdirt.public.blob.vercel-storage.com/blog/1781223391408-image-01.png
+  업로드: image-02.png
+  완료:   https://k1bzaxgjue0tdirt.public.blob.vercel-storage.com/blog/1781223391961-image-02.png
+
+=== 현장사진 업로드 ===
+  업로드: field-1.png
+  완료:   https://k1bzaxgjue0tdirt.public.blob.vercel-storage.com/blog/1781223392792-field-1.png
+
+=== 홈페이지 업로드 (카테고리: 기술문의) ===
+[SUCCESS] id=37
+[URL]     https://www.smartechvacuum.com/blog/37
+[2026-06-12 09:16:33] ✅ [금요일] 업로드 완료: 배터리 제조 공정에 PFPE 오일이 필요한 이유
