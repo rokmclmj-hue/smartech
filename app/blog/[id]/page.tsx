@@ -186,8 +186,21 @@ export default async function BlogPostPage({ params }: Props) {
 
   const tags = post.tags ? post.tags.split(/[,\s]+/).filter(Boolean) : [];
 
+  const articleSchema = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": post.title,
+    "description": post.metaDesc || undefined,
+    "datePublished": (post.publishedAt ?? post.createdAt).toISOString(),
+    "dateModified": post.updatedAt.toISOString(),
+    "url": `https://www.smartechvacuum.com/blog/${post.id}`,
+    "publisher": { "@type": "Organization", "name": "스마텍", "url": "https://www.smartechvacuum.com" },
+    "author":    { "@type": "Organization", "name": "스마텍" },
+  });
+
   return (
     <>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: articleSchema }} />
     {post.faqSchema && (
       <script
         type="application/ld+json"

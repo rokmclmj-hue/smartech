@@ -14,7 +14,11 @@ import json
 import subprocess
 import sys
 import os
+import time
 from datetime import datetime
+
+MAX_RETRY = 3
+RETRY_DELAY = 30  # 업로드 실패 시 재시도 대기 시간 (초)
 
 PYTHON_EXE = r"C:\Users\rokmc\AppData\Local\Programs\Python\Python312\python.exe"
 UPLOAD_SCRIPT = r"C:\Users\rokmc\smartech\블로그\upload_post.py"
@@ -93,27 +97,38 @@ def main():
 
     log(f"📤 [{label}] 업로드 시작: {title} (폴더: {folder})")
 
-    result = subprocess.run(
-        [PYTHON_EXE, UPLOAD_SCRIPT, folder],
-        cwd=r"C:\Users\rokmc\smartech",
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-    )
+    success = False
+    for attempt in range(1, MAX_RETRY + 1):
+        result = subprocess.run(
+            [PYTHON_EXE, UPLOAD_SCRIPT, folder],
+            cwd=r"C:\Users\rokmc\smartech",
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
 
-    if result.stdout:
-        log(result.stdout.strip())
+        if result.stdout:
+            log(result.stdout.strip())
 
-    if result.returncode == 0:
+        if result.returncode == 0:
+            success = True
+            break
+
+        log(f"❌ [{label}] 업로드 실패 (시도 {attempt}/{MAX_RETRY}, exit code {result.returncode})")
+        if result.stderr:
+            log(result.stderr.strip())
+        if attempt < MAX_RETRY:
+            log(f"⏳ {RETRY_DELAY}초 후 재시도합니다...")
+            time.sleep(RETRY_DELAY)
+
+    if success:
         queue[slot]["uploaded"] = True
         with open(QUEUE_FILE, "w", encoding="utf-8") as f:
             json.dump(queue, f, ensure_ascii=False, indent=2)
         log(f"✅ [{label}] 업로드 완료: {title}")
     else:
-        log(f"❌ [{label}] 업로드 실패 (exit code {result.returncode})")
-        if result.stderr:
-            log(result.stderr.strip())
+        log(f"❌ [{label}] {MAX_RETRY}회 시도 모두 실패. 수동 업로드 필요: {folder}")
         sys.exit(1)
 
 
