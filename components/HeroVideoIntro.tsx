@@ -52,7 +52,7 @@ export default function HeroVideoIntro({ children, src = "/smartech_main.mp4" }:
             autoPlay
             muted
             playsInline
-            preload="auto"
+            preload="metadata"
             onEnded={handleEnded}
             onTimeUpdate={(e) => {
               const v = e.currentTarget;
