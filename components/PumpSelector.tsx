@@ -593,11 +593,7 @@ export default function PumpSelector() {
         {/* 제품 검색 */}
         <button
           onClick={() => { setTab("search"); setSelectedCategory(null); setSearch(""); }}
-          className={`flex flex-col items-center justify-center py-4 px-3 border transition-colors ${
-            tab === "search"
-              ? "bg-paper text-ink border-ink hover:bg-ink hover:text-paper"
-              : "bg-paper text-ink border-ink hover:bg-ink hover:text-paper"
-          }`}
+          className="flex flex-col items-center justify-center py-4 px-3 border bg-ink text-paper border-ink"
         >
           <span className="text-[15px] font-semibold tracking-tight">제품 검색</span>
         </button>
@@ -623,14 +619,10 @@ export default function PumpSelector() {
             if (!session) { setShowLoginGate(true); return; }
             setTab("selection"); setSelectedCategory(null);
           }}
-          className={`group flex flex-col items-center justify-center py-4 px-3 border transition-colors ${
-            tab === "selection"
-              ? "bg-paper text-ink border-ink hover:bg-ink hover:text-paper"
-              : "bg-paper text-ink border-ink hover:bg-ink hover:text-paper"
-          }`}
+          className="flex flex-col items-center justify-center py-4 px-3 border bg-ink text-paper border-ink"
         >
           <span className="text-[15px] font-semibold tracking-tight">펌프선정 및 시뮬레이션</span>
-          <span className={`mono text-[10px] tracking-[0.06em] mt-0.5 group-hover:text-paper ${tab === "selection" ? "text-ink" : !session ? "text-ink/70" : "text-ink"}`}>
+          <span className="mono text-[10px] tracking-[0.06em] mt-0.5 text-paper/60">
             {!session ? "🔒 로그인 필요" : "공정 조건 기반 자동 선정"}
           </span>
         </button>

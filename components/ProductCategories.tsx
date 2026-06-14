@@ -35,7 +35,7 @@ const ITEMS = [
 const INITIAL = 16;
 
 export default function ProductCategories() {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
   const [panelItem, setPanelItem] = useState<PanelItem | null>(null);
   const visible = expanded ? ITEMS : ITEMS.slice(0, INITIAL);
 
