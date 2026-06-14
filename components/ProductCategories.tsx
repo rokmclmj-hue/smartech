@@ -55,41 +55,47 @@ export default function ProductCategories() {
       <div>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
         {visible.map((item, i) => (
-          <button
+          <div
             key={item.category}
-            onClick={() => setPanelItem({ category: item.category, code: item.code, title: item.title, image: item.image })}
-            className="group border hair bg-white p-5 hover:bg-ink hover:text-paper transition-colors overflow-hidden text-left w-full"
+            className="group border hair bg-white hover:bg-ink hover:text-paper transition-colors overflow-hidden relative"
           >
-            <div className="flex justify-between text-[10.5px] mono opacity-60">
-              <span>{String(i + 1).padStart(2, "0")} / {ITEMS.length}</span>
-              <span>{item.code}</span>
-            </div>
+            {/* 카드 본체 — 클릭 시 패널 오픈 */}
+            <button
+              onClick={() => setPanelItem({ category: item.category, code: item.code, title: item.title, image: item.image })}
+              className="w-full text-left p-5"
+            >
+              <div className="flex justify-between text-[10.5px] mono opacity-60">
+                <span>{String(i + 1).padStart(2, "0")} / {ITEMS.length}</span>
+                <span>{item.code}</span>
+              </div>
 
-            <div className="mt-4 mb-4 aspect-[4/3] relative overflow-hidden border hair bg-white">
-              <img
-                src={item.image}
-                alt={item.title}
-                className={`absolute inset-0 w-full h-full object-contain group-hover:scale-105 transition-transform ${item.category === "오일펌프(중대형 E2S)" ? "p-6" : ""}`}
-                loading="lazy"
-              />
-            </div>
+              <div className="mt-4 mb-4 aspect-[4/3] relative overflow-hidden border hair bg-white">
+                <img
+                  src={item.image}
+                  alt={item.title}
+                  className={`absolute inset-0 w-full h-full object-contain group-hover:scale-105 transition-transform ${item.category === "오일펌프(중대형 E2S)" ? "p-6" : ""}`}
+                  loading="lazy"
+                />
+              </div>
 
-            <div className="display text-[18px] leading-[1.2] line-clamp-2">{item.title}</div>
-            <div className="mono text-[11px] opacity-60 mt-1">{(item as any).label ?? item.category}</div>
+              <div className="display text-[18px] leading-[1.2] line-clamp-2">{item.title}</div>
+              <div className="mono text-[11px] opacity-60 mt-1">{(item as any).label ?? item.category}</div>
 
-            <div className="mt-3 flex items-center justify-between">
-              <span className="text-[11px] opacity-70 group-hover:opacity-100">제품 보기 →</span>
-              {SERIES_PAGE[item.category] && (
-                <Link
-                  href={SERIES_PAGE[item.category]}
-                  onClick={(e) => e.stopPropagation()}
-                  className="text-[11px] mono text-edred hover:underline opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  스펙 비교 →
-                </Link>
-              )}
-            </div>
-          </button>
+              <div className="mt-3 flex items-center justify-between">
+                <span className="text-[11px] opacity-70 group-hover:opacity-100">제품 보기 →</span>
+              </div>
+            </button>
+
+            {/* 스펙 비교 링크 — button 밖에 분리 */}
+            {SERIES_PAGE[item.category] && (
+              <Link
+                href={SERIES_PAGE[item.category]}
+                className="absolute bottom-5 right-5 text-[11px] mono text-white opacity-0 group-hover:opacity-80 hover:opacity-100 hover:underline transition-opacity"
+              >
+                스펙 비교 →
+              </Link>
+            )}
+          </div>
         ))}
       </div>
 
