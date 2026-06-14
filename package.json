@@ -10,7 +10,8 @@
     "db:generate": "prisma generate",
     "db:seed": "tsx scripts/import-products.ts",
     "import-prices": "tsx scripts/import-prices.ts",
-    "lint": "eslint \"app/**/*.{ts,tsx}\" \"components/**/*.{ts,tsx}\" \"lib/**/*.{ts,tsx}\""
+    "lint": "eslint \"app/**/*.{ts,tsx}\" \"components/**/*.{ts,tsx}\" \"lib/**/*.{ts,tsx}\"",
+    "seo-check": "node scripts/seo-check.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",

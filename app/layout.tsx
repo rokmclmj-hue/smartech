@@ -9,9 +9,6 @@ export const metadata: Metadata = {
   title: "스마텍 — Edwards Vacuum 한국 공식 대리점 | 진공 토탈 솔루션",
   description: "Edwards Vacuum 한국 공식 대리점 스마텍. 2006년 Edwards 코리아 합류, 2011년 창업. RV·E2M·GXS·nXDS·STP·nEXT 전 라인업 · 딜러/OEM/소비자 등급별 가격 · 온라인 견적 시스템.",
   metadataBase: new URL("https://smartechvacuum.com"),
-  alternates: {
-    canonical: "https://smartechvacuum.com",
-  },
   verification: {
     other: { "naver-site-verification": "42d90b9cf0599e0f8b74c3bf5abc5089c7706274" },
   },

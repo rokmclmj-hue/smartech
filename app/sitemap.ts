@@ -33,6 +33,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: BASE_URL, lastModified: new Date(), changeFrequency: "weekly", priority: 1.0 },
     // 블로그 목록
     { url: `${BASE_URL}/blog`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
+    // 제품 카탈로그
+    { url: `${BASE_URL}/products`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
     // 수리 접수
     { url: `${BASE_URL}/repair`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
     // 산업 분야 20개

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { INDUSTRIES, getIndustry } from "@/lib/industries";
 
 function hiEd(text: string) {
@@ -12,6 +13,30 @@ function hiEd(text: string) {
 
 export function generateStaticParams() {
   return INDUSTRIES.map((i) => ({ slug: i.slug }));
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const industry = getIndustry(slug);
+  if (!industry) return { title: "스마텍" };
+  return {
+    title: `${industry.title} 진공 솔루션 — 스마텍 | Edwards Vacuum`,
+    description: industry.tagline,
+    alternates: { canonical: `https://smartechvacuum.com/industries/${slug}` },
+    openGraph: {
+      title: `${industry.title} 진공 솔루션 — 스마텍`,
+      description: industry.tagline,
+      url: `https://smartechvacuum.com/industries/${slug}`,
+      type: "website",
+      siteName: "스마텍",
+      locale: "ko_KR",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${industry.title} 진공 솔루션 — 스마텍`,
+      description: industry.tagline,
+    },
+  };
 }
 
 const PUMP_PDF: Record<string, string> = {

@@ -1,11 +1,24 @@
 export const dynamic = "force-dynamic";
 
+import type { Metadata } from "next";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { getMultiplier, formatKRW } from "@/lib/pricing";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import AddToQuoteButton from "./AddToQuoteButton";
+
+export async function generateMetadata({ params }: { params: Promise<{ partNo: string }> }): Promise<Metadata> {
+  const { partNo: raw } = await params;
+  const partNo = decodeURIComponent(raw);
+  const product = await prisma.product.findUnique({ where: { partNo }, select: { description: true } });
+  if (!product) return { title: "스마텍" };
+  return {
+    title: `${product.description} (${partNo}) — 스마텍 | Edwards Vacuum`,
+    description: `Edwards ${product.description} 파트번호 ${partNo}. 스마텍에서 정품 공급·견적·문의.`,
+    alternates: { canonical: `https://smartechvacuum.com/products/${encodeURIComponent(partNo)}` },
+  };
+}
 
 export default async function ProductDetailPage({ params }: { params: Promise<{ partNo: string }> }) {
   const { partNo: rawPartNo } = await params;

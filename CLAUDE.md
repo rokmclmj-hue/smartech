@@ -196,3 +196,14 @@ Tailwind 클래스로 `bg-edred`, `text-ink` 형태로 사용. 값 임의 변경
   `ANTHROPIC_API_KEY`, `DATABASE_URL`, `SOLAPI_*`, `VERCEL_BLOB_*`,
   `KAKAO_CLIENT_SECRET`, `GOOGLE_CLIENT_SECRET`, `GMAIL_*`, `NEXTAUTH_SECRET`
 - 코드 리뷰 중 위 패턴이 발견되면 즉시 경고하고 작업을 중단한다.
+
+---
+
+## SEO 규칙 — 새 page.tsx 생성 시 반드시 준수
+
+- 모든 `app/**/page.tsx` 파일(admin·auth·mypage·quote 제외)은 **반드시** `export const metadata` 또는 `generateMetadata`를 포함해야 한다.
+- `"use client"` 페이지는 metadata 선언 불가 → **서버 컴포넌트 래퍼 패턴** 필수:
+  1. 인터랙티브 코드는 `*Client.tsx` 파일로 분리
+  2. `page.tsx`는 서버 컴포넌트로 metadata만 선언하고 `<*Client />`를 렌더링
+- 각 페이지 metadata에는 반드시 `alternates: { canonical: "https://smartechvacuum.com/경로" }` 를 포함한다.
+- 점검: `npm run seo-check` 로 전체 페이지 SEO 상태 확인 가능.

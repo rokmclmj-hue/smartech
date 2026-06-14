@@ -1,6 +1,11 @@
 export const dynamic = "force-dynamic";
 
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "https://smartechvacuum.com" },
+};
 import HeroCtaCards from "@/components/HeroCtaCards";
 import HeroChat from "@/components/HeroChat";
 import Industries from "@/components/Industries";

@@ -7,6 +7,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "블로그 — 스마텍 | 진공펌프 기술 정보",
   description: "에드워드 진공펌프 수리·납기·기술 정보를 현장 경험 기반으로 정리합니다. 스마텍 공식 블로그.",
+  alternates: { canonical: "https://smartechvacuum.com/blog" },
 };
 
 const CATEGORY_COLORS: Record<string, string> = {

@@ -23,10 +23,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: `${post.title} — 스마텍`,
     description: post.metaDesc || undefined,
     keywords: post.tags || undefined,
+    alternates: { canonical: `https://smartechvacuum.com/blog/${id}` },
     openGraph: {
       title: `${post.title} — 스마텍`,
       description: post.metaDesc || undefined,
-      url: `https://www.smartechvacuum.com/blog/${id}`,
+      url: `https://smartechvacuum.com/blog/${id}`,
       type: "article",
       publishedTime: post.publishedAt?.toISOString(),
       images: [{ url: ogImage, alt: post.title }],
