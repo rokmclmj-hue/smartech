@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import ProductPanel, { type PanelItem } from "./ProductPanel";
 import { CATALOG_MAP } from "@/lib/catalogs";
 
@@ -40,6 +40,7 @@ const ITEMS = [
 const INITIAL = 16;
 
 export default function ProductCategories() {
+  const router = useRouter();
   const [expanded, setExpanded] = useState(false);
   const [panelItem, setPanelItem] = useState<PanelItem | null>(null);
   const visible = expanded ? ITEMS : ITEMS.slice(0, INITIAL);
@@ -91,12 +92,15 @@ export default function ProductCategories() {
                 제품 보기 →
               </button>
               {SERIES_PAGE[item.category] && (
-                <Link
-                  href={SERIES_PAGE[item.category]}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push(SERIES_PAGE[item.category]);
+                  }}
                   className="text-[11px] opacity-70 group-hover:opacity-100 hover:underline"
                 >
                   스펙 비교 →
-                </Link>
+                </button>
               )}
             </div>
           </div>
