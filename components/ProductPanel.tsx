@@ -46,6 +46,64 @@ const SPEC_DATA: Record<string, SpecData> = {
       { label: "외형 치수 (L×W×H)", unit: "mm", values: ["430×158×225", "430×158×225", "470×158×225", "490×158×225"] },
     ],
   },
+  "오일펌프(소형 E2M)": {
+    models: ["E2M2", "E2M5", "E2M8", "E2M12"],
+    rows: [
+      { label: "배기속도 (60 Hz)", unit: "m³/h", values: ["2.9", "6.0", "9.6", "12.2"] },
+      { label: "도달압력 (Total)", unit: "mbar", values: ["1×10⁻³", "1×10⁻³", "1×10⁻³", "1×10⁻³"] },
+      { label: "모터 출력 (60 Hz)", unit: "W", values: ["220", "300", "370", "660"] },
+      { label: "회전수 (60 Hz)", unit: "rpm", values: ["1,720", "1,720", "1,720", "1,720"] },
+      { label: "소음", unit: "dB(A)", values: ["52", "52", "52", "52"] },
+      { label: "무게", unit: "kg", values: ["18.2", "19.6", "22.8", "26.0"] },
+      { label: "오일 용량", unit: "L", values: ["0.35~0.55", "0.42~0.55", "0.43~0.55", "0.43~0.55"] },
+      { label: "인렛 플랜지", unit: "", values: ["NW25", "NW25", "NW25", "NW25"] },
+      { label: "배기 플랜지", unit: "", values: ["G 3/4\"", "G 3/4\"", "G 3/4\"", "G 3/4\""] },
+      { label: "작동 온도", unit: "°C", values: ["12~40", "12~40", "12~40", "12~40"] },
+      { label: "외형 치수 (L×W×H)", unit: "mm", values: ["470×150×251", "470×150×251", "470×150×251", "—"] },
+    ],
+  },
+  "오일펌프(중대형 E2S)": {
+    models: ["E2S45", "E2S65", "E2S85"],
+    rows: [
+      { label: "배기속도 (60 Hz)", unit: "m³/h", values: ["50", "69", "94"] },
+      { label: "도달압력 (Total)", unit: "mbar", values: ["3.0×10⁻³", "3.0×10⁻³", "3.0×10⁻³"] },
+      { label: "모터 출력 (60 Hz)", unit: "kW", values: ["1.3", "1.8", "2.6"] },
+      { label: "소음 (60 Hz)", unit: "dB(A)", values: ["60", "62", "62"] },
+      { label: "무게", unit: "kg", values: ["80", "90", "100"] },
+      { label: "오일 용량", unit: "L", values: ["4.3", "4.8", "5.5"] },
+      { label: "인렛 플랜지", unit: "", values: ["NW40", "NW40", "NW40"] },
+      { label: "배기 플랜지", unit: "", values: ["NW25", "NW25", "NW25"] },
+      { label: "외형 치수 (L×W×H)", unit: "mm", values: ["740×244×405", "770×244×405", "857×244×405"] },
+    ],
+  },
+  "오일펌프(중대형 E2M)": {
+    models: ["E2M40", "E2M80", "E2M175", "E2M275"],
+    rows: [
+      { label: "배기속도 (60 Hz)", unit: "m³/h", values: ["44", "90", "196", "306"] },
+      { label: "도달압력 (Total)", unit: "mbar", values: ["3.0×10⁻³", "3.0×10⁻³", "3.0×10⁻³", "3.0×10⁻³"] },
+      { label: "모터 출력 (60 Hz)", unit: "kW", values: ["1.5", "3.0", "6.5", "8.5"] },
+      { label: "소음", unit: "dB(A)", values: ["65", "65", "75", "75"] },
+      { label: "무게", unit: "kg", values: ["75", "104", "198", "216"] },
+      { label: "오일 용량", unit: "L", values: ["2.2~4", "4~6.3", "16~25", "18~28"] },
+      { label: "인렛 플랜지", unit: "", values: ["NW40", "NW40", "NW63", "NW63"] },
+      { label: "배기 플랜지", unit: "", values: ["NW25", "NW25", "NW40", "NW40"] },
+      { label: "외형 치수 (L×W×H)", unit: "mm", values: ["780×240×395", "889×266×429", "1055×388×533", "1165×388×533"] },
+    ],
+  },
+  "오일펌프(nES)": {
+    models: ["nES40", "nES65", "nES100", "nES200"],
+    rows: [
+      { label: "배기속도 (60 Hz)", unit: "m³/h", values: ["47", "64", "105", "200"] },
+      { label: "도달압력 (Total)", unit: "mbar", values: ["0.5", "0.5", "0.5", "0.08"] },
+      { label: "모터 출력 (60 Hz)", unit: "kW", values: ["1.3", "1.8", "3.6", "5.5"] },
+      { label: "소음 (60 Hz)", unit: "dB(A)", values: ["60", "64", "64", "73"] },
+      { label: "무게", unit: "kg", values: ["67", "86", "104", "142"] },
+      { label: "오일 용량", unit: "L", values: ["1", "2", "2", "5~9"] },
+      { label: "인렛 플랜지", unit: "", values: ["NW40", "NW40", "NW40", "NW63"] },
+      { label: "배기 플랜지", unit: "", values: ["NW40", "NW40", "NW40", "NW63"] },
+      { label: "외형 치수 (L×W×H)", unit: "mm", values: ["540×284×303", "586×320×314", "721×400×319", "1002×535×415"] },
+    ],
+  },
 };
 
 function formatKRW(v: number) {
@@ -182,7 +240,7 @@ export default function ProductPanel({ item, onClose, catalogUrl }: Props) {
                 </tbody>
               </table>
             </div>
-            <p className="mt-4 text-[10px] dim mono">※ 60 Hz 기준 (국내 전원). cfm 단위 수치는 m³/h 환산값.</p>
+            <p className="mt-4 text-[10px] dim mono">※ 60 Hz 기준 (국내 전원). 카탈로그 원본 기준.</p>
 
             {/* 연락처 */}
             <div className="mt-6 border-t hair pt-5">
