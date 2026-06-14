@@ -61,9 +61,40 @@ const SYMPTOMS = [
 
 const STEPS = ["사진 업로드", "증상 입력", "수리 견적", "접수 완료"];
 
-// 수리 사례 데이터 — 사진 3~5건 모이면 아래 배열에 추가
-// { model: "RV12", symptom: "오일 오염 / 배기 불량", work: "풀 오버홀 · 씰 교체", before: "/images/repair/rv12-before.jpg", after: "/images/repair/rv12-after.jpg" }
-const REPAIR_CASES: { model: string; symptom: string; work: string; before?: string; after?: string }[] = [];
+type RepairCase = {
+  model: string;
+  client: string;
+  symptom: string;
+  work: string[];
+  photo: string;
+  partPhoto?: string;
+};
+
+const REPAIR_CASES: RepairCase[] = [
+  {
+    model: "Edwards iH1800HTX",
+    client: "G사",
+    symptom: "공정 부산물 오염 · 배기 불량",
+    work: ["풀 오버홀", "오염물 완전 제거", "씰·베어링 교체"],
+    photo: "/images/repair/ih1800-contamination.jpg",
+    partPhoto: "/images/repair/ih1800-rotors.jpg",
+  },
+  {
+    model: "Edwards XDS35iE",
+    client: "A사",
+    symptom: "스크롤 팁 마모 · 베어링 손상",
+    work: ["스크롤 팁 씰 교체", "베어링 교체", "내부 세정"],
+    photo: "/images/repair/xds35i-wear.jpg",
+    partPhoto: "/images/repair/xds35i-bearing.jpg",
+  },
+  {
+    model: "Edwards RV3",
+    client: "S사",
+    symptom: "오일 오염 · 진공 불량",
+    work: ["풀 오버홀", "베인 교체", "오일 세정"],
+    photo: "/images/repair/rv3-disassembly.jpg",
+  },
+];
 const EXTRA_MARGIN = 1.2; // 추가항목 마진
 
 // 모델별 기본수리 마진 (nXDS·XDS35 계열 1.5, 그 외 1.8)
@@ -1137,7 +1168,7 @@ export default function RepairPageClient() {
               </p>
             </div>
             <div className="shrink-0 text-[12px] mono text-dim border hair px-4 py-2 self-start md:self-auto">
-              사례 수집 중 — 업데이트 예정
+              {REPAIR_CASES.length}건 공개 — 순차 업데이트 중
             </div>
           </div>
 
@@ -1145,35 +1176,46 @@ export default function RepairPageClient() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {REPAIR_CASES.length > 0 ? REPAIR_CASES.map((c, i) => (
               <div key={i} className="border hair bg-white flex flex-col overflow-hidden">
-                <div className="grid grid-cols-2 divide-x hair border-b hair">
-                  <div className="aspect-[4/3] relative bg-[#F0EDE8] overflow-hidden">
-                    {c.before
-                      ? <img src={c.before} alt="수리 전" className="absolute inset-0 w-full h-full object-cover" />
-                      : <div className="absolute inset-0 flex items-center justify-center mono text-[10px] text-dim">BEFORE</div>}
-                  </div>
-                  <div className="aspect-[4/3] relative bg-[#F0EDE8] overflow-hidden">
-                    {c.after
-                      ? <img src={c.after} alt="수리 후" className="absolute inset-0 w-full h-full object-cover" />
-                      : <div className="absolute inset-0 flex items-center justify-center mono text-[10px] text-dim">AFTER</div>}
+                {/* 핵심 손상 사진 */}
+                <div className="aspect-[4/3] relative bg-[#111] overflow-hidden">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={c.photo} alt={c.symptom} className="w-full h-full object-cover" />
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent px-4 py-3">
+                    <div className="text-paper text-[13px] font-semibold leading-tight">{c.model}</div>
+                    <div className="text-paper/50 text-[10px] mono">{c.client}</div>
                   </div>
                 </div>
-                <div className="p-4 flex-1 flex flex-col gap-1">
-                  <div className="mono text-[10px] text-edred tracking-wider">{c.model}</div>
-                  <div className="text-[13px] font-semibold leading-snug">{c.symptom}</div>
-                  <div className="text-[12px] text-dim mt-1">{c.work}</div>
+                {/* 내용 */}
+                <div className="p-4 flex-1 flex flex-col gap-3">
+                  <div>
+                    <div className="mono text-[9px] text-edred tracking-widest mb-1">SYMPTOM</div>
+                    <div className="text-[13px] font-semibold leading-snug">{c.symptom}</div>
+                  </div>
+                  <div>
+                    <div className="mono text-[9px] text-dim tracking-widest mb-1.5">WORK DONE</div>
+                    <div className="flex flex-wrap gap-1">
+                      {c.work.map((w, j) => (
+                        <span key={j} className="text-[11px] border hair px-2 py-0.5 text-dim">{w}</span>
+                      ))}
+                    </div>
+                  </div>
+                  {c.partPhoto && (
+                    <div className="mt-auto pt-3 border-t hair">
+                      <div className="mono text-[9px] text-dim tracking-widest mb-1.5">PARTS</div>
+                      <div className="aspect-[16/9] relative overflow-hidden border hair">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={c.partPhoto} alt="수리 부품" className="w-full h-full object-cover" />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )) : (
               /* 플레이스홀더 — 데이터 없을 때 */
               [0, 1, 2].map((i) => (
                 <div key={i} className="border hair bg-white flex flex-col overflow-hidden opacity-40">
-                  <div className="grid grid-cols-2 divide-x hair border-b hair">
-                    <div className="aspect-[4/3] bg-[#ECEAE5] flex items-center justify-center">
-                      <span className="mono text-[10px] text-dim">BEFORE</span>
-                    </div>
-                    <div className="aspect-[4/3] bg-[#ECEAE5] flex items-center justify-center">
-                      <span className="mono text-[10px] text-dim">AFTER</span>
-                    </div>
+                  <div className="aspect-[4/3] bg-[#ECEAE5] flex items-center justify-center">
+                    <span className="mono text-[10px] text-dim">DAMAGE PHOTO</span>
                   </div>
                   <div className="p-4 flex flex-col gap-2">
                     <div className="h-2 bg-[#E3DFD6] rounded w-20" />
