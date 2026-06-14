@@ -213,8 +213,8 @@ export default function AboutPage() {
           {/* 갤러리 그리드 */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {/* Gold Award — 전폭 (모바일: 1열, 데스크탑: 2열 span) */}
-            <div className="lg:col-span-2 border hair overflow-hidden bg-white group">
-              <div className="relative aspect-[4/3] overflow-hidden">
+            <div className="lg:col-span-2 border hair overflow-hidden bg-white group flex flex-col">
+              <div className="relative h-72 bg-[#f6f4ef] overflow-hidden">
                 <Image
                   src={GALLERY[0].src}
                   alt={GALLERY[0].alt}
@@ -224,7 +224,7 @@ export default function AboutPage() {
                   priority
                 />
               </div>
-              <div className="px-5 py-4 border-t hair flex items-center justify-between">
+              <div className="px-5 py-4 border-t hair flex items-center justify-between mt-auto">
                 <div>
                   <div className="text-[13px] font-semibold">{GALLERY[0].label}</div>
                   <div className="mono text-[10px] text-dim mt-0.5">{GALLERY[0].sub}</div>
@@ -237,8 +237,8 @@ export default function AboutPage() {
 
             {/* 나머지 3장 */}
             {GALLERY.slice(1).map((img) => (
-              <div key={img.label} className="border hair overflow-hidden bg-white group">
-                <div className="relative aspect-[3/4] overflow-hidden">
+              <div key={img.label} className="border hair overflow-hidden bg-white group flex flex-col">
+                <div className="relative h-56 bg-[#f6f4ef] overflow-hidden">
                   <Image
                     src={img.src}
                     alt={img.alt}
@@ -247,7 +247,7 @@ export default function AboutPage() {
                     sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   />
                 </div>
-                <div className="px-5 py-4 border-t hair">
+                <div className="px-5 py-4 border-t hair mt-auto">
                   <div className="text-[13px] font-semibold">{img.label}</div>
                   <div className="mono text-[10px] text-dim mt-0.5">{img.sub}</div>
                 </div>
