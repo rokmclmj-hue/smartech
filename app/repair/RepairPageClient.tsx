@@ -60,6 +60,10 @@ const SYMPTOMS = [
 ];
 
 const STEPS = ["사진 업로드", "증상 입력", "수리 견적", "접수 완료"];
+
+// 수리 사례 데이터 — 사진 3~5건 모이면 아래 배열에 추가
+// { model: "RV12", symptom: "오일 오염 / 배기 불량", work: "풀 오버홀 · 씰 교체", before: "/images/repair/rv12-before.jpg", after: "/images/repair/rv12-after.jpg" }
+const REPAIR_CASES: { model: string; symptom: string; work: string; before?: string; after?: string }[] = [];
 const EXTRA_MARGIN = 1.2; // 추가항목 마진
 
 // 모델별 기본수리 마진 (nXDS·XDS35 계열 1.5, 그 외 1.8)
@@ -1119,6 +1123,83 @@ export default function RepairPageClient() {
           </div>
         </div>
       </div>
+
+      {/* ── 수리 사례 ── */}
+      <section className="mt-24 border-t hair pt-14 pb-20 bg-paper">
+        <div className="max-w-5xl mx-auto px-6">
+          {/* 헤더 */}
+          <div className="mono text-[11px] text-dim mb-3 tracking-widest">REPAIR CASES</div>
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10">
+            <div>
+              <h2 className="display text-[32px] leading-tight">수리 사례</h2>
+              <p className="mt-2 text-[14px] text-dim leading-relaxed">
+                실제 수리·오버홀 전후 사진과 작업 내용을 순차적으로 공개합니다.
+              </p>
+            </div>
+            <div className="shrink-0 text-[12px] mono text-dim border hair px-4 py-2 self-start md:self-auto">
+              사례 수집 중 — 업데이트 예정
+            </div>
+          </div>
+
+          {/* 카드 그리드 */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {REPAIR_CASES.length > 0 ? REPAIR_CASES.map((c, i) => (
+              <div key={i} className="border hair bg-white flex flex-col overflow-hidden">
+                <div className="grid grid-cols-2 divide-x hair border-b hair">
+                  <div className="aspect-[4/3] relative bg-[#F0EDE8] overflow-hidden">
+                    {c.before
+                      ? <img src={c.before} alt="수리 전" className="absolute inset-0 w-full h-full object-cover" />
+                      : <div className="absolute inset-0 flex items-center justify-center mono text-[10px] text-dim">BEFORE</div>}
+                  </div>
+                  <div className="aspect-[4/3] relative bg-[#F0EDE8] overflow-hidden">
+                    {c.after
+                      ? <img src={c.after} alt="수리 후" className="absolute inset-0 w-full h-full object-cover" />
+                      : <div className="absolute inset-0 flex items-center justify-center mono text-[10px] text-dim">AFTER</div>}
+                  </div>
+                </div>
+                <div className="p-4 flex-1 flex flex-col gap-1">
+                  <div className="mono text-[10px] text-edred tracking-wider">{c.model}</div>
+                  <div className="text-[13px] font-semibold leading-snug">{c.symptom}</div>
+                  <div className="text-[12px] text-dim mt-1">{c.work}</div>
+                </div>
+              </div>
+            )) : (
+              /* 플레이스홀더 — 데이터 없을 때 */
+              [0, 1, 2].map((i) => (
+                <div key={i} className="border hair bg-white flex flex-col overflow-hidden opacity-40">
+                  <div className="grid grid-cols-2 divide-x hair border-b hair">
+                    <div className="aspect-[4/3] bg-[#ECEAE5] flex items-center justify-center">
+                      <span className="mono text-[10px] text-dim">BEFORE</span>
+                    </div>
+                    <div className="aspect-[4/3] bg-[#ECEAE5] flex items-center justify-center">
+                      <span className="mono text-[10px] text-dim">AFTER</span>
+                    </div>
+                  </div>
+                  <div className="p-4 flex flex-col gap-2">
+                    <div className="h-2 bg-[#E3DFD6] rounded w-20" />
+                    <div className="h-3 bg-[#E3DFD6] rounded w-full" />
+                    <div className="h-3 bg-[#E3DFD6] rounded w-2/3" />
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* 하단 안내 */}
+          <div className="mt-10 pt-8 border-t hair flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-[12px] text-dim">
+            <div className="leading-relaxed">
+              수리 완료 후 고객 동의 하에 사례를 게시합니다.<br className="hidden md:block" />
+              장비명·증상·작업 내용·전후 사진이 포함됩니다.
+            </div>
+            <a
+              href="tel:031-204-7170"
+              className="shrink-0 inline-flex items-center gap-2 border hair px-5 py-2.5 text-ink hover:bg-ink hover:text-paper transition-colors mono text-[11px] tracking-wider"
+            >
+              ☏ 031-204-7170 수리 문의
+            </a>
+          </div>
+        </div>
+      </section>
 
       <style>{`
         .repair-pdf-only { display: none; }
