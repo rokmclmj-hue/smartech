@@ -158,24 +158,24 @@ export default function ProductPanel({ item, onClose, catalogUrl }: Props) {
           {/* 스펙 표 */}
           <div className="flex-1 overflow-y-auto p-5">
             <div className="overflow-x-auto">
-              <table className="w-full border-collapse text-[12px]">
+              <table className="w-full border-collapse text-[14px]">
                 <thead>
                   <tr className="bg-ink text-paper">
-                    <th className="text-left px-3 py-2 mono text-[10px] tracking-wider w-[42%]">스펙 항목</th>
+                    <th className="text-left px-4 py-3 mono text-[12px] tracking-wider w-[42%]">스펙 항목</th>
                     {specData.models.map((m) => (
-                      <th key={m} className="px-2 py-2 text-center display text-[14px]">{m}</th>
+                      <th key={m} className="px-3 py-3 text-center display text-[18px]">{m}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {specData.rows.map((row, i) => (
                     <tr key={row.label} className={i % 2 === 0 ? "bg-white" : "bg-paper"}>
-                      <td className="px-3 py-2 text-[11px] text-[#2a2823] leading-snug">
+                      <td className="px-4 py-3 text-[13px] text-[#2a2823] leading-snug">
                         {row.label}
-                        {row.unit && <span className="block text-[10px] dim">{row.unit}</span>}
+                        {row.unit && <span className="block text-[11px] dim">{row.unit}</span>}
                       </td>
                       {row.values.map((v, j) => (
-                        <td key={j} className="px-2 py-2 text-center mono text-[11px] tabular-nums">{v}</td>
+                        <td key={j} className="px-3 py-3 text-center mono text-[13px] tabular-nums">{v}</td>
                       ))}
                     </tr>
                   ))}
@@ -193,7 +193,7 @@ export default function ProductPanel({ item, onClose, catalogUrl }: Props) {
                   <span className="display text-[18px] group-hover:text-edred transition-colors">031-204-7170</span>
                 </a>
                 <a href="mailto:info@smartechvacuum.com" className="flex items-center gap-2 group">
-                  <span className="border hair mono text-[11px] px-2.5 py-1 tracking-wider text-dim">MAIL</span>
+                  <span className="bg-ink text-paper mono text-[11px] px-2.5 py-1 tracking-wider">MAIL</span>
                   <span className="mono text-[13px] text-dim group-hover:text-ink transition-colors">info@smartechvacuum.com</span>
                 </a>
               </div>
