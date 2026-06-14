@@ -814,7 +814,7 @@ export default function PumpSelector() {
                   placeholder="파트번호 또는 모델명 검색 (예: A65301903, EH250)"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full border-2 border-ink px-3 py-2.5 text-[14px] focus:outline-none bg-transparent mb-3 placeholder:text-[#2a2823]"
+                  className="w-full border-2 border-ink px-3 py-2.5 text-[14px] focus:outline-none focus:border-edred bg-transparent mb-3 placeholder:text-[#2a2823] transition-colors"
                 />
                 {newGlobalResults.length > 0 ? (
                   <>
@@ -850,7 +850,7 @@ export default function PumpSelector() {
                       <button
                         key={item.category}
                         onClick={() => { setSelectedCategory(item); setSearch(""); }}
-                        className="border border-[#E3DFD6] p-3 text-left hover:border-ink hover:bg-ink hover:text-paper transition-all group"
+                        className="border border-ink/25 p-3 text-left hover:border-ink hover:bg-ink hover:text-paper transition-all group"
                       >
                         <div className="text-[13px] font-semibold leading-snug">{item.category}</div>
                         <div className="text-[11px] text-[#6A6660] mt-1 group-hover:text-paper/70 leading-snug">
