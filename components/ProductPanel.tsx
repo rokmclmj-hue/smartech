@@ -141,7 +141,7 @@ export default function ProductPanel({ item, onClose, catalogUrl }: Props) {
     <>
       {/* ── 스펙 비교 패널 ── */}
       {showSpec && specData && (
-        <div className="fixed inset-0 md:inset-auto md:top-0 md:bottom-0 md:right-[480px] md:w-[340px] z-[60] bg-paper border-r hair flex flex-col shadow-2xl">
+        <div className="fixed inset-0 md:inset-auto md:top-0 md:bottom-0 md:right-[480px] md:left-0 z-[60] bg-paper border-r hair flex flex-col shadow-2xl">
           {/* 헤더 */}
           <div className="flex items-center justify-between px-5 py-4 border-b hair shrink-0">
             <div className="display text-[17px]">스펙 비교</div>
