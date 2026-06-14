@@ -91,7 +91,7 @@ export default function Navbar() {
             <Link href="/#industries" className="hover:text-edred transition-colors">산업 활용</Link>
             <Link href="/#products" className="hover:text-edred transition-colors">제품 카탈로그</Link>
             <Link href="/#solution" className="hover:text-edred transition-colors">토탈 솔루션</Link>
-            <Link href="/#about" className="hover:text-edred transition-colors">회사 소개</Link>
+            <Link href="/about" className="hover:text-edred transition-colors">회사 소개</Link>
             <Link href="/#ai" className="hover:text-edred transition-colors">AI 상담</Link>
             <Link href="/blog" className="hover:text-edred transition-colors">블로그</Link>
             {tier === "ADMIN" && (
@@ -237,7 +237,7 @@ export default function Navbar() {
             { href: "/#industries", label: "산업 활용" },
             { href: "/#products", label: "제품 카탈로그" },
             { href: "/#solution", label: "토탈 솔루션" },
-            { href: "/#about", label: "회사 소개" },
+            { href: "/about", label: "회사 소개" },
             { href: "/#ai", label: "AI 상담" },
             { href: "/blog", label: "블로그" },
           ].map(({ href, label }) => (

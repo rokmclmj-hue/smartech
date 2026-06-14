@@ -205,7 +205,7 @@ export default function AboutPage() {
       </section>
 
       {/* ══════════════ GOLD AWARD + 갤러리 ══════════════ */}
-      <section className="border-b hair py-16 md:py-24 bg-paper">
+      <section id="edwards-partnership" className="border-b hair py-16 md:py-24 bg-paper">
         <div className="max-w-[1400px] mx-auto px-4 md:px-6">
           <div className="mono text-[11px] dim tracking-widest mb-3">— 01 · EDWARDS PARTNERSHIP</div>
           <div className="grid grid-cols-12 gap-6 mb-12">
@@ -272,7 +272,7 @@ export default function AboutPage() {
       </section>
 
       {/* ══════════════ TIMELINE ══════════════ */}
-      <section className="border-b hair py-16 md:py-24">
+      <section id="history" className="border-b hair py-16 md:py-24">
         <div className="max-w-[1400px] mx-auto px-4 md:px-6">
           <div className="mono text-[11px] dim tracking-widest mb-3">— 02 · HISTORY</div>
           <h2 className="display text-[clamp(28px,3.5vw,48px)] leading-[1.1] mb-12 md:mb-16">

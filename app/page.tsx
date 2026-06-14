@@ -416,9 +416,9 @@ export default function Home() {
             <div className="hidden md:block col-span-6 md:col-span-3">
               <div className="mono text-[11px] dim mb-3">COMPANY</div>
               <div className="space-y-2">
-                <Link href="/#about" className="block hover:text-edred transition-colors">회사 소개</Link>
-                <Link href="/#about" className="block hover:text-edred transition-colors">공식 대리점 인증</Link>
-                <Link href="/#about" className="block hover:text-edred transition-colors">대표 메시지</Link>
+                <Link href="/about" className="block hover:text-edred transition-colors">회사 소개</Link>
+                <Link href="/about#edwards-partnership" className="block hover:text-edred transition-colors">공식 대리점 인증</Link>
+                <Link href="/about#history" className="block hover:text-edred transition-colors">회사 연혁</Link>
                 <Link href="/blog" className="block hover:text-edred transition-colors">기술 블로그</Link>
               </div>
             </div>
