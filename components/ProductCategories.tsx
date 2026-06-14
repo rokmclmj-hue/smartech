@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Image from "next/image";
 import ProductPanel, { type PanelItem } from "./ProductPanel";
 import { CATALOG_MAP } from "@/lib/catalogs";
 
@@ -65,11 +66,12 @@ export default function ProductCategories() {
               </div>
 
               <div className="mt-4 mb-4 aspect-[4/3] relative overflow-hidden border hair bg-white">
-                <img
+                <Image
                   src={item.image}
                   alt={item.title}
-                  className={`absolute inset-0 w-full h-full object-contain group-hover:scale-105 transition-transform ${item.category === "오일펌프(중대형 E2S)" ? "p-6" : ""}`}
-                  loading="lazy"
+                  fill
+                  className={`object-contain group-hover:scale-105 transition-transform ${item.category === "오일펌프(중대형 E2S)" ? "p-6" : ""}`}
+                  sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                 />
               </div>
 

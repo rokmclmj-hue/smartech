@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 type Product = {
   id: number;
@@ -394,10 +395,13 @@ export default function ProductPanel({ item, onClose, catalogUrl }: Props) {
         {/* 이미지 + 버튼 */}
         <div className="px-6 py-5 border-b hair bg-white shrink-0">
           <div className="aspect-[3/2] relative">
-            <img
+            <Image
               src={item.image}
               alt={item.title}
-              className="absolute inset-0 w-full h-full object-contain"
+              fill
+              className="object-contain"
+              sizes="480px"
+              priority={false}
             />
           </div>
           <div className="mt-3 flex items-center gap-4">
