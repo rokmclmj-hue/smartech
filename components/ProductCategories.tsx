@@ -1,7 +1,12 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 import ProductPanel, { type PanelItem } from "./ProductPanel";
 import { CATALOG_MAP } from "@/lib/catalogs";
+
+const SERIES_PAGE: Record<string, string> = {
+  "오일펌프(소형 RV)": "/products/rv",
+};
 
 const ITEMS = [
   { category: "오일펌프(소형 RV)",        code: "RV 시리즈",           title: "오일 로터리 베인 펌프 (소형)",       image: "/images/products/rv.jpeg" },
@@ -72,7 +77,18 @@ export default function ProductCategories() {
             <div className="display text-[18px] leading-[1.2] line-clamp-2">{item.title}</div>
             <div className="mono text-[11px] opacity-60 mt-1">{(item as any).label ?? item.category}</div>
 
-            <div className="mt-3 text-[11px] opacity-70 group-hover:opacity-100">제품 보기 →</div>
+            <div className="mt-3 flex items-center justify-between">
+              <span className="text-[11px] opacity-70 group-hover:opacity-100">제품 보기 →</span>
+              {SERIES_PAGE[item.category] && (
+                <Link
+                  href={SERIES_PAGE[item.category]}
+                  onClick={(e) => e.stopPropagation()}
+                  className="text-[11px] mono text-edred hover:underline opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  스펙 비교 →
+                </Link>
+              )}
+            </div>
           </button>
         ))}
       </div>
