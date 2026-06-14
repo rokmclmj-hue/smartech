@@ -1,12 +1,7 @@
 "use client";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import ProductPanel, { type PanelItem } from "./ProductPanel";
 import { CATALOG_MAP } from "@/lib/catalogs";
-
-const SERIES_PAGE: Record<string, string> = {
-  "오일펌프(소형 RV)": "/products/rv",
-};
 
 const ITEMS = [
   { category: "오일펌프(소형 RV)",        code: "RV 시리즈",           title: "오일 로터리 베인 펌프 (소형)",       image: "/images/products/rv.jpeg" },
@@ -40,7 +35,6 @@ const ITEMS = [
 const INITIAL = 16;
 
 export default function ProductCategories() {
-  const router = useRouter();
   const [expanded, setExpanded] = useState(false);
   const [panelItem, setPanelItem] = useState<PanelItem | null>(null);
   const visible = expanded ? ITEMS : ITEMS.slice(0, INITIAL);
@@ -83,25 +77,14 @@ export default function ProductCategories() {
               <div className="mono text-[11px] opacity-60 mt-1">{(item as any).label ?? item.category}</div>
             </div>
 
-            {/* 하단 바 — 제품 보기 / 스펙 비교 */}
-            <div className="px-5 pb-5 pt-2 flex items-center justify-between">
+            {/* 하단 바 */}
+            <div className="px-5 pb-5 pt-2">
               <button
                 onClick={() => setPanelItem({ category: item.category, code: item.code, title: item.title, image: item.image })}
                 className="text-[11px] opacity-70 group-hover:opacity-100 hover:underline"
               >
                 제품 보기 →
               </button>
-              {SERIES_PAGE[item.category] && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    router.push(SERIES_PAGE[item.category]);
-                  }}
-                  className="text-[11px] opacity-70 group-hover:opacity-100 hover:underline"
-                >
-                  스펙 비교 →
-                </button>
-              )}
             </div>
           </div>
         ))}
