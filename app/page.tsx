@@ -272,7 +272,7 @@ export default function Home() {
           <div className="col-span-12 lg:col-span-5">
             <div className="mono text-[13px] dim mb-4">— 05 · AI CONSULT</div>
             <h2 className="display leading-[1.12] tracking-[-0.03em]" style={{ fontSize: "clamp(32px,3.6vw,56px)" }}>
-              <span className="italic" style={{ color: "#2563eb" }}>스마텍 AI</span>가<br />
+              <span className="italic font-semibold" style={{ color: "#2563eb" }}>스마텍 AI</span>가<br />
               최적의 <span className="text-edred font-semibold">Edwards</span><br />
               라인업을 제안합니다.
             </h2>
