@@ -102,6 +102,31 @@ const SPEC_DATA: Record<string, SpecData> = {
       { label: "외형 치수 (L×W×H)", unit: "mm", values: ["540×284×303", "586×320×314", "721×400×319", "1002×535×415"] },
     ],
   },
+  "스크롤펌프(중형 XDS)": {
+    models: ["XDS35i", "XDS46i"],
+    rows: [
+      { label: "배기속도 (Peak)", unit: "m³/h", values: ["35", "40"] },
+      { label: "도달압력", unit: "mbar", values: ["0.01", "0.05"] },
+      { label: "모터 출력", unit: "W", values: ["520", "520"] },
+      { label: "회전수", unit: "rpm", values: ["1,750", "1,750"] },
+      { label: "소음", unit: "dB(A)", values: ["57", "55.4"] },
+      { label: "무게", unit: "kg", values: ["48", "48"] },
+      { label: "인렛 플랜지", unit: "", values: ["NW40", "NW40"] },
+      { label: "배기 플랜지", unit: "", values: ["NW25", "NW25"] },
+      { label: "작동 온도", unit: "°C", values: ["5~40", "5~40"] },
+    ],
+  },
+  "부스터펌프(EH)": {
+    models: ["EH250", "EH500", "EH1200", "EH2600", "EH4200"],
+    rows: [
+      { label: "배기속도 (60 Hz)", unit: "m³/h", values: ["375", "605", "1,435", "3,110", "4,985"] },
+      { label: "모터 출력", unit: "kW", values: ["2.2", "2.2", "3.0", "11.0", "11.0"] },
+      { label: "냉각 방식", unit: "", values: ["공냉", "공냉", "수냉", "수냉", "수냉"] },
+      { label: "무게", unit: "kg", values: ["69", "106", "149", "401", "481"] },
+      { label: "인렛 플랜지", unit: "", values: ["ISO63", "ISO100", "ISO160", "ISO160", "ISO250"] },
+      { label: "외형 치수 (L×W×H)", unit: "mm", values: ["705×305×272", "791×305×265", "953×380×334", "1156×522×479", "1336×522×479"] },
+    ],
+  },
 };
 
 function formatKRW(v: number) {
