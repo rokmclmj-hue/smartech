@@ -57,12 +57,12 @@ export default function ProductCategories() {
         {visible.map((item, i) => (
           <div
             key={item.category}
-            className="group border hair bg-white hover:bg-ink hover:text-paper transition-colors overflow-hidden relative"
+            className="group border hair bg-white hover:bg-ink hover:text-paper transition-colors overflow-hidden flex flex-col"
           >
-            {/* 카드 본체 — 클릭 시 패널 오픈 */}
-            <button
+            {/* 상단 — 클릭 시 패널 오픈 */}
+            <div
               onClick={() => setPanelItem({ category: item.category, code: item.code, title: item.title, image: item.image })}
-              className="w-full text-left p-5"
+              className="cursor-pointer p-5 pb-3 flex-1"
             >
               <div className="flex justify-between text-[10.5px] mono opacity-60">
                 <span>{String(i + 1).padStart(2, "0")} / {ITEMS.length}</span>
@@ -80,21 +80,25 @@ export default function ProductCategories() {
 
               <div className="display text-[18px] leading-[1.2] line-clamp-2">{item.title}</div>
               <div className="mono text-[11px] opacity-60 mt-1">{(item as any).label ?? item.category}</div>
+            </div>
 
-              <div className="mt-3 flex items-center justify-between">
-                <span className="text-[11px] opacity-70 group-hover:opacity-100">제품 보기 →</span>
-              </div>
-            </button>
-
-            {/* 스펙 비교 링크 — button 밖에 분리 */}
-            {SERIES_PAGE[item.category] && (
-              <Link
-                href={SERIES_PAGE[item.category]}
-                className="absolute bottom-5 right-5 text-[11px] mono text-white opacity-0 group-hover:opacity-80 hover:opacity-100 hover:underline transition-opacity"
+            {/* 하단 바 — 제품 보기 / 스펙 비교 */}
+            <div className="px-5 pb-5 pt-2 flex items-center justify-between">
+              <button
+                onClick={() => setPanelItem({ category: item.category, code: item.code, title: item.title, image: item.image })}
+                className="text-[11px] opacity-70 group-hover:opacity-100 hover:underline"
               >
-                스펙 비교 →
-              </Link>
-            )}
+                제품 보기 →
+              </button>
+              {SERIES_PAGE[item.category] && (
+                <Link
+                  href={SERIES_PAGE[item.category]}
+                  className="text-[11px] opacity-70 group-hover:opacity-100 hover:underline"
+                >
+                  스펙 비교 →
+                </Link>
+              )}
+            </div>
           </div>
         ))}
       </div>
