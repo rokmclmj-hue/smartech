@@ -94,6 +94,30 @@ const REPAIR_CASES: RepairCase[] = [
     work: ["풀 오버홀", "베인 교체", "오일 세정"],
     photo: "/images/repair/rv3-disassembly.jpg",
   },
+  {
+    model: "Edwards E2M28",
+    client: "E사",
+    symptom: "오일 오염 · 진공 불량",
+    work: ["풀 오버홀", "베인 교체", "씰 교체", "오일 세정"],
+    photo: "/images/repair/e2m28-exterior.jpg",
+    partPhoto: "/images/repair/e2m28-internal.jpg",
+  },
+  {
+    model: "Edwards EH500",
+    client: "H사",
+    symptom: "베어링 파손 · 심각한 내부 오염",
+    work: ["베어링 교체 (×2)", "씰·개스킷 교체", "로터 세정"],
+    photo: "/images/repair/eh500-casing.jpg",
+    partPhoto: "/images/repair/eh500-bearings.jpg",
+  },
+  {
+    model: "Edwards E2M80",
+    client: "A사",
+    symptom: "오일 오염 · 축 마모 · 진공 불량",
+    work: ["풀 오버홀", "베어링 교체", "씰 교체", "오일 세정"],
+    photo: "/images/repair/e2m80-exterior.jpg",
+    partPhoto: "/images/repair/e2m80-shaft.jpg",
+  },
 ];
 const EXTRA_MARGIN = 1.2; // 추가항목 마진
 
