@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import AboutBento from "./AboutBento";
 
 export const metadata: Metadata = {
   title: "회사 소개 — 스마텍 | Edwards Vacuum 공식 대리점",
@@ -57,10 +58,10 @@ const orgLd = {
 
 // ── 데이터 ───────────────────────────────────────────────
 const STATS = [
-  { value: "2006", label: "Edwards 기술 합류" },
-  { value: "15+",  label: "창업 연차" },
-  { value: "25+",  label: "취급 모델 군" },
-  { value: "20+",  label: "납품 산업 분야" },
+  { value: "900+",   label: "수리·기술지원 (건)" },
+  { value: "1,800+", label: "누적 납품 (건)" },
+  { value: "1,014+", label: "취급 품목" },
+  { value: "2",      label: "전국 센터" },
 ];
 
 const TIMELINE = [
@@ -156,8 +157,8 @@ export default function AboutPage() {
       <section className="border-b hair bg-paper">
         <div className="max-w-[1400px] mx-auto px-4 md:px-6 pt-10 md:pt-16 pb-12 md:pb-20">
           <div className="mono text-[11px] dim tracking-widest mb-4">— ABOUT SMARTECH</div>
-          <div className="grid grid-cols-12 gap-6 items-end">
-            <div className="col-span-12 lg:col-span-7">
+          <div className="grid grid-cols-12 gap-6 items-start">
+            <div className="col-span-12 lg:col-span-6">
               <h1 className="display text-[clamp(36px,5.5vw,80px)] leading-[1.0] tracking-tight">
                 진공 기술의<br />
                 <span className="text-edred italic">정직한</span> 파트너
@@ -168,23 +169,8 @@ export default function AboutPage() {
                 제품을 팔기 전에 현장을 이해하는 사람들이 운영합니다.
               </p>
             </div>
-            <div className="col-span-12 lg:col-span-4 lg:col-start-9">
-              <div className="border hair bg-ink text-paper p-6 md:p-8">
-                <div className="mono text-[9px] tracking-widest text-paper/40 mb-3">OFFICIAL PARTNER</div>
-                <div className="display text-[28px] md:text-[32px] leading-tight text-edred mb-1">
-                  Edwards
-                </div>
-                <div className="display text-[28px] md:text-[32px] leading-tight mb-4">
-                  Vacuum Korea
-                </div>
-                <div className="text-[12px] text-paper/60 leading-relaxed">
-                  공식 인증 대리점 · Since 2011<br />
-                  Gold Award Distributor · 2018
-                </div>
-                <div className="mt-5 pt-4 border-t border-paper/10 mono text-[11px] text-paper/50">
-                  031-204-7170
-                </div>
-              </div>
+            <div className="col-span-12 lg:col-span-6">
+              <AboutBento />
             </div>
           </div>
         </div>
@@ -228,12 +214,12 @@ export default function AboutPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {/* Gold Award — 전폭 (모바일: 1열, 데스크탑: 2열 span) */}
             <div className="lg:col-span-2 border hair overflow-hidden bg-white group">
-              <div className="relative aspect-[16/9] overflow-hidden">
+              <div className="relative aspect-[4/3] overflow-hidden">
                 <Image
                   src={GALLERY[0].src}
                   alt={GALLERY[0].alt}
                   fill
-                  className="object-cover object-top group-hover:scale-[1.02] transition-transform duration-700"
+                  className="object-contain object-top group-hover:scale-[1.02] transition-transform duration-700"
                   sizes="(max-width: 1024px) 100vw, 66vw"
                   priority
                 />
@@ -252,12 +238,12 @@ export default function AboutPage() {
             {/* 나머지 3장 */}
             {GALLERY.slice(1).map((img) => (
               <div key={img.label} className="border hair overflow-hidden bg-white group">
-                <div className="relative aspect-[4/3] overflow-hidden">
+                <div className="relative aspect-[3/4] overflow-hidden">
                   <Image
                     src={img.src}
                     alt={img.alt}
                     fill
-                    className="object-cover object-top group-hover:scale-[1.02] transition-transform duration-700"
+                    className="object-contain object-top group-hover:scale-[1.02] transition-transform duration-700"
                     sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   />
                 </div>
