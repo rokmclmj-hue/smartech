@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const ogImage =
     post.content.match(/!\[[^\]]*\]\((https?:\/\/[^\)]+)\)/)?.[1] ??
-    "https://www.smartechvacuum.com/og-default.png";
+    "https://smartechvacuum.com/og-default.png";
 
   return {
     title: `${post.title} — 스마텍`,
@@ -222,8 +222,8 @@ export default async function BlogPostPage({ params }: Props) {
     "description": post.metaDesc || undefined,
     "datePublished": (post.publishedAt ?? post.createdAt).toISOString(),
     "dateModified": post.updatedAt.toISOString(),
-    "url": `https://www.smartechvacuum.com/blog/${post.id}`,
-    "publisher": { "@type": "Organization", "name": "스마텍", "url": "https://www.smartechvacuum.com" },
+    "url": `https://smartechvacuum.com/blog/${post.id}`,
+    "publisher": { "@type": "Organization", "name": "스마텍", "url": "https://smartechvacuum.com" },
     "author":    { "@type": "Organization", "name": "스마텍" },
   });
 
