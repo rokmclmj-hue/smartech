@@ -387,15 +387,13 @@ export default function Home() {
       {/* ═══════════════ FOOTER ═══════════════ */}
       <footer className="bg-paper text-ink">
         <div className="max-w-[1400px] mx-auto px-6 pt-16 pb-10">
-          <div className="display text-[clamp(31px,4.25vw,68px)] leading-[1.15]" style={{ display: "grid", gridTemplateColumns: "auto 1fr" }}>
-            <span className="pr-[0.25em]">기술은</span>
-            <span><span className="text-edred font-semibold">Edwards</span>가 만들었습니다.</span>
-            <span className="pr-[0.25em]">신뢰는</span>
-            <span><span className="text-ink font-semibold">Smartech<span style={{ color: "#c00020" }}>.</span></span>이 쌓았습니다.</span>
+          <div className="display text-[clamp(26px,4.25vw,68px)] leading-[1.2] break-keep">
+            <div>기술은 <span className="text-edred font-semibold">Edwards</span>가 만들었습니다.</div>
+            <div>신뢰는 <span className="text-ink font-semibold">Smartech<span style={{ color: "#c00020" }}>.</span></span>이 쌓았습니다.</div>
           </div>
 
           <div className="grid grid-cols-12 gap-6 mt-12 border-t hair pt-8 text-[12.5px]">
-            <div className="col-span-6 md:col-span-3">
+            <div className="hidden md:block col-span-6 md:col-span-3">
               <div className="mono text-[11px] dim mb-3">PRODUCTS</div>
               <div className="space-y-2">
                 <Link href="/products" className="block hover:text-edred transition-colors">오일 로터리 베인</Link>
@@ -405,7 +403,7 @@ export default function Home() {
                 <Link href="/products" className="block hover:text-edred transition-colors">게이지 · 리크 디텍터</Link>
               </div>
             </div>
-            <div className="col-span-6 md:col-span-3">
+            <div className="hidden md:block col-span-6 md:col-span-3">
               <div className="mono text-[11px] dim mb-3">INDUSTRIES</div>
               <div className="space-y-2">
                 <Link href="/#industries" className="block hover:text-edred transition-colors">반도체 · 디스플레이</Link>
@@ -415,7 +413,7 @@ export default function Home() {
                 <Link href="/#industries" className="block hover:text-edred transition-colors">우주 · 항공</Link>
               </div>
             </div>
-            <div className="col-span-6 md:col-span-3">
+            <div className="hidden md:block col-span-6 md:col-span-3">
               <div className="mono text-[11px] dim mb-3">COMPANY</div>
               <div className="space-y-2">
                 <Link href="/#about" className="block hover:text-edred transition-colors">회사 소개</Link>
