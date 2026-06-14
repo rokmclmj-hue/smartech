@@ -183,6 +183,16 @@ const SPEC_DATA: Record<string, SpecData> = {
       { label: "작동 온도", unit: "°C", values: ["5~40", "5~40", "5~40", "5~40", "5~40"] },
     ],
   },
+  "터보펌프(nEXT)": {
+    models: ["nEXT85D", "nEXT240D", "nEXT300D", "nEXT400D", "nEXT730D"],
+    rows: [
+      { label: "배기속도 N₂ (Peak)", unit: "m³/h", values: ["302", "864", "1,080", "1,440", "2,628"] },
+      { label: "소비전력", unit: "W", values: ["80", "160", "160", "160", "—"] },
+      { label: "인렛 플랜지", unit: "", values: ["ISO63", "ISO100", "ISO100", "ISO160", "ISO160"] },
+      { label: "배기 포트", unit: "", values: ["NW16", "NW25", "NW25", "NW25", "NW40"] },
+      { label: "무게", unit: "kg", values: ["2.9", "5.7", "5.7", "6.5", "14.6"] },
+    ],
+  },
   "반도체드라이펌프(iXL)": {
     models: ["iXL250Q", "iXL500Q", "iXL500R", "iXL750Q"],
     rows: [
