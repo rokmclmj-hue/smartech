@@ -33,15 +33,17 @@ const SPEC_DATA: Record<string, SpecData> = {
   "오일펌프(소형 RV)": {
     models: ["RV3", "RV5", "RV8", "RV12"],
     rows: [
-      { label: "배기속도 (50 Hz)", unit: "m³/h", values: ["3.3", "5.1", "8.5", "12"] },
+      { label: "배기속도 (60 Hz)", unit: "m³/h", values: ["3.9", "6.1", "10.0", "14.3"] },
       { label: "도달압력 (Total)", unit: "mbar", values: ["2.0×10⁻³", "2.0×10⁻³", "2.0×10⁻³", "2.0×10⁻³"] },
-      { label: "모터 출력", unit: "W", values: ["450", "450", "450", "450"] },
+      { label: "모터 출력 (60 Hz)", unit: "W", values: ["550", "550", "550", "550"] },
+      { label: "회전수 (60 Hz)", unit: "rpm", values: ["1,800", "1,800", "1,800", "1,800"] },
       { label: "소음", unit: "dB(A)", values: ["48", "48", "48", "48"] },
       { label: "무게", unit: "kg", values: ["25", "25", "28", "29"] },
       { label: "오일 용량", unit: "L", values: ["0.7", "0.7", "0.75", "1.0"] },
       { label: "인렛 플랜지", unit: "", values: ["NW25", "NW25", "NW25", "NW25"] },
       { label: "배기 플랜지", unit: "", values: ["NW25", "NW25", "NW25", "NW25"] },
       { label: "작동 온도", unit: "°C", values: ["12~40", "12~40", "12~40", "12~40"] },
+      { label: "외형 치수 (L×W×H)", unit: "mm", values: ["430×158×225", "430×158×225", "470×158×225", "490×158×225"] },
     ],
   },
 };
@@ -180,7 +182,22 @@ export default function ProductPanel({ item, onClose, catalogUrl }: Props) {
                 </tbody>
               </table>
             </div>
-            <p className="mt-4 text-[10px] dim mono">※ 50 Hz 기준. 60 Hz 사양은 카탈로그 PDF 참조.</p>
+            <p className="mt-4 text-[10px] dim mono">※ 60 Hz 기준 (국내 전원). cfm 단위 수치는 m³/h 환산값.</p>
+
+            {/* 연락처 */}
+            <div className="mt-6 border-t hair pt-5">
+              <div className="mono text-[10px] tracking-widest text-dim mb-3">수량 · 납기 · 커스텀 사양 문의</div>
+              <div className="flex flex-col gap-2">
+                <a href="tel:031-204-7170" className="flex items-center gap-2 group">
+                  <span className="bg-edred text-paper mono text-[11px] px-2.5 py-1 tracking-wider">CALL</span>
+                  <span className="display text-[18px] group-hover:text-edred transition-colors">031-204-7170</span>
+                </a>
+                <a href="mailto:info@smartechvacuum.com" className="flex items-center gap-2 group">
+                  <span className="border hair mono text-[11px] px-2.5 py-1 tracking-wider text-dim">MAIL</span>
+                  <span className="mono text-[13px] text-dim group-hover:text-ink transition-colors">info@smartechvacuum.com</span>
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       )}
