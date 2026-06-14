@@ -234,9 +234,7 @@ export default function ProductPanel({ item, onClose, catalogUrl }: Props) {
             {specData && (
               <button
                 onClick={() => setShowSpec(!showSpec)}
-                className={`text-[11px] mono transition-colors ${
-                  showSpec ? "text-ink font-semibold" : "text-dim hover:text-ink"
-                }`}
+                className="text-[11px] mono text-ink hover:text-edred transition-colors"
               >
                 ← 스펙 비교
               </button>
