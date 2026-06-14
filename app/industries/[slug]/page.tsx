@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { INDUSTRIES, getIndustry } from "@/lib/industries";
@@ -147,10 +148,13 @@ export default async function IndustryDetailPage({
 
             <div className="col-span-12 lg:col-span-5">
               <div className="aspect-[4/3] border hair overflow-hidden bg-[#F6F4EF] relative">
-                <img
+                <Image
                   src={industry.image}
                   alt={industry.title}
-                  className="absolute inset-0 w-full h-full object-cover"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 42vw"
+                  priority
                 />
               </div>
             </div>
@@ -235,11 +239,12 @@ export default async function IndustryDetailPage({
                   className={`border hair bg-paper flex flex-col overflow-hidden group${pdf ? " cursor-pointer" : ""}`}
                 >
                   <div className="aspect-[4/3] relative bg-[#F6F4EF] border-b hair overflow-hidden">
-                    <img
+                    <Image
                       src={pumpImage(pump)}
                       alt={pump}
-                      className="absolute inset-0 w-full h-full object-contain p-3 group-hover:scale-105 transition-transform duration-500"
-                      loading="lazy"
+                      fill
+                      className="object-contain p-3 group-hover:scale-105 transition-transform duration-500"
+                      sizes="(max-width: 768px) 50vw, 25vw"
                     />
                   </div>
                   <div className="p-4">
