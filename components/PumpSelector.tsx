@@ -593,7 +593,7 @@ export default function PumpSelector() {
         {/* 제품 검색 */}
         <button
           onClick={() => { setTab("search"); setSelectedCategory(null); setSearch(""); }}
-          className="flex flex-col items-center justify-center py-4 px-3 border bg-ink text-paper border-ink"
+          className="flex flex-col items-center justify-center py-4 px-3 border bg-paper text-ink border-ink hover:bg-ink hover:text-paper transition-colors"
         >
           <span className="text-[15px] font-semibold tracking-tight">제품 검색</span>
         </button>
@@ -619,10 +619,10 @@ export default function PumpSelector() {
             if (!session) { setShowLoginGate(true); return; }
             setTab("selection"); setSelectedCategory(null);
           }}
-          className="flex flex-col items-center justify-center py-4 px-3 border bg-ink text-paper border-ink"
+          className="group flex flex-col items-center justify-center py-4 px-3 border bg-paper text-ink border-ink hover:bg-ink hover:text-paper transition-colors"
         >
           <span className="text-[15px] font-semibold tracking-tight">펌프선정 및 시뮬레이션</span>
-          <span className="mono text-[10px] tracking-[0.06em] mt-0.5 text-paper/60">
+          <span className="mono text-[10px] tracking-[0.06em] mt-0.5 text-ink/60 group-hover:text-paper/70">
             {!session ? "🔒 로그인 필요" : "공정 조건 기반 자동 선정"}
           </span>
         </button>
