@@ -131,6 +131,7 @@ export async function POST(
         company: recipientCompany,
         email: recipientEmail,
         phone: quote.user?.phone ?? quote.guestPhone ?? null,
+        title: quote.guestTitle ?? null,
       },
       items: quote.items.map((it) => ({
         quantity: it.quantity,
