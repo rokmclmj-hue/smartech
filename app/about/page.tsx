@@ -212,15 +212,15 @@ export default function AboutPage() {
 
           {/* 갤러리 그리드 */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {/* Gold Award — 전폭 (모바일: 1열, 데스크탑: 2열 span) */}
-            <div className="lg:col-span-2 border hair overflow-hidden bg-white group flex flex-col">
-              <div className="relative h-72 bg-[#f6f4ef] overflow-hidden">
+            {/* Gold Award — 3칸 전체 너비 */}
+            <div className="lg:col-span-3 border hair overflow-hidden bg-white group flex flex-col">
+              <div className="relative h-96 bg-[#f6f4ef] overflow-hidden">
                 <Image
                   src={GALLERY[0].src}
                   alt={GALLERY[0].alt}
                   fill
                   className="object-contain object-top group-hover:scale-[1.02] transition-transform duration-700"
-                  sizes="(max-width: 1024px) 100vw, 66vw"
+                  sizes="100vw"
                   priority
                 />
               </div>
