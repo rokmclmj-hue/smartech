@@ -131,8 +131,26 @@
 - `python check_quality.py "[주제폴더]"` 실행해서 5개 항목 자동 검증
 - 검증 항목: 글자수(1,500자) · 메타설명 · 현장사진 · EXIF 회전 · 펌프좌표
 - **하나라도 실패하면 해당 에이전트 재실행 후 check_quality.py 재실행**
-- 전체 통과 확인 후에만 Step 5 진행
+- 전체 통과 확인 후에만 Step 4.5 진행
 - 결과는 `quality-log.jsonl`에 자동 기록됨
+
+**Step 4.5 — 사진 승인** (업로드 전 필수 — 생략 불가)
+- 품질 검수 통과 직후 반드시 아래 순서로 실행한다.
+
+1. **썸네일 표시**: Read 도구로 `블로그/output/[폴더]/images/thumbnail.png` 읽기
+2. **현장사진 표시**: `images/field-1.png` 가 있으면 Read 도구로 읽기
+3. **승인 요청 멘트** (항상 이 형식으로):
+   ```
+   📸 사진 확인해 주세요.
+   - 썸네일: [위에 표시됨]
+   - 현장사진: [위에 표시됨 / 없음]
+
+   이 사진으로 업로드할까요? 괜찮으면 "업로드" 또는 "OK"라고 해주세요.
+   사진을 바꾸고 싶으면 원하는 수정을 말씀해 주세요.
+   ```
+4. **사용자 "OK" / "업로드" 확인 후에만** Step 5 진행
+5. 사용자가 수정 요청 시 → 해당 이미지 재처리 → Step 4.5 다시 실행
+- **주말 일괄 3편 모드**: 3편 모두 Step 4까지 완료 후, 3편 썸네일을 한꺼번에 보여주고 각각 OK 받기
 
 ---
 
@@ -197,8 +215,12 @@ upload-queue.json 업데이트 완료.
 explorer "C:\Users\rokmc\smartech\블로그\output\YYYY-MM\[주제]\images"
 ```
 
-### 2. 홈페이지 업로드 시도
-upload_post.py 자동 실행을 시도한다.
+### 2. 홈페이지 업로드
+사용자가 Step 4.5에서 OK를 준 폴더에 한해 approve_post.py를 실행한다:
+```
+python 블로그/approve_post.py "[폴더경로]"
+```
+approve_post.py는 upload-queue.json에 approved=true를 기록하고 upload_post.py를 호출한다.
 
 ### 3. 최종 안내 (항상 표시)
 모든 작업이 끝나면 아래 형식으로 한 번만 표시한다. [주제], [id]는 실제 값으로 채운다:
@@ -214,7 +236,7 @@ upload_post.py 자동 실행을 시도한다.
 업로드가 막혔을 경우 🌐 줄을 아래로 대체한다:
 ```
 ⬆️ 홈페이지 업로드: 아래를 프롬프트에 붙여넣으세요
-! C:\Users\rokmc\AppData\Local\Programs\Python\Python312\python.exe "C:\Users\rokmc\smartech\블로그\upload_post.py" "[주제]"
+! C:\Users\rokmc\AppData\Local\Programs\Python\Python312\python.exe "C:\Users\rokmc\smartech\블로그\approve_post.py" "[주제]"
 ```
 
 ---
