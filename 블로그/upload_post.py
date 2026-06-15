@@ -39,6 +39,23 @@ if not SECRET:
 OUTPUT_DIR  = os.path.join(os.path.dirname(__file__), "output")
 topic       = sys.argv[1] if len(sys.argv) > 1 else "스퍼터 공정 에드워드 드라이진공펌프"
 
+# ── approved 체크 (upload-queue.json A안) ───────────────
+_QUEUE_FILE = os.path.join(os.path.dirname(__file__), "upload-queue.json")
+if os.path.exists(_QUEUE_FILE):
+    with open(_QUEUE_FILE, encoding="utf-8") as _qf:
+        _queue = json.load(_qf)
+    _matched_slot = None
+    for _slot in ("day1", "day2", "day3"):
+        if _queue.get(_slot, {}).get("folder", "").strip() == topic:
+            _matched_slot = _slot
+            break
+    if _matched_slot and not _queue[_matched_slot].get("approved"):
+        print(f"[BLOCKED] upload-queue.json '{_matched_slot}' 항목이 approved=false입니다.")
+        print("  upload-queue.json에서 \"approved\": true 로 바꾼 후 다시 실행하세요.")
+        sys.exit(1)
+    if not _matched_slot:
+        print("[INFO] upload-queue.json에 없는 폴더 — 직접 업로드로 진행합니다.")
+
 # "2026-06/폴더명" 형식이면 그대로, 아니면 월별 서브폴더 자동 탐색
 BLOG_FOLDER = os.path.join(OUTPUT_DIR, topic)
 if not os.path.isdir(BLOG_FOLDER):
@@ -48,6 +65,20 @@ if not os.path.isdir(BLOG_FOLDER):
             BLOG_FOLDER = candidate
             break
 IMAGES_DIR  = os.path.join(BLOG_FOLDER, "images")
+
+# ── 품질 검수 게이트 ────────────────────────────────────
+_QUALITY_SCRIPT = os.path.join(os.path.dirname(__file__), "check_quality.py")
+if os.path.exists(_QUALITY_SCRIPT):
+    import subprocess as _sp
+    print("=== 품질 검수 ===")
+    _qr = _sp.run(
+        [sys.executable, _QUALITY_SCRIPT, topic],
+        encoding="utf-8", errors="replace",
+    )
+    if _qr.returncode != 0:
+        print("\n[BLOCKED] 품질 검수 실패 — 위 항목을 수정 후 다시 실행하세요.")
+        sys.exit(1)
+    print()
 
 print(f"주제: {topic}")
 
@@ -166,12 +197,25 @@ if naver_content:
 meta_path = os.path.join(BLOG_FOLDER, "meta.txt")
 meta_desc = ""
 if os.path.exists(meta_path):
-    for line in open(meta_path, encoding="utf-8"):
-        if line.strip().lower().startswith("description:"):
-            meta_desc = line.split(":", 1)[1].strip()
-            # 전화번호(031-...) 등 연락처 제거 — 리드 문장으로만 사용
-            meta_desc = re.sub(r"\s*031-\d{3}-\d{4}", "", meta_desc).strip().rstrip(".")
+    _meta_lines = open(meta_path, encoding="utf-8").read().strip().splitlines()
+    for _line in _meta_lines:
+        _s = _line.strip()
+        if _s.lower().startswith("description:"):
+            meta_desc = _s.split(":", 1)[1].strip()
             break
+    if not meta_desc:
+        # description: 접두사 없는 형식 — 첫 번째 의미있는 줄 사용
+        for _line in _meta_lines:
+            _s = _line.strip()
+            if _s and not any(_s.lower().startswith(p) for p in ("title:", "keywords:", "og_")):
+                meta_desc = _s
+                break
+    meta_desc = re.sub(r"\s*031-\d{3}-\d{4}", "", meta_desc).strip().rstrip(".")
+
+if not meta_desc:
+    print("[BLOCKED] meta.txt에 description이 비어있습니다. 업로드를 중단합니다.")
+    print("  meta.txt에 'description: ...' 줄을 추가하거나 내용을 채워주세요.")
+    sys.exit(1)
 
 faq_path = os.path.join(BLOG_FOLDER, "faq.json")
 faq_schema = ""

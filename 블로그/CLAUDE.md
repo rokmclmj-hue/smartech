@@ -121,9 +121,18 @@
 - 재사용 금지: `블로그/output/used-images.json` 확인 후 미사용 사진만 선택
 - 산출물: `블로그/output/[주제]/images/` 내 모든 이미지
 
-**Step 4 — 품질 검수** (`블로그/agents/assembler.md`)
-- upload_post.py 실행 전 final.md 구조·이미지 파일 존재·현장사진 블러 처리를 점검한다
-- 모두 통과해야 Step 5로 진행. 실패 시 해당 에이전트 재실행 후 재검수.
+**Step 3.5 — 블러 처리** (`블로그/blur_photo.py`) — 현장사진이 있을 때만
+- `blur-config.json`에 펌프 좌표(`pump_box`) 기록 후 blur_photo.py 실행
+- EXIF 회전 자동 보정 + 배경 블러 + 펌프 영역 복원
+- 실행 후 반드시 Read 도구로 결과 이미지를 열어 시각 확인
+- 블러 미확인 시 Step 4 진행 금지
+
+**Step 4 — 품질 검수** (`블로그/check_quality.py` 직접 실행)
+- `python check_quality.py "[주제폴더]"` 실행해서 5개 항목 자동 검증
+- 검증 항목: 글자수(1,500자) · 메타설명 · 현장사진 · EXIF 회전 · 펌프좌표
+- **하나라도 실패하면 해당 에이전트 재실행 후 check_quality.py 재실행**
+- 전체 통과 확인 후에만 Step 5 진행
+- 결과는 `quality-log.jsonl`에 자동 기록됨
 
 ---
 
@@ -145,24 +154,24 @@
   "_week": "YYYY-Www",
   "_created": "YYYY-MM-DD",
   "_note": "토/일에 Claude가 자동으로 채워줌. 직접 수정 금지.",
-  "day1": { "folder": "[주제폴더명]", "title": "[제목]", "uploaded": false },
-  "day2": { "folder": "[주제폴더명]", "title": "[제목]", "uploaded": false },
-  "day3": { "folder": "[주제폴더명]", "title": "[제목]", "uploaded": false }
+  "day1": { "folder": "[주제폴더명]", "title": "[제목]", "uploaded": false, "approved": false },
+  "day2": { "folder": "[주제폴더명]", "title": "[제목]", "uploaded": false, "approved": false },
+  "day3": { "folder": "[주제폴더명]", "title": "[제목]", "uploaded": false, "approved": false }
 }
 ```
 
 4. **완료 안내** — 아래 형식으로 표시
 
 ```
-✅ 3편 생성 완료 — 자동 업로드 예약됨
+✅ 3편 생성 완료 — 검토 후 승인 필요
 
-① [제목1] → 월요일 자동 업로드 예정
-② [제목2] → 수요일 자동 업로드 예정
-③ [제목3] → 금요일 자동 업로드 예정
+① [제목1] → 월요일 업로드 예정 (승인 필요)
+② [제목2] → 수요일 업로드 예정 (승인 필요)
+③ [제목3] → 금요일 업로드 예정 (승인 필요)
 
 upload-queue.json 업데이트 완료.
-컴퓨터가 당일 한 번이라도 켜지면 자동으로 홈페이지에 올라갑니다.
-업로드 결과는 블로그/upload-log.txt 에서 확인하세요.
+⚠️ 자동 업로드 전에 반드시 사진·내용 검토 후 approved를 true로 변경하세요.
+변경 방법: upload-queue.json 열어서 해당 슬롯의 "approved": false → true 로 수정
 ```
 
 > **전제 조건**: setup_scheduler.ps1을 처음 1회 실행해야 자동 업로드가 동작한다.

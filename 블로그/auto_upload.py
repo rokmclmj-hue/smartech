@@ -76,6 +76,11 @@ def main():
         log(f"✅ [{label}] 이미 업로드 완료: {title}")
         sys.exit(0)
 
+    if not post.get("approved"):
+        log(f"⏸️ [{label}] 승인 대기 중: {title}")
+        log(f"   → upload-queue.json 에서 \"{slot}\".approved 를 true 로 바꾸면 다음 실행 시 업로드됩니다.")
+        sys.exit(0)
+
     if dry_run:
         import urllib.request
         env_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
