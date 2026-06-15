@@ -210,17 +210,17 @@ export default function AboutPage() {
             </div>
           </div>
 
-          {/* 갤러리 그리드 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {/* Gold Award — 3칸 전체 너비 */}
-            <div className="lg:col-span-3 border hair overflow-hidden bg-white group flex flex-col">
-              <div className="relative h-96 bg-[#f6f4ef] overflow-hidden">
+          {/* 갤러리 그리드 — 2×2 */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Gold Award */}
+            <div className="border hair overflow-hidden bg-white group flex flex-col">
+              <div className="relative h-72 bg-[#f6f4ef] overflow-hidden">
                 <Image
                   src={GALLERY[0].src}
                   alt={GALLERY[0].alt}
                   fill
                   className="object-contain object-top group-hover:scale-[1.02] transition-transform duration-700"
-                  sizes="100vw"
+                  sizes="(max-width: 768px) 100vw, 50vw"
                   priority
                 />
               </div>
@@ -238,13 +238,13 @@ export default function AboutPage() {
             {/* 나머지 3장 */}
             {GALLERY.slice(1).map((img) => (
               <div key={img.label} className="border hair overflow-hidden bg-white group flex flex-col">
-                <div className="relative h-56 bg-[#f6f4ef] overflow-hidden">
+                <div className="relative h-72 bg-[#f6f4ef] overflow-hidden">
                   <Image
                     src={img.src}
                     alt={img.alt}
                     fill
                     className="object-contain object-top group-hover:scale-[1.02] transition-transform duration-700"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    sizes="(max-width: 768px) 100vw, 50vw"
                   />
                 </div>
                 <div className="px-5 py-4 border-t hair mt-auto">
