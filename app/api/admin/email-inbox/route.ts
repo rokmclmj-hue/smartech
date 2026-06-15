@@ -56,7 +56,7 @@ export async function DELETE() {
 
   const BLOCK_DOMAINS = [
     "github.com", "hometax.go.kr", "accounts.google.com",
-    "edwardsvacuum.com", "ecount.com",
+    "edwardsvacuum.com",
   ];
   const BLOCK_PREFIXES = [
     "noreply", "no-reply", "notifications", "mailer-daemon",

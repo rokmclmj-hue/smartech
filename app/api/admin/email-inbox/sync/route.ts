@@ -50,7 +50,6 @@ export async function POST(req: Request) {
     "hometax.go.kr",       // 국세청
     "google.com",          // Google 시스템
     "edwardsvacuum.com",   // Edwards 공급사
-    "ecount.com",          // ECOUNT 시스템 (별도 처리)
     "accounts.google.com",
   ];
   const BLOCK_PREFIXES = [
