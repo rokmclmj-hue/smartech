@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import nodemailer from "nodemailer";
 import { trashEmail } from "@/lib/gmail-imap";
+import { generateQuotePdf } from "@/lib/pdf";
 
 async function requireAdmin() {
   const session = await auth();
@@ -100,13 +101,54 @@ export async function PATCH(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { id, action, finalDraft, adminNote, replyTo } = body;
+  const { id, action, finalDraft, adminNote, replyTo, quoteId } = body;
   // action: "approve" | "reject" | "ignore"
 
   const task = await prisma.emailTask.findUnique({ where: { id: Number(id) } });
   if (!task) return NextResponse.json({ error: "이메일 없음" }, { status: 404 });
 
   if (action === "approve") {
+    // PDF 첨부 생성
+    const attachments: { filename: string; content: Buffer; contentType: string }[] = [];
+    if (quoteId) {
+      const quote = await prisma.quote.findUnique({
+        where: { id: Number(quoteId) },
+        include: { items: { include: { product: true } }, user: true },
+      });
+      if (quote) {
+        const pdfBuffer = await generateQuotePdf({
+          id: quote.id,
+          createdAt: quote.createdAt,
+          expiresAt: quote.expiresAt,
+          taxInvoiceRequested: quote.taxInvoiceRequested,
+          totalAmount: quote.totalAmount,
+          note: quote.note,
+          user: {
+            name: quote.user?.name ?? quote.guestName ?? "",
+            company: quote.user?.company ?? quote.guestCompany ?? "",
+            email: quote.user?.email ?? quote.guestEmail ?? "",
+            phone: quote.user?.phone ?? quote.guestPhone ?? null,
+            title: (quote as { guestTitle?: string | null }).guestTitle ?? null,
+          },
+          items: quote.items.map((item) => ({
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+            product: {
+              partNo: (item as { customPartNo?: string | null }).customPartNo ?? item.product?.partNo ?? "",
+              description: (item as { customDescription?: string | null }).customDescription ?? item.product?.description ?? "",
+            },
+          })),
+        });
+        const d = quote.createdAt;
+        const quoteNo = `Q-${quote.id}-${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
+        attachments.push({
+          filename: `견적서_${quoteNo}.pdf`,
+          content: pdfBuffer,
+          contentType: "application/pdf",
+        });
+      }
+    }
+
     // 이메일 발송
     const sendFrom = `"스마텍" <info@smartechvacuum.com>`;
     const replyAddress = replyTo ?? task.fromEmail;
@@ -116,6 +158,7 @@ export async function PATCH(req: NextRequest) {
       to: replyAddress,
       subject: `Re: ${task.subject}`,
       text: finalDraft ?? task.aiDraft ?? "",
+      attachments,
     });
 
     await prisma.emailTask.update({

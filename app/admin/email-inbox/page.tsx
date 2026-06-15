@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import QuoteAttachPanel from "@/components/QuoteAttachPanel";
 
 interface EmailTask {
   id: number;
@@ -52,6 +53,9 @@ export default function EmailInboxPage() {
   const [classifying, setClassifying] = useState(false);
   const [cleaning, setCleaning] = useState(false);
   const [syncMsg, setSyncMsg] = useState("");
+  const [attachedQuoteId, setAttachedQuoteId] = useState<number | null>(null);
+  const [showQuotePanel, setShowQuotePanel] = useState(false);
+  const [showSendConfirm, setShowSendConfirm] = useState(false);
 
   const load = useCallback(async () => {
     const res = await fetch(`/api/admin/email-inbox?status=${statusFilter}`);
@@ -80,6 +84,7 @@ export default function EmailInboxPage() {
     setSelected(task);
     setDraft(task.aiDraft ?? "");
     setAdminNote(task.adminNote ?? "");
+    setAttachedQuoteId(null);
 
     // AI 분류 안 된 이메일이면 클릭 시 분류 요청
     if (!task.aiDraft && task.status === "PENDING") {
@@ -182,6 +187,7 @@ export default function EmailInboxPage() {
           finalDraft: draft,
           adminNote,
           replyTo: selected.fromEmail,
+          quoteId: action === "approve" ? attachedQuoteId : undefined,
         }),
       });
       const data = await res.json();
@@ -407,11 +413,33 @@ export default function EmailInboxPage() {
               </div>
             )}
 
+            {/* 견적서 첨부 (견적문의일 때만) */}
+            {selected.status === "PENDING" && selected.emailType === "QUOTE_INQUIRY" && (
+              <div className="flex items-center justify-between py-3 px-4 bg-paper rounded-xl">
+                {attachedQuoteId ? (
+                  <span className="flex items-center gap-2 text-[13px] text-green-700 font-medium">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                    </svg>
+                    견적서 #{attachedQuoteId} PDF 첨부됨
+                  </span>
+                ) : (
+                  <span className="text-[13px] text-dim">PDF 견적서를 작성해 첨부할 수 있습니다</span>
+                )}
+                <button
+                  onClick={() => setShowQuotePanel(true)}
+                  className="ml-4 px-4 py-2 border border-smblue text-smblue text-[13px] font-medium rounded-lg hover:bg-smblue/5 transition-colors shrink-0"
+                >
+                  {attachedQuoteId ? "견적서 재작성" : "견적서 작성"}
+                </button>
+              </div>
+            )}
+
             {/* 액션 버튼 */}
             {selected.status === "PENDING" && (
               <div className="flex gap-3 pt-2 flex-wrap">
                 <button
-                  onClick={() => handleAction("approve")}
+                  onClick={() => setShowSendConfirm(true)}
                   disabled={acting}
                   className="flex-1 py-3 bg-ink text-white text-[14px] font-semibold rounded-xl hover:bg-ink/80 disabled:opacity-50 transition-colors"
                 >
@@ -484,6 +512,64 @@ export default function EmailInboxPage() {
           </div>
         )}
       </div>
+      {/* 발송 확인 모달 */}
+      {showSendConfirm && selected && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-ink/40 px-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 space-y-4">
+            <h3 className="text-[16px] font-semibold text-ink">발송 전 확인</h3>
+
+            <div className="space-y-1 text-[12px] text-dim">
+              <div>받는 사람: <span className="text-ink font-medium">{selected.fromEmail}</span></div>
+              <div>제목: <span className="text-ink">Re: {selected.subject}</span></div>
+            </div>
+
+            <pre className="text-[11px] bg-paper rounded-xl p-4 max-h-48 overflow-y-auto whitespace-pre-wrap leading-relaxed text-ink/80">
+              {draft || "(내용 없음)"}
+            </pre>
+
+            {attachedQuoteId ? (
+              <div className="flex items-center gap-2 px-3 py-2.5 bg-green-50 border border-green-200 rounded-lg text-[12px] text-green-700">
+                <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                </svg>
+                첨부: 견적서_Q-{attachedQuoteId}.pdf
+              </div>
+            ) : (
+              <div className="px-3 py-2.5 bg-paper rounded-lg text-[12px] text-dim">
+                첨부 파일 없음 — 견적서를 첨부하려면 취소 후 "견적서 작성"을 먼저 하세요.
+              </div>
+            )}
+
+            <div className="flex gap-3 pt-1">
+              <button
+                onClick={() => { setShowSendConfirm(false); handleAction("approve"); }}
+                disabled={acting}
+                className="flex-1 py-3 bg-ink text-white text-[14px] font-semibold rounded-xl hover:bg-ink/80 disabled:opacity-50 transition-colors"
+              >
+                {acting ? "발송 중..." : "보내기"}
+              </button>
+              <button
+                onClick={() => setShowSendConfirm(false)}
+                className="px-6 py-3 border border-line text-dim text-[13px] rounded-xl hover:border-ink/30 hover:text-ink transition-colors"
+              >
+                취소
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 견적서 작성 패널 */}
+      {showQuotePanel && selected && (
+        <QuoteAttachPanel
+          emailTask={selected}
+          onClose={() => setShowQuotePanel(false)}
+          onCreated={(quoteId) => {
+            setAttachedQuoteId(quoteId);
+            setShowQuotePanel(false);
+          }}
+        />
+      )}
     </div>
   );
 }
