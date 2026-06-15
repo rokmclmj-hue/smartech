@@ -249,5 +249,7 @@ try:
         print(f"[URL]     {result['url']}")
 except urllib.error.HTTPError as e:
     print(f"[HTTP {e.code}]", e.read().decode("utf-8", errors="replace"))
+    sys.exit(1)
 except Exception as e:
     print(f"[ERROR] {e}")
+    sys.exit(1)
