@@ -27,22 +27,24 @@ type Job = {
 };
 
 const STATUS_LABELS: Record<string, string> = {
-  RECEIVED:   "접수",
-  SENT_TO_SUB:"외주발송",
-  WORKING:    "작업중",
-  UPLOADED:   "업로드완료",
-  QUOTE_SENT: "견적발송",
-  CONFIRMED:  "수리확정",
-  DELIVERED:  "납품완료",
+  RECEIVED:      "접수",
+  ITEM_RECEIVED: "물품수령",
+  SENT_TO_SUB:   "외주발송",
+  WORKING:       "작업중",
+  UPLOADED:      "업로드완료",
+  QUOTE_SENT:    "견적발송",
+  CONFIRMED:     "수리확정",
+  DELIVERED:     "납품완료",
 };
 const STATUS_COLORS: Record<string, string> = {
-  RECEIVED:   "bg-blue-50 text-blue-700",
-  SENT_TO_SUB:"bg-yellow-50 text-yellow-700",
-  WORKING:    "bg-orange-50 text-orange-700",
-  UPLOADED:   "bg-purple-50 text-purple-700",
-  QUOTE_SENT: "bg-teal-50 text-teal-700",
-  CONFIRMED:  "bg-green-50 text-green-700",
-  DELIVERED:  "bg-ink/10 text-ink/60",
+  RECEIVED:      "bg-blue-50 text-blue-700",
+  ITEM_RECEIVED: "bg-sky-50 text-sky-700",
+  SENT_TO_SUB:   "bg-yellow-50 text-yellow-700",
+  WORKING:       "bg-orange-50 text-orange-700",
+  UPLOADED:      "bg-purple-50 text-purple-700",
+  QUOTE_SENT:    "bg-teal-50 text-teal-700",
+  CONFIRMED:     "bg-green-50 text-green-700",
+  DELIVERED:     "bg-ink/10 text-ink/60",
 };
 
 function toDateInput(s: string) { return new Date(s).toISOString().slice(0, 10); }
@@ -268,6 +270,10 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone }: {
   const [sending, setSending] = useState(false);
   const [kitLoaded, setKitLoaded] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [preQuoteCost, setPreQuoteCost] = useState("");
+  const [preQuoteNote, setPreQuoteNote] = useState("");
+  const [preQuoteEmail, setPreQuoteEmail] = useState(job.contactEmail ?? "");
+  const [sendingPreQuote, setSendingPreQuote] = useState(false);
 
   const uploadUrl = job.uploadToken
     ? `${typeof window !== "undefined" ? window.location.origin : ""}/repair/offline-upload/${job.uploadToken}`
@@ -383,6 +389,27 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone }: {
     } finally { setSending(false); }
   }
 
+  async function handleSendPreQuote() {
+    if (!preQuoteEmail) { showToast("수신 이메일을 입력해주세요."); return; }
+    setSendingPreQuote(true);
+    try {
+      const res = await fetch(`/api/admin/offline-repairs/${job.id}/send-pre-quote`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: preQuoteEmail,
+          estimatedCost: preQuoteCost !== "" ? Number(preQuoteCost) : null,
+          note: preQuoteNote,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) showToast("사전 견적 발송 완료");
+      else showToast(data.error ?? "발송 오류");
+    } finally {
+      setSendingPreQuote(false);
+    }
+  }
+
   async function handleStatusChange(status: string) {
     setStatusChanging(true);
     await fetch(`/api/admin/offline-repairs/${job.id}`, {
@@ -451,6 +478,44 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone }: {
               </button>
             ))}
           </div>
+
+          {/* 사전 견적 발송 — 접수·물품수령 단계에서만 표시 */}
+          {(job.status === "RECEIVED" || job.status === "ITEM_RECEIVED") && (
+            <div className="space-y-2">
+              <div className="mono text-[10px] dim tracking-[0.1em]">— 사전 견적 발송 (성적서 없이 예상 금액만)</div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <div className="mono text-[10px] dim mb-1">예상 금액 (원, 공급가)</div>
+                  <input
+                    type="number" value={preQuoteCost}
+                    onChange={e => setPreQuoteCost(e.target.value)}
+                    placeholder="예: 850000 (미입력 시 추후 안내)"
+                    className="w-full border hair px-3 py-1.5 text-[13px] mono focus:outline-none focus:border-ink"
+                  />
+                </div>
+              </div>
+              <div>
+                <div className="mono text-[10px] dim mb-1">안내 사항 (선택)</div>
+                <textarea
+                  value={preQuoteNote} onChange={e => setPreQuoteNote(e.target.value)}
+                  rows={2} placeholder={"예: 정밀 점검 후 최종 확정 / 부품 수급에 따라 변동 가능"}
+                  className="w-full border hair px-3 py-2 text-[13px] font-mono focus:outline-none focus:border-ink resize-none"
+                />
+              </div>
+              <div className="flex gap-2 items-center flex-wrap">
+                <input
+                  type="email" value={preQuoteEmail} onChange={e => setPreQuoteEmail(e.target.value)}
+                  placeholder="수신 이메일"
+                  className="border hair px-3 py-1.5 text-[13px] mono focus:outline-none focus:border-ink w-60"
+                />
+                <button onClick={handleSendPreQuote} disabled={sendingPreQuote}
+                  className="bg-ink text-paper px-4 py-1.5 text-[12px] font-semibold hover:bg-ink/80 transition-all disabled:opacity-50">
+                  {sendingPreQuote ? "발송 중..." : "사전 견적 이메일 발송"}
+                </button>
+              </div>
+              <p className="text-[11px] dim">· 발송해도 상태는 변경되지 않습니다. 정밀 점검 후 최종 견적서를 별도 발송하세요.</p>
+            </div>
+          )}
 
           {/* 협력사 링크 */}
           <div className="space-y-2">
