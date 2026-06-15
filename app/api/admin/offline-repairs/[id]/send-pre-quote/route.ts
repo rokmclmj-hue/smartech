@@ -26,7 +26,7 @@ export async function POST(req: NextRequest, { params }: Params) {
   });
   if (!job) return NextResponse.json({ error: "찾을 수 없음" }, { status: 404 });
 
-  const toEmail: string = body.email || job.contactEmail;
+  const toEmail: string | null = (body.email as string | undefined) || job.contactEmail;
   if (!toEmail) return NextResponse.json({ error: "수신 이메일이 없습니다." }, { status: 400 });
 
   const estimatedCost: number | null = body.estimatedCost ? Number(body.estimatedCost) : null;
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     `※ 본 견적은 사전 예상 금액이며, 정밀 점검 후 최종 견적서를 별도 발송해 드립니다.`,
     `※ 문의사항은 아래 연락처로 연락 주십시오.`,
     ``,
-    `스마텍 | 02-000-0000 | info@smartechvacuum.com`,
+    `스마텍 | 031-204-7170 | info@smartechvacuum.com`,
   ].join("\n");
 
   await transporter.sendMail({

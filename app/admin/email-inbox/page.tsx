@@ -542,7 +542,7 @@ export default function EmailInboxPage() {
 
             <div className="flex gap-3 pt-1">
               <button
-                onClick={() => { setShowSendConfirm(false); handleAction("approve"); }}
+                onClick={async () => { setShowSendConfirm(false); await handleAction("approve"); }}
                 disabled={acting}
                 className="flex-1 py-3 bg-ink text-white text-[14px] font-semibold rounded-xl hover:bg-ink/80 disabled:opacity-50 transition-colors"
               >
