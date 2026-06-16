@@ -103,40 +103,35 @@ naver.md를 읽고 `[IMAGE: 설명]` 마커를 순서대로 모두 찾는다.
 어느 단계든 실패하면 해당 사진을 포기하고 다음 후보 사진 또는 AI 생성으로 대체한다.
 **블러 미처리 원본 사용은 절대 불가.**
 
-#### 1단계 — 원본 사진 시각 확인 (Read 도구 필수)
-- Read 도구로 원본 파일을 열어 시각적으로 확인한다.
-- 펌프 위치와 대략적 좌표 범위를 텍스트로 기록한다.
-  기록 예: "펌프: 사진 우측 하단, 약 x=1400~2000, y=900~1400 (전체 2400×1600 기준)"
-- 펌프가 식별되지 않으면 이 사진은 사용하지 않는다.
+#### 1단계 — blur_preview.py로 격자 미리보기 생성 후 좌표 확인 (건너뛰기 금지)
 
-#### 2단계 — 블러 스크립트 실행 및 오류 확인
-```python
-from PIL import Image, ImageFilter
-
-img = Image.open("원본경로")
-w, h = img.size
-
-# 1단계: 전체 배경 블러
-blurred = img.filter(ImageFilter.GaussianBlur(radius=30))
-
-# 2단계: 배관 영역 (있는 경우) — 중간 블러
-# pipe_region = img.crop((pipe_x1, pipe_y1, pipe_x2, pipe_y2))
-# pipe_mid = pipe_region.filter(ImageFilter.GaussianBlur(radius=12))
-# blurred.paste(pipe_mid, (pipe_x1, pipe_y1))
-
-# 3단계: 펌프 본체 영역 — 선명하게
-px1, py1, px2, py2 = 펌프_left, 펌프_top, 펌프_right, 펌프_bottom
-pump_region = img.crop((px1, py1, px2, py2))
-blurred.paste(pump_region, (px1, py1))
-
-blurred.save("블로그/output/processed-images/파일명_blurred.png")
+```bash
+python 블로그/blur_preview.py "data/현장사진/.../원본.jpg" "블로그/output/[주제]/images/preview_grid.png"
 ```
 
+- Read 도구로 생성된 격자 이미지를 열어 시각적으로 확인한다.
+- 격자 눈금(500px 간격)을 보고 펌프 본체의 x1·y1·x2·y2 좌표를 기록한다.
+  기록 예: "펌프: 약 x=700~2600, y=1350~2750 (원본 4000×3000 기준)"
+- **좌표를 추정만 하고 바로 실행하지 않는다. 격자로 직접 눈으로 확인한 값만 사용한다.**
+- 펌프가 식별되지 않으면 이 사진은 사용하지 않는다.
+
+#### 2단계 — blur-config.json 작성 후 blur_photo.py 실행
+
+```json
+{
+  "pump_box": [x1, y1, x2, y2],
+  "blur_radius": 55
+}
+```
+
+```bash
+python 블로그/blur_photo.py "원본경로" "블로그/output/[주제]/images/field-N.png"
+```
+
+- **blur_radius는 반드시 55 고정.** (기준: 2026-06-17 동결건조 글 작업에서 확정)
+- **원본 파일(data/현장사진/...)을 입력으로 사용한다. 이미 처리된 field-N.png를 입력으로 쓰지 않는다.**
 - Python 위치: `C:\Users\rokmc\AppData\Local\Programs\Python\Python312\python.exe`
 - 실행 결과(터미널 출력)에 오류가 없는지 확인한다.
-- 오류 발생 시 즉시 원인 수정 후 재실행. 저장 경로 두 곳 모두 확인:
-  1. `블로그/output/processed-images/파일명_blurred.png`
-  2. `블로그/output/[주제]/images/field-순번.png`
 
 #### 3단계 — 블러 결과물 시각 확인 (Read 도구 필수, 건너뛰기 금지)
 - Read 도구로 처리된 파일(field-N.png)을 반드시 직접 연다.
@@ -152,7 +147,7 @@ blurred.save("블로그/output/processed-images/파일명_blurred.png")
 - 원본: data/현장사진/07_기타/파일명.jpg
 - 처리본: 블로그/output/[주제]/images/field-1.png ✅ 시각 확인 완료
 - 펌프 좌표: (px1, py1, px2, py2) = (1400, 900, 2000, 1400)
-- 배경 블러 radius: 30 / 배관 blur radius: 12 (해당시)
+- 배경 블러 radius: 55 (고정값) / 배관 blur radius: 해당 시 75 (55+20 자동 적용)
 ```
 
 ---
