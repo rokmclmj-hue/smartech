@@ -12,11 +12,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "사진이 없습니다." }, { status: 400 });
     }
 
-    // 파일을 base64로 변환
+    // 파일을 base64로 변환 (이미지 + PDF 모두 지원)
     const imageContents = await Promise.all(
       files.map(async (file) => {
         const buffer = await file.arrayBuffer();
         const base64 = Buffer.from(buffer).toString("base64");
+
+        if (file.type === "application/pdf") {
+          return {
+            type: "document" as const,
+            source: { type: "base64" as const, media_type: "application/pdf" as const, data: base64 },
+          };
+        }
+
         const mediaType = (
           file.type === "image/png" ? "image/png" :
           file.type === "image/webp" ? "image/webp" :

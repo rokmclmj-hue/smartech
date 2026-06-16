@@ -571,12 +571,19 @@ export default function PumpSelector() {
   }
 
   function handleScanFile(file: File) {
+    const isPdf = file.type === "application/pdf";
+    const isImage = file.type.startsWith("image/");
+    if (!isPdf && !isImage) return;
     setScanFile(file);
     setScanResult(null);
     setScanProduct(null);
-    const reader = new FileReader();
-    reader.onload = (e) => setScanPreview(e.target?.result as string);
-    reader.readAsDataURL(file);
+    if (isPdf) {
+      setScanPreview("__pdf__");
+    } else {
+      const reader = new FileReader();
+      reader.onload = (e) => setScanPreview(e.target?.result as string);
+      reader.readAsDataURL(file);
+    }
   }
 
   return (
@@ -686,7 +693,16 @@ export default function PumpSelector() {
               <div className="space-y-4">
                 {/* 미리보기 */}
                 <div className="relative border hair overflow-hidden">
-                  <img src={scanPreview} alt="명판 사진" className="w-full max-h-64 object-contain bg-[#F6F4EF]" />
+                  {scanPreview === "__pdf__" ? (
+                    <div className="w-full h-40 bg-[#F6F4EF] flex flex-col items-center justify-center gap-2">
+                      <svg className="w-10 h-10 text-edred" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                      </svg>
+                      <span className="mono text-[11px] tracking-[0.08em] text-dim">{scanFile?.name ?? "PDF 파일"}</span>
+                    </div>
+                  ) : (
+                    <img src={scanPreview} alt="명판 사진" className="w-full max-h-64 object-contain bg-[#F6F4EF]" />
+                  )}
                   <button
                     onClick={() => { setScanFile(null); setScanPreview(""); setScanResult(null); }}
                     className="absolute top-2 right-2 w-7 h-7 bg-ink/70 text-paper flex items-center justify-center text-[14px] hover:bg-edred transition-colors"
@@ -784,7 +800,7 @@ export default function PumpSelector() {
               </div>
             )}
 
-            <input ref={scanInputRef} type="file" accept="image/*" capture="environment" className="hidden"
+            <input ref={scanInputRef} type="file" accept="image/*,application/pdf" className="hidden"
               onChange={(e) => { const f = e.target.files?.[0]; if (f) handleScanFile(f); }} />
 
             {/* 촬영 팁 */}

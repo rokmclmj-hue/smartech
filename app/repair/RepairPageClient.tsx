@@ -402,7 +402,7 @@ export default function RepairPageClient() {
                         e.preventDefault();
                         setDragOver(null);
                         const file = e.dataTransfer.files[0];
-                        if (file && file.type.startsWith("image/")) handlePhotoSelect(slot.key, file);
+                        if (file && (file.type.startsWith("image/") || file.type === "application/pdf")) handlePhotoSelect(slot.key, file);
                       }}
                       className={`relative aspect-square border-2 cursor-pointer flex flex-col items-center justify-center transition-all overflow-hidden group ${
                         dragOver === slot.key
@@ -416,12 +416,21 @@ export default function RepairPageClient() {
                     >
                       {photo ? (
                         <>
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={photo.preview}
-                            alt={slot.label}
-                            className="absolute inset-0 w-full h-full object-cover"
-                          />
+                          {photo.file.type === "application/pdf" ? (
+                            <div className="absolute inset-0 w-full h-full flex flex-col items-center justify-center bg-[#F6F4EF] gap-1">
+                              <svg className="w-8 h-8 text-edred" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                              </svg>
+                              <span className="mono text-[9px] text-dim text-center px-1 truncate w-full text-center">{photo.file.name}</span>
+                            </div>
+                          ) : (
+                            /* eslint-disable-next-line @next/next/no-img-element */
+                            <img
+                              src={photo.preview}
+                              alt={slot.label}
+                              className="absolute inset-0 w-full h-full object-cover"
+                            />
+                          )}
                           <div className="absolute inset-0 bg-ink/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                             <span className="text-paper text-[12px] font-medium">변경</span>
                           </div>
@@ -452,7 +461,7 @@ export default function RepairPageClient() {
                     <input
                       ref={(el) => { fileRefs.current[slot.key] = el; }}
                       type="file"
-                      accept="image/*"
+                      accept="image/*,application/pdf"
                       className="hidden"
                       onChange={(e) => {
                         const file = e.target.files?.[0];
