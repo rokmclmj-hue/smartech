@@ -578,7 +578,7 @@ export default function PumpSelector() {
     setScanResult(null);
     setScanProduct(null);
     if (isPdf) {
-      setScanPreview("__pdf__");
+      setScanPreview(URL.createObjectURL(file));
     } else {
       const reader = new FileReader();
       reader.onload = (e) => setScanPreview(e.target?.result as string);
@@ -693,13 +693,12 @@ export default function PumpSelector() {
               <div className="space-y-4">
                 {/* 미리보기 */}
                 <div className="relative border hair overflow-hidden">
-                  {scanPreview === "__pdf__" ? (
-                    <div className="w-full h-40 bg-[#F6F4EF] flex flex-col items-center justify-center gap-2">
-                      <svg className="w-10 h-10 text-edred" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                      </svg>
-                      <span className="mono text-[11px] tracking-[0.08em] text-dim">{scanFile?.name ?? "PDF 파일"}</span>
-                    </div>
+                  {scanFile?.type === "application/pdf" ? (
+                    <embed
+                      src={scanPreview}
+                      type="application/pdf"
+                      className="w-full h-64 pointer-events-none bg-[#F6F4EF]"
+                    />
                   ) : (
                     <img src={scanPreview} alt="명판 사진" className="w-full max-h-64 object-contain bg-[#F6F4EF]" />
                   )}

@@ -417,12 +417,11 @@ export default function RepairPageClient() {
                       {photo ? (
                         <>
                           {photo.file.type === "application/pdf" ? (
-                            <div className="absolute inset-0 w-full h-full flex flex-col items-center justify-center bg-[#F6F4EF] gap-1">
-                              <svg className="w-8 h-8 text-edred" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                              </svg>
-                              <span className="mono text-[9px] text-dim text-center px-1 truncate w-full text-center">{photo.file.name}</span>
-                            </div>
+                            <embed
+                              src={photo.preview}
+                              type="application/pdf"
+                              className="absolute inset-0 w-full h-full pointer-events-none"
+                            />
                           ) : (
                             /* eslint-disable-next-line @next/next/no-img-element */
                             <img
