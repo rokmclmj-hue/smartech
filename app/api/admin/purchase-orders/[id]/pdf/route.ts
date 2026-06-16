@@ -42,13 +42,25 @@ export async function GET(req: NextRequest, { params }: Params) {
       pdfBuffer.byteOffset + pdfBuffer.byteLength
     ) as ArrayBuffer;
 
+    const isEdwards = ["IV", "SV", "AK"].includes(order.department);
+    let pdfName: string;
+    if (isEdwards && order.items.length > 0) {
+      const dateStr = new Date(order.orderDate).toISOString().slice(0, 10).replace(/-/g, "");
+      const first = order.items[0];
+      const itemStr = `${first.description} x ${first.quantity}ea`;
+      const extra = order.items.length - 1;
+      const itemPart = extra > 0 ? `${itemStr} 외 ${extra}건` : itemStr;
+      pdfName = `발주서_${dateStr}_에드워드${order.department}(${itemPart}).pdf`;
+    } else {
+      pdfName = `PO_${order.orderNo}.pdf`;
+    }
+    const encodedName = encodeURIComponent(pdfName);
+
     return new NextResponse(arrayBuf, {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": preview
-          ? `inline; filename="PO_${order.orderNo}.pdf"`
-          : `attachment; filename="PO_${order.orderNo}.pdf"`,
+        "Content-Disposition": `${preview ? "inline" : "attachment"}; filename*=UTF-8''${encodedName}`,
         "Content-Length": String(pdfBuffer.length),
       },
     });

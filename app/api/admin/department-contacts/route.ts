@@ -5,9 +5,9 @@ import { getAdminSession } from "@/lib/admin-auth";
 const DEPT_CODES = ["IV", "SV", "AK"] as const;
 
 const DEFAULT_MESSAGES: Record<string, string> = {
-  IV: `안녕하세요 이종원 수석님,\n\n첨부와 같이 발주서를 송부하오니 진행부탁드립니다.\n\n감사합니다.`,
-  SV: `안녕하세요 현지선 수석님,\n\n첨부와 같이 발주서를 송부하오니 진행부탁드립니다.\n\n감사합니다.`,
-  AK: `안녕하세요 정재희 차장님,\n\n첨부와 같이 발주서를 송부하오니 진행부탁드립니다.\n\n감사합니다.`,
+  IV: `안녕하세요 이종원 수석님,\n스마텍 이명재 입니다.\n\n첨부와 같이 발주서를 송부하오니 진행부탁드립니다.\n\n감사합니다.`,
+  SV: `안녕하세요 현지선 수석님,\n스마텍 이명재 입니다.\n\n첨부와 같이 발주서를 송부하오니 진행부탁드립니다.\n\n감사합니다.`,
+  AK: `안녕하세요 정재희 차장님,\n스마텍 이명재 입니다.\n\n첨부와 같이 발주서를 송부하오니 진행부탁드립니다.\n\n감사합니다.`,
 };
 
 const DEFAULT_CONTACTS: Record<string, { contactName: string; contactEmail: string; ccEmails: string | null }> = {
@@ -42,7 +42,9 @@ export async function GET() {
 
   // contactEmail이 비어있거나 이전 기본 문구인 레코드 업데이트
   const needsUpdate = existing.filter(
-    (d) => !d.contactEmail || d.defaultMessage?.includes("(주)스마텍 영업팀입니다")
+    (d) => !d.contactEmail ||
+           d.defaultMessage?.includes("(주)스마텍 영업팀입니다") ||
+           (d.defaultMessage && !d.defaultMessage.includes("이명재"))
   );
   if (needsUpdate.length > 0) {
     await Promise.all(
