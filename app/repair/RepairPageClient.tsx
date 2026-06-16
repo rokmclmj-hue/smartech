@@ -238,15 +238,20 @@ export default function RepairPageClient() {
 
   // 사진 선택
   function handlePhotoSelect(key: string, file: File) {
-    const preview = URL.createObjectURL(file);
-    setPhotos((p) => ({ ...p, [key]: { file, preview, label: key } }));
+    setPhotos((p) => {
+      if (p[key]?.preview.startsWith("blob:")) URL.revokeObjectURL(p[key]!.preview);
+      return { ...p, [key]: { file, preview: URL.createObjectURL(file), label: key } };
+    });
     setAiDone(false);
     setAiResult(null);
   }
 
   // 사진 삭제
   function handlePhotoRemove(key: string) {
-    setPhotos((p) => ({ ...p, [key]: null }));
+    setPhotos((p) => {
+      if (p[key]?.preview.startsWith("blob:")) URL.revokeObjectURL(p[key]!.preview);
+      return { ...p, [key]: null };
+    });
     setAiDone(false);
     setAiResult(null);
     if (fileRefs.current[key]) fileRefs.current[key]!.value = "";
@@ -417,10 +422,10 @@ export default function RepairPageClient() {
                       {photo ? (
                         <>
                           {photo.file.type === "application/pdf" ? (
-                            <embed
+                            <iframe
                               src={photo.preview}
-                              type="application/pdf"
-                              className="absolute inset-0 w-full h-full pointer-events-none"
+                              className="absolute inset-0 w-full h-full border-0"
+                              title="PDF 미리보기"
                             />
                           ) : (
                             /* eslint-disable-next-line @next/next/no-img-element */

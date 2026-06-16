@@ -40,11 +40,10 @@ export async function GET() {
     });
   }
 
-  // contactEmail이 비어있거나 이전 기본 문구인 레코드 업데이트
+  // contactEmail이 비어있거나 이전 기본 문구인 레코드 업데이트 (사용자가 수정한 문구는 건드리지 않음)
   const needsUpdate = existing.filter(
     (d) => !d.contactEmail ||
-           d.defaultMessage?.includes("(주)스마텍 영업팀입니다") ||
-           (d.defaultMessage && !d.defaultMessage.includes("이명재"))
+           d.defaultMessage?.includes("(주)스마텍 영업팀입니다")
   );
   if (needsUpdate.length > 0) {
     await Promise.all(

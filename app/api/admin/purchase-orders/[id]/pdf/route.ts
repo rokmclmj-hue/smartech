@@ -45,7 +45,9 @@ export async function GET(req: NextRequest, { params }: Params) {
     const isEdwards = ["IV", "SV", "AK"].includes(order.department);
     let pdfName: string;
     if (isEdwards && order.items.length > 0) {
-      const dateStr = new Date(order.orderDate).toISOString().slice(0, 10).replace(/-/g, "");
+      const dateStr = new Date(order.orderDate)
+        .toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" })
+        .replace(/-/g, "");
       const first = order.items[0];
       const itemStr = `${first.description} x ${first.quantity}ea`;
       const extra = order.items.length - 1;

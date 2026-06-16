@@ -578,7 +578,10 @@ export default function PumpSelector() {
     setScanResult(null);
     setScanProduct(null);
     if (isPdf) {
-      setScanPreview(URL.createObjectURL(file));
+      setScanPreview((prev) => {
+        if (prev.startsWith("blob:")) URL.revokeObjectURL(prev);
+        return URL.createObjectURL(file);
+      });
     } else {
       const reader = new FileReader();
       reader.onload = (e) => setScanPreview(e.target?.result as string);
@@ -694,16 +697,16 @@ export default function PumpSelector() {
                 {/* 미리보기 */}
                 <div className="relative border hair overflow-hidden">
                   {scanFile?.type === "application/pdf" ? (
-                    <embed
+                    <iframe
                       src={scanPreview}
-                      type="application/pdf"
-                      className="w-full h-64 pointer-events-none bg-[#F6F4EF]"
+                      className="w-full h-64 bg-[#F6F4EF] border-0"
+                      title="PDF 미리보기"
                     />
                   ) : (
                     <img src={scanPreview} alt="명판 사진" className="w-full max-h-64 object-contain bg-[#F6F4EF]" />
                   )}
                   <button
-                    onClick={() => { setScanFile(null); setScanPreview(""); setScanResult(null); }}
+                    onClick={() => { setScanFile(null); setScanPreview((prev) => { if (prev.startsWith("blob:")) URL.revokeObjectURL(prev); return ""; }); setScanResult(null); }}
                     className="absolute top-2 right-2 w-7 h-7 bg-ink/70 text-paper flex items-center justify-center text-[14px] hover:bg-edred transition-colors"
                   >×</button>
                 </div>
@@ -733,7 +736,7 @@ export default function PumpSelector() {
                       }`}>
                         {scanResult.confidence === "high" ? "인식 완료" : scanResult.confidence === "medium" ? "부분 인식" : "인식 불가"}
                       </span>
-                      <button onClick={() => { setScanFile(null); setScanPreview(""); setScanResult(null); }} className="mono text-[10px] text-dim hover:text-ink">다시 촬영</button>
+                      <button onClick={() => { setScanFile(null); setScanPreview((prev) => { if (prev.startsWith("blob:")) URL.revokeObjectURL(prev); return ""; }); setScanResult(null); }} className="mono text-[10px] text-dim hover:text-ink">다시 촬영</button>
                     </div>
 
                     {scanResult.modelName && (
@@ -787,7 +790,7 @@ export default function PumpSelector() {
                       <div className="pt-1 space-y-2">
                         <p className="text-[12px] text-dim">명판이 잘 보이도록 다시 촬영하거나, 모델명을 직접 입력해 검색해보세요.</p>
                         <button
-                          onClick={() => { setTab("search"); setScanFile(null); setScanPreview(""); setScanResult(null); }}
+                          onClick={() => { setTab("search"); setScanFile(null); setScanPreview((prev) => { if (prev.startsWith("blob:")) URL.revokeObjectURL(prev); return ""; }); setScanResult(null); }}
                           className="w-full py-2.5 border hair text-ink text-[13px] hover:bg-ink hover:text-paper transition-colors"
                         >
                           모델명 직접 검색 →
