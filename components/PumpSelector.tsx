@@ -1465,7 +1465,7 @@ export default function PumpSelector() {
                   {/* 주석 */}
                   <div className="px-4 py-2.5 border-t border-[#E3DFD6] bg-[#F6F4EF]">
                     <p className="text-[10px] text-[#6A6660] leading-relaxed">
-                      ※ 상기 결과는 수치 시뮬레이션 참고값입니다 (SUS+Nitrile, outgassing 1.3×10⁻⁷ mbar·L/s·cm², 60Hz 기준).
+                      ※ 상기 결과는 수치 시뮬레이션 참고값입니다 (SUS+Viton, outgassing 1.9×10⁻⁷ mbar·L/s·cm², 60Hz 기준).
                       최종 모델 선정은 스마텍 전문가 검토를 권장합니다.
                     </p>
                   </div>
