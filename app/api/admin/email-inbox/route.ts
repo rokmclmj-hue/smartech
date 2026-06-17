@@ -128,7 +128,7 @@ export async function PATCH(req: NextRequest) {
             company: quote.user?.company ?? quote.guestCompany ?? "",
             email: quote.user?.email ?? quote.guestEmail ?? "",
             phone: quote.user?.phone ?? quote.guestPhone ?? null,
-            title: (quote as { guestTitle?: string | null }).guestTitle ?? null,
+            title: (quote as { guestTitle?: string | null }).guestTitle ?? quote.user?.title ?? null,
           },
           items: quote.items.map((item) => ({
             quantity: item.quantity,
@@ -140,7 +140,7 @@ export async function PATCH(req: NextRequest) {
           })),
         });
         const d = quote.createdAt;
-        const quoteNo = `Q-${quote.id}-${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
+        const quoteNo = `SMT-${d.getFullYear()}-Q-${String(quote.id).padStart(6, "0")}`;
         attachments.push({
           filename: `견적서_${quoteNo}.pdf`,
           content: pdfBuffer,

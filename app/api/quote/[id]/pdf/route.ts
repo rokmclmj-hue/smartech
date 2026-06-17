@@ -57,7 +57,7 @@ export async function GET(
         company: quote.user?.company ?? quote.guestCompany ?? "",
         email: quote.user?.email ?? quote.guestEmail ?? "",
         phone: quote.user?.phone ?? quote.guestPhone ?? null,
-        title: quote.guestTitle ?? null,
+        title: quote.guestTitle ?? quote.user?.title ?? null,
       },
       items: quote.items.map((item) => ({
         quantity: item.quantity,

@@ -182,6 +182,7 @@ function AdminProxyQuotesInner() {
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [attachFiles, setAttachFiles] = useState<{ name: string; base64: string; contentType: string }[]>([]);
+  const [sentAttachCount, setSentAttachCount] = useState(0);
 
   // 결제조건
   const [paymentTerm, setPaymentTerm] = useState<string | null>(null);
@@ -277,6 +278,7 @@ function AdminProxyQuotesInner() {
     setShowDirect(false);
     setGuest({ name: "", title: "", company: "", email: "", phone: "", tier: "ENDUSER" });
     setPaymentTerm(null);
+    setAttachFiles([]);
   }
 
   function selectContact(ct: KnownContact) {
@@ -539,6 +541,7 @@ function AdminProxyQuotesInner() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) { toast.error(data.error ?? "메일 발송에 실패했습니다."); return; }
+      setSentAttachCount(attachFiles.length);
       setSent(true);
       setAttachFiles([]);
       toast.success(`견적서를 ${data.sentTo}로 발송했습니다.`);
@@ -601,7 +604,7 @@ function AdminProxyQuotesInner() {
             {recipientEmail ? (
               sent ? (
                 <div className="border border-green-500/40 rounded-md px-4 py-3 text-[13px] text-green-600">
-                  ✓ {recipientEmail} 발송 완료{attachFiles.length > 0 ? ` (+첨부 ${attachFiles.length}건)` : ""}
+                  ✓ {recipientEmail} 발송 완료{sentAttachCount > 0 ? ` (+첨부 ${sentAttachCount}건)` : ""}
                 </div>
               ) : (
                 <button
@@ -634,8 +637,8 @@ function AdminProxyQuotesInner() {
             {/* 새 견적 작성 */}
             <button
               onClick={() => {
-                setDoneQuoteId(null); setSent(false);
-                setLines([]); clearCustomer(); setAttachFiles([]);
+                setDoneQuoteId(null); setSent(false); setSentAttachCount(0);
+                setLines([]); clearCustomer();
                 router.replace("/admin/proxy-quotes");
               }}
               className="text-[12px] dim hover:text-ink transition-colors"

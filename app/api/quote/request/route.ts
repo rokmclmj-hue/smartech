@@ -115,7 +115,7 @@ export async function POST(req: NextRequest) {
         },
       })),
     });
-    const quoteNo = `Q-${quote.id}-${formatDate(quote.createdAt)}`;
+    const quoteNo = `SMT-${quote.createdAt.getFullYear()}-Q-${String(quote.id).padStart(6, "0")}`;
     if (userEmail) {
       await sendQuotePdf(userEmail, pdfBuffer, quoteNo);
     }
@@ -153,11 +153,4 @@ export async function POST(req: NextRequest) {
     quoteId: quote.id,
     downloadUrl: `/api/quote/${quote.id}/pdf`,
   });
-}
-
-function formatDate(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  return `${y}${m}${d}`;
 }
