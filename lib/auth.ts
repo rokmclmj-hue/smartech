@@ -85,8 +85,57 @@ const providers: any[] = [
       // 관리자 전용 (UI에서 노출 안 함)
       phone: { label: "전화번호", type: "tel" },
       password: { label: "비밀번호", type: "password" },
+      // 사업자번호 간편 로그인
+      businessNo: { label: "사업자등록번호", type: "text" },
+      companyName: { label: "상호명", type: "text" },
     },
     async authorize(credentials) {
+      // 사업자번호 간편 로그인
+      if (credentials?.businessNo) {
+        const digits = (credentials.businessNo as string).replace(/[^0-9]/g, "");
+        if (digits.length !== 10) return null;
+
+        // 1. 이미 가입된 사용자인지 확인
+        let user = await prisma.user.findFirst({ where: { businessNo: digits } });
+        if (user) {
+          return { id: String(user.id), name: user.name, tier: user.tier, company: user.company, businessNo: digits };
+        }
+
+        // 2. 신규 가입 — companyName 필수
+        const companyName = ((credentials.companyName as string) || "").trim();
+        if (!companyName) return null;
+
+        // 3. KnownCompany에서 사업자번호 또는 상호명으로 등급 조회
+        let tier: string = "OEM"; // 기본 우대 등급
+        const known = await prisma.knownCompany.findFirst({
+          where: {
+            OR: [
+              { businessNo: digits },
+              { companyName: { contains: companyName, mode: "insensitive" } },
+            ],
+          },
+        });
+        if (known) tier = known.tier;
+
+        // 4. 계정 생성
+        user = await prisma.user.create({
+          data: {
+            name: companyName,
+            company: companyName,
+            passwordHash: "",
+            tier,
+            businessNo: digits,
+            aiTypeReason: "biz_login",
+          },
+        });
+
+        // 5. 관리자 SMS 알림
+        const { notifyNewMember } = await import("./solapi");
+        notifyNewMember(companyName, `사업자:${digits}`, `${tier} — 사업자번호 간편가입`).catch(() => {});
+
+        return { id: String(user.id), name: user.name, tier: user.tier, company: user.company, businessNo: digits };
+      }
+
       if (credentials?.magicToken) {
         const token = await prisma.magicLinkToken.findUnique({
           where: { token: credentials.magicToken as string },

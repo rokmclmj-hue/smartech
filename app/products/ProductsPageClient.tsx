@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 
 type Product = {
   id: number;
@@ -90,9 +91,130 @@ export default function ProductsPageClient() {
   );
 }
 
+function BizLoginModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
+  const [bizNo, setBizNo] = useState("");
+  const [bizCompany, setBizCompany] = useState("");
+  const [step, setStep] = useState<"input" | "company">("input");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleVerify(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/verify-biz", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ businessNo: bizNo.replace(/[^0-9]/g, "") }),
+      });
+      const data = await res.json();
+      if (data.status === "active") {
+        setStep("company");
+      } else {
+        setError(data.message ?? "유효하지 않은 사업자번호입니다.");
+      }
+    } catch {
+      setError("네트워크 오류가 발생했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      const result = await signIn("credentials", {
+        businessNo: bizNo.replace(/[^0-9]/g, ""),
+        companyName: bizCompany,
+        redirect: false,
+      });
+      if (result?.ok) {
+        onSuccess();
+      } else {
+        setError("로그인에 실패했습니다. 다시 시도해 주세요.");
+      }
+    } catch {
+      setError("네트워크 오류가 발생했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" onClick={onClose}>
+      <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <p className="font-semibold text-smblue text-base">우대가 확인</p>
+            <p className="text-[11px] text-gray-400 mt-0.5">사업자등록번호로 OEM 우대 금액 확인</p>
+          </div>
+          <button onClick={onClose} className="text-gray-300 hover:text-gray-500 text-xl leading-none">✕</button>
+        </div>
+
+        {step === "input" && (
+          <form onSubmit={handleVerify} className="space-y-3">
+            <input
+              type="text"
+              value={bizNo}
+              onChange={(e) => setBizNo(e.target.value)}
+              required
+              autoFocus
+              placeholder="사업자등록번호 10자리"
+              maxLength={12}
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-smblue/30 bg-gray-50"
+            />
+            {error && <p className="text-red-500 text-xs">{error}</p>}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-smblue hover:bg-smblue/90 disabled:opacity-50 text-white font-semibold py-3 rounded-xl text-sm transition-colors"
+            >
+              {loading ? "조회 중..." : "사업자 확인"}
+            </button>
+          </form>
+        )}
+
+        {step === "company" && (
+          <form onSubmit={handleLogin} className="space-y-3">
+            <p className="text-xs text-green-600">✓ 정상 사업자 확인 완료</p>
+            <input
+              type="text"
+              value={bizCompany}
+              onChange={(e) => setBizCompany(e.target.value)}
+              required
+              autoFocus
+              placeholder="상호명 입력 (예: (주)스마텍)"
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-smblue/30 bg-gray-50"
+            />
+            {error && <p className="text-red-500 text-xs">{error}</p>}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-smblue hover:bg-smblue/90 disabled:opacity-50 text-white font-semibold py-3 rounded-xl text-sm transition-colors"
+            >
+              {loading ? "확인 중..." : "우대가 확인하기"}
+            </button>
+            <button
+              type="button"
+              onClick={() => { setStep("input"); setError(""); }}
+              className="w-full text-xs text-gray-400 hover:text-gray-600 py-1"
+            >
+              번호 다시 입력
+            </button>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function ProductsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const [bizModalOpen, setBizModalOpen] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState(searchParams.get("q") ?? "");
@@ -194,6 +316,12 @@ function ProductsContent() {
 
   return (
     <div className="min-h-screen bg-paper text-ink">
+      {bizModalOpen && (
+        <BizLoginModal
+          onClose={() => setBizModalOpen(false)}
+          onSuccess={() => { setBizModalOpen(false); router.refresh(); }}
+        />
+      )}
       {/* ── Header ─────────────────────────────── */}
       <header className="border-b hair">
         <div className="max-w-7xl mx-auto px-6 pt-14 pb-10">
@@ -415,9 +543,9 @@ function ProductsContent() {
                 </div>
               </div>
             ) : view === "table" ? (
-              <CatalogTable groups={grouped} />
+              <CatalogTable groups={grouped} onBizLogin={() => setBizModalOpen(true)} />
             ) : (
-              <CatalogGrid groups={grouped} />
+              <CatalogGrid groups={grouped} onBizLogin={() => setBizModalOpen(true)} />
             )}
           </main>
         </div>
@@ -427,7 +555,7 @@ function ProductsContent() {
 }
 
 /* ─── Table View ─────────────────────────────── */
-function CatalogTable({ groups }: { groups: [string, Product[]][] }) {
+function CatalogTable({ groups, onBizLogin }: { groups: [string, Product[]][]; onBizLogin: () => void }) {
   return (
     <div className="space-y-10">
       {groups.map(([cat, items]) => (
@@ -484,9 +612,12 @@ function CatalogTable({ groups }: { groups: [string, Product[]][] }) {
                       ) : p.priceStatus === "pending" ? (
                         <span className="text-[10px] text-dim">승인 대기</span>
                       ) : (
-                        <Link href="/auth/login" className="text-[10px] text-dim hover:text-edred underline-red pb-0.5">
-                          로그인 후 확인
-                        </Link>
+                        <button
+                          onClick={() => setBizModalOpen(true)}
+                          className="text-[10px] text-smblue hover:text-smblue/70 font-medium pb-0.5 border-b border-smblue/30"
+                        >
+                          우대가 확인
+                        </button>
                       )}
                     </td>
                     <td className="py-2 align-middle text-right">
@@ -510,7 +641,7 @@ function CatalogTable({ groups }: { groups: [string, Product[]][] }) {
 }
 
 /* ─── Dense Grid View ────────────────────────── */
-function CatalogGrid({ groups }: { groups: [string, Product[]][] }) {
+function CatalogGrid({ groups, onBizLogin }: { groups: [string, Product[]][]; onBizLogin: () => void }) {
   return (
     <div className="space-y-10">
       {groups.map(([cat, items]) => (
@@ -546,7 +677,7 @@ function CatalogGrid({ groups }: { groups: [string, Product[]][] }) {
                   ) : p.priceStatus === "pending" ? (
                     <span className="opacity-60">승인 대기</span>
                   ) : (
-                    <span className="opacity-60">로그인 후 가격</span>
+                    <span className="text-smblue font-medium" onClick={(e) => { e.preventDefault(); onBizLogin(); }}>우대가 확인 →</span>
                   )}
                 </div>
               </Link>

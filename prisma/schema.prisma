@@ -311,6 +311,7 @@ model KnownCompany {
   tier          String             // DEALER | OEM | ENDUSER | KEY_DEALER | VIP_DEALER
   paymentTerm   String?            // a=납품전현금 b=계약30%납품전70% d=계약30%익월말일70% e=정기결제 c=직접입력
   source        String             @default("excel") // excel | manual | html_backup
+  businessNo    String?            // 사업자등록번호 (하이픈 없이 10자리)
   createdAt     DateTime           @default(now())
   updatedAt     DateTime           @updatedAt
   contacts      KnownContact[]
@@ -319,6 +320,7 @@ model KnownCompany {
   @@index([phone])
   @@index([email])
   @@index([companyName])
+  @@index([businessNo])
 }
 
 // 거래처별 담당자 목록

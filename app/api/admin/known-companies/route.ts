@@ -47,6 +47,7 @@ export async function PATCH(req: NextRequest) {
       ...(body.email !== undefined && { email: body.email }),
       ...(body.tier !== undefined && { tier: body.tier }),
       ...(body.paymentTerm !== undefined && { paymentTerm: body.paymentTerm }),
+      ...(body.businessNo !== undefined && { businessNo: body.businessNo || null }),
     },
   });
   return NextResponse.json({ ok: true, company: updated });
