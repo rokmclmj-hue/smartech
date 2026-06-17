@@ -236,8 +236,6 @@ export default function ProductPanel({ item, onClose, catalogUrl }: Props) {
   const [showSpec, setShowSpec] = useState(false);
   const [bizModalOpen, setBizModalOpen] = useState(false);
   const [bizNo, setBizNo] = useState("");
-  const [bizCompany, setBizCompany] = useState("");
-  const [bizStep, setBizStep] = useState<"input" | "company">("input");
   const [bizLoading, setBizLoading] = useState(false);
   const [bizError, setBizError] = useState("");
 
@@ -461,24 +459,35 @@ export default function ProductPanel({ item, onClose, catalogUrl }: Props) {
               priority={false}
             />
           </div>
-          <div className="mt-3 flex items-center gap-4">
-            {specData && (
+          <div className="mt-3 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              {specData && (
+                <button
+                  onClick={() => setShowSpec(!showSpec)}
+                  className="text-[11px] mono text-ink hover:text-edred transition-colors"
+                >
+                  ← 스펙 비교
+                </button>
+              )}
+              {catalogUrl && (
+                <a
+                  href={catalogUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-[11px] mono text-edred hover:underline font-medium tracking-[0.06em]"
+                >
+                  카탈로그 PDF →
+                </a>
+              )}
+            </div>
+            {products.some(p => p.priceStatus === "login") && (
               <button
-                onClick={() => setShowSpec(!showSpec)}
-                className="text-[11px] mono text-ink hover:text-edred transition-colors"
+                onClick={() => setBizModalOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-edred text-paper text-[11px] font-semibold rounded-full hover:bg-edred3 transition-colors whitespace-nowrap"
               >
-                ← 스펙 비교
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-paper shrink-0" />
+                우대가 확인
               </button>
-            )}
-            {catalogUrl && (
-              <a
-                href={catalogUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-[11px] mono text-edred hover:underline font-medium tracking-[0.06em]"
-              >
-                카탈로그 PDF →
-              </a>
             )}
           </div>
         </div>
@@ -535,7 +544,17 @@ export default function ProductPanel({ item, onClose, catalogUrl }: Props) {
                       </div>
 
                       {/* 수량 + 담기 */}
-                      <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
+                      <div className="flex flex-col items-end gap-1 shrink-0 mt-0.5">
+                      {product.priceStatus === "login" && (
+                        <button
+                          onClick={() => setBizModalOpen(true)}
+                          className="flex items-center gap-1 text-[10px] text-edred font-semibold hover:opacity-75 transition-opacity whitespace-nowrap"
+                        >
+                          <span className="inline-block w-1.5 h-1.5 rounded-full bg-edred shrink-0" />
+                          우대가 확인
+                        </button>
+                      )}
+                      <div className="flex items-center gap-1.5">
                         <input
                           type="number"
                           min={1}
@@ -559,6 +578,7 @@ export default function ProductPanel({ item, onClose, catalogUrl }: Props) {
                         >
                           {isAdded ? "✓" : "담기"}
                         </button>
+                      </div>
                       </div>
                     </div>
                   </div>
