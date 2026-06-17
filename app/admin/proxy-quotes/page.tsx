@@ -493,22 +493,33 @@ function AdminProxyQuotesInner() {
 
   async function handleAttachFiles(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []);
-    const results = await Promise.all(
-      files.map(
-        (f) =>
-          new Promise<{ name: string; base64: string; contentType: string }>((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => {
-              const result = reader.result as string;
-              resolve({ name: f.name, base64: result.split(",")[1], contentType: f.type });
-            };
-            reader.onerror = reject;
-            reader.readAsDataURL(f);
-          })
-      )
-    );
-    setAttachFiles((prev) => [...prev, ...results]);
-    e.target.value = "";
+    const oversized = files.filter((f) => f.size > 2 * 1024 * 1024);
+    if (oversized.length > 0) {
+      toast.error(`파일 크기는 2MB 이하만 가능합니다: ${oversized.map((f) => f.name).join(", ")}`);
+      e.target.value = "";
+      return;
+    }
+    try {
+      const results = await Promise.all(
+        files.map(
+          (f) =>
+            new Promise<{ name: string; base64: string; contentType: string }>((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => {
+                const result = reader.result as string;
+                resolve({ name: f.name, base64: result.split(",")[1], contentType: f.type });
+              };
+              reader.onerror = () => reject(new Error(`"${f.name}" 파일을 읽을 수 없습니다.`));
+              reader.readAsDataURL(f);
+            })
+        )
+      );
+      setAttachFiles((prev) => [...prev, ...results]);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "파일 읽기 오류가 발생했습니다.");
+    } finally {
+      e.target.value = "";
+    }
   }
 
   async function sendMail() {
@@ -529,6 +540,7 @@ function AdminProxyQuotesInner() {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) { toast.error(data.error ?? "메일 발송에 실패했습니다."); return; }
       setSent(true);
+      setAttachFiles([]);
       toast.success(`견적서를 ${data.sentTo}로 발송했습니다.`);
     } catch {
       toast.error("네트워크 오류가 발생했습니다.");
@@ -623,7 +635,7 @@ function AdminProxyQuotesInner() {
             <button
               onClick={() => {
                 setDoneQuoteId(null); setSent(false);
-                setLines([]); clearCustomer();
+                setLines([]); clearCustomer(); setAttachFiles([]);
                 router.replace("/admin/proxy-quotes");
               }}
               className="text-[12px] dim hover:text-ink transition-colors"

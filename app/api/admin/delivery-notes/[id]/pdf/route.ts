@@ -48,8 +48,8 @@ export async function GET(req: NextRequest, { params }: Params) {
     const firstItem = note.items[0];
     const itemLabel = firstItem
       ? note.items.length === 1
-        ? `${firstItem.description || firstItem.partNo} x ${firstItem.quantity}ea`
-        : `${firstItem.description || firstItem.partNo} x 외`
+        ? `${firstItem.description || firstItem.partNo || "품목"} x ${firstItem.quantity}ea`
+        : `${firstItem.description || firstItem.partNo || "품목"} x 외`
       : "품목없음";
     const smartFilename = `거래명세표_${dateStr}_${note.toCompany}(${itemLabel}).pdf`;
     const encodedFilename = encodeURIComponent(smartFilename);

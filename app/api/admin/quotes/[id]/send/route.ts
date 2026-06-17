@@ -79,7 +79,7 @@ export async function POST(
   const quote = await prisma.quote.findUnique({
     where: { id: quoteId },
     include: {
-      user: { select: { name: true, company: true, email: true, phone: true, tier: true } },
+      user: { select: { name: true, company: true, email: true, phone: true, tier: true, title: true } },
       items: {
         include: {
           product: { select: { partNo: true, description: true, category: true } },
@@ -140,7 +140,7 @@ export async function POST(
         company: recipientCompany,
         email: recipientEmail,
         phone: quote.user?.phone ?? quote.guestPhone ?? null,
-        title: quote.guestTitle ?? null,
+        title: quote.guestTitle ?? quote.user?.title ?? null,
       },
       items: quote.items.map((it) => ({
         quantity: it.quantity,

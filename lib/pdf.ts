@@ -340,7 +340,7 @@ function QuoteDocument({ quote }: { quote: QuoteForPdf }) {
             el(Text, { style: [S.tdNormal, S.colNo] }, String(idx + 1).padStart(2, "0")),
             el(Text, { style: [S.tdCode, S.colCode] }, item.product.partNo),
             el(Text, { style: [S.tdNormal, S.colDesc] }, item.product.description),
-            el(Text, { style: [S.tdNormal, S.colLead] }, item.leadTime ?? "협의"),
+            el(Text, { style: [S.tdNormal, S.colLead] }, item.leadTime || "협의"),
             el(Text, { style: [S.tdNormal, S.colQty] }, `${item.quantity} EA`),
             el(Text, { style: [S.tdNormal, S.colPrice] }, `₩ ${item.unitPrice.toLocaleString("en-US")}`),
             el(Text, { style: [S.tdAmount, S.colAmount] }, `₩ ${(item.unitPrice * item.quantity).toLocaleString("en-US")}`)

@@ -71,7 +71,7 @@ export async function GET(
     });
 
     const issuedDate = quote.createdAt;
-    const quoteNo = `Q-${quote.id}-${issuedDate.getFullYear()}${String(issuedDate.getMonth() + 1).padStart(2, "0")}${String(issuedDate.getDate()).padStart(2, "0")}`;
+    const quoteNo = `SMT-${issuedDate.getFullYear()}-Q-${String(quote.id).padStart(6, "0")}`;
 
     return new NextResponse(pdfBuffer.buffer as ArrayBuffer, {
       status: 200,
