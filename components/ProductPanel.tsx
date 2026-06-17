@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { signIn } from "next-auth/react";
 
 type Product = {
   id: number;
@@ -233,6 +234,45 @@ export default function ProductPanel({ item, onClose, catalogUrl }: Props) {
   const [quantities, setQuantities] = useState<Record<number, number>>({});
   const [added, setAdded] = useState<Set<number>>(new Set());
   const [showSpec, setShowSpec] = useState(false);
+  const [bizModalOpen, setBizModalOpen] = useState(false);
+  const [bizNo, setBizNo] = useState("");
+  const [bizCompany, setBizCompany] = useState("");
+  const [bizStep, setBizStep] = useState<"input" | "company">("input");
+  const [bizLoading, setBizLoading] = useState(false);
+  const [bizError, setBizError] = useState("");
+
+  async function handleBizVerify(e: React.FormEvent) {
+    e.preventDefault();
+    setBizError("");
+    setBizLoading(true);
+    try {
+      const res = await fetch("/api/auth/verify-biz", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ businessNo: bizNo.replace(/[^0-9]/g, "") }),
+      });
+      const data = await res.json();
+      if (data.status === "active") { setBizStep("company"); }
+      else { setBizError(data.message ?? "유효하지 않은 사업자번호입니다."); }
+    } catch { setBizError("네트워크 오류가 발생했습니다."); }
+    finally { setBizLoading(false); }
+  }
+
+  async function handleBizLogin(e: React.FormEvent) {
+    e.preventDefault();
+    setBizError("");
+    setBizLoading(true);
+    try {
+      const result = await signIn("credentials", {
+        businessNo: bizNo.replace(/[^0-9]/g, ""),
+        companyName: bizCompany,
+        redirect: false,
+      });
+      if (result?.ok) { setBizModalOpen(false); window.location.reload(); }
+      else { setBizError("로그인에 실패했습니다. 다시 시도해 주세요."); }
+    } catch { setBizError("네트워크 오류가 발생했습니다."); }
+    finally { setBizLoading(false); }
+  }
 
   const specData = item ? SPEC_DATA[item.category] : undefined;
 
@@ -312,6 +352,48 @@ export default function ProductPanel({ item, onClose, catalogUrl }: Props) {
 
   return (
     <>
+      {/* ── 우대가 확인 모달 ── */}
+      {bizModalOpen && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/50 px-4" onClick={() => setBizModalOpen(false)}>
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="font-semibold text-smblue text-base">우대가 확인</p>
+                <p className="text-[11px] text-gray-400 mt-0.5">사업자등록번호로 로그인 후 우대 금액 확인</p>
+              </div>
+              <button onClick={() => setBizModalOpen(false)} className="text-gray-300 hover:text-gray-500 text-xl leading-none">✕</button>
+            </div>
+            {bizStep === "input" && (
+              <form onSubmit={handleBizVerify} className="space-y-3">
+                <input type="text" value={bizNo} onChange={(e) => setBizNo(e.target.value)} required autoFocus
+                  placeholder="사업자등록번호 10자리" maxLength={12}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-smblue/30 bg-gray-50" />
+                {bizError && <p className="text-red-500 text-xs">{bizError}</p>}
+                <button type="submit" disabled={bizLoading}
+                  className="w-full bg-smblue hover:bg-smblue/90 disabled:opacity-50 text-white font-semibold py-3 rounded-xl text-sm transition-colors">
+                  {bizLoading ? "조회 중..." : "사업자 확인"}
+                </button>
+              </form>
+            )}
+            {bizStep === "company" && (
+              <form onSubmit={handleBizLogin} className="space-y-3">
+                <p className="text-xs text-green-600">✓ 정상 사업자 확인 완료</p>
+                <input type="text" value={bizCompany} onChange={(e) => setBizCompany(e.target.value)} required autoFocus
+                  placeholder="상호명 입력 (예: (주)스마텍)"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-smblue/30 bg-gray-50" />
+                {bizError && <p className="text-red-500 text-xs">{bizError}</p>}
+                <button type="submit" disabled={bizLoading}
+                  className="w-full bg-smblue hover:bg-smblue/90 disabled:opacity-50 text-white font-semibold py-3 rounded-xl text-sm transition-colors">
+                  {bizLoading ? "확인 중..." : "우대가 확인하기"}
+                </button>
+                <button type="button" onClick={() => { setBizStep("input"); setBizError(""); }}
+                  className="w-full text-xs text-gray-400 hover:text-gray-600 py-1">번호 다시 입력</button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* ── 스펙 비교 패널 ── */}
       {showSpec && specData && (
         <div className="fixed inset-0 md:inset-auto md:top-0 md:bottom-0 md:right-[480px] md:left-0 z-[60] bg-paper border-r hair flex flex-col shadow-2xl">
@@ -466,7 +548,13 @@ export default function ProductPanel({ item, onClose, catalogUrl }: Props) {
                           ) : product.priceStatus === "pending" ? (
                             <span className="mono text-[11px] text-dim">승인 대기</span>
                           ) : (
-                            <span className="mono text-[11px] text-dim">로그인 후 가격 확인</span>
+                            <button
+                              onClick={() => setBizModalOpen(true)}
+                              className="flex items-center gap-1 text-[11px] text-edred font-medium hover:opacity-75 transition-opacity"
+                            >
+                              <span className="inline-block w-1.5 h-1.5 rounded-full bg-edred shrink-0" />
+                              우대가 확인
+                            </button>
                           )}
                         </div>
                       </div>

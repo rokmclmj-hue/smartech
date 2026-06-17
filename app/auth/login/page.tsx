@@ -192,9 +192,9 @@ function LoginContent() {
               <rect x="2" y="3" width="16" height="14" rx="2"/>
               <path d="M6 7h8M6 10h5"/>
             </svg>
-            <p className="text-sm font-semibold text-smblue tracking-tight">사업자번호로 우대가 확인</p>
+            <p className="text-sm font-semibold text-smblue tracking-tight">사업자번호로 로그인</p>
           </div>
-          <p className="text-[11px] text-gray-400 text-center mb-3">사업자등록번호 입력 시 OEM 우대 금액으로 바로 확인</p>
+          <p className="text-[11px] text-gray-400 text-center mb-3">로그인 시 우대 금액으로 바로 확인</p>
 
           {bizStep === "input" && (
             <form onSubmit={handleBizVerify} className="space-y-2">

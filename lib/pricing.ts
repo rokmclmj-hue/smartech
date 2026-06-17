@@ -7,7 +7,7 @@ const DEFAULT_MULTIPLIERS: Record<string, number> = {
   PUBLIC:     1.40,
   ENDUSER:    1.40,
   PENDING:    1.40,
-  OEM:        1.25,
+  OEM:        1.30,
   DEALER:     1.20,
   KEY_DEALER: 1.15,
   VIP_DEALER: 1.10,

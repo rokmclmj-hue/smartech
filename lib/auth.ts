@@ -106,7 +106,7 @@ const providers: any[] = [
         if (!companyName) return null;
 
         // 3. KnownCompany에서 사업자번호 또는 상호명으로 등급 조회
-        let tier: string = "OEM"; // 기본 우대 등급
+        let tier: string = "ENDUSER"; // 기본 일반회원 등급
         const known = await prisma.knownCompany.findFirst({
           where: {
             OR: [

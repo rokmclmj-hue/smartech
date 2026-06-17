@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db";
 
 const TIER_MULTIPLIER: Record<string, number> = {
   ENDUSER: 1.40,
-  OEM: 1.25,
+  OEM: 1.30,
   DEALER: 1.20,
   KEY_DEALER: 1.15,
   VIP_DEALER: 1.10,
