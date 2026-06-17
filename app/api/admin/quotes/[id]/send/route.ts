@@ -71,10 +71,15 @@ export async function POST(
     );
   }
 
+  // body에서 추가 첨부파일 파싱 (사업자등록증·통장사본 등)
+  let bodyData: { attachments?: { filename: string; base64: string; contentType: string }[] } = {};
+  try { bodyData = await req.json(); } catch { /* body 없음 */ }
+  const extraAttachments = bodyData.attachments ?? [];
+
   const quote = await prisma.quote.findUnique({
     where: { id: quoteId },
     include: {
-      user: { select: { name: true, company: true, email: true, phone: true } },
+      user: { select: { name: true, company: true, email: true, phone: true, tier: true } },
       items: {
         include: {
           product: { select: { partNo: true, description: true, category: true } },
@@ -119,6 +124,9 @@ export async function POST(
   }
 
   try {
+    const tier = (quote as { guestTier?: string | null }).guestTier ?? quote.user?.tier ?? "ENDUSER";
+    const priceBasis = (tier && tier !== "ENDUSER" && tier !== "PENDING") ? "우대적용" : null;
+
     const quoteForPdf: QuoteForPdf = {
       id: quote.id,
       createdAt: quote.createdAt,
@@ -126,6 +134,7 @@ export async function POST(
       taxInvoiceRequested: quote.taxInvoiceRequested,
       totalAmount: quote.totalAmount,
       note: quote.note,
+      priceBasis,
       user: {
         name: recipientName,
         company: recipientCompany,
@@ -136,6 +145,7 @@ export async function POST(
       items: quote.items.map((it) => ({
         quantity: it.quantity,
         unitPrice: it.unitPrice,
+        leadTime: (it as { leadTime?: string | null }).leadTime ?? null,
         product: {
           partNo: it.customPartNo ?? it.product?.partNo ?? "",
           description: it.customDescription ?? it.product?.description ?? "",
@@ -166,6 +176,11 @@ export async function POST(
           grandTotal,
           expiresAt: quote.expiresAt,
         }),
+        extraAttachments: extraAttachments.map((a) => ({
+          filename: a.filename,
+          content: Buffer.from(a.base64, "base64"),
+          contentType: a.contentType,
+        })),
       });
     } catch (e: unknown) {
       console.error("[quote send / mail]", e);

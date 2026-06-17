@@ -43,13 +43,24 @@ export async function GET(req: NextRequest, { params }: Params) {
       pdfBuffer.byteOffset + pdfBuffer.byteLength
     ) as ArrayBuffer;
 
+    // 스마트 파일명: 거래명세표_YYYYMMDD_거래처명(품목명 x Nea).pdf
+    const dateStr = note.createdAt.toISOString().slice(0, 10).replace(/-/g, "");
+    const firstItem = note.items[0];
+    const itemLabel = firstItem
+      ? note.items.length === 1
+        ? `${firstItem.description || firstItem.partNo} x ${firstItem.quantity}ea`
+        : `${firstItem.description || firstItem.partNo} x 외`
+      : "품목없음";
+    const smartFilename = `거래명세표_${dateStr}_${note.toCompany}(${itemLabel}).pdf`;
+    const encodedFilename = encodeURIComponent(smartFilename);
+
     return new NextResponse(arrayBuf, {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": preview
           ? `inline; filename="DN_${note.noteNo}.pdf"`
-          : `attachment; filename="DN_${note.noteNo}.pdf"`,
+          : `attachment; filename="DN_${note.noteNo}.pdf"; filename*=UTF-8''${encodedFilename}`,
         "Content-Length": String(pdfBuffer.length),
       },
     });

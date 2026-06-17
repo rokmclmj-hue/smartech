@@ -15,7 +15,11 @@ export async function sendQuotePdf(
   to: string,
   pdfBuffer: Buffer,
   quoteNo: string,
-  opts?: { html?: string; text?: string }
+  opts?: {
+    html?: string;
+    text?: string;
+    extraAttachments?: { filename: string; content: Buffer; contentType: string }[];
+  }
 ): Promise<void> {
   await transporter.sendMail({
     from: `"스마텍" <${process.env.GMAIL_USER}>`,
@@ -31,6 +35,7 @@ export async function sendQuotePdf(
         content: pdfBuffer,
         contentType: "application/pdf",
       },
+      ...(opts?.extraAttachments ?? []),
     ],
   });
 }

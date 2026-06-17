@@ -29,6 +29,7 @@ export interface QuoteForPdf {
   taxInvoiceRequested: boolean;
   totalAmount: number | null;
   note?: string | null;
+  priceBasis?: string | null;
   user: {
     name: string;
     company: string;
@@ -39,6 +40,7 @@ export interface QuoteForPdf {
   items: {
     quantity: number;
     unitPrice: number;
+    leadTime?: string | null;
     product: {
       partNo: string;
       description: string;
@@ -150,12 +152,13 @@ const S = StyleSheet.create({
     paddingHorizontal: 4,
     backgroundColor: "#fafafa",
   },
-  colNo:     { width: "6%", textAlign: "center" },
-  colCode:   { width: "18%", paddingRight: 4 },
-  colDesc:   { width: "42%", paddingRight: 4 },
-  colQty:    { width: "8%", textAlign: "center" },
-  colPrice:  { width: "13%", textAlign: "right" },
-  colAmount: { width: "13%", textAlign: "right" },
+  colNo:     { width: "5%",  textAlign: "center" },
+  colCode:   { width: "16%", paddingRight: 4 },
+  colDesc:   { width: "35%", paddingRight: 4 },
+  colLead:   { width: "9%",  textAlign: "center" },
+  colQty:    { width: "7%",  textAlign: "center" },
+  colPrice:  { width: "14%", textAlign: "right" },
+  colAmount: { width: "14%", textAlign: "right" },
 
   tdNormal: { fontSize: 8, color: "#222222" },
   tdCode:   { fontSize: 7, color: "#333333", fontFamily: "Pretendard", fontWeight: 700 },
@@ -239,6 +242,9 @@ function fmtDate(d: Date): string {
 function QuoteDocument({ quote }: { quote: QuoteForPdf }) {
   const issued = new Date(quote.createdAt);
   const year = issued.getFullYear();
+  const seq = String(quote.id).padStart(6, "0");
+  const quoteNo = `SMT-${year}-Q-${seq}`;
+  const validStr = quote.expiresAt ? fmtDate(new Date(quote.expiresAt)) : "발행일+14일";
 
   const subtotal = quote.items.reduce((s, i) => s + i.unitPrice * i.quantity, 0);
   const vat = Math.round(subtotal * VAT_RATE);
@@ -248,15 +254,15 @@ function QuoteDocument({ quote }: { quote: QuoteForPdf }) {
 
   return el(
     Document,
-    { title: `SMARTECH QUOTATION ${fmtDate(issued)}` },
+    { title: `SMARTECH QUOTATION ${quoteNo}` },
     el(Page, { size: "A4", style: S.page },
 
       // ── 헤더
       el(View, { style: S.header },
         el(Text, { style: S.headerTitle }, "SMARTECH · QUOTATION"),
         el(View, { style: S.headerMeta },
-          el(Text, { style: S.headerMetaLine }, `DATE · ${fmtDate(issued)}`),
-          el(Text, { style: S.headerMetaLine }, `ITEMS · ${quote.items.length} LINES`)
+          el(Text, { style: S.headerMetaLine }, `Q-REF · ${quoteNo}`),
+          el(Text, { style: S.headerMetaLine }, `ISSUED · ${fmtDate(issued)}   VALID · ${validStr}`)
         )
       ),
 
@@ -265,22 +271,22 @@ function QuoteDocument({ quote }: { quote: QuoteForPdf }) {
         el(View, { style: S.toBox },
           el(Text, { style: S.partyLabel }, "TO · 수신처"),
           el(View, { style: S.partyRow },
-            el(Text, { style: S.partyKey }, "Company"),
+            el(Text, { style: S.partyKey }, "COMPANY"),
             el(Text, { style: S.partyVal }, quote.user.company)
           ),
           el(View, { style: S.partyRow },
-            el(Text, { style: S.partyKey }, "Attn"),
-            el(Text, { style: S.partyVal }, quote.user.title ? `${quote.user.name} (${quote.user.title})` : quote.user.name)
+            el(Text, { style: S.partyKey }, "ATTN"),
+            el(Text, { style: S.partyVal }, quote.user.title ? `${quote.user.name} ${quote.user.title}` : quote.user.name)
           ),
           quote.user.phone
             ? el(View, { style: S.partyRow },
-                el(Text, { style: S.partyKey }, "Tel"),
+                el(Text, { style: S.partyKey }, "TEL"),
                 el(Text, { style: S.partyVal }, quote.user.phone)
               )
             : null,
           quote.user.email
             ? el(View, { style: S.partyRow },
-                el(Text, { style: S.partyKey }, "Email"),
+                el(Text, { style: S.partyKey }, "EMAIL"),
                 el(Text, { style: S.partyVal }, quote.user.email)
               )
             : null
@@ -288,7 +294,7 @@ function QuoteDocument({ quote }: { quote: QuoteForPdf }) {
         el(View, { style: S.fromBox },
           el(Text, { style: S.partyLabel }, "FROM · 발신처"),
           el(View, { style: S.partyRow },
-            el(Text, { style: S.partyKey }, "Company"),
+            el(Text, { style: S.partyKey }, "COMPANY"),
             el(Text, { style: S.partyVal }, `${SMARTECH_COMPANY.name} · ${SMARTECH_COMPANY.english}`)
           ),
           el(View, { style: S.partyRow },
@@ -296,20 +302,24 @@ function QuoteDocument({ quote }: { quote: QuoteForPdf }) {
             el(Text, { style: S.partyVal }, SMARTECH_COMPANY.ceo)
           ),
           el(View, { style: S.partyRow },
-            el(Text, { style: S.partyKey }, "Biz No"),
+            el(Text, { style: S.partyKey }, "BIZ NO"),
             el(Text, { style: S.partyVal }, SMARTECH_COMPANY.bizNo)
           ),
           el(View, { style: S.partyRow },
-            el(Text, { style: S.partyKey }, "Tel"),
+            el(Text, { style: S.partyKey }, "TEL"),
             el(Text, { style: S.partyVal }, `${SMARTECH_COMPANY.officeTel} / M ${SMARTECH_COMPANY.mobileTel}`)
           ),
           el(View, { style: S.partyRow },
-            el(Text, { style: S.partyKey }, "Email"),
+            el(Text, { style: S.partyKey }, "EMAIL"),
             el(Text, { style: S.partyVal }, SMARTECH_COMPANY.email)
           ),
           el(View, { style: S.partyRow },
-            el(Text, { style: S.partyKey }, "Office"),
+            el(Text, { style: S.partyKey }, "OFFICE"),
             el(Text, { style: S.partyVal }, SMARTECH_COMPANY.headOfficeKo)
+          ),
+          el(View, { style: S.partyRow },
+            el(Text, { style: S.partyKey }, "A/S CTR"),
+            el(Text, { style: S.partyVal }, SMARTECH_COMPANY.cheonanCenterKo)
           )
         )
       ),
@@ -317,9 +327,10 @@ function QuoteDocument({ quote }: { quote: QuoteForPdf }) {
       // ── 품목 테이블
       el(View, { style: S.table },
         el(View, { style: S.tableHeader },
-          el(Text, { style: [S.thCell, S.colNo] }, "No"),
+          el(Text, { style: [S.thCell, S.colNo] }, "NO"),
           el(Text, { style: [S.thCell, S.colCode] }, "PART NO"),
           el(Text, { style: [S.thCell, S.colDesc] }, "DESCRIPTION"),
+          el(Text, { style: [S.thCell, S.colLead] }, "납기"),
           el(Text, { style: [S.thCell, S.colQty] }, "QTY"),
           el(Text, { style: [S.thCell, S.colPrice] }, "UNIT PRICE"),
           el(Text, { style: [S.thCell, S.colAmount] }, "SUBTOTAL")
@@ -329,6 +340,7 @@ function QuoteDocument({ quote }: { quote: QuoteForPdf }) {
             el(Text, { style: [S.tdNormal, S.colNo] }, String(idx + 1).padStart(2, "0")),
             el(Text, { style: [S.tdCode, S.colCode] }, item.product.partNo),
             el(Text, { style: [S.tdNormal, S.colDesc] }, item.product.description),
+            el(Text, { style: [S.tdNormal, S.colLead] }, item.leadTime ?? "협의"),
             el(Text, { style: [S.tdNormal, S.colQty] }, `${item.quantity} EA`),
             el(Text, { style: [S.tdNormal, S.colPrice] }, `₩ ${item.unitPrice.toLocaleString("en-US")}`),
             el(Text, { style: [S.tdAmount, S.colAmount] }, `₩ ${(item.unitPrice * item.quantity).toLocaleString("en-US")}`)
@@ -339,8 +351,14 @@ function QuoteDocument({ quote }: { quote: QuoteForPdf }) {
       // ── 합계
       el(View, { style: S.summaryArea },
         el(View, { style: S.summaryBox },
+          quote.priceBasis
+            ? el(View, { style: S.summaryRow },
+                el(Text, { style: S.sumLabel }, "PRICE BASIS"),
+                el(Text, { style: { ...S.sumValue, color: "#c00020", fontFamily: "Pretendard", fontWeight: 700 } }, quote.priceBasis)
+              )
+            : null,
           el(View, { style: S.summaryRow },
-            el(Text, { style: S.sumLabel }, "Sub-Total"),
+            el(Text, { style: S.sumLabel }, "SUB-TOTAL"),
             el(Text, { style: S.sumValue }, `₩ ${subtotal.toLocaleString("en-US")}`)
           ),
           el(View, { style: S.summaryRow },
@@ -451,9 +469,9 @@ const DN = StyleSheet.create({
 
 // 거래명세표 전용 레이아웃 스타일 (견적서 화이트 스타일과 별개로 유지)
 const DS = StyleSheet.create({
-  topBar: { backgroundColor: "#111111", paddingVertical: 10, paddingHorizontal: 14, flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  topBar: { backgroundColor: "#c00020", paddingVertical: 10, paddingHorizontal: 14, flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   topBarLeft: { color: "#ffffff", fontSize: 7, fontFamily: "Pretendard", letterSpacing: 1 },
-  topBarRight: { color: "#aaaaaa", fontSize: 7, letterSpacing: 0.5 },
+  topBarRight: { color: "#ffbbbb", fontSize: 7, letterSpacing: 0.5 },
   titleArea: { borderBottom: "2 solid #111111", paddingBottom: 8, marginBottom: 10, flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", marginTop: 10 },
   titleLeft: {},
   noteTitle: { fontSize: 26, fontFamily: "Pretendard", fontWeight: 700, color: "#111111", letterSpacing: 6 },
@@ -478,7 +496,7 @@ const DS = StyleSheet.create({
   breakdownValue: { fontSize: 8, color: "#111111", fontFamily: "Pretendard", fontWeight: 700 },
   taxBadge: { backgroundColor: "#111111", paddingHorizontal: 6, paddingVertical: 2, marginTop: 4, alignSelf: "flex-start" },
   taxBadgeText: { fontSize: 6, color: "#ffffff", letterSpacing: 1 },
-  tableHeader: { flexDirection: "row", backgroundColor: "#111111", paddingVertical: 6, paddingHorizontal: 6 },
+  tableHeader: { flexDirection: "row", backgroundColor: "#c00020", paddingVertical: 6, paddingHorizontal: 6 },
   thCell: { color: "#ffffff", fontFamily: "Pretendard", fontWeight: 700, fontSize: 7, letterSpacing: 1 },
   tableRow: { flexDirection: "row", borderBottom: "1 solid #eeeeee", paddingVertical: 6, paddingHorizontal: 6 },
   tableRowAlt: { flexDirection: "row", borderBottom: "1 solid #eeeeee", paddingVertical: 6, paddingHorizontal: 6, backgroundColor: "#fafafa" },

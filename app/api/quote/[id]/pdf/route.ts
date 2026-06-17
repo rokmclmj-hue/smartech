@@ -41,6 +41,9 @@ export async function GET(
   }
 
   try {
+    const tier = (quote as { guestTier?: string | null }).guestTier ?? quote.user?.tier ?? "ENDUSER";
+    const priceBasis = (tier && tier !== "ENDUSER" && tier !== "PENDING") ? "우대적용" : null;
+
     const pdfBuffer = await generateQuotePdf({
       id: quote.id,
       createdAt: quote.createdAt,
@@ -48,6 +51,7 @@ export async function GET(
       taxInvoiceRequested: quote.taxInvoiceRequested,
       totalAmount: quote.totalAmount,
       note: quote.note,
+      priceBasis,
       user: {
         name: quote.user?.name ?? quote.guestName ?? "",
         company: quote.user?.company ?? quote.guestCompany ?? "",
@@ -58,6 +62,7 @@ export async function GET(
       items: quote.items.map((item) => ({
         quantity: item.quantity,
         unitPrice: item.unitPrice,
+        leadTime: (item as { leadTime?: string | null }).leadTime ?? null,
         product: {
           partNo: item.customPartNo ?? item.product?.partNo ?? "",
           description: item.customDescription ?? item.product?.description ?? "",

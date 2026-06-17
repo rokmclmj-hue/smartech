@@ -181,6 +181,7 @@ function AdminProxyQuotesInner() {
   );
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [attachFiles, setAttachFiles] = useState<{ name: string; base64: string; contentType: string }[]>([]);
 
   // 결제조건
   const [paymentTerm, setPaymentTerm] = useState<string | null>(null);
@@ -490,11 +491,41 @@ function AdminProxyQuotesInner() {
 
   // ── 메일 발송 ────────────────────────────────────────────
 
+  async function handleAttachFiles(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
+    const results = await Promise.all(
+      files.map(
+        (f) =>
+          new Promise<{ name: string; base64: string; contentType: string }>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+              const result = reader.result as string;
+              resolve({ name: f.name, base64: result.split(",")[1], contentType: f.type });
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(f);
+          })
+      )
+    );
+    setAttachFiles((prev) => [...prev, ...results]);
+    e.target.value = "";
+  }
+
   async function sendMail() {
     if (!doneQuoteId) return;
     setSending(true);
     try {
-      const res = await fetch(`/api/admin/quotes/${doneQuoteId}/send`, { method: "POST" });
+      const res = await fetch(`/api/admin/quotes/${doneQuoteId}/send`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          attachments: attachFiles.map((f) => ({
+            filename: f.name,
+            base64: f.base64,
+            contentType: f.contentType,
+          })),
+        }),
+      });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) { toast.error(data.error ?? "메일 발송에 실패했습니다."); return; }
       setSent(true);
@@ -526,11 +557,39 @@ function AdminProxyQuotesInner() {
           </div>
 
           <div className="flex flex-col gap-3 max-w-[320px] mx-auto">
+            {/* 첨부 서류 (사업자등록증·통장사본) */}
+            {!sent && recipientEmail && (
+              <div className="border hair rounded-md px-4 py-3 space-y-2">
+                <div className="mono text-[10px] tracking-[0.12em] dim uppercase">첨부 서류 (선택)</div>
+                <label className="flex items-center gap-2 cursor-pointer text-[12px] dim hover:text-ink transition-colors">
+                  <span>📎 파일 선택 (사업자등록증·통장사본)</span>
+                  <input
+                    type="file"
+                    multiple
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={handleAttachFiles}
+                    className="hidden"
+                  />
+                </label>
+                {attachFiles.map((f, i) => (
+                  <div key={i} className="flex items-center justify-between text-[11px]">
+                    <span className="truncate dim">{f.name}</span>
+                    <button
+                      onClick={() => setAttachFiles((prev) => prev.filter((_, j) => j !== i))}
+                      className="text-[10px] dim hover:text-edred ml-2 shrink-0"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* 메일 발송 */}
             {recipientEmail ? (
               sent ? (
                 <div className="border border-green-500/40 rounded-md px-4 py-3 text-[13px] text-green-600">
-                  ✓ {recipientEmail} 발송 완료
+                  ✓ {recipientEmail} 발송 완료{attachFiles.length > 0 ? ` (+첨부 ${attachFiles.length}건)` : ""}
                 </div>
               ) : (
                 <button
@@ -539,6 +598,9 @@ function AdminProxyQuotesInner() {
                   className="bg-edred text-white px-4 py-3 rounded-md text-[14px] font-semibold hover:brightness-110 disabled:opacity-40 transition-all"
                 >
                   {sending ? "발송 중…" : `📧 메일 발송 → ${recipientEmail}`}
+                  {attachFiles.length > 0 && !sending && (
+                    <span className="block text-[11px] font-normal opacity-80 mt-0.5">첨부 {attachFiles.length}건 포함</span>
+                  )}
                 </button>
               )
             ) : (
