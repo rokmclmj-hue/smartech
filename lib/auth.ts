@@ -101,19 +101,14 @@ const providers: any[] = [
           return { id: String(user.id), name: user.name, tier: user.tier, company: user.company, businessNo: digits };
         }
 
-        // 2. 신규 가입 — companyName 필수
-        const companyName = ((credentials.companyName as string) || "").trim();
-        if (!companyName) return null;
+        // 2. 신규 가입 — 상호명은 선택(없으면 사업자번호로 대체)
+        const companyName = ((credentials.companyName as string) || "").trim()
+          || `사업자_${digits}`;
 
-        // 3. KnownCompany에서 사업자번호 또는 상호명으로 등급 조회
+        // 3. KnownCompany에서 사업자번호로 등급 조회
         let tier: string = "ENDUSER"; // 기본 일반회원 등급
         const known = await prisma.knownCompany.findFirst({
-          where: {
-            OR: [
-              { businessNo: digits },
-              { companyName: { contains: companyName, mode: "insensitive" } },
-            ],
-          },
+          where: { businessNo: digits },
         });
         if (known) tier = known.tier;
 

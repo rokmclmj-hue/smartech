@@ -252,20 +252,12 @@ export default function ProductPanel({ item, onClose, catalogUrl }: Props) {
         body: JSON.stringify({ businessNo: bizNo.replace(/[^0-9]/g, "") }),
       });
       const data = await res.json();
-      if (data.status === "active") { setBizStep("company"); }
-      else { setBizError(data.message ?? "유효하지 않은 사업자번호입니다."); }
-    } catch { setBizError("네트워크 오류가 발생했습니다."); }
-    finally { setBizLoading(false); }
-  }
-
-  async function handleBizLogin(e: React.FormEvent) {
-    e.preventDefault();
-    setBizError("");
-    setBizLoading(true);
-    try {
+      if (data.status !== "active") {
+        setBizError(data.message ?? "유효하지 않은 사업자번호입니다.");
+        return;
+      }
       const result = await signIn("credentials", {
         businessNo: bizNo.replace(/[^0-9]/g, ""),
-        companyName: bizCompany,
         redirect: false,
       });
       if (result?.ok) { setBizModalOpen(false); window.location.reload(); }
@@ -363,33 +355,16 @@ export default function ProductPanel({ item, onClose, catalogUrl }: Props) {
               </div>
               <button onClick={() => setBizModalOpen(false)} className="text-gray-300 hover:text-gray-500 text-xl leading-none">✕</button>
             </div>
-            {bizStep === "input" && (
-              <form onSubmit={handleBizVerify} className="space-y-3">
-                <input type="text" value={bizNo} onChange={(e) => setBizNo(e.target.value)} required autoFocus
-                  placeholder="사업자등록번호 10자리" maxLength={12}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-smblue/30 bg-gray-50" />
-                {bizError && <p className="text-red-500 text-xs">{bizError}</p>}
-                <button type="submit" disabled={bizLoading}
-                  className="w-full bg-smblue hover:bg-smblue/90 disabled:opacity-50 text-white font-semibold py-3 rounded-xl text-sm transition-colors">
-                  {bizLoading ? "조회 중..." : "사업자 확인"}
-                </button>
-              </form>
-            )}
-            {bizStep === "company" && (
-              <form onSubmit={handleBizLogin} className="space-y-3">
-                <p className="text-xs text-green-600">✓ 정상 사업자 확인 완료</p>
-                <input type="text" value={bizCompany} onChange={(e) => setBizCompany(e.target.value)} required autoFocus
-                  placeholder="상호명 입력 (예: (주)스마텍)"
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-smblue/30 bg-gray-50" />
-                {bizError && <p className="text-red-500 text-xs">{bizError}</p>}
-                <button type="submit" disabled={bizLoading}
-                  className="w-full bg-smblue hover:bg-smblue/90 disabled:opacity-50 text-white font-semibold py-3 rounded-xl text-sm transition-colors">
-                  {bizLoading ? "확인 중..." : "우대가 확인하기"}
-                </button>
-                <button type="button" onClick={() => { setBizStep("input"); setBizError(""); }}
-                  className="w-full text-xs text-gray-400 hover:text-gray-600 py-1">번호 다시 입력</button>
-              </form>
-            )}
+            <form onSubmit={handleBizVerify} className="space-y-3">
+              <input type="text" value={bizNo} onChange={(e) => setBizNo(e.target.value)} required autoFocus
+                placeholder="사업자등록번호 10자리" maxLength={12}
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-smblue/30 bg-gray-50" />
+              {bizError && <p className="text-red-500 text-xs">{bizError}</p>}
+              <button type="submit" disabled={bizLoading}
+                className="w-full bg-smblue hover:bg-smblue/90 disabled:opacity-50 text-white font-semibold py-3 rounded-xl text-sm transition-colors">
+                {bizLoading ? "확인 중..." : "로그인하기"}
+              </button>
+            </form>
           </div>
         </div>
       )}

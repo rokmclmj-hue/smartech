@@ -23,8 +23,6 @@ function LoginContent() {
 
   // 사업자번호 로그인 상태
   const [bizNo, setBizNo] = useState("");
-  const [bizCompany, setBizCompany] = useState("");
-  const [bizStep, setBizStep] = useState<"input" | "company" | "done">("input");
   const [bizLoading, setBizLoading] = useState(false);
   const [bizError, setBizError] = useState("");
 
@@ -33,32 +31,20 @@ function LoginContent() {
     setBizError("");
     setBizLoading(true);
     try {
+      // 1단계: 국세청 유효성 검증
       const res = await fetch("/api/auth/verify-biz", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ businessNo: bizNo.replace(/[^0-9]/g, "") }),
       });
       const data = await res.json();
-      if (data.status === "active") {
-        setBizStep("company");
-      } else {
+      if (data.status !== "active") {
         setBizError(data.message ?? "유효하지 않은 사업자번호입니다.");
+        return;
       }
-    } catch {
-      setBizError("네트워크 오류가 발생했습니다.");
-    } finally {
-      setBizLoading(false);
-    }
-  }
-
-  async function handleBizLogin(e: React.FormEvent) {
-    e.preventDefault();
-    setBizError("");
-    setBizLoading(true);
-    try {
+      // 2단계: 바로 로그인
       const result = await signIn("credentials", {
         businessNo: bizNo.replace(/[^0-9]/g, ""),
-        companyName: bizCompany,
         redirect: false,
       });
       if (result?.ok) {
@@ -194,58 +180,27 @@ function LoginContent() {
             </svg>
             <p className="text-sm font-semibold text-smblue tracking-tight">사업자번호로 로그인</p>
           </div>
-          <p className="text-[11px] text-gray-400 text-center mb-3">로그인 시 우대 금액으로 바로 확인</p>
+          <p className="text-[11px] text-gray-400 text-center mb-3">사업자번호 입력 후 바로 로그인 · 우대 금액 확인</p>
 
-          {bizStep === "input" && (
-            <form onSubmit={handleBizVerify} className="space-y-2">
-              <input
-                type="text"
-                value={bizNo}
-                onChange={(e) => setBizNo(e.target.value)}
-                required
-                placeholder="사업자등록번호 10자리 (예: 1234567890)"
-                maxLength={12}
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-smblue/30 bg-gray-50"
-              />
-              {bizError && <p className="text-red-500 text-xs">{bizError}</p>}
-              <button
-                type="submit"
-                disabled={bizLoading}
-                className="w-full bg-smblue hover:bg-smblue/90 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition-colors text-sm"
-              >
-                {bizLoading ? "조회 중..." : "사업자 확인"}
-              </button>
-            </form>
-          )}
-
-          {bizStep === "company" && (
-            <form onSubmit={handleBizLogin} className="space-y-2">
-              <p className="text-xs text-green-600 text-center mb-1">✓ 정상 사업자 확인</p>
-              <input
-                type="text"
-                value={bizCompany}
-                onChange={(e) => setBizCompany(e.target.value)}
-                required
-                placeholder="상호명 입력 (예: (주)스마텍)"
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-smblue/30 bg-gray-50"
-              />
-              {bizError && <p className="text-red-500 text-xs">{bizError}</p>}
-              <button
-                type="submit"
-                disabled={bizLoading}
-                className="w-full bg-smblue hover:bg-smblue/90 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition-colors text-sm"
-              >
-                {bizLoading ? "로그인 중..." : "우대가 확인하기"}
-              </button>
-              <button
-                type="button"
-                onClick={() => { setBizStep("input"); setBizError(""); }}
-                className="w-full text-xs text-gray-400 hover:text-gray-600 py-1"
-              >
-                번호 다시 입력
-              </button>
-            </form>
-          )}
+          <form onSubmit={handleBizVerify} className="space-y-2">
+            <input
+              type="text"
+              value={bizNo}
+              onChange={(e) => setBizNo(e.target.value)}
+              required
+              placeholder="사업자등록번호 10자리 (예: 1234567890)"
+              maxLength={12}
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-smblue/30 bg-gray-50"
+            />
+            {bizError && <p className="text-red-500 text-xs">{bizError}</p>}
+            <button
+              type="submit"
+              disabled={bizLoading}
+              className="w-full bg-smblue hover:bg-smblue/90 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition-colors text-sm"
+            >
+              {bizLoading ? "확인 중..." : "로그인하기"}
+            </button>
+          </form>
         </div>
 
         {/* 관리자 링크 — 매우 작게 */}
