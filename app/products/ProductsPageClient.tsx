@@ -613,7 +613,7 @@ function CatalogTable({ groups, onBizLogin }: { groups: [string, Product[]][]; o
                         <span className="text-[10px] text-dim">승인 대기</span>
                       ) : (
                         <button
-                          onClick={() => setBizModalOpen(true)}
+                          onClick={() => onBizLogin()}
                           className="text-[10px] text-smblue hover:text-smblue/70 font-medium pb-0.5 border-b border-smblue/30"
                         >
                           우대가 확인
