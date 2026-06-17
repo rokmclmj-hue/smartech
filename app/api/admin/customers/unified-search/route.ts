@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
   // 1. 홈페이지 등록 회원
   const users = await prisma.user.findMany({
     where: { tier: { in: ELIGIBLE_TIERS } },
-    select: { id: true, name: true, company: true, phone: true, email: true, tier: true },
+    select: { id: true, name: true, company: true, phone: true, email: true, tier: true, businessNo: true },
     orderBy: { createdAt: "desc" },
     take: 500,
   });
@@ -32,6 +32,7 @@ export async function GET(req: NextRequest) {
       name: u.name,
       phone: u.phone ?? "",
       email: u.email ?? "",
+      bizNo: u.businessNo ?? null,
       tier: u.tier,
       paymentTerm: null as string | null,
       contacts: [] as { name: string; title: string | null; mobile: string | null; email: string | null }[],
@@ -56,6 +57,7 @@ export async function GET(req: NextRequest) {
       name: c.contacts[0]?.name ?? "",
       phone: c.contacts[0]?.mobile ?? c.contacts[0]?.tel ?? c.phone ?? "",
       email: c.contacts[0]?.email ?? c.email ?? "",
+      bizNo: c.businessNo ?? null,
       tier: c.tier,
       paymentTerm: c.paymentTerm ?? null,
       contacts: c.contacts.map((ct) => ({

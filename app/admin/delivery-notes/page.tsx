@@ -35,13 +35,37 @@ type DeliveryNote = {
 
 type SearchResult = {
   id: number;
-  source: "user" | "company";
+  source: "user" | "company" | "known";
   company: string;
   name: string;
   phone: string;
   email: string;
+  bizNo?: string | null;
   contacts: { name: string; title: string | null; mobile: string | null; email: string | null }[];
 };
+
+function formatBizNo(raw: string): string {
+  const digits = raw.replace(/\D/g, "").slice(0, 10);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 5) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  return `${digits.slice(0, 3)}-${digits.slice(3, 5)}-${digits.slice(5)}`;
+}
+
+function formatPhone(raw: string): string {
+  const digits = raw.replace(/\D/g, "").slice(0, 11);
+  if (digits.length <= 3) return digits;
+  if (digits.startsWith("02")) {
+    // 서울 지역번호 02-xxxx-xxxx (최대 10자리)
+    const d = digits.slice(0, 10);
+    if (d.length <= 2) return d;
+    if (d.length <= 6) return `${d.slice(0, 2)}-${d.slice(2)}`;
+    if (d.length <= 9) return `${d.slice(0, 2)}-${d.slice(2, 5)}-${d.slice(5)}`;
+    return `${d.slice(0, 2)}-${d.slice(2, 6)}-${d.slice(6)}`;
+  }
+  if (digits.length <= 6) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  if (digits.length <= 10) return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
+  return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+}
 
 function fmt(n: number) {
   return n.toLocaleString("ko-KR") + " 원";
@@ -88,7 +112,7 @@ function NoteForm({ onSaved }: { onSaved: () => void }) {
     if (searchQ.length < 1) { setSearchResults([]); return; }
     const t = setTimeout(async () => {
       const res = await fetch(`/api/admin/customers/unified-search?q=${encodeURIComponent(searchQ)}`);
-      if (res.ok) setSearchResults((await res.json()).results ?? []);
+      if (res.ok) setSearchResults((await res.json()).items ?? []);
     }, 250);
     return () => clearTimeout(t);
   }, [searchQ]);
@@ -110,7 +134,9 @@ function NoteForm({ onSaved }: { onSaved: () => void }) {
     setToCompany(r.company);
     setToName(r.contacts[0]?.name ?? r.name);
     setToEmail(r.contacts[0]?.email ?? r.email);
-    setToPhone(r.contacts[0]?.mobile ?? r.phone);
+    setToPhone(formatPhone(r.contacts[0]?.mobile ?? r.phone));
+    setToBizNo(r.bizNo ? formatBizNo(r.bizNo) : "");
+    setShowDirect(true);
     setSearchQ("");
     setSearchResults([]);
   }
@@ -221,12 +247,12 @@ function NoteForm({ onSaved }: { onSaved: () => void }) {
               </div>
               <div>
                 <div className="mono text-[10px] dim mb-1">전화번호</div>
-                <input value={toPhone} onChange={(e) => setToPhone(e.target.value)}
+                <input value={toPhone} onChange={(e) => setToPhone(formatPhone(e.target.value))}
                   placeholder="010-0000-0000" className="w-full border hair px-3 py-1.5 text-[13px] mono focus:outline-none focus:border-ink" />
               </div>
               <div>
                 <div className="mono text-[10px] dim mb-1">사업자번호</div>
-                <input value={toBizNo} onChange={(e) => setToBizNo(e.target.value)}
+                <input value={toBizNo} onChange={(e) => setToBizNo(formatBizNo(e.target.value))}
                   placeholder="000-00-00000" className="w-full border hair px-3 py-1.5 text-[13px] mono focus:outline-none focus:border-ink" />
               </div>
             </div>
@@ -277,7 +303,9 @@ function NoteForm({ onSaved }: { onSaved: () => void }) {
           )}
 
           <div className="grid grid-cols-[2fr_3fr_1fr_2fr_auto] gap-2 text-[10px] mono dim tracking-[0.06em] uppercase px-1">
-            <div>파트번호</div><div>품목명</div><div>수량</div><div>단가 (원)</div><div></div>
+            <div>파트번호</div><div>품목명</div><div>수량</div>
+            <div>단가 (원) <span className="text-edred2 normal-case not-uppercase">← 원가 기본값</span></div>
+            <div></div>
           </div>
           {items.map((item, idx) => (
             <div key={idx} className="grid grid-cols-[2fr_3fr_1fr_2fr_auto] gap-2 items-center">
