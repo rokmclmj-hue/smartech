@@ -18,6 +18,7 @@ type KnownCompany = {
   email: string | null;
   tier: string;
   paymentTerm: string | null;
+  businessNo: string | null;
   source: string;
   createdAt: string;
   contacts: KnownContact[];
@@ -192,6 +193,30 @@ export default function AdminCompaniesPage() {
       setSelected((s) => s ? { ...s, paymentTerm: term } : s);
       setCompanies((cs) => cs.map((c) => c.id === selected.id ? { ...c, paymentTerm: term } : c));
     }
+  }
+
+  const [bizNoInput, setBizNoInput] = useState("");
+  const [bizNoSaving, setBizNoSaving] = useState(false);
+
+  useEffect(() => {
+    setBizNoInput(selected?.businessNo ?? "");
+  }, [selected?.id]);
+
+  async function saveBusinessNo() {
+    if (!selected) return;
+    setBizNoSaving(true);
+    const digits = bizNoInput.replace(/[^0-9]/g, "");
+    const res = await fetch(`/api/admin/known-companies?id=${selected.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ businessNo: digits || null }),
+    });
+    if (res.ok) {
+      const saved = digits || null;
+      setSelected((s) => s ? { ...s, businessNo: saved } : s);
+      setCompanies((cs) => cs.map((c) => c.id === selected.id ? { ...c, businessNo: saved } : c));
+    }
+    setBizNoSaving(false);
   }
 
   const filtered = companies.filter((c) => {
@@ -383,6 +408,30 @@ export default function AdminCompaniesPage() {
                       </button>
                     ))}
                   </div>
+                </div>
+                <div className="mt-2.5">
+                  <div className="mono text-[9px] tracking-[0.12em] uppercase dim mb-1.5">사업자등록번호</div>
+                  <div className="flex gap-1.5">
+                    <input
+                      type="text"
+                      value={bizNoInput}
+                      onChange={(e) => setBizNoInput(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && saveBusinessNo()}
+                      placeholder="숫자 10자리"
+                      maxLength={12}
+                      className="flex-1 border hair rounded px-2.5 py-1 text-[12px] mono focus:outline-none focus:border-smblue"
+                    />
+                    <button
+                      onClick={saveBusinessNo}
+                      disabled={bizNoSaving}
+                      className="px-3 py-1 bg-smblue text-white text-[11px] font-semibold rounded hover:brightness-110 disabled:opacity-50 transition-all"
+                    >
+                      {bizNoSaving ? "…" : "저장"}
+                    </button>
+                  </div>
+                  {selected.businessNo && (
+                    <div className="mt-1 mono text-[10px] text-smblue">✓ {selected.businessNo} 등록됨</div>
+                  )}
                 </div>
               </div>
               <button onClick={() => { setSelected(null); cancelForm(); }} className="dim hover:text-edred text-[18px] ml-3 shrink-0">✕</button>
