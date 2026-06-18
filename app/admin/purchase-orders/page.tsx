@@ -60,7 +60,7 @@ const DEPT_COMPANIES: Record<string, string> = {
 };
 
 // ── 발주서 작성 폼 ─────────────────────────────────
-function OrderForm({ onSaved }: { onSaved: () => void }) {
+function OrderForm({ onSaved, initialData }: { onSaved: () => void; initialData?: PurchaseOrder | null }) {
   const [deptContacts, setDeptContacts] = useState<DeptContact[]>([]);
 
   // 발주 정보
@@ -94,6 +94,21 @@ function OrderForm({ onSaved }: { onSaved: () => void }) {
       .then((r) => r.ok ? r.json() : [])
       .then(setDeptContacts);
   }, []);
+
+  // 이전 발주서 복사 시 폼 자동 채우기
+  useEffect(() => {
+    if (!initialData) return;
+    setDepartment(initialData.department);
+    setToCompany(initialData.toCompany);
+    setToName(initialData.toName ?? "");
+    setToEmail(initialData.toEmail ?? "");
+    setCcEmails(initialData.ccEmails ?? "");
+    setMessage(initialData.message ?? "");
+    setMemo(initialData.memo ?? "");
+    setItems(initialData.items.map((it) => ({ ...it })));
+    setOrderDate(toDateInput(new Date()));
+    setRequestedDate("");
+  }, [initialData]);
 
   // 부서 선택 시 담당자 정보 자동 채우기
   function handleDeptChange(code: string) {
@@ -452,7 +467,7 @@ function OrderForm({ onSaved }: { onSaved: () => void }) {
 }
 
 // ── 이력 행 ───────────────────────────────────────
-function OrderRow({ order, onDelete }: { order: PurchaseOrder; onDelete: () => void }) {
+function OrderRow({ order, onDelete, onCopy }: { order: PurchaseOrder; onDelete: () => void; onCopy: (o: PurchaseOrder) => void }) {
   const [sendEmail, setSendEmail] = useState("");
   const [ccInput, setCcInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -546,6 +561,10 @@ function OrderRow({ order, onDelete }: { order: PurchaseOrder; onDelete: () => v
           className="bg-smblue text-paper px-3 py-1.5 text-[12px] hover:brightness-110 transition-colors">
           이메일 발송
         </button>
+        <button onClick={() => onCopy(order)}
+          className="border border-smblue/50 text-smblue px-3 py-1.5 text-[12px] mono hover:bg-smblue/5 transition-colors">
+          복사하여 새 발주
+        </button>
         <button onClick={handleDelete} disabled={deleting}
           className="border hair border-red-200 text-red-500 px-3 py-1.5 text-[12px] hover:bg-red-50 transition-colors disabled:opacity-40">
           삭제
@@ -631,6 +650,7 @@ function OrderRow({ order, onDelete }: { order: PurchaseOrder; onDelete: () => v
 export default function PurchaseOrdersPage() {
   const [orders, setOrders] = useState<PurchaseOrder[]>([]);
   const [showForm, setShowForm] = useState(false);
+  const [copyData, setCopyData] = useState<PurchaseOrder | null>(null);
   const [loading, setLoading] = useState(true);
 
   const loadOrders = useCallback(async () => {
@@ -647,7 +667,14 @@ export default function PurchaseOrdersPage() {
 
   function handleSaved() {
     setShowForm(false);
+    setCopyData(null);
     loadOrders();
+  }
+
+  function handleCopy(order: PurchaseOrder) {
+    setCopyData(order);
+    setShowForm(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   return (
@@ -662,7 +689,7 @@ export default function PurchaseOrdersPage() {
           <p className="mt-3 text-[13px] dim">부서별 공급업체에 발주서를 직접 작성·발송합니다. 단가는 반드시 기재합니다.</p>
         </div>
         <button
-          onClick={() => setShowForm(!showForm)}
+          onClick={() => { setShowForm(!showForm); if (showForm) setCopyData(null); }}
           className="bg-smblue text-paper px-5 py-2.5 text-[13px] font-semibold hover:brightness-110 transition-all shrink-0"
         >
           {showForm ? "✕ 닫기" : "+ 새 발주서"}
@@ -672,8 +699,10 @@ export default function PurchaseOrdersPage() {
       {/* 작성 폼 */}
       {showForm && (
         <div className="border-2 border-smblue/30 p-5 sm:p-6 bg-paper">
-          <div className="mono text-[10px] dim tracking-[0.12em] uppercase mb-5">— 새 발주서 작성</div>
-          <OrderForm onSaved={handleSaved} />
+          <div className="mono text-[10px] dim tracking-[0.12em] uppercase mb-5">
+            {copyData ? `— 복사하여 새 발주서 (원본: ${copyData.orderNo})` : "— 새 발주서 작성"}
+          </div>
+          <OrderForm onSaved={handleSaved} initialData={copyData} />
         </div>
       )}
 
@@ -691,7 +720,7 @@ export default function PurchaseOrdersPage() {
         ) : (
           <div className="space-y-3">
             {orders.map((o) => (
-              <OrderRow key={o.id} order={o} onDelete={loadOrders} />
+              <OrderRow key={o.id} order={o} onDelete={loadOrders} onCopy={handleCopy} />
             ))}
           </div>
         )}
