@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
       { source: "/INTRO/:path*",    destination: "/",          permanent: true },
       { source: "/Products",        destination: "/",          permanent: true },
       { source: "/Products/:path*", destination: "/",          permanent: true },
+      { source: "/About-Us",        destination: "/about",     permanent: true },
+      { source: "/견적문의",             destination: "/quote",     permanent: true },
+      { source: "/blog/14",         destination: "/blog",      permanent: true },
+      { source: "/blog/15",         destination: "/blog",      permanent: true },
     ];
   },
   serverExternalPackages: ["bcryptjs", "@prisma/client", "prisma", "xlsx", "sharp"],
