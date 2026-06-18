@@ -182,6 +182,19 @@ export default function AdminCompaniesPage() {
     setForm(EMPTY_FORM);
   }
 
+  async function saveTier(tier: string) {
+    if (!selected) return;
+    const res = await fetch(`/api/admin/known-companies?id=${selected.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tier }),
+    });
+    if (res.ok) {
+      setSelected((s) => s ? { ...s, tier } : s);
+      setCompanies((cs) => cs.map((c) => c.id === selected.id ? { ...c, tier } : c));
+    }
+  }
+
   async function savePaymentTerm(term: string | null) {
     if (!selected) return;
     const res = await fetch(`/api/admin/known-companies?id=${selected.id}`, {
@@ -385,9 +398,17 @@ export default function AdminCompaniesPage() {
                 <div className="mono text-[9px] tracking-[0.15em] uppercase dim mb-1">담당자 관리</div>
                 <div className="text-[16px] font-semibold text-ink truncate">{selected.companyName}</div>
                 <div className="flex items-center gap-2 mt-1 flex-wrap">
-                  <span className={`inline-block border px-1.5 py-0.5 text-[10px] rounded-sm ${TIER_COLOR[selected.tier] ?? "bg-gray-50 text-gray-600 border-gray-200"}`}>
-                    {TIER_LABEL[selected.tier] ?? selected.tier}
-                  </span>
+                  <select
+                    value={selected.tier}
+                    onChange={(e) => saveTier(e.target.value)}
+                    className={`border px-1.5 py-0.5 text-[10px] rounded-sm cursor-pointer focus:outline-none ${TIER_COLOR[selected.tier] ?? "bg-gray-50 text-gray-600 border-gray-200"}`}
+                  >
+                    <option value="ENDUSER">일반</option>
+                    <option value="DEALER">딜러</option>
+                    <option value="KEY_DEALER">키딜러</option>
+                    <option value="VIP_DEALER">VIP딜러</option>
+                    <option value="OEM">OEM</option>
+                  </select>
                   {selected.phone && <span className="mono text-[11px] dim">{selected.phone}</span>}
                 </div>
                 <div className="mt-2.5">
