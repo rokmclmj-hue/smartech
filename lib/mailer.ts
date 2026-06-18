@@ -18,9 +18,11 @@ export async function sendQuotePdf(
   opts?: {
     html?: string;
     text?: string;
+    pdfFilename?: string;
     extraAttachments?: { filename: string; content: Buffer; contentType: string }[];
   }
 ): Promise<void> {
+  const attachFilename = opts?.pdfFilename ?? `견적서_${quoteNo}.pdf`;
   await transporter.sendMail({
     from: `"스마텍" <${process.env.GMAIL_USER}>`,
     to,
@@ -31,7 +33,7 @@ export async function sendQuotePdf(
     html: opts?.html,
     attachments: [
       {
-        filename: `견적서_${quoteNo}.pdf`,
+        filename: attachFilename,
         content: pdfBuffer,
         contentType: "application/pdf",
       },

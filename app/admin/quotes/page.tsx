@@ -358,6 +358,14 @@ function AdminQuotesContent() {
                             >
                               {actionLoading === q.id ? "..." : "Send"}
                             </button>
+                            <a
+                              href={`/quote/${q.id}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="mono text-[10px] tracking-[0.1em] uppercase border border-line text-dim px-2.5 py-1 hover:border-smblue hover:text-smblue transition-colors"
+                            >
+                              보기
+                            </a>
                             {q.status !== "CONFIRMED" && (
                               <button
                                 onClick={() => deleteQuote(q.id)}

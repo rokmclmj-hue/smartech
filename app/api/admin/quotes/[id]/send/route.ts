@@ -6,6 +6,31 @@ import { generateQuotePdf, type QuoteForPdf } from "@/lib/pdf";
 import { sendQuotePdf } from "@/lib/mailer";
 import { VAT_RATE } from "@/lib/constants";
 
+function stripCompanyPrefix(name: string): string {
+  return name
+    .replace(/^(주식회사|유한회사|합자회사|합명회사)\s*/u, "")
+    .replace(/^\(주\)\s*/u, "")
+    .replace(/^㈜\s*/u, "")
+    .trim();
+}
+
+function buildSmartFilename(
+  date: Date,
+  company: string,
+  items: { description: string; quantity: number }[]
+): string {
+  const d = date;
+  const yyyymmdd = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
+  const co = stripCompanyPrefix(company) || company;
+  if (items.length === 0) return `견적서_${yyyymmdd}_${co}.pdf`;
+  const first = items[0];
+  const desc = first.description || "품목";
+  const label = items.length === 1
+    ? `${desc} x ${first.quantity}ea`
+    : `${desc} x ${first.quantity}ea 외`;
+  return `견적서_${yyyymmdd}_${co}(${label}).pdf`;
+}
+
 function fmtKRW(n: number): string {
   return "₩" + n.toLocaleString("ko-KR");
 }
@@ -160,6 +185,15 @@ export async function POST(
     const seq = String(quote.id).padStart(6, "0");
     const quoteNo = `SMT-${year}-Q-${seq}`;
 
+    const pdfFilename = buildSmartFilename(
+      quote.createdAt,
+      recipientCompany,
+      quote.items.map((it) => ({
+        description: it.customDescription ?? it.product?.description ?? "",
+        quantity: it.quantity,
+      }))
+    );
+
     const subtotal = quote.items.reduce(
       (s, i) => s + i.unitPrice * i.quantity,
       0
@@ -176,6 +210,7 @@ export async function POST(
           grandTotal,
           expiresAt: quote.expiresAt,
         }),
+        pdfFilename,
         extraAttachments: extraAttachments.map((a) => ({
           filename: a.filename,
           content: Buffer.from(a.base64, "base64"),

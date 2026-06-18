@@ -226,9 +226,29 @@ export default function QuoteDetailPage() {
 
     fetch(`/api/quote/${quoteId}/detail`)
       .then((r) => r.json())
-      .then((data) => {
-        if (data.error) setQuote(null);
-        else setQuote(data);
+      .then((data: QuoteDetail & { error?: string }) => {
+        if (data.error) { setQuote(null); }
+        else {
+          setQuote(data);
+          // 브라우저 인쇄 저장 시 파일명으로 쓰임
+          const issued = new Date(data.createdAt);
+          const yyyymmdd = `${issued.getFullYear()}${String(issued.getMonth() + 1).padStart(2, "0")}${String(issued.getDate()).padStart(2, "0")}`;
+          const co = data.user.company
+            .replace(/^(주식회사|유한회사|합자회사|합명회사)\s*/u, "")
+            .replace(/^\(주\)\s*/u, "")
+            .replace(/^㈜\s*/u, "")
+            .trim() || data.user.company;
+          const first = data.items[0];
+          if (first) {
+            const desc = first.customDescription ?? first.product?.description ?? "품목";
+            const label = data.items.length === 1
+              ? `${desc} x ${first.quantity}ea`
+              : `${desc} x ${first.quantity}ea 외`;
+            document.title = `견적서_${yyyymmdd}_${co}(${label})`;
+          } else {
+            document.title = `견적서_${yyyymmdd}_${co}`;
+          }
+        }
         setLoading(false);
       })
       .catch(() => setLoading(false));

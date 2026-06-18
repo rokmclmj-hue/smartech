@@ -571,7 +571,14 @@ function AdminProxyQuotesInner() {
             <div className="text-[28px] font-bold text-ink">
               SMT-{new Date().getFullYear()}-Q-{String(doneQuoteId).padStart(6, "0")}
             </div>
-            <div className="text-[13px] dim mt-1">{recipientName}</div>
+            <div className="text-[13px] dim mt-1">
+              {recipientName}
+              {items.length > 0 && (
+                <span className="ml-2 text-[12px]">
+                  · {items[0].description || items[0].partNo || "품목"} x {items[0].quantity}ea{items.length > 1 ? " 외" : ""}
+                </span>
+              )}
+            </div>
           </div>
 
           <div className="flex flex-col gap-3 max-w-[320px] mx-auto">
