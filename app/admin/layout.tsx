@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ToastProvider } from "@/lib/toast";
 import RedTape from "@/components/RedTape";
+import "./admin.css";
 
 const NAV_ITEMS = [
   { href: "/admin", label: "대시보드", exact: true },
@@ -251,7 +252,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </header>
 
       {/* 메인 콘텐츠 — 전체폭 */}
-      <main>{children}</main>
+      <main className="admin-scope">{children}</main>
     </div>
     </ToastProvider>
   );
