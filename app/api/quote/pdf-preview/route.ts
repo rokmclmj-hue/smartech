@@ -117,9 +117,10 @@ export async function POST(req: NextRequest) {
     pdfFilename = `견적서_${dateStr}_${co}.pdf`;
   } else {
     const first = items[0];
+    const desc = first.description || "품목";
     const label = items.length === 1
-      ? `${first.description} x ${first.quantity}ea`
-      : `${first.description} x ${first.quantity}ea 외`;
+      ? `${desc} x ${first.quantity}ea`
+      : `${desc} x ${first.quantity}ea 외`;
     pdfFilename = `견적서_${dateStr}_${co}(${label}).pdf`;
   }
 

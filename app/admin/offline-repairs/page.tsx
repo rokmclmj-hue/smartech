@@ -341,7 +341,11 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone }: {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "generate_token" }),
       });
-      if (res.ok) { onRefresh(); showToast("링크 생성 완료"); }
+      if (res.ok) {
+        const data = await res.json();
+        onRefresh();
+        showToast(data.emailSent ? "링크 생성 + 이메일 발송 완료" : "링크 생성 완료 (이메일 미발송 — 협력사 이메일 미설정)");
+      }
     } finally { setGenToken(false); }
   }
 
@@ -537,12 +541,13 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone }: {
               />
               <button
                 onClick={async () => {
-                  await fetch(`/api/admin/offline-repairs/${job.id}`, {
+                  const res = await fetch(`/api/admin/offline-repairs/${job.id}`, {
                     method: "PATCH",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ subEmail: editSubEmail }),
                   });
-                  showToast("저장됨");
+                  if (res.ok) { showToast("저장됨"); onRefresh(); }
+                  else showToast("저장 실패");
                 }}
                 className="border hair px-3 py-1.5 text-[11px] hover:bg-ink/5 shrink-0">저장</button>
             </div>

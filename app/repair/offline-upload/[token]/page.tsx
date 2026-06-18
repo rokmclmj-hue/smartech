@@ -183,8 +183,8 @@ export default function OfflineUploadPage() {
                   const data = await res.json();
                   if (!res.ok) { setExcelResult(`오류: ${data.error}`); return; }
                   // 파싱 후 서버에서 최신 항목 다시 불러오기
-                  const refreshed = await fetch(`/api/repair/offline-upload?token=${token}`).then(r => r.json());
-                  if (refreshed?.inspectionItems) setItems(refreshed.inspectionItems);
+                  const refreshed = await fetch(`/api/repair/offline-upload?token=${token}`).then(r => r.json()).catch(() => null);
+                  if (Array.isArray(refreshed?.inspectionItems)) setItems(refreshed.inspectionItems);
                   setExcelResult(`✓ ${data.matched}개 항목 자동 입력 완료. 아래에서 확인 후 수정하세요.`);
                 } catch { setExcelResult("파싱 실패. 직접 입력해주세요."); }
                 finally { setExcelParsing(false); if (excelRef.current) excelRef.current.value = ""; }

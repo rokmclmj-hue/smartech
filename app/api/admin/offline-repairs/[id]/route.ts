@@ -38,16 +38,25 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     const token = randomUUID();
     const expiresAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000); // 14일
     const job = await prisma.offlineRepairJob.findUnique({ where: { id: nId } });
-    const updated = await prisma.offlineRepairJob.update({
-      where: { id: nId },
-      data: { uploadToken: token, tokenExpiresAt: expiresAt, status: "SENT_TO_SUB" },
-    });
+    if (!job) return NextResponse.json({ error: "찾을 수 없음" }, { status: 404 });
+
+    let updated;
+    try {
+      updated = await prisma.offlineRepairJob.update({
+        where: { id: nId },
+        data: { uploadToken: token, tokenExpiresAt: expiresAt, status: "SENT_TO_SUB" },
+      });
+    } catch {
+      return NextResponse.json({ error: "업데이트 실패 (동시 삭제됐을 수 있음)" }, { status: 409 });
+    }
 
     // 협력사 이메일 자동 발송 (subEmail 우선, 없으면 환경변수)
-    const subEmail = job?.subEmail || process.env.REPAIR_SUB_EMAIL;
+    const subEmail = job.subEmail || process.env.REPAIR_SUB_EMAIL;
+    let emailSent = false;
     if (subEmail && updated.uploadToken) {
       const origin = process.env.NEXTAUTH_URL ?? "https://smartechvacuum.com";
       const uploadUrl = `${origin}/repair/offline-upload/${updated.uploadToken}`;
+      emailSent = true;
       sendSubUploadLink({
         to: subEmail,
         jobNo: updated.jobNo,
@@ -56,10 +65,10 @@ export async function PATCH(req: NextRequest, { params }: Params) {
         serialNo: updated.serialNo,
         uploadUrl,
         expiresAt,
-      }).catch((e) => console.error("[협력사 이메일 발송 오류]", e));
+      }).catch((e) => { emailSent = false; console.error("[협력사 이메일 발송 오류]", e); });
     }
 
-    return NextResponse.json({ token: updated.uploadToken, expiresAt: updated.tokenExpiresAt });
+    return NextResponse.json({ token: updated.uploadToken, expiresAt: updated.tokenExpiresAt, emailSent });
   }
 
   // 검사항목 수정

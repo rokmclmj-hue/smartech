@@ -332,10 +332,11 @@ export default function PumpSelector() {
       setDbSearchResults([]);
       return;
     }
+    const controller = new AbortController();
     setSearchLoading(true);
     const timer = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/products?q=${encodeURIComponent(search)}&limit=50`);
+        const res = await fetch(`/api/products?q=${encodeURIComponent(search)}&limit=50`, { signal: controller.signal });
         const data = await res.json();
         const products: { partNo: string; description: string; displayPrice: number | null }[] = data.products ?? [];
         setDbSearchResults(
@@ -346,13 +347,13 @@ export default function PumpSelector() {
             series: "",
           }))
         );
-      } catch {
-        setDbSearchResults([]);
+      } catch (e) {
+        if ((e as Error).name !== "AbortError") setDbSearchResults([]);
       } finally {
         setSearchLoading(false);
       }
     }, 300);
-    return () => clearTimeout(timer);
+    return () => { clearTimeout(timer); controller.abort(); };
   }, [search, selectedCategory, tab]);
 
   // 선택된 TMP 객체

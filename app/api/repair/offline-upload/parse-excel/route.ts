@@ -51,12 +51,12 @@ export async function POST(req: NextRequest) {
   const ws = wb.Sheets[wb.SheetNames[0]];
   const rows = XLSX.utils.sheet_to_json<(string | number)[]>(ws, { header: 1, defval: "" });
 
-  // 열 오프셋 자동 감지 (col[0]=1 이면 o=0, col[1]=1 이면 o=1)
+  // 열 오프셋 자동 감지 (숫자·텍스트 혼용 대응: Number() 변환 사용)
   let startRow = -1;
   let o = 0;
   for (let i = 0; i < rows.length; i++) {
-    if (rows[i][0] === 1) { startRow = i; o = 0; break; }
-    if (rows[i][1] === 1) { startRow = i; o = 1; break; }
+    if (Number(rows[i][0]) === 1) { startRow = i; o = 0; break; }
+    if (Number(rows[i][1]) === 1) { startRow = i; o = 1; break; }
   }
   if (startRow < 0)
     return NextResponse.json({ error: "검사항목 테이블을 찾을 수 없습니다." }, { status: 422 });
@@ -65,8 +65,8 @@ export async function POST(req: NextRequest) {
   const parsed: { masterLabel: string; spec: string; value: string; rawPass: string }[] = [];
   for (let i = startRow; i < rows.length; i++) {
     const row = rows[i];
-    const seq = row[o];
-    if (typeof seq !== "number" || seq < 1) continue;
+    const seq = Number(row[o]);
+    if (!Number.isFinite(seq) || seq < 1) continue;
 
     const excelLabel = String(row[o + 1] ?? "").trim();
     const masterLabel = LABEL_MAP[excelLabel];
@@ -108,7 +108,7 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  await Promise.all(
+  await prisma.$transaction(
     updates.map(u =>
       prisma.offlineRepairInspectionItem.update({
         where: { id: u.id },
