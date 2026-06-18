@@ -35,7 +35,7 @@ export async function GET() {
     include: {
       company: { select: { id: true, companyName: true } },
       files: { select: { id: true, fileType: true, isSelected: true } },
-      inspectionItems: { select: { id: true } },
+      inspectionItems: { orderBy: { sortOrder: "asc" } },
     },
     orderBy: { createdAt: "desc" },
   });
