@@ -1296,7 +1296,7 @@ function InspectionReportDocument({ data }: { data: RepairInspectionForPdf }) {
           el(Text, { style: [IR.th, IR.cNA] }, "N/A"),
           el(Text, { style: [IR.th, IR.cPass] }, "판정")
         ),
-        ...data.inspectionItems.map((item, idx) =>
+        ...data.inspectionItems.filter(item => !item.isNA).map((item, idx) =>
           el(View, { key: String(idx), style: idx % 2 === 0 ? IR.tRow : IR.tRowAlt },
             el(Text, { style: [IR.td, IR.cItem] }, item.itemLabel),
             el(Text, { style: [IR.td, IR.cUnit] }, item.unit ?? ""),

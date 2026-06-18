@@ -667,24 +667,29 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone }: {
           </div>
 
           {/* PDF 저장 + 이메일 발송 */}
-          <div className="space-y-2">
-            <div className="mono text-[10px] dim tracking-[0.1em]">— PDF 저장 · 이메일 발송</div>
+          <div className="space-y-3">
+            {/* 1단계: 미리보기 */}
+            <div className="mono text-[10px] dim tracking-[0.1em]">— 1단계 · PDF 미리보기 및 저장</div>
             <div className="flex gap-2 flex-wrap">
               <a
                 href={`/api/admin/offline-repairs/${job.id}/inspection-pdf`}
                 target="_blank" rel="noopener noreferrer"
                 className="border hair px-4 py-1.5 text-[12px] hover:bg-ink/5 transition-colors"
               >
-                검사성적서 PDF ↓
+                검사성적서 미리보기 ↗
               </a>
               <a
                 href={`/api/admin/offline-repairs/${job.id}/quote-pdf`}
                 target="_blank" rel="noopener noreferrer"
                 className="border hair px-4 py-1.5 text-[12px] hover:bg-ink/5 transition-colors"
               >
-                수리견적서 PDF ↓
+                수리견적서 미리보기 ↗
               </a>
             </div>
+            <p className="text-[11px] dim">· 클릭하면 새 탭에서 PDF를 확인할 수 있습니다. 내용 검토 후 아래에서 발송하세요.</p>
+
+            {/* 2단계: 이메일 발송 */}
+            <div className="mono text-[10px] dim tracking-[0.1em] pt-1 border-t hair">— 2단계 · 이메일 발송</div>
             <div className="flex gap-2 items-center flex-wrap">
               <input
                 type="email" value={sendEmail} onChange={e => setSendEmail(e.target.value)}
@@ -693,7 +698,7 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone }: {
               />
               <button onClick={handleSendQuote} disabled={sending}
                 className="bg-smblue text-paper px-4 py-1.5 text-[12px] font-semibold hover:brightness-110 transition-all disabled:opacity-50">
-                {sending ? "발송 중..." : "견적서 + 성적서 이메일 발송"}
+                {sending ? "발송 중..." : "검토 완료 · 이메일 발송 →"}
               </button>
             </div>
             <p className="text-[11px] dim">· 수리견적서 + 검사성적서 PDF 2개가 첨부됩니다. 발송 시 상태가 "견적발송"으로 변경됩니다.</p>

@@ -2,19 +2,28 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAdminSession } from "@/lib/admin-auth";
 
+// 전 모델 공통 마스터 항목 (엑셀 파싱 후 해당 항목만 isNA: false로 전환)
 const DEFAULT_ITEMS = [
-  { sortOrder: 0,  itemLabel: "Vacuum (Booster)", unit: "Torr",         spec: "≤6.0×10⁻³" },
-  { sortOrder: 1,  itemLabel: "Vacuum (Scroll)",  unit: "Torr",         spec: "≤9.0×10⁻²" },
-  { sortOrder: 2,  itemLabel: "Current (Booster)",unit: "A",            spec: "≤7A" },
-  { sortOrder: 3,  itemLabel: "Current (Scroll)", unit: "A",            spec: "≤5.2A" },
-  { sortOrder: 4,  itemLabel: "Body temp (Booster)", unit: "℃",        spec: "≤100℃" },
-  { sortOrder: 5,  itemLabel: "Body temp (Scroll)",  unit: "℃",        spec: "≤60℃" },
-  { sortOrder: 6,  itemLabel: "Leak (sys.mod)",   unit: "mbar·ℓ/sec",  spec: "P/F" },
-  { sortOrder: 7,  itemLabel: "Oil leak",          unit: "유/무",        spec: "무" },
-  { sortOrder: 8,  itemLabel: "Water leak",        unit: "유/무",        spec: "무" },
-  { sortOrder: 9,  itemLabel: "Noise",             unit: "유/무",        spec: "무" },
-  { sortOrder: 10, itemLabel: "Function test",     unit: "정상/이상",    spec: "정상" },
-  { sortOrder: 11, itemLabel: "Test time",         unit: "hr",           spec: "≥4hr" },
+  { sortOrder:  0, itemLabel: "Vacuum Test (Combi)",   unit: "Torr",       spec: null, isNA: true },
+  { sortOrder:  1, itemLabel: "Vacuum Test (Single)",  unit: "Torr",       spec: null, isNA: true },
+  { sortOrder:  2, itemLabel: "Vacuum (Booster)",      unit: "Torr",       spec: null, isNA: true },
+  { sortOrder:  3, itemLabel: "Vacuum (Scroll)",       unit: "Torr",       spec: null, isNA: true },
+  { sortOrder:  4, itemLabel: "Current (Combi)",       unit: "A",          spec: null, isNA: true },
+  { sortOrder:  5, itemLabel: "Current (Single)",      unit: "A",          spec: null, isNA: true },
+  { sortOrder:  6, itemLabel: "Current (Booster)",     unit: "A",          spec: null, isNA: true },
+  { sortOrder:  7, itemLabel: "Current (Scroll)",      unit: "A",          spec: null, isNA: true },
+  { sortOrder:  8, itemLabel: "Current (Rotary)",      unit: "A",          spec: null, isNA: true },
+  { sortOrder:  9, itemLabel: "Body temp",             unit: "℃",          spec: null, isNA: true },
+  { sortOrder: 10, itemLabel: "Body temp (Booster)",   unit: "℃",          spec: null, isNA: true },
+  { sortOrder: 11, itemLabel: "Body temp (Scroll)",    unit: "℃",          spec: null, isNA: true },
+  { sortOrder: 12, itemLabel: "Body temp (Rotary)",    unit: "℃",          spec: null, isNA: true },
+  { sortOrder: 13, itemLabel: "Leak (sys.mod)",        unit: "mbar·ℓ/sec", spec: null, isNA: true },
+  { sortOrder: 14, itemLabel: "Oil leak",              unit: "유/무",       spec: null, isNA: true },
+  { sortOrder: 15, itemLabel: "Water leak",            unit: "유/무",       spec: null, isNA: true },
+  { sortOrder: 16, itemLabel: "Noise",                 unit: "유/무",       spec: null, isNA: true },
+  { sortOrder: 17, itemLabel: "Function test",         unit: "정상/이상",   spec: null, isNA: true },
+  { sortOrder: 18, itemLabel: "Test time",             unit: "hr",          spec: null, isNA: true },
+  { sortOrder: 19, itemLabel: "Oil",                   unit: "N/A",         spec: null, isNA: true },
 ];
 
 // GET — 목록

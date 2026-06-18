@@ -188,7 +188,7 @@ export default function OfflineUploadPage() {
                     if (!p) return it;
                     return { ...it, value: p.value || it.value, isNA: p.value === "" && p.pass === "" };
                   }));
-                  setExcelResult(`✓ ${data.count}개 항목 자동 입력 완료. 아래에서 확인 후 수정하세요.`);
+                  setExcelResult(`✓ ${data.matched}개 항목 자동 입력 완료. 아래에서 확인 후 수정하세요.`);
                 } catch { setExcelResult("파싱 실패. 직접 입력해주세요."); }
                 finally { setExcelParsing(false); if (excelRef.current) excelRef.current.value = ""; }
               }}
