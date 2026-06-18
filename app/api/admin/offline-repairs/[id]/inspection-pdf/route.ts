@@ -39,7 +39,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="inspection_${job.jobNo}.pdf"`,
+        "Content-Disposition": `inline; filename="inspection_${job.jobNo}.pdf"`,
         "Content-Length": String(pdfBuffer.length),
       },
     });
