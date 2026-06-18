@@ -687,7 +687,7 @@ export default function QuoteDetailPage() {
           <div>
             <h5>TO · 수신처</h5>
             <div className="row"><div className="k">Company</div><div className="v">{quote.user.company}</div></div>
-            <div className="row"><div className="k">Attn</div><div className="v">{quote.user.title ? `${quote.user.name} (${quote.user.title}님)` : `${quote.user.name}님`}</div></div>
+            <div className="row"><div className="k">Attn</div><div className="v">{quote.user.title ? `${quote.user.name} ${quote.user.title}님` : `${quote.user.name}님`}</div></div>
             {quote.user.phone && (
               <div className="row"><div className="k">Tel</div><div className="v pmono">{fmtPhone(quote.user.phone)}</div></div>
             )}

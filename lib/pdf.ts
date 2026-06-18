@@ -360,7 +360,7 @@ function QuoteDocument({ quote }: { quote: QuoteForPdf }) {
           ),
           el(View, { style: S.partyRow },
             el(Text, { style: QS.partyKey }, "ATTN"),
-            el(Text, { style: S.partyVal }, quote.user.title ? `${quote.user.name} (${quote.user.title}님)` : `${quote.user.name}님`)
+            el(Text, { style: S.partyVal }, quote.user.title ? `${quote.user.name} ${quote.user.title}님` : `${quote.user.name}님`)
           ),
           quote.user.phone
             ? el(View, { style: S.partyRow },
