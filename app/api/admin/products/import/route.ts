@@ -5,7 +5,7 @@ import * as XLSX from "xlsx";
 
 async function requireAdmin() {
   const session = await auth();
-  return (session?.user as any)?.tier === "ADMIN";
+  return (session?.user as { tier?: string })?.tier === "ADMIN";
 }
 
 export async function POST(req: NextRequest) {
@@ -45,9 +45,9 @@ export async function POST(req: NextRequest) {
   for (const row of rows) {
     // 코드번호 컬럼 (partNo, 코드번호, code, Part No 등 허용)
     const partNo =
-      (row["partNo"] ?? row["코드번호"] ?? row["code"] ?? row["Part No"] ?? row["PartNo"] ?? "") as string;
+      (row["partNo"] ?? row["코드번호"] ?? row["code"] ?? row["Part No"] ?? row["Part NO"] ?? row["PartNo"] ?? "") as string;
     const costPriceRaw =
-      row["costPrice"] ?? row["원가"] ?? row["cost"] ?? row["Cost Price"] ?? null;
+      row["costPrice"] ?? row["원가"] ?? row["cost"] ?? row["Cost Price"] ?? row["Price"] ?? row["price"] ?? null;
 
     if (!partNo) {
       skipped++;
