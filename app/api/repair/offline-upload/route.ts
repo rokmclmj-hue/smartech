@@ -64,15 +64,15 @@ export async function POST(req: NextRequest) {
 
   // 관리자 SMS 알림
   const adminPhone = process.env.ADMIN_PHONE;
-  if (adminPhone && process.env.SOLAPI_API_KEY && process.env.SOLAPI_API_SECRET) {
+  if (adminPhone) {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const SolapiMessageService = require("solapi").default ?? require("solapi");
+      const { SolapiMessageService } = await import("solapi");
       const svc = new SolapiMessageService(
-        process.env.SOLAPI_API_KEY,
-        process.env.SOLAPI_API_SECRET
+        process.env.SOLAPI_API_KEY!,
+        process.env.SOLAPI_API_SECRET!
       );
-      await svc.sendOne({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (svc as any).send({
         to: adminPhone,
         from: process.env.SOLAPI_SENDER ?? adminPhone,
         text: `[스마텍] ${job.pumpModel} / ${job.serialNo ?? job.jobNo} 협력사 업로드 완료. 검사성적서를 확인해 주세요.`,
