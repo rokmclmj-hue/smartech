@@ -183,7 +183,7 @@ export async function sendManualPurchaseOrder(opts: {
     subject: `[스마텍] 발주서 ${opts.orderNo} 발송드립니다.`,
     text:
       opts.bodyText ??
-      `${opts.toCompany} 담당자님, 안녕하세요.\n\n스마텍입니다.\n발주서(${opts.orderNo})를 첨부하여 드립니다.\n납기 확인 후 회신 부탁드립니다.\n\n감사합니다.\n(주)스마텍`,
+      `${opts.toCompany} 담당자님, 안녕하세요.\n\n스마텍입니다.\n발주서(${opts.orderNo})를 첨부하여 드립니다.\n납기 확인 후 회신 부탁드립니다.\n\n감사합니다.\n이명재 배상`,
     attachments: [
       {
         filename: `발주서_${opts.orderNo}.pdf`,

@@ -466,6 +466,9 @@ function OrderForm({ onSaved, initialData }: { onSaved: () => void; initialData?
   );
 }
 
+const DEFAULT_MAIL_BODY = (toCompany: string, orderNo: string) =>
+  `${toCompany} 담당자님, 안녕하세요.\n\n스마텍입니다.\n발주서(${orderNo})를 첨부하여 드립니다.\n납기 확인 후 회신 부탁드립니다.\n\n감사합니다.\n이명재 배상`;
+
 // ── 이력 행 ───────────────────────────────────────
 function OrderRow({ order, onDelete, onCopy }: { order: PurchaseOrder; onDelete: () => void; onCopy: (o: PurchaseOrder) => void }) {
   const [sendEmail, setSendEmail] = useState("");
@@ -475,11 +478,16 @@ function OrderRow({ order, onDelete, onCopy }: { order: PurchaseOrder; onDelete:
   const [deleting, setDeleting] = useState(false);
   const [showSend, setShowSend] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [mailBody, setMailBody] = useState(
+    order.message || DEFAULT_MAIL_BODY(order.toCompany, order.orderNo)
+  );
 
   useEffect(() => {
     setSendEmail(order.toEmail ?? "");
     setCcInput(order.ccEmails ?? "");
-  }, [order.toEmail, order.ccEmails]);
+    setMailBody(order.message || DEFAULT_MAIL_BODY(order.toCompany, order.orderNo));
+  }, [order.toEmail, order.ccEmails, order.message, order.toCompany, order.orderNo]);
 
   const totalSupply = order.items.reduce((s, i) => s + i.unitPrice * i.quantity, 0);
   const grand = Math.round(totalSupply * 1.1);
@@ -496,7 +504,7 @@ function OrderRow({ order, onDelete, onCopy }: { order: PurchaseOrder; onDelete:
       const res = await fetch(`/api/admin/purchase-orders/${order.id}/send`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ toEmail: sendEmail, ccEmails: ccInput }),
+        body: JSON.stringify({ toEmail: sendEmail, ccEmails: ccInput, bodyText: mailBody }),
       });
       const data = await res.json();
       if (res.ok) { setToast("발송 완료"); setShowSend(false); onDelete(); }
@@ -517,9 +525,14 @@ function OrderRow({ order, onDelete, onCopy }: { order: PurchaseOrder; onDelete:
   return (
     <div className="border hair bg-paper p-4 space-y-3">
       <div className="flex items-start justify-between gap-4">
-        <div className="space-y-0.5 min-w-0">
+        <div className="space-y-0.5 min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="mono text-[11px] font-bold text-smblue">{order.orderNo}</span>
+            <button
+              onClick={() => setExpanded((v) => !v)}
+              className="mono text-[11px] font-bold text-smblue hover:underline text-left"
+            >
+              {expanded ? "▲" : "▼"} {order.orderNo}
+            </button>
             <span className={`mono text-[10px] px-1.5 py-0.5 ${order.status === "SENT" ? "bg-green-100 text-green-700" : "bg-blue-50 text-blue-700"}`}>
               {order.status === "SENT" ? "발송완료" : "초안"}
             </span>
@@ -546,6 +559,40 @@ function OrderRow({ order, onDelete, onCopy }: { order: PurchaseOrder; onDelete:
           )}
         </div>
       </div>
+
+      {/* 아코디언 — 품목 목록 */}
+      {expanded && (
+        <div className="border-t hair pt-3">
+          <table className="w-full text-[12px]">
+            <thead>
+              <tr className="text-left mono text-[10px] dim border-b hair">
+                <th className="pb-1.5 pr-3 font-normal">파트번호</th>
+                <th className="pb-1.5 pr-3 font-normal">품명</th>
+                <th className="pb-1.5 pr-3 font-normal text-right">수량</th>
+                <th className="pb-1.5 font-normal text-right">단가</th>
+              </tr>
+            </thead>
+            <tbody>
+              {order.items.map((item, idx) => (
+                <tr key={idx} className="border-b hair last:border-0">
+                  <td className="py-1.5 pr-3 mono text-[11px] dim">{item.partNo || "—"}</td>
+                  <td className="py-1.5 pr-3">{item.description || "—"}</td>
+                  <td className="py-1.5 pr-3 text-right mono">{item.quantity}</td>
+                  <td className="py-1.5 text-right mono">{item.unitPrice.toLocaleString()}원</td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colSpan={3} className="pt-2 text-right mono text-[11px] dim">합계 (VAT 포함)</td>
+                <td className="pt-2 text-right mono font-bold">
+                  {Math.round(order.items.reduce((s, i) => s + i.unitPrice * i.quantity, 0) * 1.1).toLocaleString()}원
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      )}
 
       {/* 액션 버튼 */}
       <div className="flex items-center gap-2 flex-wrap">
@@ -624,9 +671,12 @@ function OrderRow({ order, onDelete, onCopy }: { order: PurchaseOrder; onDelete:
               </div>
               <div className="flex gap-3">
                 <span className="mono text-[10px] dim w-12 shrink-0 mt-0.5">본문</span>
-                <pre className="text-[12px] whitespace-pre-wrap leading-relaxed flex-1 max-h-32 overflow-y-auto">
-                  {order.message || "(본문 없음 — 새 발주서 작성 시 발주 문구 입력)"}
-                </pre>
+                <textarea
+                  value={mailBody}
+                  onChange={(e) => setMailBody(e.target.value)}
+                  rows={6}
+                  className="flex-1 border hair px-2.5 py-2 text-[12px] leading-relaxed focus:outline-none focus:border-ink resize-y bg-transparent"
+                />
               </div>
             </div>
             <div className="flex gap-3 pt-2">
