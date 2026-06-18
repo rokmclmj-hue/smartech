@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAdminSession } from "@/lib/admin-auth";
 import { randomUUID } from "crypto";
+import { sendSubUploadLink } from "@/lib/mailer";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -36,10 +37,28 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   if (body.action === "generate_token") {
     const token = randomUUID();
     const expiresAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000); // 14일
+    const job = await prisma.offlineRepairJob.findUnique({ where: { id: nId } });
     const updated = await prisma.offlineRepairJob.update({
       where: { id: nId },
       data: { uploadToken: token, tokenExpiresAt: expiresAt, status: "SENT_TO_SUB" },
     });
+
+    // 협력사 이메일 자동 발송 (subEmail 우선, 없으면 환경변수)
+    const subEmail = job?.subEmail || process.env.REPAIR_SUB_EMAIL;
+    if (subEmail && updated.uploadToken) {
+      const origin = process.env.NEXTAUTH_URL ?? "https://smartechvacuum.com";
+      const uploadUrl = `${origin}/repair/offline-upload/${updated.uploadToken}`;
+      sendSubUploadLink({
+        to: subEmail,
+        jobNo: updated.jobNo,
+        pumpMaker: updated.pumpMaker,
+        pumpModel: updated.pumpModel,
+        serialNo: updated.serialNo,
+        uploadUrl,
+        expiresAt,
+      }).catch((e) => console.error("[협력사 이메일 발송 오류]", e));
+    }
+
     return NextResponse.json({ token: updated.uploadToken, expiresAt: updated.tokenExpiresAt });
   }
 
@@ -84,6 +103,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       ...(body.repairCost !== undefined && { repairCost: body.repairCost != null ? Math.round(Number(body.repairCost)) : null }),
       ...(body.repairPartsText !== undefined && { repairPartsText: body.repairPartsText }),
       ...(body.inspectorName !== undefined && { inspectorName: body.inspectorName }),
+      ...(body.subEmail !== undefined && { subEmail: body.subEmail || null }),
+      ...(body.subName !== undefined && { subName: body.subName || null }),
     },
   });
   return NextResponse.json(updated);

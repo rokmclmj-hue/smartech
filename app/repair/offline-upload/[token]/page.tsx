@@ -33,6 +33,9 @@ export default function OfflineUploadPage() {
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const excelRef = useRef<HTMLInputElement>(null);
+  const [excelParsing, setExcelParsing] = useState(false);
+  const [excelResult, setExcelResult] = useState<string>("");
 
   useEffect(() => {
     fetch(`/api/repair/offline-upload?token=${token}`)
@@ -153,10 +156,60 @@ export default function OfflineUploadPage() {
           </div>
         </div>
 
-        {/* 02 검사성적서 */}
+        {/* 02 엑셀 성적서 자동 입력 */}
+        <div className="border hair bg-white">
+          <div className="px-4 py-3 border-b hair flex items-center justify-between">
+            <span className="mono text-[10px] dim tracking-[0.12em]">02 / 엑셀 성적서 자동 입력 <span className="text-edred">(권장)</span></span>
+          </div>
+          <div className="px-4 py-4 space-y-3">
+            <p className="text-[13px] dim">기존에 사용하시던 엑셀 성적서 파일을 업로드하면 아래 검사항목이 자동으로 채워집니다.</p>
+            <input
+              ref={excelRef}
+              type="file"
+              accept=".xlsx,.xls"
+              className="hidden"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                setExcelParsing(true);
+                setExcelResult("");
+                try {
+                  const form = new FormData();
+                  form.append("file", file);
+                  const res = await fetch(`/api/repair/offline-upload/parse-excel?token=${token}`, {
+                    method: "POST",
+                    body: form,
+                  });
+                  const data = await res.json();
+                  if (!res.ok) { setExcelResult(`오류: ${data.error}`); return; }
+                  // 파싱된 값으로 items 상태 업데이트
+                  setItems(prev => prev.map((it, idx) => {
+                    const p = data.parsed[idx];
+                    if (!p) return it;
+                    return { ...it, value: p.value || it.value, isNA: p.value === "" && p.pass === "" };
+                  }));
+                  setExcelResult(`✓ ${data.count}개 항목 자동 입력 완료. 아래에서 확인 후 수정하세요.`);
+                } catch { setExcelResult("파싱 실패. 직접 입력해주세요."); }
+                finally { setExcelParsing(false); if (excelRef.current) excelRef.current.value = ""; }
+              }}
+            />
+            <button
+              onClick={() => excelRef.current?.click()}
+              disabled={excelParsing}
+              className="border hair px-4 py-2 text-[13px] hover:bg-ink/5 transition-colors w-full text-left disabled:opacity-50"
+            >
+              {excelParsing ? "⏳ 파싱 중..." : "📊 엑셀 성적서 파일 선택 (.xlsx)"}
+            </button>
+            {excelResult && (
+              <p className={`text-[12px] ${excelResult.startsWith("✓") ? "text-green-700" : "text-edred"}`}>{excelResult}</p>
+            )}
+          </div>
+        </div>
+
+        {/* 03 검사성적서 */}
         <div className="border hair bg-white">
           <div className="px-4 py-3 border-b hair">
-            <span className="mono text-[10px] dim tracking-[0.12em]">02 / 검사성적서 — Final Test Inspection Sheet</span>
+            <span className="mono text-[10px] dim tracking-[0.12em]">03 / 검사성적서 — 확인 및 수정</span>
           </div>
           <div className="px-4 py-2">
             {/* 테이블 헤더 */}

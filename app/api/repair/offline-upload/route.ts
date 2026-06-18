@@ -31,6 +31,7 @@ export async function POST(req: NextRequest) {
         fileName: file.name,
         fileUrl: blob.url,
         fileSize: file.size,
+        isSelected: true,
       },
     });
   }
@@ -60,6 +61,26 @@ export async function POST(req: NextRequest) {
     where: { id: job.id },
     data: { status: "UPLOADED", uploadedAt: new Date() },
   });
+
+  // 관리자 SMS 알림
+  const adminPhone = process.env.ADMIN_PHONE;
+  if (adminPhone && process.env.SOLAPI_API_KEY && process.env.SOLAPI_API_SECRET) {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const SolapiMessageService = require("solapi").default ?? require("solapi");
+      const svc = new SolapiMessageService(
+        process.env.SOLAPI_API_KEY,
+        process.env.SOLAPI_API_SECRET
+      );
+      await svc.sendOne({
+        to: adminPhone,
+        from: process.env.SOLAPI_SENDER ?? adminPhone,
+        text: `[스마텍] ${job.pumpModel} / ${job.serialNo ?? job.jobNo} 협력사 업로드 완료. 검사성적서를 확인해 주세요.`,
+      });
+    } catch (e) {
+      console.error("[수리접수 SMS 오류]", e);
+    }
+  }
 
   return NextResponse.json({ ok: true });
 }

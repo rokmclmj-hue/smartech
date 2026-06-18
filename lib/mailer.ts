@@ -194,33 +194,70 @@ export async function sendManualPurchaseOrder(opts: {
   });
 }
 
+export async function sendSubUploadLink(opts: {
+  to: string;
+  jobNo: string;
+  pumpMaker: string;
+  pumpModel: string;
+  serialNo: string | null;
+  uploadUrl: string;
+  expiresAt: Date;
+}): Promise<void> {
+  const expStr = opts.expiresAt.toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" });
+  await transporter.sendMail({
+    from: `"스마텍" <${process.env.GMAIL_USER}>`,
+    to: opts.to,
+    subject: `[스마텍] 수리 업로드 요청 · ${opts.jobNo}`,
+    html: `<div style="font-family:'Malgun Gothic','Apple SD Gothic Neo',Arial,sans-serif;color:#222;line-height:1.7;font-size:14px">
+  <p>안녕하세요, <strong>(주)스마텍</strong>입니다.</p>
+  <p>아래 장비의 검사성적서 및 분해사진 업로드를 요청드립니다.</p>
+  <table style="border-collapse:collapse;margin:18px 0;font-size:13px">
+    <tr><td style="padding:6px 12px;color:#666;border:1px solid #ddd">접수번호</td>
+        <td style="padding:6px 12px;border:1px solid #ddd"><strong>${opts.jobNo}</strong></td></tr>
+    <tr><td style="padding:6px 12px;color:#666;border:1px solid #ddd">장비</td>
+        <td style="padding:6px 12px;border:1px solid #ddd">${opts.pumpMaker} ${opts.pumpModel}${opts.serialNo ? ` / S/N: ${opts.serialNo}` : ""}</td></tr>
+    <tr><td style="padding:6px 12px;color:#666;border:1px solid #ddd">링크 유효기간</td>
+        <td style="padding:6px 12px;border:1px solid #ddd">${expStr}까지</td></tr>
+  </table>
+  <a href="${opts.uploadUrl}" style="display:inline-block;background:#c00020;color:#fff;padding:12px 28px;font-size:14px;font-weight:600;text-decoration:none;">
+    업로드 페이지 열기 →
+  </a>
+  <p style="margin-top:24px;font-size:12px;color:#9ca3af">
+    문의: 031-204-7170 · info@smartechvacuum.com
+  </p>
+</div>`,
+    text: `스마텍 수리 업로드 요청\n\n접수번호: ${opts.jobNo}\n장비: ${opts.pumpMaker} ${opts.pumpModel}${opts.serialNo ? ` / S/N: ${opts.serialNo}` : ""}\n유효기간: ${expStr}까지\n\n업로드 링크: ${opts.uploadUrl}\n\n문의: 031-204-7170`,
+  });
+}
+
 export async function sendRepairQuote(opts: {
   to: string;
   jobNo: string;
   companyName: string;
   contactName: string | null;
   quotePdfBuffer: Buffer;
-  inspectionPdfBuffer: Buffer;
+  inspectionPdfBuffer?: Buffer;
   bodyText?: string;
 }): Promise<void> {
+  const hasInspection = opts.inspectionPdfBuffer && opts.inspectionPdfBuffer.length > 0;
   await transporter.sendMail({
     from: `"스마텍" <${process.env.GMAIL_USER}>`,
     to: opts.to,
     subject: `[스마텍] 수리견적서 ${opts.jobNo} 발송드립니다.`,
     text:
       opts.bodyText ??
-      `${opts.companyName} ${opts.contactName ?? "담당자"}님, 안녕하세요.\n\n스마텍입니다.\n수리견적서와 검사성적서(${opts.jobNo})를 첨부하여 드립니다.\n검토 후 수리 진행 여부를 회신해 주시면 감사하겠습니다.\n\n감사합니다.\n(주)스마텍 서비스팀\n031-204-7170 · info@smartechvacuum.com`,
+      `${opts.companyName} ${opts.contactName ?? "담당자"}님, 안녕하세요.\n\n스마텍입니다.\n수리견적서${hasInspection ? "와 검사성적서" : ""}(${opts.jobNo})를 첨부하여 드립니다.\n검토 후 수리 진행 여부를 회신해 주시면 감사하겠습니다.\n\n감사합니다.\n(주)스마텍 서비스팀\n031-204-7170 · info@smartechvacuum.com`,
     attachments: [
       {
         filename: `수리견적서_${opts.jobNo}.pdf`,
         content: opts.quotePdfBuffer,
         contentType: "application/pdf",
       },
-      {
+      ...(hasInspection ? [{
         filename: `검사성적서_${opts.jobNo}.pdf`,
-        content: opts.inspectionPdfBuffer,
+        content: opts.inspectionPdfBuffer!,
         contentType: "application/pdf",
-      },
+      }] : []),
     ],
   });
 }

@@ -577,6 +577,7 @@ model OfflineRepairJob {
 
   // 외주 협력사
   subName         String?
+  subEmail        String?
 
   // 업로드 토큰 (협력사 전용 링크)
   uploadToken     String?   @unique

@@ -15,7 +15,7 @@ type Job = {
   id: number; jobNo: string; status: string;
   pumpMaker: string; pumpModel: string; serialNo: string | null;
   voltage: string | null; repairReason: string | null;
-  subName: string | null;
+  subName: string | null; subEmail: string | null;
   company: { id: number; companyName: string } | null;
   contactName: string | null; contactEmail: string | null; contactPhone: string | null;
   receivedDate: string; requestedDate: string | null;
@@ -65,6 +65,7 @@ function JobForm({ onSaved }: { onSaved: (newJobId: number) => void }) {
   const [voltage, setVoltage] = useState("220V 1PH");
   const [repairReason, setRepairReason] = useState("정기");
   const [subName, setSubName] = useState("");
+  const [subEmail, setSubEmail] = useState("");
   const [contactName, setContactName] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [contactPhone, setContactPhone] = useState("");
@@ -99,7 +100,7 @@ function JobForm({ onSaved }: { onSaved: (newJobId: number) => void }) {
         body: JSON.stringify({
           companyId: selectedCompany?.id ?? null,
           pumpMaker, pumpModel, serialNo, voltage, repairReason,
-          subName, contactName, contactEmail, contactPhone,
+          subName, subEmail: subEmail || null, contactName, contactEmail, contactPhone,
           receivedDate, requestedDate: requestedDate || null, memo,
         }),
       });
@@ -205,6 +206,11 @@ function JobForm({ onSaved }: { onSaved: (newJobId: number) => void }) {
               <input value={subName} onChange={e => setSubName(e.target.value)} placeholder="협력사명"
                 className="w-full border hair px-3 py-1.5 text-[13px] focus:outline-none focus:border-ink" />
             </div>
+            <div>
+              <div className="mono text-[10px] dim mb-1">협력사 이메일 <span className="text-dim">(빈칸=기본)</span></div>
+              <input type="email" value={subEmail} onChange={e => setSubEmail(e.target.value)} placeholder="partner@example.com"
+                className="w-full border hair px-3 py-1.5 text-[13px] mono focus:outline-none focus:border-ink" />
+            </div>
           </div>
         </div>
       </div>
@@ -274,6 +280,7 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone }: {
   const [preQuoteNote, setPreQuoteNote] = useState("");
   const [preQuoteEmail, setPreQuoteEmail] = useState(job.contactEmail ?? "");
   const [sendingPreQuote, setSendingPreQuote] = useState(false);
+  const [editSubEmail, setEditSubEmail] = useState(job.subEmail ?? "");
 
   const uploadUrl = job.uploadToken
     ? `${typeof window !== "undefined" ? window.location.origin : ""}/repair/offline-upload/${job.uploadToken}`
@@ -520,6 +527,25 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone }: {
           {/* 협력사 링크 */}
           <div className="space-y-2">
             <div className="mono text-[10px] dim tracking-[0.1em]">— 협력사 업로드 링크</div>
+            <div className="flex gap-2 items-center max-w-md">
+              <input
+                type="email"
+                value={editSubEmail}
+                onChange={e => setEditSubEmail(e.target.value)}
+                placeholder={`협력사 이메일 (빈칸=${process.env.NEXT_PUBLIC_DEFAULT_SUB ?? "기본 설정값"})`}
+                className="flex-1 border hair px-3 py-1.5 text-[12px] mono focus:outline-none focus:border-ink"
+              />
+              <button
+                onClick={async () => {
+                  await fetch(`/api/admin/offline-repairs/${job.id}`, {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ subEmail: editSubEmail }),
+                  });
+                  showToast("저장됨");
+                }}
+                className="border hair px-3 py-1.5 text-[11px] hover:bg-ink/5 shrink-0">저장</button>
+            </div>
             {uploadUrl ? (
               <div className="flex gap-2 flex-wrap items-center">
                 <span className="mono text-[11px] text-smblue break-all">{uploadUrl}</span>
@@ -532,7 +558,7 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone }: {
             ) : (
               <button onClick={handleGenerateToken} disabled={genToken}
                 className="bg-smblue text-paper px-4 py-1.5 text-[12px] hover:brightness-110 transition-all disabled:opacity-50">
-                {genToken ? "생성 중..." : "협력사 링크 생성 (14일)"}
+                {genToken ? "생성 중..." : "협력사 링크 생성 + 이메일 발송 (14일)"}
               </button>
             )}
           </div>

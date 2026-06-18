@@ -32,6 +32,8 @@ type Repair = {
   adminNote: string | null;
   aiConfidence: string | null;
   aiModelRaw: string | null;
+  docsSentAt: string | null;
+  docsSentCount: number;
   symptoms: string[];
   symptomNote: string | null;
   createdAt: string;
@@ -664,6 +666,43 @@ export default function AdminRepairsPage() {
               >
                 {saving ? "저장 중..." : "메모 / 금액 저장"}
               </button>
+
+              {/* 수리 견적서 PDF */}
+              <div className="border border-line p-4 text-[13px] space-y-3">
+                <div className="mono text-[10px] text-dim tracking-widest">수리 견적서 PDF</div>
+                {selected.totalAmount <= 0 && (
+                  <p className="text-[12px] text-amber-600">금액을 입력하고 저장한 후 사용하세요.</p>
+                )}
+                <div className="flex gap-2 flex-wrap">
+                  <a
+                    href={`/api/admin/repairs/${selected.id}/send-quote`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="border border-line px-4 py-2 text-[12px] hover:bg-ink/5 transition"
+                  >
+                    PDF 저장
+                  </a>
+                  {selected.contactEmail ? (
+                    <button
+                      onClick={async () => {
+                        if (!confirm(`${selected.contactEmail} 으로 수리견적서를 발송하시겠습니까?`)) return;
+                        const res = await fetch(`/api/admin/repairs/${selected.id}/send-quote`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ adminNote: editNote }) });
+                        const data = await res.json();
+                        if (res.ok) { alert(`발송 완료: ${data.sentTo}`); load(); }
+                        else alert(`발송 실패: ${data.error}`);
+                      }}
+                      className="bg-smblue text-paper px-4 py-2 text-[12px] hover:brightness-110 transition"
+                    >
+                      이메일 발송
+                    </button>
+                  ) : (
+                    <span className="text-[11px] text-dim self-center">이메일 없음 — 연락처 확인 필요</span>
+                  )}
+                </div>
+                {selected.docsSentAt && (
+                  <p className="mono text-[10px] text-dim">최근 발송: {formatDate(selected.docsSentAt)} ({selected.docsSentCount}회)</p>
+                )}
+              </div>
             </div>
         </div>
       )}
