@@ -598,10 +598,15 @@ export default function QuoteDetailPage() {
             <div className="row"><span className="k">DELIVERY</span><span className="v">국내 재고분 D+1 / 해외 발주분 D+14 (협의)</span></div>
             <div className="row"><span className="k">WARRANTY</span><span className="v">12개월 · Edwards 정품 보증</span></div>
             <div className="row"><span className="k">A / S</span><span className="v">현장 서비스 · 기술지원</span></div>
-            {quote.note && (
-              <div className="row"><span className="k">NOTE</span><span className="v">{quote.note}</span></div>
-            )}
           </div>
+
+          {/* NOTE — TERMS 아래 별도 강조 블록 */}
+          {quote.note && (
+            <div style={{ borderLeft: "4px solid #c00020", paddingLeft: "16px", paddingTop: "10px", paddingBottom: "10px", marginBottom: "24px", background: "rgba(192,0,32,0.04)" }}>
+              <div style={{ fontFamily: "monospace", fontSize: "10px", letterSpacing: "0.15em", textTransform: "uppercase", color: "#c00020", marginBottom: "4px" }}>REMARKS</div>
+              <div style={{ fontSize: "13px", fontStyle: "italic", color: "#0B0B0C" }}>{quote.note}</div>
+            </div>
+          )}
 
           {/* SECTION 07 · SIGNATURES + 주문 확정 */}
           <div className="section-label">— SECTION 07 · SIGNATURES</div>
@@ -719,14 +724,17 @@ export default function QuoteDetailPage() {
           <div className="row"><span className="k">VAT (10%)</span><span className="v">₩ {fmt(vat)}</span></div>
           <div className="row grand"><span className="k">GRAND TOTAL</span><span className="v">₩ {fmt(grandTotal)}</span></div>
         </div>
+        {quote.note && (
+          <div style={{ borderLeft: "4px solid #c00020", paddingLeft: "12px", paddingTop: "8px", paddingBottom: "8px", margin: "10px 0", background: "rgba(192,0,32,0.04)" }}>
+            <div style={{ fontFamily: "monospace", fontSize: "9px", letterSpacing: "0.15em", textTransform: "uppercase", color: "#c00020", marginBottom: "3px" }}>REMARKS</div>
+            <div style={{ fontSize: "11px", fontStyle: "italic", color: "#0B0B0C" }}>{quote.note}</div>
+          </div>
+        )}
         <div className="p-terms">
           <div className="row"><span className="k">Payment</span><span className="v">{paymentLabel(quote.paymentTerm, quote.taxInvoiceRequested)}</span></div>
           <div className="row"><span className="k">Delivery</span><span className="v">국내 재고분 D+1 / 해외 발주분 D+14 (협의)</span></div>
           <div className="row"><span className="k">Warranty</span><span className="v">12개월 · Edwards 정품 보증</span></div>
           <div className="row"><span className="k">A / S</span><span className="v">현장 서비스 · 기술지원</span></div>
-          {quote.note && (
-            <div className="row"><span className="k">Note</span><span className="v">{quote.note}</span></div>
-          )}
         </div>
         <div className="p-footer">
           <span>© {issuedDate.getFullYear()} SMARTECH CO., LTD. · Edwards Vacuum Korea Authorized Distributor</span>

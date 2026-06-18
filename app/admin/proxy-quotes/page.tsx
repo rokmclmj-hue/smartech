@@ -187,6 +187,9 @@ function AdminProxyQuotesInner() {
   // 결제조건
   const [paymentTerm, setPaymentTerm] = useState<string | null>(null);
 
+  // 비고
+  const [note, setNote] = useState("");
+
   // 거래처 저장 옵션
   const [saveToCompany, setSaveToCompany] = useState(true);
 
@@ -472,8 +475,8 @@ function AdminProxyQuotesInner() {
       // 홈페이지 등록 회원이면 customerId, 거래처/직접입력이면 guest
       const body =
         selectedCustomer?.source === "user"
-          ? { customerId: selectedCustomer.id, items: itemsPayload, paymentTerm: paymentTerm ?? undefined }
-          : { guest, items: itemsPayload, paymentTerm: paymentTerm ?? undefined, saveToCompany: showDirect ? saveToCompany : false };
+          ? { customerId: selectedCustomer.id, items: itemsPayload, paymentTerm: paymentTerm ?? undefined, note: note || undefined }
+          : { guest, items: itemsPayload, paymentTerm: paymentTerm ?? undefined, note: note || undefined, saveToCompany: showDirect ? saveToCompany : false };
 
       const res = await fetch("/api/admin/proxy-quotes", {
         method: "POST",
@@ -1153,6 +1156,29 @@ function AdminProxyQuotesInner() {
         </div>
       </div>
 
+      {/* 05 / 비고 */}
+      <div className="mb-8">
+        <label className="mono text-[10px] tracking-[0.18em] uppercase dim mb-3 block">
+          05 / 비고 <span className="normal-case text-[10px]">(선택) — 납기·특이사항 메모</span>
+        </label>
+        <textarea
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          rows={3}
+          placeholder="예) D397·D161 품목은 8주 납기 가능 / 나머지 16주"
+          className="w-full border hair px-3 py-2.5 text-[13px] focus:outline-none focus:border-ink resize-y bg-transparent placeholder:text-dim"
+        />
+        {note && (
+          <button
+            type="button"
+            onClick={() => setNote("")}
+            className="mt-1 mono text-[10px] dim hover:text-edred transition-colors"
+          >
+            초기화
+          </button>
+        )}
+      </div>
+
       {/* 발행 버튼 */}
       <div className="flex justify-end gap-3">
         <button
@@ -1261,6 +1287,14 @@ function AdminProxyQuotesInner() {
                   <div className="text-[14px] font-medium text-ink">
                     {PAY_OPTIONS.find((o) => o.value === paymentTerm)?.label ?? paymentTerm}
                   </div>
+                </div>
+              )}
+
+              {/* 비고 */}
+              {note && (
+                <div className="border-l-4 border-edred pl-4 py-2 bg-edred/5">
+                  <div className="mono text-[9px] tracking-[0.15em] uppercase text-edred mb-1">REMARKS</div>
+                  <div className="text-[13px] italic text-ink">{note}</div>
                 </div>
               )}
             </div>
