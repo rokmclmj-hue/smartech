@@ -469,6 +469,12 @@ function OrderForm({ onSaved, initialData }: { onSaved: () => void; initialData?
 const DEFAULT_MAIL_BODY = (toCompany: string, orderNo: string) =>
   `${toCompany} 담당자님, 안녕하세요.\n\n스마텍입니다.\n발주서(${orderNo})를 첨부하여 드립니다.\n납기 확인 후 회신 부탁드립니다.\n\n감사합니다.\n이명재 배상`;
 
+function ensureSignature(msg: string, toCompany: string, orderNo: string): string {
+  const base = msg || DEFAULT_MAIL_BODY(toCompany, orderNo);
+  if (base.includes("이명재 배상")) return base;
+  return base + "\n이명재 배상";
+}
+
 // ── 이력 행 ───────────────────────────────────────
 function OrderRow({ order, onDelete, onCopy }: { order: PurchaseOrder; onDelete: () => void; onCopy: (o: PurchaseOrder) => void }) {
   const [sendEmail, setSendEmail] = useState("");
@@ -480,13 +486,13 @@ function OrderRow({ order, onDelete, onCopy }: { order: PurchaseOrder; onDelete:
   const [previewOpen, setPreviewOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [mailBody, setMailBody] = useState(
-    order.message || DEFAULT_MAIL_BODY(order.toCompany, order.orderNo)
+    ensureSignature(order.message ?? "", order.toCompany, order.orderNo)
   );
 
   useEffect(() => {
     setSendEmail(order.toEmail ?? "");
     setCcInput(order.ccEmails ?? "");
-    setMailBody(order.message || DEFAULT_MAIL_BODY(order.toCompany, order.orderNo));
+    setMailBody(ensureSignature(order.message ?? "", order.toCompany, order.orderNo));
   }, [order.toEmail, order.ccEmails, order.message, order.toCompany, order.orderNo]);
 
   const totalSupply = order.items.reduce((s, i) => s + i.unitPrice * i.quantity, 0);
