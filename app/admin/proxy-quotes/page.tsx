@@ -1025,8 +1025,8 @@ function AdminProxyQuotesInner() {
           <div className="grid grid-cols-[100px_1fr_90px_80px_120px_120px_36px] gap-2 px-3 py-2.5 border-b hair bg-ink/5 mono text-[9px] tracking-[0.15em] uppercase dim">
             <div>파트번호</div>
             <div>제품명</div>
-            <div className="text-center">납기</div>
-            <div className="text-right">수량</div>
+            <div className="text-center">납기(주)</div>
+            <div className="text-right">수량(Q&apos;ty)</div>
             <div className="text-right">단가</div>
             <div className="text-right">소계</div>
             <div />
@@ -1062,6 +1062,8 @@ function AdminProxyQuotesInner() {
                 </div>
                 {/* 수량 */}
                 <input type="number" min={1} value={l.quantity}
+                  inputMode="numeric"
+                  onKeyDown={(e) => { if ([".", "-", "+", "e"].includes(e.key)) e.preventDefault(); }}
                   onChange={(e) => updateQty(l.key, parseInt(e.target.value) || 1)}
                   className="w-full text-right border hair rounded px-2 py-1 text-[13px] focus:outline-none focus:border-edred" />
                 {/* 단가 */}
