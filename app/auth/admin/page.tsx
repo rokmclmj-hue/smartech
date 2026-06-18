@@ -38,19 +38,22 @@ export default function AdminLoginPage() {
         <form onSubmit={handleSubmit} className="space-y-3">
           <input
             type="tel"
+            name="phone"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             required
             placeholder="전화번호"
-            autoComplete="tel"
+            autoComplete="username"
             className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
           />
           <input
             type="password"
+            name="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
             placeholder="비밀번호"
+            autoComplete="current-password"
             className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
           />
           {error && <p className="text-red-500 text-xs">{error}</p>}
