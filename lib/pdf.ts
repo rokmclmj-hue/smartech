@@ -315,6 +315,17 @@ function pdfPaymentLabel(term: string | null | undefined, taxInvoice: boolean): 
   return taxInvoice ? "세금계산서 발행 · 익월 말 결제" : "납품 전 현금결제";
 }
 
+function fmtPhone(p: string): string {
+  const d = p.replace(/\D/g, "");
+  if (d.startsWith("02")) {
+    if (d.length === 9) return `${d.slice(0, 2)}-${d.slice(2, 5)}-${d.slice(5)}`;
+    return `${d.slice(0, 2)}-${d.slice(2, 6)}-${d.slice(6)}`;
+  }
+  if (d.length === 10) return `${d.slice(0, 3)}-${d.slice(3, 6)}-${d.slice(6)}`;
+  if (d.length === 11) return `${d.slice(0, 3)}-${d.slice(3, 7)}-${d.slice(7)}`;
+  return p;
+}
+
 function fmt(n: number): string {
   return "₩" + n.toLocaleString("en-US");
 }
@@ -365,7 +376,7 @@ function QuoteDocument({ quote }: { quote: QuoteForPdf }) {
           quote.user.phone
             ? el(View, { style: S.partyRow },
                 el(Text, { style: QS.partyKey }, "TEL"),
-                el(Text, { style: S.partyVal }, quote.user.phone)
+                el(Text, { style: S.partyVal }, fmtPhone(quote.user.phone))
               )
             : null,
           quote.user.email

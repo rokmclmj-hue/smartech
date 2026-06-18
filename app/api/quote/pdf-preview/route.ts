@@ -104,11 +104,30 @@ export async function POST(req: NextRequest) {
 
   const dateStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}`;
 
+  function stripPrefix(name: string) {
+    return name
+      .replace(/^(주식회사|유한회사|합자회사|합명회사)\s*/u, "")
+      .replace(/^\(주\)\s*/u, "")
+      .replace(/^㈜\s*/u, "")
+      .trim();
+  }
+  const co = stripPrefix(user.company ?? "") || (user.company ?? "");
+  let pdfFilename: string;
+  if (items.length === 0) {
+    pdfFilename = `견적서_${dateStr}_${co}.pdf`;
+  } else {
+    const first = items[0];
+    const label = items.length === 1
+      ? `${first.description} x ${first.quantity}ea`
+      : `${first.description} x ${first.quantity}ea 외`;
+    pdfFilename = `견적서_${dateStr}_${co}(${label}).pdf`;
+  }
+
   return new NextResponse(pdfBuffer.buffer as ArrayBuffer, {
     status: 200,
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="견적서_${dateStr}.pdf"`,
+      "Content-Disposition": `attachment; filename*=UTF-8''${encodeURIComponent(pdfFilename)}`,
       "Content-Length": String(pdfBuffer.length),
     },
   });
