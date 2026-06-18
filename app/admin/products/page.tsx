@@ -16,11 +16,6 @@ type Product = {
   isDiscontinued: boolean;
 };
 
-type PriceRule = {
-  tier: string;
-  multiplier: number;
-};
-
 type ApiResponse = {
   items: Product[];
   total: number;
@@ -49,14 +44,6 @@ type EditProductForm = {
 
 // ─── 상수 ────────────────────────────────────────────────────────────────────
 
-const TIER_LABELS: Record<string, string> = {
-  ENDUSER: "Enduser",
-  OEM: "OEM",
-  DEALER: "딜러",
-  KEY_DEALER: "Key딜러",
-  ADMIN: "관리자",
-};
-
 const EMPTY_NEW_FORM: NewProductForm = {
   partNo: "",
   description: "",
@@ -82,7 +69,7 @@ export default function AdminProductsPage() {
   const { success, error: toastError, info } = useToast();
 
   // 탭
-  const [tab, setTab] = useState<"products" | "prices">("products");
+  const [tab] = useState<"products">("products");
 
   // 제품 목록 상태
   const [products, setProducts] = useState<Product[]>([]);
@@ -98,10 +85,6 @@ export default function AdminProductsPage() {
   const [showDiscontinued, setShowDiscontinued] = useState(false);
   const debouncedSearch = useDebounce(search, 300);
   const debouncedCategory = useDebounce(category, 300);
-
-  // 가격 규칙
-  const [rules, setRules] = useState<PriceRule[]>([]);
-  const [ruleSaving, setRuleSaving] = useState<string | null>(null);
 
   // 인라인 편집: stock
   const [editingStock, setEditingStock] = useState<Record<number, string>>({});
@@ -165,14 +148,6 @@ export default function AdminProductsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
-  useEffect(() => {
-    if (tab === "prices") {
-      fetch("/api/admin/price-rules")
-        .then((r) => r.json())
-        .then(setRules)
-        .catch(() => toastError("가격 규칙을 불러오지 못했습니다"));
-    }
-  }, [tab, toastError]);
 
   // ─── 카테고리 목록 (현재 로드된 제품 기준) ─────────────────────────────────
 
@@ -411,29 +386,6 @@ export default function AdminProductsPage() {
     }
   }
 
-  // ─── 가격 규칙 저장 ────────────────────────────────────────────────────────
-
-  async function saveRule(tier: string, multiplier: number) {
-    setRuleSaving(tier);
-    try {
-      const res = await fetch("/api/admin/price-rules", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tier, multiplier }),
-      });
-      const j = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        toastError((j as { error?: string }).error ?? "저장에 실패했습니다");
-        return;
-      }
-      success(`${TIER_LABELS[tier] ?? tier} 가격 규칙이 저장되었습니다`);
-    } catch {
-      toastError("저장에 실패했습니다");
-    } finally {
-      setRuleSaving(null);
-    }
-  }
-
   // ─── 엑셀 업로드 ───────────────────────────────────────────────────────────
 
   async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -546,15 +498,7 @@ export default function AdminProductsPage() {
 
       {/* 탭 */}
       <div className="flex gap-2">
-        {(["products", "prices"] as const).map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`chip ${tab === t ? "active" : ""}`}
-          >
-            {t === "products" ? "제품 목록" : "가격 규칙"}
-          </button>
-        ))}
+        <button className="chip active">제품 목록</button>
       </div>
 
       {/* ─── 제품 목록 탭 ──────────────────────────────────────────────────── */}
@@ -860,65 +804,6 @@ export default function AdminProductsPage() {
         </>
       )}
 
-      {/* ─── 가격 규칙 탭 ──────────────────────────────────────────────────── */}
-      {tab === "prices" && (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-3xl">
-          {rules.length === 0 ? (
-            <div className="col-span-full text-center py-16 dim text-[13px]">
-              가격 규칙이 없습니다
-            </div>
-          ) : (
-            rules.map((r) => (
-              <div
-                key={r.tier}
-                className="border hair bg-paper p-5 hover:border-edred/40 transition-colors"
-              >
-                <div className="mono text-[10px] dim tracking-[0.15em] uppercase mb-1">
-                  {r.tier}
-                </div>
-                <div className="text-[15px] font-semibold text-ink mb-4">
-                  {TIER_LABELS[r.tier] ?? r.tier}
-                </div>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="number"
-                    step="0.05"
-                    min="0.5"
-                    max="10"
-                    value={r.multiplier}
-                    onChange={(e) =>
-                      setRules((prev) =>
-                        prev.map((x) =>
-                          x.tier === r.tier
-                            ? {
-                                ...x,
-                                multiplier: parseFloat(e.target.value) || 1,
-                              }
-                            : x
-                        )
-                      )
-                    }
-                    className="w-20 border hair bg-paper px-2 py-1 text-[13px] focus:outline-none focus:border-ink mono tabular"
-                  />
-                  <span className="mono text-[10px] dim tracking-[0.1em] uppercase">
-                    ×
-                  </span>
-                  <button
-                    onClick={() => saveRule(r.tier, r.multiplier)}
-                    disabled={ruleSaving === r.tier}
-                    className="ml-auto mono text-[10px] tracking-[0.1em] uppercase bg-ink text-paper px-3 py-1 hover:bg-edred disabled:opacity-40 transition-colors"
-                  >
-                    {ruleSaving === r.tier ? "..." : "저장"}
-                  </button>
-                </div>
-                <div className="mt-3 mono text-[10px] dim tracking-[0.05em]">
-                  원가 × {r.multiplier} = 판매가
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      )}
 
       {/* ─── 신제품 추가 모달 ──────────────────────────────────────────────── */}
       {showNewModal && (
