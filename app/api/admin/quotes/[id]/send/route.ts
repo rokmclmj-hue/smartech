@@ -160,6 +160,7 @@ export async function POST(
       totalAmount: quote.totalAmount,
       note: quote.note,
       priceBasis,
+      paymentTerm: quote.paymentTerm ?? null,
       user: {
         name: recipientName,
         company: recipientCompany,

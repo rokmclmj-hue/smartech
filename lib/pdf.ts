@@ -30,6 +30,7 @@ export interface QuoteForPdf {
   totalAmount: number | null;
   note?: string | null;
   priceBasis?: string | null;
+  paymentTerm?: string | null;
   user: {
     name: string;
     company: string;
@@ -231,6 +232,89 @@ const S = StyleSheet.create({
   },
 });
 
+// ── 견적서 전용 파란색 디자인 (HTML 인쇄 포맷과 통일)
+const QS = StyleSheet.create({
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
+    borderBottom: "1.5 solid #1F4E79",
+    paddingBottom: 8,
+    marginBottom: 12,
+  },
+  headerTitle: {
+    fontSize: 14,
+    fontFamily: "Pretendard",
+    fontWeight: 700,
+    color: "#1F4E79",
+    letterSpacing: 0.5,
+  },
+  partiesBox: {
+    flexDirection: "row",
+    border: "0.5 solid #BFBFBF",
+    marginBottom: 12,
+  },
+  toBox:   { flex: 1, padding: 10, borderRight: "0.5 solid #BFBFBF" },
+  fromBox: { flex: 1, padding: 10 },
+  partyLabel: {
+    fontSize: 6.5,
+    fontFamily: "Pretendard",
+    fontWeight: 700,
+    color: "#1F4E79",
+    letterSpacing: 2,
+    marginBottom: 6,
+  },
+  partyKey: { fontSize: 7, color: "#555555", width: 42 },
+  tableHeader: {
+    flexDirection: "row",
+    backgroundColor: "#F4F6F8",
+    borderTop: "0.5 solid #111111",
+    borderBottom: "0.5 solid #111111",
+    paddingVertical: 5,
+    paddingHorizontal: 4,
+  },
+  thCell: { color: "#111111", fontFamily: "Pretendard", fontWeight: 700, fontSize: 7, letterSpacing: 0.5 },
+  tableRow: { flexDirection: "row", borderBottom: "0.5 solid #BFBFBF", paddingVertical: 6, paddingHorizontal: 4 },
+  summaryRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 3,
+    borderBottom: "0.5 solid #BFBFBF",
+  },
+  summaryTotalRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 5,
+    borderTop: "1 solid #1F4E79",
+    borderBottom: "1 solid #1F4E79",
+    marginTop: 1,
+  },
+  sumTLabel: { fontSize: 10, fontFamily: "Pretendard", fontWeight: 700, color: "#1F4E79" },
+  sumTValue: { fontSize: 10, fontFamily: "Pretendard", fontWeight: 700, color: "#1F4E79" },
+  termsBox: { border: "0.5 solid #BFBFBF", padding: 10, marginBottom: 12 },
+  remarkBox: {
+    borderLeft: "4 solid #c00020",
+    paddingLeft: 10,
+    paddingTop: 8,
+    paddingBottom: 8,
+    marginBottom: 10,
+    backgroundColor: "#FEF2F2",
+  },
+  remarkLabel: { fontSize: 6.5, letterSpacing: 2, color: "#c00020", marginBottom: 3 },
+  remarkText:  { fontSize: 9, color: "#0B0B0C" },
+});
+
+const PAY_LABELS: Record<string, string> = {
+  d: "납품 전 현금결제",
+  e: "정기결제 (익월 말일)",
+  c: "담당자 협의",
+};
+
+function pdfPaymentLabel(term: string | null | undefined, taxInvoice: boolean): string {
+  if (term && PAY_LABELS[term]) return PAY_LABELS[term];
+  return taxInvoice ? "세금계산서 발행 · 익월 말 결제" : "납품 전 현금결제";
+}
+
 function fmt(n: number): string {
   return "₩" + n.toLocaleString("en-US");
 }
@@ -258,8 +342,8 @@ function QuoteDocument({ quote }: { quote: QuoteForPdf }) {
     el(Page, { size: "A4", style: S.page },
 
       // ── 헤더
-      el(View, { style: S.header },
-        el(Text, { style: S.headerTitle }, "SMARTECH · QUOTATION"),
+      el(View, { style: QS.header },
+        el(Text, { style: QS.headerTitle }, "SMARTECH · QUOTATION"),
         el(View, { style: S.headerMeta },
           el(Text, { style: S.headerMetaLine }, `Q-REF · ${quoteNo}`),
           el(Text, { style: S.headerMetaLine }, `ISSUED · ${fmtDate(issued)}   VALID · ${validStr}`)
@@ -267,58 +351,58 @@ function QuoteDocument({ quote }: { quote: QuoteForPdf }) {
       ),
 
       // ── TO / FROM
-      el(View, { style: S.partiesBox },
-        el(View, { style: S.toBox },
-          el(Text, { style: S.partyLabel }, "TO · 수신처"),
+      el(View, { style: QS.partiesBox },
+        el(View, { style: QS.toBox },
+          el(Text, { style: QS.partyLabel }, "TO · 수신처"),
           el(View, { style: S.partyRow },
-            el(Text, { style: S.partyKey }, "COMPANY"),
+            el(Text, { style: QS.partyKey }, "COMPANY"),
             el(Text, { style: S.partyVal }, quote.user.company)
           ),
           el(View, { style: S.partyRow },
-            el(Text, { style: S.partyKey }, "ATTN"),
-            el(Text, { style: S.partyVal }, quote.user.title ? `${quote.user.name} ${quote.user.title}` : quote.user.name)
+            el(Text, { style: QS.partyKey }, "ATTN"),
+            el(Text, { style: S.partyVal }, quote.user.title ? `${quote.user.name} (${quote.user.title}님)` : `${quote.user.name}님`)
           ),
           quote.user.phone
             ? el(View, { style: S.partyRow },
-                el(Text, { style: S.partyKey }, "TEL"),
+                el(Text, { style: QS.partyKey }, "TEL"),
                 el(Text, { style: S.partyVal }, quote.user.phone)
               )
             : null,
           quote.user.email
             ? el(View, { style: S.partyRow },
-                el(Text, { style: S.partyKey }, "EMAIL"),
+                el(Text, { style: QS.partyKey }, "EMAIL"),
                 el(Text, { style: S.partyVal }, quote.user.email)
               )
             : null
         ),
-        el(View, { style: S.fromBox },
-          el(Text, { style: S.partyLabel }, "FROM · 발신처"),
+        el(View, { style: QS.fromBox },
+          el(Text, { style: QS.partyLabel }, "FROM · 발신처"),
           el(View, { style: S.partyRow },
-            el(Text, { style: S.partyKey }, "COMPANY"),
+            el(Text, { style: QS.partyKey }, "COMPANY"),
             el(Text, { style: S.partyVal }, `${SMARTECH_COMPANY.name} · ${SMARTECH_COMPANY.english}`)
           ),
           el(View, { style: S.partyRow },
-            el(Text, { style: S.partyKey }, "CEO"),
+            el(Text, { style: QS.partyKey }, "CEO"),
             el(Text, { style: S.partyVal }, SMARTECH_COMPANY.ceo)
           ),
           el(View, { style: S.partyRow },
-            el(Text, { style: S.partyKey }, "BIZ NO"),
+            el(Text, { style: QS.partyKey }, "BIZ NO"),
             el(Text, { style: S.partyVal }, SMARTECH_COMPANY.bizNo)
           ),
           el(View, { style: S.partyRow },
-            el(Text, { style: S.partyKey }, "TEL"),
+            el(Text, { style: QS.partyKey }, "TEL"),
             el(Text, { style: S.partyVal }, `${SMARTECH_COMPANY.officeTel} / M ${SMARTECH_COMPANY.mobileTel}`)
           ),
           el(View, { style: S.partyRow },
-            el(Text, { style: S.partyKey }, "EMAIL"),
+            el(Text, { style: QS.partyKey }, "EMAIL"),
             el(Text, { style: S.partyVal }, SMARTECH_COMPANY.email)
           ),
           el(View, { style: S.partyRow },
-            el(Text, { style: S.partyKey }, "OFFICE"),
+            el(Text, { style: QS.partyKey }, "OFFICE"),
             el(Text, { style: S.partyVal }, SMARTECH_COMPANY.headOfficeKo)
           ),
           el(View, { style: S.partyRow },
-            el(Text, { style: S.partyKey }, "A/S CTR"),
+            el(Text, { style: QS.partyKey }, "A/S CTR"),
             el(Text, { style: S.partyVal }, SMARTECH_COMPANY.cheonanCenterKo)
           )
         )
@@ -326,17 +410,17 @@ function QuoteDocument({ quote }: { quote: QuoteForPdf }) {
 
       // ── 품목 테이블
       el(View, { style: S.table },
-        el(View, { style: S.tableHeader },
-          el(Text, { style: [S.thCell, S.colNo] }, "NO"),
-          el(Text, { style: [S.thCell, S.colCode] }, "PART NO"),
-          el(Text, { style: [S.thCell, S.colDesc] }, "DESCRIPTION"),
-          el(Text, { style: [S.thCell, S.colLead] }, "납기"),
-          el(Text, { style: [S.thCell, S.colQty] }, "QTY"),
-          el(Text, { style: [S.thCell, S.colPrice] }, "UNIT PRICE"),
-          el(Text, { style: [S.thCell, S.colAmount] }, "SUBTOTAL")
+        el(View, { style: QS.tableHeader },
+          el(Text, { style: [QS.thCell, S.colNo] }, "NO"),
+          el(Text, { style: [QS.thCell, S.colCode] }, "PART NO"),
+          el(Text, { style: [QS.thCell, S.colDesc] }, "DESCRIPTION"),
+          el(Text, { style: [QS.thCell, S.colLead] }, "납기"),
+          el(Text, { style: [QS.thCell, S.colQty] }, "QTY"),
+          el(Text, { style: [QS.thCell, S.colPrice] }, "UNIT PRICE"),
+          el(Text, { style: [QS.thCell, S.colAmount] }, "SUBTOTAL")
         ),
         ...quote.items.map((item, idx) =>
-          el(View, { key: String(idx), style: idx % 2 === 0 ? S.tableRow : S.tableRowAlt },
+          el(View, { key: String(idx), style: QS.tableRow },
             el(Text, { style: [S.tdNormal, S.colNo] }, String(idx + 1).padStart(2, "0")),
             el(Text, { style: [S.tdCode, S.colCode] }, item.product.partNo),
             el(Text, { style: [S.tdNormal, S.colDesc] }, item.product.description),
@@ -352,31 +436,39 @@ function QuoteDocument({ quote }: { quote: QuoteForPdf }) {
       el(View, { style: S.summaryArea },
         el(View, { style: S.summaryBox },
           quote.priceBasis
-            ? el(View, { style: S.summaryRow },
+            ? el(View, { style: QS.summaryRow },
                 el(Text, { style: S.sumLabel }, "PRICE BASIS"),
-                el(Text, { style: { ...S.sumValue, color: "#c00020", fontFamily: "Pretendard", fontWeight: 700 } }, quote.priceBasis)
+                el(Text, { style: { fontSize: 8, color: "#c00020", fontFamily: "Pretendard", fontWeight: 700 } }, quote.priceBasis)
               )
             : null,
-          el(View, { style: S.summaryRow },
+          el(View, { style: QS.summaryRow },
             el(Text, { style: S.sumLabel }, "SUB-TOTAL"),
             el(Text, { style: S.sumValue }, `₩ ${subtotal.toLocaleString("en-US")}`)
           ),
-          el(View, { style: S.summaryRow },
+          el(View, { style: QS.summaryRow },
             el(Text, { style: S.sumLabel }, "VAT (10%)"),
             el(Text, { style: S.sumValue }, `₩ ${vat.toLocaleString("en-US")}`)
           ),
-          el(View, { style: S.summaryTotalRow },
-            el(Text, { style: S.sumTLabel }, "GRAND TOTAL"),
-            el(Text, { style: S.sumTValue }, `₩ ${grand.toLocaleString("en-US")}`)
+          el(View, { style: QS.summaryTotalRow },
+            el(Text, { style: QS.sumTLabel }, "GRAND TOTAL"),
+            el(Text, { style: QS.sumTValue }, `₩ ${grand.toLocaleString("en-US")}`)
           )
         )
       ),
 
+      // ── 특이사항
+      quote.note
+        ? el(View, { style: QS.remarkBox },
+            el(Text, { style: QS.remarkLabel }, "REMARKS"),
+            el(Text, { style: QS.remarkText }, quote.note)
+          )
+        : null,
+
       // ── 거래 조건
-      el(View, { style: S.termsBox },
+      el(View, { style: QS.termsBox },
         el(View, { style: S.termRow },
           el(Text, { style: S.termLabel }, "PAYMENT"),
-          el(Text, { style: S.termValue }, "납품 전 현금결제")
+          el(Text, { style: S.termValue }, pdfPaymentLabel(quote.paymentTerm, quote.taxInvoiceRequested))
         ),
         el(View, { style: S.termRow },
           el(Text, { style: S.termLabel }, "DELIVERY"),
@@ -386,16 +478,10 @@ function QuoteDocument({ quote }: { quote: QuoteForPdf }) {
           el(Text, { style: S.termLabel }, "WARRANTY"),
           el(Text, { style: S.termValue }, "12개월 · Edwards 정품 보증")
         ),
-        el(View, { style: S.termRow },
+        el(View, { style: { ...S.termRow, marginBottom: 0 } },
           el(Text, { style: S.termLabel }, "A / S"),
           el(Text, { style: S.termValue }, "현장 서비스 · 기술지원")
-        ),
-        quote.note
-          ? el(View, { style: { ...S.termRow, marginTop: 2 } },
-              el(Text, { style: S.termLabel }, "REMARK"),
-              el(Text, { style: S.termValue }, quote.note)
-            )
-          : null
+        )
       ),
 
       // ── 푸터
