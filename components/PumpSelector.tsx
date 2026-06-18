@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import productData from "@/lib/productCatalog.json";
@@ -323,6 +323,38 @@ export default function PumpSelector() {
   const [cartLoading, setCartLoading] = useState<string | null>(null);
   const [cartAdded, setCartAdded] = useState<Set<string>>(new Set());
 
+  type FlatItem = { partNo: string; desc: string; price: number | null; series: string };
+  const [dbSearchResults, setDbSearchResults] = useState<FlatItem[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+
+  useEffect(() => {
+    if (selectedCategory || search.trim().length < 1 || tab !== "search") {
+      setDbSearchResults([]);
+      return;
+    }
+    setSearchLoading(true);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/products?q=${encodeURIComponent(search)}&limit=50`);
+        const data = await res.json();
+        const products: { partNo: string; description: string; displayPrice: number | null }[] = data.products ?? [];
+        setDbSearchResults(
+          products.map((p) => ({
+            partNo: p.partNo,
+            desc: p.description,
+            price: p.displayPrice,
+            series: "",
+          }))
+        );
+      } catch {
+        setDbSearchResults([]);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search, selectedCategory, tab]);
+
   // 선택된 TMP 객체
   const selectedTMPObj = TURBO_PUMPS.find(t => t.model === turboTMP) ?? null;
 
@@ -478,21 +510,7 @@ export default function PumpSelector() {
       )
     : [];
 
-  type FlatItem = { partNo: string; desc: string; price: number; series: string };
-
-  // 재구매·신규 전체검색 공용: SPARE 키(전체 품목)에서 검색
-  const spareItems: FlatItem[] = (productData["SPARE"] as { partNo: string; desc: string; price: number }[]).map(
-    (item) => ({ ...item, series: "" })
-  );
-
-  const newGlobalResults: FlatItem[] =
-    !selectedCategory && search.trim().length >= 1
-      ? spareItems.filter(
-          (item) =>
-            item.desc.toLowerCase().includes(search.toLowerCase()) ||
-            item.partNo.toLowerCase().includes(search.toLowerCase())
-        )
-      : [];
+  const newGlobalResults = dbSearchResults;
 
   async function handleScan() {
     if (!scanFile) return;
@@ -834,7 +852,9 @@ export default function PumpSelector() {
                   onChange={(e) => setSearch(e.target.value)}
                   className="w-full border-2 border-ink px-3 py-2.5 text-[14px] focus:outline-none focus:border-edred bg-transparent mb-3 placeholder:text-[#2a2823] transition-colors"
                 />
-                {newGlobalResults.length > 0 ? (
+                {searchLoading ? (
+                  <div className="border border-[#E3DFD6] p-4 text-[12px] text-[#6A6660]">검색 중...</div>
+                ) : newGlobalResults.length > 0 ? (
                   <>
                     <div className="border border-[#E3DFD6] divide-y divide-[#E3DFD6] max-h-[360px] overflow-y-auto">
                       {newGlobalResults.map((item, i) => (
@@ -845,7 +865,7 @@ export default function PumpSelector() {
                           </div>
                           <div className="shrink-0 ml-4 flex items-center gap-2">
                             <div className="text-[12px] font-semibold text-[#c00020]">
-                              {item.price.toLocaleString()}원
+                              {item.price ? item.price.toLocaleString() + "원" : "문의"}
                             </div>
                             <button
                               onClick={() => handleAddToCart(item.partNo, item.desc)}
