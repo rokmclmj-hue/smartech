@@ -573,9 +573,9 @@ function AdminProxyQuotesInner() {
             </div>
             <div className="text-[13px] dim mt-1">
               {recipientName}
-              {items.length > 0 && (
+              {lines.length > 0 && (
                 <span className="ml-2 text-[12px]">
-                  · {items[0].description || items[0].partNo || "품목"} x {items[0].quantity}ea{items.length > 1 ? " 외" : ""}
+                  · {lines[0].description || lines[0].partNo || "품목"} x {lines[0].quantity}ea{lines.length > 1 ? " 외" : ""}
                 </span>
               )}
             </div>
