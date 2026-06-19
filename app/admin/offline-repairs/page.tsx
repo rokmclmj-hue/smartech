@@ -281,6 +281,11 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone }: {
   const [preQuoteEmail, setPreQuoteEmail] = useState(job.contactEmail ?? "");
   const [sendingPreQuote, setSendingPreQuote] = useState(false);
   const [editSubEmail, setEditSubEmail] = useState(job.subEmail ?? "");
+  const [adminUploading, setAdminUploading] = useState(false);
+  const [adminUploadMsg, setAdminUploadMsg] = useState("");
+  const [deletingFileId, setDeletingFileId] = useState<number | null>(null);
+  const adminZipRef = useRef<HTMLInputElement>(null);
+  const adminExcelRef = useRef<HTMLInputElement>(null);
 
   const uploadUrl = job.uploadToken
     ? `${typeof window !== "undefined" ? window.location.origin : ""}/repair/offline-upload/${job.uploadToken}`
@@ -398,6 +403,39 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone }: {
       if (res.ok) { showToast("이메일 발송 완료"); onRefresh(); }
       else showToast(data.error ?? "발송 오류");
     } finally { setSending(false); }
+  }
+
+  async function handleAdminUpload(file: File, type: "zip" | "excel") {
+    setAdminUploading(true);
+    setAdminUploadMsg("");
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch(`/api/admin/offline-repairs/${job.id}/upload`, { method: "POST", body: form });
+      const data = await res.json();
+      if (!res.ok) { setAdminUploadMsg(`오류: ${data.error}`); return; }
+      if (type === "excel") {
+        setAdminUploadMsg(`✓ ${data.matched ?? 0}개 항목 자동 입력 완료 — 아래 검사성적서에서 확인하세요`);
+      } else {
+        setAdminUploadMsg("✓ 파일 업로드 완료");
+      }
+      onRefresh();
+    } catch { setAdminUploadMsg("업로드 실패. 다시 시도해주세요."); }
+    finally { setAdminUploading(false); }
+  }
+
+  async function handleDeleteFile(fileId: number, fileType: string) {
+    const label = fileType === "EXCEL" ? "엑셀 파일을 삭제하면 검사성적서 항목값도 초기화됩니다. 삭제하시겠습니까?" : "파일을 삭제하시겠습니까?";
+    if (!confirm(label)) return;
+    setDeletingFileId(fileId);
+    try {
+      const res = await fetch(`/api/admin/offline-repairs/${job.id}/files/${fileId}`, { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok) { showToast(`삭제 실패: ${data.error}`); return; }
+      showToast(data.clearedInspection ? "파일 삭제 + 검사성적서 초기화 완료" : "파일 삭제 완료");
+      setAdminUploadMsg("");
+      onRefresh();
+    } finally { setDeletingFileId(null); }
   }
 
   async function handleSendPreQuote() {
@@ -568,6 +606,38 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone }: {
             )}
           </div>
 
+          {/* 관리자 직접 업로드 */}
+          <div className="space-y-2">
+            <div className="mono text-[10px] dim tracking-[0.1em]">— 파일 직접 업로드 (관리자)</div>
+            <input ref={adminZipRef} type="file" accept=".zip,.7z" className="hidden"
+              onChange={async e => {
+                const f = e.target.files?.[0]; if (!f) return;
+                await handleAdminUpload(f, "zip");
+                if (adminZipRef.current) adminZipRef.current.value = "";
+              }} />
+            <input ref={adminExcelRef} type="file" accept=".xlsx,.xls" className="hidden"
+              onChange={async e => {
+                const f = e.target.files?.[0]; if (!f) return;
+                await handleAdminUpload(f, "excel");
+                if (adminExcelRef.current) adminExcelRef.current.value = "";
+              }} />
+            <div className="flex gap-2 flex-wrap">
+              <button onClick={() => adminZipRef.current?.click()} disabled={adminUploading}
+                className="border hair px-4 py-1.5 text-[12px] hover:bg-ink/5 transition-colors disabled:opacity-50">
+                {adminUploading ? "업로드 중..." : "📎 분해사진 ZIP 업로드"}
+              </button>
+              <button onClick={() => adminExcelRef.current?.click()} disabled={adminUploading}
+                className="border hair px-4 py-1.5 text-[12px] hover:bg-ink/5 transition-colors disabled:opacity-50">
+                {adminUploading ? "업로드 중..." : "📊 엑셀 성적서 업로드 (자동 파싱)"}
+              </button>
+            </div>
+            {adminUploadMsg && (
+              <p className={`text-[12px] ${adminUploadMsg.startsWith("✓") ? "text-green-700" : "text-edred"}`}>
+                {adminUploadMsg}
+              </p>
+            )}
+          </div>
+
           {/* 업로드된 파일 */}
           {job.files.length > 0 && (
             <div className="space-y-2">
@@ -579,8 +649,17 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone }: {
                       className="w-4 h-4 accent-smblue" />
                     <a href={f.fileUrl} target="_blank" rel="noopener noreferrer"
                       className="text-[12px] text-smblue hover:underline">{f.fileName}</a>
-                    <span className="mono text-[10px] dim">{f.fileType}</span>
+                    <span className="mono text-[10px] dim">
+                      {f.fileType === "EXCEL" ? "엑셀" : f.fileType === "PHOTO_ZIP" ? "ZIP" : f.fileType}
+                    </span>
                     {f.fileSize && <span className="mono text-[10px] dim">{(f.fileSize / 1024 / 1024).toFixed(1)}MB</span>}
+                    <button
+                      onClick={() => handleDeleteFile(f.id, f.fileType)}
+                      disabled={deletingFileId === f.id}
+                      className="ml-1 text-[11px] text-edred hover:underline disabled:opacity-40"
+                    >
+                      {deletingFileId === f.id ? "삭제 중..." : "삭제"}
+                    </button>
                   </div>
                 ))}
               </div>
