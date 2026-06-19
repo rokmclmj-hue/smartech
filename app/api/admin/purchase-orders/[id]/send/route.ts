@@ -58,6 +58,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     orderNo: order.orderNo,
     toCompany: order.toCompany,
     bodyText: body.bodyText ?? order.message ?? undefined,
+    subject: body.subject ?? undefined,
   });
 
   await prisma.manualPurchaseOrder.update({

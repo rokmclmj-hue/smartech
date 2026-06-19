@@ -42,6 +42,22 @@ function fmt(n: number) {
   return n.toLocaleString("ko-KR") + " 원";
 }
 
+function makeSubject(department: string, items: OrderItem[]): string {
+  const dept = department || "IV";
+  const valid = items.filter((i) => (i.description || i.partNo).trim());
+  if (!valid.length) return `[스마텍] 발주서 송부 — 에드워드${dept}`;
+  const first = valid[0];
+  const name = (first.description || first.partNo).trim();
+  const suffix = valid.length > 1 ? " 외" : "";
+  return `[스마텍] 발주서 송부 — 에드워드${dept} · ${name} x${first.quantity}${suffix}`;
+}
+
+function appendSignature(msg: string): string {
+  if (!msg) return "";
+  if (msg.includes("이명재 배상")) return msg;
+  return msg.trimEnd() + "\n\n이명재 배상";
+}
+
 function fmtDate(s: string) {
   return new Date(s).toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" });
 }
@@ -120,7 +136,7 @@ function OrderForm({ onSaved, initialData }: { onSaved: () => void; initialData?
       setToName(dc.contactName ?? "");
       setToEmail(dc.contactEmail ?? "");
       setCcEmails(dc.ccEmails ?? "");
-      setMessage(dc.defaultMessage ?? "");
+      setMessage(appendSignature(dc.defaultMessage ?? ""));
     }
   }
 
@@ -222,7 +238,7 @@ function OrderForm({ onSaved, initialData }: { onSaved: () => void; initialData?
       const sendRes = await fetch(`/api/admin/purchase-orders/${saveData.id}/send`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ toEmail, ccEmails, bodyText: message }),
+        body: JSON.stringify({ toEmail, ccEmails, bodyText: ensureSignature(message, toCompany, ""), subject: makeSubject(department, items) }),
       });
       const sendData = await sendRes.json();
       if (!sendRes.ok) { setError(sendData.error ?? "메일 발송 오류가 발생했습니다."); return; }
@@ -436,7 +452,7 @@ function OrderForm({ onSaved, initialData }: { onSaved: () => void; initialData?
               )}
               <div className="flex gap-3 border-b hair pb-2">
                 <span className="mono text-[10px] dim w-12 shrink-0 mt-0.5">제목</span>
-                <span className="font-medium">[스마텍] 발주서 송부 — {toCompany}{toName ? ` ${toName} 님` : ""}</span>
+                <span className="font-medium">{makeSubject(department, items)}</span>
               </div>
               <div className="flex gap-3 border-b hair pb-2">
                 <span className="mono text-[10px] dim w-12 shrink-0 mt-0.5">첨부</span>
@@ -445,7 +461,7 @@ function OrderForm({ onSaved, initialData }: { onSaved: () => void; initialData?
               <div className="flex gap-3">
                 <span className="mono text-[10px] dim w-12 shrink-0 mt-0.5">본문</span>
                 <pre className="text-[12px] whitespace-pre-wrap leading-relaxed flex-1 max-h-32 overflow-y-auto">
-                  {message || "(본문 없음)"}
+                  {ensureSignature(message, toCompany, "") || "(본문 없음)"}
                 </pre>
               </div>
             </div>
@@ -510,7 +526,7 @@ function OrderRow({ order, onDelete, onCopy }: { order: PurchaseOrder; onDelete:
       const res = await fetch(`/api/admin/purchase-orders/${order.id}/send`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ toEmail: sendEmail, ccEmails: ccInput, bodyText: mailBody }),
+        body: JSON.stringify({ toEmail: sendEmail, ccEmails: ccInput, bodyText: mailBody, subject: makeSubject(order.department, order.items) }),
       });
       const data = await res.json();
       if (res.ok) { setToast("발송 완료"); setShowSend(false); onDelete(); }
@@ -669,7 +685,7 @@ function OrderRow({ order, onDelete, onCopy }: { order: PurchaseOrder; onDelete:
               )}
               <div className="flex gap-3 border-b hair pb-2">
                 <span className="mono text-[10px] dim w-12 shrink-0 mt-0.5">제목</span>
-                <span className="font-medium">[스마텍] 발주서 송부 — {order.toCompany}{order.toName ? ` ${order.toName} 님` : ""}</span>
+                <span className="font-medium">{makeSubject(order.department, order.items)}</span>
               </div>
               <div className="flex gap-3 border-b hair pb-2">
                 <span className="mono text-[10px] dim w-12 shrink-0 mt-0.5">첨부</span>
