@@ -4,12 +4,14 @@ check_quality.py — 블로그 글 업로드 전 통합 품질 검수 게이트
 사용법: python check_quality.py <글폴더경로>
 예시:  python check_quality.py "2026-06/진공건조-드라이펌프-선택기준-20260613"
 
-검수 항목 (5개):
-  1. 글자수   — final.md 마크다운 제거 후 1,500자 이상
+검수 항목 (7개):
+  1. 글자수   — final.md 마크다운 제거 후 2,000자 이상
   2. 메타설명 — meta.txt description 비어있지 않음
   3. 현장사진 — field-*.png 최소 1장 존재
   4. EXIF 회전 — 방향값 1 또는 태그 없음 (보정 완료 기준)
   5. 펌프좌표 — blur-config.json의 pump_box가 이미지 범위 내 + 면적 비율 정상
+  6. GEO형식  — ## 스마텍 H2 섹션 없음 (홍보 섹션 금지)
+  7. 연락처   — 문의: 전화번호 단독 줄 없음 (홈페이지 자동 표시로 중복 방지)
 
 결과: quality-log.jsonl 에 항목별 상세 기록 (임계값 조정 시 참고)
 종료코드: 0=전체통과, 1=하나이상반려
@@ -193,6 +195,36 @@ def chk_pump_box(folder: str) -> dict:
     }
 
 
+def chk_geo_format(folder: str) -> dict:
+    path = os.path.join(folder, "final.md")
+    if not os.path.exists(path):
+        return {"pass": True, "note": "final.md 없음 — 건너뜀"}
+    content = open(path, encoding="utf-8").read()
+
+    # 금지 ③: "## 스마텍" H2 섹션
+    if re.search(r"^##\s+스마텍", content, re.MULTILINE):
+        return {
+            "pass": False,
+            "reason": "'## 스마텍' H2 섹션 발견 — AI가 홍보 섹션으로 분류함. 구분선+1줄 형식으로 교체하세요. (writer.md 금지③)",
+        }
+    return {"pass": True}
+
+
+def chk_no_contact(folder: str) -> dict:
+    path = os.path.join(folder, "final.md")
+    if not os.path.exists(path):
+        return {"pass": True, "note": "final.md 없음 — 건너뜀"}
+    content = open(path, encoding="utf-8").read()
+
+    # 금지 ①: 연락처 단독 줄 (문의: 031-xxx-xxxx 형태)
+    if re.search(r"^문의\s*[:：].*031-\d{3}-\d{4}", content, re.MULTILINE):
+        return {
+            "pass": False,
+            "reason": "전화번호 연락처 줄 발견 — 홈페이지 자동 문의 박스와 중복됨. 해당 줄 삭제하세요. (writer.md 금지①)",
+        }
+    return {"pass": True}
+
+
 # ── 메인 ─────────────────────────────────────────────────
 
 def run(folder_arg: str) -> bool:
@@ -219,6 +251,8 @@ def run(folder_arg: str) -> bool:
         "field_photo": chk_field_photo(folder),
         "exif":        chk_exif(folder),
         "pump_box":    chk_pump_box(folder),
+        "geo_format":  chk_geo_format(folder),
+        "no_contact":  chk_no_contact(folder),
     }
 
     labels = {
@@ -227,6 +261,8 @@ def run(folder_arg: str) -> bool:
         "field_photo": "현장사진",
         "exif":        "EXIF 회전",
         "pump_box":    "펌프좌표",
+        "geo_format":  "GEO형식",
+        "no_contact":  "연락처중복",
     }
 
     failed = []
@@ -254,6 +290,8 @@ def run(folder_arg: str) -> bool:
             else:
                 ar = res.get("area_ratio_pct")
                 detail = f"면적 {ar}" if ar else "(오류)"
+        elif key in ("geo_format", "no_contact"):
+            detail = res.get("note", "통과") if res["pass"] else ""
         else:
             detail = ""
 
