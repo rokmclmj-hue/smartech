@@ -5,7 +5,17 @@ import { sendChatEmail } from "@/lib/chatEmailAction";
 
 type Message = { role: "user" | "assistant"; content: string };
 
-function buildGreeting(user: { name?: string; title?: string }): string {
+const QUICK_SELECTS = [
+  { label: "펌프에 문제가 생겼어요", sub: "수리 접수 · 고장 진단 · A/S" },
+  { label: "펌프·부품을 구매하고 싶어요", sub: "모델 추천 · 견적 · OEM 부품" },
+  { label: "기술 자료가 필요해요", sub: "스펙 · 매뉴얼 · 압력 범위" },
+  { label: "기타 문의", sub: "직접 입력하기" },
+];
+
+function buildGreeting(user?: { name?: string; title?: string }): string {
+  if (!user?.name) {
+    return `안녕하세요, 스마텍입니다.\nEdwards Vacuum 공식 기술지원\n\n무엇을 도와드릴까요?`;
+  }
   const name = user.name || "";
   const title = user.title || "";
   const salutation = title ? `${name} ${title}님` : `${name}님`;
@@ -21,7 +31,6 @@ const TIER_LABEL: Record<string, string> = {
   ADMIN: "관리자",
   PENDING: "회원",
 };
-// TIER_LABEL은 향후 등급 표시용으로 유지
 void TIER_LABEL;
 
 export default function FloatingChat() {
@@ -39,9 +48,8 @@ export default function FloatingChat() {
   const tooltipShownRef = useRef(false);
   const logRef = useRef<HTMLDivElement>(null);
 
-  // 스크롤 30% 이상 → 툴팁 1회 표시 (3초 후 사라짐)
+  // 스크롤 30% 이상 → 툴팁 1회 표시 (로그인 여부 무관)
   useEffect(() => {
-    if (status !== "authenticated") return;
     const onScroll = () => {
       if (tooltipShownRef.current || isOpen) return;
       const total = document.body.scrollHeight - window.innerHeight;
@@ -53,7 +61,7 @@ export default function FloatingChat() {
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [status, isOpen]);
+  }, [isOpen]);
 
   useEffect(() => {
     if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
@@ -63,8 +71,8 @@ export default function FloatingChat() {
 
   const open = useCallback(() => {
     setShowTooltip(false);
-    if (messages.length === 0 && user) {
-      setMessages([{ role: "assistant", content: buildGreeting(user) }]);
+    if (messages.length === 0) {
+      setMessages([{ role: "assistant", content: buildGreeting(user ?? undefined) }]);
     }
     setIsOpen(true);
   }, [messages.length, user]);
@@ -164,10 +172,9 @@ export default function FloatingChat() {
     }
   }
 
-  // 로그인 안 했거나 ADMIN/PENDING이면 렌더 안 함
-  if (status !== "authenticated" || !user?.id) return null;
-  const tier = user.tier ?? "";
-  if (tier === "ADMIN") return null;
+  // ADMIN만 숨김 (비로그인 포함 모든 방문자에게 표시)
+  const tier = user?.tier ?? "";
+  if (status === "authenticated" && tier === "ADMIN") return null;
 
   return (
     <>
@@ -208,7 +215,7 @@ export default function FloatingChat() {
             style={{ maxHeight: "calc(100vh - 0px)" }}>
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 bg-green-400 rounded-full inline-block" />
-              <span>AI 상담 · {user.company || user.name}</span>
+              <span>AI 상담 · {user?.company || user?.name || "스마텍"}</span>
             </div>
             <button
               onClick={close}
@@ -235,6 +242,23 @@ export default function FloatingChat() {
                 </div>
               </div>
             ))}
+
+            {/* 빠른 선택 버튼 — 인사말 직후 표시 */}
+            {messages.length === 1 && messages[0].role === "assistant" && !loading && (
+              <div className="space-y-1.5 mt-1">
+                {QUICK_SELECTS.map((q) => (
+                  <button
+                    key={q.label}
+                    onClick={() => send(q.label)}
+                    className="w-full text-left px-3 py-2.5 border border-line hover:border-ink hover:bg-[#F8F6F2] transition-colors"
+                  >
+                    <div className="text-[13px] text-ink font-medium">{q.label}</div>
+                    <div className="text-[11px] text-dim mt-0.5">{q.sub}</div>
+                  </button>
+                ))}
+              </div>
+            )}
+
             {loading && messages[messages.length - 1]?.role !== "assistant" && (
               <div className="flex justify-start">
                 <div className="px-3 py-2 bg-[#F1EDE4] mono text-[11px]">● ● ●</div>
