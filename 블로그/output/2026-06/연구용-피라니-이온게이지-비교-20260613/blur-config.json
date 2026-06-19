@@ -1,0 +1,6 @@
+{
+  "source": "images/field-1.png",
+  "pump_box": [50, 430, 850, 790],
+  "background_blur_radius": 30,
+  "pipe_blur_radius": 12
+}

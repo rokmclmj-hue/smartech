@@ -137,9 +137,14 @@
 **Step 4.5 — 사진 승인** (업로드 전 필수 — 생략 불가)
 - 품질 검수 통과 직후 반드시 아래 순서로 실행한다.
 
-1. **썸네일 표시**: Read 도구로 `블로그/output/[폴더]/images/thumbnail.png` 읽기
-2. **현장사진 표시**: `images/field-1.png` 가 있으면 Read 도구로 읽기
-3. **승인 요청 멘트** (항상 이 형식으로):
+1. **사진 뷰어로 열기**: 아래 명령으로 현장사진과 썸네일을 윈도우 사진 앱에서 바로 연다 (터미널에서는 사진이 안 보이기 때문)
+   ```
+   Start-Process "블로그/output/[폴더]/images/field-1.png"   # 현장사진 (있을 때만)
+   Start-Process "블로그/output/[폴더]/images/thumbnail.png" # 썸네일
+   ```
+2. **썸네일 표시**: Read 도구로 `블로그/output/[폴더]/images/thumbnail.png` 읽기
+3. **현장사진 표시**: `images/field-1.png` 가 있으면 Read 도구로 읽기
+4. **승인 요청 멘트** (항상 이 형식으로):
    ```
    📸 사진 확인해 주세요.
    - 썸네일: [위에 표시됨]

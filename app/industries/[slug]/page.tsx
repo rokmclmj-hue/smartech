@@ -23,11 +23,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title: `${industry.title} 진공 솔루션 — 스마텍 | Edwards Vacuum`,
     description: industry.tagline,
-    alternates: { canonical: `https://smartechvacuum.com/industries/${slug}` },
+    alternates: { canonical: `https://www.smartechvacuum.com/industries/${slug}` },
     openGraph: {
       title: `${industry.title} 진공 솔루션 — 스마텍`,
       description: industry.tagline,
-      url: `https://smartechvacuum.com/industries/${slug}`,
+      url: `https://www.smartechvacuum.com/industries/${slug}`,
       type: "website",
       siteName: "스마텍",
       locale: "ko_KR",

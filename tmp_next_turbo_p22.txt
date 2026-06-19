@@ -1,0 +1,48 @@
+nEXT Turbomolecular Pumps IEDWARDS
+22
+Accessories and spares:
+ORDERING INFORMATION
+Pump Product description Order number
+nEXT55/85
+Controller (1)
+TAG controller D39592000
+TAG power supply D39592800
+TIC 200 turbo and instrument controller D39721000
+Cooling
+WCX85 water cooling kit (4 position) B8G200833
+ACX85 air cooler connector fitted B8G200820
+Venting
+N/O TAV5 vent valve connector fitted B8G200834
+N/C TAV5 vent valve connector fitted B8G200835
+Bakeout CF63 flange heater 110 V B8G200823
+CF63 flange heater 240 V B8G200824
+Service
+Oil cartridge kit B8G200828
+Bearing and oil cartridge kit B8G200811
+Bearing replacement tool kit B8G200845
+Miscellaneous
+Accessory "Y" adaptor B8G200837
+Accessory cable 90 degree/extension B8G200836
+Accessory connector bare wired B8G200839
+nEXT85/EXT75DX base mounting adaptor B8G200838
+nEXT240/ 
+300/400
+Controller (1)
+TAG controller D39592000
+TAG power supply D39592800
+TIC100 turbo and instrument controller D39722000
+Cooling
+nEXT radial air cooler B58053175
+nEXT axial air cooler B58053185
+nEXT water cooler B80000815
+Bakeout
+CF100 flange heater 100-120 V B58052773
+CF100 flange heater 200-240 V B58052774
+CF160 flange heater 100-120 V B58052775
+CF160 flange heater 200-240 V B58052776
+Venting TAV5 solenoid operated vent valve B58066010
+Service
+Oil cartridge tool kit B80000812
+Bearing tool kit B80000805
+Oil cartridge B80000811
+Bearing and oil cartridge B80000810

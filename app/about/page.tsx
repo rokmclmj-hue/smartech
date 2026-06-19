@@ -7,12 +7,12 @@ export const metadata: Metadata = {
   title: "회사 소개 — 스마텍 | Edwards Vacuum 공식 대리점",
   description:
     "2006년 Edwards 코리아 합류, 2011년 창업. 2018 Edwards Korea Gold Award 수상. 진공펌프 공급·수리·기술지원 일체를 직접 운영하는 공식 대리점.",
-  alternates: { canonical: "https://smartechvacuum.com/about" },
+  alternates: { canonical: "https://www.smartechvacuum.com/about" },
   openGraph: {
     title: "회사 소개 — 스마텍",
     description:
       "Edwards Vacuum 공식 Gold Award 대리점. 2006년부터 쌓아온 현장 기술력으로 공급·수리·기술지원.",
-    url: "https://smartechvacuum.com/about",
+    url: "https://www.smartechvacuum.com/about",
     type: "website",
     siteName: "스마텍",
     locale: "ko_KR",
@@ -29,18 +29,18 @@ const breadcrumbLd = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   itemListElement: [
-    { "@type": "ListItem", position: 1, name: "홈", item: "https://smartechvacuum.com" },
-    { "@type": "ListItem", position: 2, name: "회사 소개", item: "https://smartechvacuum.com/about" },
+    { "@type": "ListItem", position: 1, name: "홈", item: "https://www.smartechvacuum.com" },
+    { "@type": "ListItem", position: 2, name: "회사 소개", item: "https://www.smartechvacuum.com/about" },
   ],
 };
 
 const orgLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  "@id": "https://smartechvacuum.com/#organization",
+  "@id": "https://www.smartechvacuum.com/#organization",
   name: "스마텍",
   alternateName: "(주)스마텍",
-  url: "https://smartechvacuum.com",
+  url: "https://www.smartechvacuum.com",
   foundingDate: "2011",
   award: "Edwards Vacuum Korea Distributor Gold Award 2018",
   description:

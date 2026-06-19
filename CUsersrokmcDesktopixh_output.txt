@@ -1,0 +1,184 @@
+=== PAGE 1 ===
+iXH DRY PUMPS
+FOR HARSH PROCESSES
+Giving you a clear edge
+PPRROODDUUCCTT DDAATTAASSHHEEEETT
+The iXH dry pump range is an evoluti on of our market leading iH products and sets new
+standards for harsh process capability, reliability and lower cost of ownership.
+With a modular design, iXH pumps meet today’s process
+requirements and have road-mapped responses to emerging
+applicati on challenges in high-k, low-k, SACVD, LPCVD, ALD,
+TCO, GaN and EPI.
+Applicati ons
+k c o L d a o L re fs n a rT y g o lo rte M y h p a rg o h tiL s s e c o rP D V P n a e lC -e rP D V P A T R g n ih s A /p irtS h c tE e d ix O h c tE n o c iliS h c tE la te M e c ru o S tn a lp m I D V C -P D H P T R D V C A S D V C O M D V C E P D V C P L D L D A L A
+iiXXHH ccaann bbeee uusseedd iiXXHH rreeccccoommmmeeeennddddeedd
+iiGGGGXX ccaannn bbbeee uusssseedd iiGGGGXXX rrreeeccccoommmmmmmeeeennddeeedd
+iiXXXLLL rreeeeeccooommmmmmmeeennnddeeeedd
+CClleeaann AAppppplliiccaattiioonnnss HHaarrsshhh AApppplliiccaattiioonnnsss
+Non-reactive gases used Corrosive or reactive gases used
+Features and benefi ts
+More process capability Reduced cost of ownership Greatly increased hydrogen pumping
+• Greatly increased powder handling capability • 10% less energy consumpti on than the speed for advanced EPI and solar processes
+and innovati ve Gas Buster™ (1) technology previous model
+• Wide temperature range allows opti misati on • SEMI® E54 compati ble and Green Mode
+of pump to minimise by-product capable
+accumulati on from condensati on and plati ng • Longer overhaul intervals and less
+• Innovati ve pump seal technology to lengthen unscheduled down ti me
+process life and reduce leakage risks (1)
+High capacity dry pumps and boosters Complies with key internati onal Smaller footprint and lower height for ease of
+give an expanded process window to standards including UL, CE and S2 fi tti ng in any fab
+enhance yields
+1 Patent applied for
+edwardsvacuum.com
+--- TABLE 1 ---
+['']
+['PPRROODDUUCCTT DDAATTAASSHHEEEETT']
+=== PAGE 2 ===
+Technical data
+Performance curves
+1400
+1200
+1000
+800
+600
+400
+200
+0
+0.001 0.01 0.1 1 10 100 1000
+Pressure torr
+Global contacts
+EUROPE USA ASIA PACIFIC
+UK Crawley +44 1293 528844 Niagara (toll free) +1 800 848 9800 China (toll free) +86 400 111 9618
+UK (local rate) 08459 212223 BRAZIL India Pune +91 20 4075 2222
+Belgium Brussels +32 2 300 0730 Sao Paulo +55 11 3952 5000 Japan Yachiyo +81 47 458 8831
+France Paris +33 1 4121 1256 Korea Bundang +82 31 716 7070
+ISRAEL
+Germany Munich 0800 000 1456 Singapore +65 6546 8408
+Qiryat-Gat +972 8 681 0633
+Italy Milan +39 02 48 4471 Taiwan R.O.C. Jhunan Town +886 3758 1000
+Publicati on Number: M56100895, Issue E
+© Edwards Limited 2014. All rights reserved.
+Edwards and the Edwards logo are trade marks of Edwards Limited.
+edwardsvacuum.com
+h/3m
+deepS
+iXH1220H iXH1210H iXH1210 iXH610 iXH200H iXH100
+3000
+2500
+2000
+1500
+1000
+500
+0
+0.001 0.01 0.1 1 10 100 1000
+Pressure torr
+h/3m
+deepS
+iXH3030 iXH3030T iXH1820 iXH1820T iXH1820H
+140
+120
+100
+80
+60
+40
+20
+0
+1 10 100
+Pressure torr
+mls
+tuphguorhT
+2H
+Dimensions
+Product iXH iXH iXH iXH iXH iXH iXH
+100 200H 610 1210 1210H 1210HT 1220H
+Dry pump size m3/h 100 200 100 100 100 100 200
+Booster size m3/h 600 1200 1200 1200 1200
+Peak Speed m3/h 100 215 665 1025 1065 1000 1250
+Ulti mate Vac (Typical) Torr 1.5x10-2 7.5x10-3 3.7x10-3 3.7x10-3 3.7x10-3 7.5x10-3 3.7x10-3
+System Power at Ult.(2) kW 2.1 3.7 2.6 3.2 3.9 3.9 4.8 H
+Inlet Connecti on ISO 63 63 100 100 100 100 100
+Outlet Connecti on NW 40 40 40 40 40 40 40
+Typical Water Flow (1) l/m 2.0 2.7 3.0 4.0 4.2 4.2 4.7
+Purge Flow Range slm 28/44* 28/44* 22/44* 22/44* 22/44*/60 22/44*/60 34*/96/122
+Weight kg 260 287 355 430 413 413 457
+L
+W
+Product iXH iXH iXH iXH iXH iXH iXH Dimensions (mm) L W H
+1220HTX 1820T 1820 1820H 3030TX 3030(2) 3030T
+iXH100 784 390 526
+Dry pump size m3/h 200 200 200 200 300 300 300
+iXH200H 901 390 526
+Booster size m3/h 1200 1800 1800 1800 3000 3000 3000 iXH610, 1210, 1210H, 784 390 780
+Peak Speed m3/h 1250 1700 1820 1825 2750 2900 2750 1210HT
+iXH1220H, 1820, 1820T, 901 390 780
+Ulti mate Vac. (Typical) Torr 3.7x10-3 3.7x10-3 3.7x10-3 3.7x10-3 3.7x10-3 3.7x10-3 3.7x10-3
+1820H, 1220HTX
+System Power at Ult.(2) kW 4.8 4.0 3.9 4.8 5.7 (4) 5.7 5.7
+iXH3030, 3030T, 3030TX 915 517 966
+Inlet Connecti on ISO 100 160 160 160 160 160 160
+Outlet Connecti on NW 40 40 40 40 40 40 40
+Typical Water Flow (1) l/m 4.7 3.5 4.2 4.7 4.5 5.0 4.5
+Purge Flow Range slm 34*/96/122 34/96*/122 28/44* 34*/96/122 34*/96/122 28/44* 34/96*/122
+Weight kg 473 471 487 625 619 624
+* Factory default setti ng
+(1) Water consumpti on varies with pump operati ng temperature; fi gures at 110 ºC
+(2) Average power at 700 T exhaust pressure
+(3) Booster heaters add 1 kW when switched on
+(4) Booster heaters add 1.5 kW when switched on
+iXH1220H iXH200H
+--- TABLE 1 ---
+['Product', '', 'iXH\n100', 'iXH\n200H', 'iXH\n610', 'iXH\n1210', 'iXH\n1210H', 'iXH\n1210HT']
+['Dry pump size', None, None, None, None, None, None, None]
+['Booster size', None, None, None, None, None, None, None]
+['Peak Speed', None, None, None, None, None, None, None]
+['Ulti mate Vac (Typical)', None, None, None, None, None, None, None]
+['System Power at Ult.(2)', None, None, None, None, None, None, None]
+['Inlet Connecti on', None, None, None, None, None, None, None]
+['Outlet Connecti on', None, None, None, None, None, None, None]
+['Typical Water Flow (1)', None, None, None, None, None, None, None]
+['Purge Flow Range', None, None, None, None, None, None, None]
+['Weight', None, None, None, None, None, None, None]
+--- TABLE 2 ---
+['Product', '', 'iXH\n1220HTX', 'iXH\n1820T', 'iXH\n1820', 'iXH\n1820H', 'iXH\n3030TX', 'iXH\n3030(2)']
+['Dry pump size', None, None, None, None, None, None, None]
+['Booster size', None, None, None, None, None, None, None]
+['Peak Speed', None, None, None, None, None, None, None]
+['Ulti mate Vac. (Typical)', None, None, None, None, None, None, None]
+['System Power at Ult.(2)', None, None, None, None, None, None, None]
+['Inlet Connecti on', None, None, None, None, None, None, None]
+['Outlet Connecti on', None, None, None, None, None, None, None]
+['Typical Water Flow (1)', None, None, None, None, None, None, None]
+['Purge Flow Range', None, None, None, None, None, None, None]
+['Weight', None, None, None, None, None, None, None]
+--- TABLE 3 ---
+['Dimensions (mm)', 'L', 'W', 'H']
+['iXH100', None, None, None]
+['iXH200H', None, None, None]
+['iXH610, 1210, 1210H,\n1210HT', None, None, None]
+['iXH1220H, 1820, 1820T,\n1820H, 1220HTX', None, None, None]
+['iXH3030, 3030T, 3030TX', None, None, None]
+--- TABLE 4 ---
+['iXH3030 iXH3030T iXH1820 iXH1820T iXH1820H\n3000\n2500\n2000 h/3m\n1500 deepS\n1000\n500\n0\n0.001 0.01 0.1 1 10 100 1000\nPressure torr', 'iXH3030 iXH3030T iXH1820 iXH1820T iXH1820H', 'h/3m\ndeepS', 'iXH1220H iXH1210H iXH1210 iXH610 iXH200H iXH100\n1400\n1200\n1000\n800\n600\n400\n200\n0\n0.001 0.01 0.1 1 10 100 1000\nPressure torr']
+--- TABLE 5 ---
+['', '', '', '', None, '', '']
+['', '', '', '', None, '', '']
+['', '', '', '', None, '', '']
+['', '', '', '', '', '', '']
+['', '', '', '', None, '', '']
+['', '', '', '', None, '', '']
+--- TABLE 6 ---
+['', '', '', '', '', '']
+['', '', '', '', '', '']
+['', '', '', '', '', '']
+['', '', '', '', '', '']
+['', '', '', '', '', '']
+['', '', '', '', '', '']
+['', '', '', '', '', '']
+--- TABLE 7 ---
+['', '', '', '', '', '', '', '', '', '', '', '', '']
+['', '', '', '', '', '', '', '', '', '', '', '', '']
+['', '', '', '', '', '', '', '', '', '', '', '', '']
+['', '', '', '', '', '', '', '', '', '', '', '', '']
+['', '', '', '', '', '', '', '', '', '', '', '', '']
+['', '', '', '', '', '', '', '', '', '', '', '', '']
+['', '', '', '', '', '', '', '', '', '', '', '', '']

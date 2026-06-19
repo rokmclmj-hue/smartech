@@ -17,17 +17,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const ogImage =
     post.content.match(/!\[[^\]]*\]\((https?:\/\/[^\)]+)\)/)?.[1] ??
-    "https://smartechvacuum.com/og-default.png";
+    "https://www.smartechvacuum.com/og-default.png";
 
   return {
     title: `${post.title} — 스마텍`,
     description: post.metaDesc || undefined,
     keywords: post.tags || undefined,
-    alternates: { canonical: `https://smartechvacuum.com/blog/${id}` },
+    alternates: { canonical: `https://www.smartechvacuum.com/blog/${id}` },
     openGraph: {
       title: `${post.title} — 스마텍`,
       description: post.metaDesc || undefined,
-      url: `https://smartechvacuum.com/blog/${id}`,
+      url: `https://www.smartechvacuum.com/blog/${id}`,
       type: "article",
       publishedTime: post.publishedAt?.toISOString(),
       images: [{ url: ogImage, alt: post.title }],
@@ -222,8 +222,8 @@ export default async function BlogPostPage({ params }: Props) {
     "description": post.metaDesc || undefined,
     "datePublished": (post.publishedAt ?? post.createdAt).toISOString(),
     "dateModified": post.updatedAt.toISOString(),
-    "url": `https://smartechvacuum.com/blog/${post.id}`,
-    "publisher": { "@type": "Organization", "name": "스마텍", "url": "https://smartechvacuum.com" },
+    "url": `https://www.smartechvacuum.com/blog/${post.id}`,
+    "publisher": { "@type": "Organization", "name": "스마텍", "url": "https://www.smartechvacuum.com" },
     "author":    { "@type": "Organization", "name": "스마텍" },
   });
 

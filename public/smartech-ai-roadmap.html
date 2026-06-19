@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>스마텍 차세대 AI 자동화 전략 로드맵 2026–2028</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:    #0B0B0C;
+      --paper:  #F6F4EF;
+      --edred:  #c00020;
+      --edred2: #E46F75;
+      --edred3: #621318;
+      --smblue: #0d3a8a;
+      --line:   #E3DFD6;
+      --dim:    #6A6660;
+      --green:  #1a7a4a;
+      --amber:  #b45309;
+    }
+
+    body {
+      font-family: 'Pretendard Variable', 'Pretendard', -apple-system, sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.7;
+    }
+
+    /* ── PRINT ── */
+    @media print {
+      .no-print { display: none; }
+      body { background: white; }
+      .page-break { page-break-before: always; }
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--ink);
+      color: white;
+      padding: 48px 64px 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    header::after {
+      content: '';
+      position: absolute;
+      right: -60px; top: -60px;
+      width: 300px; height: 300px;
+      border-radius: 50%;
+      background: var(--edred);
+      opacity: 0.15;
+    }
+    header .badge {
+      display: inline-block;
+      background: var(--edred);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      padding: 4px 12px;
+      border-radius: 2px;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+    }
+    header h1 {
+      font-size: 32px;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 12px;
+    }
+    header h1 span { color: var(--edred2); }
+    header p {
+      color: #aaa;
+      font-size: 14px;
+    }
+
+    /* ── LAYOUT ── */
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 48px 32px;
+    }
+
+    /* ── SECTION TITLE ── */
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--edred);
+      margin-bottom: 8px;
+    }
+    h2 {
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--edred);
+      display: inline-block;
+    }
+
+    /* ── CURRENT STATUS GRID ── */
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px;
+      margin-bottom: 48px;
+    }
+    .status-card {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .status-card .icon { font-size: 20px; margin-bottom: 8px; }
+    .status-card .label { font-size: 13px; font-weight: 600; }
+    .status-card .sub { font-size: 12px; color: var(--dim); margin-top: 4px; }
+    .status-done { border-left: 3px solid var(--green); }
+    .status-wip  { border-left: 3px solid var(--amber); }
+    .status-todo { border-left: 3px solid var(--edred2); }
+
+    .legend {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 20px;
+      font-size: 12px;
+    }
+    .legend span { display: flex; align-items: center; gap: 6px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    .dot-done { background: var(--green); }
+    .dot-wip  { background: var(--amber); }
+    .dot-todo { background: var(--edred2); }
+
+    /* ── HIGHLIGHT BOX ── */
+    .highlight-box {
+      background: var(--ink);
+      color: white;
+      border-radius: 12px;
+      padding: 32px 36px;
+      margin-bottom: 48px;
+    }
+    .highlight-box h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--edred2);
+    }
+    .highlight-box .flow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .flow-step {
+      background: #1e1e22;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      min-width: 130px;
+      text-align: center;
+    }
+    .flow-step .step-num {
+      font-size: 10px;
+      color: var(--edred2);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .flow-arrow {
+      color: var(--edred);
+      font-size: 20px;
+      padding: 0 8px;
+    }
+    .sms-preview {
+      background: #1e1e22;
+      border-radius: 8px;
+      padding: 16px 20px;
+      font-size: 13px;
+      border-left: 3px solid var(--edred);
+      margin-top: 16px;
+    }
+    .sms-preview .sms-label {
+      font-size: 10px;
+      color: var(--edred2);
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      margin-bottom: 8px;
+    }
+    .sms-preview p { color: #ddd; line-height: 1.8; }
+
+    /* ── PHASE CARDS ── */
+    .phase-list { margin-bottom: 48px; }
+    .phase-card {
+      border-radius: 10px;
+      padding: 28px 32px;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .phase-card::before {
+      content: attr(data-phase);
+      position: absolute;
+      right: 24px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 80px;
+      font-weight: 900;
+      opacity: 0.06;
+      color: var(--ink);
+      line-height: 1;
+    }
+    .phase-1 { background: #eef4ff; border: 1px solid #b3caf8; }
+    .phase-2 { background: #fff3f3; border: 1px solid #f8b3b3; }
+    .phase-3 { background: #f0fff6; border: 1px solid #b3f0cc; }
+    .phase-card .phase-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .phase-tag {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      padding: 3px 10px;
+      border-radius: 3px;
+      text-transform: uppercase;
+    }
+    .tag-blue  { background: var(--smblue); color: white; }
+    .tag-red   { background: var(--edred);  color: white; }
+    .tag-green { background: var(--green);  color: white; }
+    .phase-card h3 { font-size: 18px; font-weight: 700; }
+    .phase-card .period {
+      font-size: 12px;
+      color: var(--dim);
+      margin-bottom: 16px;
+    }
+    .item-list { list-style: none; }
+    .item-list li {
+      font-size: 14px;
+      padding: 6px 0;
+      display: flex;
+      gap: 10px;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    .item-list li:last-child { border-bottom: none; }
+    .item-list li .check { flex-shrink: 0; }
+
+    /* ── DATA TABLE ── */
+    .data-section { margin-bottom: 48px; }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    .data-table th {
+      background: var(--ink);
+      color: white;
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .data-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--line);
+    }
+    .data-table tr:nth-child(even) td { background: white; }
+    .data-table .badge-have  { background: #d1fae5; color: #065f46; border-radius: 3px; padding: 2px 8px; font-size: 11px; font-weight: 600; }
+    .data-table .badge-need  { background: #fee2e2; color: #991b1b; border-radius: 3px; padding: 2px 8px; font-size: 11px; font-weight: 600; }
+    .data-table .badge-build { background: #fef3c7; color: #92400e; border-radius: 3px; padding: 2px 8px; font-size: 11px; font-weight: 600; }
+
+    /* ── STRENGTH GRID ── */
+    .strength-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+    .strength-card {
+      background: white;
+      border-radius: 10px;
+      padding: 22px 24px;
+      border: 1px solid var(--line);
+    }
+    .strength-card h4 {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .strength-card p { font-size: 13px; color: var(--dim); line-height: 1.65; }
+    .num-badge {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; flex-shrink: 0;
+    }
+    .nb-red  { background: var(--edred);  color: white; }
+    .nb-blue { background: var(--smblue); color: white; }
+
+    /* ── CONFLICT SECTION ── */
+    .conflict-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-radius: 10px;
+      padding: 24px 28px;
+      margin-bottom: 48px;
+    }
+    .conflict-box h3 {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #92400e;
+    }
+    .conflict-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 8px 0;
+      border-bottom: 1px solid #fde68a;
+      font-size: 13px;
+    }
+    .conflict-row:last-child { border-bottom: none; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--ink);
+      color: #777;
+      text-align: center;
+      padding: 24px;
+      font-size: 12px;
+    }
+    footer strong { color: white; }
+
+    /* ── DIVIDER ── */
+    .divider { border: none; border-top: 1px solid var(--line); margin: 48px 0; }
+
+    @media (max-width: 640px) {
+      header { padding: 32px 24px; }
+      header h1 { font-size: 22px; }
+      .container { padding: 32px 16px; }
+      .strength-grid { grid-template-columns: 1fr; }
+      .flow { flex-direction: column; }
+      .flow-arrow { transform: rotate(90deg); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="badge">INTERNAL STRATEGY DOCUMENT</div>
+  <h1>스마텍 차세대 <span>AI 자동화</span> 전략 로드맵</h1>
+  <p>작성일 2026년 6월 16일 &nbsp;|&nbsp; 버전 1.0 &nbsp;|&nbsp; 대상: 경영진 내부 검토용</p>
+</header>
+
+<div class="container">
+
+  <!-- ── 1. 현재 완성도 ── -->
+  <div class="section-title">SECTION 01</div>
+  <h2>현재 홈페이지 완성도</h2>
+
+  <div class="legend">
+    <span><span class="dot dot-done"></span> 완료</span>
+    <span><span class="dot dot-wip"></span> 진행 중</span>
+    <span><span class="dot dot-todo"></span> 미구현 (필요)</span>
+  </div>
+
+  <div class="status-grid">
+    <div class="status-card status-done">
+      <div class="icon">🔐</div>
+      <div class="label">OAuth 로그인</div>
+      <div class="sub">카카오·구글·이메일 매직링크</div>
+    </div>
+    <div class="status-card status-done">
+      <div class="icon">📋</div>
+      <div class="label">견적 카트 + PDF</div>
+      <div class="sub">발주요청·이력·챗봇 연동</div>
+    </div>
+    <div class="status-card status-done">
+      <div class="icon">🔧</div>
+      <div class="label">수리 접수 시스템</div>
+      <div class="sub">온/오프라인·SMS 알림·PDF</div>
+    </div>
+    <div class="status-card status-done">
+      <div class="icon">🤖</div>
+      <div class="label">AI 상담 챗봇</div>
+      <div class="sub">스트리밍·시뮬레이션 KB 연동</div>
+    </div>
+    <div class="status-card status-done">
+      <div class="icon">📊</div>
+      <div class="label">펌프 선정 시뮬레이션</div>
+      <div class="sub">GXS·nXRi·iH 실측 커브 반영</div>
+    </div>
+    <div class="status-card status-done">
+      <div class="icon">🏢</div>
+      <div class="label">거래처·담당자 DB</div>
+      <div class="sub">임포트·패널·guestTitle</div>
+    </div>
+    <div class="status-card status-done">
+      <div class="icon">📄</div>
+      <div class="label">발주서·거래명세표</div>
+      <div class="sub">/admin 완성</div>
+    </div>
+    <div class="status-card status-done">
+      <div class="icon">📈</div>
+      <div class="label">GA4 + 어드민 차트</div>
+      <div class="sub">Looker Studio 연동</div>
+    </div>
+    <div class="status-card status-done">
+      <div class="icon">🔍</div>
+      <div class="label">SEO + GEO</div>
+      <div class="sub">canonical·JSON-LD·/about 완성</div>
+    </div>
+    <div class="status-card status-done">
+      <div class="icon">📝</div>
+      <div class="label">블로그 파이프라인</div>
+      <div class="sub">녹음→텍스트→AI글 자동화</div>
+    </div>
+    <div class="status-card status-wip">
+      <div class="icon">🧪</div>
+      <div class="label">시뮬레이션 KB 축적</div>
+      <div class="sub">3케이스 완료, 확장 진행 중</div>
+    </div>
+    <div class="status-card status-todo">
+      <div class="icon">🔔</div>
+      <div class="label">AI 예방정비 알림</div>
+      <div class="sub">시리얼번호·점검일·자동 SMS</div>
+    </div>
+    <div class="status-card status-todo">
+      <div class="icon">📦</div>
+      <div class="label">재고 실시간 연동</div>
+      <div class="sub">30개 품목 정리 후 구축 예정</div>
+    </div>
+    <div class="status-card status-todo">
+      <div class="icon">👤</div>
+      <div class="label">고객 포털</div>
+      <div class="sub">내 펌프 이력·수리 진행 조회</div>
+    </div>
+    <div class="status-card status-todo">
+      <div class="icon">📡</div>
+      <div class="label">IoT 데이터 수집</div>
+      <div class="sub">센서·게이트웨이·디지털 트윈</div>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- ── 2. AI 예방정비 알림 시스템 ── -->
+  <div class="section-title">SECTION 02 · 즉시 구현 가능</div>
+  <h2>AI 예방정비 자동 알림 시스템</h2>
+
+  <div class="highlight-box">
+    <h3>자동차 서비스센터처럼 — 펌프 정비 알림을 자동으로</h3>
+
+    <div class="flow">
+      <div class="flow-step">
+        <div class="step-num">STEP 1</div>
+        수리 완료<br/>시리얼번호 등록
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="step-num">STEP 2</div>
+        증상 기반<br/>다음 점검일 계산
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="step-num">STEP 3</div>
+        납품 시<br/>즉시 문자 발송
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="step-num">STEP 4</div>
+        1개월 전<br/>리마인더 문자
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="step-num">STEP 5</div>
+        고객 포털<br/>이력 확인
+      </div>
+    </div>
+
+    <div class="sms-preview">
+      <div class="sms-label">납품 완료 즉시 발송 문자 예시</div>
+      <p>
+        [스마텍] 안녕하세요 ○○○ 담당자님,<br/>
+        Edwards GXS450 (S/N: 123456789) 오버홀이 완료되어 납품되었습니다.<br/>
+        ▪ 수리 내역: 오일 교환·필터 교체·베어링 점검<br/>
+        ▪ 다음 권장 점검: 2027년 8월 (약 14개월 후)<br/><br/>
+        점검 시기 1개월 전 다시 안내드리겠습니다.<br/>
+        감사합니다. 스마텍 02-XXX-XXXX
+      </p>
+    </div>
+
+    <div class="sms-preview" style="margin-top:12px; border-left-color: #E46F75;">
+      <div class="sms-label" style="color: #E46F75;">1개월 전 리마인더 문자 예시</div>
+      <p>
+        [스마텍] ○○○ 담당자님,<br/>
+        Edwards GXS450 (S/N: 123456789) 정기 점검 시기가 한 달 남았습니다.<br/>
+        ▪ 권장 점검일: 2027년 8월<br/>
+        ▪ 지난 수리일: 2026년 6월 16일<br/><br/>
+        수리 예약 또는 문의: 02-XXX-XXXX<br/>
+        스마텍 드림
+      </p>
+    </div>
+  </div>
+
+  <!-- 필요한 DB 추가 항목 -->
+  <div class="section-title">DB 추가 항목</div>
+  <table class="data-table" style="margin-bottom: 48px;">
+    <thead>
+      <tr>
+        <th>항목</th>
+        <th>현재</th>
+        <th>추가 필요</th>
+        <th>용도</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>시리얼 번호</td>
+        <td><span class="badge-need">없음</span></td>
+        <td>serialNumber 필드 추가</td>
+        <td>펌프 개체별 이력 추적</td>
+      </tr>
+      <tr>
+        <td>다음 점검 예정일</td>
+        <td><span class="badge-need">없음</span></td>
+        <td>predictedServiceDate 필드</td>
+        <td>알림 스케줄 기준</td>
+      </tr>
+      <tr>
+        <td>수리 증상 분류</td>
+        <td>텍스트 자유입력</td>
+        <td>symptomCategory 코드화</td>
+        <td>AI 점검 주기 계산 기반</td>
+      </tr>
+      <tr>
+        <td>알림 발송 이력</td>
+        <td><span class="badge-need">없음</span></td>
+        <td>SmsLog 테이블</td>
+        <td>중복 발송 방지</td>
+      </tr>
+      <tr>
+        <td>담당자 핸드폰</td>
+        <td><span class="badge-have">있음</span></td>
+        <td>거래처 담당자 DB 연결</td>
+        <td>자동 문자 수신처</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <hr class="divider page-break" />
+
+  <!-- ── 3. 강화 포인트 ── -->
+  <div class="section-title">SECTION 03</div>
+  <h2>AI 자동화를 위해 반드시 강화할 4가지</h2>
+
+  <div class="strength-grid">
+    <div class="strength-card">
+      <h4><span class="num-badge nb-red">1</span> 데이터 구조화</h4>
+      <p>
+        지금 수리 이력은 텍스트로만 저장돼 있어요. AI가 패턴을 찾으려면
+        <strong>증상·원인·부품교체 항목을 코드로 분류</strong>해야 해요.
+        예: "오일 오염 → code: OIL_CONTAMINATION"처럼 정해진 항목으로.
+        이 작업은 지금 당장 시작할 수 있고, 100건만 쌓여도 AI 분석이 가능해져요.
+      </p>
+    </div>
+    <div class="strength-card">
+      <h4><span class="num-badge nb-red">2</span> 시리얼번호 기반 펌프 이력 DB</h4>
+      <p>
+        지금은 "A회사 펌프 수리"만 알아요. 앞으로는
+        <strong>"A회사의 GXS450 S/N 123456의 전체 수리 이력"</strong>을 조회할 수 있어야 해요.
+        시리얼번호가 펌프의 주민등록번호 역할. 이걸 기반으로 예측 정비와 고객 포털이 만들어져요.
+      </p>
+    </div>
+    <div class="strength-card">
+      <h4><span class="num-badge nb-blue">3</span> 공정 정보 수집</h4>
+      <p>
+        같은 GXS450이라도 반도체 CVD 공정에서 쓰면 18개월마다, 일반 연구용으로 쓰면 36개월마다 오버홀이 필요해요.
+        견적 문의·수리 접수 시 <strong>"어떤 공정에 사용하시나요?"</strong> 항목 하나를 추가하면
+        AI 예측 정확도가 3배 이상 올라가요.
+      </p>
+    </div>
+    <div class="strength-card">
+      <h4><span class="num-badge nb-blue">4</span> 자동화 스케줄러 인프라</h4>
+      <p>
+        예방정비 문자, 후속 이메일, 견적 만료 알림 등
+        <strong>"미래 시점에 자동으로 실행되는 작업"</strong>을 처리하는 엔진이 필요해요.
+        지금은 이 인프라가 없어요. Vercel Cron Jobs 또는 외부 스케줄러를 준비하면
+        모든 자동화 기능의 기반이 돼요.
+      </p>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- ── 4. 단계별 로드맵 ── -->
+  <div class="section-title">SECTION 04</div>
+  <h2>단계별 진화 로드맵</h2>
+
+  <div class="phase-list">
+
+    <!-- Phase 1 -->
+    <div class="phase-card phase-1" data-phase="1">
+      <div class="phase-header">
+        <span class="phase-tag tag-blue">Phase 1</span>
+        <h3>데이터 기반 서비스 자동화</h3>
+      </div>
+      <div class="period">2026년 7월 — 2026년 12월 (6개월)</div>
+      <ul class="item-list">
+        <li><span class="check">✅</span> AI 예방정비 SMS 알림 시스템 (수리완료→즉시 + 1개월 전)</li>
+        <li><span class="check">✅</span> 시리얼번호 기반 펌프 개체 이력 DB 구축</li>
+        <li><span class="check">✅</span> 수리 증상 코드 분류 체계 수립</li>
+        <li><span class="check">✅</span> 재고 30개 품목 DB + 실시간 재고 현황 페이지</li>
+        <li><span class="check">✅</span> 고객 포털 기초 — 내 견적·수리 이력 조회</li>
+        <li><span class="check">✅</span> 견적 후속 이메일 자동화 (3일 후 "진행 어떻게 되셨나요?")</li>
+        <li><span class="check">✅</span> Vercel Cron Jobs 스케줄러 인프라 구축</li>
+      </ul>
+    </div>
+
+    <!-- Phase 2 -->
+    <div class="phase-card phase-2" data-phase="2">
+      <div class="phase-header">
+        <span class="phase-tag tag-red">Phase 2</span>
+        <h3>AI 기반 펌프 주치의</h3>
+      </div>
+      <div class="period">2027년 1월 — 2027년 6월 (6개월)</div>
+      <ul class="item-list">
+        <li><span class="check">🔲</span> 수리 이력 100건 이상 → AI 고장 패턴 분석 엔진</li>
+        <li><span class="check">🔲</span> 공정별·모델별 최적 오버홀 주기 자동 계산</li>
+        <li><span class="check">🔲</span> 챗봇에서 "내 펌프 상태 어때요?" 질의 응답</li>
+        <li><span class="check">🔲</span> 펌프 선정 AI 대화 — "CVD 챔버 50,000L 어떤 펌프?" → 시뮬레이션 즉시 응답</li>
+        <li><span class="check">🔲</span> 현장 엔지니어 모바일 앱 (QR → 수리 이력·매뉴얼·재고)</li>
+        <li><span class="check">🔲</span> 고객사 포털 — 수리 진행 상황 실시간 확인</li>
+        <li><span class="check">🔲</span> Edwards·BOC 카탈로그 AI 파싱 → 지식베이스 자동 업데이트</li>
+      </ul>
+    </div>
+
+    <!-- Phase 3 -->
+    <div class="phase-card phase-3" data-phase="3">
+      <div class="phase-header">
+        <span class="phase-tag tag-green">Phase 3</span>
+        <h3>진공 공정 디지털 트윈 · 세계 최초 도전</h3>
+      </div>
+      <div class="period">2027년 7월 — 2028년 이후 (장기)</div>
+      <ul class="item-list">
+        <li><span class="check">🔲</span> 고객 공장 펌프에 IoT 센서 설치 (온도·진동·압력·운전시간)</li>
+        <li><span class="check">🔲</span> 실시간 데이터 수집 → 스마텍 AI 서버 분석</li>
+        <li><span class="check">🔲</span> 고장 72시간 전 경보 → 자동 수리 예약 생성</li>
+        <li><span class="check">🔲</span> 고객 공장 진공 시스템 가상 재현 (디지털 트윈)</li>
+        <li><span class="check">🔲</span> AI가 공정 파라미터 최적화 제안 ("펌프 속도 10% 낮추면 수명 20% 증가")</li>
+        <li><span class="check">🔲</span> 업계 최초 "진공 공정 AI 컨설팅 플랫폼" 론칭</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <hr class="divider page-break" />
+
+  <!-- ── 5. 데이터 준비 현황 ── -->
+  <div class="section-title">SECTION 05</div>
+  <h2>AI 자동화를 위한 데이터 준비 현황</h2>
+
+  <div class="data-section">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>데이터 종류</th>
+          <th>현재 상태</th>
+          <th>Phase 1 목표</th>
+          <th>AI 활용처</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>수리 이력</td>
+          <td><span class="badge-build">텍스트 저장</span></td>
+          <td>증상 코드화 + 시리얼번호 연결</td>
+          <td>고장 패턴 학습, 예측 정비</td>
+        </tr>
+        <tr>
+          <td>펌프 속도 커브</td>
+          <td><span class="badge-have">실측 데이터 완비</span></td>
+          <td>시뮬레이션 KB 30케이스 목표</td>
+          <td>챗봇 펌프 선정 추천</td>
+        </tr>
+        <tr>
+          <td>고객사 공정 정보</td>
+          <td><span class="badge-need">미수집</span></td>
+          <td>견적·수리 접수 시 항목 추가</td>
+          <td>공정별 오버홀 주기 계산</td>
+        </tr>
+        <tr>
+          <td>거래처 담당자</td>
+          <td><span class="badge-have">DB 완비</span></td>
+          <td>핸드폰 번호 필드 보완</td>
+          <td>자동 SMS 발송</td>
+        </tr>
+        <tr>
+          <td>재고 현황</td>
+          <td><span class="badge-need">미구축</span></td>
+          <td>30개 품목 DB 입력</td>
+          <td>챗봇 "재고 있나요?" 응답</td>
+        </tr>
+        <tr>
+          <td>Edwards 카탈로그</td>
+          <td><span class="badge-build">수동 참조</span></td>
+          <td>PDF 파싱 → 지식베이스</td>
+          <td>챗봇 기술 스펙 응답</td>
+        </tr>
+        <tr>
+          <td>IoT 센서 데이터</td>
+          <td><span class="badge-need">없음 (Phase 3)</span></td>
+          <td>—</td>
+          <td>실시간 이상 감지, 디지털 트윈</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- ── 6. 충돌 방지 ── -->
+  <div class="section-title">SECTION 06</div>
+  <h2>작업 충돌 방지 — 파일 소유권 지도</h2>
+
+  <div class="conflict-box">
+    <h3>⚠️ 동시에 건드리면 충돌 위험이 있는 파일들</h3>
+    <div class="conflict-row">
+      <strong style="min-width:200px">app/api/chat/route.ts</strong>
+      <span>AI 챗봇 스트리밍 + 시뮬레이션 KB 로딩 담당. 예방정비 챗봇 연동 작업 시 시뮬레이션 KB 작업과 동시 수정 금지.</span>
+    </div>
+    <div class="conflict-row">
+      <strong style="min-width:200px">prisma/schema.prisma</strong>
+      <span>DB 구조 파일. 시리얼번호·점검일 필드 추가 시 반드시 단독 작업. 변경 후 npx prisma db push 필수.</span>
+    </div>
+    <div class="conflict-row">
+      <strong style="min-width:200px">lib/pumpSpeedData.ts</strong>
+      <span>펌프 속도 커브 데이터. 시뮬레이션 업데이트 작업 전용. 챗봇·UI 작업과 분리.</span>
+    </div>
+    <div class="conflict-row">
+      <strong style="min-width:200px">data/simulation-cases/</strong>
+      <span>시뮬레이션 KB 케이스 파일. 추가만 가능. 기존 파일 삭제·수정 금지.</span>
+    </div>
+  </div>
+
+  <div style="background: white; border-radius: 10px; padding: 24px 28px; border: 1px solid var(--line); margin-bottom: 48px;">
+    <div class="section-title">권장 작업 순서 (Phase 1 기준)</div>
+    <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 8px;">
+      <div style="display: flex; gap: 12px; align-items: center; font-size: 14px;">
+        <span style="background: var(--smblue); color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0;">1</span>
+        <span><strong>DB 스키마 확정</strong> — serialNumber·predictedServiceDate·symptomCategory 필드 추가 (schema.prisma 단독 작업)</span>
+      </div>
+      <div style="display: flex; gap: 12px; align-items: center; font-size: 14px;">
+        <span style="background: var(--smblue); color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0;">2</span>
+        <span><strong>수리 접수 UI 업데이트</strong> — 시리얼번호·공정 유형·점검일 입력 필드 추가</span>
+      </div>
+      <div style="display: flex; gap: 12px; align-items: center; font-size: 14px;">
+        <span style="background: var(--smblue); color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0;">3</span>
+        <span><strong>SMS 자동 발송 로직</strong> — 납품 완료 이벤트 → 즉시 문자 (Solapi 기존 연동 활용)</span>
+      </div>
+      <div style="display: flex; gap: 12px; align-items: center; font-size: 14px;">
+        <span style="background: var(--smblue); color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0;">4</span>
+        <span><strong>스케줄러 구축</strong> — Vercel Cron → 매일 점검 예정일 D-30 체크 → 리마인더 문자</span>
+      </div>
+      <div style="display: flex; gap: 12px; align-items: center; font-size: 14px;">
+        <span style="background: var(--smblue); color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0;">5</span>
+        <span><strong>고객 포털</strong> — 로그인 후 내 펌프 이력·다음 점검일 확인 페이지</span>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- ── 7. 경쟁 우위 ── -->
+  <div class="section-title">SECTION 07</div>
+  <h2>스마텍만 할 수 있는 이유</h2>
+
+  <div class="strength-grid">
+    <div class="strength-card">
+      <h4>🏆 실제 수리 데이터 독점 보유</h4>
+      <p>Edwards 공식 대리점으로 쌓인 수년치 수리 이력. 경쟁사는 이 데이터를 구조적으로 가질 수 없어요. 이 데이터가 AI 예측 모델의 핵심 재료가 돼요.</p>
+    </div>
+    <div class="strength-card">
+      <h4>⚡ 실측 펌프 커브 데이터</h4>
+      <p>GXS·nXRi·iH 시리즈 전체의 PumpCalc 기반 실측 속도 커브. 시뮬레이션 정확도 ±1.1% 이내. 홈페이지에 공개 구현된 사례는 한국에서 스마텍이 유일해요.</p>
+    </div>
+    <div class="strength-card">
+      <h4>🔗 고객사 직접 연결 채널</h4>
+      <p>거래처 담당자 DB + SMS 직접 발송 채널 보유. 고객과의 관계를 플랫폼이 가져가지 않고 스마텍이 직접 유지해요. 이 채널 위에 모든 자동화 서비스가 올라가요.</p>
+    </div>
+    <div class="strength-card">
+      <h4>🧠 AI 상담 + 기술 지식의 결합</h4>
+      <p>챗봇이 시뮬레이션 KB·스펙 데이터·수리 사례를 동시에 참조해요. "이 조건에 몇 대 필요해요?"부터 "언제 오버홀해야 해요?"까지 한 채널에서 답해요.</p>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- ── 8. 다음 한 걸음 ── -->
+  <div class="section-title">SECTION 08</div>
+  <h2>지금 당장 시작할 수 있는 것</h2>
+
+  <div style="background: var(--ink); color: white; border-radius: 12px; padding: 32px 36px;">
+    <p style="color: #aaa; font-size: 14px; margin-bottom: 20px;">
+      Phase 1 중 가장 비즈니스 임팩트가 크고, 기존 시스템을 최대한 활용해 빠르게 구현 가능한 것부터.
+    </p>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+      <div style="background: #1e1e22; border-radius: 8px; padding: 18px 20px; border-left: 3px solid var(--edred);">
+        <div style="font-size: 11px; color: var(--edred2); font-weight: 700; margin-bottom: 8px;">MOST IMPACTFUL FIRST</div>
+        <div style="font-size: 14px; font-weight: 600; margin-bottom: 6px;">AI 예방정비 SMS 시스템</div>
+        <div style="font-size: 12px; color: #888;">수리 1건마다 자동 실행. Solapi 기존 연동 그대로 활용. 고객 감동 즉시 체감.</div>
+      </div>
+      <div style="background: #1e1e22; border-radius: 8px; padding: 18px 20px; border-left: 3px solid var(--smblue);">
+        <div style="font-size: 11px; color: #7ba9f0; font-weight: 700; margin-bottom: 8px;">FOUNDATION FIRST</div>
+        <div style="font-size: 14px; font-weight: 600; margin-bottom: 6px;">수리 데이터 구조화</div>
+        <div style="font-size: 12px; color: #888;">증상 코드 + 시리얼번호 + 공정 유형. 이 세 가지가 모든 AI 기능의 뿌리.</div>
+      </div>
+    </div>
+    <p style="color: #555; font-size: 12px; margin-top: 20px; text-align: right;">
+      두 가지 중 어느 쪽을 먼저 시작할지 결정 후 작업 진행
+    </p>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <strong>SMARTECH</strong> — 한국 진공 시장 1위를 향한 차세대 AI 자동화 전략<br/>
+  <span>작성 2026-06-16 &nbsp;|&nbsp; 내부 검토용 비공개 문서</span>
+</footer>
+
+</body>
+</html>

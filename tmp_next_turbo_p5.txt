@@ -1,0 +1,41 @@
+nEXT Turbomolecular Pumps IEDWARDS
+5
+NW40 DN63 ISO-K DN63-ISO CF DN100 ISO-K DN100 ISO CF DN160 ISO-K DN160 ISO CF DN200 ISO-K DN200 ISO CF DN200 ISO-F
+nEXT55D x* x x x*
+nEXT85D nEXT85H x x x x
+nEXT240D nEXT240T x x
+nEXT300D nEXT300T x x
+nEXT400D nEXT400T x x
+nEXT730D x x x x
+nEXT930D x x
+nEXT1230H x x x
+ADVANCED TECHNOLOGY
+nEXT has been designed to combine all the latest technological advances in turbomolecular pumps with some new 
+thinking in design for manufacture, delivering a truly class leading product.
+The nEXT platform brings a high level of modularity to offer maximum flexibility for customer application and 
+requirements. Each pump is available in different internal configurations to offer differing functionality and performance.
+Our nEXT pumps come in different variants "D" Duplex comes with both turbomolecular and drag stages for improved 
+tolerance to higher backing line pressures. The “D” variants offer superior pumping speed and compression across all 
+gas species. Triplex “T” variants feature turbomolecular, drag and Edwards unique regenerative pumping stages for the 
+ultimate in compression ratio and boost technology for unique vacuum system rationalisation.
+The "H" variant has been physically tuned to offer an improvement where an application has focus on light  
+gas compression. 
+nEXT is available in eight models with a range of inlet flange sizes
+nEXT55 nEXT85 nEXT240 nEXT300 nEXT400 nEXT730 nEXT930 nEXT1230
+Research & Development
+Chamber evacuation, coating systems,  
+turbomolecular pump systems
+High Energy Physics
+Beam Lines, accelerators, mobile pump carts,  
+turbomolecular pump backing, laser evacuation, medical systems
+Mass Spectrometry
+GCMS, LCMS, ICPMS, MALDI, inorganic MS, RGA,  
+surface science, leak detectors
+Electron Microscopy
+TEM, SEM, EPMA, SPM sample prep benches
+Industrial
+Glove boxes, coating systems, XRD/XRF systems,  
+Leak testing, energy, furnaces, medical technologies
+You can be assured Edwards has the application expertise and vacuum solution to meet your needs.
+APPLICATIONS
+*Available by special order

@@ -54,7 +54,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     const subEmail = job.subEmail || process.env.REPAIR_SUB_EMAIL;
     let emailSent = false;
     if (subEmail && updated.uploadToken) {
-      const origin = process.env.NEXTAUTH_URL ?? "https://smartechvacuum.com";
+      const origin = process.env.NEXTAUTH_URL ?? "https://www.smartechvacuum.com";
       const uploadUrl = `${origin}/repair/offline-upload/${updated.uploadToken}`;
       emailSent = true;
       sendSubUploadLink({

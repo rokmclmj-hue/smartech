@@ -162,6 +162,22 @@ python 블로그/blur_photo.py "원본경로" "블로그/output/[주제]/images/
 - 보조 텍스트: 카테고리 또는 부제 (연한 회색)
 - **브랜드 텍스트 삽입 금지**: SMARTECH, SMARTECH VACUUM, 전화번호, 웹사이트 모두 금지
 
+#### 🔴 썸네일 여백 규칙 — 반드시 준수
+- 전체 레이아웃은 `display:flex; flex-direction:column; justify-content:center; align-items:center` 로 중앙 정렬
+- **위아래 패딩: 60px 이하** (기존 과도한 여백 금지)
+- 텍스트 요소 간 간격(`gap` 또는 `margin`): 16px~24px 이내로 좁게
+- 텍스트 블록 전체를 하나의 `<div>`로 묶어 세로 여백을 최소화
+- HTML 예시 구조:
+  ```html
+  <body style="margin:0; width:1080px; height:1080px; display:flex; align-items:center; justify-content:center; background: linear-gradient(135deg,#1a1a2e,#16213e);">
+    <div style="text-align:center; padding:60px; display:flex; flex-direction:column; gap:20px; align-items:center;">
+      <span style="...카테고리 뱃지..."></span>
+      <h1 style="...제목..."></h1>
+      <p style="...부제..."></p>
+    </div>
+  </body>
+  ```
+
 ---
 
 ### 4단계 — 본문 이미지 (AI 생성)

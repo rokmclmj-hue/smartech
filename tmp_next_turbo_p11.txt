@@ -1,0 +1,35 @@
+nEXT Turbomolecular Pumps IEDWARDS
+11
+nEX T240, nEXT300, nEX T400 
+TURBOMOLECULAR PUMP
+The innovative nEXT240, nEXT300 and 
+nEXT400 pumps, have been designed to 
+provide high vacuum performance in a 
+compact size. 
+The range offers a wide variety of sizes and variants giving 
+OEMs and end users a greater choice and the flexibility to 
+tailor the most appropriate vacuum solution to meet their 
+individual needs. 
+Each is available in two variants: the D-Type combines 
+turbo and drag stages; and the T-Type adds Edwards 
+unique fluid dynamic stages and the option of additional 
+booster ports for increased system rationalisation.  
+See Boost technology custom interface splitflow  
+variants are also available in three sizes for further  
+vacuum system optimisation. 
+The pumps feature a field replaceable oil cartridge and 
+bearing assembly and the user is notified as to when 
+service intervention is required. This enables easy 
+maintenance as users can carry out servicing in-house, 
+which reduces the cost of ownership.
+The efficient pumps have low power consumption and 
+also feature a standby mode, which allow users to make 
+further energy savings. nEXT240-300-400 pumps have 
+extra low vibration and low magnetic field signature 
+variants for sensitive electron microscope applications.
+The compact design means the pumps fit together neatly 
+in high product density applications. They are easy 
+to configure and have an intelligent control interface 
+accepting a 24 to 48Vdc input power supply voltage range 
+and can be controlled using a simple parallel control or 
+serial communications in both RS232 or RS485 formats.

@@ -24,7 +24,7 @@ SCRIPT_DIR  = os.path.dirname(os.path.abspath(__file__))
 OUTPUT_DIR  = os.path.join(SCRIPT_DIR, "output")
 LOG_FILE    = os.path.join(SCRIPT_DIR, "quality-log.jsonl")
 
-MIN_CHARS           = 1500
+MIN_CHARS           = 2000
 PUMP_BOX_MIN_RATIO  = 0.01   # 1%  — 너무 작은 좌표 차단
 PUMP_BOX_MAX_RATIO  = 0.70   # 70% — 사진 전체를 펌프로 잡은 오류 차단
 

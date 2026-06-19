@@ -1,0 +1,21 @@
+nEXT Turbomolecular Pumps IEDWARDS
+7
+Permanent magnet upper bearing for a 
+hydrocarbon free vacuum, reduced vibration 
+and minimum wear
+Advanced simulation tool derived rotor 
+design to give better speed and compression 
+performance
+Manual vent port with automatic valve accessories 
+for rapid venting and quick cycle times
+Manual as well as serial setting of standby speed 
+for flexible system tuning
+Simple parallel operation or more sophisticated 
+serial control in both RS232 and RS485 protocols
+Automatic wide operating voltage 
+range from 24V to 48V d.c. for 
+versatility in system integration  
+(nEXT730-1230 48V)
+Sensorless drive for high efficiency and 
+compactness with reduced stray magnetic fields
+nEXT300 turbomolecular pump sectional view

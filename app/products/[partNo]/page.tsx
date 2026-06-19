@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: { params: Promise<{ partNo: s
   return {
     title: `${product.description} (${partNo}) — 스마텍 | Edwards Vacuum`,
     description: `Edwards ${product.description} 파트번호 ${partNo}. 스마텍에서 정품 공급·견적·문의.`,
-    alternates: { canonical: `https://smartechvacuum.com/products/${encodeURIComponent(partNo)}` },
+    alternates: { canonical: `https://www.smartechvacuum.com/products/${encodeURIComponent(partNo)}` },
   };
 }
 

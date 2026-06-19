@@ -8,7 +8,7 @@ import { SessionProvider } from "./providers";
 export const metadata: Metadata = {
   title: "스마텍 — Edwards Vacuum 한국 공식 대리점 | 진공 토탈 솔루션",
   description: "Edwards Vacuum 한국 공식 대리점 스마텍. 2006년 Edwards 코리아 합류, 2011년 창업. RV·E2M·GXS·nXDS·STP·nEXT 전 라인업 · 딜러/OEM/소비자 등급별 가격 · 온라인 견적 시스템.",
-  metadataBase: new URL("https://smartechvacuum.com"),
+  metadataBase: new URL("https://www.smartechvacuum.com"),
   verification: {
     other: { "naver-site-verification": "42d90b9cf0599e0f8b74c3bf5abc5089c7706274" },
   },
@@ -31,13 +31,13 @@ const jsonLd = {
   "@graph": [
     {
       "@type": "Organization",
-      "@id": "https://smartechvacuum.com/#organization",
+      "@id": "https://www.smartechvacuum.com/#organization",
       "name": "(주)스마텍",
       "alternateName": ["Smartech", "스마텍"],
-      "url": "https://smartechvacuum.com",
+      "url": "https://www.smartechvacuum.com",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://smartechvacuum.com/icon.png",
+        "url": "https://www.smartechvacuum.com/icon.png",
       },
       "telephone": "031-204-7170",
       "email": "info@smartechvacuum.com",
@@ -60,10 +60,10 @@ const jsonLd = {
     },
     {
       "@type": "LocalBusiness",
-      "@id": "https://smartechvacuum.com/#local-suwon",
+      "@id": "https://www.smartechvacuum.com/#local-suwon",
       "name": "스마텍 본사",
-      "parentOrganization": { "@id": "https://smartechvacuum.com/#organization" },
-      "url": "https://smartechvacuum.com",
+      "parentOrganization": { "@id": "https://www.smartechvacuum.com/#organization" },
+      "url": "https://www.smartechvacuum.com",
       "telephone": "031-204-7170",
       "address": {
         "@type": "PostalAddress",
@@ -75,9 +75,9 @@ const jsonLd = {
     },
     {
       "@type": "LocalBusiness",
-      "@id": "https://smartechvacuum.com/#local-cheonan",
+      "@id": "https://www.smartechvacuum.com/#local-cheonan",
       "name": "스마텍 천안수리센터",
-      "parentOrganization": { "@id": "https://smartechvacuum.com/#organization" },
+      "parentOrganization": { "@id": "https://www.smartechvacuum.com/#organization" },
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "두정공원 2길 49",
@@ -88,18 +88,18 @@ const jsonLd = {
     },
     {
       "@type": "Service",
-      "@id": "https://smartechvacuum.com/#repair-service",
+      "@id": "https://www.smartechvacuum.com/#repair-service",
       "name": "Edwards 진공펌프 수리·오버홀 서비스",
-      "provider": { "@id": "https://smartechvacuum.com/#organization" },
+      "provider": { "@id": "https://www.smartechvacuum.com/#organization" },
       "serviceType": "진공펌프 수리 및 오버홀",
       "description": "Edwards 진공펌프(RV·E2M·nES·GXS·EXS·nXDS·XDS·iXH·nEXT·STP) 전 라인업 수리·오버홀·부품 교체. 수원 본사 및 천안 수리센터 운영.",
       "areaServed": { "@type": "Country", "name": "대한민국" },
-      "url": "https://smartechvacuum.com/repair",
+      "url": "https://www.smartechvacuum.com/repair",
     },
     {
       "@type": "FAQPage",
-      "@id": "https://smartechvacuum.com/#faq",
-      "url": "https://smartechvacuum.com",
+      "@id": "https://www.smartechvacuum.com/#faq",
+      "url": "https://www.smartechvacuum.com",
       "mainEntity": [
         {
           "@type": "Question",

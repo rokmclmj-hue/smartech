@@ -1,0 +1,87 @@
+1. Choose your turbopump 2. Choose your backing pump 3. Select your voltage
+nEXT85 (84 ls-1)
+nEXT300 (300 ls-1) nEXT400 (400 ls-1)
+nEXT240 (240 ls-1)
+PRODUCT DATA SHEET edwardsvacuum.com
+EMEA
+UK +44 1444 253 000 
+ (local rate) 08459 212223
+Belgium  +32 2 300 0730
+France +33 1 4121 1256
+Germany    0800 000 1456
+Italy + 39 02 48 4471
+Israel + 972 8 681 0633
+ASIA PACIFIC
+China   +86 400 111 9618
+India +91 20 4075 2222
+Japan +81 47 458 8836
+Korea +82 31 716 7070
+Singapore +65 6546 8408
+Taiwan  +886 3758 1000 
+AMERICAS
+USA  +1 800 848 9800 
+Brazil  +55 11 3952 5000 
+Publication Number: 3601 0448 01 
+© Edwards Limited 2018. All rights reserved Edwards 
+and the Edwards logo are trademarks of Edwards 
+Limited
+Whilst we make every effort to ensure that we 
+accurately describe our products and services, we give 
+no guarantee as to the accuracy or completeness of any 
+information provided in this datasheet.
+Edwards Ltd, registered in England and Wales 
+No. 6124750, registered office: Innovation Drive,
+Burgess Hill, West Sussex, RH15 9TW, UK.
+GLOBAL CONTACTS
+‘Plug and play’ turbomolecular pumping station
+Ordering information
+nEXT  turbomolecular pumping station:
+Turbomolecular
+pump
+B nEXT240
+C nEXT300
+D nEXT400
+E nEXT240T
+F nEXT300T
+G nEXT400T
+J nEXT85D
+K nEXT85H
+Inlet Flange
+1 DN40NW (nEXT85)
+2 DN63ISO-K (nEXT85)
+3 DN63CF (nEXT85)
+4 DN100ISO-K (nEXT240/300)
+5 DN100CF (nEXT240/300)
+6 DN160ISO-K (nEXT400)
+7 DN160CF (nEXT400)
+Backing Pump
+1 E2M1.5
+2 RV5
+3 RV12
+A XDD1
+D nXDS6i
+E nXDS10i
+F nXDS15i
+G nXDS20i
+Vent Option
+0 Manual Vent
+1 TAV5 Vent Valve
+Electrical Supply
+1 220-240 V 50/60 Hz (Europe)
+2 110-120 V 50/60 Hz (USA)
+3 200 V 50/60 Hz (Japan)
+4 220-240 V 50/60 Hz (UK)
+T S - - 0  0
+Everything about our range of nEXT turbomolecular pumping stations has been developed to provide a comprehensive 
+vacuum solution with the latest technological advances for easy installation and operation.
+A simplified ordering matrix and expanded range, to include turbopumps with speeds from 42 ls-1 to 400 ls-1, enables you 
+to select the most appropriate combination for your application, fully assembled and ready to go.
+nXDS6i (6.2 m3h-1) 
+nXDS10i (11.4 m3h-1)
+nXDS15i (15.1 m3h-1)
+nXDS20i (22.0 m3h-1)
+E2M1.5 (1.6 m3h-1)
+RV5 (5.1 m3h-1)
+RV12 (12.0 m3h-1)
+XDD1 (1.2 m3h-1)
+nXDS

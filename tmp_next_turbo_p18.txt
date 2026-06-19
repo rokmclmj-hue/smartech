@@ -1,0 +1,69 @@
+nEXT Turbomolecular Pumps IEDWARDS
+18
+ls-1
+200
+0
+1400
+1200
+1000
+800
+600
+400
+1600
+nEXT1230H
+N
+Ar
+He
+H
+10-6 10-5 10-4 10-3 10-2 10-1 mbar
+PERFORMANCE
+10-6 10-5 10-4 10-3 10-2 10-1 100 mbar
+ls-1
+0
+400
+200
+600
+800
+1000
+N
+Ar
+nEXT730
+He
+H2
+10-6 10-5 10-4 10-3 10-2 10-1 100 mbar
+ls-1
+0
+400
+200
+600
+800
+1000
+N
+Ar
+nEXT930
+He
+H2
+BESPOKE PRODUCT DEVELOPMENT
+With Edwards, you can quickly and accurately create the 
+perfect vacuum solution for your needs. When an off the 
+shelf pump will not meet your requirements for space or 
+performance, our Bespoke Product Development (BPD) 
+team will develop a customised vacuum solution to turn 
+your requirement into reality.
+At Edwards, a partnership approach is taken to system 
+design, and it all starts with a vacuum expert gathering 
+your application details: what pressures you wish to 
+achieve, what gas flows you have, how much space is 
+available etc. Our expert then uses a number of in-house 
+and publicly available  modelling tools at his disposal to 
+optimise your vacuum system. Developed by our Analytical 
+Services group, these tools are used to model complete 
+vacuum systems from atmosphere down to ultra-high 
+vacuum (UHV). This software has been developed to 
+give rapid simulation of the behaviour of the proposed 
+vacuum solution to ensure that it perfectly meets your 
+requirements.
+Accurate computer modelling offers you the chance to 
+streamline your development cycle, avoiding a costly 
+iterative approach and delivering a quicker time to market. 
+Please contact Edwards to take advantage of this service.

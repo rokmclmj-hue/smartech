@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  alternates: { canonical: "https://smartechvacuum.com" },
+  alternates: { canonical: "https://www.smartechvacuum.com" },
 };
 import HeroCtaCards from "@/components/HeroCtaCards";
 import HeroChat from "@/components/HeroChat";

@@ -87,7 +87,7 @@ export async function PATCH(req: Request) {
 
   // 발행 시 IndexNow로 빙에 즉시 알림 (챗GPT 크롤링 촉진)
   if (updates.status === "PUBLISHED") {
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://smartechvacuum.com";
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.smartechvacuum.com";
     // 프로덕션 도메인에서만 IndexNow 전송 (프리뷰 배포 제외)
     if (siteUrl.includes("smartechvacuum.com")) {
       const indexNowKey = process.env.INDEXNOW_KEY ?? "f868dd92e4a94e2cb6ec60c397058e84";
