@@ -44,7 +44,8 @@ function fmt(n: number) {
 
 function makeSubject(department: string, items: OrderItem[]): string {
   const dept = department || "IV";
-  const valid = items.filter((i) => (i.description || i.partNo).trim());
+  // Fix #9: 수량 0 항목 제외 (제목에 "x0" 표시 방지)
+  const valid = items.filter((i) => (i.description || i.partNo).trim() && i.quantity > 0);
   if (!valid.length) return `[스마텍] 발주서 송부 — 에드워드${dept}`;
   const first = valid[0];
   const name = (first.description || first.partNo).trim();
@@ -54,8 +55,8 @@ function makeSubject(department: string, items: OrderItem[]): string {
 
 function appendSignature(msg: string): string {
   if (msg.includes("이명재 배상")) return msg;
-  // Fix #5: 빈 메시지여도 서명은 항상 포함
-  return msg ? msg.trimEnd() + "\n\n이명재 배상" : "이명재 배상";
+  // ensureSignature와 동일한 단일 개행 사용 (초안·발송 본문 일치)
+  return msg ? msg.trimEnd() + "\n이명재 배상" : "이명재 배상";
 }
 
 function fmtDate(s: string) {
