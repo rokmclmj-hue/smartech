@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAdminSession } from "@/lib/admin-auth";
-import { put } from "@vercel/blob";
+import { put, del } from "@vercel/blob";
 import * as XLSX from "xlsx";
 
 const LABEL_MAP: Record<string, string> = {
@@ -58,22 +58,38 @@ export async function POST(req: NextRequest, { params }: Params) {
   if (!isExcel && !isZip)
     return NextResponse.json({ error: "xlsx 또는 zip/7z 파일만 업로드 가능합니다." }, { status: 400 });
 
+  // Fix #4: Excel 중복 업로드 방지
+  if (isExcel) {
+    const existing = await prisma.offlineRepairFile.findFirst({ where: { jobId: nId, fileType: "EXCEL" } });
+    if (existing)
+      return NextResponse.json({ error: "엑셀 파일이 이미 업로드되어 있습니다. 기존 파일을 삭제한 후 재업로드해 주세요." }, { status: 409 });
+  }
+
   const fileType = isExcel ? "EXCEL" : "PHOTO_ZIP";
 
-  const blob = await put(`offline-repairs/${nId}/admin_${Date.now()}_${file.name}`, file, {
+  // Fix #8: arrayBuffer 먼저 읽어서 put()에 전달 (스트림 소진 방지)
+  const fileBuffer = Buffer.from(await file.arrayBuffer());
+
+  const blob = await put(`offline-repairs/${nId}/admin_${Date.now()}_${file.name}`, fileBuffer, {
     access: "public",
     contentType: file.type || "application/octet-stream",
   });
 
-  const fileRecord = await prisma.offlineRepairFile.create({
-    data: { jobId: nId, fileType, fileName: file.name, fileUrl: blob.url, fileSize: file.size, isSelected: true },
-  });
+  // Fix #1: DB 저장 실패 시 Blob 정리
+  let fileRecord;
+  try {
+    fileRecord = await prisma.offlineRepairFile.create({
+      data: { jobId: nId, fileType, fileName: file.name, fileUrl: blob.url, fileSize: file.size, isSelected: true },
+    });
+  } catch {
+    try { await del(blob.url); } catch {}
+    return NextResponse.json({ error: "파일 정보 저장에 실패했습니다. 다시 시도해 주세요." }, { status: 500 });
+  }
 
   if (!isExcel) return NextResponse.json({ ok: true, fileId: fileRecord.id });
 
   // Excel 파싱 → 검사성적서 자동 입력
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const wb = XLSX.read(buffer, { type: "buffer" });
+  const wb = XLSX.read(fileBuffer, { type: "buffer" });
   const ws = wb.Sheets[wb.SheetNames[0]];
   const rows = XLSX.utils.sheet_to_json<(string | number)[]>(ws, { header: 1, defval: "" });
 
@@ -84,8 +100,9 @@ export async function POST(req: NextRequest, { params }: Params) {
     if (Number(rows[i][1]) === 1) { startRow = i; o = 1; break; }
   }
 
+  // Fix #2: 파싱 실패 시 경고 반환 (ok:false로 명확히)
   if (startRow < 0)
-    return NextResponse.json({ ok: true, fileId: fileRecord.id, matched: 0, warning: "검사항목 테이블을 찾을 수 없습니다." });
+    return NextResponse.json({ ok: false, fileId: fileRecord.id, matched: 0, warning: "검사항목 테이블을 찾을 수 없습니다. 엑셀 파일 형식을 확인해 주세요." }, { status: 422 });
 
   const dbByLabel = Object.fromEntries(job.inspectionItems.map(it => [it.itemLabel, it]));
   const updates: { id: number; spec: string | null; value: string; pass: boolean | null; isNA: boolean }[] = [];

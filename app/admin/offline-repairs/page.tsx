@@ -406,6 +406,11 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone }: {
   }
 
   async function handleAdminUpload(file: File, type: "zip" | "excel") {
+    // Fix #7: 클라이언트 사이드 용량 체크 (Vercel 4.5MB 제한)
+    if (file.size > 4 * 1024 * 1024) {
+      setAdminUploadMsg("⚠️ 파일 크기가 4MB를 초과합니다. 압축을 더 하거나 분할 업로드해 주세요.");
+      return;
+    }
     setAdminUploading(true);
     setAdminUploadMsg("");
     try {
@@ -414,7 +419,10 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone }: {
       const res = await fetch(`/api/admin/offline-repairs/${job.id}/upload`, { method: "POST", body: form });
       const data = await res.json();
       if (!res.ok) { setAdminUploadMsg(`오류: ${data.error}`); return; }
-      if (type === "excel") {
+      // Fix #2: 서버에서 warning 반환 시 오류로 표시
+      if (data.warning) {
+        setAdminUploadMsg(`⚠️ ${data.warning}`);
+      } else if (type === "excel") {
         setAdminUploadMsg(`✓ ${data.matched ?? 0}개 항목 자동 입력 완료 — 아래 검사성적서에서 확인하세요`);
       } else {
         setAdminUploadMsg("✓ 파일 업로드 완료");
@@ -425,17 +433,26 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone }: {
   }
 
   async function handleDeleteFile(fileId: number, fileType: string) {
-    const label = fileType === "EXCEL" ? "엑셀 파일을 삭제하면 검사성적서 항목값도 초기화됩니다. 삭제하시겠습니까?" : "파일을 삭제하시겠습니까?";
-    if (!confirm(label)) return;
+    if (!confirm("파일을 삭제하시겠습니까?")) return;
+    // Fix #3: Excel 삭제 시 검사성적서 초기화 여부를 사용자가 선택
+    let resetInspection = false;
+    if (fileType === "EXCEL") {
+      resetInspection = confirm("검사성적서 항목값도 함께 초기화할까요?\n(수동 입력 포함 전체 초기화)\n\n확인 = 초기화 / 취소 = 파일만 삭제");
+    }
     setDeletingFileId(fileId);
     try {
-      const res = await fetch(`/api/admin/offline-repairs/${job.id}/files/${fileId}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/offline-repairs/${job.id}/files/${fileId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ resetInspection }),
+      });
       const data = await res.json();
       if (!res.ok) { showToast(`삭제 실패: ${data.error}`); return; }
       showToast(data.clearedInspection ? "파일 삭제 + 검사성적서 초기화 완료" : "파일 삭제 완료");
       setAdminUploadMsg("");
       onRefresh();
-    } finally { setDeletingFileId(null); }
+    } catch { showToast("삭제 중 오류가 발생했습니다. 다시 시도해주세요."); } // Fix #6: catch 추가
+    finally { setDeletingFileId(null); }
   }
 
   async function handleSendPreQuote() {

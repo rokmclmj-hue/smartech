@@ -53,9 +53,9 @@ function makeSubject(department: string, items: OrderItem[]): string {
 }
 
 function appendSignature(msg: string): string {
-  if (!msg) return "";
   if (msg.includes("이명재 배상")) return msg;
-  return msg.trimEnd() + "\n\n이명재 배상";
+  // Fix #5: 빈 메시지여도 서명은 항상 포함
+  return msg ? msg.trimEnd() + "\n\n이명재 배상" : "이명재 배상";
 }
 
 function fmtDate(s: string) {
