@@ -39,8 +39,50 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const isLoggedIn = !!session;
   const isPending = tier === "PENDING";
 
+  const productSchema = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": product.description,
+    "description": `Edwards ${product.description} — 파트번호 ${product.partNo}. 스마텍(Edwards Vacuum 한국 공식 대리점)에서 정품 공급·견적·수리 상담.`,
+    "brand": { "@type": "Brand", "name": "Edwards Vacuum" },
+    "manufacturer": { "@type": "Organization", "name": "Edwards Vacuum" },
+    "sku": product.partNo,
+    "offers": {
+      "@type": "Offer",
+      "priceCurrency": "KRW",
+      "price": displayPrice,
+      "availability": "https://schema.org/InStock",
+      "url": `https://www.smartechvacuum.com/products/${encodeURIComponent(product.partNo)}`,
+      "seller": { "@type": "Organization", "name": "스마텍", "url": "https://www.smartechvacuum.com" },
+    },
+  });
+
+  const faqSchema = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "이 제품의 납기는 얼마나 걸리나요?",
+        "acceptedAnswer": { "@type": "Answer", "text": "재고 보유 제품은 즉시 출고 가능합니다. 수입 발주 제품은 4~8주 소요됩니다. 정확한 납기는 031-204-7170으로 문의해 주세요." },
+      },
+      {
+        "@type": "Question",
+        "name": "Edwards 정품 부품인가요?",
+        "acceptedAnswer": { "@type": "Answer", "text": "스마텍은 Edwards Vacuum 한국 공식 대리점으로 모든 제품은 Edwards 정품입니다. 정품 인증서 발급이 가능합니다." },
+      },
+      {
+        "@type": "Question",
+        "name": "설치·시운전 지원이 되나요?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Edwards 공인 엔지니어의 현장 출장 설치·시운전 지원이 가능합니다. 031-204-7170으로 문의해 주세요." },
+      },
+    ],
+  });
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: productSchema }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: faqSchema }} />
       {/* 모바일 하단 고정 바를 위해 하단 패딩 확보 */}
       <div className="max-w-4xl mx-auto px-4 md:px-6 py-8 md:py-12 pb-28 md:pb-12">
         <Link href="/products" className="text-sm text-gray-500 hover:text-blue-600 mb-6 inline-block">
