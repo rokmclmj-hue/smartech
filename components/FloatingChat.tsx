@@ -206,9 +206,8 @@ export default function FloatingChat() {
       {isOpen && (
         <div
           className="fixed z-50 bg-white border hair shadow-2xl flex flex-col
-            bottom-0 right-0 w-full
-            sm:bottom-6 sm:right-6 sm:w-[380px] sm:max-w-[calc(100vw-24px)]"
-          style={{ maxHeight: "calc(100vh - 0px)", height: "100svh" }}
+            bottom-0 right-0 w-full h-svh
+            sm:bottom-6 sm:right-6 sm:w-[380px] sm:max-w-[calc(100vw-24px)] sm:h-auto sm:max-h-[calc(100vh-80px)]"
         >
           {/* 헤더 */}
           <div className="px-4 py-3 border-b hair flex items-center justify-between bg-ink text-paper text-[12px] mono shrink-0"
