@@ -195,11 +195,16 @@ def chk_pump_box(folder: str) -> dict:
     }
 
 
+def _strip_code_fences(text: str) -> str:
+    """코드 블록(```...```) 안의 내용을 제거해 오탐 방지"""
+    return re.sub(r"```[\s\S]*?```", "", text)
+
+
 def chk_geo_format(folder: str) -> dict:
     path = os.path.join(folder, "final.md")
     if not os.path.exists(path):
         return {"pass": True, "note": "final.md 없음 — 건너뜀"}
-    content = open(path, encoding="utf-8").read()
+    content = _strip_code_fences(open(path, encoding="utf-8").read())
 
     # 금지 ③: "## 스마텍" H2 섹션
     if re.search(r"^##\s+스마텍", content, re.MULTILINE):
@@ -214,7 +219,7 @@ def chk_no_contact(folder: str) -> dict:
     path = os.path.join(folder, "final.md")
     if not os.path.exists(path):
         return {"pass": True, "note": "final.md 없음 — 건너뜀"}
-    content = open(path, encoding="utf-8").read()
+    content = _strip_code_fences(open(path, encoding="utf-8").read())
 
     # 금지 ①: 연락처 단독 줄 (문의: 031-xxx-xxxx 형태)
     if re.search(r"^문의\s*[:：].*031-\d{3}-\d{4}", content, re.MULTILINE):
