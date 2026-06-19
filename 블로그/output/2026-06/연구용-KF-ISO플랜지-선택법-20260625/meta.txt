@@ -1,0 +1,4 @@
+title: KF vs ISO-K 플랜지 완벽 정리 — 연구용 진공 배관 피팅 선택 기준
+metaDesc: 연구실 진공 배관에서 KF(NW), ISO-K, CF 플랜지의 차이와 선택 기준을 표와 그림으로 설명합니다. nEXT 터보펌프 어댑터 연결 사례 포함.
+canonical: https://smartechvacuum.com/blog/연구용-KF-ISO플랜지-선택법
+tags: KF플랜지,ISO-K,진공배관,NW플랜지,CF플랜지,진공피팅,어댑터,터보펌프배관,Edwards진공
