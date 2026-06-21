@@ -429,6 +429,7 @@ model ManualDeliveryNote {
   // 수신자 정보 (발행 시점 스냅샷)
   toCompany       String
   toName          String?
+  toTitle         String?
   toEmail         String?
   toPhone         String?
   toBizNo         String?

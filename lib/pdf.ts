@@ -819,6 +819,7 @@ export interface ManualDeliveryNoteForPdf {
   createdAt: Date;
   toCompany: string;
   toName?: string | null;
+  toTitle?: string | null;
   toEmail?: string | null;
   toPhone?: string | null;
   toBizNo?: string | null;
@@ -862,7 +863,7 @@ function ManualDeliveryNoteDocument({ data }: { data: ManualDeliveryNoteForPdf }
           el(Text, { style: DS.toFromLabel }, "공급받는자  ·  TO"),
           el(Text, { style: DS.toFromCompany }, `${data.toCompany} 귀중`),
           data.toBizNo ? el(Text, { style: DS.toFromLine }, `사업자번호: ${data.toBizNo}`) : null,
-          data.toName  ? el(Text, { style: DS.toFromLine }, `담당자: ${data.toName}`) : null,
+          data.toName  ? el(Text, { style: DS.toFromLine }, `담당자: ${data.toName}${data.toTitle ? ` ${data.toTitle}님` : ""}`) : null,
           data.toEmail ? el(Text, { style: DS.toFromLine }, `E-mail: ${data.toEmail}`) : null,
           data.toPhone ? el(Text, { style: DS.toFromLine }, `Tel: ${data.toPhone}`) : null,
         ),

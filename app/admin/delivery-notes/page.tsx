@@ -87,6 +87,7 @@ function NoteForm({ onSaved }: { onSaved: () => void }) {
   // 수신자 정보
   const [toCompany, setToCompany] = useState("");
   const [toName, setToName] = useState("");
+  const [toTitle, setToTitle] = useState("");
   const [toEmail, setToEmail] = useState("");
   const [toPhone, setToPhone] = useState("");
   const [toBizNo, setToBizNo] = useState("");
@@ -133,6 +134,7 @@ function NoteForm({ onSaved }: { onSaved: () => void }) {
   function selectCustomer(r: SearchResult) {
     setToCompany(r.company);
     setToName(r.contacts[0]?.name ?? r.name);
+    setToTitle(r.contacts[0]?.title ?? "");
     setToEmail(r.contacts[0]?.email ?? r.email);
     setToPhone(formatPhone(r.contacts[0]?.mobile ?? r.phone));
     setToBizNo(r.bizNo ? formatBizNo(r.bizNo) : "");
@@ -180,7 +182,7 @@ function NoteForm({ onSaved }: { onSaved: () => void }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          toCompany, toName, toEmail, toPhone, toBizNo,
+          toCompany, toName, toTitle, toEmail, toPhone, toBizNo,
           memo, includeBankInfo,
           items: items.map((it, idx) => ({ ...it, quantity: Number(it.quantity), unitPrice: Number(it.unitPrice), sortOrder: idx })),
         }),
@@ -235,10 +237,17 @@ function NoteForm({ onSaved }: { onSaved: () => void }) {
                 <input value={toCompany} onChange={(e) => setToCompany(e.target.value)}
                   placeholder="(주)다윈바이오" className="w-full border hair px-3 py-1.5 text-[13px] focus:outline-none focus:border-ink" />
               </div>
-              <div>
-                <div className="mono text-[10px] dim mb-1">담당자</div>
-                <input value={toName} onChange={(e) => setToName(e.target.value)}
-                  placeholder="홍길동" className="w-full border hair px-3 py-1.5 text-[13px] focus:outline-none focus:border-ink" />
+              <div className="grid grid-cols-[2fr_1fr] gap-2">
+                <div>
+                  <div className="mono text-[10px] dim mb-1">담당자</div>
+                  <input value={toName} onChange={(e) => setToName(e.target.value)}
+                    placeholder="홍길동" className="w-full border hair px-3 py-1.5 text-[13px] focus:outline-none focus:border-ink" />
+                </div>
+                <div>
+                  <div className="mono text-[10px] dim mb-1">직함</div>
+                  <input value={toTitle} onChange={(e) => setToTitle(e.target.value)}
+                    placeholder="대리" className="w-full border hair px-3 py-1.5 text-[13px] focus:outline-none focus:border-ink" />
+                </div>
               </div>
               <div>
                 <div className="mono text-[10px] dim mb-1">이메일</div>

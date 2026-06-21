@@ -25,6 +25,7 @@ export async function GET(req: NextRequest, { params }: Params) {
       createdAt: note.createdAt,
       toCompany: note.toCompany,
       toName: note.toName,
+      toTitle: note.toTitle,
       toEmail: note.toEmail,
       toPhone: note.toPhone,
       toBizNo: note.toBizNo,

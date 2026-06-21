@@ -42,6 +42,7 @@ export async function POST(req: NextRequest) {
         noteNo: "TEMP",
         toCompany: body.toCompany.trim(),
         toName: body.toName?.trim() || null,
+        toTitle: body.toTitle?.trim() || null,
         toEmail: body.toEmail?.trim() || null,
         toPhone: body.toPhone?.trim() || null,
         toBizNo: body.toBizNo?.trim() || null,
