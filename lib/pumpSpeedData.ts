@@ -1063,10 +1063,6 @@ const iXH: PumpModel[] = [
 ];
 
 // ─────────────────────────────────────────────────────
-// iXL / nEXT / STP — PumpCalc CSV 미확보
-// ─────────────────────────────────────────────────────
-const PENDING: PumpModel[] = [];
-
 // ─────────────────────────────────────────────────────
 // 전체 펌프 목록
 // ─────────────────────────────────────────────────────
@@ -1261,6 +1257,8 @@ export type PumpDownResult = {
   pumpDownTime_s: number;
   pumpDownTime_min: number;
   reachable: boolean;
+  /** pumpCalcKV 테이블 범위를 초과한 챔버 용적 — GXS+GXB 대용량 챔버 경고용 */
+  kvOutOfRange?: boolean;
 };
 
 /** 배관 컨덕턴스 [m³/h] — 점성류 + 분자류 Knudsen 합산 */
@@ -1388,6 +1386,9 @@ function calcPumpDownNumerical(input: PumpDownInput, pump: PumpModel): PumpDownR
   const C_nom    = pipeConductance_m3h(pipeID_mm, pipeLength_m, pipeBends, 1.0);
   const S_eff_nom = S_nom > 0 && C_nom > 0 ? 1 / (1 / S_nom + 1 / C_nom) : S_nom;
 
+  const maxKVvol = pump.pumpCalcKV?.at(-1)?.vol ?? Infinity;
+  const kvOutOfRange = pump.pumpCalcKV != null && chamberVol_L > maxKVvol;
+
   const kFactor = pump.pumpCalcKV
     ? interpolateKV(pump.pumpCalcKV, chamberVol_L)
     : (pump.pumpCalcFactor ?? 1.0);
@@ -1402,6 +1403,7 @@ function calcPumpDownNumerical(input: PumpDownInput, pump: PumpModel): PumpDownR
     pumpDownTime_s: Math.round(corrected_t_s),
     pumpDownTime_min: Math.round(corrected_t_s / 60 * 10) / 10,
     reachable,
+    kvOutOfRange: kvOutOfRange || undefined,
   };
 }
 

@@ -1470,6 +1470,11 @@ export default function PumpSelector() {
                               <div className={`text-[13px] font-semibold mono ${i === 0 ? "text-ink" : ""}`}>
                                 {fmtTime(r.pumpDownTime_s, timeUnit)}
                               </div>
+                              {r.kvOutOfRange && (
+                                <div className="mt-0.5 text-[9px] text-amber-600 font-medium">
+                                  ⚠ 참고값
+                                </div>
+                              )}
                               <button
                                 onClick={() => setPanelItem(SERIES_PANEL_MAP[r.series] ?? null)}
                                 className="mt-1 block text-[10px] text-[#6A6660] hover:text-ink underline w-full text-right"
@@ -1484,11 +1489,16 @@ export default function PumpSelector() {
                   )}
 
                   {/* 주석 */}
-                  <div className="px-4 py-2.5 border-t border-[#E3DFD6] bg-[#F6F4EF]">
+                  <div className="px-4 py-2.5 border-t border-[#E3DFD6] bg-[#F6F4EF] space-y-1">
                     <p className="text-[10px] text-[#6A6660] leading-relaxed">
                       ※ 상기 결과는 수치 시뮬레이션 참고값입니다 (SUS+Viton, outgassing 1.9×10⁻⁷ mbar·L/s·cm², 60Hz 기준).
                       최종 모델 선정은 스마텍 전문가 검토를 권장합니다.
                     </p>
+                    {results?.some((r) => r.kvOutOfRange) && (
+                      <p className="text-[10px] text-amber-700 leading-relaxed">
+                        ⚠ &apos;참고값&apos; 표시 모델은 입력하신 챔버 용적이 검증 범위를 초과해 오차가 커질 수 있습니다. 정확한 선정은 스마텍에 문의해 주세요.
+                      </p>
+                    )}
                   </div>
                 </div>
               )}
