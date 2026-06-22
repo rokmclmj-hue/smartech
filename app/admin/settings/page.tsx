@@ -380,6 +380,61 @@ function ContactSettings() {
 // ─── 회사 서류 관리 (사업자등록증·통장사본) ──────────────────
 type DocInfo = { url: string | null; name: string | null };
 
+function DocRow({ type, label, info, fileRef, uploading, deleting, onDelete, onFileChange }: {
+  type: "biz" | "bank";
+  label: string;
+  info: DocInfo;
+  fileRef: React.RefObject<HTMLInputElement | null>;
+  uploading: "biz" | "bank" | null;
+  deleting: "biz" | "bank" | null;
+  onDelete: (type: "biz" | "bank") => void;
+  onFileChange: (type: "biz" | "bank", file: File) => void;
+}) {
+  return (
+    <div className="px-5 py-4 flex items-center gap-4 flex-wrap">
+      <div className="w-[140px] mono text-[11px] dim tracking-[0.06em] uppercase shrink-0">{label}</div>
+      <div className="flex-1 min-w-0">
+        {info.url ? (
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-[13px] text-smblue truncate max-w-[280px]">
+              📄 {info.name ?? "파일"}
+            </span>
+            <button
+              onClick={() => onDelete(type)}
+              disabled={deleting === type}
+              className="mono text-[10px] text-red-400 hover:text-red-600 disabled:opacity-40"
+            >
+              {deleting === type ? "삭제 중…" : "삭제"}
+            </button>
+            <button
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading === type}
+              className="mono text-[10px] dim hover:text-ink disabled:opacity-40"
+            >
+              교체
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => fileRef.current?.click()}
+            disabled={uploading === type}
+            className="mono text-[10px] tracking-[0.08em] uppercase border hair px-3 py-1.5 hover:bg-ink/5 transition-colors disabled:opacity-40"
+          >
+            {uploading === type ? "업로드 중…" : "📎 파일 선택"}
+          </button>
+        )}
+      </div>
+      <input
+        ref={fileRef}
+        type="file"
+        accept=".pdf,.jpg,.jpeg,.png"
+        className="hidden"
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) onFileChange(type, f); e.target.value = ""; }}
+      />
+    </div>
+  );
+}
+
 function CompanyDocSettings() {
   const [biz, setBiz]   = useState<DocInfo>({ url: null, name: null });
   const [bank, setBank] = useState<DocInfo>({ url: null, name: null });
@@ -440,60 +495,11 @@ function CompanyDocSettings() {
     finally { setDeleting(null); }
   }
 
-  const DocRow = ({ type, label, info, fileRef }: {
-    type: "biz" | "bank";
-    label: string;
-    info: DocInfo;
-    fileRef: React.RefObject<HTMLInputElement | null>;
-  }) => (
-    <div className="px-5 py-4 flex items-center gap-4 flex-wrap">
-      <div className="w-[140px] mono text-[11px] dim tracking-[0.06em] uppercase shrink-0">{label}</div>
-      <div className="flex-1 min-w-0">
-        {info.url ? (
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[13px] text-smblue truncate max-w-[280px]">
-              📄 {info.name ?? "파일"}
-            </span>
-            <button
-              onClick={() => handleDelete(type)}
-              disabled={deleting === type}
-              className="mono text-[10px] text-red-400 hover:text-red-600 disabled:opacity-40"
-            >
-              {deleting === type ? "삭제 중…" : "삭제"}
-            </button>
-            <button
-              onClick={() => fileRef.current?.click()}
-              disabled={uploading === type}
-              className="mono text-[10px] dim hover:text-ink disabled:opacity-40"
-            >
-              교체
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={() => fileRef.current?.click()}
-            disabled={uploading === type}
-            className="mono text-[10px] tracking-[0.08em] uppercase border hair px-3 py-1.5 hover:bg-ink/5 transition-colors disabled:opacity-40"
-          >
-            {uploading === type ? "업로드 중…" : "📎 파일 선택"}
-          </button>
-        )}
-      </div>
-      <input
-        ref={fileRef}
-        type="file"
-        accept=".pdf,.jpg,.jpeg,.png"
-        className="hidden"
-        onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUpload(type, f); e.target.value = ""; }}
-      />
-    </div>
-  );
-
   return (
     <div>
       <div className="divide-y hair">
-        <DocRow type="biz"  label="사업자등록증" info={biz}  fileRef={bizRef} />
-        <DocRow type="bank" label="통장사본"     info={bank} fileRef={bankRef} />
+        <DocRow type="biz"  label="사업자등록증" info={biz}  fileRef={bizRef}  uploading={uploading} deleting={deleting} onDelete={handleDelete} onFileChange={handleUpload} />
+        <DocRow type="bank" label="통장사본"     info={bank} fileRef={bankRef} uploading={uploading} deleting={deleting} onDelete={handleDelete} onFileChange={handleUpload} />
       </div>
       <div className="px-5 py-3 border-t hair">
         {toast && (

@@ -369,7 +369,7 @@ export default function AdminCompaniesPage() {
                   ) : filtered.map((c) => (
                     <tr
                       key={c.id}
-                      onClick={() => { setSelected(c); cancelForm(); }}
+                      onClick={() => { setSelected(c); cancelForm(); setEditingName(false); setNameInput(""); }}
                       className={`cursor-pointer transition-colors ${
                         selected?.id === c.id ? "bg-edred/5 border-l-2 border-l-edred" : "hover:bg-ink/[0.02]"
                       }`}
@@ -426,7 +426,7 @@ export default function AdminCompaniesPage() {
                       autoFocus
                       className="flex-1 border hair rounded px-2 py-0.5 text-[14px] font-semibold focus:outline-none focus:border-smblue"
                     />
-                    <button onClick={saveCompanyName} disabled={nameSaving} className="px-2 py-0.5 bg-smblue text-white text-[11px] font-semibold rounded hover:brightness-110 disabled:opacity-50">
+                    <button onClick={saveCompanyName} disabled={nameSaving || !nameInput.trim()} className="px-2 py-0.5 bg-smblue text-white text-[11px] font-semibold rounded hover:brightness-110 disabled:opacity-50">
                       {nameSaving ? "…" : "저장"}
                     </button>
                     <button onClick={() => setEditingName(false)} className="px-2 py-0.5 text-[11px] dim hover:text-edred">취소</button>
@@ -499,7 +499,7 @@ export default function AdminCompaniesPage() {
                   )}
                 </div>
               </div>
-              <button onClick={() => { setSelected(null); cancelForm(); }} className="dim hover:text-edred text-[18px] ml-3 shrink-0">✕</button>
+              <button onClick={() => { setSelected(null); cancelForm(); setEditingName(false); setNameInput(""); }} className="dim hover:text-edred text-[18px] ml-3 shrink-0">✕</button>
             </div>
 
             {/* 담당자 목록 */}

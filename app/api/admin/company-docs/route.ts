@@ -67,19 +67,26 @@ export async function POST(req: NextRequest) {
 
 // DELETE — 서류 삭제
 export async function DELETE(req: NextRequest) {
-  const session = await getAdminSession();
-  if (!session) return NextResponse.json({ error: "권한 없음" }, { status: 403 });
+  try {
+    const session = await getAdminSession();
+    if (!session) return NextResponse.json({ error: "권한 없음" }, { status: 403 });
 
-  const { type } = await req.json() as { type: DocType };
-  if (!type || !KEYS[type]) return NextResponse.json({ error: "type 필요" }, { status: 400 });
+    const body = await req.json().catch(() => null);
+    const type = body?.type as DocType | undefined;
+    if (!type || !KEYS[type]) return NextResponse.json({ error: "type 필요 (biz | bank)" }, { status: 400 });
 
-  const existing = await prisma.siteSetting.findUnique({ where: { key: KEYS[type].url } });
-  if (existing?.value) await del(existing.value).catch(() => null);
+    const existing = await prisma.siteSetting.findUnique({ where: { key: KEYS[type].url } });
+    if (existing?.value) await del(existing.value).catch(() => null);
 
-  await Promise.all([
-    prisma.siteSetting.deleteMany({ where: { key: KEYS[type].url } }),
-    prisma.siteSetting.deleteMany({ where: { key: KEYS[type].name } }),
-  ]);
+    await Promise.all([
+      prisma.siteSetting.deleteMany({ where: { key: KEYS[type].url } }),
+      prisma.siteSetting.deleteMany({ where: { key: KEYS[type].name } }),
+    ]);
 
-  return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true });
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error("[company-docs DELETE]", e);
+    return NextResponse.json({ error: `서버 오류: ${msg}` }, { status: 500 });
+  }
 }
