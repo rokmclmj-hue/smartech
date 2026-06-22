@@ -28,35 +28,41 @@ export async function GET() {
 
 // POST — 파일 업로드 → Vercel Blob 저장 → SiteSetting upsert
 export async function POST(req: NextRequest) {
-  const session = await getAdminSession();
-  if (!session) return NextResponse.json({ error: "권한 없음" }, { status: 403 });
+  try {
+    const session = await getAdminSession();
+    if (!session) return NextResponse.json({ error: "권한 없음" }, { status: 403 });
 
-  const form = await req.formData();
-  const type = form.get("type") as DocType | null;
-  const file = form.get("file") as File | null;
+    const form = await req.formData();
+    const type = form.get("type") as DocType | null;
+    const file = form.get("file") as File | null;
 
-  if (!type || !KEYS[type]) return NextResponse.json({ error: "type 필요 (biz | bank)" }, { status: 400 });
-  if (!file) return NextResponse.json({ error: "file 필요" }, { status: 400 });
-  if (file.size > 5 * 1024 * 1024) return NextResponse.json({ error: "5MB 이하 파일만 가능합니다" }, { status: 400 });
+    if (!type || !KEYS[type]) return NextResponse.json({ error: "type 필요 (biz | bank)" }, { status: 400 });
+    if (!file) return NextResponse.json({ error: "file 필요" }, { status: 400 });
+    if (file.size > 5 * 1024 * 1024) return NextResponse.json({ error: "5MB 이하 파일만 가능합니다" }, { status: 400 });
 
-  // 기존 파일 삭제
-  const existing = await prisma.siteSetting.findUnique({ where: { key: KEYS[type].url } });
-  if (existing?.value) {
-    await del(existing.value).catch(() => null);
+    // 기존 파일 삭제
+    const existing = await prisma.siteSetting.findUnique({ where: { key: KEYS[type].url } });
+    if (existing?.value) {
+      await del(existing.value).catch(() => null);
+    }
+
+    const fileBuffer = Buffer.from(await file.arrayBuffer());
+    const blob = await put(`company-docs/${type}-${Date.now()}-${file.name}`, fileBuffer, {
+      access: "public",
+      contentType: file.type || "application/octet-stream",
+    });
+
+    await Promise.all([
+      prisma.siteSetting.upsert({ where: { key: KEYS[type].url },  update: { value: blob.url },  create: { key: KEYS[type].url,  value: blob.url } }),
+      prisma.siteSetting.upsert({ where: { key: KEYS[type].name }, update: { value: file.name }, create: { key: KEYS[type].name, value: file.name } }),
+    ]);
+
+    return NextResponse.json({ ok: true, url: blob.url, name: file.name });
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error("[company-docs POST]", e);
+    return NextResponse.json({ error: `서버 오류: ${msg}` }, { status: 500 });
   }
-
-  const fileBuffer = Buffer.from(await file.arrayBuffer());
-  const blob = await put(`company-docs/${type}-${Date.now()}-${file.name}`, fileBuffer, {
-    access: "public",
-    contentType: file.type || "application/octet-stream",
-  });
-
-  await Promise.all([
-    prisma.siteSetting.upsert({ where: { key: KEYS[type].url },  update: { value: blob.url },  create: { key: KEYS[type].url,  value: blob.url } }),
-    prisma.siteSetting.upsert({ where: { key: KEYS[type].name }, update: { value: file.name }, create: { key: KEYS[type].name, value: file.name } }),
-  ]);
-
-  return NextResponse.json({ ok: true, url: blob.url, name: file.name });
 }
 
 // DELETE — 서류 삭제
