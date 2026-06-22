@@ -210,6 +210,9 @@ export default function AdminCompaniesPage() {
 
   const [bizNoInput, setBizNoInput] = useState("");
   const [bizNoSaving, setBizNoSaving] = useState(false);
+  const [editingName, setEditingName] = useState(false);
+  const [nameInput, setNameInput] = useState("");
+  const [nameSaving, setNameSaving] = useState(false);
 
   useEffect(() => {
     setBizNoInput(selected?.businessNo ?? "");
@@ -230,6 +233,23 @@ export default function AdminCompaniesPage() {
       setCompanies((cs) => cs.map((c) => c.id === selected.id ? { ...c, businessNo: saved } : c));
     }
     setBizNoSaving(false);
+  }
+
+  async function saveCompanyName() {
+    if (!selected || !nameInput.trim()) return;
+    setNameSaving(true);
+    const res = await fetch(`/api/admin/known-companies?id=${selected.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ companyName: nameInput.trim() }),
+    });
+    if (res.ok) {
+      const newName = nameInput.trim();
+      setSelected((s) => s ? { ...s, companyName: newName } : s);
+      setCompanies((cs) => cs.map((c) => c.id === selected.id ? { ...c, companyName: newName } : c));
+      setEditingName(false);
+    }
+    setNameSaving(false);
   }
 
   const filtered = companies.filter((c) => {
@@ -396,7 +416,31 @@ export default function AdminCompaniesPage() {
             <div className="flex items-start justify-between px-5 py-4 border-b hair">
               <div className="min-w-0 flex-1">
                 <div className="mono text-[9px] tracking-[0.15em] uppercase dim mb-1">담당자 관리</div>
-                <div className="text-[16px] font-semibold text-ink truncate">{selected.companyName}</div>
+                {editingName ? (
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <input
+                      type="text"
+                      value={nameInput}
+                      onChange={(e) => setNameInput(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter") saveCompanyName(); if (e.key === "Escape") setEditingName(false); }}
+                      autoFocus
+                      className="flex-1 border hair rounded px-2 py-0.5 text-[14px] font-semibold focus:outline-none focus:border-smblue"
+                    />
+                    <button onClick={saveCompanyName} disabled={nameSaving} className="px-2 py-0.5 bg-smblue text-white text-[11px] font-semibold rounded hover:brightness-110 disabled:opacity-50">
+                      {nameSaving ? "…" : "저장"}
+                    </button>
+                    <button onClick={() => setEditingName(false)} className="px-2 py-0.5 text-[11px] dim hover:text-edred">취소</button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1.5 group">
+                    <div className="text-[16px] font-semibold text-ink truncate">{selected.companyName}</div>
+                    <button
+                      onClick={() => { setNameInput(selected.companyName); setEditingName(true); }}
+                      className="text-[11px] dim hover:text-ink opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                      title="상호명 수정"
+                    >✏️</button>
+                  </div>
+                )}
                 <div className="flex items-center gap-2 mt-1 flex-wrap">
                   <select
                     value={selected.tier}
