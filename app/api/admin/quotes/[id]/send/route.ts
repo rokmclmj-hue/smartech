@@ -104,11 +104,13 @@ export async function POST(
   try { bodyData = await req.json(); } catch { /* body 없음 */ }
   const extraAttachments = bodyData.attachments ?? [];
 
-  // Blob URL 첨부파일 → 서버에서 fetch 후 Buffer 변환
+  // Blob URL 첨부파일 → 서버에서 fetch 후 Buffer 변환 (private blob: Bearer 토큰 필요)
   const blobAttachments: { filename: string; content: Buffer; contentType: string }[] = [];
   for (const b of bodyData.blobAttachments ?? []) {
     try {
-      const r = await fetch(b.url);
+      const r = await fetch(b.url, {
+        headers: { Authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN ?? ""}` },
+      });
       if (r.ok) {
         const buf = Buffer.from(await r.arrayBuffer());
         blobAttachments.push({ filename: b.filename, content: buf, contentType: b.contentType });

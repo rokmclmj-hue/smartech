@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
 
     const fileBuffer = Buffer.from(await file.arrayBuffer());
     const blob = await put(`company-docs/${type}-${Date.now()}-${file.name}`, fileBuffer, {
-      access: "public",
+      access: "private",
       contentType: file.type || "application/octet-stream",
     });
 

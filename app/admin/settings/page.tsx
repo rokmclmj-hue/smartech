@@ -451,9 +451,9 @@ function CompanyDocSettings() {
       <div className="flex-1 min-w-0">
         {info.url ? (
           <div className="flex items-center gap-2 flex-wrap">
-            <a href={info.url} target="_blank" rel="noreferrer" className="text-[13px] text-smblue hover:underline truncate max-w-[280px]">
+            <span className="text-[13px] text-smblue truncate max-w-[280px]">
               📄 {info.name ?? "파일"}
-            </a>
+            </span>
             <button
               onClick={() => handleDelete(type)}
               disabled={deleting === type}
