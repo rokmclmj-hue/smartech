@@ -97,9 +97,24 @@ export async function POST(
   }
 
   // body에서 추가 첨부파일 파싱 (사업자등록증·통장사본 등)
-  let bodyData: { attachments?: { filename: string; base64: string; contentType: string }[] } = {};
+  let bodyData: {
+    attachments?: { filename: string; base64: string; contentType: string }[];
+    blobAttachments?: { url: string; filename: string; contentType: string }[];
+  } = {};
   try { bodyData = await req.json(); } catch { /* body 없음 */ }
   const extraAttachments = bodyData.attachments ?? [];
+
+  // Blob URL 첨부파일 → 서버에서 fetch 후 Buffer 변환
+  const blobAttachments: { filename: string; content: Buffer; contentType: string }[] = [];
+  for (const b of bodyData.blobAttachments ?? []) {
+    try {
+      const r = await fetch(b.url);
+      if (r.ok) {
+        const buf = Buffer.from(await r.arrayBuffer());
+        blobAttachments.push({ filename: b.filename, content: buf, contentType: b.contentType });
+      }
+    } catch { /* fetch 실패 시 건너뜀 */ }
+  }
 
   const quote = await prisma.quote.findUnique({
     where: { id: quoteId },
@@ -212,11 +227,14 @@ export async function POST(
           expiresAt: quote.expiresAt,
         }),
         pdfFilename,
-        extraAttachments: extraAttachments.map((a) => ({
-          filename: a.filename,
-          content: Buffer.from(a.base64, "base64"),
-          contentType: a.contentType,
-        })),
+        extraAttachments: [
+          ...extraAttachments.map((a) => ({
+            filename: a.filename,
+            content: Buffer.from(a.base64, "base64"),
+            contentType: a.contentType,
+          })),
+          ...blobAttachments,
+        ],
       });
     } catch (e: unknown) {
       console.error("[quote send / mail]", e);

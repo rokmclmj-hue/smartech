@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SMARTECH_COMPANY } from "@/lib/company";
 import MarginSettings from "@/components/MarginSettings";
 
@@ -377,6 +377,136 @@ function ContactSettings() {
   );
 }
 
+// ─── 회사 서류 관리 (사업자등록증·통장사본) ──────────────────
+type DocInfo = { url: string | null; name: string | null };
+
+function CompanyDocSettings() {
+  const [biz, setBiz]   = useState<DocInfo>({ url: null, name: null });
+  const [bank, setBank] = useState<DocInfo>({ url: null, name: null });
+  const [uploading, setUploading] = useState<"biz" | "bank" | null>(null);
+  const [deleting, setDeleting]   = useState<"biz" | "bank" | null>(null);
+  const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
+  const bizRef  = useRef<HTMLInputElement>(null);
+  const bankRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    fetch("/api/admin/company-docs")
+      .then((r) => r.json())
+      .then((d) => { setBiz(d.biz); setBank(d.bank); });
+  }, []);
+
+  const showToast = (msg: string, ok: boolean) => {
+    setToast({ msg, ok });
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  async function handleUpload(type: "biz" | "bank", file: File) {
+    if (file.size > 5 * 1024 * 1024) { showToast("5MB 이하 파일만 가능합니다", false); return; }
+    setUploading(type);
+    const fd = new FormData();
+    fd.append("type", type);
+    fd.append("file", file);
+    try {
+      const res = await fetch("/api/admin/company-docs", { method: "POST", body: fd });
+      const data = await res.json();
+      if (res.ok) {
+        if (type === "biz") setBiz({ url: data.url, name: data.name });
+        else setBank({ url: data.url, name: data.name });
+        showToast("업로드 완료", true);
+      } else {
+        showToast(data.error ?? "업로드 실패", false);
+      }
+    } catch { showToast("서버 오류", false); }
+    finally { setUploading(null); }
+  }
+
+  async function handleDelete(type: "biz" | "bank") {
+    if (!confirm("삭제하시겠습니까?")) return;
+    setDeleting(type);
+    try {
+      const res = await fetch("/api/admin/company-docs", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type }),
+      });
+      if (res.ok) {
+        if (type === "biz") setBiz({ url: null, name: null });
+        else setBank({ url: null, name: null });
+        showToast("삭제 완료", true);
+      } else {
+        showToast("삭제 실패", false);
+      }
+    } catch { showToast("서버 오류", false); }
+    finally { setDeleting(null); }
+  }
+
+  const DocRow = ({ type, label, info, fileRef }: {
+    type: "biz" | "bank";
+    label: string;
+    info: DocInfo;
+    fileRef: React.RefObject<HTMLInputElement | null>;
+  }) => (
+    <div className="px-5 py-4 flex items-center gap-4 flex-wrap">
+      <div className="w-[140px] mono text-[11px] dim tracking-[0.06em] uppercase shrink-0">{label}</div>
+      <div className="flex-1 min-w-0">
+        {info.url ? (
+          <div className="flex items-center gap-2 flex-wrap">
+            <a href={info.url} target="_blank" rel="noreferrer" className="text-[13px] text-smblue hover:underline truncate max-w-[280px]">
+              📄 {info.name ?? "파일"}
+            </a>
+            <button
+              onClick={() => handleDelete(type)}
+              disabled={deleting === type}
+              className="mono text-[10px] text-red-400 hover:text-red-600 disabled:opacity-40"
+            >
+              {deleting === type ? "삭제 중…" : "삭제"}
+            </button>
+            <button
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading === type}
+              className="mono text-[10px] dim hover:text-ink disabled:opacity-40"
+            >
+              교체
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => fileRef.current?.click()}
+            disabled={uploading === type}
+            className="mono text-[10px] tracking-[0.08em] uppercase border hair px-3 py-1.5 hover:bg-ink/5 transition-colors disabled:opacity-40"
+          >
+            {uploading === type ? "업로드 중…" : "📎 파일 선택"}
+          </button>
+        )}
+      </div>
+      <input
+        ref={fileRef}
+        type="file"
+        accept=".pdf,.jpg,.jpeg,.png"
+        className="hidden"
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUpload(type, f); e.target.value = ""; }}
+      />
+    </div>
+  );
+
+  return (
+    <div>
+      <div className="divide-y hair">
+        <DocRow type="biz"  label="사업자등록증" info={biz}  fileRef={bizRef} />
+        <DocRow type="bank" label="통장사본"     info={bank} fileRef={bankRef} />
+      </div>
+      <div className="px-5 py-3 border-t hair">
+        {toast && (
+          <span className={`mono text-[10px] tracking-[0.06em] ${toast.ok ? "text-green-600" : "text-red-600"}`}>
+            {toast.ok ? "✓ " : "✗ "}{toast.msg}
+          </span>
+        )}
+        {!toast && <span className="mono text-[10px] dim tracking-[0.06em]">PDF · JPG · PNG / 최대 5MB</span>}
+      </div>
+    </div>
+  );
+}
+
 // ─── 메인 ────────────────────────────────────────────────────
 export default function AdminSettingsPage() {
   return (
@@ -480,6 +610,18 @@ export default function AdminSettingsPage() {
           발주서 작성 시 자동으로 불러올 공급업체 담당자 정보와 기본 발주 문구를 설정합니다.
         </p>
         <DepartmentContactSettings />
+      </div>
+
+      {/* 회사 서류 관리 */}
+      <div className="border hair bg-paper">
+        <div className="px-5 py-3 border-b hair flex items-center justify-between">
+          <h2 className="text-[14px] font-semibold text-ink tracking-tight">회사 서류 (사업자등록증·통장사본)</h2>
+          <span className="mono text-[10px] text-edred tracking-[0.12em] uppercase">메일 자동첨부</span>
+        </div>
+        <p className="px-5 pt-4 pb-2 text-[13px] dim leading-[1.6]">
+          대행 견적서 메일 발송 시 체크박스로 선택하면 자동 첨부됩니다. 한 번만 업로드하면 계속 사용할 수 있어요.
+        </p>
+        <CompanyDocSettings />
       </div>
 
       {/* 빠른 링크 발송 */}

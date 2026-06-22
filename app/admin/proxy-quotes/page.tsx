@@ -184,6 +184,14 @@ function AdminProxyQuotesInner() {
   const [attachFiles, setAttachFiles] = useState<{ name: string; base64: string; contentType: string }[]>([]);
   const [sentAttachCount, setSentAttachCount] = useState(0);
 
+  // 저장된 회사 서류 (사업자등록증·통장사본)
+  type DocInfo = { url: string | null; name: string | null };
+  const [savedDocs, setSavedDocs] = useState<{ biz: DocInfo; bank: DocInfo }>({
+    biz: { url: null, name: null }, bank: { url: null, name: null },
+  });
+  const [attachBiz, setAttachBiz]   = useState(false);
+  const [attachBank, setAttachBank] = useState(false);
+
   // 결제조건
   const [paymentTerm, setPaymentTerm] = useState<string | null>(null);
 
@@ -199,6 +207,14 @@ function AdminProxyQuotesInner() {
   // 현재 활성 tier / 고객 확정 여부
   const activeTier = selectedCustomer?.tier ?? guest.tier ?? "ENDUSER";
   const hasCustomer = !!selectedCustomer || (showDirect && !!guest.company.trim());
+
+  // ── 저장된 회사 서류 로드 ────────────────────────────────
+  useEffect(() => {
+    fetch("/api/admin/company-docs")
+      .then((r) => r.json())
+      .then((d) => setSavedDocs(d))
+      .catch(() => null);
+  }, []);
 
   // ── 외부 클릭 닫기 ──────────────────────────────────────
 
@@ -531,6 +547,14 @@ function AdminProxyQuotesInner() {
     if (!doneQuoteId) return;
     setSending(true);
     try {
+      const blobAttachments = [
+        ...(attachBiz && savedDocs.biz.url
+          ? [{ url: savedDocs.biz.url, filename: savedDocs.biz.name ?? "사업자등록증.pdf", contentType: "application/pdf" }]
+          : []),
+        ...(attachBank && savedDocs.bank.url
+          ? [{ url: savedDocs.bank.url, filename: savedDocs.bank.name ?? "통장사본.pdf", contentType: "application/pdf" }]
+          : []),
+      ];
       const res = await fetch(`/api/admin/quotes/${doneQuoteId}/send`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -540,13 +564,16 @@ function AdminProxyQuotesInner() {
             base64: f.base64,
             contentType: f.contentType,
           })),
+          blobAttachments,
         }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) { toast.error(data.error ?? "메일 발송에 실패했습니다."); return; }
-      setSentAttachCount(attachFiles.length);
+      setSentAttachCount(attachFiles.length + blobAttachments.length);
       setSent(true);
       setAttachFiles([]);
+      setAttachBiz(false);
+      setAttachBank(false);
       toast.success(`견적서를 ${data.sentTo}로 발송했습니다.`);
     } catch {
       toast.error("네트워크 오류가 발생했습니다.");
@@ -586,8 +613,31 @@ function AdminProxyQuotesInner() {
             {!sent && recipientEmail && (
               <div className="border hair rounded-md px-4 py-3 space-y-2">
                 <div className="mono text-[10px] tracking-[0.12em] dim uppercase">첨부 서류 (선택)</div>
+
+                {/* 저장된 서류 체크박스 */}
+                {(savedDocs.biz.url || savedDocs.bank.url) && (
+                  <div className="space-y-1.5">
+                    {savedDocs.biz.url && (
+                      <label className="flex items-center gap-2 cursor-pointer text-[12px] text-ink">
+                        <input type="checkbox" checked={attachBiz} onChange={(e) => setAttachBiz(e.target.checked)} className="accent-smblue" />
+                        <span>사업자등록증</span>
+                        <span className="dim text-[11px] truncate max-w-[140px]">({savedDocs.biz.name})</span>
+                      </label>
+                    )}
+                    {savedDocs.bank.url && (
+                      <label className="flex items-center gap-2 cursor-pointer text-[12px] text-ink">
+                        <input type="checkbox" checked={attachBank} onChange={(e) => setAttachBank(e.target.checked)} className="accent-smblue" />
+                        <span>통장사본</span>
+                        <span className="dim text-[11px] truncate max-w-[140px]">({savedDocs.bank.name})</span>
+                      </label>
+                    )}
+                    <div className="border-t hair pt-1.5" />
+                  </div>
+                )}
+
+                {/* 임시 파일 선택 */}
                 <label className="flex items-center gap-2 cursor-pointer text-[12px] dim hover:text-ink transition-colors">
-                  <span>📎 파일 선택 (사업자등록증·통장사본)</span>
+                  <span>📎 추가 파일 선택</span>
                   <input
                     type="file"
                     multiple
@@ -607,6 +657,13 @@ function AdminProxyQuotesInner() {
                     </button>
                   </div>
                 ))}
+
+                {!savedDocs.biz.url && !savedDocs.bank.url && (
+                  <p className="text-[11px] dim">
+                    사업자등록증·통장사본을 미리 등록하려면{" "}
+                    <a href="/admin/settings" className="text-smblue hover:underline">설정 페이지</a>에서 업로드하세요.
+                  </p>
+                )}
               </div>
             )}
 
@@ -623,8 +680,8 @@ function AdminProxyQuotesInner() {
                   className="bg-edred text-white px-4 py-3 rounded-md text-[14px] font-semibold hover:brightness-110 disabled:opacity-40 transition-all"
                 >
                   {sending ? "발송 중…" : `📧 메일 발송 → ${recipientEmail}`}
-                  {attachFiles.length > 0 && !sending && (
-                    <span className="block text-[11px] font-normal opacity-80 mt-0.5">첨부 {attachFiles.length}건 포함</span>
+                  {(attachFiles.length + (attachBiz && savedDocs.biz.url ? 1 : 0) + (attachBank && savedDocs.bank.url ? 1 : 0)) > 0 && !sending && (
+                    <span className="block text-[11px] font-normal opacity-80 mt-0.5">첨부 {attachFiles.length + (attachBiz && savedDocs.biz.url ? 1 : 0) + (attachBank && savedDocs.bank.url ? 1 : 0)}건 포함</span>
                   )}
                 </button>
               )
