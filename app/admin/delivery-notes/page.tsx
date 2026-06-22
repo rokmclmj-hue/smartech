@@ -44,6 +44,30 @@ type SearchResult = {
   contacts: { name: string; title: string | null; mobile: string | null; email: string | null }[];
 };
 
+type HistoryItem = {
+  id: number;
+  noteNo: string;
+  createdAt: string;
+  toCompany: string;
+  toName: string | null;
+  toTitle: string | null;
+  toEmail: string | null;
+  toPhone: string | null;
+  toBizNo: string | null;
+  memo: string | null;
+  includeBankInfo: boolean;
+  totalAmount: number;
+  itemCount: number;
+  previewItems: {
+    partNo: string;
+    description: string;
+    quantity: number;
+    unitPrice: number;
+    productId?: number | null;
+    sortOrder: number;
+  }[];
+};
+
 function formatBizNo(raw: string): string {
   const digits = raw.replace(/\D/g, "").slice(0, 10);
   if (digits.length <= 3) return digits;
@@ -99,6 +123,12 @@ function NoteForm({ onSaved }: { onSaved: () => void }) {
   const [memo, setMemo] = useState("");
   const [includeBankInfo, setIncludeBankInfo] = useState(true);
 
+  // 불러오기 모달
+  const [showHistory, setShowHistory] = useState(false);
+  const [historyQ, setHistoryQ] = useState("");
+  const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+
   // 상태
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -131,6 +161,18 @@ function NoteForm({ onSaved }: { onSaved: () => void }) {
     return () => clearTimeout(t);
   }, [productQ]);
 
+  // 이전 명세표 검색
+  useEffect(() => {
+    if (!showHistory) return;
+    setHistoryLoading(true);
+    const t = setTimeout(async () => {
+      const res = await fetch(`/api/admin/delivery-notes/history?q=${encodeURIComponent(historyQ)}`);
+      if (res.ok) setHistoryItems((await res.json()).items ?? []);
+      setHistoryLoading(false);
+    }, 200);
+    return () => clearTimeout(t);
+  }, [historyQ, showHistory]);
+
   function selectCustomer(r: SearchResult) {
     setToCompany(r.company);
     setToName(r.contacts[0]?.name ?? r.name);
@@ -141,6 +183,28 @@ function NoteForm({ onSaved }: { onSaved: () => void }) {
     setShowDirect(true);
     setSearchQ("");
     setSearchResults([]);
+  }
+
+  function loadFromHistory(h: HistoryItem) {
+    setToCompany(h.toCompany);
+    setToName(h.toName ?? "");
+    setToTitle(h.toTitle ?? "");
+    setToEmail(h.toEmail ?? "");
+    setToPhone(h.toPhone ?? "");
+    setToBizNo(h.toBizNo ?? "");
+    setMemo(h.memo ?? "");
+    setIncludeBankInfo(h.includeBankInfo);
+    setItems(h.previewItems.map((i) => ({
+      partNo: i.partNo,
+      description: i.description,
+      quantity: i.quantity,
+      unitPrice: i.unitPrice,
+      productId: i.productId ?? null,
+      sortOrder: i.sortOrder,
+    })));
+    setShowDirect(true);
+    setShowHistory(false);
+    setHistoryQ("");
   }
 
   function addItem() {
@@ -197,10 +261,64 @@ function NoteForm({ onSaved }: { onSaved: () => void }) {
 
   return (
     <div className="space-y-6">
+      {/* 불러오기 모달 */}
+      {showHistory && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-start justify-center pt-20 px-4">
+          <div className="bg-paper w-full max-w-xl shadow-2xl border hair flex flex-col max-h-[70vh]">
+            <div className="px-5 py-3 border-b hair flex items-center justify-between shrink-0">
+              <span className="mono text-[11px] tracking-[0.12em] uppercase">이전 거래명세표 불러오기</span>
+              <button onClick={() => setShowHistory(false)} className="text-[16px] dim hover:text-ink">✕</button>
+            </div>
+            <div className="px-5 py-3 border-b hair shrink-0">
+              <input
+                autoFocus
+                value={historyQ}
+                onChange={(e) => setHistoryQ(e.target.value)}
+                placeholder="업체명으로 검색 (비우면 전체 최신순)"
+                className="w-full border hair px-3 py-2 text-[13px] focus:outline-none focus:border-ink"
+              />
+            </div>
+            <div className="overflow-y-auto flex-1">
+              {historyLoading ? (
+                <div className="mono text-[11px] dim text-center py-8">— 검색 중</div>
+              ) : historyItems.length === 0 ? (
+                <div className="mono text-[11px] dim text-center py-8">— 이전 명세표가 없습니다</div>
+              ) : (
+                historyItems.map((h) => (
+                  <button
+                    key={h.id}
+                    onClick={() => loadFromHistory(h)}
+                    className="w-full text-left px-5 py-3.5 hover:bg-ink/5 border-b hair last:border-0 transition-colors"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-medium text-[13px]">{h.toCompany}</span>
+                      <span className="mono text-[10px] text-edred shrink-0">{h.noteNo}</span>
+                    </div>
+                    <div className="text-[11px] dim mt-0.5">
+                      {fmtDate(h.createdAt)} · {h.itemCount}개 품목 · {h.totalAmount.toLocaleString()}원
+                    </div>
+                    <div className="text-[11px] dim mt-0.5 truncate">
+                      {h.previewItems.slice(0, 3).map((i) => i.description).join(", ")}
+                      {h.itemCount > 3 && ` 외 ${h.itemCount - 3}건`}
+                    </div>
+                  </button>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 01 수신자 */}
       <div className="border hair bg-paper">
-        <div className="px-5 py-3 border-b hair flex items-center gap-2">
+        <div className="px-5 py-3 border-b hair flex items-center justify-between gap-2">
           <span className="mono text-[10px] dim tracking-[0.12em]">01 / 수신자</span>
+          <button
+            onClick={() => setShowHistory(true)}
+            className="mono text-[10px] border hair px-3 py-1 hover:bg-ink/5 transition-colors tracking-[0.06em]"
+          >
+            ↩ 이전 명세표 불러오기
+          </button>
         </div>
         <div className="px-5 py-4 space-y-3">
           {/* 통합 검색 */}
