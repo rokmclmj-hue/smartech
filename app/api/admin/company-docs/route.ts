@@ -45,7 +45,11 @@ export async function POST(req: NextRequest) {
     await del(existing.value).catch(() => null);
   }
 
-  const blob = await put(`company-docs/${type}-${Date.now()}-${file.name}`, file, { access: "public" });
+  const fileBuffer = Buffer.from(await file.arrayBuffer());
+  const blob = await put(`company-docs/${type}-${Date.now()}-${file.name}`, fileBuffer, {
+    access: "public",
+    contentType: file.type || "application/octet-stream",
+  });
 
   await Promise.all([
     prisma.siteSetting.upsert({ where: { key: KEYS[type].url },  update: { value: blob.url },  create: { key: KEYS[type].url,  value: blob.url } }),
