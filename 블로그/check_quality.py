@@ -4,7 +4,7 @@ check_quality.py — 블로그 글 업로드 전 통합 품질 검수 게이트
 사용법: python check_quality.py <글폴더경로>
 예시:  python check_quality.py "2026-06/진공건조-드라이펌프-선택기준-20260613"
 
-검수 항목 (7개):
+검수 항목 (8개):
   1. 글자수   — final.md 마크다운 제거 후 2,000자 이상
   2. 메타설명 — meta.txt description 비어있지 않음
   3. 현장사진 — field-*.png 최소 1장 존재
@@ -12,6 +12,7 @@ check_quality.py — 블로그 글 업로드 전 통합 품질 검수 게이트
   5. 펌프좌표 — blur-config.json의 pump_box가 이미지 범위 내 + 면적 비율 정상
   6. GEO형식  — ## 스마텍 H2 섹션 없음 (홍보 섹션 금지)
   7. 연락처   — 문의: 전화번호 단독 줄 없음 (홈페이지 자동 표시로 중복 방지)
+  8. 네이버글 — naver.md 글자수 1,500자↑ + [IMAGE] 마커 1개↑ + 해시태그 + 서명
 
 결과: quality-log.jsonl 에 항목별 상세 기록 (임계값 조정 시 참고)
 종료코드: 0=전체통과, 1=하나이상반려
@@ -200,6 +201,41 @@ def _strip_code_fences(text: str) -> str:
     return re.sub(r"```[\s\S]*?```", "", text)
 
 
+def chk_naver_md(folder: str) -> dict:
+    path = os.path.join(folder, "naver.md")
+    if not os.path.exists(path):
+        return {"pass": False, "reason": "naver.md 없음"}
+    content = open(path, encoding="utf-8").read()
+
+    errors = []
+
+    # 1. 글자수 (공백 제외 1,500자 이상)
+    char_count = len(re.sub(r"\s+", "", re.sub(r"#[^\s].*", "", re.sub(r"\[IMAGE:.*?\]", "", re.sub(r"^#.+$", "", content, flags=re.MULTILINE)))))
+    if char_count < 1500:
+        errors.append(f"글자수 {char_count}자 (최소 1,500자)")
+
+    # 2. [IMAGE] 마커 최소 1개
+    image_markers = re.findall(r"\[IMAGE:", content)
+    if len(image_markers) < 1:
+        errors.append("[IMAGE:] 마커 없음 — 이미지 삽입 위치 표시 필요")
+
+    # 3. 해시태그
+    if not re.search(r"#[가-힣a-zA-Z]+", content):
+        errors.append("해시태그 없음")
+
+    # 4. 서명(footer)
+    if "031-204-7170" not in content and "smartechvacuum.com" not in content:
+        errors.append("서명(연락처) 없음")
+
+    ok = len(errors) == 0
+    return {
+        "pass": ok,
+        "char_count": char_count,
+        "image_markers": len(image_markers),
+        "reason": " / ".join(errors) if errors else None,
+    }
+
+
 def chk_geo_format(folder: str) -> dict:
     path = os.path.join(folder, "final.md")
     if not os.path.exists(path):
@@ -258,6 +294,7 @@ def run(folder_arg: str) -> bool:
         "pump_box":    chk_pump_box(folder),
         "geo_format":  chk_geo_format(folder),
         "no_contact":  chk_no_contact(folder),
+        "naver_md":    chk_naver_md(folder),
     }
 
     labels = {
@@ -268,6 +305,7 @@ def run(folder_arg: str) -> bool:
         "pump_box":    "펌프좌표",
         "geo_format":  "GEO형식",
         "no_contact":  "연락처중복",
+        "naver_md":    "네이버글",
     }
 
     failed = []
@@ -295,6 +333,11 @@ def run(folder_arg: str) -> bool:
             else:
                 ar = res.get("area_ratio_pct")
                 detail = f"면적 {ar}" if ar else "(오류)"
+        elif key == "naver_md":
+            if res["pass"]:
+                detail = f"{res.get('char_count',0)}자 / [IMAGE] {res.get('image_markers',0)}개"
+            else:
+                detail = ""
         elif key in ("geo_format", "no_contact"):
             detail = res.get("note", "통과") if res["pass"] else ""
         else:
