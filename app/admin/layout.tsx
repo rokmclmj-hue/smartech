@@ -74,7 +74,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <header className="sticky top-0 z-40 bg-paper/90 backdrop-blur border-b hair">
         <div className="max-w-[1400px] mx-auto px-4 md:px-6 h-14 md:h-16 flex items-center justify-between gap-4 md:gap-6">
           {/* 데스크톱 네비 */}
-          <nav className="hidden lg:flex items-center">
+          <nav className="hidden lg:flex flex-1 items-center justify-between mr-6">
             {NAV_ITEMS.map((item, index) => {
               const active = isActive(item);
               const showSep = index > 0;
@@ -87,7 +87,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                       active ? "text-ink" : "text-dim hover:text-ink"
                     }`}
                   >
-                    <span className="flex items-center gap-1.5 text-[15px] font-medium tracking-tight">
+                    <span className="flex items-center gap-1.5 text-[16px] font-medium tracking-tight">
                       {item.label}
                       {item.badge && pendingEmail > 0 && (
                         <span className="mono text-[9px] font-bold bg-edred text-white px-1.5 py-px rounded-full">
@@ -164,7 +164,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                       active ? "text-ink" : "text-dim"
                     }`}
                   >
-                    <span className="flex items-center gap-2 text-[15px] font-medium tracking-tight">
+                    <span className="flex items-center gap-2 text-[16px] font-medium tracking-tight">
                       {item.label}
                       {item.badge && pendingEmail > 0 && (
                         <span className="mono text-[9px] font-bold bg-edred text-white px-1.5 py-px rounded-full">
