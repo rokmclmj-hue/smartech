@@ -365,18 +365,6 @@ function QuoteDocument({ quote }: { quote: QuoteForPdf }) {
         el(Text, { style: { color: "rgba(255,255,255,0.85)", fontSize: 7, letterSpacing: 1 } }, "UHV · 10⁻¹⁰ mbar"),
       ),
 
-      // ── Smartech 워드마크
-      el(View, { style: {
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        borderBottom: "1 solid #E3DFD6",
-        flexDirection: "row",
-        alignItems: "baseline",
-      } },
-        el(Text, { style: { fontSize: 22, fontFamily: "Pretendard", fontWeight: 700, color: "#0B0B0C" } }, "Smartech"),
-        el(Text, { style: { fontSize: 22, fontFamily: "Pretendard", fontWeight: 700, color: "#c00020" } }, "."),
-      ),
-
       // ── 본문 래퍼
       el(View, { style: { paddingHorizontal: 40, paddingTop: 16 } },
 

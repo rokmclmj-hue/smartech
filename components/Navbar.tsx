@@ -73,7 +73,7 @@ export default function Navbar() {
       {!isAuthPage && <RedTape />}
 
       {/* STICKY HEADER */}
-      <header className="sticky top-0 z-40 border-b hair bg-paper/90 backdrop-blur">
+      <header className="print:hidden sticky top-0 z-40 border-b hair bg-paper/90 backdrop-blur">
         <div className="max-w-[1400px] mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
           {/* 로고 */}
           <Link href="/" className="flex items-center gap-2.5 md:gap-3 leading-none text-ink">
