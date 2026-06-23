@@ -206,14 +206,36 @@ export default async function BlogPostPage({ params }: Props) {
 
   if (!post) return notFound();
 
-  const relatedPosts = await prisma.blogPost.findMany({
-    where: { category: post.category, id: { not: post.id }, status: "PUBLISHED" },
-    orderBy: { publishedAt: "desc" },
-    take: 3,
-    select: { id: true, title: true, metaDesc: true, publishedAt: true, createdAt: true },
-  });
+  // 태그 공유 기반 관련 글 (카테고리 경계를 넘어 연결)
+  const tagList = post.tags ? post.tags.split(/[,\s]+/).filter(t => t.length > 1) : [];
+  let relatedPosts = tagList.length > 0
+    ? await prisma.blogPost.findMany({
+        where: {
+          status: "PUBLISHED",
+          id: { not: post.id },
+          OR: tagList.map(tag => ({ tags: { contains: tag } })),
+        },
+        orderBy: { publishedAt: "desc" },
+        take: 3,
+        select: { id: true, title: true, metaDesc: true, publishedAt: true, createdAt: true },
+      })
+    : [];
+  // 태그 매칭 부족 시 카테고리로 보충
+  if (relatedPosts.length < 2) {
+    relatedPosts = await prisma.blogPost.findMany({
+      where: { category: post.category, id: { not: post.id }, status: "PUBLISHED" },
+      orderBy: { publishedAt: "desc" },
+      take: 3,
+      select: { id: true, title: true, metaDesc: true, publishedAt: true, createdAt: true },
+    });
+  }
 
   const tags = post.tags ? post.tags.split(/[,\s]+/).filter(Boolean) : [];
+
+  // 본문·태그에서 제품 모델 키워드 추출 → 제품 페이지 링크용
+  const PRODUCT_MODELS = ["RV", "E2M", "E2S", "nES", "nXDS", "XDS", "EH", "GXS", "EXS", "iXH", "nXRi", "iXL", "nEXT", "STP", "ELD500", "APG", "AIM", "WRG"];
+  const searchText = `${post.tags ?? ""} ${post.title}`.toUpperCase();
+  const productKeyword = PRODUCT_MODELS.find(m => searchText.includes(m)) ?? null;
 
   const articleSchema = JSON.stringify({
     "@context": "https://schema.org",
@@ -382,6 +404,20 @@ export default async function BlogPostPage({ params }: Props) {
               031-204-7170
             </a>
           </div>
+          {/* 관련 제품 페이지 바로가기 */}
+          {productKeyword && (
+            <div className="mt-5 pt-5 border-t border-black/10">
+              <span className="mono text-[9px] tracking-[0.18em] dim uppercase">관련 제품</span>
+              <div className="mt-2">
+                <Link
+                  href={`/products?q=${encodeURIComponent(productKeyword)}`}
+                  className="inline-flex items-center gap-1.5 mono text-[11px] tracking-[0.08em] text-smblue hover:underline"
+                >
+                  {productKeyword} 제품 사양·가격 보기 →
+                </Link>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* 관련 글 */}
