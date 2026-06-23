@@ -207,13 +207,33 @@ export default function AdminBlogPage() {
     const source = selected.naverContent || selected.content;
     let imgCount = 0;
     const text = source
+      // frontmatter 제거
+      .replace(/^---[\s\S]*?---\s*/m, "")
+      // HTML 주석 제거
+      .replace(/<!--[\s\S]*?-->/g, "")
+      // [IMAGE: 설명] 마커 → 📷 사진 안내
+      .replace(/\[IMAGE:\s*([^\]]*)\]/g, (_, desc) => {
+        imgCount++;
+        const label = desc.trim() || `이미지 ${imgCount}`;
+        return `\n\n[📷 사진 ${imgCount}번 — ${label}]\n\n`;
+      })
+      // 마크다운 이미지 ![alt](url) → 📷 사진 안내
       .replace(/!\[([^\]]*)\]\([^)]*\)/g, (_, alt) => {
         imgCount++;
         const label = alt && alt.trim() ? alt.trim() : `이미지 ${imgCount}`;
         return `\n\n[📷 사진 ${imgCount}번 — ${label}]\n\n`;
       })
+      // HTML 이미지·figure
       .replace(/<figure[\s\S]*?<\/figure>/gi, () => { imgCount++; return `\n\n[📷 사진 ${imgCount}번]\n\n`; })
       .replace(/<img[^>]*alt="([^"]*)"[^>]*>/gi, (_, alt) => { imgCount++; return `\n\n[📷 사진 ${imgCount}번 — ${alt}]\n\n`; })
+      // 제목 기호 제거 (# ## ###) — 텍스트만 남김
+      .replace(/^#{1,6}\s+/gm, "")
+      // 굵게·기울임 기호 제거
+      .replace(/\*\*([^*]+)\*\*/g, "$1")
+      .replace(/\*([^*]+)\*/g, "$1")
+      // 구분선 제거
+      .replace(/^---+$/gm, "")
+      // 3줄 이상 빈 줄 → 2줄로
       .replace(/\n{3,}/g, "\n\n")
       .trim();
     const label = selected.naverContent ? "네이버 전용 버전" : "홈페이지 버전 (naver.md 없음)";
