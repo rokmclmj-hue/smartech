@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { put } from "@vercel/blob";
+import { put, del } from "@vercel/blob";
 import type { Session } from "next-auth";
 
 function isAdmin(session: Session | null) {
-  return (session?.user as any)?.tier === "ADMIN";
+  return (session?.user as { tier?: string })?.tier === "ADMIN";
 }
 
 // POST /api/admin/repairs/[id]/files — 관리자 직접 파일 업로드
@@ -33,7 +33,6 @@ export async function POST(
   const saved: { fileName: string; fileUrl: string }[] = [];
 
   for (const file of files) {
-    const ext = file.name.split(".").pop() ?? "bin";
     const blobName = `repairs/${repair.repairNo}/${fileType}/${Date.now()}-${file.name}`;
 
     let fileUrl: string;
@@ -59,6 +58,32 @@ export async function POST(
   }
 
   return NextResponse.json({ saved, count: saved.length });
+}
+
+// DELETE /api/admin/repairs/[id]/files?fileId=N — 파일 삭제
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await auth();
+  if (!isAdmin(session)) return NextResponse.json({ error: "권한 없음" }, { status: 403 });
+
+  const { id } = await params;
+  const fileId = Number(new URL(req.url).searchParams.get("fileId"));
+  if (isNaN(fileId)) return NextResponse.json({ error: "fileId 누락" }, { status: 400 });
+
+  const file = await prisma.repairFile.findFirst({
+    where: { id: fileId, repairId: Number(id) },
+  });
+  if (!file) return NextResponse.json({ error: "파일 없음" }, { status: 404 });
+
+  // Vercel Blob에서도 삭제 (URL이 유효한 경우)
+  if (file.fileUrl.startsWith("https://")) {
+    try { await del(file.fileUrl); } catch { /* Blob 삭제 실패는 무시 */ }
+  }
+
+  await prisma.repairFile.delete({ where: { id: fileId } });
+  return NextResponse.json({ ok: true });
 }
 
 // GET /api/admin/repairs/[id]/files — 파일 목록

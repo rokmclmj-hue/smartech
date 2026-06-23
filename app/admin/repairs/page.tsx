@@ -43,14 +43,14 @@ type Repair = {
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   RECEIVED:    { label: "접수완료",  color: "bg-blue-100 text-blue-700" },
-  IN_PROGRESS: { label: "수리진행",  color: "bg-yellow-100 text-yellow-700" },
-  INSPECTION:  { label: "검사중",    color: "bg-purple-100 text-purple-700" },
-  COMPLETED:   { label: "수리완료",  color: "bg-green-100 text-green-700" },
-  DELIVERED:   { label: "납품완료",  color: "bg-ink/10 text-dim" },
+  IN_PROGRESS: { label: "수리중",    color: "bg-yellow-100 text-yellow-700" },
+  INSPECTION:  { label: "수리중",    color: "bg-yellow-100 text-yellow-700" },
+  COMPLETED:   { label: "수리중",    color: "bg-yellow-100 text-yellow-700" },
+  DELIVERED:   { label: "납품완료",  color: "bg-green-100 text-green-700" },
   CANCELLED:   { label: "취소",      color: "bg-red-100 text-red-700" },
 };
 
-const STATUS_FLOW = ["RECEIVED", "IN_PROGRESS", "INSPECTION", "COMPLETED", "DELIVERED"];
+const STATUS_FLOW = ["RECEIVED", "IN_PROGRESS", "DELIVERED"];
 
 function formatPrice(n: number) {
   return n > 0 ? n.toLocaleString("ko-KR") + "원" : "—";
@@ -80,6 +80,7 @@ export default function AdminRepairsPage() {
   // 관리자 업로드
   const [adminUploadType, setAdminUploadType] = useState("disassembly_photo");
   const [adminUploading, setAdminUploading] = useState(false);
+  const [deletingFileId, setDeletingFileId] = useState<number | null>(null);
 
   // 외주업체 링크
   const [outsourcePhone, setOutsourcePhone] = useState("");
@@ -176,6 +177,25 @@ export default function AdminRepairsPage() {
       alert("업로드 실패");
     } finally {
       setAdminUploading(false);
+    }
+  }
+
+  async function deleteFile(fileId: number) {
+    if (!selected) return;
+    if (!confirm("이 파일을 삭제하시겠습니까?")) return;
+    setDeletingFileId(fileId);
+    try {
+      const res = await fetch(
+        `/api/admin/repairs/${selected.id}/files?fileId=${fileId}`,
+        { method: "DELETE" }
+      );
+      if (!res.ok) throw new Error();
+      await loadFiles(selected.id);
+      await load();
+    } catch {
+      alert("삭제 실패");
+    } finally {
+      setDeletingFileId(null);
     }
   }
 
@@ -465,7 +485,7 @@ export default function AdminRepairsPage() {
                     );
                   })}
                 </div>
-                <p className="text-[11px] text-dim mt-2">클릭하면 상태가 변경되고 고객에게 SMS가 발송됩니다.</p>
+                <p className="text-[11px] text-dim mt-2">수리중·납품완료 선택 시 고객에게 SMS가 발송됩니다.</p>
               </div>
 
               {/* AI 인식 결과 + 모델 수동 수정 */}
@@ -600,6 +620,13 @@ export default function AdminRepairsPage() {
                             보기
                           </a>
                         )}
+                        <button
+                          onClick={() => deleteFile(f.id)}
+                          disabled={deletingFileId === f.id}
+                          className="text-[10px] text-red-400 hover:text-red-600 shrink-0 disabled:opacity-40"
+                        >
+                          {deletingFileId === f.id ? "…" : "삭제"}
+                        </button>
                       </div>
                     ))}
                   </div>
@@ -651,47 +678,7 @@ export default function AdminRepairsPage() {
                 </label>
               </div>
 
-              {/* 외주업체 업로드 링크 */}
-              <div className="border border-line p-4 text-[13px]">
-                <div className="mono text-[10px] text-dim tracking-widest mb-3">외주업체 업로드 링크</div>
-                <div className="mb-3">
-                  <label className="text-[11px] text-dim block mb-1">외주업체 전화번호 (선택 — 문자 발송용)</label>
-                  <input
-                    type="tel"
-                    value={outsourcePhone}
-                    onChange={(e) => setOutsourcePhone(e.target.value)}
-                    placeholder="010-0000-0000"
-                    className="w-full border border-line px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-paper"
-                  />
-                </div>
-                <button
-                  onClick={generateToken}
-                  disabled={generatingToken}
-                  className="w-full py-2.5 border border-ink text-ink text-[12px] font-semibold hover:bg-ink hover:text-paper transition disabled:opacity-40"
-                >
-                  {generatingToken ? "생성 중..." : "30일 업로드 링크 생성"}
-                </button>
-                {tokenUrl && (
-                  <div className="mt-3 space-y-2">
-                    <div className="bg-ink/5 border border-line px-3 py-2 text-[11px] mono break-all">
-                      {tokenUrl}
-                    </div>
-                    <button
-                      onClick={() => { navigator.clipboard.writeText(tokenUrl); alert("복사되었습니다."); }}
-                      className="w-full py-2 bg-ink text-paper text-[12px] font-semibold hover:bg-edred transition"
-                    >
-                      링크 복사
-                    </button>
-                  </div>
-                )}
-                {selected.uploadTokens.length > 0 && (
-                  <p className="text-[11px] text-dim mt-3">
-                    기존 링크 {selected.uploadTokens.length}개 (최근:{" "}
-                    {formatDate(selected.uploadTokens[0].expiresAt)} 만료
-                    {selected.uploadTokens[0].usedAt ? " · 사용됨" : " · 미사용"})
-                  </p>
-                )}
-              </div>
+              {/* 외주업체 업로드 링크 — 현재 미사용 (직접 수리 운영) */}
 
               {/* 관리자 메모 */}
               <div>

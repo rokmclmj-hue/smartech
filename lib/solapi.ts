@@ -170,8 +170,6 @@ export async function notifyRepairStatus(
 ): Promise<void> {
   const statusLabel: Record<string, string> = {
     IN_PROGRESS: "수리가 시작되었습니다",
-    INSPECTION: "검사가 진행중입니다",
-    COMPLETED: "수리가 완료되었습니다. 최종 서류를 이메일로 발송드렸습니다",
     DELIVERED: "납품이 완료되었습니다. 감사합니다",
   };
   const msg = statusLabel[status];
