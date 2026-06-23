@@ -80,35 +80,34 @@ export default function EmailInboxPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function selectTask(task: EmailTask) {
+  function selectTask(task: EmailTask) {
     setSelected(task);
     setDraft(task.aiDraft ?? "");
     setAdminNote(task.adminNote ?? "");
     setAttachedQuoteId(null);
+  }
 
-    // AI 분류 안 된 이메일이면 클릭 시 분류 요청
-    if (!task.aiDraft && task.status === "PENDING") {
-      setClassifying(true);
-      try {
-        const res = await fetch("/api/admin/email-inbox/classify", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: task.id }),
-        });
-        const data = await res.json();
-        if (data.task) {
-          setSelected(data.task);
-          setDraft(data.task.aiDraft ?? "");
-          // 목록도 갱신
-          setTasks((prev) =>
-            prev.map((t) => (t.id === data.task.id ? data.task : t))
-          );
-        }
-      } catch {
-        // 분류 실패해도 이메일은 볼 수 있음
-      } finally {
-        setClassifying(false);
+  async function handleClassify() {
+    if (!selected) return;
+    setClassifying(true);
+    try {
+      const res = await fetch("/api/admin/email-inbox/classify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: selected.id }),
+      });
+      const data = await res.json();
+      if (data.task) {
+        setSelected(data.task);
+        setDraft(data.task.aiDraft ?? "");
+        setTasks((prev) =>
+          prev.map((t) => (t.id === data.task.id ? data.task : t))
+        );
       }
+    } catch {
+      // 분류 실패해도 이메일은 볼 수 있음
+    } finally {
+      setClassifying(false);
     }
   }
 
@@ -371,6 +370,19 @@ export default function EmailInboxPage() {
                 ECOUNT 발주서입니다. 아래 발주 내용은 수신 링크에서 직접 확인해 주세요.<br />
                 확인 후 발주를 등록하려면 <a href="/admin/orders" className="underline">주문 관리</a>에서 진행해 주세요.
               </div>
+            )}
+
+            {/* AI 초안 생성 버튼 */}
+            {selected.status === "PENDING" && !classifying && (
+              <button
+                onClick={handleClassify}
+                className="flex items-center gap-2 w-full py-3 px-4 border border-smblue/40 text-smblue text-[13px] font-medium rounded-xl hover:bg-smblue/5 transition-colors"
+              >
+                <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                {selected.aiDraft ? "AI 초안 재생성" : "AI 초안 생성"}
+              </button>
             )}
 
             {/* AI 분류 중 */}
