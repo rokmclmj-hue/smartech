@@ -4,11 +4,8 @@ import { prisma } from "@/lib/db";
 import Link from "next/link";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = {
-  title: "블로그 — 스마텍 | 진공펌프 기술 정보",
-  description: "에드워드 진공펌프 수리·납기·기술 정보를 현장 경험 기반으로 정리합니다. 스마텍 공식 블로그.",
-  alternates: { canonical: "https://www.smartechvacuum.com/blog" },
-};
+const PAGE_SIZE = 9;
+const BASE_URL = "https://www.smartechvacuum.com";
 
 const CATEGORY_COLORS: Record<string, string> = {
   "견적문의": "bg-blue-50 text-blue-700 border-blue-100",
@@ -18,35 +15,75 @@ const CATEGORY_COLORS: Record<string, string> = {
   "일반":     "bg-ink/5 text-dim border-ink/10",
 };
 
+const CATEGORIES = ["기술문의", "수리문의", "견적문의", "납기문의", "단종문의"];
+
 function formatDate(d: Date) {
   return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
 }
 
-const CATEGORIES = ["기술문의", "수리문의", "견적문의", "납기문의", "단종문의"];
+function buildCanonical(category?: string, page?: number) {
+  const params = new URLSearchParams();
+  if (category) params.set("category", category);
+  if (page && page > 1) params.set("page", String(page));
+  const qs = params.toString();
+  return `${BASE_URL}/blog${qs ? `?${qs}` : ""}`;
+}
 
-export default async function BlogListPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ category?: string }>;
-}) {
-  const { category } = await searchParams;
+type SearchParams = Promise<{ category?: string; page?: string }>;
 
-  const posts = await prisma.blogPost.findMany({
-    where: {
-      status: "PUBLISHED",
-      ...(category ? { category } : {}),
-    },
-    orderBy: { publishedAt: "desc" },
-    select: {
-      id: true,
-      title: true,
-      metaDesc: true,
-      category: true,
-      tags: true,
-      publishedAt: true,
-      createdAt: true,
-    },
-  });
+export async function generateMetadata({ searchParams }: { searchParams: SearchParams }): Promise<Metadata> {
+  const { category, page: pageStr } = await searchParams;
+  const page = Math.max(1, Number(pageStr) || 1);
+  const canonical = buildCanonical(category, page);
+
+  const title = category
+    ? `${category} — 스마텍 블로그 | 진공펌프 기술 정보`
+    : "블로그 — 스마텍 | 진공펌프 기술 정보";
+
+  return {
+    title,
+    description: "에드워드 진공펌프 수리·납기·기술 정보를 현장 경험 기반으로 정리합니다. 스마텍 공식 블로그.",
+    alternates: { canonical },
+  };
+}
+
+export default async function BlogListPage({ searchParams }: { searchParams: SearchParams }) {
+  const { category, page: pageStr } = await searchParams;
+  const page = Math.max(1, Number(pageStr) || 1);
+
+  const where = {
+    status: "PUBLISHED",
+    ...(category ? { category } : {}),
+  };
+
+  const [posts, total] = await Promise.all([
+    prisma.blogPost.findMany({
+      where,
+      orderBy: { publishedAt: "desc" },
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+      select: {
+        id: true,
+        title: true,
+        metaDesc: true,
+        category: true,
+        tags: true,
+        publishedAt: true,
+        createdAt: true,
+      },
+    }),
+    prisma.blogPost.count({ where }),
+  ]);
+
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+
+  function pageHref(p: number) {
+    const params = new URLSearchParams();
+    if (category) params.set("category", category);
+    if (p > 1) params.set("page", String(p));
+    const qs = params.toString();
+    return `/blog${qs ? `?${qs}` : ""}`;
+  }
 
   return (
     <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-10 md:py-16">
@@ -92,44 +129,107 @@ export default async function BlogListPage({
           — 아직 발행된 글이 없습니다
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {posts.map((post) => {
-            const colorClass = CATEGORY_COLORS[post.category] ?? CATEGORY_COLORS["일반"];
-            const date = post.publishedAt ?? post.createdAt;
-            return (
-              <Link
-                key={post.id}
-                href={`/blog/${post.id}`}
-                className="group flex flex-col border hair bg-paper hover:border-ink/30 transition-colors"
-              >
-                {/* 카테고리 바 */}
-                <div className={`px-5 py-2.5 border-b ${colorClass}`}>
-                  <span className="mono text-[9px] tracking-[0.1em] font-medium uppercase">
-                    {post.category}
-                  </span>
-                </div>
-
-                {/* 본문 */}
-                <div className="flex-1 px-5 py-5 flex flex-col gap-3">
-                  <h2 className="text-[15px] font-semibold leading-snug tracking-tight group-hover:text-edred transition-colors line-clamp-3">
-                    {post.title}
-                  </h2>
-                  {post.metaDesc && (
-                    <p className="text-[13px] dim leading-relaxed line-clamp-3">
-                      {post.metaDesc}
-                    </p>
-                  )}
-                  <div className="mt-auto pt-2 flex items-center justify-between">
-                    <span className="mono text-[10px] dim">{formatDate(date)}</span>
-                    <span className="mono text-[10px] text-edred opacity-0 group-hover:opacity-100 transition-opacity">
-                      읽기 →
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {posts.map((post) => {
+              const colorClass = CATEGORY_COLORS[post.category] ?? CATEGORY_COLORS["일반"];
+              const date = post.publishedAt ?? post.createdAt;
+              return (
+                <Link
+                  key={post.id}
+                  href={`/blog/${post.id}`}
+                  className="group flex flex-col border hair bg-paper hover:border-ink/30 transition-colors"
+                >
+                  <div className={`px-5 py-2.5 border-b ${colorClass}`}>
+                    <span className="mono text-[9px] tracking-[0.1em] font-medium uppercase">
+                      {post.category}
                     </span>
                   </div>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
+                  <div className="flex-1 px-5 py-5 flex flex-col gap-3">
+                    <h2 className="text-[15px] font-semibold leading-snug tracking-tight group-hover:text-edred transition-colors line-clamp-3">
+                      {post.title}
+                    </h2>
+                    {post.metaDesc && (
+                      <p className="text-[13px] dim leading-relaxed line-clamp-3">
+                        {post.metaDesc}
+                      </p>
+                    )}
+                    <div className="mt-auto pt-2 flex items-center justify-between">
+                      <span className="mono text-[10px] dim">{formatDate(date)}</span>
+                      <span className="mono text-[10px] text-edred opacity-0 group-hover:opacity-100 transition-opacity">
+                        읽기 →
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* 페이지네이션 */}
+          {totalPages > 1 && (
+            <div className="mt-12 flex items-center justify-center gap-1">
+              {/* 이전 */}
+              {page > 1 ? (
+                <Link
+                  href={pageHref(page - 1)}
+                  className="mono text-[11px] px-4 py-2 border border-line hover:border-ink text-dim hover:text-ink transition-colors"
+                >
+                  ← 이전
+                </Link>
+              ) : (
+                <span className="mono text-[11px] px-4 py-2 border border-line text-dim/40 cursor-not-allowed">
+                  ← 이전
+                </span>
+              )}
+
+              {/* 페이지 번호 */}
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => {
+                const isActive = p === page;
+                // 현재 페이지 주변 2개 + 첫/끝 페이지만 표시
+                const show = p === 1 || p === totalPages || Math.abs(p - page) <= 1;
+                const showEllipsisBefore = p === page - 2 && page - 2 > 1;
+                const showEllipsisAfter = p === page + 2 && page + 2 < totalPages;
+                if (!show) return null;
+                return (
+                  <span key={p} className="flex items-center">
+                    {showEllipsisBefore && <span className="mono text-[11px] px-2 text-dim">…</span>}
+                    <Link
+                      href={pageHref(p)}
+                      className={`mono text-[11px] px-3.5 py-2 border transition-colors ${
+                        isActive
+                          ? "bg-ink text-paper border-ink"
+                          : "border-line text-dim hover:border-ink hover:text-ink"
+                      }`}
+                    >
+                      {p}
+                    </Link>
+                    {showEllipsisAfter && <span className="mono text-[11px] px-2 text-dim">…</span>}
+                  </span>
+                );
+              })}
+
+              {/* 다음 */}
+              {page < totalPages ? (
+                <Link
+                  href={pageHref(page + 1)}
+                  className="mono text-[11px] px-4 py-2 border border-line hover:border-ink text-dim hover:text-ink transition-colors"
+                >
+                  다음 →
+                </Link>
+              ) : (
+                <span className="mono text-[11px] px-4 py-2 border border-line text-dim/40 cursor-not-allowed">
+                  다음 →
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* 총 글 수 */}
+          <p className="mt-4 text-center mono text-[10px] text-dim">
+            {total}편 중 {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, total)}편
+          </p>
+        </>
       )}
 
       {/* 문의 유도 */}
