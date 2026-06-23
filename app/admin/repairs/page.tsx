@@ -86,6 +86,13 @@ export default function AdminRepairsPage() {
   const [generatingToken, setGeneratingToken] = useState(false);
   const [tokenUrl, setTokenUrl] = useState("");
 
+  // 블로그 초안
+  const [blogDraftLoading, setBlogDraftLoading] = useState(false);
+  const [blogDraft, setBlogDraft] = useState<{ title: string; metaDesc: string; tags: string; content: string } | null>(null);
+  const [blogPhotoUrls, setBlogPhotoUrls] = useState<string[]>([]);
+  const [blogPublishing, setBlogPublishing] = useState(false);
+  const [blogPublishedId, setBlogPublishedId] = useState<number | null>(null);
+
   const load = useCallback(async () => {
     const q = statusFilter !== "ALL" ? `?status=${statusFilter}` : "";
     const res = await fetch(`/api/admin/repairs${q}`);
@@ -114,6 +121,9 @@ export default function AdminRepairsPage() {
     setEditModel(r.pumpModel ?? "");
     setTokenUrl("");
     setOutsourcePhone("");
+    setBlogDraft(null);
+    setBlogPhotoUrls([]);
+    setBlogPublishedId(null);
     loadFiles(r.id);
   }
 
@@ -166,6 +176,43 @@ export default function AdminRepairsPage() {
       alert("업로드 실패");
     } finally {
       setAdminUploading(false);
+    }
+  }
+
+  async function generateBlogDraft() {
+    if (!selected) return;
+    setBlogDraftLoading(true);
+    setBlogDraft(null);
+    setBlogPublishedId(null);
+    try {
+      const res = await fetch(`/api/admin/repairs/${selected.id}/blog-draft`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "서버 오류");
+      setBlogDraft(data.draft);
+      setBlogPhotoUrls(data.photoUrls ?? []);
+    } catch (e) {
+      alert(`초안 생성 실패: ${e}`);
+    } finally {
+      setBlogDraftLoading(false);
+    }
+  }
+
+  async function publishBlogDraft() {
+    if (!selected || !blogDraft) return;
+    setBlogPublishing(true);
+    try {
+      const res = await fetch(`/api/admin/repairs/${selected.id}/blog-draft`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...blogDraft, photoUrls: blogPhotoUrls }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "서버 오류");
+      setBlogPublishedId(data.blogId);
+    } catch (e) {
+      alert(`발행 실패: ${e}`);
+    } finally {
+      setBlogPublishing(false);
     }
   }
 
@@ -701,6 +748,97 @@ export default function AdminRepairsPage() {
                 </div>
                 {selected.docsSentAt && (
                   <p className="mono text-[10px] text-dim">최근 발송: {formatDate(selected.docsSentAt)} ({selected.docsSentCount}회)</p>
+                )}
+              </div>
+
+              {/* 블로그 수리 사례 자동 생성 */}
+              <div className="border border-line p-4 text-[13px] space-y-3">
+                <div className="mono text-[10px] text-dim tracking-widest">블로그 수리 사례</div>
+
+                {blogPublishedId ? (
+                  <div className="space-y-2">
+                    <p className="text-[12px] text-green-700 font-semibold">블로그에 발행되었습니다.</p>
+                    <a
+                      href={`/blog/${blogPublishedId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[12px] text-edred hover:underline"
+                    >
+                      발행된 글 확인하기 →
+                    </a>
+                  </div>
+                ) : blogDraft ? (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-[11px] text-dim block mb-1">제목</label>
+                      <input
+                        type="text"
+                        value={blogDraft.title}
+                        onChange={(e) => setBlogDraft((d) => d ? { ...d, title: e.target.value } : null)}
+                        className="w-full border border-line px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-paper"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] text-dim block mb-1">메타 설명</label>
+                      <input
+                        type="text"
+                        value={blogDraft.metaDesc}
+                        onChange={(e) => setBlogDraft((d) => d ? { ...d, metaDesc: e.target.value } : null)}
+                        className="w-full border border-line px-3 py-2 text-[12px] focus:outline-none focus:border-ink bg-paper"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] text-dim block mb-1">태그</label>
+                      <input
+                        type="text"
+                        value={blogDraft.tags}
+                        onChange={(e) => setBlogDraft((d) => d ? { ...d, tags: e.target.value } : null)}
+                        className="w-full border border-line px-3 py-2 text-[12px] focus:outline-none focus:border-ink bg-paper"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] text-dim block mb-1">본문 미리보기 (앞 400자)</label>
+                      <div className="bg-ink/5 border border-line px-3 py-2 text-[11px] max-h-28 overflow-y-auto whitespace-pre-wrap leading-relaxed">
+                        {blogDraft.content.slice(0, 400)}…
+                      </div>
+                    </div>
+                    {blogPhotoUrls.length > 0 && (
+                      <p className="text-[11px] text-dim">분해 사진 {blogPhotoUrls.length}장 포함 예정</p>
+                    )}
+                    <div className="flex gap-2">
+                      <button
+                        onClick={publishBlogDraft}
+                        disabled={blogPublishing}
+                        className="flex-1 py-2.5 bg-edred text-paper text-[12px] font-semibold hover:bg-edred3 transition disabled:opacity-40"
+                      >
+                        {blogPublishing ? "발행 중..." : "블로그 발행"}
+                      </button>
+                      <button
+                        onClick={() => setBlogDraft(null)}
+                        className="px-4 py-2.5 border border-line text-[12px] text-dim hover:border-ink hover:text-ink transition"
+                      >
+                        취소
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-[11px] text-dim">
+                      관리자 메모와 분해 사진을 바탕으로 AI가 수리 사례 블로그 글 초안을 생성합니다.
+                    </p>
+                    <button
+                      onClick={generateBlogDraft}
+                      disabled={blogDraftLoading}
+                      className="w-full py-2.5 border border-smblue text-smblue text-[12px] font-semibold hover:bg-smblue hover:text-paper transition disabled:opacity-40"
+                    >
+                      {blogDraftLoading ? (
+                        <span className="flex items-center justify-center gap-2">
+                          <span className="animate-spin w-3 h-3 border-2 border-smblue/30 border-t-smblue rounded-full inline-block" />
+                          AI 초안 생성 중 (15~30초)…
+                        </span>
+                      ) : "블로그 초안 생성 (AI)"}
+                    </button>
+                  </>
                 )}
               </div>
             </div>
