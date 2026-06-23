@@ -262,3 +262,30 @@ export async function sendRepairQuote(opts: {
     ],
   });
 }
+
+/**
+ * 수리 완료 서류 일괄 발송 (거래명세표 + 검사성적서 + 분해사진 + 통장사본)
+ */
+export async function sendRepairCompletion(opts: {
+  to: string;
+  jobNo: string;
+  companyName: string;
+  contactName: string | null;
+  deliveryNotePdfBuffer: Buffer;
+  extraAttachments: { filename: string; content: Buffer; contentType: string }[];
+}): Promise<void> {
+  await transporter.sendMail({
+    from: `"스마텍" <${process.env.GMAIL_USER}>`,
+    to: opts.to,
+    subject: `[스마텍] 수리 완료 서류 ${opts.jobNo}`,
+    text: `${opts.companyName} ${opts.contactName ?? "담당자"}님, 안녕하세요.\n\n스마텍입니다.\n수리가 완료되어 관련 서류를 첨부하여 드립니다.\n\n  ▸ 거래명세표\n  ▸ 검사성적서 (해당 시)\n  ▸ 분해 사진 (해당 시)\n  ▸ 통장 사본\n\n입금 확인 후 납품 진행하겠습니다.\n문의 사항은 아래로 연락 주시기 바랍니다.\n\n감사합니다.\n(주)스마텍 서비스팀\n031-204-7170 · info@smartechvacuum.com`,
+    attachments: [
+      {
+        filename: `거래명세표_${opts.jobNo}.pdf`,
+        content: opts.deliveryNotePdfBuffer,
+        contentType: "application/pdf",
+      },
+      ...opts.extraAttachments,
+    ],
+  });
+}

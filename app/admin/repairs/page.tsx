@@ -97,6 +97,13 @@ export default function AdminRepairsPage() {
   const [adminUploading, setAdminUploading] = useState(false);
   const [deletingFileId, setDeletingFileId] = useState<number | null>(null);
 
+  // 발송 탭 — 수리 완료 서류 현황
+  const [completionSummary, setCompletionSummary] = useState<{
+    hasEmail: boolean; hasAmount: boolean; deliveryNote: boolean;
+    inspectionCert: boolean; disassemblyPhotos: number; bankCopy: boolean;
+  } | null>(null);
+  const [sendingCompletion, setSendingCompletion] = useState(false);
+
   // 블로그 탭 상태
   const [blogDraftLoading, setBlogDraftLoading] = useState(false);
   const [blogDraft, setBlogDraft] = useState<{ title: string; metaDesc: string; tags: string; content: string } | null>(null);
@@ -134,6 +141,7 @@ export default function AdminRepairsPage() {
     setBlogDraft(null);
     setBlogPhotoUrls([]);
     setBlogPublishedId(null);
+    setCompletionSummary(null);
     loadFiles(r.id);
   }
 
@@ -607,19 +615,19 @@ export default function AdminRepairsPage() {
             {/* ── 발송 탭 ── */}
             {activeTab === "send" && (
               <>
-                <Section title="수리 견적서 발송">
-                  <p className="text-[12px] text-dim mb-4">
-                    수리 견적서 PDF를 생성해 고객 이메일로 발송합니다.<br />
-                    분해 사진·검사 성적서는 포함되지 않습니다.
+                {/* 1단계: 견적 단계 */}
+                <Section title="1단계 — 수리 견적서">
+                  <p className="text-[12px] text-dim mb-3">
+                    수리 견적서 PDF만 발송합니다. 수리 진행 여부 확인 단계에서 사용하세요.
                   </p>
                   {selected.totalAmount <= 0 && (
-                    <p className="text-[12px] text-amber-600 mb-3">수리작업 탭에서 금액을 입력하고 저장한 후 사용하세요.</p>
+                    <p className="text-[12px] text-amber-600 mb-3">수리작업 탭에서 금액을 먼저 저장하세요.</p>
                   )}
                   <div className="flex gap-2">
                     <a
                       href={`/api/admin/repairs/${selected.id}/send-quote`}
                       target="_blank" rel="noopener noreferrer"
-                      className="border border-line px-4 py-2.5 text-[12px] hover:bg-ink/5 transition"
+                      className="border border-line px-4 py-2 text-[12px] hover:bg-ink/5 transition"
                     >
                       PDF 저장
                     </a>
@@ -633,19 +641,88 @@ export default function AdminRepairsPage() {
                             body: JSON.stringify({ adminNote: editNote }),
                           });
                           const data = await res.json();
-                          if (res.ok) { alert(`발송 완료: ${data.sentTo}`); load(); }
+                          if (res.ok) alert(`발송 완료: ${data.sentTo}`);
                           else alert(`발송 실패: ${data.error}`);
                         }}
-                        className="bg-smblue text-paper px-4 py-2.5 text-[12px] hover:brightness-110 transition"
+                        className="bg-smblue text-paper px-4 py-2 text-[12px] hover:brightness-110 transition"
                       >
-                        이메일 발송
+                        견적서 발송
                       </button>
                     ) : (
-                      <span className="text-[11px] text-dim self-center">이메일 없음 — 접수정보 탭에서 확인</span>
+                      <span className="text-[11px] text-dim self-center">이메일 없음</span>
                     )}
                   </div>
+                </Section>
+
+                {/* 2단계: 수리 완료 서류 */}
+                <Section title="2단계 — 수리 완료 서류 일괄 발송">
+                  <p className="text-[12px] text-dim mb-3">
+                    수리 완료 후 4가지 서류를 한 번에 발송합니다.
+                  </p>
+
+                  {/* 발송 항목 현황 */}
+                  {completionSummary === null ? (
+                    <button
+                      onClick={async () => {
+                        const res = await fetch(`/api/admin/repairs/${selected.id}/send-completion`);
+                        const data = await res.json();
+                        setCompletionSummary(data);
+                      }}
+                      className="w-full py-2 border border-line text-[12px] text-dim hover:border-ink hover:text-ink transition"
+                    >
+                      발송 전 파일 현황 확인
+                    </button>
+                  ) : (
+                    <div className="space-y-2 mb-4">
+                      {[
+                        { label: "거래명세표", ok: completionSummary.deliveryNote, note: "자동 생성" },
+                        { label: "검사 성적서", ok: completionSummary.inspectionCert, note: "업로드 파일" },
+                        { label: "분해 사진", ok: completionSummary.disassemblyPhotos > 0, note: completionSummary.disassemblyPhotos > 0 ? `${completionSummary.disassemblyPhotos}장` : "미업로드" },
+                        { label: "통장 사본", ok: completionSummary.bankCopy, note: "업로드 파일" },
+                      ].map((item) => (
+                        <div key={item.label} className="flex items-center gap-3 text-[12px]">
+                          <span className={item.ok ? "text-green-600" : "text-red-400"}>{item.ok ? "✓" : "✗"}</span>
+                          <span className="w-24 font-medium">{item.label}</span>
+                          <span className="text-dim text-[11px]">{item.note}</span>
+                          {!item.ok && item.label !== "거래명세표" && (
+                            <span className="text-[10px] text-amber-600">수리작업 탭에서 업로드</span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {completionSummary && (
+                    <>
+                      {!completionSummary.hasEmail && <p className="text-[12px] text-red-500 mb-2">이메일 없음 — 접수정보 탭 확인</p>}
+                      {!completionSummary.hasAmount && <p className="text-[12px] text-amber-600 mb-2">금액 미입력 — 수리작업 탭에서 저장</p>}
+                      <button
+                        disabled={sendingCompletion || !completionSummary.hasEmail || !completionSummary.hasAmount}
+                        onClick={async () => {
+                          if (!confirm(`${selected.contactEmail}으로 수리 완료 서류를 발송하시겠습니까?`)) return;
+                          setSendingCompletion(true);
+                          try {
+                            const res = await fetch(`/api/admin/repairs/${selected.id}/send-completion`, { method: "POST" });
+                            const data = await res.json();
+                            if (res.ok) {
+                              alert(`발송 완료\n수신: ${data.sentTo}\n첨부: ${data.attachedFiles?.join(", ")}`);
+                              load();
+                            } else {
+                              alert(`발송 실패: ${data.error}`);
+                            }
+                          } finally {
+                            setSendingCompletion(false);
+                          }
+                        }}
+                        className="w-full py-3 bg-ink text-paper text-[12px] font-semibold hover:bg-edred transition disabled:opacity-40"
+                      >
+                        {sendingCompletion ? "발송 중..." : "수리 완료 서류 일괄 발송"}
+                      </button>
+                    </>
+                  )}
+
                   {selected.docsSentAt && (
-                    <p className="mono text-[10px] text-dim mt-3">
+                    <p className="mono text-[10px] text-dim mt-2">
                       최근 발송: {formatDate(selected.docsSentAt)} ({selected.docsSentCount}회)
                     </p>
                   )}
