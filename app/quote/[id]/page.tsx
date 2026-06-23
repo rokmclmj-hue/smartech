@@ -747,7 +747,7 @@ export default function QuoteDetailPage() {
         {quote.note && (
           <div style={{ borderLeft: "4px solid #c00020", paddingLeft: "12px", paddingTop: "8px", paddingBottom: "8px", margin: "10px 0", background: "rgba(192,0,32,0.04)" }}>
             <div style={{ fontFamily: "monospace", fontSize: "9px", letterSpacing: "0.15em", textTransform: "uppercase", color: "#c00020", marginBottom: "3px" }}>REMARKS</div>
-            <div style={{ fontSize: "11px", fontStyle: "italic", color: "#0B0B0C" }}>{quote.note}</div>
+            <div style={{ fontSize: "11px", color: "#0B0B0C" }}>{quote.note}</div>
           </div>
         )}
         <div className="p-terms">

@@ -350,7 +350,35 @@ function QuoteDocument({ quote }: { quote: QuoteForPdf }) {
   return el(
     Document,
     { title: `SMARTECH QUOTATION ${quoteNo}` },
-    el(Page, { size: "A4", style: S.page },
+    el(Page, { size: "A4", style: { ...S.page, paddingTop: 0, paddingHorizontal: 0 } },
+
+      // ── Red Tape (진공 게이지 바)
+      el(View, { style: {
+        backgroundColor: "#c00020",
+        paddingVertical: 7,
+        paddingHorizontal: 20,
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+      } },
+        el(Text, { style: { color: "rgba(255,255,255,0.85)", fontSize: 7, letterSpacing: 1 } }, "ATM · 10³ mbar"),
+        el(Text, { style: { color: "rgba(255,255,255,0.85)", fontSize: 7, letterSpacing: 1 } }, "UHV · 10⁻¹⁰ mbar"),
+      ),
+
+      // ── Smartech 워드마크
+      el(View, { style: {
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderBottom: "1 solid #E3DFD6",
+        flexDirection: "row",
+        alignItems: "baseline",
+      } },
+        el(Text, { style: { fontSize: 22, fontFamily: "Pretendard", fontWeight: 700, color: "#0B0B0C" } }, "Smartech"),
+        el(Text, { style: { fontSize: 22, fontFamily: "Pretendard", fontWeight: 700, color: "#c00020" } }, "."),
+      ),
+
+      // ── 본문 래퍼
+      el(View, { style: { paddingHorizontal: 40, paddingTop: 16 } },
 
       // ── 헤더
       el(View, { style: QS.header },
@@ -494,6 +522,8 @@ function QuoteDocument({ quote }: { quote: QuoteForPdf }) {
           el(Text, { style: S.termValue }, "현장 서비스 · 기술지원")
         )
       ),
+
+      ), // ── 본문 래퍼 닫기
 
       // ── 푸터
       el(View, { style: S.footer },

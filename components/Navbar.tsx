@@ -149,7 +149,7 @@ export default function Navbar() {
             {session && (
               <Link
                 href="/quote"
-                className="md:hidden relative p-2 text-ink/70 hover:text-edred transition min-h-[44px] min-w-[44px] flex items-center justify-center"
+                className="md:hidden print:hidden relative p-2 text-ink/70 hover:text-edred transition min-h-[44px] min-w-[44px] flex items-center justify-center"
                 aria-label={`견적 카트 ${cartCount}개`}
               >
                 {/* 카트 아이콘 */}
@@ -166,7 +166,7 @@ export default function Navbar() {
 
             {/* 햄버거 버튼 */}
             <button
-              className="md:hidden ml-1 text-ink/60 hover:text-ink transition min-h-[44px] min-w-[44px] flex items-center justify-center"
+              className="md:hidden print:hidden ml-1 text-ink/60 hover:text-ink transition min-h-[44px] min-w-[44px] flex items-center justify-center"
               onClick={() => setMenuOpen(!menuOpen)}
               aria-label={menuOpen ? "메뉴 닫기" : "메뉴 열기"}
               aria-expanded={menuOpen}
@@ -190,7 +190,7 @@ export default function Navbar() {
       {/* 모바일 드로어 오버레이 */}
       {menuOpen && (
         <div
-          className="md:hidden fixed inset-0 z-30 bg-ink/40 backdrop-blur-sm"
+          className="md:hidden print:hidden fixed inset-0 z-30 bg-ink/40 backdrop-blur-sm"
           onClick={() => setMenuOpen(false)}
           aria-hidden="true"
         />
@@ -198,7 +198,7 @@ export default function Navbar() {
 
       {/* 모바일 드로어 패널 */}
       <div
-        className={`md:hidden fixed top-0 right-0 z-50 h-full w-[280px] bg-paper shadow-2xl transform transition-transform duration-300 ease-out ${
+        className={`md:hidden print:hidden fixed top-0 right-0 z-50 h-full w-[280px] bg-paper shadow-2xl transform transition-transform duration-300 ease-out ${
           menuOpen ? "translate-x-0" : "translate-x-full"
         }`}
         role="dialog"
