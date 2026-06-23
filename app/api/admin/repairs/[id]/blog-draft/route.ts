@@ -15,8 +15,8 @@ const SYMPTOM_KO: Record<string, string> = {
   vacuum: "진공 불량",
   overload: "과부하",
   temperature: "온도 이상",
-  oil_leak: "오일 누유/오염",
-  contamination: "공정 부산물 오염",
+  oil_leak: "오일 누유",
+  contamination: "공정 오염",
   electrical: "전기/제어 오류",
   other: "기타",
 };

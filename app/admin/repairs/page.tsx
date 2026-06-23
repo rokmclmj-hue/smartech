@@ -390,7 +390,7 @@ export default function AdminRepairsPage() {
                 return (
                   <button
                     key={tab}
-                    onClick={() => setActiveTab(tab)}
+                    onClick={() => { if (tab === "send") setCompletionSummary(null); setActiveTab(tab); }}
                     className={`flex-1 py-2 text-[11px] mono font-medium transition border-r last:border-r-0 border-line ${
                       activeTab === tab ? "bg-ink text-paper" : "text-dim hover:text-ink hover:bg-ink/5"
                     }`}
@@ -666,11 +666,12 @@ export default function AdminRepairsPage() {
                       onClick={async () => {
                         const res = await fetch(`/api/admin/repairs/${selected.id}/send-completion`);
                         const data = await res.json();
+                        if (!res.ok) { alert(`오류: ${data.error ?? "현황 조회 실패"}`); return; }
                         setCompletionSummary(data);
                       }}
                       className="w-full py-2 border border-line text-[12px] text-dim hover:border-ink hover:text-ink transition"
                     >
-                      발송 전 파일 현황 확인
+                      파일 현황 확인 (클릭 시 최신 정보 조회)
                     </button>
                   ) : (
                     <div className="space-y-2 mb-4">
@@ -705,7 +706,10 @@ export default function AdminRepairsPage() {
                             const res = await fetch(`/api/admin/repairs/${selected.id}/send-completion`, { method: "POST" });
                             const data = await res.json();
                             if (res.ok) {
-                              alert(`발송 완료\n수신: ${data.sentTo}\n첨부: ${data.attachedFiles?.join(", ")}`);
+                              const msg = data.warning
+                                ? `발송 완료\n수신: ${data.sentTo}\n첨부: ${data.attachedFiles?.join(", ")}\n\n⚠️ ${data.warning}`
+                                : `발송 완료\n수신: ${data.sentTo}\n첨부: ${data.attachedFiles?.join(", ")}`;
+                              alert(msg);
                               load();
                             } else {
                               alert(`발송 실패: ${data.error}`);

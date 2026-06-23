@@ -183,31 +183,32 @@ export default async function BlogListPage({ searchParams }: { searchParams: Sea
                 </span>
               )}
 
-              {/* 페이지 번호 */}
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => {
-                const isActive = p === page;
-                // 현재 페이지 주변 2개 + 첫/끝 페이지만 표시
-                const show = p === 1 || p === totalPages || Math.abs(p - page) <= 1;
-                const showEllipsisBefore = p === page - 2 && page - 2 > 1;
-                const showEllipsisAfter = p === page + 2 && page + 2 < totalPages;
-                if (!show) return null;
-                return (
-                  <span key={p} className="flex items-center">
-                    {showEllipsisBefore && <span className="mono text-[11px] px-2 text-dim">…</span>}
-                    <Link
-                      href={pageHref(p)}
-                      className={`mono text-[11px] px-3.5 py-2 border transition-colors ${
-                        isActive
-                          ? "bg-ink text-paper border-ink"
-                          : "border-line text-dim hover:border-ink hover:text-ink"
-                      }`}
-                    >
-                      {p}
-                    </Link>
-                    {showEllipsisAfter && <span className="mono text-[11px] px-2 text-dim">…</span>}
-                  </span>
-                );
-              })}
+              {/* 페이지 번호 — 첫/끝 + 현재±1, 갭에 … 삽입 */}
+              {(() => {
+                const shown = Array.from(
+                  new Set([1, totalPages, page - 1, page, page + 1].filter((p) => p >= 1 && p <= totalPages))
+                ).sort((a, b) => a - b);
+                return shown.map((p, idx) => {
+                  const prev = shown[idx - 1];
+                  return (
+                    <span key={p} className="flex items-center">
+                      {prev !== undefined && p - prev > 1 && (
+                        <span className="mono text-[11px] px-2 text-dim">…</span>
+                      )}
+                      <Link
+                        href={pageHref(p)}
+                        className={`mono text-[11px] px-3.5 py-2 border transition-colors ${
+                          p === page
+                            ? "bg-ink text-paper border-ink"
+                            : "border-line text-dim hover:border-ink hover:text-ink"
+                        }`}
+                      >
+                        {p}
+                      </Link>
+                    </span>
+                  );
+                });
+              })()}
 
               {/* 다음 */}
               {page < totalPages ? (

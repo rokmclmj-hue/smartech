@@ -49,7 +49,7 @@ export async function POST(_req: NextRequest, { params }: Params) {
         partNo: "-",
         description: `진공펌프 수리 (${repair.pumpMaker} ${repair.pumpModel})`,
         quantity: 1,
-        unitPrice: Math.round(repair.totalAmount / 1.1), // 부가세 역산
+        unitPrice: repair.totalAmount, // totalAmount = 공급가액 (부가세 별도)
       },
     ],
   });
@@ -77,7 +77,7 @@ export async function POST(_req: NextRequest, { params }: Params) {
         contentType: contentTypeFromName(file.fileName),
       });
     } catch {
-      // 개별 파일 실패는 건너뜀 (나머지는 계속 발송)
+      console.warn(`[send-completion] 파일 첨부 실패 (건너뜀): ${file.fileName}`);
     }
   }
 
@@ -97,10 +97,15 @@ export async function POST(_req: NextRequest, { params }: Params) {
     data: { docsSentAt: new Date(), docsSentCount: { increment: 1 } },
   });
 
+  const failedCount = repair.files.filter(
+    (f) => ATTACH_TYPES.includes(f.fileType) && f.fileUrl.startsWith("https://")
+  ).length - extraAttachments.length;
+
   return NextResponse.json({
     ok: true,
     sentTo: repair.contactEmail,
     attachedFiles: extraAttachments.map((a) => a.filename),
+    ...(failedCount > 0 ? { warning: `${failedCount}개 파일 첨부 실패 (나머지는 발송됨)` } : {}),
   });
 }
 
