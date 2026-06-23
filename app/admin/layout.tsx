@@ -10,7 +10,7 @@ import "./admin.css";
 
 const NAV_ITEMS = [
   { href: "/admin", label: "대시보드", exact: true },
-  { href: "/admin/offline-repairs", label: "수리접수", highlight: true },
+  { href: "/admin/offline-repairs", label: "수리접수" },
   { href: "/admin/repairs", label: "온라인수리" },
   { href: "/admin/orders", label: "주문" },
   { href: "/admin/products", label: "제품" },
@@ -73,41 +73,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* 스티키 상단 헤더 */}
       <header className="sticky top-0 z-40 bg-paper/90 backdrop-blur border-b hair">
         <div className="max-w-[1400px] mx-auto px-4 md:px-6 h-14 md:h-16 flex items-center justify-between gap-4 md:gap-6">
-          {/* 로고 — 홈페이지와 동일 사양 (28/32px, 빨간 점, 세로선 + 부제) */}
-          <Link href="/admin" className="flex items-center gap-2.5 md:gap-3 leading-none text-ink shrink-0">
-            <div className="display text-[28px] md:text-[32px] tracking-[-0.045em]">
-              Smartech<span style={{ color: "#c00020" }}>.</span>
-            </div>
-          </Link>
-
           {/* 데스크톱 네비 */}
           <nav className="hidden lg:flex items-center">
             {NAV_ITEMS.map((item, index) => {
               const active = isActive(item);
-              const prev = NAV_ITEMS[index - 1];
-              const showSep = index > 0 && !item.highlight && !prev?.highlight;
-              if (item.highlight) {
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`group relative mx-2 px-3 py-1.5 rounded-md transition-all ${
-                      active
-                        ? "bg-edred text-white shadow-sm"
-                        : "bg-edred text-white hover:brightness-110 shadow-sm"
-                    }`}
-                  >
-                    <span className="flex items-center gap-1.5">
-                      <span className="text-[15px] font-semibold tracking-tight">
-                        {item.label}
-                      </span>
-                      <span className="mono text-[9px] font-bold tracking-[0.15em] bg-white text-edred px-1.5 py-[2px] rounded">
-                        NEW
-                      </span>
-                    </span>
-                  </Link>
-                );
-              }
+              const showSep = index > 0;
               return (
                 <div key={item.href} className="flex items-center">
                   {showSep && <span className="w-px h-3.5 bg-ink/15 shrink-0" aria-hidden />}
@@ -185,23 +155,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-2">
               {NAV_ITEMS.map((item) => {
                 const active = isActive(item);
-                if (item.highlight) {
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setMobileOpen(false)}
-                      className="flex items-center gap-3 my-2 px-3 py-3 rounded-md bg-edred text-white shadow-sm"
-                    >
-                      <span className="text-[15px] font-semibold tracking-tight">
-                        {item.label}
-                      </span>
-                      <span className="ml-auto mono text-[9px] font-bold tracking-[0.15em] bg-white text-edred px-1.5 py-[2px] rounded">
-                        NEW
-                      </span>
-                    </Link>
-                  );
-                }
                 return (
                   <Link
                     key={item.href}
