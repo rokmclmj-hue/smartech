@@ -242,6 +242,7 @@ export default async function BlogPostPage({ params }: Props) {
     "@type": "Article",
     "headline": post.title,
     "description": post.metaDesc || undefined,
+    "articleBody": post.content.replace(/[#*`!\[\]()]/g, "").slice(0, 2000),
     "datePublished": (post.publishedAt ?? post.createdAt).toISOString(),
     "dateModified": post.updatedAt.toISOString(),
     "url": `https://www.smartechvacuum.com/blog/${post.id}`,
@@ -249,9 +250,20 @@ export default async function BlogPostPage({ params }: Props) {
     "author":    { "@type": "Organization", "name": "스마텍" },
   });
 
+  const breadcrumbSchema = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "홈",    "item": "https://www.smartechvacuum.com" },
+      { "@type": "ListItem", "position": 2, "name": "블로그", "item": "https://www.smartechvacuum.com/blog" },
+      { "@type": "ListItem", "position": 3, "name": post.title, "item": `https://www.smartechvacuum.com/blog/${post.id}` },
+    ],
+  });
+
   return (
     <>
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: articleSchema }} />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: breadcrumbSchema }} />
     {post.faqSchema && (
       <script
         type="application/ld+json"

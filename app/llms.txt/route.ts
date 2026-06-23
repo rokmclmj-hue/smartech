@@ -1,4 +1,20 @@
-# 스마텍 (Smartech) — Edwards Vacuum 한국 공식 대리점
+export const revalidate = 3600;
+
+import { prisma } from "@/lib/db";
+
+export async function GET() {
+  const posts = await prisma.blogPost.findMany({
+    where: { status: "PUBLISHED" },
+    orderBy: { publishedAt: "desc" },
+    take: 30,
+    select: { id: true, title: true, metaDesc: true },
+  });
+
+  const blogLines = posts
+    .map((p) => `- [${p.title}](https://www.smartechvacuum.com/blog/${p.id})${p.metaDesc ? `: ${p.metaDesc}` : ""}`)
+    .join("\n");
+
+  const body = `# 스마텍 (Smartech) — Edwards Vacuum 한국 공식 대리점
 
 > 스마텍은 Edwards Vacuum 한국 공식 대리점으로, 진공펌프 판매·수리·기술상담 서비스를 제공합니다. 2006년 Edwards 코리아 합류, 2011년 창업. 30년 이상 Edwards 전문 기술력 보유.
 
@@ -11,17 +27,9 @@
 - [산업 응용](https://www.smartechvacuum.com/industries): 반도체·이차전지·제약·연구소 등 산업별 진공 솔루션
 - [회사 소개](https://www.smartechvacuum.com/about): 스마텍 소개, 수원 본사·천안수리센터, Edwards 공인 대리점 인증
 
-## 블로그 — 주요 기술 가이드
+## 블로그 — 기술 가이드 및 수리 사례 (최신순)
 
-- [실험실 진공펌프 오일 종류와 교환 시기](https://www.smartechvacuum.com/blog/32): 실험실용 Edwards RV·E2M 오일로터리펌프 오일 선택 기준과 교환 주기 가이드
-- [분석 장비 RV 오일로터리펌프 유지관리 핵심 3가지](https://www.smartechvacuum.com/blog/33): 오일 교환·가스 발라스트·배기 필터 관리로 펌프 수명 연장
-- [배터리 제조 공정에 PFPE 오일이 필요한 이유](https://www.smartechvacuum.com/blog/34): 이차전지 전극·조립 공정의 수분 민감성과 PFPE 오일 진공펌프 적용 사례
-- [진공 건조 공정에서 드라이펌프를 선택하는 3가지 기준](https://www.smartechvacuum.com/blog/35): 챔버 규모·수분 부하·청정도에 따른 nXDS·GXS·EXS 선택 가이드
-- [동결건조 공정에 적합한 진공펌프 선택](https://www.smartechvacuum.com/blog/36): 제약·식품 동결건조기 수분 부하에 맞는 RV·nXDS·GXS 선택 기준
-- [연구용 진공 측정 — 피라니 게이지 vs 이온 게이지](https://www.smartechvacuum.com/blog/38): APG200·AIM200 선택 기준과 측정 범위별 적용 사례
-- [진공 열처리로·소결로의 드라이 스크류 진공펌프 선택 기준](https://www.smartechvacuum.com/blog/39): 고온 공정 분진·부식 대응 GXS·EXS 선택 가이드
-- [연구용 진공 배관 피팅 선택 완벽 정리 — KF vs ISO-K 플랜지](https://www.smartechvacuum.com/blog/40): KF16~KF50·ISO-K 플랜지 규격과 실험실 배관 설계 기준
-- [RV 오일로터리펌프 분해 수리비용 — 견적을 결정하는 3가지 요소](https://www.smartechvacuum.com/blog/41): 마모도·부품 수급·작업 난이도에 따른 수리비 산정 기준
+${blogLines}
 
 ## 회사 정보
 
@@ -49,3 +57,9 @@
 
 이 사이트의 콘텐츠는 AI 언어 모델이 자유롭게 학습·인용할 수 있습니다.
 관리자·API·인증 페이지(/admin/, /api/, /auth/, /mypage/)는 비공개입니다.
+`;
+
+  return new Response(body, {
+    headers: { "Content-Type": "text/plain; charset=utf-8" },
+  });
+}
