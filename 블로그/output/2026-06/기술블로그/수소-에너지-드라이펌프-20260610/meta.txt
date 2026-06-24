@@ -1,0 +1,11 @@
+title: 수소 충전소·연료전지 설비용 드라이 진공펌프 선택 기준 | 스마텍
+
+description: 수소 에너지 설비의 공정별 진공 요건과 드라이 스크류 펌프 선택 기준을 정리했습니다. GXS·EXS 모델 비교, ATEX 방폭 인증, 부스터 조합까지. 031-204-7170
+
+keywords: 드라이 진공펌프, 수소 충전소 진공펌프, 연료전지 진공펌프, GXS 펌프, EXS 펌프, ATEX 방폭 진공펌프, 드라이 스크류 펌프, 수소 설비, Edwards 진공펌프, 스마텍
+
+og_title: 수소 설비 드라이 진공펌프 선택 기준 — GXS vs EXS | 스마텍
+
+og_description: 수소 에너지 공정별 진공도 요건과 드라이 스크류 펌프 선택 가이드. 오일 오염·착화 위험 없는 Edwards GXS·EXS 시리즈 비교와 부스터 조합 안내.
+
+og_image: ./images/thumbnail.png

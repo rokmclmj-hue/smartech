@@ -1,0 +1,46 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "T-Station 85D가 분석장비에 적합한 이유는 무엇인가요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "XDD1 건식 다이어프램 백킹펌프를 사용하기 때문에 오일이 전혀 없습니다. 오일 역류로 인한 시료 오염이 구조적으로 차단되어 XPS, 질량분석기 등 정밀 분석장비에 적합합니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "T-Station 85D의 도달진공도는 얼마인가요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "5×10⁻¹⁰ mbar 미만입니다. XPS, 표면분석기, 질량분석기 등이 요구하는 초고진공 영역을 충족합니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "기존 오일 로터리 펌프와 T-Station 85D를 함께 사용할 수 있나요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "같은 라인에 연결하는 것은 권장하지 않습니다. 오일 펌프와 건식 펌프를 장비별로 분리해 운용하는 것이 분석 신뢰도 측면에서 유리합니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "T-Station 85D는 실험실 공간에 설치하기 어렵지 않나요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "무게 17 kg의 소형 일체형 장비로, 실험실 벤치 옆에 바로 설치할 수 있습니다. 소음도 56 dB(A) 이하라 연구실 환경에서 장시간 운용에 부담이 없습니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "E2M1.5 오일 로터리 펌프는 어떤 용도로 사용하나요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "소형 분석장비의 1차 진공(러핑) 공급에 사용하는 소형 오일 로터리 베인 펌프입니다. T-Station 85D와는 별도 라인으로 구분해 운용합니다."
+      }
+    }
+  ]
+}

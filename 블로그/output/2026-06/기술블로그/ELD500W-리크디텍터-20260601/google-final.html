@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>헬륨 리크디텍터란? Edwards ELD500W 적용 상황 완전 정리</title>
+  <style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #ffffff;
+  font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', '맑은 고딕', sans-serif;
+  color: #202124;
+  line-height: 1.75;
+}
+.blog-wrap {
+  max-width: 740px;
+  margin: 40px auto;
+  background: #fff;
+  padding: 48px 40px;
+}
+h1 { font-size: 28px; font-weight: 700; line-height: 1.35; margin-bottom: 24px; color: #1a1a1a; border-bottom: 3px solid #4285f4; padding-bottom: 12px; }
+h2 { font-size: 20px; font-weight: 700; margin-top: 40px; margin-bottom: 12px; color: #1a1a1a; }
+h3 { font-size: 17px; font-weight: 700; margin-top: 24px; margin-bottom: 8px; color: #333; }
+p { font-size: 15px; margin-bottom: 16px; color: #444; }
+img { width: 100%; height: auto; display: block; margin: 24px 0; border-radius: 6px; }
+table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px; }
+th { background: #e8f0fe; padding: 10px 14px; text-align: left; font-weight: 600; border: 1px solid #c5d0f0; color: #333; }
+td { padding: 9px 14px; border: 1px solid #e8ecf5; color: #444; }
+tr:nth-child(even) td { background: #f8f9fa; }
+ul, ol { margin: 12px 0 16px 24px; font-size: 15px; color: #444; }
+li { margin-bottom: 8px; }
+hr { border: none; border-top: 2px solid #f1f3f4; margin: 40px 0; }
+strong { color: #1a1a1a; font-weight: 700; }
+a { color: #1a73e8; text-decoration: none; }
+.cta-box { background: #e8f0fe; border-left: 4px solid #4285f4; padding: 20px 24px; border-radius: 0 8px 8px 0; margin-top: 32px; }
+.cta-box p { margin: 0; color: #333; font-size: 15px; }
+</style>
+</head>
+<body>
+  <div class="blog-wrap">
+    <h1>헬륨 리크디텍터란? Edwards ELD500W 적용 상황 완전 정리</h1>
+<p>진공 시스템에서 원인 불명의 진공도 저하가 발생할 때, 가장 빠르고 정확한 진단 방법이 헬륨 리크디텍터 검사입니다. 이 글에서는 리크디텍터의 원리, 사용 시점, Edwards ELD500W 사양을 정리합니다.</p>
+<hr>
+<h2>헬륨 리크디텍터의 작동 원리</h2>
+<p>헬륨 리크디텍터는 헬륨 질량분석계(Helium Mass Spectrometer)를 기반으로 합니다. 헬륨의 원자 질량(AMU 4)이 가장 가볍고 대기 중 농도가 약 5 ppm에 불과해 미세 신호 구별이 용이합니다. 헬륨은 공기 대비 약 2.7배 빠르게 미세 누설 경로를 통과하여, 5×10⁻¹² mbar·l/s 수준의 극미세 누설도 검출 가능합니다.</p>
+<hr>
+<h2>리크디텍터가 필요한 4가지 상황</h2>
+<p><strong>1. 챔버 PM(정기보수) 후 재가동 전 밀봉 확인</strong></p>
+<p>O-링 교체, 내부 파츠 교체 후 누설 합격 기준 확인이 필요할 때</p>
+<p><strong>2. 원인 불명의 진공도 저하 진단</strong></p>
+<p>펌프·게이지 점검 후에도 목표 진공도에 도달하지 못하는 경우, 누설 위치 특정 목적</p>
+<p><strong>3. 가스 배관·용접부 누설 검증</strong></p>
+<p>반도체·디스플레이 공정의 가스 공급 라인, 진공 배관 접합부 누설 여부 확인</p>
+<p><strong>4. 장비 출하 전 수락 검사(Acceptance Test)</strong></p>
+<p>장비 제조사 기준에 따른 밀봉 수락 검사 수치 판정</p>
+<hr>
+<h2>Edwards ELD500W 주요 사양</h2>
+<p>| 항목 | ELD500 WET | ELD500 DRY |</p>
+<p>|------|-----------|-----------|</p>
+<p>| 최소 검출 누설량 | 5×10⁻¹² mbar·l/s | 3×10⁻¹¹ mbar·l/s |</p>
+<p>| 내장 펌프 | 오일식 로터리 베인 | 다이어프램 드라이 |</p>
+<p>| 기동 시간 | 2분 이내 | 2분 이내 |</p>
+<p>| 인터페이스 | NW25 (KF DN25) | NW25 (KF DN25) |</p>
+<p>| 캘리브레이션 | 내장 TL7, 완전 자동 | 내장 TL7, 완전 자동 |</p>
+<p>| 설계 | 이동형 (바퀴+핸들) | 이동형 (바퀴+핸들) |</p>
+<p>사용 모드: 진공 모드(Vacuum Mode) — 누설량 정량 측정 / 스니퍼 모드(Sniffer Mode) — 누설 위치 탐색</p>
+<hr>
+<h2>주요 적용 분야</h2>
+<ul>
+<li>반도체: 식각(Etch)/증착(CVD/PVD) 챔버, 로드락, 전달 챔버, 가스 패널</li>
+<li>디스플레이: 스퍼터·OLED 증착 챔버 밀봉 검사</li>
+<li>연구소: 질량분석기, 전자현미경(SEM/TEM), 고에너지물리 실험장비</li>
+<li>공통: 정기 예방보수(PM) 검증, 출하 전 수락 검사</li>
+</ul>
+<hr>
+<h2>스마텍 공급 및 기술 지원</h2>
+<p>스마텍은 Edwards 코리아 공식 대리점으로서 ELD500W 시리즈 전 모델을 공급합니다. 제품 선정 상담, 현장 실연, 사후 기술 지원까지 원스톱으로 대응합니다.</p>
+<p>문의: <strong>031-204-7170</strong> / <a href="https://www.smartechvacuum.com">www.smartechvacuum.com</a></p>
+  </div>
+</body>
+</html>

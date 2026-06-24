@@ -1,0 +1,5 @@
+title: 촉매 연구소에 Edwards T-Station 85D를 납품한 이유 | 스마텍
+
+description: 귀금속 촉매 연구기관에 Edwards T-Station 85D(TS85D1001)를 납품·설치·진공 테스트 완료한 현장 사례입니다. 분석장비에 건식 터보 스테이션이 적합한 이유를 실제 납품 경험을 바탕으로 설명합니다.
+
+keywords: T-Station 85D, Edwards 터보분자펌프, 연구용 진공펌프, 건식 진공펌프, 분석장비 진공, TS85D1001, 촉매 연구소 진공, 스마텍
