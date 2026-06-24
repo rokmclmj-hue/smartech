@@ -225,7 +225,7 @@ export default function AdminBlogPage() {
       })
       // HTML 이미지·figure
       .replace(/<figure[\s\S]*?<\/figure>/gi, () => { imgCount++; return `\n\n[📷 사진 ${imgCount}번]\n\n`; })
-      .replace(/<img[^>]*alt="([^"]*)"[^>]*>/gi, (_, alt) => { imgCount++; return `\n\n[📷 사진 ${imgCount}번 — ${alt}]\n\n`; })
+      .replace(/<img[^>]*alt="([^"]*)"[^>]*>/gi, (_, alt) => { imgCount++; const label = alt && alt.trim() ? alt.trim() : `이미지 ${imgCount}`; return `\n\n[📷 사진 ${imgCount}번 — ${label}]\n\n`; })
       // 제목 기호 제거 (# ## ###) — 텍스트만 남김
       .replace(/^#{1,6}\s+/gm, "")
       // 굵게·기울임 기호 제거

@@ -205,12 +205,13 @@ def chk_naver_md(folder: str) -> dict:
     path = os.path.join(folder, "naver.md")
     if not os.path.exists(path):
         return {"pass": False, "reason": "naver.md 없음"}
-    content = open(path, encoding="utf-8").read()
+    with open(path, encoding="utf-8") as f:
+        content = f.read()
 
     errors = []
 
     # 1. 글자수 (공백 제외 1,500자 이상)
-    char_count = len(re.sub(r"\s+", "", re.sub(r"#[^\s].*", "", re.sub(r"\[IMAGE:.*?\]", "", re.sub(r"^#.+$", "", content, flags=re.MULTILINE)))))
+    char_count = len(re.sub(r"\s+", "", re.sub(r"^#[^\s].*", "", re.sub(r"\[IMAGE:.*?\]", "", re.sub(r"^#.+$", "", content, flags=re.MULTILINE)), flags=re.MULTILINE)))
     if char_count < 1500:
         errors.append(f"글자수 {char_count}자 (최소 1,500자)")
 

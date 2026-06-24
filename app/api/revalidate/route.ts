@@ -8,8 +8,17 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "인증 실패" }, { status: 401 });
   }
 
-  const { path } = await req.json();
-  if (!path) return NextResponse.json({ error: "path 필수" }, { status: 400 });
+  let path: string;
+  try {
+    const body = await req.json();
+    path = body?.path;
+  } catch {
+    return NextResponse.json({ error: "잘못된 JSON" }, { status: 400 });
+  }
+
+  if (!path || !/^\/blog\/\d+$/.test(path)) {
+    return NextResponse.json({ error: "path는 /blog/{숫자} 형식만 허용" }, { status: 400 });
+  }
 
   revalidatePath(path);
   return NextResponse.json({ ok: true, path });
