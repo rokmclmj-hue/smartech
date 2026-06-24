@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
+import { upload } from "@vercel/blob/client";
 
 type RepairFile = { fileType: string };
 type FullRepairFile = {
@@ -201,16 +202,30 @@ export default function AdminRepairsPage() {
   async function adminUpload(files: FileList) {
     if (!selected || !files.length) return;
     setAdminUploading(true);
-    const formData = new FormData();
-    formData.append("fileType", adminUploadType);
-    Array.from(files).forEach((f) => formData.append("files", f));
     try {
-      const res = await fetch(`/api/admin/repairs/${selected.id}/files`, { method: "POST", body: formData });
-      if (!res.ok) throw new Error();
+      for (const file of Array.from(files)) {
+        // 1단계: 브라우저 → Blob 직접 업로드 (용량 제한 없음)
+        const blob = await upload(
+          `repairs/${selected.id}/${adminUploadType}/${Date.now()}-${file.name}`,
+          file,
+          { access: "public", handleUploadUrl: `/api/admin/repairs/${selected.id}/blob-upload` }
+        );
+        // 2단계: DB 저장
+        const saveRes = await fetch(`/api/admin/repairs/${selected.id}/blob-upload`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phase: "save", url: blob.url, filename: file.name, fileType: adminUploadType, fileSize: file.size }),
+        });
+        if (!saveRes.ok) {
+          const d = await saveRes.json().catch(() => ({}));
+          throw new Error(d.error ?? "DB 저장 실패");
+        }
+      }
       await loadFiles(selected.id);
       await load();
-    } catch { alert("업로드 실패"); }
-    finally { setAdminUploading(false); }
+    } catch (e) {
+      alert(`업로드 실패: ${e instanceof Error ? e.message : "다시 시도해주세요."}`);
+    } finally { setAdminUploading(false); }
   }
 
   async function deleteFile(fileId: number) {

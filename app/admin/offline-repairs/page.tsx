@@ -411,11 +411,22 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone }: {
     setAdminUploadMsg("");
     try {
       if (type === "zip") {
-        // 브라우저 → Blob 직접 업로드 (용량 제한 없음)
-        await upload(`offline-repairs/${job.id}/admin_${Date.now()}_${file.name}`, file, {
-          access: "public",
-          handleUploadUrl: `/api/admin/offline-repairs/${job.id}/blob-upload`,
+        // 1단계: 브라우저 → Blob 직접 업로드 (용량 제한 없음)
+        const blob = await upload(
+          `offline-repairs/${job.id}/admin_${Date.now()}_${file.name}`,
+          file,
+          { access: "public", handleUploadUrl: `/api/admin/offline-repairs/${job.id}/blob-upload` }
+        );
+        // 2단계: DB 저장
+        const saveRes = await fetch(`/api/admin/offline-repairs/${job.id}/blob-upload`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phase: "save", url: blob.url, filename: file.name }),
         });
+        if (!saveRes.ok) {
+          const d = await saveRes.json().catch(() => ({}));
+          throw new Error(d.error ?? "DB 저장 실패");
+        }
         setAdminUploadMsg("✓ 파일 업로드 완료");
         onRefresh();
         return;
