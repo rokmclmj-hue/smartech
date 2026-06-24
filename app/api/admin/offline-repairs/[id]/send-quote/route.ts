@@ -45,6 +45,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         repairCost: job.repairCost,
         repairPartsText: job.repairPartsText,
         inspectorName: job.inspectorName,
+        quoteRemarks: job.quoteRemarks,
       }),
       generateRepairInspectionPdf({
         jobNo: job.jobNo,

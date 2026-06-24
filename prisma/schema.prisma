@@ -595,6 +595,7 @@ model OfflineRepairJob {
   repairCost      Int?
   repairPartsText String?
   inspectorName   String?
+  quoteRemarks    String?
 
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt

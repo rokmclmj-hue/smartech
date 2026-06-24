@@ -23,7 +23,7 @@ type Job = {
   receivedDate: string; requestedDate: string | null;
   uploadToken: string | null; tokenExpiresAt: string | null; uploadedAt: string | null;
   memo: string | null; createdAt: string;
-  repairCost: number | null; repairPartsText: string | null; inspectorName: string | null;
+  repairCost: number | null; repairPartsText: string | null; inspectorName: string | null; quoteRemarks: string | null;
   inspectionItems: InspectionItem[];
   files: RepairFile[];
 };
@@ -292,6 +292,7 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone, isSelected, onToggle
   const [repairCost, setRepairCost] = useState(job.repairCost != null ? String(job.repairCost) : "");
   const [repairPartsText, setRepairPartsText] = useState(job.repairPartsText ?? "");
   const [inspectorName, setInspectorName] = useState(job.inspectorName ?? "");
+  const [quoteRemarks, setQuoteRemarks] = useState(job.quoteRemarks ?? "");
   const [savingQuote, setSavingQuote] = useState(false);
   const [sendEmail, setSendEmail] = useState(job.contactEmail ?? "");
   const [sending, setSending] = useState(false);
@@ -403,6 +404,7 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone, isSelected, onToggle
           repairCost: repairCost !== "" ? Math.round(Number(repairCost)) : null,
           repairPartsText: repairPartsText || null,
           inspectorName: inspectorName || null,
+          quoteRemarks: quoteRemarks || null,
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -805,6 +807,15 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone, isSelected, onToggle
                 value={repairPartsText} onChange={e => setRepairPartsText(e.target.value)}
                 rows={4} placeholder={"Tip Seal Kit × 1\nShaft Seal × 1"}
                 className="w-full border hair px-3 py-2 text-[13px] font-mono focus:outline-none focus:border-ink resize-none"
+              />
+            </div>
+            <div>
+              <div className="mono text-[10px] dim mb-1">견적 특이사항 (REMARKS · PDF에 표시)</div>
+              <textarea
+                value={quoteRemarks} onChange={e => setQuoteRemarks(e.target.value)}
+                rows={2}
+                placeholder="수리 견적은 분해 검사 결과에 따라 최종 금액이 변동될 수 있습니다."
+                className="w-full border hair px-3 py-2 text-[13px] focus:outline-none focus:border-ink resize-none"
               />
             </div>
             <button onClick={handleSaveQuote} disabled={savingQuote}

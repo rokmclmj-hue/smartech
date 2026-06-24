@@ -1407,6 +1407,7 @@ export interface RepairQuoteForPdf {
   repairCost: number | null;
   repairPartsText: string | null;
   inspectorName: string | null;
+  quoteRemarks?: string | null;
 }
 
 function RepairQuoteDocument({ data }: { data: RepairQuoteForPdf }) {
@@ -1443,8 +1444,8 @@ function RepairQuoteDocument({ data }: { data: RepairQuoteForPdf }) {
       // ── 본문 래퍼
       el(View, { style: { paddingHorizontal: 40, paddingTop: 16 } },
 
-      // ── 헤더
-      el(View, { style: S.header },
+      // ── 헤더 (구분선 파란색)
+      el(View, { style: { ...S.header, borderBottom: "2 solid #0d3a8a" } },
         el(Text, { style: S.headerTitle }, "SMARTECH · REPAIR ESTIMATE"),
         el(View, { style: S.headerMeta },
           el(Text, { style: S.headerMetaLine }, `NO · ${data.jobNo}`),
@@ -1543,17 +1544,19 @@ function RepairQuoteDocument({ data }: { data: RepairQuoteForPdf }) {
             el(Text, { style: S.sumLabel }, "VAT (10%)"),
             el(Text, { style: S.sumValue }, data.repairCost != null ? fmt(vat) : "—")
           ),
-          el(View, { style: { ...S.summaryTotalRow, borderTop: "1.5 solid #c00020" } },
-            el(Text, { style: { ...S.sumTLabel, color: "#c00020" } }, "GRAND TOTAL"),
-            el(Text, { style: { ...S.sumTValue, fontSize: 12 } }, data.repairCost != null ? fmt(total) : "협의")
+          el(View, { style: { ...S.summaryTotalRow, borderTop: "1.5 solid #0d3a8a" } },
+            el(Text, { style: { ...S.sumTLabel, color: "#0d3a8a" } }, "GRAND TOTAL"),
+            el(Text, { style: { ...S.sumTValue, fontSize: 12, color: "#0d3a8a" } }, data.repairCost != null ? fmt(total) : "협의")
           )
         )
       ),
 
-      // ── 특이사항
+      // ── 특이사항 (어드민에서 수정 가능, 기본값 고정 문구)
       el(View, { style: QS.remarkBox },
         el(Text, { style: QS.remarkLabel }, "REMARKS"),
-        el(Text, { style: QS.remarkText }, "수리 견적은 분해 검사 결과에 따라 최종 금액이 변동될 수 있습니다.")
+        el(Text, { style: QS.remarkText },
+          data.quoteRemarks ?? "수리 견적은 분해 검사 결과에 따라 최종 금액이 변동될 수 있습니다."
+        )
       ),
 
       // ── 거래 조건
@@ -1577,7 +1580,7 @@ function RepairQuoteDocument({ data }: { data: RepairQuoteForPdf }) {
       // ── 푸터
       el(View, { style: S.footer },
         el(Text, { style: S.footerText },
-          `© ${year} SMARTECH CO., LTD.  ·  www.smartechvacuum.com`
+          `© ${year} SMARTECH CO., LTD.  ·  031-204-7170  ·  www.smartechvacuum.com`
         ),
         el(Text, { style: S.footerText }, "PAGE 1 / 1")
       )

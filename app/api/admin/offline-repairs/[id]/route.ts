@@ -112,6 +112,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       ...(body.repairCost !== undefined && { repairCost: body.repairCost != null ? Math.round(Number(body.repairCost)) : null }),
       ...(body.repairPartsText !== undefined && { repairPartsText: body.repairPartsText }),
       ...(body.inspectorName !== undefined && { inspectorName: body.inspectorName }),
+      ...(body.quoteRemarks !== undefined && { quoteRemarks: body.quoteRemarks || null }),
       ...(body.subEmail !== undefined && { subEmail: body.subEmail || null }),
       ...(body.subName !== undefined && { subName: body.subName || null }),
     },

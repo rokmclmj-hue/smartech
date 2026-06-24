@@ -33,6 +33,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
       repairCost: job.repairCost,
       repairPartsText: job.repairPartsText,
       inspectorName: job.inspectorName,
+      quoteRemarks: job.quoteRemarks,
     });
 
     return new NextResponse(Buffer.from(pdfBuffer).buffer as ArrayBuffer, {
