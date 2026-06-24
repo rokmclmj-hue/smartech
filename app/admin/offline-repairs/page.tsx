@@ -285,6 +285,7 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone, isSelected, onToggle
   const [genToken, setGenToken] = useState(false);
   const [toast, setToast] = useState("");
   const [editItems, setEditItems] = useState<InspectionItem[]>(job.inspectionItems);
+  useEffect(() => { setEditItems(job.inspectionItems); }, [job.inspectionItems]);
   const [savingItems, setSavingItems] = useState(false);
   const [statusChanging, setStatusChanging] = useState(false);
   const [repairCost, setRepairCost] = useState(job.repairCost != null ? String(job.repairCost) : "");
