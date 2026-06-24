@@ -5,9 +5,6 @@ import { getAdminSession } from "@/lib/admin-auth";
 
 type Params = { params: Promise<{ id: string }> };
 
-// POST — 두 가지 역할:
-// 1) blob.generate-client-token : @vercel/blob/client upload() 가 호출 → 업로드 토큰 발급
-// 2) blob-save                  : 업로드 완료 후 클라이언트가 직접 호출 → DB 저장
 export async function POST(req: NextRequest, { params }: Params) {
   if (!(await getAdminSession()))
     return NextResponse.json({ error: "권한 없음" }, { status: 403 });
@@ -36,6 +33,7 @@ export async function POST(req: NextRequest, { params }: Params) {
   }
 
   // 토큰 발급 단계 (upload() 가 자동 호출)
+  // onUploadCompleted 제거 → 콜백 URL 없이 토큰 생성 → Vercel 400 에러 해소
   try {
     const jsonResponse = await handleUpload({
       body: body as HandleUploadBody,
@@ -49,9 +47,6 @@ export async function POST(req: NextRequest, { params }: Params) {
         ],
         maximumSizeInBytes: 100 * 1024 * 1024,
       }),
-      onUploadCompleted: async () => {
-        // DB 저장은 클라이언트가 별도로 처리 (phase: "save")
-      },
     });
     return NextResponse.json(jsonResponse);
   } catch (e) {
