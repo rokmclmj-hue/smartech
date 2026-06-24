@@ -75,23 +75,19 @@ function formatDate(s: string) {
   return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
 }
 
-export default function AdminRepairsPage() {
-  const [repairs, setRepairs] = useState<Repair[]>([]);
-  const [total, setTotal] = useState(0);
-  const [statusFilter, setStatusFilter] = useState("ALL");
-  const [selected, setSelected] = useState<Repair | null>(null);
+// ── 수리 행 (아코디언) ────────────────────────────
+function RepairRow({ repair, onRefresh }: { repair: Repair; onRefresh: () => void }) {
+  const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("info");
+  const [curRepair, setCurRepair] = useState<Repair>(repair);
 
-  // 수리작업 탭 상태
   const [saving, setSaving] = useState(false);
-  const [editNote, setEditNote] = useState("");
-  const [editExtra, setEditExtra] = useState("");
-
-  // 접수정보 탭 — 모델명 수정
-  const [editModel, setEditModel] = useState("");
+  const [editNote, setEditNote] = useState(repair.adminNote ?? "");
+  const [editExtra, setEditExtra] = useState(repair.extraAmount > 0 ? String(repair.extraAmount) : "");
+  const [editModel, setEditModel] = useState(repair.pumpModel ?? "");
   const [savingModel, setSavingModel] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
-  // 파일
   const [fullFiles, setFullFiles] = useState<FullRepairFile[]>([]);
   const [filesLoading, setFilesLoading] = useState(false);
   const [adminUploadType, setAdminUploadType] = useState("disassembly_photo");
@@ -100,114 +96,93 @@ export default function AdminRepairsPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [deletingFileId, setDeletingFileId] = useState<number | null>(null);
 
-  // 발송 탭 — 수리 완료 서류 현황
   const [completionSummary, setCompletionSummary] = useState<{
     hasEmail: boolean; hasAmount: boolean; deliveryNote: boolean;
     inspectionCert: boolean; disassemblyPhotos: number; bankCopy: boolean;
   } | null>(null);
   const [sendingCompletion, setSendingCompletion] = useState(false);
 
-  // 블로그 탭 상태
   const [blogDraftLoading, setBlogDraftLoading] = useState(false);
   const [blogDraft, setBlogDraft] = useState<{ title: string; metaDesc: string; tags: string; content: string } | null>(null);
   const [blogPhotoUrls, setBlogPhotoUrls] = useState<string[]>([]);
   const [blogPublishing, setBlogPublishing] = useState(false);
   const [blogPublishedId, setBlogPublishedId] = useState<number | null>(null);
 
-  const load = useCallback(async () => {
-    const q = statusFilter !== "ALL" ? `?status=${statusFilter}` : "";
-    const res = await fetch(`/api/admin/repairs${q}`);
-    const data = await res.json();
-    setRepairs(data.repairs ?? []);
-    setTotal(data.total ?? 0);
-  }, [statusFilter]);
+  useEffect(() => { setCurRepair(repair); }, [repair]);
 
-  useEffect(() => { load(); }, [load]);
-
-  async function loadFiles(repairId: number) {
+  async function loadFiles() {
     setFilesLoading(true);
     try {
-      const res = await fetch(`/api/admin/repairs/${repairId}/files`);
+      const res = await fetch(`/api/admin/repairs/${repair.id}/files`);
       const data = await res.json();
       setFullFiles(data.files ?? []);
-    } finally {
-      setFilesLoading(false);
-    }
+    } finally { setFilesLoading(false); }
   }
 
-  function openDetail(r: Repair) {
-    setSelected(r);
-    setActiveTab("info");
-    setEditNote(r.adminNote ?? "");
-    setEditExtra(r.extraAmount > 0 ? String(r.extraAmount) : "");
-    setEditModel(r.pumpModel ?? "");
-    setBlogDraft(null);
-    setBlogPhotoUrls([]);
-    setBlogPublishedId(null);
-    setCompletionSummary(null);
-    loadFiles(r.id);
+  function handleToggle() {
+    if (!open) { setOpen(true); loadFiles(); }
+    else { setOpen(false); }
   }
 
-  async function deleteRepair(id: number, repairNo: string) {
-    if (!confirm(`${repairNo} 접수를 삭제하시겠습니까?\n삭제 후 복구할 수 없습니다.`)) return;
-    const res = await fetch(`/api/admin/repairs?id=${id}`, { method: "DELETE" });
-    if (res.ok) { if (selected?.id === id) setSelected(null); load(); }
-    else alert("삭제 실패");
+  async function handleDelete(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!confirm(`${repair.repairNo} 접수를 삭제하시겠습니까?\n삭제 후 복구할 수 없습니다.`)) return;
+    setDeleting(true);
+    const res = await fetch(`/api/admin/repairs?id=${repair.id}`, { method: "DELETE" });
+    if (res.ok) onRefresh();
+    else { alert("삭제 실패"); setDeleting(false); }
   }
 
   async function saveModel() {
-    if (!selected || !editModel.trim()) return;
+    if (!editModel.trim()) return;
     setSavingModel(true);
     try {
       await fetch("/api/admin/repairs", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: selected.id, status: selected.status, pumpModel: editModel.trim() }),
+        body: JSON.stringify({ id: repair.id, status: curRepair.status, pumpModel: editModel.trim() }),
       });
-      setSelected((p) => p ? { ...p, pumpModel: editModel.trim() } : null);
-      load();
+      setCurRepair(p => ({ ...p, pumpModel: editModel.trim() }));
+      onRefresh();
     } finally { setSavingModel(false); }
   }
 
   async function updateStatus(newStatus: string) {
-    if (!selected) return;
     setSaving(true);
     try {
       await fetch("/api/admin/repairs", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: selected.id, status: newStatus, adminNote: editNote || null, extraAmount: editExtra ? Number(editExtra) : 0 }),
+        body: JSON.stringify({ id: repair.id, status: newStatus, adminNote: editNote || null, extraAmount: editExtra ? Number(editExtra) : 0 }),
       });
-      setSelected((p) => p ? { ...p, status: newStatus } : null);
-      load();
+      setCurRepair(p => ({ ...p, status: newStatus }));
+      onRefresh();
     } catch { alert("저장 실패"); }
     finally { setSaving(false); }
   }
 
   async function saveNote() {
-    if (!selected) return;
     setSaving(true);
     try {
       const extra = editExtra ? Number(editExtra) : 0;
       await fetch("/api/admin/repairs", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: selected.id, status: selected.status, adminNote: editNote || null, extraAmount: extra }),
+        body: JSON.stringify({ id: repair.id, status: curRepair.status, adminNote: editNote || null, extraAmount: extra }),
       });
-      setSelected((p) => p ? { ...p, adminNote: editNote || null, extraAmount: extra } : null);
-      load();
+      setCurRepair(p => ({ ...p, adminNote: editNote || null, extraAmount: extra }));
+      onRefresh();
     } finally { setSaving(false); }
   }
 
   async function adminUpload(files: FileList) {
-    if (!selected || !files.length) return;
+    if (!files.length) return;
     setAdminUploading(true);
     try {
       for (const file of Array.from(files)) {
         const safeName = file.name.replace(/[()[\]{} ]/g, "_");
-        const pathname = `repairs/${selected.id}/${adminUploadType}/${Date.now()}-${safeName}`;
-        const base = `/api/admin/repairs/${selected.id}/multipart`;
-        // 1단계: 멀티파트 업로드 세션 초기화
+        const pathname = `repairs/${repair.id}/${adminUploadType}/${Date.now()}-${safeName}`;
+        const base = `/api/admin/repairs/${repair.id}/multipart`;
         const initRes = await fetch(base, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -215,7 +190,6 @@ export default function AdminRepairsPage() {
         });
         if (!initRes.ok) throw new Error("업로드 초기화 실패");
         const { uploadId, key } = await initRes.json();
-        // 2단계: 3.5MB 씩 청크 업로드
         const CHUNK = 3.5 * 1024 * 1024;
         const parts: { etag: string; partNumber: number }[] = [];
         let partNumber = 1;
@@ -233,7 +207,6 @@ export default function AdminRepairsPage() {
           parts.push({ etag: p.etag, partNumber: p.partNumber });
           partNumber++;
         }
-        // 3단계: 완료 + DB 저장
         const completeRes = await fetch(base, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -241,35 +214,32 @@ export default function AdminRepairsPage() {
         });
         if (!completeRes.ok) {
           const d = await completeRes.json().catch(() => ({}));
-          throw new Error(d.error ?? "완료 처리 실패");
+          throw new Error((d as { error?: string }).error ?? "완료 처리 실패");
         }
       }
-      await loadFiles(selected.id);
-      await load();
+      await loadFiles();
+      onRefresh();
     } catch (e) {
       alert(`업로드 실패: ${e instanceof Error ? e.message : "다시 시도해주세요."}`);
     } finally { setAdminUploading(false); }
   }
 
   async function deleteFile(fileId: number) {
-    if (!selected || !confirm("이 파일을 삭제하시겠습니까?")) return;
+    if (!confirm("이 파일을 삭제하시겠습니까?")) return;
     setDeletingFileId(fileId);
     try {
-      const res = await fetch(`/api/admin/repairs/${selected.id}/files?fileId=${fileId}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/repairs/${repair.id}/files?fileId=${fileId}`, { method: "DELETE" });
       if (!res.ok) throw new Error();
-      await loadFiles(selected.id);
-      await load();
+      await loadFiles();
+      onRefresh();
     } catch { alert("삭제 실패"); }
     finally { setDeletingFileId(null); }
   }
 
   async function generateBlogDraft() {
-    if (!selected) return;
-    setBlogDraftLoading(true);
-    setBlogDraft(null);
-    setBlogPublishedId(null);
+    setBlogDraftLoading(true); setBlogDraft(null); setBlogPublishedId(null);
     try {
-      const res = await fetch(`/api/admin/repairs/${selected.id}/blog-draft`);
+      const res = await fetch(`/api/admin/repairs/${repair.id}/blog-draft`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "서버 오류");
       setBlogDraft(data.draft);
@@ -279,10 +249,10 @@ export default function AdminRepairsPage() {
   }
 
   async function publishBlogDraft() {
-    if (!selected || !blogDraft) return;
+    if (!blogDraft) return;
     setBlogPublishing(true);
     try {
-      const res = await fetch(`/api/admin/repairs/${selected.id}/blog-draft`, {
+      const res = await fetch(`/api/admin/repairs/${repair.id}/blog-draft`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...blogDraft, photoUrls: blogPhotoUrls }),
@@ -294,289 +264,164 @@ export default function AdminRepairsPage() {
     finally { setBlogPublishing(false); }
   }
 
-  const fileCount = (r: Repair, type: string) => r.files.filter((f) => f.fileType === type).length;
+  const st = STATUS_LABELS[curRepair.status];
+  const photoCount = curRepair.files.filter(f => f.fileType === "disassembly_photo").length;
+  const certCount = curRepair.files.filter(f => f.fileType === "inspection_cert").length;
 
   return (
-    <div className="flex overflow-hidden" style={{ height: "calc(100vh - 100px)" }}>
-
-      {/* 왼쪽: 목록 */}
-      <div className="flex-1 min-w-0 overflow-y-auto p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-[22px] font-bold tracking-tight">수리 접수 현황</h1>
-            <p className="text-[13px] text-dim mt-0.5">총 {total}건</p>
+    <div className="border hair bg-paper">
+      {/* 헤더 행 */}
+      <div className="p-4 flex items-start justify-between gap-4 cursor-pointer" onClick={handleToggle}>
+        <div className="space-y-0.5 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="mono text-[11px] font-bold text-smblue">{curRepair.repairNo}</span>
+            <span className={`mono text-[10px] px-1.5 py-0.5 ${st?.color ?? "bg-ink/5 text-ink/60"}`}>
+              {st?.label ?? curRepair.status}
+            </span>
+            {curRepair.aiConfidence === "low" && (
+              <span className="text-[9px] bg-amber-100 text-amber-700 px-1.5 py-0.5 font-semibold">모델확인필요</span>
+            )}
+            {photoCount > 0 && <span className="text-[10px] bg-blue-50 text-blue-600 px-1.5 py-0.5">사진 {photoCount}</span>}
+            {certCount > 0 && <span className="text-[10px] bg-green-50 text-green-600 px-1.5 py-0.5">성적서 {certCount}</span>}
           </div>
-          <div className="flex gap-2">
-            <a href="/admin/repair-kits" className="text-[12px] border border-line px-3 py-1.5 hover:border-ink transition mono text-dim">
-              수리키트 설정 →
-            </a>
-            <button onClick={load} className="text-[12px] border border-line px-3 py-1.5 hover:border-ink transition mono">
-              새로고침
-            </button>
+          <div className="text-[15px] font-semibold">{curRepair.pumpMaker} {curRepair.pumpModel || "모델 미확인"}</div>
+          <div className="text-[12px] dim">
+            {curRepair.company && <span className="mr-2">{curRepair.company}</span>}
+            <span className="mr-2">{curRepair.contactName}</span>
+            <span className="mono">{formatDate(curRepair.createdAt)}</span>
+            {curRepair.totalAmount > 0 && (
+              <span className="ml-2 font-semibold text-ink">{formatPrice(curRepair.totalAmount)}</span>
+            )}
           </div>
         </div>
-
-        {/* 상태 필터 */}
-        <div className="flex gap-2 mb-6 flex-wrap">
-          {["ALL", ...STATUS_FLOW, "CANCELLED"].map((s) => (
-            <button
-              key={s}
-              onClick={() => setStatusFilter(s)}
-              className={`text-[11px] mono px-3 py-1.5 border transition ${
-                statusFilter === s ? "bg-ink text-paper border-ink" : "border-line hover:border-ink text-dim"
-              }`}
-            >
-              {s === "ALL" ? "전체" : STATUS_LABELS[s]?.label}
-            </button>
-          ))}
-        </div>
-
-        {/* 테이블 */}
-        <div className="border border-line overflow-x-auto">
-          <table className="w-full text-[13px]">
-            <thead>
-              <tr className="border-b border-line bg-paper/50">
-                <th className="text-left px-4 py-3 font-medium text-dim mono text-[11px]">접수번호</th>
-                <th className="text-left px-4 py-3 font-medium text-dim mono text-[11px]">장비</th>
-                <th className="text-left px-4 py-3 font-medium text-dim mono text-[11px]">접수자</th>
-                <th className="text-left px-4 py-3 font-medium text-dim mono text-[11px]">상태</th>
-                <th className="text-right px-4 py-3 font-medium text-dim mono text-[11px]">금액</th>
-                <th className="text-left px-4 py-3 font-medium text-dim mono text-[11px]">파일</th>
-                <th className="text-left px-4 py-3 font-medium text-dim mono text-[11px]">접수일</th>
-              </tr>
-            </thead>
-            <tbody>
-              {repairs.length === 0 && (
-                <tr><td colSpan={7} className="text-center py-12 text-dim text-[13px]">접수 내역이 없습니다.</td></tr>
-              )}
-              {repairs.map((r) => {
-                const st = STATUS_LABELS[r.status];
-                const photoCount = fileCount(r, "disassembly_photo");
-                const certCount = fileCount(r, "inspection_cert");
-                return (
-                  <tr
-                    key={r.id}
-                    onClick={() => openDetail(r)}
-                    className="border-b border-line hover:bg-paper/80 cursor-pointer transition group"
-                  >
-                    <td className="px-4 py-3 mono font-semibold text-[12px]">{r.repairNo}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">{r.pumpModel || "미확인"}</span>
-                        {r.aiConfidence === "low" && (
-                          <span className="text-[9px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-semibold">모델확인필요</span>
-                        )}
-                      </div>
-                      <div className="text-[11px] text-dim">{r.pumpMaker}</div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div>{r.contactName}</div>
-                      {r.company && <div className="text-[11px] text-dim">{r.company}</div>}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${st?.color}`}>{st?.label}</span>
-                    </td>
-                    <td className="px-4 py-3 text-right tabular">
-                      {r.totalAmount > 0 ? (
-                        <div>
-                          <div className="font-semibold">{formatPrice(r.totalAmount)}</div>
-                          {r.extraAmount > 0 && <div className="text-[10px] text-dim">+{formatPrice(r.extraAmount)}</div>}
-                        </div>
-                      ) : <span className="text-dim text-[11px]">상담필요</span>}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex gap-1.5">
-                        {photoCount > 0 && <span className="text-[10px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">사진 {photoCount}</span>}
-                        {certCount > 0 && <span className="text-[10px] bg-green-50 text-green-600 px-1.5 py-0.5 rounded">성적서 {certCount}</span>}
-                        {photoCount === 0 && certCount === 0 && <span className="text-[10px] text-dim">—</span>}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-dim text-[11px] mono">
-                      <div className="flex items-center gap-2">
-                        <span>{formatDate(r.createdAt)}</span>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); deleteRepair(r.id, r.repairNo); }}
-                          className="opacity-0 group-hover:opacity-100 transition-opacity text-[10px] text-red-500 hover:text-red-700 border border-red-200 hover:border-red-400 px-1.5 py-0.5"
-                        >삭제</button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+        <div className="flex items-center gap-2 shrink-0">
+          <button onClick={handleDelete} disabled={deleting}
+            className="mono text-[10px] text-edred/50 hover:text-edred border border-transparent hover:border-edred/30 px-2 py-1 transition-colors disabled:opacity-40">
+            {deleting ? "..." : "삭제"}
+          </button>
+          <span className="text-[18px] dim">{open ? "▲" : "▼"}</span>
         </div>
       </div>
 
-      {/* 오른쪽: 상세 패널 */}
-      {selected && (
-        <div className="w-[460px] shrink-0 border-l border-line overflow-y-auto bg-paper flex flex-col">
-
-          {/* 패널 헤더 */}
-          <div className="sticky top-0 bg-paper border-b border-line px-5 py-4 z-10">
-            <div className="flex items-start justify-between mb-3">
-              <div>
-                <div className="mono text-[10px] text-dim mb-0.5">{selected.repairNo} · {formatDate(selected.createdAt)}</div>
-                <div className="font-bold text-[17px]">{selected.pumpMaker} {selected.pumpModel || "모델 미확인"}</div>
-                {selected.company && <div className="text-[12px] text-dim mt-0.5">{selected.company} · {selected.contactName}</div>}
-              </div>
-              <button onClick={() => setSelected(null)} className="text-dim hover:text-ink text-xl leading-none mt-0.5">×</button>
-            </div>
-
-            {/* 탭 */}
-            <div className="flex gap-0 border border-line">
-              {(["info", "work", "send", "blog"] as Tab[]).map((tab) => {
-                const labels: Record<Tab, string> = { info: "접수정보", work: "수리작업", send: "발송", blog: "블로그" };
-                return (
-                  <button
-                    key={tab}
-                    onClick={() => { if (tab === "send") setCompletionSummary(null); setActiveTab(tab); }}
-                    className={`flex-1 py-2 text-[11px] mono font-medium transition border-r last:border-r-0 border-line ${
-                      activeTab === tab ? "bg-ink text-paper" : "text-dim hover:text-ink hover:bg-ink/5"
-                    }`}
-                  >
-                    {labels[tab]}
-                  </button>
-                );
-              })}
-            </div>
+      {/* 펼쳐진 상세 */}
+      {open && (
+        <div className="border-t hair">
+          {/* 탭 */}
+          <div className="flex gap-0 border-b hair">
+            {(["info", "work", "send", "blog"] as Tab[]).map((tab) => {
+              const labels: Record<Tab, string> = { info: "접수정보", work: "수리작업", send: "발송", blog: "블로그" };
+              return (
+                <button key={tab}
+                  onClick={() => { if (tab === "send") setCompletionSummary(null); setActiveTab(tab); }}
+                  className={`flex-1 py-2 text-[11px] mono font-medium transition border-r last:border-r-0 hair ${
+                    activeTab === tab ? "bg-ink text-paper" : "text-dim hover:text-ink hover:bg-ink/5"
+                  }`}>
+                  {labels[tab]}
+                </button>
+              );
+            })}
           </div>
 
-          {/* 탭 콘텐츠 */}
-          <div className="flex-1 px-5 py-5 space-y-5">
+          <div className="px-5 py-5 space-y-5">
 
-            {/* ── 접수정보 탭 ── */}
+            {/* ── 접수정보 ── */}
             {activeTab === "info" && (
               <>
-                {/* AI 인식 경고 */}
-                {selected.aiConfidence === "low" && (
+                {curRepair.aiConfidence === "low" && (
                   <div className="border border-amber-300 bg-amber-50 p-4 text-[13px]">
                     <div className="mono text-[9px] text-amber-700 tracking-widest mb-2">AI 인식 실패 — 모델명 확인 필요</div>
-                    <div className="text-[11px] text-dim mb-3">원본: {selected.aiModelRaw ?? "—"}</div>
+                    <div className="text-[11px] text-dim mb-3">원본: {curRepair.aiModelRaw ?? "—"}</div>
                     <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={editModel}
-                        onChange={(e) => setEditModel(e.target.value)}
+                      <input type="text" value={editModel} onChange={e => setEditModel(e.target.value)}
                         placeholder="예: XDS35iE, nXDS10i"
-                        className="flex-1 border border-line px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-white"
-                      />
-                      <button
-                        onClick={saveModel}
-                        disabled={savingModel || !editModel.trim()}
-                        className="px-4 py-2 bg-ink text-paper text-[12px] font-semibold hover:bg-edred transition disabled:opacity-40"
-                      >
+                        className="flex-1 border border-line px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-white" />
+                      <button onClick={saveModel} disabled={savingModel || !editModel.trim()}
+                        className="px-4 py-2 bg-ink text-paper text-[12px] font-semibold hover:bg-edred transition disabled:opacity-40">
                         {savingModel ? "..." : "저장"}
                       </button>
                     </div>
                   </div>
                 )}
-
-                {/* 장비 정보 */}
                 <Section title="장비">
                   <Row label="모델" value={
-                    selected.aiConfidence !== "low" ? (
+                    curRepair.aiConfidence !== "low" ? (
                       <div className="flex gap-2 items-center">
-                        <input
-                          type="text"
-                          value={editModel}
-                          onChange={(e) => setEditModel(e.target.value)}
-                          className="flex-1 border border-line px-2 py-1 text-[13px] focus:outline-none focus:border-ink bg-paper"
-                        />
-                        {editModel !== selected.pumpModel && (
-                          <button onClick={saveModel} disabled={savingModel} className="text-[11px] px-2 py-1 bg-ink text-paper hover:bg-edred transition disabled:opacity-40">
+                        <input type="text" value={editModel} onChange={e => setEditModel(e.target.value)}
+                          className="flex-1 border border-line px-2 py-1 text-[13px] focus:outline-none focus:border-ink bg-paper" />
+                        {editModel !== curRepair.pumpModel && (
+                          <button onClick={saveModel} disabled={savingModel}
+                            className="text-[11px] px-2 py-1 bg-ink text-paper hover:bg-edred transition disabled:opacity-40">
                             {savingModel ? "..." : "저장"}
                           </button>
                         )}
                       </div>
-                    ) : selected.pumpModel
+                    ) : curRepair.pumpModel
                   } />
-                  <Row label="제조사" value={selected.pumpMaker} />
-                  {selected.pumpSerial && <Row label="시리얼" value={selected.pumpSerial} />}
-                  <Row label="종류" value={selected.pumpFamily} />
+                  <Row label="제조사" value={curRepair.pumpMaker} />
+                  {curRepair.pumpSerial && <Row label="시리얼" value={curRepair.pumpSerial} />}
+                  <Row label="종류" value={curRepair.pumpFamily} />
                 </Section>
-
-                {/* 증상 */}
                 <Section title="증상">
                   <div className="flex flex-wrap gap-1.5">
-                    {selected.symptoms.map((s) => (
+                    {curRepair.symptoms.map(s => (
                       <span key={s} className="text-[11px] bg-ink/5 border border-line px-2 py-0.5">
                         {SYMPTOM_KO[s] ?? s}
                       </span>
                     ))}
                   </div>
-                  {selected.symptomNote && <p className="text-[12px] text-dim mt-2">{selected.symptomNote}</p>}
+                  {curRepair.symptomNote && <p className="text-[12px] text-dim mt-2">{curRepair.symptomNote}</p>}
                 </Section>
-
-                {/* 연락처 */}
                 <Section title="연락처">
-                  <Row label="담당자" value={selected.contactName} />
-                  {selected.company && <Row label="회사" value={selected.company} />}
+                  <Row label="담당자" value={curRepair.contactName} />
+                  {curRepair.company && <Row label="회사" value={curRepair.company} />}
                   <Row label="전화" value={
-                    <a href={`tel:${selected.contactPhone}`} className="text-edred hover:underline">{selected.contactPhone}</a>
+                    <a href={`tel:${curRepair.contactPhone}`} className="text-edred hover:underline">{curRepair.contactPhone}</a>
                   } />
-                  {selected.contactEmail && (
+                  {curRepair.contactEmail && (
                     <Row label="이메일" value={
-                      <a href={`mailto:${selected.contactEmail}`} className="text-edred hover:underline">{selected.contactEmail}</a>
+                      <a href={`mailto:${curRepair.contactEmail}`} className="text-edred hover:underline">{curRepair.contactEmail}</a>
                     } />
                   )}
                 </Section>
               </>
             )}
 
-            {/* ── 수리작업 탭 ── */}
+            {/* ── 수리작업 ── */}
             {activeTab === "work" && (
               <>
-                {/* 상태 변경 */}
                 <Section title="진행 상태">
                   <div className="flex gap-2">
-                    {STATUS_FLOW.map((s) => (
-                      <button
-                        key={s}
-                        disabled={saving}
-                        onClick={() => updateStatus(s)}
+                    {STATUS_FLOW.map(s => (
+                      <button key={s} disabled={saving} onClick={() => updateStatus(s)}
                         className={`flex-1 py-2 text-[12px] border transition font-medium ${
-                          selected.status === s || (s === "IN_PROGRESS" && ["IN_PROGRESS","INSPECTION","COMPLETED"].includes(selected.status))
+                          curRepair.status === s || (s === "IN_PROGRESS" && ["IN_PROGRESS","INSPECTION","COMPLETED"].includes(curRepair.status))
                             ? "bg-ink text-paper border-ink"
                             : "border-line hover:border-ink text-dim hover:text-ink"
-                        }`}
-                      >
+                        }`}>
                         {STATUS_LABELS[s].label}
                       </button>
                     ))}
                   </div>
                   <p className="text-[11px] text-dim mt-2">수리중·납품완료 선택 시 고객에게 SMS가 발송됩니다.</p>
                 </Section>
-
-                {/* 금액 */}
                 <Section title="금액">
-                  <Row label="기본 수리비" value={selected.baseAmount > 0 ? formatPrice(selected.baseAmount) : "상담필요"} />
+                  <Row label="기본 수리비" value={curRepair.baseAmount > 0 ? formatPrice(curRepair.baseAmount) : "상담필요"} />
                   <div className="mt-2">
                     <label className="text-[11px] text-dim block mb-1">추가 파트비 (원)</label>
-                    <input
-                      type="number"
-                      value={editExtra}
-                      onChange={(e) => setEditExtra(e.target.value)}
-                      placeholder="0"
-                      className="w-full border border-line px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-paper"
-                    />
+                    <input type="number" value={editExtra} onChange={e => setEditExtra(e.target.value)}
+                      placeholder="0" className="w-full border border-line px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-paper" />
                   </div>
                   <div className="flex items-center justify-between pt-3 border-t border-line font-bold mt-2">
                     <span className="text-[13px]">합계</span>
                     <span className="tabular text-[16px]">
-                      {formatPrice(selected.baseAmount + (editExtra ? Number(editExtra) : selected.extraAmount))}
+                      {formatPrice(curRepair.baseAmount + (editExtra ? Number(editExtra) : curRepair.extraAmount))}
                     </span>
                   </div>
                 </Section>
-
-                {/* 파일 업로드 */}
                 <Section title="파일 업로드">
                   <div className="mb-3">
-                    <select
-                      value={adminUploadType}
-                      onChange={(e) => setAdminUploadType(e.target.value)}
-                      className="w-full border border-line px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-paper"
-                    >
+                    <select value={adminUploadType} onChange={e => setAdminUploadType(e.target.value)}
+                      className="w-full border border-line px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-paper">
                       <option value="disassembly_photo">분해 사진</option>
                       <option value="inspection_cert">검사 성적서</option>
                       <option value="quote_pdf">견적서 PDF</option>
@@ -584,29 +429,20 @@ export default function AdminRepairsPage() {
                       <option value="bank_copy">통장 사본</option>
                     </select>
                   </div>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    className="hidden"
-                    multiple
-                    disabled={adminUploading}
-                    onChange={(e) => e.target.files && adminUpload(e.target.files)}
-                  />
+                  <input ref={fileInputRef} type="file" className="hidden" multiple disabled={adminUploading}
+                    onChange={e => e.target.files && adminUpload(e.target.files)} />
                   <div
                     onClick={() => !adminUploading && fileInputRef.current?.click()}
-                    onDragOver={(e) => { e.preventDefault(); if (!adminUploading) setIsDragging(true); }}
+                    onDragOver={e => { e.preventDefault(); if (!adminUploading) setIsDragging(true); }}
                     onDragLeave={() => setIsDragging(false)}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      setIsDragging(false);
+                    onDrop={e => {
+                      e.preventDefault(); setIsDragging(false);
                       if (!adminUploading && e.dataTransfer.files.length) adminUpload(e.dataTransfer.files);
                     }}
                     className={`flex flex-col items-center justify-center border-2 border-dashed py-5 transition select-none ${
-                      adminUploading
-                        ? "border-ink/30 bg-ink/5 cursor-wait"
-                        : isDragging
-                          ? "border-smblue bg-smblue/5 cursor-copy"
-                          : "border-line hover:border-ink hover:bg-ink/5 cursor-pointer"
+                      adminUploading ? "border-ink/30 bg-ink/5 cursor-wait"
+                        : isDragging ? "border-smblue bg-smblue/5 cursor-copy"
+                        : "border-line hover:border-ink hover:bg-ink/5 cursor-pointer"
                     }`}
                   >
                     {adminUploading ? (
@@ -628,8 +464,6 @@ export default function AdminRepairsPage() {
                     )}
                   </div>
                 </Section>
-
-                {/* 파일 목록 */}
                 <Section title="업로드된 파일">
                   {filesLoading ? (
                     <div className="text-[12px] text-dim animate-pulse">로딩 중...</div>
@@ -637,7 +471,7 @@ export default function AdminRepairsPage() {
                     <div className="text-[12px] text-dim">업로드된 파일이 없습니다.</div>
                   ) : (
                     <div className="space-y-1.5">
-                      {fullFiles.map((f) => (
+                      {fullFiles.map(f => (
                         <div key={f.id} className="flex items-center gap-2 border border-line px-3 py-2">
                           <span className="text-[10px] text-dim shrink-0 w-16">{FILE_TYPE_KO[f.fileType] ?? f.fileType}</span>
                           <span className="flex-1 text-[12px] truncate">{f.fileName}</span>
@@ -645,11 +479,8 @@ export default function AdminRepairsPage() {
                             <a href={f.fileUrl} target="_blank" rel="noopener noreferrer"
                               className="text-[10px] text-smblue hover:underline shrink-0">보기</a>
                           )}
-                          <button
-                            onClick={() => deleteFile(f.id)}
-                            disabled={deletingFileId === f.id}
-                            className="text-[10px] text-red-400 hover:text-red-600 shrink-0 disabled:opacity-40"
-                          >
+                          <button onClick={() => deleteFile(f.id)} disabled={deletingFileId === f.id}
+                            className="text-[10px] text-red-400 hover:text-red-600 shrink-0 disabled:opacity-40">
                             {deletingFileId === f.id ? "…" : "삭제"}
                           </button>
                         </div>
@@ -657,51 +488,34 @@ export default function AdminRepairsPage() {
                     </div>
                   )}
                 </Section>
-
-                {/* 관리자 메모 + 저장 */}
                 <Section title="관리자 메모">
-                  <textarea
-                    rows={3}
-                    value={editNote}
-                    onChange={(e) => setEditNote(e.target.value)}
+                  <textarea rows={3} value={editNote} onChange={e => setEditNote(e.target.value)}
                     placeholder="수리 원인, 교체 부품 등 내부 메모 (고객에게 보이지 않음)"
-                    className="w-full border border-line px-3 py-2.5 text-[13px] focus:outline-none focus:border-ink bg-paper resize-none"
-                  />
-                  <button
-                    onClick={saveNote}
-                    disabled={saving}
-                    className="w-full mt-3 py-3 bg-ink text-paper text-[13px] font-semibold hover:bg-edred transition disabled:opacity-40"
-                  >
+                    className="w-full border border-line px-3 py-2.5 text-[13px] focus:outline-none focus:border-ink bg-paper resize-none" />
+                  <button onClick={saveNote} disabled={saving}
+                    className="w-full mt-3 py-3 bg-ink text-paper text-[13px] font-semibold hover:bg-edred transition disabled:opacity-40">
                     {saving ? "저장 중..." : "저장"}
                   </button>
                 </Section>
               </>
             )}
 
-            {/* ── 발송 탭 ── */}
+            {/* ── 발송 ── */}
             {activeTab === "send" && (
               <>
-                {/* 1단계: 견적 단계 */}
                 <Section title="1단계 — 수리 견적서">
-                  <p className="text-[12px] text-dim mb-3">
-                    수리 견적서 PDF만 발송합니다. 수리 진행 여부 확인 단계에서 사용하세요.
-                  </p>
-                  {selected.totalAmount <= 0 && (
+                  <p className="text-[12px] text-dim mb-3">수리 견적서 PDF만 발송합니다. 수리 진행 여부 확인 단계에서 사용하세요.</p>
+                  {curRepair.totalAmount <= 0 && (
                     <p className="text-[12px] text-amber-600 mb-3">수리작업 탭에서 금액을 먼저 저장하세요.</p>
                   )}
                   <div className="flex gap-2">
-                    <a
-                      href={`/api/admin/repairs/${selected.id}/send-quote`}
-                      target="_blank" rel="noopener noreferrer"
-                      className="border border-line px-4 py-2 text-[12px] hover:bg-ink/5 transition"
-                    >
-                      PDF 저장
-                    </a>
-                    {selected.contactEmail ? (
+                    <a href={`/api/admin/repairs/${repair.id}/send-quote`} target="_blank" rel="noopener noreferrer"
+                      className="border border-line px-4 py-2 text-[12px] hover:bg-ink/5 transition">PDF 저장</a>
+                    {curRepair.contactEmail ? (
                       <button
                         onClick={async () => {
-                          if (!confirm(`${selected.contactEmail}으로 수리 견적서를 발송하시겠습니까?`)) return;
-                          const res = await fetch(`/api/admin/repairs/${selected.id}/send-quote`, {
+                          if (!confirm(`${curRepair.contactEmail}으로 수리 견적서를 발송하시겠습니까?`)) return;
+                          const res = await fetch(`/api/admin/repairs/${repair.id}/send-quote`, {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({ adminNote: editNote }),
@@ -710,33 +524,21 @@ export default function AdminRepairsPage() {
                           if (res.ok) alert(`발송 완료: ${data.sentTo}`);
                           else alert(`발송 실패: ${data.error}`);
                         }}
-                        className="bg-smblue text-paper px-4 py-2 text-[12px] hover:brightness-110 transition"
-                      >
+                        className="bg-smblue text-paper px-4 py-2 text-[12px] hover:brightness-110 transition">
                         견적서 발송
                       </button>
-                    ) : (
-                      <span className="text-[11px] text-dim self-center">이메일 없음</span>
-                    )}
+                    ) : <span className="text-[11px] text-dim self-center">이메일 없음</span>}
                   </div>
                 </Section>
-
-                {/* 2단계: 수리 완료 서류 */}
                 <Section title="2단계 — 수리 완료 서류 일괄 발송">
-                  <p className="text-[12px] text-dim mb-3">
-                    수리 완료 후 4가지 서류를 한 번에 발송합니다.
-                  </p>
-
-                  {/* 발송 항목 현황 */}
+                  <p className="text-[12px] text-dim mb-3">수리 완료 후 4가지 서류를 한 번에 발송합니다.</p>
                   {completionSummary === null ? (
-                    <button
-                      onClick={async () => {
-                        const res = await fetch(`/api/admin/repairs/${selected.id}/send-completion`);
-                        const data = await res.json();
-                        if (!res.ok) { alert(`오류: ${data.error ?? "현황 조회 실패"}`); return; }
-                        setCompletionSummary(data);
-                      }}
-                      className="w-full py-2 border border-line text-[12px] text-dim hover:border-ink hover:text-ink transition"
-                    >
+                    <button onClick={async () => {
+                      const res = await fetch(`/api/admin/repairs/${repair.id}/send-completion`);
+                      const data = await res.json();
+                      if (!res.ok) { alert(`오류: ${data.error ?? "현황 조회 실패"}`); return; }
+                      setCompletionSummary(data);
+                    }} className="w-full py-2 border border-line text-[12px] text-dim hover:border-ink hover:text-ink transition">
                       파일 현황 확인 (클릭 시 최신 정보 조회)
                     </button>
                   ) : (
@@ -746,7 +548,7 @@ export default function AdminRepairsPage() {
                         { label: "검사 성적서", ok: completionSummary.inspectionCert, note: "업로드 파일" },
                         { label: "분해 사진", ok: completionSummary.disassemblyPhotos > 0, note: completionSummary.disassemblyPhotos > 0 ? `${completionSummary.disassemblyPhotos}장` : "미업로드" },
                         { label: "통장 사본", ok: completionSummary.bankCopy, note: "업로드 파일" },
-                      ].map((item) => (
+                      ].map(item => (
                         <div key={item.label} className="flex items-center gap-3 text-[12px]">
                           <span className={item.ok ? "text-green-600" : "text-red-400"}>{item.ok ? "✓" : "✗"}</span>
                           <span className="w-24 font-medium">{item.label}</span>
@@ -758,7 +560,6 @@ export default function AdminRepairsPage() {
                       ))}
                     </div>
                   )}
-
                   {completionSummary && (
                     <>
                       {!completionSummary.hasEmail && <p className="text-[12px] text-red-500 mb-2">이메일 없음 — 접수정보 탭 확인</p>}
@@ -766,69 +567,60 @@ export default function AdminRepairsPage() {
                       <button
                         disabled={sendingCompletion || !completionSummary.hasEmail || !completionSummary.hasAmount}
                         onClick={async () => {
-                          if (!confirm(`${selected.contactEmail}으로 수리 완료 서류를 발송하시겠습니까?`)) return;
+                          if (!confirm(`${curRepair.contactEmail}으로 수리 완료 서류를 발송하시겠습니까?`)) return;
                           setSendingCompletion(true);
                           try {
-                            const res = await fetch(`/api/admin/repairs/${selected.id}/send-completion`, { method: "POST" });
+                            const res = await fetch(`/api/admin/repairs/${repair.id}/send-completion`, { method: "POST" });
                             const data = await res.json();
                             if (res.ok) {
                               const msg = data.warning
                                 ? `발송 완료\n수신: ${data.sentTo}\n첨부: ${data.attachedFiles?.join(", ")}\n\n⚠️ ${data.warning}`
                                 : `발송 완료\n수신: ${data.sentTo}\n첨부: ${data.attachedFiles?.join(", ")}`;
-                              alert(msg);
-                              load();
-                            } else {
-                              alert(`발송 실패: ${data.error}`);
-                            }
-                          } finally {
-                            setSendingCompletion(false);
-                          }
+                              alert(msg); onRefresh();
+                            } else { alert(`발송 실패: ${data.error}`); }
+                          } finally { setSendingCompletion(false); }
                         }}
-                        className="w-full py-3 bg-ink text-paper text-[12px] font-semibold hover:bg-edred transition disabled:opacity-40"
-                      >
+                        className="w-full py-3 bg-ink text-paper text-[12px] font-semibold hover:bg-edred transition disabled:opacity-40">
                         {sendingCompletion ? "발송 중..." : "수리 완료 서류 일괄 발송"}
                       </button>
                     </>
                   )}
-
-                  {selected.docsSentAt && (
+                  {curRepair.docsSentAt && (
                     <p className="mono text-[10px] text-dim mt-2">
-                      최근 발송: {formatDate(selected.docsSentAt)} ({selected.docsSentCount}회)
+                      최근 발송: {formatDate(curRepair.docsSentAt)} ({curRepair.docsSentCount}회)
                     </p>
                   )}
                 </Section>
               </>
             )}
 
-            {/* ── 블로그 탭 ── */}
+            {/* ── 블로그 ── */}
             {activeTab === "blog" && (
               <Section title="수리 사례 블로그">
                 {blogPublishedId ? (
                   <div className="space-y-2">
                     <p className="text-[12px] text-green-700 font-semibold">블로그에 발행되었습니다.</p>
                     <a href={`/blog/${blogPublishedId}`} target="_blank" rel="noopener noreferrer"
-                      className="text-[12px] text-edred hover:underline">
-                      발행된 글 확인하기 →
-                    </a>
+                      className="text-[12px] text-edred hover:underline">발행된 글 확인하기 →</a>
                   </div>
                 ) : blogDraft ? (
                   <div className="space-y-3">
                     <div>
                       <label className="text-[11px] text-dim block mb-1">제목</label>
                       <input type="text" value={blogDraft.title}
-                        onChange={(e) => setBlogDraft((d) => d ? { ...d, title: e.target.value } : null)}
+                        onChange={e => setBlogDraft(d => d ? { ...d, title: e.target.value } : null)}
                         className="w-full border border-line px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-paper" />
                     </div>
                     <div>
                       <label className="text-[11px] text-dim block mb-1">메타 설명</label>
                       <input type="text" value={blogDraft.metaDesc}
-                        onChange={(e) => setBlogDraft((d) => d ? { ...d, metaDesc: e.target.value } : null)}
+                        onChange={e => setBlogDraft(d => d ? { ...d, metaDesc: e.target.value } : null)}
                         className="w-full border border-line px-3 py-2 text-[12px] focus:outline-none focus:border-ink bg-paper" />
                     </div>
                     <div>
                       <label className="text-[11px] text-dim block mb-1">태그</label>
                       <input type="text" value={blogDraft.tags}
-                        onChange={(e) => setBlogDraft((d) => d ? { ...d, tags: e.target.value } : null)}
+                        onChange={e => setBlogDraft(d => d ? { ...d, tags: e.target.value } : null)}
                         className="w-full border border-line px-3 py-2 text-[12px] focus:outline-none focus:border-ink bg-paper" />
                     </div>
                     <div>
@@ -837,9 +629,7 @@ export default function AdminRepairsPage() {
                         {blogDraft.content.slice(0, 400)}…
                       </div>
                     </div>
-                    {blogPhotoUrls.length > 0 && (
-                      <p className="text-[11px] text-dim">분해 사진 {blogPhotoUrls.length}장 포함 예정</p>
-                    )}
+                    {blogPhotoUrls.length > 0 && <p className="text-[11px] text-dim">분해 사진 {blogPhotoUrls.length}장 포함 예정</p>}
                     <div className="flex gap-2 pt-1">
                       <button onClick={publishBlogDraft} disabled={blogPublishing}
                         className="flex-1 py-2.5 bg-edred text-paper text-[12px] font-semibold hover:bg-edred3 transition disabled:opacity-40">
@@ -874,6 +664,76 @@ export default function AdminRepairsPage() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ── 메인 페이지 ──────────────────────────────────
+export default function AdminRepairsPage() {
+  const [repairs, setRepairs] = useState<Repair[]>([]);
+  const [total, setTotal] = useState(0);
+  const [statusFilter, setStatusFilter] = useState("ALL");
+
+  const load = useCallback(async () => {
+    const q = statusFilter !== "ALL" ? `?status=${statusFilter}` : "";
+    const res = await fetch(`/api/admin/repairs${q}`);
+    const data = await res.json();
+    setRepairs(data.repairs ?? []);
+    setTotal(data.total ?? 0);
+  }, [statusFilter]);
+
+  useEffect(() => { load(); }, [load]);
+
+  return (
+    <div className="px-4 sm:px-6 py-6 sm:py-10 max-w-[1200px] mx-auto space-y-6">
+      <div className="flex items-end justify-between gap-4">
+        <div>
+          <div className="mono text-[11px] dim tracking-[0.15em] uppercase mb-3">— 온라인 수리접수</div>
+          <h1 className="display text-[28px] sm:text-[40px] leading-none text-ink">
+            수리 <span className="italic text-smblue">현황</span>
+          </h1>
+          <p className="mt-3 text-[13px] dim">온라인 수리접수 관리 · 총 {total}건</p>
+        </div>
+        <div className="flex gap-2">
+          <a href="/admin/repair-kits"
+            className="text-[12px] border hair px-3 py-1.5 hover:border-ink transition mono text-dim">
+            수리키트 설정 →
+          </a>
+          <button onClick={load} className="text-[12px] border hair px-3 py-1.5 hover:border-ink transition mono">
+            새로고침
+          </button>
+        </div>
+      </div>
+
+      {/* 상태 필터 */}
+      <div className="flex gap-2 flex-wrap">
+        {["ALL", ...STATUS_FLOW, "CANCELLED"].map(s => (
+          <button key={s} onClick={() => setStatusFilter(s)}
+            className={`text-[11px] mono px-3 py-1.5 border transition ${
+              statusFilter === s ? "bg-ink text-paper border-ink" : "border-line hover:border-ink text-dim"
+            }`}>
+            {s === "ALL" ? "전체" : STATUS_LABELS[s]?.label}
+          </button>
+        ))}
+      </div>
+
+      {/* 목록 */}
+      <div>
+        <div className="mono text-[11px] dim tracking-[0.12em] uppercase mb-3">
+          — 접수 이력 ({repairs.length}건)
+        </div>
+        {repairs.length === 0 ? (
+          <div className="border hair bg-paper/50 px-6 py-10 text-center text-[13px] dim">
+            접수 내역이 없습니다.
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {repairs.map(r => (
+              <RepairRow key={r.id} repair={r} onRefresh={load} />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
