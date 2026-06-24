@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, useCallback, useRef } from "react";
+import { upload } from "@vercel/blob/client";
 
 type Company = { id: number; companyName: string };
 type InspectionItem = {
@@ -406,30 +407,37 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone }: {
   }
 
   async function handleAdminUpload(file: File, type: "zip" | "excel") {
-    // Fix #7: 클라이언트 사이드 용량 체크 (Vercel 4.5MB 제한)
-    if (file.size > 4 * 1024 * 1024) {
-      setAdminUploadMsg("⚠️ 파일 크기가 4MB를 초과합니다. 압축을 더 하거나 분할 업로드해 주세요.");
-      return;
-    }
     setAdminUploading(true);
     setAdminUploadMsg("");
     try {
+      if (type === "zip") {
+        // 브라우저 → Blob 직접 업로드 (용량 제한 없음)
+        await upload(`offline-repairs/${job.id}/admin_${Date.now()}_${file.name}`, file, {
+          access: "public",
+          handleUploadUrl: `/api/admin/offline-repairs/${job.id}/blob-upload`,
+        });
+        setAdminUploadMsg("✓ 파일 업로드 완료");
+        onRefresh();
+        return;
+      }
+      // 엑셀 — 서버 경유 (파싱 필요)
       const form = new FormData();
       form.append("file", file);
       const res = await fetch(`/api/admin/offline-repairs/${job.id}/upload`, { method: "POST", body: form });
-      const data = await res.json();
-      if (!res.ok) { setAdminUploadMsg(`오류: ${data.error}`); return; }
-      // Fix #2: 서버에서 warning 반환 시 오류로 표시
+      let data: { error?: string; warning?: string; matched?: number };
+      try { data = await res.json(); } catch { throw new Error("서버 응답 오류. 다시 시도해주세요."); }
+      if (!res.ok) { setAdminUploadMsg(`오류: ${data.error ?? "알 수 없는 오류"}`); return; }
       if (data.warning) {
         setAdminUploadMsg(`⚠️ ${data.warning}`);
-      } else if (type === "excel") {
-        setAdminUploadMsg(`✓ ${data.matched ?? 0}개 항목 자동 입력 완료 — 아래 검사성적서에서 확인하세요`);
       } else {
-        setAdminUploadMsg("✓ 파일 업로드 완료");
+        setAdminUploadMsg(`✓ ${data.matched ?? 0}개 항목 자동 입력 완료 — 아래 검사성적서에서 확인하세요`);
       }
       onRefresh();
-    } catch { setAdminUploadMsg("업로드 실패. 다시 시도해주세요."); }
-    finally { setAdminUploading(false); }
+    } catch (e) {
+      setAdminUploadMsg(`업로드 실패: ${e instanceof Error ? e.message : "다시 시도해주세요."}`);
+    } finally {
+      setAdminUploading(false);
+    }
   }
 
   async function handleDeleteFile(fileId: number, fileType: string) {

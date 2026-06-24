@@ -89,7 +89,12 @@ export async function POST(req: NextRequest, { params }: Params) {
   if (!isExcel) return NextResponse.json({ ok: true, fileId: fileRecord.id });
 
   // Excel 파싱 → 검사성적서 자동 입력
-  const wb = XLSX.read(fileBuffer, { type: "buffer" });
+  let wb;
+  try {
+    wb = XLSX.read(fileBuffer, { type: "buffer" });
+  } catch {
+    return NextResponse.json({ ok: false, fileId: fileRecord.id, matched: 0, warning: "엑셀 파일을 읽을 수 없습니다. 파일 형식(.xlsx/.xls)을 확인해 주세요." }, { status: 422 });
+  }
   const ws = wb.Sheets[wb.SheetNames[0]];
   const rows = XLSX.utils.sheet_to_json<(string | number)[]>(ws, { header: 1, defval: "" });
 
