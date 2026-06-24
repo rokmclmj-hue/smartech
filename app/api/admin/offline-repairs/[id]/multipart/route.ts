@@ -28,7 +28,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     }
 
     const buffer = Buffer.from(await chunk.arrayBuffer());
-    const part = await uploadPart(pathname, buffer, { access: "public", uploadId, key, partNumber });
+    const part = await uploadPart(pathname, buffer, { access: "private", uploadId, key, partNumber });
     return NextResponse.json({ etag: part.etag, partNumber: part.partNumber });
   }
 
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest, { params }: Params) {
   if (body.action === "init") {
     const { pathname } = body as { pathname: string };
     try {
-      const { uploadId, key } = await createMultipartUpload(pathname, { access: "public" });
+      const { uploadId, key } = await createMultipartUpload(pathname, { access: "private" });
       return NextResponse.json({ uploadId, key });
     } catch (e) {
       console.error("[multipart/init]", e);
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       filename: string;
     };
 
-    const blob = await completeMultipartUpload(pathname, parts, { access: "public", uploadId, key });
+    const blob = await completeMultipartUpload(pathname, parts, { access: "private", uploadId, key });
 
     try {
       const existing = await prisma.offlineRepairFile.findFirst({
