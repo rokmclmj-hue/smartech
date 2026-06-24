@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createMultipartUpload, uploadPart, completeMultipartUpload, del } from "@vercel/blob";
+import { createMultipartUpload, uploadPart, completeMultipartUpload } from "@vercel/blob";
 import { prisma } from "@/lib/db";
 import { getAdminSession } from "@/lib/admin-auth";
 
@@ -16,27 +16,37 @@ export async function POST(req: NextRequest, { params }: Params) {
   const contentType = req.headers.get("content-type") ?? "";
 
   if (contentType.includes("multipart/form-data")) {
-    const form = await req.formData();
-    const uploadId = form.get("uploadId") as string;
-    const key = form.get("key") as string;
-    const partNumber = parseInt(form.get("partNumber") as string);
-    const pathname = form.get("pathname") as string;
-    const chunk = form.get("chunk") as File;
+    try {
+      const form = await req.formData();
+      const uploadId = form.get("uploadId") as string;
+      const key = form.get("key") as string;
+      const partNumber = parseInt(form.get("partNumber") as string);
+      const pathname = form.get("pathname") as string;
+      const chunk = form.get("chunk") as File;
 
-    if (!uploadId || !key || !pathname || !chunk || isNaN(partNumber)) {
-      return NextResponse.json({ error: "잘못된 파라미터" }, { status: 400 });
+      if (!uploadId || !key || !pathname || !chunk || isNaN(partNumber)) {
+        return NextResponse.json({ error: "잘못된 파라미터" }, { status: 400 });
+      }
+
+      const buffer = Buffer.from(await chunk.arrayBuffer());
+      const part = await uploadPart(pathname, buffer, { access: "private", uploadId, key, partNumber });
+      return NextResponse.json({ etag: part.etag, partNumber: part.partNumber });
+    } catch (e) {
+      console.error("[multipart/part]", e);
+      return NextResponse.json({ error: String(e) }, { status: 500 });
     }
-
-    const buffer = Buffer.from(await chunk.arrayBuffer());
-    const part = await uploadPart(pathname, buffer, { access: "private", uploadId, key, partNumber });
-    return NextResponse.json({ etag: part.etag, partNumber: part.partNumber });
   }
 
-  const body = await req.json();
+  let body: Record<string, unknown>;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "JSON 파싱 실패" }, { status: 400 });
+  }
 
   if (body.action === "init") {
-    const { pathname } = body as { pathname: string };
     try {
+      const pathname = body.pathname as string;
       const { uploadId, key } = await createMultipartUpload(pathname, { access: "private" });
       return NextResponse.json({ uploadId, key });
     } catch (e) {
@@ -46,17 +56,17 @@ export async function POST(req: NextRequest, { params }: Params) {
   }
 
   if (body.action === "complete") {
-    const { uploadId, key, pathname, parts, filename } = body as {
-      uploadId: string;
-      key: string;
-      pathname: string;
-      parts: { etag: string; partNumber: number }[];
-      filename: string;
-    };
-
-    const blob = await completeMultipartUpload(pathname, parts, { access: "private", uploadId, key });
-
     try {
+      const { uploadId, key, pathname, parts, filename } = body as {
+        uploadId: string;
+        key: string;
+        pathname: string;
+        parts: { etag: string; partNumber: number }[];
+        filename: string;
+      };
+
+      const blob = await completeMultipartUpload(pathname, parts, { access: "private", uploadId, key });
+
       const existing = await prisma.offlineRepairFile.findFirst({
         where: { jobId: nId, fileType: "PHOTO_ZIP" },
       });
@@ -66,7 +76,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       });
       return NextResponse.json({ ok: true });
     } catch (e) {
-      try { await del(blob.url); } catch {}
+      console.error("[multipart/complete]", e);
       return NextResponse.json({ error: String(e) }, { status: 500 });
     }
   }
