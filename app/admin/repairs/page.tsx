@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 
 type RepairFile = { fileType: string };
 type FullRepairFile = {
@@ -95,6 +95,8 @@ export default function AdminRepairsPage() {
   const [filesLoading, setFilesLoading] = useState(false);
   const [adminUploadType, setAdminUploadType] = useState("disassembly_photo");
   const [adminUploading, setAdminUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [deletingFileId, setDeletingFileId] = useState<number | null>(null);
 
   // 발송 탭 — 수리 완료 서류 현황
@@ -544,23 +546,49 @@ export default function AdminRepairsPage() {
                       <option value="bank_copy">통장 사본</option>
                     </select>
                   </div>
-                  <label className={`flex flex-col items-center justify-center border-2 border-dashed cursor-pointer py-5 transition ${
-                    adminUploading ? "border-ink/30 bg-ink/5 cursor-wait" : "border-line hover:border-ink hover:bg-ink/5"
-                  }`}>
-                    <input type="file" className="hidden" multiple disabled={adminUploading}
-                      onChange={(e) => e.target.files && adminUpload(e.target.files)} />
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    className="hidden"
+                    multiple
+                    disabled={adminUploading}
+                    onChange={(e) => e.target.files && adminUpload(e.target.files)}
+                  />
+                  <div
+                    onClick={() => !adminUploading && fileInputRef.current?.click()}
+                    onDragOver={(e) => { e.preventDefault(); if (!adminUploading) setIsDragging(true); }}
+                    onDragLeave={() => setIsDragging(false)}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      setIsDragging(false);
+                      if (!adminUploading && e.dataTransfer.files.length) adminUpload(e.dataTransfer.files);
+                    }}
+                    className={`flex flex-col items-center justify-center border-2 border-dashed py-5 transition select-none ${
+                      adminUploading
+                        ? "border-ink/30 bg-ink/5 cursor-wait"
+                        : isDragging
+                          ? "border-smblue bg-smblue/5 cursor-copy"
+                          : "border-line hover:border-ink hover:bg-ink/5 cursor-pointer"
+                    }`}
+                  >
                     {adminUploading ? (
                       <div className="flex items-center gap-2 text-[12px] text-dim">
                         <span className="animate-spin w-3 h-3 border-2 border-dim/30 border-t-ink rounded-full inline-block" />
                         업로드 중...
                       </div>
+                    ) : isDragging ? (
+                      <div className="text-center">
+                        <div className="text-[20px] text-smblue mb-1">↓</div>
+                        <div className="text-[12px] font-medium text-smblue">여기에 놓으세요</div>
+                      </div>
                     ) : (
                       <div className="text-center">
                         <div className="text-[20px] text-dim mb-1">↑</div>
                         <div className="text-[12px] font-medium">클릭하여 파일 선택</div>
+                        <div className="text-[11px] text-dim mt-1">또는 파일을 여기로 드래그</div>
                       </div>
                     )}
-                  </label>
+                  </div>
                 </Section>
 
                 {/* 파일 목록 */}
