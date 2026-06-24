@@ -36,8 +36,13 @@ export async function POST(req: NextRequest, { params }: Params) {
 
   if (body.action === "init") {
     const { pathname } = body as { pathname: string };
-    const { uploadId, key } = await createMultipartUpload(pathname, { access: "public" });
-    return NextResponse.json({ uploadId, key });
+    try {
+      const { uploadId, key } = await createMultipartUpload(pathname, { access: "public" });
+      return NextResponse.json({ uploadId, key });
+    } catch (e) {
+      console.error("[multipart/init]", e);
+      return NextResponse.json({ error: String(e) }, { status: 500 });
+    }
   }
 
   if (body.action === "complete") {

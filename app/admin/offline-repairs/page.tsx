@@ -438,7 +438,10 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone, isSelected, onToggle
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ action: "init", pathname }),
         });
-        if (!initRes.ok) throw new Error("업로드 초기화 실패");
+        if (!initRes.ok) {
+          const d = await initRes.json().catch(() => ({}));
+          throw new Error(`업로드 초기화 실패: ${d.error ?? initRes.status}`);
+        }
         const { uploadId, key } = await initRes.json();
         // 2단계: 3.5MB 씩 청크 업로드
         const CHUNK = 3.5 * 1024 * 1024;
