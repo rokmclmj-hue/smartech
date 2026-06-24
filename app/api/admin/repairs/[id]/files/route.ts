@@ -37,7 +37,7 @@ export async function POST(
 
     let fileUrl: string;
     try {
-      const blob = await put(blobName, file, { access: "public" });
+      const blob = await put(blobName, file, { access: "private" });
       fileUrl = blob.url;
     } catch {
       // BLOB_READ_WRITE_TOKEN 없을 때 임시 처리

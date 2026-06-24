@@ -71,7 +71,7 @@ export async function POST(req: NextRequest, { params }: Params) {
   const fileBuffer = Buffer.from(await file.arrayBuffer());
 
   const blob = await put(`offline-repairs/${nId}/admin_${Date.now()}_${file.name}`, fileBuffer, {
-    access: "public",
+    access: "private",
     contentType: file.type || "application/octet-stream",
   });
 
