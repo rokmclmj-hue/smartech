@@ -516,7 +516,7 @@ function QuoteDocument({ quote }: { quote: QuoteForPdf }) {
       // ── 푸터
       el(View, { style: S.footer },
         el(Text, { style: S.footerText },
-          `© ${year} SMARTECH CO., LTD. · Edwards Vacuum Korea Authorized Distributor`
+          `© ${year} SMARTECH CO., LTD.  ·  www.smartechvacuum.com`
         ),
         el(Text, { style: S.footerText }, "PAGE 1 / 1")
       )
@@ -1425,14 +1425,27 @@ function RepairQuoteDocument({ data }: { data: RepairQuoteForPdf }) {
   return el(
     Document,
     { title: `수리견적서_${data.jobNo}` },
-    el(Page, { size: "A4", style: S.page },
+    el(Page, { size: "A4", style: { ...S.page, paddingTop: 0, paddingHorizontal: 0 } },
+
+      // ── Blue Tape (진공 게이지 바 — 수리용 파란색)
+      el(View, { style: {
+        backgroundColor: "#0d3a8a",
+        paddingVertical: 7,
+        paddingHorizontal: 20,
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+      } },
+        el(Text, { style: { color: "rgba(255,255,255,0.85)", fontSize: 7, letterSpacing: 1 } }, "ATM · 10³ mbar"),
+        el(Text, { style: { color: "rgba(255,255,255,0.85)", fontSize: 7, letterSpacing: 1 } }, "UHV · 10⁻¹⁰ mbar"),
+      ),
+
+      // ── 본문 래퍼
+      el(View, { style: { paddingHorizontal: 40, paddingTop: 16 } },
 
       // ── 헤더
       el(View, { style: S.header },
-        el(View, { style: { flexDirection: "row", alignItems: "baseline", gap: 8 } },
-          el(Text, { style: S.headerTitle }, "SMARTECH · REPAIR ESTIMATE"),
-          el(Text, { style: { fontSize: 11, fontFamily: "Pretendard", fontWeight: 700, color: "#111111" } }, "수리 견적서")
-        ),
+        el(Text, { style: S.headerTitle }, "SMARTECH · REPAIR ESTIMATE"),
         el(View, { style: S.headerMeta },
           el(Text, { style: S.headerMetaLine }, `NO · ${data.jobNo}`),
           el(Text, { style: S.headerMetaLine }, `DATE · ${fmtDate(issued)}`),
@@ -1537,6 +1550,12 @@ function RepairQuoteDocument({ data }: { data: RepairQuoteForPdf }) {
         )
       ),
 
+      // ── 특이사항
+      el(View, { style: QS.remarkBox },
+        el(Text, { style: QS.remarkLabel }, "REMARKS"),
+        el(Text, { style: QS.remarkText }, "수리 견적은 분해 검사 결과에 따라 최종 금액이 변동될 수 있습니다.")
+      ),
+
       // ── 거래 조건
       el(View, { style: S.termsBox },
         el(View, { style: S.termRow },
@@ -1547,20 +1566,18 @@ function RepairQuoteDocument({ data }: { data: RepairQuoteForPdf }) {
           el(Text, { style: S.termLabel }, "WARRANTY"),
           el(Text, { style: S.termValue }, "수리 후 3개월 보증")
         ),
-        el(View, { style: S.termRow },
+        el(View, { style: { ...S.termRow, marginBottom: 0 } },
           el(Text, { style: S.termLabel }, "A / S"),
           el(Text, { style: S.termValue }, `${SMARTECH_COMPANY.officeTel} · 스마텍 서비스센터 직접 응대`)
-        ),
-        el(View, { style: { ...S.termRow, marginBottom: 0 } },
-          el(Text, { style: S.termLabel }, "NOTE"),
-          el(Text, { style: S.termValue }, "본 견적은 참고용이며 분해 검사 후 정확한 금액이 확정됩니다.")
         )
       ),
+
+      ), // ── 본문 래퍼 닫기
 
       // ── 푸터
       el(View, { style: S.footer },
         el(Text, { style: S.footerText },
-          `© ${year} SMARTECH CO., LTD.  ·  EDWARDS VACUUM KOREA AUTHORIZED SERVICE PARTNER`
+          `© ${year} SMARTECH CO., LTD.  ·  www.smartechvacuum.com`
         ),
         el(Text, { style: S.footerText }, "PAGE 1 / 1")
       )
