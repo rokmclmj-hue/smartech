@@ -200,6 +200,7 @@ function RepairRow({ repair, onRefresh }: { repair: Repair; onRefresh: () => voi
       await loadFiles();
       onRefresh();
     } catch (e) {
+      await loadFiles();
       alert(`업로드 실패: ${e instanceof Error ? e.message : "다시 시도해주세요."}`);
     } finally { setAdminUploading(false); }
   }

@@ -404,7 +404,7 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone, isSelected, onToggle
           repairCost: repairCost !== "" ? Math.round(Number(repairCost)) : null,
           repairPartsText: repairPartsText || null,
           inspectorName: inspectorName || null,
-          quoteRemarks: quoteRemarks || null,
+          quoteRemarks: quoteRemarks.trim() || null,
         }),
       });
       const data = await res.json().catch(() => ({}));

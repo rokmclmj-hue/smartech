@@ -36,6 +36,7 @@ export async function POST(req: NextRequest) {
         companyName: job.company?.companyName ?? null,
         contactName: job.contactName, contactEmail: job.contactEmail, contactPhone: job.contactPhone,
         repairCost: job.repairCost, repairPartsText: job.repairPartsText, inspectorName: job.inspectorName,
+        quoteRemarks: job.quoteRemarks,
       }),
       generateRepairInspectionPdf({
         jobNo: job.jobNo, pumpMaker: job.pumpMaker, pumpModel: job.pumpModel,
