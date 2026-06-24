@@ -11,6 +11,7 @@ const nextConfig: NextConfig = {
       { source: "/견적문의",             destination: "/quote",     permanent: true },
       { source: "/blog/14",         destination: "/blog",      permanent: true },
       { source: "/blog/15",         destination: "/blog",      permanent: true },
+      { source: "/blog/16",         destination: "/blog",      permanent: true },
     ];
   },
   serverExternalPackages: ["bcryptjs", "@prisma/client", "prisma", "xlsx", "sharp"],
