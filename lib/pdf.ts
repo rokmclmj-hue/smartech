@@ -1441,8 +1441,8 @@ function RepairQuoteDocument({ data }: { data: RepairQuoteForPdf }) {
       ),
 
       // ── TO / FROM
-      el(View, { style: S.partiesBox },
-        el(View, { style: S.toBox },
+      el(View, { style: { flexDirection: "row", gap: 8, marginBottom: 12 } },
+        el(View, { style: { flex: 1, padding: 10, borderTop: "3 solid #c00020", backgroundColor: "#fafafa" } },
           el(Text, { style: S.partyLabel }, "TO · 수신처"),
           el(View, { style: S.partyRow },
             el(Text, { style: S.partyKey }, "COMPANY"),
@@ -1461,7 +1461,7 @@ function RepairQuoteDocument({ data }: { data: RepairQuoteForPdf }) {
             el(Text, { style: S.partyVal }, data.contactEmail ?? "—")
           )
         ),
-        el(View, { style: S.fromBox },
+        el(View, { style: { flex: 1, padding: 10, borderTop: "3 solid #0B0B0C", backgroundColor: "#fafafa" } },
           el(Text, { style: S.partyLabel }, "FROM · 발신처"),
           el(View, { style: S.partyRow },
             el(Text, { style: S.partyKey }, "COMPANY"),
@@ -1496,7 +1496,7 @@ function RepairQuoteDocument({ data }: { data: RepairQuoteForPdf }) {
 
       // ── 품목 테이블
       el(View, { style: S.table },
-        el(View, { style: S.tableHeader },
+        el(View, { style: { ...S.tableHeader, backgroundColor: "#f0f0f0" } },
           el(Text, { style: [S.thCell, { width: "6%", textAlign: "center" }] }, "NO"),
           el(Text, { style: [S.thCell, { width: "62%", paddingRight: 4 }] }, "수리 항목  /  교체 파트"),
           el(Text, { style: [S.thCell, { width: "10%", textAlign: "center" }] }, "수량"),
@@ -1530,9 +1530,9 @@ function RepairQuoteDocument({ data }: { data: RepairQuoteForPdf }) {
             el(Text, { style: S.sumLabel }, "VAT (10%)"),
             el(Text, { style: S.sumValue }, data.repairCost != null ? fmt(vat) : "—")
           ),
-          el(View, { style: S.summaryTotalRow },
-            el(Text, { style: S.sumTLabel }, "GRAND TOTAL"),
-            el(Text, { style: S.sumTValue }, data.repairCost != null ? fmt(total) : "협의")
+          el(View, { style: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 7, paddingHorizontal: 8, backgroundColor: "#0B0B0C", marginTop: 2 } },
+            el(Text, { style: { fontSize: 10, fontFamily: "Pretendard", fontWeight: 700, color: "#ffffff" } }, "GRAND TOTAL"),
+            el(Text, { style: { fontSize: 10, fontFamily: "Pretendard", fontWeight: 700, color: "#c00020" } }, data.repairCost != null ? fmt(total) : "협의")
           )
         )
       ),
