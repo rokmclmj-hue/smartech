@@ -263,6 +263,40 @@ export async function sendRepairQuote(opts: {
   });
 }
 
+export async function sendRepairQuoteBatch(opts: {
+  to: string;
+  jobs: Array<{ jobNo: string; pumpMaker: string; pumpModel: string; serialNo: string | null }>;
+  companyName: string;
+  contactName: string | null;
+  attachments: Array<{ filename: string; content: Buffer; contentType: string }>;
+}): Promise<void> {
+  const { to, jobs, companyName, contactName, attachments } = opts;
+  const subject = jobs.length === 1
+    ? `[스마텍] 수리견적서 ${jobs[0].jobNo} 발송드립니다.`
+    : `[스마텍] 수리견적서 일괄 발송 (${jobs[0].jobNo} 외 ${jobs.length - 1}건)`;
+  const lines = [
+    `${companyName} ${contactName ?? "담당자"}님, 안녕하세요.`,
+    ``,
+    `스마텍입니다.`,
+    `아래 ${jobs.length}건의 수리견적서와 검사성적서를 첨부하여 드립니다.`,
+    ``,
+    ...jobs.map((j, i) => `  ${i + 1}. ${j.pumpMaker} ${j.pumpModel}${j.serialNo ? ` (S/N ${j.serialNo})` : ""} — ${j.jobNo}`),
+    ``,
+    `검토 후 수리 진행 여부를 회신해 주시면 감사하겠습니다.`,
+    ``,
+    `감사합니다.`,
+    `(주)스마텍 서비스팀`,
+    `031-204-7170 · info@smartechvacuum.com`,
+  ];
+  await transporter.sendMail({
+    from: `"스마텍" <${process.env.GMAIL_USER}>`,
+    to,
+    subject,
+    text: lines.join("\n"),
+    attachments,
+  });
+}
+
 /**
  * 수리 완료 서류 일괄 발송 (거래명세표 + 검사성적서 + 분해사진 + 통장사본)
  */
