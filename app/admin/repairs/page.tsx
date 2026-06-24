@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
-import { upload } from "@vercel/blob/client";
+
 
 type RepairFile = { fileType: string };
 type FullRepairFile = {
@@ -204,21 +204,44 @@ export default function AdminRepairsPage() {
     setAdminUploading(true);
     try {
       for (const file of Array.from(files)) {
-        // 1단계: 브라우저 → Blob 직접 업로드 (용량 제한 없음)
-        const blob = await upload(
-          `repairs/${selected.id}/${adminUploadType}/${Date.now()}-${file.name}`,
-          file,
-          { access: "public", handleUploadUrl: `/api/admin/repairs/${selected.id}/blob-upload` }
-        );
-        // 2단계: DB 저장
-        const saveRes = await fetch(`/api/admin/repairs/${selected.id}/blob-upload`, {
+        const safeName = file.name.replace(/[()[\]{} ]/g, "_");
+        const pathname = `repairs/${selected.id}/${adminUploadType}/${Date.now()}-${safeName}`;
+        const base = `/api/admin/repairs/${selected.id}/multipart`;
+        // 1단계: 멀티파트 업로드 세션 초기화
+        const initRes = await fetch(base, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ phase: "save", url: blob.url, filename: file.name, fileType: adminUploadType, fileSize: file.size }),
+          body: JSON.stringify({ action: "init", pathname }),
         });
-        if (!saveRes.ok) {
-          const d = await saveRes.json().catch(() => ({}));
-          throw new Error(d.error ?? "DB 저장 실패");
+        if (!initRes.ok) throw new Error("업로드 초기화 실패");
+        const { uploadId, key } = await initRes.json();
+        // 2단계: 3.5MB 씩 청크 업로드
+        const CHUNK = 3.5 * 1024 * 1024;
+        const parts: { etag: string; partNumber: number }[] = [];
+        let partNumber = 1;
+        for (let offset = 0; offset < file.size; offset += CHUNK) {
+          const chunk = file.slice(offset, Math.min(offset + CHUNK, file.size));
+          const form = new FormData();
+          form.append("uploadId", uploadId);
+          form.append("key", key);
+          form.append("partNumber", String(partNumber));
+          form.append("pathname", pathname);
+          form.append("chunk", chunk);
+          const partRes = await fetch(base, { method: "POST", body: form });
+          if (!partRes.ok) throw new Error(`청크 ${partNumber} 업로드 실패`);
+          const p = await partRes.json();
+          parts.push({ etag: p.etag, partNumber: p.partNumber });
+          partNumber++;
+        }
+        // 3단계: 완료 + DB 저장
+        const completeRes = await fetch(base, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "complete", uploadId, key, pathname, parts, filename: file.name, fileType: adminUploadType, fileSize: file.size }),
+        });
+        if (!completeRes.ok) {
+          const d = await completeRes.json().catch(() => ({}));
+          throw new Error(d.error ?? "완료 처리 실패");
         }
       }
       await loadFiles(selected.id);

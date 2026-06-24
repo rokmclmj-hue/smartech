@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState, useCallback, useRef } from "react";
-import { upload } from "@vercel/blob/client";
+
 
 type Company = { id: number; companyName: string };
 type InspectionItem = {
@@ -53,6 +53,11 @@ function fmtDate(s: string) {
   return new Date(s).toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" });
 }
 
+type ItemRow = { pumpMaker: string; pumpModel: string; serialNo: string; voltage: string; repairReason: string };
+function defaultItem(): ItemRow {
+  return { pumpMaker: "EDWARDS", pumpModel: "", serialNo: "", voltage: "220V 1PH", repairReason: "정기" };
+}
+
 // ── 수리접수 작성 폼 ──────────────────────────────
 function JobForm({ onSaved }: { onSaved: (newJobId: number) => void }) {
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -60,11 +65,7 @@ function JobForm({ onSaved }: { onSaved: (newJobId: number) => void }) {
   const [companyResults, setCompanyResults] = useState<Company[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
 
-  const [pumpMaker, setPumpMaker] = useState("EDWARDS");
-  const [pumpModel, setPumpModel] = useState("");
-  const [serialNo, setSerialNo] = useState("");
-  const [voltage, setVoltage] = useState("220V 1PH");
-  const [repairReason, setRepairReason] = useState("정기");
+  const [items, setItems] = useState<ItemRow[]>([defaultItem()]);
   const [subName, setSubName] = useState("");
   const [subEmail, setSubEmail] = useState("");
   const [contactName, setContactName] = useState("");
@@ -90,9 +91,15 @@ function JobForm({ onSaved }: { onSaved: (newJobId: number) => void }) {
     setCompanyResults(filtered);
   }, [companyQ, companies]);
 
+  function updateItem(idx: number, field: keyof ItemRow, value: string) {
+    setItems(prev => prev.map((it, i) => i === idx ? { ...it, [field]: value } : it));
+  }
+  function addItem() { setItems(prev => [...prev, defaultItem()]); }
+  function removeItem(idx: number) { setItems(prev => prev.filter((_, i) => i !== idx)); }
+
   async function handleSave() {
     setError("");
-    if (!pumpModel.trim()) { setError("펌프 모델을 입력해주세요."); return; }
+    if (items.some(it => !it.pumpModel.trim())) { setError("모든 장비의 모델명을 입력해주세요."); return; }
     setSaving(true);
     try {
       const res = await fetch("/api/admin/offline-repairs", {
@@ -100,7 +107,7 @@ function JobForm({ onSaved }: { onSaved: (newJobId: number) => void }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           companyId: selectedCompany?.id ?? null,
-          pumpMaker, pumpModel, serialNo, voltage, repairReason,
+          items,
           subName, subEmail: subEmail || null, contactName, contactEmail, contactPhone,
           receivedDate, requestedDate: requestedDate || null, memo,
         }),
@@ -112,6 +119,8 @@ function JobForm({ onSaved }: { onSaved: (newJobId: number) => void }) {
       setSaving(false);
     }
   }
+
+  const inputCls = "w-full border hair px-3 py-1.5 text-[13px] focus:outline-none focus:border-ink";
 
   return (
     <div className="space-y-5">
@@ -127,7 +136,7 @@ function JobForm({ onSaved }: { onSaved: (newJobId: number) => void }) {
               value={selectedCompany ? selectedCompany.companyName : companyQ}
               onChange={(e) => { setCompanyQ(e.target.value); setSelectedCompany(null); }}
               placeholder="회사명 검색..."
-              className="w-full border hair px-3 py-1.5 text-[13px] focus:outline-none focus:border-ink"
+              className={inputCls}
             />
             {companyResults.length > 0 && !selectedCompany && (
               <div className="absolute z-10 top-full left-0 right-0 bg-paper border hair shadow-md">
@@ -149,92 +158,100 @@ function JobForm({ onSaved }: { onSaved: (newJobId: number) => void }) {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl">
             <div>
               <div className="mono text-[10px] dim mb-1">담당자</div>
-              <input value={contactName} onChange={e => setContactName(e.target.value)} placeholder="홍길동"
-                className="w-full border hair px-3 py-1.5 text-[13px] focus:outline-none focus:border-ink" />
+              <input value={contactName} onChange={e => setContactName(e.target.value)} placeholder="홍길동" className={inputCls} />
             </div>
             <div>
               <div className="mono text-[10px] dim mb-1">이메일</div>
               <input type="email" value={contactEmail} onChange={e => setContactEmail(e.target.value)} placeholder="contact@company.com"
-                className="w-full border hair px-3 py-1.5 text-[13px] mono focus:outline-none focus:border-ink" />
+                className={inputCls + " mono"} />
             </div>
             <div>
               <div className="mono text-[10px] dim mb-1">전화</div>
-              <input value={contactPhone} onChange={e => setContactPhone(e.target.value)} placeholder="02-0000-0000"
-                className="w-full border hair px-3 py-1.5 text-[13px] focus:outline-none focus:border-ink" />
+              <input value={contactPhone} onChange={e => setContactPhone(e.target.value)} placeholder="02-0000-0000" className={inputCls} />
             </div>
           </div>
         </div>
       </div>
 
-      {/* 장비 정보 */}
+      {/* 장비 정보 — 다건 입력 */}
       <div className="border hair bg-paper">
-        <div className="px-5 py-3 border-b hair">
-          <span className="mono text-[10px] dim tracking-[0.12em]">02 / 장비 정보</span>
+        <div className="px-5 py-3 border-b hair flex items-center justify-between">
+          <span className="mono text-[10px] dim tracking-[0.12em]">02 / 장비 정보 ({items.length}건)</span>
+          <button onClick={addItem} className="mono text-[10px] text-smblue hover:underline">+ 항목 추가</button>
         </div>
-        <div className="px-5 py-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl">
-            <div>
-              <div className="mono text-[10px] dim mb-1">제조사</div>
-              <input value={pumpMaker} onChange={e => setPumpMaker(e.target.value)} placeholder="EDWARDS"
-                className="w-full border hair px-3 py-1.5 text-[13px] focus:outline-none focus:border-ink" />
+        <div className="divide-y divide-line">
+          {items.map((item, idx) => (
+            <div key={idx} className="px-5 py-4">
+              <div className="flex items-center justify-between mb-3">
+                <span className="mono text-[10px] dim">— 장비 {idx + 1}</span>
+                {items.length > 1 && (
+                  <button onClick={() => removeItem(idx)} className="mono text-[10px] text-edred/60 hover:text-edred">✕ 삭제</button>
+                )}
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl">
+                <div>
+                  <div className="mono text-[10px] dim mb-1">제조사</div>
+                  <input value={item.pumpMaker} onChange={e => updateItem(idx, "pumpMaker", e.target.value)}
+                    placeholder="EDWARDS" className={inputCls} />
+                </div>
+                <div>
+                  <div className="mono text-[10px] dim mb-1">모델 *</div>
+                  <input value={item.pumpModel} onChange={e => updateItem(idx, "pumpModel", e.target.value)}
+                    placeholder="XDS35iE" className={inputCls + " mono"} />
+                </div>
+                <div>
+                  <div className="mono text-[10px] dim mb-1">시리얼 번호</div>
+                  <input value={item.serialNo} onChange={e => updateItem(idx, "serialNo", e.target.value)}
+                    placeholder="230810339" className={inputCls + " mono"} />
+                </div>
+                <div>
+                  <div className="mono text-[10px] dim mb-1">전압</div>
+                  <input value={item.voltage} onChange={e => updateItem(idx, "voltage", e.target.value)}
+                    placeholder="220V 1PH" className={inputCls} />
+                </div>
+                <div>
+                  <div className="mono text-[10px] dim mb-1">수리사유</div>
+                  <select value={item.repairReason} onChange={e => updateItem(idx, "repairReason", e.target.value)}
+                    className={inputCls + " bg-paper"}>
+                    <option value="정기">정기</option>
+                    <option value="고장">고장</option>
+                    <option value="기타">기타</option>
+                  </select>
+                </div>
+              </div>
             </div>
-            <div>
-              <div className="mono text-[10px] dim mb-1">모델 *</div>
-              <input value={pumpModel} onChange={e => setPumpModel(e.target.value)} placeholder="XDS35iE"
-                className="w-full border hair px-3 py-1.5 text-[13px] mono focus:outline-none focus:border-ink" />
-            </div>
-            <div>
-              <div className="mono text-[10px] dim mb-1">시리얼 번호</div>
-              <input value={serialNo} onChange={e => setSerialNo(e.target.value)} placeholder="230810339"
-                className="w-full border hair px-3 py-1.5 text-[13px] mono focus:outline-none focus:border-ink" />
-            </div>
-            <div>
-              <div className="mono text-[10px] dim mb-1">전압</div>
-              <input value={voltage} onChange={e => setVoltage(e.target.value)} placeholder="220V 1PH"
-                className="w-full border hair px-3 py-1.5 text-[13px] focus:outline-none focus:border-ink" />
-            </div>
-            <div>
-              <div className="mono text-[10px] dim mb-1">수리사유</div>
-              <select value={repairReason} onChange={e => setRepairReason(e.target.value)}
-                className="w-full border hair px-3 py-1.5 text-[13px] focus:outline-none focus:border-ink bg-paper">
-                <option value="정기">정기</option>
-                <option value="고장">고장</option>
-                <option value="기타">기타</option>
-              </select>
-            </div>
-            <div>
-              <div className="mono text-[10px] dim mb-1">외주 협력사</div>
-              <input value={subName} onChange={e => setSubName(e.target.value)} placeholder="협력사명"
-                className="w-full border hair px-3 py-1.5 text-[13px] focus:outline-none focus:border-ink" />
-            </div>
-            <div>
-              <div className="mono text-[10px] dim mb-1">협력사 이메일 <span className="text-dim">(빈칸=기본)</span></div>
-              <input type="email" value={subEmail} onChange={e => setSubEmail(e.target.value)} placeholder="partner@example.com"
-                className="w-full border hair px-3 py-1.5 text-[13px] mono focus:outline-none focus:border-ink" />
-            </div>
-          </div>
+          ))}
         </div>
       </div>
 
-      {/* 일정 + 메모 */}
+      {/* 외주 협력사 + 일정 + 메모 */}
       <div className="border hair bg-paper">
         <div className="px-5 py-3 border-b hair">
           <span className="mono text-[10px] dim tracking-[0.12em]">03 / 일정 및 메모</span>
         </div>
-        <div className="px-5 py-4">
+        <div className="px-5 py-4 space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl">
             <div>
               <div className="mono text-[10px] dim mb-1">입고일 *</div>
               <input type="date" value={receivedDate} onChange={e => setReceivedDate(e.target.value)}
-                className="w-full border hair px-3 py-1.5 text-[13px] mono focus:outline-none focus:border-ink" />
+                className={inputCls + " mono"} />
             </div>
             <div>
               <div className="mono text-[10px] dim mb-1">납기 요청일</div>
               <input type="date" value={requestedDate} onChange={e => setRequestedDate(e.target.value)}
-                className="w-full border hair px-3 py-1.5 text-[13px] mono focus:outline-none focus:border-ink" />
+                className={inputCls + " mono"} />
+            </div>
+            <div>
+              <div className="mono text-[10px] dim mb-1">외주 협력사</div>
+              <input value={subName} onChange={e => setSubName(e.target.value)} placeholder="협력사명" className={inputCls} />
+            </div>
+            <div>
+              <div className="mono text-[10px] dim mb-1">협력사 이메일 <span className="text-dim">(빈칸=기본)</span></div>
+              <input type="email" value={subEmail} onChange={e => setSubEmail(e.target.value)}
+                placeholder="partner@example.com" className={inputCls + " mono"} />
             </div>
           </div>
-          <div className="mt-3 max-w-xl">
+          <div className="max-w-xl">
             <div className="mono text-[10px] dim mb-1">내부 메모</div>
             <textarea value={memo} onChange={e => setMemo(e.target.value)} rows={2}
               className="w-full border hair px-3 py-2 text-[13px] focus:outline-none focus:border-ink resize-none" />
@@ -245,15 +262,16 @@ function JobForm({ onSaved }: { onSaved: (newJobId: number) => void }) {
       {error && <p className="text-[13px] text-edred px-1">{error}</p>}
       <button onClick={handleSave} disabled={saving}
         className="bg-smblue text-paper px-6 py-2.5 text-[13px] font-semibold hover:brightness-110 transition-all disabled:opacity-50">
-        {saving ? "저장 중..." : "수리접수 등록"}
+        {saving ? "저장 중..." : items.length > 1 ? `수리접수 등록 (${items.length}건)` : "수리접수 등록"}
       </button>
     </div>
   );
 }
 
 // ── 수리접수 이력 행 ──────────────────────────────
-function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone }: {
+function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone, isSelected, onToggleSelect }: {
   job: Job; onRefresh: () => void; autoOpen?: boolean; onAutoOpenDone?: () => void;
+  isSelected?: boolean; onToggleSelect?: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const rowRef = useRef<HTMLDivElement>(null);
@@ -411,21 +429,44 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone }: {
     setAdminUploadMsg("");
     try {
       if (type === "zip") {
-        // 1단계: 브라우저 → Blob 직접 업로드 (용량 제한 없음)
-        const blob = await upload(
-          `offline-repairs/${job.id}/admin_${Date.now()}_${file.name}`,
-          file,
-          { access: "public", handleUploadUrl: `/api/admin/offline-repairs/${job.id}/blob-upload` }
-        );
-        // 2단계: DB 저장
-        const saveRes = await fetch(`/api/admin/offline-repairs/${job.id}/blob-upload`, {
+        const safeName = file.name.replace(/[()[\]{} ]/g, "_");
+        const pathname = `offline-repairs/${job.id}/admin_${Date.now()}_${safeName}`;
+        const base = `/api/admin/offline-repairs/${job.id}/multipart`;
+        // 1단계: 멀티파트 업로드 세션 초기화
+        const initRes = await fetch(base, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ phase: "save", url: blob.url, filename: file.name }),
+          body: JSON.stringify({ action: "init", pathname }),
         });
-        if (!saveRes.ok) {
-          const d = await saveRes.json().catch(() => ({}));
-          throw new Error(d.error ?? "DB 저장 실패");
+        if (!initRes.ok) throw new Error("업로드 초기화 실패");
+        const { uploadId, key } = await initRes.json();
+        // 2단계: 3.5MB 씩 청크 업로드
+        const CHUNK = 3.5 * 1024 * 1024;
+        const parts: { etag: string; partNumber: number }[] = [];
+        let partNumber = 1;
+        for (let offset = 0; offset < file.size; offset += CHUNK) {
+          const chunk = file.slice(offset, Math.min(offset + CHUNK, file.size));
+          const form = new FormData();
+          form.append("uploadId", uploadId);
+          form.append("key", key);
+          form.append("partNumber", String(partNumber));
+          form.append("pathname", pathname);
+          form.append("chunk", chunk);
+          const partRes = await fetch(base, { method: "POST", body: form });
+          if (!partRes.ok) throw new Error(`청크 ${partNumber} 업로드 실패`);
+          const p = await partRes.json();
+          parts.push({ etag: p.etag, partNumber: p.partNumber });
+          partNumber++;
+        }
+        // 3단계: 완료 + DB 저장
+        const completeRes = await fetch(base, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "complete", uploadId, key, pathname, parts, filename: file.name }),
+        });
+        if (!completeRes.ok) {
+          const d = await completeRes.json().catch(() => ({}));
+          throw new Error(d.error ?? "완료 처리 실패");
         }
         setAdminUploadMsg("✓ 파일 업로드 완료");
         onRefresh();
@@ -523,31 +564,39 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone }: {
 
   return (
     <div ref={rowRef} className="border hair bg-paper">
-      <div className="p-4 flex items-start justify-between gap-4 cursor-pointer" onClick={() => setOpen(!open)}>
-        <div className="space-y-0.5 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="mono text-[11px] font-bold text-smblue">{job.jobNo}</span>
-            <span className={`mono text-[10px] px-1.5 py-0.5 ${STATUS_COLORS[job.status] ?? "bg-ink/5 text-ink/60"}`}>
-              {STATUS_LABELS[job.status] ?? job.status}
-            </span>
-            {job.uploadedAt && <span className="mono text-[10px] text-purple-600">↑ 업로드됨</span>}
+      <div className="p-4 flex items-start gap-3">
+        <input
+          type="checkbox" checked={isSelected ?? false}
+          onChange={() => onToggleSelect?.()}
+          onClick={e => e.stopPropagation()}
+          className="mt-1 w-4 h-4 accent-smblue cursor-pointer shrink-0"
+        />
+        <div className="flex-1 flex items-start justify-between gap-4 cursor-pointer min-w-0" onClick={() => setOpen(!open)}>
+          <div className="space-y-0.5 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="mono text-[11px] font-bold text-smblue">{job.jobNo}</span>
+              <span className={`mono text-[10px] px-1.5 py-0.5 ${STATUS_COLORS[job.status] ?? "bg-ink/5 text-ink/60"}`}>
+                {STATUS_LABELS[job.status] ?? job.status}
+              </span>
+              {job.uploadedAt && <span className="mono text-[10px] text-purple-600">↑ 업로드됨</span>}
+            </div>
+            <div className="text-[15px] font-semibold">{job.pumpMaker} {job.pumpModel}</div>
+            <div className="text-[12px] dim">
+              {job.company?.companyName && <span className="mr-2">{job.company.companyName}</span>}
+              {job.serialNo && <span className="mono mr-2">S/N {job.serialNo}</span>}
+              <span>{fmtDate(job.receivedDate)}</span>
+            </div>
           </div>
-          <div className="text-[15px] font-semibold">{job.pumpMaker} {job.pumpModel}</div>
-          <div className="text-[12px] dim">
-            {job.company?.companyName && <span className="mr-2">{job.company.companyName}</span>}
-            {job.serialNo && <span className="mono mr-2">S/N {job.serialNo}</span>}
-            <span>{fmtDate(job.receivedDate)}</span>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={handleDelete}
+              disabled={deleting}
+              className="mono text-[10px] text-edred/50 hover:text-edred border border-transparent hover:border-edred/30 px-2 py-1 transition-colors disabled:opacity-40"
+            >
+              {deleting ? "..." : "삭제"}
+            </button>
+            <span className="text-[18px] dim">{open ? "▲" : "▼"}</span>
           </div>
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            onClick={handleDelete}
-            disabled={deleting}
-            className="mono text-[10px] text-edred/50 hover:text-edred border border-transparent hover:border-edred/30 px-2 py-1 transition-colors disabled:opacity-40"
-          >
-            {deleting ? "..." : "삭제"}
-          </button>
-          <span className="text-[18px] dim">{open ? "▲" : "▼"}</span>
         </div>
       </div>
 
@@ -837,6 +886,10 @@ export default function OfflineRepairsPage() {
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [autoOpenId, setAutoOpenId] = useState<number | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [batchEmail, setBatchEmail] = useState("");
+  const [batchSending, setBatchSending] = useState(false);
+  const [batchToast, setBatchToast] = useState("");
 
   const load = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
@@ -852,6 +905,38 @@ export default function OfflineRepairsPage() {
     setShowForm(false);
     setAutoOpenId(newJobId);
     load(true);
+  }
+
+  function toggleSelect(id: number) {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+
+  async function handleBatchSend() {
+    if (!batchEmail.trim()) { setBatchToast("수신 이메일을 입력해주세요."); return; }
+    setBatchSending(true);
+    try {
+      const res = await fetch("/api/admin/offline-repairs/batch-send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: Array.from(selectedIds), email: batchEmail }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setBatchToast(`${data.count}건 발송 완료`);
+        setSelectedIds(new Set());
+        setBatchEmail("");
+        load(true);
+      } else {
+        setBatchToast(data.error ?? "발송 오류");
+      }
+    } finally {
+      setBatchSending(false);
+      setTimeout(() => setBatchToast(""), 3000);
+    }
   }
 
   return (
@@ -881,6 +966,29 @@ export default function OfflineRepairsPage() {
         <div className="mono text-[11px] dim tracking-[0.12em] uppercase mb-3">
           — 접수 이력 ({jobs.length}건)
         </div>
+
+        {/* 일괄 발송 바 */}
+        {selectedIds.size > 0 && (
+          <div className="mb-4 border-2 border-smblue/30 p-4 bg-paper space-y-3">
+            <div className="mono text-[10px] dim tracking-[0.1em]">— 선택 {selectedIds.size}건 견적서 일괄 발송</div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <input
+                type="email" value={batchEmail} onChange={e => setBatchEmail(e.target.value)}
+                placeholder="수신 이메일"
+                className="border hair px-3 py-1.5 text-[13px] mono focus:outline-none focus:border-ink w-64"
+              />
+              <button onClick={handleBatchSend} disabled={batchSending || !batchEmail.trim()}
+                className="bg-smblue text-paper px-4 py-1.5 text-[12px] font-semibold hover:brightness-110 transition-all disabled:opacity-50">
+                {batchSending ? "발송 중..." : `${selectedIds.size}건 일괄 발송`}
+              </button>
+              <button onClick={() => setSelectedIds(new Set())}
+                className="text-[12px] dim hover:text-ink border hair px-3 py-1.5">선택 해제</button>
+            </div>
+            <p className="text-[11px] dim">· 각 건별 견적서 + 검사성적서 PDF가 한 이메일로 발송됩니다. 발송 후 상태가 "견적발송"으로 변경됩니다.</p>
+            {batchToast && <p className="mono text-[12px] text-green-600">{batchToast}</p>}
+          </div>
+        )}
+
         {loading ? (
           <div className="mono text-[11px] dim text-center py-10">— Loading</div>
         ) : jobs.length === 0 ? (
@@ -896,6 +1004,8 @@ export default function OfflineRepairsPage() {
                 onRefresh={() => load(true)}
                 autoOpen={autoOpenId === j.id}
                 onAutoOpenDone={() => setAutoOpenId(null)}
+                isSelected={selectedIds.has(j.id)}
+                onToggleSelect={() => toggleSelect(j.id)}
               />
             ))}
           </div>
