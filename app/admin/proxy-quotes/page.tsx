@@ -284,7 +284,8 @@ function AdminProxyQuotesInner() {
     setShowDirect(false);
     setSelectedContacts(c.contacts as KnownContact[]);
     setSelectedCompanyName(c.source === "known" ? c.company : null);
-    setGuest({ company: c.company, name: c.name, title: "", phone: c.phone, email: c.email, tier: c.tier });
+    const matchingContact = c.contacts.find((ct) => ct.name === c.name);
+    setGuest({ company: c.company, name: c.name, title: matchingContact?.title ?? "", phone: c.phone, email: c.email, tier: c.tier });
     setPaymentTerm(c.paymentTerm ?? null);
   }
 
