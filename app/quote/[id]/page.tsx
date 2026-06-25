@@ -46,6 +46,15 @@ function paymentLabel(term: string | null, taxInvoice: boolean): string {
   return taxInvoice ? "세금계산서 발행 · 익월 말 결제" : "납품 전 현금결제";
 }
 
+function fmtLeadTime(lt: string | null | undefined): string {
+  if (!lt) return "협의";
+  const trimmed = lt.trim();
+  if (!trimmed) return "협의";
+  // 순수 숫자면 "주" 자동 추가
+  if (/^\d+$/.test(trimmed)) return `${trimmed}주`;
+  return trimmed;
+}
+
 function fmtPhone(p: string): string {
   const d = p.replace(/\D/g, "");
   if (d.startsWith("02")) {
@@ -531,7 +540,7 @@ export default function QuoteDetailPage() {
                       </div>
                       <div>
                         <div className="k">납기 · Delivery</div>
-                        <div className="v">{item.leadTime ?? "협의"}</div>
+                        <div className="v">{fmtLeadTime(item.leadTime)}</div>
                       </div>
                     </div>
                     <div className="price-block">
@@ -550,7 +559,7 @@ export default function QuoteDetailPage() {
                     </div>
                     <div className="status-line">
                       <span className="ok">● Edwards 정품</span>
-                      <span>출고 · {item.leadTime ?? "협의"}</span>
+                      <span>출고 · {fmtLeadTime(item.leadTime)}</span>
                     </div>
                   </div>
                 </article>
@@ -722,7 +731,7 @@ export default function QuoteDetailPage() {
                 <td className="pmono">{String(idx + 1).padStart(2, "0")}</td>
                 <td className="partno">{item.customPartNo ?? item.product?.partNo ?? "—"}</td>
                 <td>{item.customDescription ?? item.product?.description ?? ""}</td>
-                <td style={{ textAlign: "center" }}>{item.leadTime ?? "협의"}</td>
+                <td style={{ textAlign: "center" }}>{fmtLeadTime(item.leadTime)}</td>
                 <td className="num-col">{item.quantity} EA</td>
                 <td className="num-col">₩ {fmt(item.unitPrice)}</td>
                 <td className="num-col">₩ {fmt(item.unitPrice * item.quantity)}</td>
