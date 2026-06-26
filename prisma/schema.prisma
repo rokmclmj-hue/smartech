@@ -233,9 +233,10 @@ model RepairRequest {
   selectedExtrasJson String?     // JSON: [{category, name, costPrice}]
 
   // 관리자 메모 / 외주 배정
-  adminNote     String?
-  quoteRemarks  String?           // 견적서 PDF REMARKS 란 출력
-  assignedAt    DateTime?         // 외주업체 배정 시각
+  adminNote       String?
+  quoteRemarks    String?           // 견적서 PDF REMARKS 란 출력
+  extraPartsName  String?           // 추가 파트 품목명 (견적서 PDF 출력)
+  assignedAt      DateTime?         // 외주업체 배정 시각
 
   // 발송 이력
   docsSentAt    DateTime?         // 최종 서류 발송 시각

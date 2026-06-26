@@ -46,7 +46,7 @@ export async function PATCH(req: NextRequest) {
   if (!isAdmin(session)) return NextResponse.json({ error: "권한 없음" }, { status: 403 });
 
   const body = await req.json();
-  const { id, status, adminNote, extraAmount, pumpModel, quoteRemarks } = body;
+  const { id, status, adminNote, extraAmount, extraPartsName, pumpModel, quoteRemarks } = body;
 
   if (!id || !status) return NextResponse.json({ error: "id, status 필수" }, { status: 400 });
 
@@ -64,6 +64,7 @@ export async function PATCH(req: NextRequest) {
       totalAmount,
       ...(pumpModel !== undefined && { pumpModel }),
       ...(quoteRemarks !== undefined && { quoteRemarks: quoteRemarks?.trim() || null }),
+      ...(extraPartsName !== undefined && { extraPartsName: extraPartsName?.trim() || null }),
       statusLogs: {
         create: {
           fromStatus: current.status,

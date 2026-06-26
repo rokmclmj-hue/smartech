@@ -31,6 +31,7 @@ type Repair = {
   totalAmount: number;
   adminNote: string | null;
   quoteRemarks: string | null;
+  extraPartsName: string | null;
   aiConfidence: string | null;
   aiModelRaw: string | null;
   docsSentAt: string | null;
@@ -86,7 +87,9 @@ function RepairRow({ repair, onRefresh }: { repair: Repair; onRefresh: () => voi
   const [saving, setSaving] = useState(false);
   const [editNote, setEditNote] = useState(repair.adminNote ?? "");
   const [editQuoteRemarks, setEditQuoteRemarks] = useState(repair.quoteRemarks ?? "");
+  const [editExtraName, setEditExtraName] = useState(repair.extraPartsName ?? "");
   const [editExtra, setEditExtra] = useState(repair.extraAmount > 0 ? String(repair.extraAmount) : "");
+  const [showQuoteModal, setShowQuoteModal] = useState(false);
   const [editModel, setEditModel] = useState(repair.pumpModel ?? "");
   const [savingModel, setSavingModel] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -171,9 +174,9 @@ function RepairRow({ repair, onRefresh }: { repair: Repair; onRefresh: () => voi
       await fetch("/api/admin/repairs", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: repair.id, status: curRepair.status, adminNote: editNote || null, extraAmount: extra, quoteRemarks: editQuoteRemarks || null }),
+        body: JSON.stringify({ id: repair.id, status: curRepair.status, adminNote: editNote || null, extraAmount: extra, extraPartsName: editExtraName || null, quoteRemarks: editQuoteRemarks || null }),
       });
-      setCurRepair(p => ({ ...p, adminNote: editNote || null, extraAmount: extra, quoteRemarks: editQuoteRemarks || null }));
+      setCurRepair(p => ({ ...p, adminNote: editNote || null, extraAmount: extra, extraPartsName: editExtraName || null, quoteRemarks: editQuoteRemarks || null }));
       onRefresh();
     } finally { setSaving(false); }
   }
@@ -390,6 +393,12 @@ function RepairRow({ repair, onRefresh }: { repair: Repair; onRefresh: () => voi
                 <Section title="금액">
                   <Row label="기본 수리비" value={curRepair.baseAmount > 0 ? formatPrice(curRepair.baseAmount) : "상담필요"} />
                   <div className="mt-2">
+                    <label className="text-[11px] text-dim block mb-1">추가 파트 품목명</label>
+                    <input value={editExtraName} onChange={e => setEditExtraName(e.target.value)}
+                      placeholder="예: Bearing x2, O-ring kit x1"
+                      className="w-full border border-line px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-paper" />
+                  </div>
+                  <div className="mt-2">
                     <label className="text-[11px] text-dim block mb-1">추가 파트비 (원)</label>
                     <input type="number" value={editExtra} onChange={e => setEditExtra(e.target.value)}
                       placeholder="0" className="w-full border border-line px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-paper" />
@@ -416,10 +425,10 @@ function RepairRow({ repair, onRefresh }: { repair: Repair; onRefresh: () => voi
                     onChange={e => e.target.files && adminUpload(e.target.files)} />
                   <div
                     onClick={() => !adminUploading && fileInputRef.current?.click()}
-                    onDragOver={e => { e.preventDefault(); if (!adminUploading) setIsDragging(true); }}
-                    onDragLeave={() => setIsDragging(false)}
+                    onDragOver={e => { e.preventDefault(); e.stopPropagation(); if (!adminUploading) setIsDragging(true); }}
+                    onDragLeave={e => { e.stopPropagation(); setIsDragging(false); }}
                     onDrop={e => {
-                      e.preventDefault(); setIsDragging(false);
+                      e.preventDefault(); e.stopPropagation(); setIsDragging(false);
                       if (!adminUploading && e.dataTransfer.files.length) adminUpload(e.dataTransfer.files);
                     }}
                     className={`flex flex-col items-center justify-center border-2 border-dashed py-5 transition select-none ${
@@ -497,26 +506,13 @@ function RepairRow({ repair, onRefresh }: { repair: Repair; onRefresh: () => voi
                   {curRepair.totalAmount <= 0 && (
                     <p className="text-[12px] text-amber-600 mb-3">수리작업 탭에서 금액을 먼저 저장하세요.</p>
                   )}
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-wrap">
                     <a href={`/api/admin/repairs/${repair.id}/send-quote`} target="_blank" rel="noopener noreferrer"
                       className="border border-line px-4 py-2 text-[12px] hover:bg-ink/5 transition">PDF 저장</a>
-                    {curRepair.contactEmail ? (
-                      <button
-                        onClick={async () => {
-                          if (!confirm(`${curRepair.contactEmail}으로 수리 견적서를 발송하시겠습니까?`)) return;
-                          const res = await fetch(`/api/admin/repairs/${repair.id}/send-quote`, {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ adminNote: editNote }),
-                          });
-                          const data = await res.json();
-                          if (res.ok) alert(`발송 완료: ${data.sentTo}`);
-                          else alert(`발송 실패: ${data.error}`);
-                        }}
-                        className="bg-smblue text-paper px-4 py-2 text-[12px] hover:brightness-110 transition">
-                        견적서 발송
-                      </button>
-                    ) : <span className="text-[11px] text-dim self-center">이메일 없음</span>}
+                    <button onClick={() => setShowQuoteModal(true)}
+                      className="border border-smblue text-smblue px-4 py-2 text-[12px] hover:bg-smblue/5 transition">
+                      내용 편집 · 발송
+                    </button>
                   </div>
                 </Section>
                 <Section title="2단계 — 수리 완료 서류 일괄 발송">
@@ -650,6 +646,68 @@ function RepairRow({ repair, onRefresh }: { repair: Repair; onRefresh: () => voi
               </Section>
             )}
 
+          </div>
+        </div>
+      )}
+
+      {/* ── 견적서 편집·발송 모달 ── */}
+      {showQuoteModal && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4"
+          onClick={e => { if (e.target === e.currentTarget) setShowQuoteModal(false); }}>
+          <div className="bg-paper w-full max-w-[500px] shadow-xl p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-[15px] font-bold">견적서 내용 편집</h3>
+              <button onClick={() => setShowQuoteModal(false)} className="text-dim hover:text-ink text-[18px] leading-none">×</button>
+            </div>
+            <div>
+              <label className="text-[11px] text-dim block mb-1">추가 파트 품목명</label>
+              <input value={editExtraName} onChange={e => setEditExtraName(e.target.value)}
+                placeholder="예: Bearing x2, O-ring kit x1"
+                className="w-full border border-line px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-white" />
+            </div>
+            <div>
+              <label className="text-[11px] text-dim block mb-1">추가 파트비 (원)</label>
+              <input type="number" value={editExtra} onChange={e => setEditExtra(e.target.value)}
+                placeholder="0"
+                className="w-full border border-line px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-white" />
+            </div>
+            <div>
+              <label className="text-[11px] text-dim block mb-1">비고란 REMARKS (PDF 출력)</label>
+              <textarea rows={3} value={editQuoteRemarks} onChange={e => setEditQuoteRemarks(e.target.value)}
+                placeholder="예: 분해 검사 후 추가 파트 교체 시 비용이 변동될 수 있습니다."
+                className="w-full border border-line px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-white resize-none" />
+            </div>
+            <div className="pt-2 border-t border-line flex gap-2 flex-wrap">
+              <button onClick={async () => { await saveNote(); }}
+                disabled={saving}
+                className="flex-1 py-2.5 bg-ink text-paper text-[12px] font-semibold hover:bg-edred transition disabled:opacity-40">
+                {saving ? "저장 중..." : "저장"}
+              </button>
+              <a href={`/api/admin/repairs/${repair.id}/send-quote`} target="_blank" rel="noopener noreferrer"
+                onClick={async e => { e.preventDefault(); await saveNote(); window.open(`/api/admin/repairs/${repair.id}/send-quote`, "_blank"); }}
+                className="flex-1 py-2.5 border border-line text-[12px] text-center hover:bg-ink/5 transition">
+                저장 후 PDF 저장
+              </a>
+              {curRepair.contactEmail && (
+                <button
+                  disabled={saving || curRepair.totalAmount <= 0}
+                  onClick={async () => {
+                    if (!confirm(`${curRepair.contactEmail}으로 수리 견적서를 발송하시겠습니까?`)) return;
+                    await saveNote();
+                    const res = await fetch(`/api/admin/repairs/${repair.id}/send-quote`, {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ adminNote: editNote }),
+                    });
+                    const data = await res.json();
+                    if (res.ok) { alert(`발송 완료: ${data.sentTo}`); setShowQuoteModal(false); }
+                    else alert(`발송 실패: ${data.error}`);
+                  }}
+                  className="flex-1 py-2.5 bg-smblue text-paper text-[12px] font-semibold hover:brightness-110 transition disabled:opacity-40">
+                  저장 후 발송
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}
