@@ -303,6 +303,11 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone, isSelected, onToggle
   const [preQuoteEmail, setPreQuoteEmail] = useState(job.contactEmail ?? "");
   const [sendingPreQuote, setSendingPreQuote] = useState(false);
   const [editSubEmail, setEditSubEmail] = useState(job.subEmail ?? "");
+  const [allCompanies, setAllCompanies] = useState<Company[]>([]);
+  const [editCompanyQ, setEditCompanyQ] = useState("");
+  const [editCompanyResults, setEditCompanyResults] = useState<Company[]>([]);
+  const [editSelectedCompany, setEditSelectedCompany] = useState<Company | null>(job.company);
+  const [savingCompany, setSavingCompany] = useState(false);
   const [adminUploading, setAdminUploading] = useState(false);
   const [adminUploadMsg, setAdminUploadMsg] = useState("");
   const [deletingFileId, setDeletingFileId] = useState<number | null>(null);
@@ -312,6 +317,36 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone, isSelected, onToggle
   const uploadUrl = job.uploadToken
     ? `${typeof window !== "undefined" ? window.location.origin : ""}/repair/offline-upload/${job.uploadToken}`
     : null;
+
+  // 패널 열릴 때 거래처 목록 로드
+  useEffect(() => {
+    if (!open || allCompanies.length > 0) return;
+    fetch("/api/admin/known-companies").then(r => r.json()).then(data => {
+      setAllCompanies(data.companies ?? []);
+    }).catch(() => {});
+  }, [open, allCompanies.length]);
+
+  // 거래처 검색 필터링
+  useEffect(() => {
+    if (!editCompanyQ.trim()) { setEditCompanyResults([]); return; }
+    const filtered = allCompanies.filter(c =>
+      c.companyName.toLowerCase().includes(editCompanyQ.toLowerCase())
+    ).slice(0, 6);
+    setEditCompanyResults(filtered);
+  }, [editCompanyQ, allCompanies]);
+
+  async function handleSaveCompany() {
+    setSavingCompany(true);
+    try {
+      const res = await fetch(`/api/admin/offline-repairs/${job.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ companyId: editSelectedCompany?.id ?? null }),
+      });
+      if (res.ok) { showToast("거래처 저장됨"); onRefresh(); }
+      else showToast("저장 실패");
+    } finally { setSavingCompany(false); }
+  }
 
   // 패널 열릴 때 교체부품 비어있으면 수리 키트에서 자동 채우기
   useEffect(() => {
@@ -560,9 +595,11 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone, isSelected, onToggle
               </span>
               {job.uploadedAt && <span className="mono text-[10px] text-purple-600">↑ 업로드됨</span>}
             </div>
-            <div className="text-[15px] font-semibold">{job.pumpMaker} {job.pumpModel}</div>
+            <div className="text-[15px] font-semibold">
+              {job.company?.companyName ?? <span className="text-ink/30">(거래처 미지정)</span>}
+              {" · "}{job.pumpModel}
+            </div>
             <div className="text-[12px] dim">
-              {job.company?.companyName && <span className="mr-2">{job.company.companyName}</span>}
               {job.serialNo && <span className="mono mr-2">S/N {job.serialNo}</span>}
               <span>{fmtDate(job.receivedDate)}</span>
             </div>
@@ -591,6 +628,44 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone, isSelected, onToggle
                 {label}
               </button>
             ))}
+          </div>
+
+          {/* 거래처 수정 */}
+          <div className="space-y-2">
+            <div className="mono text-[10px] dim tracking-[0.1em]">— 거래처 수정</div>
+            <div className="flex items-center gap-2 flex-wrap">
+              {editSelectedCompany ? (
+                <>
+                  <span className="text-[13px] font-semibold">{editSelectedCompany.companyName}</span>
+                  <button onClick={() => { setEditSelectedCompany(null); setEditCompanyQ(""); }}
+                    className="text-[11px] dim hover:text-edred">✕ 변경</button>
+                </>
+              ) : (
+                <div className="relative max-w-xs w-full">
+                  <input
+                    value={editCompanyQ}
+                    onChange={e => setEditCompanyQ(e.target.value)}
+                    placeholder="거래처 검색..."
+                    className="w-full border hair px-3 py-1.5 text-[13px] focus:outline-none focus:border-ink"
+                  />
+                  {editCompanyResults.length > 0 && (
+                    <div className="absolute z-10 top-full left-0 right-0 bg-paper border hair shadow-md">
+                      {editCompanyResults.map(c => (
+                        <button key={c.id}
+                          onClick={() => { setEditSelectedCompany(c); setEditCompanyQ(""); setEditCompanyResults([]); }}
+                          className="w-full text-left px-3 py-2 text-[13px] hover:bg-ink/5 border-b hair last:border-0">
+                          {c.companyName}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+              <button onClick={handleSaveCompany} disabled={savingCompany}
+                className="border hair px-3 py-1.5 text-[11px] hover:bg-ink/5 shrink-0 disabled:opacity-50">
+                {savingCompany ? "저장 중..." : "저장"}
+              </button>
+            </div>
           </div>
 
           {/* 사전 견적 발송 — 접수·물품수령 단계에서만 표시 */}

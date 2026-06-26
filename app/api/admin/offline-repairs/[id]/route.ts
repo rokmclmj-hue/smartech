@@ -115,6 +115,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       ...(body.quoteRemarks !== undefined && { quoteRemarks: body.quoteRemarks || null }),
       ...(body.subEmail !== undefined && { subEmail: body.subEmail || null }),
       ...(body.subName !== undefined && { subName: body.subName || null }),
+      ...(body.companyId !== undefined && { companyId: body.companyId ?? null }),
     },
   });
   return NextResponse.json(updated);
