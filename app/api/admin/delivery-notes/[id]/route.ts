@@ -44,6 +44,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       ...(body.status !== undefined && { status: body.status }),
       ...(body.sentAt !== undefined && { sentAt: body.sentAt }),
       ...(body.sentTo !== undefined && { sentTo: body.sentTo }),
+      ...(body.remarks !== undefined && { remarks: body.remarks?.trim() || null }),
     },
   });
   return NextResponse.json({ ok: true, note: updated });

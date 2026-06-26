@@ -30,6 +30,7 @@ export async function GET(req: NextRequest) {
     toPhone: n.toPhone,
     toBizNo: n.toBizNo,
     memo: n.memo,
+    remarks: n.remarks,
     includeBankInfo: n.includeBankInfo,
     totalAmount: n.totalAmount,
     itemCount: n.items.length,

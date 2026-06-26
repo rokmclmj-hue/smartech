@@ -318,6 +318,11 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone, isSelected, onToggle
     ? `${typeof window !== "undefined" ? window.location.origin : ""}/repair/offline-upload/${job.uploadToken}`
     : null;
 
+  // job.company 변경 시 editSelectedCompany 동기화 (onRefresh 후 stale 방지)
+  useEffect(() => {
+    setEditSelectedCompany(job.company);
+  }, [job.company]);
+
   // 패널 열릴 때 거래처 목록 로드
   useEffect(() => {
     if (!open || allCompanies.length > 0) return;

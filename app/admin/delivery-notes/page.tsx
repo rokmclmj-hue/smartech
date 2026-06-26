@@ -23,6 +23,7 @@ type DeliveryNote = {
   toPhone: string | null;
   toBizNo: string | null;
   memo: string | null;
+  remarks: string | null;
   includeBankInfo: boolean;
   totalSupply: number;
   totalVat: number;
@@ -55,6 +56,7 @@ type HistoryItem = {
   toPhone: string | null;
   toBizNo: string | null;
   memo: string | null;
+  remarks: string | null;
   includeBankInfo: boolean;
   totalAmount: number;
   itemCount: number;
@@ -194,7 +196,7 @@ function NoteForm({ onSaved }: { onSaved: () => void }) {
     setToPhone(h.toPhone ?? "");
     setToBizNo(h.toBizNo ?? "");
     setMemo(h.memo ?? "");
-    setRemarks((h as { remarks?: string | null }).remarks ?? "");
+    setRemarks(h.remarks ?? "");
     setIncludeBankInfo(h.includeBankInfo);
     setItems(h.previewItems.map((i) => ({
       partNo: i.partNo,
