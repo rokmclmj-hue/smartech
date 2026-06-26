@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db";
 import type { Session } from "next-auth";
 
 function isAdmin(session: Session | null) {
-  return (session?.user as any)?.tier === "ADMIN";
+  return (session?.user as { tier?: string })?.tier === "ADMIN";
 }
 
 // GET /api/admin/repairs — 수리 접수 전체 목록
@@ -37,13 +37,16 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ repairs, total, page, pages: Math.ceil(total / limit) });
 }
 
+// SMS 발송 비활성화 플래그 — true 로 바꾸면 재활성화
+const SMS_ENABLED = false;
+
 // PATCH /api/admin/repairs — 수리 상태 업데이트
 export async function PATCH(req: NextRequest) {
   const session = await auth();
   if (!isAdmin(session)) return NextResponse.json({ error: "권한 없음" }, { status: 403 });
 
   const body = await req.json();
-  const { id, status, adminNote, extraAmount, pumpModel } = body;
+  const { id, status, adminNote, extraAmount, pumpModel, quoteRemarks } = body;
 
   if (!id || !status) return NextResponse.json({ error: "id, status 필수" }, { status: 400 });
 
@@ -60,6 +63,7 @@ export async function PATCH(req: NextRequest) {
       extraAmount: extraAmount ?? current.extraAmount,
       totalAmount,
       ...(pumpModel !== undefined && { pumpModel }),
+      ...(quoteRemarks !== undefined && { quoteRemarks: quoteRemarks?.trim() || null }),
       statusLogs: {
         create: {
           fromStatus: current.status,
@@ -71,8 +75,8 @@ export async function PATCH(req: NextRequest) {
     },
   });
 
-  // 고객에게 SMS (연락처 있을 때만)
-  if (current.contactPhone) {
+  // 고객에게 SMS — SMS_ENABLED = true 로 변경하면 재활성화
+  if (SMS_ENABLED && current.contactPhone) {
     try {
       const { notifyRepairStatus } = await import("@/lib/solapi");
       await notifyRepairStatus(current.contactPhone, current.repairNo, status);

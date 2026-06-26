@@ -38,6 +38,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       repairCost: repair.totalAmount,
       repairPartsText: adminNote || null,
       inspectorName: null,
+      quoteRemarks: repair.quoteRemarks ?? null,
     });
 
     // 수리견적서만 첨부 (온라인 수리는 검사성적서 없음)
@@ -86,6 +87,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
     repairCost: repair.totalAmount,
     repairPartsText: repair.adminNote ?? null,
     inspectorName: null,
+    quoteRemarks: repair.quoteRemarks ?? null,
   });
 
   const filename = `수리견적서_${repair.repairNo}.pdf`;

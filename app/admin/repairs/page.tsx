@@ -30,6 +30,7 @@ type Repair = {
   extraAmount: number;
   totalAmount: number;
   adminNote: string | null;
+  quoteRemarks: string | null;
   aiConfidence: string | null;
   aiModelRaw: string | null;
   docsSentAt: string | null;
@@ -84,6 +85,7 @@ function RepairRow({ repair, onRefresh }: { repair: Repair; onRefresh: () => voi
 
   const [saving, setSaving] = useState(false);
   const [editNote, setEditNote] = useState(repair.adminNote ?? "");
+  const [editQuoteRemarks, setEditQuoteRemarks] = useState(repair.quoteRemarks ?? "");
   const [editExtra, setEditExtra] = useState(repair.extraAmount > 0 ? String(repair.extraAmount) : "");
   const [editModel, setEditModel] = useState(repair.pumpModel ?? "");
   const [savingModel, setSavingModel] = useState(false);
@@ -169,9 +171,9 @@ function RepairRow({ repair, onRefresh }: { repair: Repair; onRefresh: () => voi
       await fetch("/api/admin/repairs", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: repair.id, status: curRepair.status, adminNote: editNote || null, extraAmount: extra }),
+        body: JSON.stringify({ id: repair.id, status: curRepair.status, adminNote: editNote || null, extraAmount: extra, quoteRemarks: editQuoteRemarks || null }),
       });
-      setCurRepair(p => ({ ...p, adminNote: editNote || null, extraAmount: extra }));
+      setCurRepair(p => ({ ...p, adminNote: editNote || null, extraAmount: extra, quoteRemarks: editQuoteRemarks || null }));
       onRefresh();
     } finally { setSaving(false); }
   }
@@ -383,7 +385,7 @@ function RepairRow({ repair, onRefresh }: { repair: Repair; onRefresh: () => voi
                       </button>
                     ))}
                   </div>
-                  <p className="text-[11px] text-dim mt-2">수리중·납품완료 선택 시 고객에게 SMS가 발송됩니다.</p>
+                  <p className="text-[11px] text-dim mt-2">SMS 발송 기능은 현재 비활성화되어 있습니다.</p>
                 </Section>
                 <Section title="금액">
                   <Row label="기본 수리비" value={curRepair.baseAmount > 0 ? formatPrice(curRepair.baseAmount) : "상담필요"} />
@@ -472,6 +474,12 @@ function RepairRow({ repair, onRefresh }: { repair: Repair; onRefresh: () => voi
                 <Section title="관리자 메모">
                   <textarea rows={3} value={editNote} onChange={e => setEditNote(e.target.value)}
                     placeholder="수리 원인, 교체 부품 등 내부 메모 (고객에게 보이지 않음)"
+                    className="w-full border border-line px-3 py-2.5 text-[13px] focus:outline-none focus:border-ink bg-paper resize-none" />
+                </Section>
+                <Section title="견적서 비고란">
+                  <p className="text-[11px] text-dim mb-2">견적서 PDF 하단 REMARKS 란에 출력됩니다.</p>
+                  <textarea rows={3} value={editQuoteRemarks} onChange={e => setEditQuoteRemarks(e.target.value)}
+                    placeholder="예: 분해 검사 후 추가 파트 교체 시 비용이 변동될 수 있습니다."
                     className="w-full border border-line px-3 py-2.5 text-[13px] focus:outline-none focus:border-ink bg-paper resize-none" />
                   <button onClick={saveNote} disabled={saving}
                     className="w-full mt-3 py-3 bg-ink text-paper text-[13px] font-semibold hover:bg-edred transition disabled:opacity-40">
