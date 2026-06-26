@@ -273,10 +273,27 @@ def run(folder_arg: str) -> bool:
     # 폴더 경로 결정
     folder = os.path.join(OUTPUT_DIR, folder_arg)
     if not os.path.isdir(folder):
-        for entry in os.listdir(OUTPUT_DIR):
-            c = os.path.join(OUTPUT_DIR, entry, folder_arg)
+        # 카테고리/월/폴더 구조에서 폴더명으로 탐색 (최대 3단계)
+        found = False
+        for cat in os.listdir(OUTPUT_DIR):
+            cat_path = os.path.join(OUTPUT_DIR, cat)
+            if not os.path.isdir(cat_path):
+                continue
+            c = os.path.join(cat_path, folder_arg)
             if os.path.isdir(c):
                 folder = c
+                found = True
+                break
+            for month in os.listdir(cat_path):
+                month_path = os.path.join(cat_path, month)
+                if not os.path.isdir(month_path):
+                    continue
+                c = os.path.join(month_path, folder_arg)
+                if os.path.isdir(c):
+                    folder = c
+                    found = True
+                    break
+            if found:
                 break
 
     if not os.path.isdir(folder):

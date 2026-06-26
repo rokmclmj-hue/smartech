@@ -56,13 +56,29 @@ if os.path.exists(_QUEUE_FILE):
     if not _matched_slot:
         print("[INFO] upload-queue.json에 없는 폴더 — 직접 업로드로 진행합니다.")
 
-# "2026-06/폴더명" 형식이면 그대로, 아니면 월별 서브폴더 자동 탐색
+# "카테고리/월/폴더명" 형식이면 그대로, 아니면 카테고리→월→폴더 순으로 탐색
 BLOG_FOLDER = os.path.join(OUTPUT_DIR, topic)
 if not os.path.isdir(BLOG_FOLDER):
-    for entry in os.listdir(OUTPUT_DIR):
-        candidate = os.path.join(OUTPUT_DIR, entry, topic)
-        if os.path.isdir(candidate):
-            BLOG_FOLDER = candidate
+    found = False
+    for cat in os.listdir(OUTPUT_DIR):
+        cat_path = os.path.join(OUTPUT_DIR, cat)
+        if not os.path.isdir(cat_path):
+            continue
+        c = os.path.join(cat_path, topic)
+        if os.path.isdir(c):
+            BLOG_FOLDER = c
+            found = True
+            break
+        for month in os.listdir(cat_path):
+            month_path = os.path.join(cat_path, month)
+            if not os.path.isdir(month_path):
+                continue
+            c = os.path.join(month_path, topic)
+            if os.path.isdir(c):
+                BLOG_FOLDER = c
+                found = True
+                break
+        if found:
             break
 IMAGES_DIR  = os.path.join(BLOG_FOLDER, "images")
 
