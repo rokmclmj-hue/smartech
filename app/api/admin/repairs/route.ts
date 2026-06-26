@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
 
   const { searchParams } = new URL(req.url);
   const status = searchParams.get("status"); // 필터
-  const page = Number(searchParams.get("page") ?? 1);
+  const page = Math.max(1, Number(searchParams.get("page") ?? 1));
   const limit = 20;
 
   const where = status && status !== "ALL" ? { status } : {};
@@ -59,20 +59,22 @@ export async function PATCH(req: NextRequest) {
     where: { id },
     data: {
       status,
-      adminNote: adminNote ?? current.adminNote,
-      extraAmount: extraAmount ?? current.extraAmount,
+      adminNote: adminNote !== undefined ? adminNote : current.adminNote,
+      extraAmount: extraAmount !== undefined ? extraAmount : current.extraAmount,
       totalAmount,
       ...(pumpModel !== undefined && { pumpModel }),
       ...(quoteRemarks !== undefined && { quoteRemarks: quoteRemarks?.trim() || null }),
       ...(extraPartsName !== undefined && { extraPartsName: extraPartsName?.trim() || null }),
-      statusLogs: {
-        create: {
-          fromStatus: current.status,
-          toStatus: status,
-          note: adminNote ?? null,
-          changedBy: "admin",
+      ...(status !== current.status && {
+        statusLogs: {
+          create: {
+            fromStatus: current.status,
+            toStatus: status,
+            note: adminNote ?? null,
+            changedBy: "admin",
+          },
         },
-      },
+      }),
     },
   });
 

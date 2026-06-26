@@ -159,7 +159,7 @@ function RepairRow({ repair, onRefresh }: { repair: Repair; onRefresh: () => voi
       await fetch("/api/admin/repairs", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: repair.id, status: newStatus, adminNote: editNote || null, extraAmount: editExtra ? Number(editExtra) : 0 }),
+        body: JSON.stringify({ id: repair.id, status: newStatus }),
       });
       setCurRepair(p => ({ ...p, status: newStatus }));
       onRefresh();
@@ -517,6 +517,7 @@ function RepairRow({ repair, onRefresh }: { repair: Repair; onRefresh: () => voi
                           if (!confirm(`${curRepair.contactEmail}으로 수리 견적서를 발송하시겠습니까?`)) return;
                           setSendingQuote(true);
                           try {
+                            await saveNote();
                             const res = await fetch(`/api/admin/repairs/${repair.id}/send-quote`, {
                               method: "POST",
                               headers: { "Content-Type": "application/json" },

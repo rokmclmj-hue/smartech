@@ -275,9 +275,9 @@ export async function sendRepairQuoteBatch(opts: {
     ? `[스마텍] 수리견적서 ${jobs[0].jobNo} 발송드립니다.`
     : `[스마텍] 수리견적서 일괄 발송 (${jobs[0].jobNo} 외 ${jobs.length - 1}건)`;
   const lines = [
-    `${companyName} ${contactName ?? "담당자"}님, 안녕하세요.`,
+    `안녕하세요 ${(contactName ?? "담당자").replace(/ ?님$/, "")}님,`,
+    `스마텍 이명재 입니다.`,
     ``,
-    `스마텍입니다.`,
     `아래 ${jobs.length}건의 수리견적서와 검사성적서를 첨부하여 드립니다.`,
     ``,
     ...jobs.map((j, i) => `  ${i + 1}. ${j.pumpMaker} ${j.pumpModel}${j.serialNo ? ` (S/N ${j.serialNo})` : ""} — ${j.jobNo}`),
@@ -285,7 +285,6 @@ export async function sendRepairQuoteBatch(opts: {
     `검토 후 수리 진행 여부를 회신해 주시면 감사하겠습니다.`,
     ``,
     `감사합니다.`,
-    `(주)스마텍 서비스팀`,
     `031-204-7170 · info@smartechvacuum.com`,
   ];
   await transporter.sendMail({
@@ -312,7 +311,7 @@ export async function sendRepairCompletion(opts: {
     from: `"스마텍" <${process.env.GMAIL_USER}>`,
     to: opts.to,
     subject: `[스마텍] 수리 완료 서류 ${opts.jobNo}`,
-    text: `${opts.companyName} ${opts.contactName ?? "담당자"}님, 안녕하세요.\n\n스마텍입니다.\n수리가 완료되어 관련 서류를 첨부하여 드립니다.\n\n  ▸ 거래명세표\n  ▸ 검사성적서 (해당 시)\n  ▸ 분해 사진 (해당 시)\n  ▸ 통장 사본\n\n입금 확인 후 납품 진행하겠습니다.\n문의 사항은 아래로 연락 주시기 바랍니다.\n\n감사합니다.\n(주)스마텍 서비스팀\n031-204-7170 · info@smartechvacuum.com`,
+    text: `안녕하세요 ${(opts.contactName ?? "담당자").replace(/ ?님$/, "")}님,\n스마텍 이명재 입니다.\n\n수리가 완료되어 관련 서류를 첨부하여 드립니다.\n\n  ▸ 거래명세표\n  ▸ 검사성적서 (해당 시)\n  ▸ 분해 사진 (해당 시)\n  ▸ 통장 사본\n\n입금 확인 후 납품 진행하겠습니다.\n문의 사항은 아래로 연락 주시기 바랍니다.\n\n감사합니다.\n031-204-7170 · info@smartechvacuum.com`,
     attachments: [
       {
         filename: `거래명세표_${opts.jobNo}.pdf`,

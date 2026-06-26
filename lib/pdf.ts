@@ -1433,8 +1433,8 @@ function RepairQuoteDocument({ data }: { data: RepairQuoteForPdf }) {
   const el = React.createElement;
   const issued = new Date();
   const year = issued.getFullYear();
-  const extra = (data.extraPartsName && (data.extraAmount ?? 0) > 0) ? (data.extraAmount ?? 0) : 0;
-  const base = (data.repairCost ?? 0) - extra;
+  const extra = (data.extraAmount ?? 0) > 0 ? (data.extraAmount ?? 0) : 0;
+  const base = Math.max(0, (data.repairCost ?? 0) - extra);
   const vat = data.repairCost != null ? Math.round(data.repairCost * VAT_RATE) : 0;
   const total = (data.repairCost ?? 0) + vat;
 
@@ -1552,14 +1552,16 @@ function RepairQuoteDocument({ data }: { data: RepairQuoteForPdf }) {
             data.repairCost != null ? fmt(extra > 0 ? base : data.repairCost) : "협의"
           )
         ),
-        extra > 0 && data.extraPartsName
+        extra > 0
           ? el(View, { style: { ...S.tableRow, borderTop: "1 solid #E3DFD6" } },
               el(Text, { style: [S.tdNormal, { width: "6%", textAlign: "center" }] }, "02"),
               el(View, { style: { width: "62%", paddingRight: 8 } },
                 el(Text, { style: { fontSize: 9, fontFamily: "Pretendard", fontWeight: 700, color: "#111111", marginBottom: 4 } },
                   "추가 파트 교체"
                 ),
-                el(Text, { style: { fontSize: 7, color: "#555555", lineHeight: 1.6 } }, data.extraPartsName)
+                data.extraPartsName
+                  ? el(Text, { style: { fontSize: 7, color: "#555555", lineHeight: 1.6 } }, data.extraPartsName)
+                  : null
               ),
               el(Text, { style: [S.tdNormal, { width: "10%", textAlign: "center" }] }, "1식"),
               el(Text, { style: [S.tdAmount, { width: "22%", textAlign: "right" }] }, fmt(extra))
