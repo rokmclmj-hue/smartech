@@ -79,8 +79,8 @@ function JobForm({ onSaved }: { onSaved: (newJobId: number) => void }) {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch("/api/admin/companies?limit=200").then(r => r.json()).then(data => {
-      setCompanies(data.items ?? data ?? []);
+    fetch("/api/admin/known-companies").then(r => r.json()).then(data => {
+      setCompanies(data.companies ?? []);
     }).catch(() => {});
   }, []);
 
