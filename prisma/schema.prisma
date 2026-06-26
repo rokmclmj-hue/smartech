@@ -234,6 +234,7 @@ model RepairRequest {
 
   // 관리자 메모 / 외주 배정
   adminNote     String?
+  quoteRemarks  String?           // 견적서 PDF REMARKS 란 출력
   assignedAt    DateTime?         // 외주업체 배정 시각
 
   // 발송 이력
