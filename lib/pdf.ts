@@ -1436,7 +1436,7 @@ function RepairQuoteDocument({ data }: { data: RepairQuoteForPdf }) {
 
   const partsOneLine = data.repairPartsText
     ?.split("\n")
-    .map(l => l.trim())
+    .map(l => l.trim().replace(/×/g, "x"))
     .filter(Boolean)
     .join("  ·  ") ?? "";
 
