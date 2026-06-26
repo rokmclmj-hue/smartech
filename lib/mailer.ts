@@ -247,7 +247,7 @@ export async function sendRepairQuote(opts: {
     subject: `[스마텍] 수리견적서 ${opts.jobNo} 발송드립니다.`,
     text:
       opts.bodyText ??
-      `${opts.companyName} ${opts.contactName ?? "담당자"}님, 안녕하세요.\n\n스마텍입니다.\n수리견적서${hasInspection ? "와 검사성적서" : ""}(${opts.jobNo})를 첨부하여 드립니다.\n검토 후 수리 진행 여부를 회신해 주시면 감사하겠습니다.\n\n감사합니다.\n(주)스마텍 서비스팀\n031-204-7170 · info@smartechvacuum.com`,
+      `안녕하세요 ${(opts.contactName ?? "담당자").replace(/ ?님$/, "")}님,\n스마텍 이명재 입니다.\n\n수리견적서${hasInspection ? "와 검사성적서" : ""}(${opts.jobNo})를 첨부하여 드립니다.\n검토 후 수리 진행 여부를 회신해 주시면 감사하겠습니다.\n\n감사합니다.\n031-204-7170 · info@smartechvacuum.com`,
     attachments: [
       {
         filename: `수리견적서_${opts.jobNo}.pdf`,

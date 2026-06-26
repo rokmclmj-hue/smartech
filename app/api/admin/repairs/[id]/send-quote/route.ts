@@ -64,7 +64,7 @@ export async function POST(req: NextRequest, { params }: Params) {
   }
 }
 
-export async function GET(_req: NextRequest, { params }: Params) {
+export async function GET(req: NextRequest, { params }: Params) {
   if (!(await getAdminSession()))
     return NextResponse.json({ error: "권한 없음" }, { status: 403 });
 
@@ -95,10 +95,13 @@ export async function GET(_req: NextRequest, { params }: Params) {
   });
 
   const filename = `수리견적서_${repair.repairNo}.pdf`;
+  const preview = new URL(req.url).searchParams.get("preview") === "1";
   return new NextResponse(pdfBuffer.buffer as ArrayBuffer, {
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`,
+      "Content-Disposition": preview
+        ? `inline; filename*=UTF-8''${encodeURIComponent(filename)}`
+        : `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`,
     },
   });
 }
