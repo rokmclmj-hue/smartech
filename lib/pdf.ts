@@ -610,8 +610,8 @@ const DS = StyleSheet.create({
   breakdownValue: { fontSize: 8, color: "#111111", fontFamily: "Pretendard", fontWeight: 700 },
   taxBadge: { backgroundColor: "#111111", paddingHorizontal: 6, paddingVertical: 2, marginTop: 4, alignSelf: "flex-start" },
   taxBadgeText: { fontSize: 6, color: "#ffffff", letterSpacing: 1 },
-  tableHeader: { flexDirection: "row", backgroundColor: "#c00020", paddingVertical: 6, paddingHorizontal: 6 },
-  thCell: { color: "#ffffff", fontFamily: "Pretendard", fontWeight: 700, fontSize: 7, letterSpacing: 1 },
+  tableHeader: { flexDirection: "row", backgroundColor: "#F4F6F8", borderTop: "0.5 solid #111111", borderBottom: "0.5 solid #111111", paddingVertical: 6, paddingHorizontal: 6 },
+  thCell: { color: "#111111", fontFamily: "Pretendard", fontWeight: 700, fontSize: 7, letterSpacing: 1 },
   tableRow: { flexDirection: "row", borderBottom: "1 solid #eeeeee", paddingVertical: 6, paddingHorizontal: 6 },
   tableRowAlt: { flexDirection: "row", borderBottom: "1 solid #eeeeee", paddingVertical: 6, paddingHorizontal: 6, backgroundColor: "#fafafa" },
   tdNormal: { fontSize: 8, color: "#222222" },
@@ -841,6 +841,7 @@ export interface ManualDeliveryNoteForPdf {
   toEmail?: string | null;
   toPhone?: string | null;
   toBizNo?: string | null;
+  remarks?: string | null;
   includeBankInfo: boolean;
   items: ManualDeliveryNoteItemForPdf[];
 }
@@ -965,6 +966,14 @@ function ManualDeliveryNoteDocument({ data }: { data: ManualDeliveryNoteForPdf }
           )
         )
       ),
+
+      // REMARKS
+      data.remarks
+        ? el(View, { style: QS.remarkBox },
+            el(Text, { style: QS.remarkLabel }, "REMARKS"),
+            el(Text, { style: QS.remarkText }, data.remarks)
+          )
+        : null,
 
       // Section 05: 서명
       el(Text, { style: DS.sectionLabel }, "— 05  인수 확인"),
@@ -1215,6 +1224,7 @@ export interface RepairInspectionForPdf {
   companyName: string | null;
   contactName: string | null;
   inspectorName: string | null;
+  remarks?: string | null;
   inspectionItems: RepairInspectionItem[];
   selectedPhotos: RepairPhotoFile[];
 }
@@ -1223,21 +1233,21 @@ const IR = StyleSheet.create({
   topBar: { backgroundColor: "#c00020", paddingVertical: 8, paddingHorizontal: 14, flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   topLeft: { color: "#ffffff", fontSize: 7, fontFamily: "Pretendard", fontWeight: 700, letterSpacing: 1 },
   topRight: { color: "#ffbbbb", fontSize: 7 },
-  titleArea: { borderBottom: "2 solid #c00020", paddingBottom: 6, marginBottom: 10, flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", marginTop: 8 },
-  docTitle: { fontSize: 22, fontFamily: "Pretendard", fontWeight: 700, color: "#c00020", letterSpacing: 4 },
+  titleArea: { borderBottom: "2 solid #111111", paddingBottom: 6, marginBottom: 10, flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", marginTop: 8 },
+  docTitle: { fontSize: 22, fontFamily: "Pretendard", fontWeight: 700, color: "#111111", letterSpacing: 4 },
   docSub: { fontSize: 7, color: "#666666", marginTop: 2, letterSpacing: 2 },
-  jobNo: { fontSize: 10, fontFamily: "Pretendard", fontWeight: 700, color: "#c00020" },
+  jobNo: { fontSize: 10, fontFamily: "Pretendard", fontWeight: 700, color: "#111111" },
   jobMeta: { fontSize: 7, color: "#666666", marginTop: 2 },
   secLabel: { fontSize: 7, fontFamily: "Pretendard", fontWeight: 700, color: "#444444", letterSpacing: 2, marginTop: 10, marginBottom: 3, textTransform: "uppercase" },
   infoRow: { flexDirection: "row", gap: 10, marginBottom: 8 },
-  infoBox: { flex: 1, borderLeft: "3 solid #c00020", paddingLeft: 6 },
+  infoBox: { flex: 1, borderLeft: "3 solid #0d3a8a", paddingLeft: 6 },
   infoLabel: { fontSize: 6, color: "#999999", letterSpacing: 1, marginBottom: 1 },
   infoVal: { fontSize: 10, fontFamily: "Pretendard", fontWeight: 700, color: "#111111" },
   infoSub: { fontSize: 7, color: "#555555", marginTop: 1 },
-  tHead: { flexDirection: "row", backgroundColor: "#c00020", paddingVertical: 4, paddingHorizontal: 3 },
+  tHead: { flexDirection: "row", backgroundColor: "#F4F6F8", borderTop: "0.5 solid #111111", borderBottom: "0.5 solid #111111", paddingVertical: 4, paddingHorizontal: 3 },
   tRow: { flexDirection: "row", borderBottom: "1 solid #eeeeee", paddingVertical: 2.5, paddingHorizontal: 3 },
   tRowAlt: { flexDirection: "row", borderBottom: "1 solid #eeeeee", paddingVertical: 2.5, paddingHorizontal: 3, backgroundColor: "#fafafa" },
-  th: { fontSize: 6, color: "#ffffff", fontFamily: "Pretendard", fontWeight: 700, letterSpacing: 0.5 },
+  th: { fontSize: 6, color: "#111111", fontFamily: "Pretendard", fontWeight: 700, letterSpacing: 0.5 },
   td: { fontSize: 7, color: "#333333" },
   tdBold: { fontSize: 7, fontFamily: "Pretendard", fontWeight: 700 },
   cItem: { width: "28%" },
@@ -1328,6 +1338,13 @@ function InspectionReportDocument({ data }: { data: RepairInspectionForPdf }) {
           )
         )
       ),
+
+      data.remarks
+        ? el(View, { style: QS.remarkBox },
+            el(Text, { style: QS.remarkLabel }, "REMARKS"),
+            el(Text, { style: QS.remarkText }, data.remarks)
+          )
+        : null,
 
       el(Text, { style: IR.secLabel }, "— 03  검사자 확인"),
       el(View, { style: IR.sigRow },

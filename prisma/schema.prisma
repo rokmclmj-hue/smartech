@@ -437,6 +437,9 @@ model ManualDeliveryNote {
   // 내부 메모 (PDF 미출력 — 납품처·참고사항 등 내부 기록용)
   memo            String?
 
+  // PDF 비고란 (PDF 출력)
+  remarks         String?  @db.Text
+
   // 통장사본 포함 여부
   includeBankInfo Boolean  @default(true)
 

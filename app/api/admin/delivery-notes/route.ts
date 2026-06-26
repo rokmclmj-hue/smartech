@@ -47,6 +47,7 @@ export async function POST(req: NextRequest) {
         toPhone: body.toPhone?.trim() || null,
         toBizNo: body.toBizNo?.trim() || null,
         memo: body.memo?.trim() || null,
+        remarks: body.remarks?.trim() || null,
         includeBankInfo: body.includeBankInfo !== false,
         totalSupply,
         totalVat,

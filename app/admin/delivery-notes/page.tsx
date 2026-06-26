@@ -121,6 +121,7 @@ function NoteForm({ onSaved }: { onSaved: () => void }) {
 
   // 기타
   const [memo, setMemo] = useState("");
+  const [remarks, setRemarks] = useState("");
   const [includeBankInfo, setIncludeBankInfo] = useState(true);
 
   // 불러오기 모달
@@ -193,6 +194,7 @@ function NoteForm({ onSaved }: { onSaved: () => void }) {
     setToPhone(h.toPhone ?? "");
     setToBizNo(h.toBizNo ?? "");
     setMemo(h.memo ?? "");
+    setRemarks((h as { remarks?: string | null }).remarks ?? "");
     setIncludeBankInfo(h.includeBankInfo);
     setItems(h.previewItems.map((i) => ({
       partNo: i.partNo,
@@ -247,7 +249,7 @@ function NoteForm({ onSaved }: { onSaved: () => void }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           toCompany, toName, toTitle, toEmail, toPhone, toBizNo,
-          memo, includeBankInfo,
+          memo, remarks, includeBankInfo,
           items: items.map((it, idx) => ({ ...it, quantity: Number(it.quantity), unitPrice: Number(it.unitPrice), sortOrder: idx })),
         }),
       });
@@ -472,6 +474,12 @@ function NoteForm({ onSaved }: { onSaved: () => void }) {
             <div className="mono text-[10px] dim mb-1">내부 메모 <span className="normal-case">(PDF 미출력 — 납품처·참고사항)</span></div>
             <textarea value={memo} onChange={(e) => setMemo(e.target.value)} rows={2}
               placeholder="예: 식약처 3월2기 입찰건 납품 / 택배비 착불 포함"
+              className="w-full border hair px-3 py-2 text-[13px] focus:outline-none focus:border-ink resize-none max-w-2xl" />
+          </div>
+          <div>
+            <div className="mono text-[10px] dim mb-1">비고 REMARKS <span className="normal-case">(PDF 출력 — 거래 특이사항)</span></div>
+            <textarea value={remarks} onChange={(e) => setRemarks(e.target.value)} rows={2}
+              placeholder="예: 이 견적은 분해 결과에 따라 변동될 수 있습니다."
               className="w-full border hair px-3 py-2 text-[13px] focus:outline-none focus:border-ink resize-none max-w-2xl" />
           </div>
           <label className="flex items-center gap-2.5 cursor-pointer select-none group">

@@ -31,6 +31,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
       companyName: job.company?.companyName ?? null,
       contactName: job.contactName,
       inspectorName: job.inspectorName,
+      remarks: job.quoteRemarks,
       inspectionItems: job.inspectionItems,
       selectedPhotos: job.files.map(f => ({ fileName: f.fileName, fileUrl: f.fileUrl })),
     });

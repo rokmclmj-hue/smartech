@@ -29,6 +29,7 @@ export async function GET(req: NextRequest, { params }: Params) {
       toEmail: note.toEmail,
       toPhone: note.toPhone,
       toBizNo: note.toBizNo,
+      remarks: note.remarks,
       includeBankInfo: note.includeBankInfo,
       items: note.items.map((i) => ({
         partNo: i.partNo,
