@@ -16,6 +16,7 @@ export type AuditAction =
   | "user.approve"
   | "user.reject"
   | "user.tier_change"
+  | "user.rename"
   | "user.delete"
   | "product.create"
   | "product.update"
