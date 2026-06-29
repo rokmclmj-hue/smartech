@@ -91,6 +91,11 @@ export default function AdminUsersPage() {
   // all tab — pending select value before confirmation
   const [pendingTierChange, setPendingTierChange] = useState<Record<number, string>>({});
 
+  // 이름/회사 인라인 수정
+  const [editingUserId, setEditingUserId] = useState<number | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editCompany, setEditCompany] = useState("");
+
   // ── Fetch helpers ─────────────────────────────────────────────────────────
 
   const fetchPending = useCallback(async () => {
@@ -280,6 +285,43 @@ export default function AdminUsersPage() {
       }
       success(`${user.name}님 계정이 삭제되었습니다`);
       fetchAll(allPage, search);
+    } catch (e) {
+      toastError(e instanceof Error ? e.message : "오류가 발생했습니다");
+    } finally {
+      setActionLoading(null);
+    }
+  }
+
+  function startEditUser(u: UserItem) {
+    setEditingUserId(u.id);
+    setEditName(u.name);
+    setEditCompany(u.company);
+  }
+
+  function cancelEditUser() {
+    setEditingUserId(null);
+    setEditName("");
+    setEditCompany("");
+  }
+
+  async function saveUserName(userId: number) {
+    if (!editName.trim()) { info("이름을 입력해주세요"); return; }
+    setActionLoading(userId);
+    try {
+      const res = await fetch("/api/admin/users", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, action: "rename", name: editName.trim(), company: editCompany.trim() }),
+      });
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        throw new Error((json as { error?: string }).error ?? "처리 실패");
+      }
+      success("이름/회사가 수정되었습니다");
+      setAllUsers((prev) =>
+        prev.map((u) => u.id === userId ? { ...u, name: editName.trim(), company: editCompany.trim() } : u)
+      );
+      cancelEditUser();
     } catch (e) {
       toastError(e instanceof Error ? e.message : "오류가 발생했습니다");
     } finally {
@@ -556,10 +598,20 @@ export default function AdminUsersPage() {
                         className="border hair bg-paper p-4 space-y-3"
                       >
                         <div className="flex items-start justify-between gap-2">
-                          <div className="min-w-0">
-                            <div className="font-semibold text-ink truncate">{u.name}</div>
-                            <div className="text-[13px] dim truncate">{u.company}</div>
-                            <div className="mono text-[11px] dim truncate mt-0.5">{u.email}</div>
+                          <div className="min-w-0 flex-1">
+                            {editingUserId === u.id ? (
+                              <div className="space-y-1.5">
+                                <input value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="이름" onKeyDown={(e) => { if (e.key === "Escape") cancelEditUser(); }} className="border hair bg-paper px-2 py-1 text-[13px] w-full focus:outline-none focus:border-ink" />
+                                <input value={editCompany} onChange={(e) => setEditCompany(e.target.value)} placeholder="회사" onKeyDown={(e) => { if (e.key === "Escape") cancelEditUser(); }} className="border hair bg-paper px-2 py-1 text-[13px] w-full focus:outline-none focus:border-ink" />
+                                <div className="mono text-[11px] dim truncate">{u.email}</div>
+                              </div>
+                            ) : (
+                              <>
+                                <div className="font-semibold text-ink truncate">{u.name}</div>
+                                <div className="text-[13px] dim truncate">{u.company}</div>
+                                <div className="mono text-[11px] dim truncate mt-0.5">{u.email}</div>
+                              </>
+                            )}
                           </div>
                           <span
                             className={`shrink-0 mono text-[10px] tracking-[0.08em] uppercase border px-2 py-0.5 ${
@@ -573,41 +625,69 @@ export default function AdminUsersPage() {
                           가입 · {new Date(u.createdAt).toLocaleDateString("ko-KR")}
                         </div>
                         <div className="flex gap-2 pt-2 border-t hair">
-                          <select
-                            value={selectVal}
-                            onChange={(e) =>
-                              setPendingTierChange((prev) => ({
-                                ...prev,
-                                [u.id]: e.target.value,
-                              }))
-                            }
-                            disabled={actionLoading === u.id || u.tier === "ADMIN"}
-                            className="flex-1 min-w-0 border hair bg-paper px-2 py-2 text-[13px] focus:outline-none focus:border-ink disabled:opacity-40 disabled:cursor-not-allowed"
-                          >
-                            {["PENDING", ...TIER_OPTIONS, "ADMIN"].map((t) => (
-                              <option key={t} value={t}>
-                                {TIER_LABELS[t] ?? t}
-                              </option>
-                            ))}
-                          </select>
-                          <button
-                            onClick={() => changeTier(u, selectVal)}
-                            disabled={
-                              actionLoading === u.id ||
-                              u.tier === "ADMIN" ||
-                              selectVal === u.tier
-                            }
-                            className="shrink-0 mono text-[11px] tracking-[0.1em] uppercase border border-line text-dim px-4 py-2 hover:border-ink hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                          >
-                            {actionLoading === u.id ? "..." : "적용"}
-                          </button>
-                          <button
-                            onClick={() => deleteUser(u)}
-                            disabled={actionLoading === u.id || u.tier === "ADMIN"}
-                            className="shrink-0 mono text-[11px] tracking-[0.1em] uppercase border border-edred/40 text-edred/60 px-3 py-2 hover:border-edred hover:text-edred disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                          >
-                            삭제
-                          </button>
+                          {editingUserId === u.id ? (
+                            <>
+                              <button
+                                onClick={() => saveUserName(u.id)}
+                                disabled={actionLoading === u.id}
+                                className="flex-1 mono text-[11px] tracking-[0.1em] uppercase border border-smblue text-smblue py-2 hover:bg-smblue hover:text-paper disabled:opacity-30 transition-colors"
+                              >
+                                {actionLoading === u.id ? "..." : "저장"}
+                              </button>
+                              <button
+                                onClick={cancelEditUser}
+                                disabled={actionLoading === u.id}
+                                className="shrink-0 mono text-[11px] tracking-[0.1em] uppercase border border-line text-dim px-4 py-2 hover:border-ink hover:text-ink disabled:opacity-30 transition-colors"
+                              >
+                                취소
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <select
+                                value={selectVal}
+                                onChange={(e) =>
+                                  setPendingTierChange((prev) => ({
+                                    ...prev,
+                                    [u.id]: e.target.value,
+                                  }))
+                                }
+                                disabled={actionLoading === u.id || u.tier === "ADMIN"}
+                                className="flex-1 min-w-0 border hair bg-paper px-2 py-2 text-[13px] focus:outline-none focus:border-ink disabled:opacity-40 disabled:cursor-not-allowed"
+                              >
+                                {["PENDING", ...TIER_OPTIONS, "ADMIN"].map((t) => (
+                                  <option key={t} value={t}>
+                                    {TIER_LABELS[t] ?? t}
+                                  </option>
+                                ))}
+                              </select>
+                              <button
+                                onClick={() => changeTier(u, selectVal)}
+                                disabled={
+                                  actionLoading === u.id ||
+                                  u.tier === "ADMIN" ||
+                                  selectVal === u.tier
+                                }
+                                className="shrink-0 mono text-[11px] tracking-[0.1em] uppercase border border-line text-dim px-3 py-2 hover:border-ink hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                              >
+                                {actionLoading === u.id ? "..." : "적용"}
+                              </button>
+                              <button
+                                onClick={() => startEditUser(u)}
+                                disabled={actionLoading === u.id || u.tier === "ADMIN"}
+                                className="shrink-0 mono text-[11px] tracking-[0.1em] uppercase border border-line text-dim px-3 py-2 hover:border-ink hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                              >
+                                수정
+                              </button>
+                              <button
+                                onClick={() => deleteUser(u)}
+                                disabled={actionLoading === u.id || u.tier === "ADMIN"}
+                                className="shrink-0 mono text-[11px] tracking-[0.1em] uppercase border border-edred/40 text-edred/60 px-3 py-2 hover:border-edred hover:text-edred disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                              >
+                                삭제
+                              </button>
+                            </>
+                          )}
                         </div>
                       </div>
                     );
@@ -646,8 +726,16 @@ export default function AdminUsersPage() {
                               key={u.id}
                               className="border-b hair last:border-b-0 hover:bg-ink/[0.02] transition-colors"
                             >
-                              <td className="px-4 py-3 text-ink">{u.name}</td>
-                              <td className="px-4 py-3 dim">{u.company}</td>
+                              <td className="px-4 py-3 text-ink">
+                                {editingUserId === u.id
+                                  ? <input value={editName} onChange={(e) => setEditName(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") saveUserName(u.id); if (e.key === "Escape") cancelEditUser(); }} className="border hair bg-paper px-2 py-1 text-[12px] w-full focus:outline-none focus:border-ink" />
+                                  : u.name}
+                              </td>
+                              <td className="px-4 py-3 dim">
+                                {editingUserId === u.id
+                                  ? <input value={editCompany} onChange={(e) => setEditCompany(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") saveUserName(u.id); if (e.key === "Escape") cancelEditUser(); }} className="border hair bg-paper px-2 py-1 text-[12px] w-full focus:outline-none focus:border-ink" />
+                                  : u.company}
+                              </td>
                               <td className="px-4 py-3 mono text-[11px] dim">{u.email}</td>
                               <td className="px-4 py-3">
                                 <span
@@ -663,41 +751,69 @@ export default function AdminUsersPage() {
                               </td>
                               <td className="px-4 py-3">
                                 <div className="flex items-center gap-2">
-                                  <select
-                                    value={selectVal}
-                                    onChange={(e) =>
-                                      setPendingTierChange((prev) => ({
-                                        ...prev,
-                                        [u.id]: e.target.value,
-                                      }))
-                                    }
-                                    disabled={actionLoading === u.id || u.tier === "ADMIN"}
-                                    className="border hair bg-paper px-2 py-1 text-[12px] focus:outline-none focus:border-ink disabled:opacity-40 disabled:cursor-not-allowed"
-                                  >
-                                    {["PENDING", ...TIER_OPTIONS, "ADMIN"].map((t) => (
-                                      <option key={t} value={t}>
-                                        {TIER_LABELS[t] ?? t}
-                                      </option>
-                                    ))}
-                                  </select>
-                                  <button
-                                    onClick={() => changeTier(u, selectVal)}
-                                    disabled={
-                                      actionLoading === u.id ||
-                                      u.tier === "ADMIN" ||
-                                      selectVal === u.tier
-                                    }
-                                    className="mono text-[10px] tracking-[0.1em] uppercase border border-line text-dim px-2.5 py-1 hover:border-ink hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                                  >
-                                    {actionLoading === u.id ? "..." : "적용"}
-                                  </button>
-                                  <button
-                                    onClick={() => deleteUser(u)}
-                                    disabled={actionLoading === u.id || u.tier === "ADMIN"}
-                                    className="mono text-[10px] tracking-[0.1em] uppercase border border-edred/40 text-edred/60 px-2.5 py-1 hover:border-edred hover:text-edred disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                                  >
-                                    삭제
-                                  </button>
+                                  {editingUserId === u.id ? (
+                                    <>
+                                      <button
+                                        onClick={() => saveUserName(u.id)}
+                                        disabled={actionLoading === u.id}
+                                        className="mono text-[10px] tracking-[0.1em] uppercase border border-smblue text-smblue px-2.5 py-1 hover:bg-smblue hover:text-paper disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                      >
+                                        {actionLoading === u.id ? "..." : "저장"}
+                                      </button>
+                                      <button
+                                        onClick={cancelEditUser}
+                                        disabled={actionLoading === u.id}
+                                        className="mono text-[10px] tracking-[0.1em] uppercase border border-line text-dim px-2.5 py-1 hover:border-ink hover:text-ink disabled:opacity-30 transition-colors"
+                                      >
+                                        취소
+                                      </button>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <select
+                                        value={selectVal}
+                                        onChange={(e) =>
+                                          setPendingTierChange((prev) => ({
+                                            ...prev,
+                                            [u.id]: e.target.value,
+                                          }))
+                                        }
+                                        disabled={actionLoading === u.id || u.tier === "ADMIN"}
+                                        className="border hair bg-paper px-2 py-1 text-[12px] focus:outline-none focus:border-ink disabled:opacity-40 disabled:cursor-not-allowed"
+                                      >
+                                        {["PENDING", ...TIER_OPTIONS, "ADMIN"].map((t) => (
+                                          <option key={t} value={t}>
+                                            {TIER_LABELS[t] ?? t}
+                                          </option>
+                                        ))}
+                                      </select>
+                                      <button
+                                        onClick={() => changeTier(u, selectVal)}
+                                        disabled={
+                                          actionLoading === u.id ||
+                                          u.tier === "ADMIN" ||
+                                          selectVal === u.tier
+                                        }
+                                        className="mono text-[10px] tracking-[0.1em] uppercase border border-line text-dim px-2.5 py-1 hover:border-ink hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                      >
+                                        {actionLoading === u.id ? "..." : "적용"}
+                                      </button>
+                                      <button
+                                        onClick={() => deleteUser(u)}
+                                        disabled={actionLoading === u.id || u.tier === "ADMIN"}
+                                        className="mono text-[10px] tracking-[0.1em] uppercase border border-edred/40 text-edred/60 px-2.5 py-1 hover:border-edred hover:text-edred disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                      >
+                                        삭제
+                                      </button>
+                                      <button
+                                        onClick={() => startEditUser(u)}
+                                        disabled={actionLoading === u.id || u.tier === "ADMIN"}
+                                        className="mono text-[10px] tracking-[0.1em] uppercase border border-line text-dim px-2.5 py-1 hover:border-ink hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                      >
+                                        수정
+                                      </button>
+                                    </>
+                                  )}
                                 </div>
                               </td>
                             </tr>

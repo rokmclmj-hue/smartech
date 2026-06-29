@@ -95,6 +95,26 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: "userId는 숫자여야 합니다" }, { status: 400 });
   }
 
+  // 이름/회사 수정
+  if (action === "rename") {
+    const { name, company } = body as { name?: unknown; company?: unknown };
+    const data: Record<string, string> = {};
+    if (typeof name === "string" && name.trim()) data.name = name.trim();
+    if (typeof company === "string" && company.trim()) data.company = company.trim();
+    if (Object.keys(data).length === 0) {
+      return NextResponse.json({ error: "수정할 내용이 없습니다" }, { status: 400 });
+    }
+    await prisma.user.update({ where: { id: userId }, data });
+    await logAudit({
+      userId: admin.userId,
+      action: "user.rename",
+      target: "User",
+      targetId: userId,
+      payload: data,
+    });
+    return NextResponse.json({ ok: true });
+  }
+
   // 거절 처리 (soft delete)
   if (action === "delete") {
     const existing = await prisma.user.findUnique({
