@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 
 // ── 타입 ──────────────────────────────────────────
 type OrderItem = {
@@ -51,6 +51,15 @@ function makeSubject(department: string, items: OrderItem[]): string {
   const name = (first.description || first.partNo).trim();
   const suffix = valid.length > 1 ? " 외" : "";
   return `[스마텍] 발주서 송부 — 에드워드${dept} · ${name} x${first.quantity}${suffix}`;
+}
+
+function makeItemSummary(items: OrderItem[]): string {
+  const valid = items.filter((i) => (i.description || i.partNo).trim() && i.quantity > 0);
+  if (!valid.length) return "";
+  const first = valid[0];
+  const name = (first.description || first.partNo).trim();
+  const suffix = valid.length > 1 ? ` 외 ${valid.length - 1}건` : "";
+  return `${name} x${first.quantity}${suffix}`;
 }
 
 function appendSignature(msg: string): string {
@@ -500,6 +509,8 @@ function OrderRow({ order, onDelete, onCopy }: { order: PurchaseOrder; onDelete:
   const [toast, setToast] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [showSend, setShowSend] = useState(false);
+  const [localStatus, setLocalStatus] = useState(order.status);
+  useEffect(() => { setLocalStatus(order.status); }, [order.status]);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [mailBody, setMailBody] = useState(
@@ -545,6 +556,20 @@ function OrderRow({ order, onDelete, onCopy }: { order: PurchaseOrder; onDelete:
     onDelete();
   }
 
+  async function handleReceive() {
+    const next = localStatus === "RECEIVED" ? "SENT" : "RECEIVED";
+    const res = await fetch(`/api/admin/purchase-orders/${order.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: next }),
+    });
+    if (res.ok) {
+      setLocalStatus(next);
+      setToast(next === "RECEIVED" ? "입고완료 처리됨" : "입고취소 처리됨");
+      setTimeout(() => { setToast(null); onDelete(); }, 1200);
+    }
+  }
+
   return (
     <div className="border hair bg-paper p-4 space-y-3">
       <div className="flex items-start justify-between gap-4">
@@ -555,9 +580,15 @@ function OrderRow({ order, onDelete, onCopy }: { order: PurchaseOrder; onDelete:
               className="mono text-[11px] font-bold text-smblue hover:underline text-left"
             >
               {expanded ? "▲" : "▼"} {order.orderNo}
+              {!expanded && makeItemSummary(order.items) && (
+                <span className="ml-2 text-ink/50 font-normal normal-case tracking-normal">· {makeItemSummary(order.items)}</span>
+              )}
             </button>
-            <span className={`mono text-[10px] px-1.5 py-0.5 ${order.status === "SENT" ? "bg-green-100 text-green-700" : "bg-blue-50 text-blue-700"}`}>
-              {order.status === "SENT" ? "발송완료" : "초안"}
+            <span className={`mono text-[10px] px-1.5 py-0.5 ${
+              localStatus === "RECEIVED" ? "bg-gray-100 text-gray-500" :
+              localStatus === "SENT" ? "bg-green-100 text-green-700" : "bg-blue-50 text-blue-700"
+            }`}>
+              {localStatus === "RECEIVED" ? "입고완료" : localStatus === "SENT" ? "발송완료" : "초안"}
             </span>
             <span className="mono text-[10px] px-1.5 py-0.5 bg-ink/5 text-ink/70">{order.department}</span>
             <span className="mono text-[10px] dim">{fmtDate(order.orderDate)}</span>
@@ -634,6 +665,14 @@ function OrderRow({ order, onDelete, onCopy }: { order: PurchaseOrder; onDelete:
         <button onClick={() => onCopy(order)}
           className="border border-smblue/50 text-smblue px-3 py-1.5 text-[12px] mono hover:bg-smblue/5 transition-colors">
           복사하여 새 발주
+        </button>
+        <button onClick={handleReceive}
+          className={`border px-3 py-1.5 text-[12px] transition-colors ${
+            localStatus === "RECEIVED"
+              ? "border-gray-300 text-gray-400 hover:bg-gray-50"
+              : "border-green-300 text-green-700 hover:bg-green-50"
+          }`}>
+          {localStatus === "RECEIVED" ? "입고취소" : "입고완료"}
         </button>
         <button onClick={handleDelete} disabled={deleting}
           className="border hair border-red-200 text-red-500 px-3 py-1.5 text-[12px] hover:bg-red-50 transition-colors disabled:opacity-40">
@@ -719,12 +758,58 @@ function OrderRow({ order, onDelete, onCopy }: { order: PurchaseOrder; onDelete:
   );
 }
 
+// ── 공급업체 그룹 아코디언 ────────────────────────
+function SupplierGroup({ dept, orders, onDelete, onCopy }: {
+  dept: string;
+  orders: PurchaseOrder[];
+  onDelete: () => void;
+  onCopy: (o: PurchaseOrder) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const companyName = DEPT_COMPANIES[dept] ?? dept;
+  const latestDate = orders.length > 0
+    ? orders.reduce((a, b) => new Date(a.orderDate) > new Date(b.orderDate) ? a : b).orderDate
+    : null;
+
+  return (
+    <div className="border hair">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center justify-between px-5 py-3.5 bg-paper hover:bg-ink/[0.02] transition-colors"
+      >
+        <div className="flex items-center gap-3">
+          <span className="text-[14px] font-semibold">{open ? "▲" : "▶"} {companyName}</span>
+          <span className="mono text-[11px] text-smblue bg-smblue/10 px-2 py-0.5">{orders.length}건</span>
+        </div>
+        {latestDate && (
+          <span className="mono text-[11px] dim">최근: {fmtDate(latestDate)}</span>
+        )}
+      </button>
+      {open && (
+        <div className="border-t hair divide-y divide-line bg-ink/[0.01]">
+          {orders.length === 0 ? (
+            <div className="px-6 py-6 text-center text-[13px] dim">발주서가 없습니다.</div>
+          ) : (
+            orders.map((o) => (
+              <div key={o.id} className="p-4">
+                <OrderRow order={o} onDelete={onDelete} onCopy={onCopy} />
+              </div>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── 메인 페이지 ───────────────────────────────────
 export default function PurchaseOrdersPage() {
   const [orders, setOrders] = useState<PurchaseOrder[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [copyData, setCopyData] = useState<PurchaseOrder | null>(null);
   const [loading, setLoading] = useState(true);
+  const [yearTab, setYearTab] = useState(String(new Date().getFullYear()));
+  const [showReceived, setShowReceived] = useState(false);
 
   const loadOrders = useCallback(async () => {
     setLoading(true);
@@ -737,6 +822,34 @@ export default function PurchaseOrdersPage() {
   }, []);
 
   useEffect(() => { loadOrders(); }, [loadOrders]);
+
+  // 사용 가능한 연도 목록 (데이터에서 자동 추출)
+  const availableYears = useMemo(() => {
+    const years = new Set<string>();
+    const curYear = String(new Date().getFullYear());
+    years.add(curYear);
+    orders.forEach((o) => years.add(String(new Date(o.orderDate).getFullYear())));
+    return Array.from(years).sort((a, b) => Number(b) - Number(a));
+  }, [orders]);
+
+  // 연도 + 입고완료 필터 적용
+  const filteredOrders = useMemo(() => {
+    return orders.filter((o) => {
+      const year = String(new Date(o.orderDate).getFullYear());
+      const yearMatch = yearTab === "전체" || year === yearTab;
+      const statusMatch = showReceived || o.status !== "RECEIVED";
+      return yearMatch && statusMatch;
+    });
+  }, [orders, yearTab, showReceived]);
+
+  // 부서별 그룹화 (IV → SV → AK 순서 고정)
+  const groupedOrders = useMemo(() => {
+    const groups: Record<string, PurchaseOrder[]> = { IV: [], SV: [], AK: [] };
+    filteredOrders.forEach((o) => {
+      if (o.department in groups) groups[o.department].push(o);
+    });
+    return groups;
+  }, [filteredOrders]);
 
   function handleSaved() {
     setShowForm(false);
@@ -780,20 +893,60 @@ export default function PurchaseOrdersPage() {
       )}
 
       {/* 이력 목록 */}
-      <div>
-        <div className="mono text-[11px] dim tracking-[0.12em] uppercase mb-3">
-          — 발행 이력 ({orders.length}건)
+      <div className="space-y-4">
+        {/* 연도 탭 + 완료 건 토글 */}
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-1">
+            {availableYears.map((y) => (
+              <button
+                key={y}
+                onClick={() => setYearTab(y)}
+                className={`mono text-[12px] px-3 py-1.5 border transition-colors ${
+                  yearTab === y ? "bg-ink text-paper border-ink" : "hair hover:bg-ink/5"
+                }`}
+              >
+                {y}
+              </button>
+            ))}
+            <button
+              onClick={() => setYearTab("전체")}
+              className={`mono text-[12px] px-3 py-1.5 border transition-colors ${
+                yearTab === "전체" ? "bg-ink text-paper border-ink" : "hair hover:bg-ink/5"
+              }`}
+            >
+              전체
+            </button>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="mono text-[11px] dim">{filteredOrders.length}건</span>
+            <button
+              onClick={() => setShowReceived((v) => !v)}
+              className={`mono text-[11px] px-3 py-1.5 border transition-colors ${
+                showReceived ? "bg-gray-100 text-gray-600 border-gray-300" : "hair dim hover:bg-ink/5"
+              }`}
+            >
+              {showReceived ? "입고완료 숨기기" : "입고완료 포함"}
+            </button>
+          </div>
         </div>
+
+        {/* 공급업체별 그룹 */}
         {loading ? (
           <div className="mono text-[11px] dim text-center py-10">— Loading</div>
-        ) : orders.length === 0 ? (
+        ) : filteredOrders.length === 0 ? (
           <div className="border hair bg-paper/50 px-6 py-10 text-center text-[13px] dim">
-            발행된 발주서가 없습니다.
+            {yearTab}년 발행된 발주서가 없습니다.
           </div>
         ) : (
           <div className="space-y-3">
-            {orders.map((o) => (
-              <OrderRow key={o.id} order={o} onDelete={loadOrders} onCopy={handleCopy} />
+            {(["IV", "SV", "AK"] as const).map((dept) => (
+              <SupplierGroup
+                key={dept}
+                dept={dept}
+                orders={groupedOrders[dept]}
+                onDelete={loadOrders}
+                onCopy={handleCopy}
+              />
             ))}
           </div>
         )}
