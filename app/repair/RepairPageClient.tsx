@@ -73,6 +73,15 @@ type RepairCase = {
 
 const REPAIR_CASES: RepairCase[] = [
   {
+    model: "Edwards nXDS10i",
+    client: "K사",
+    symptom: "팁씰 마모 · 베어링 손상",
+    work: ["팁씰 교체", "베어링 교체", "스크롤 세정", "기능 점검"],
+    photo: "/images/repair/nxds10i-exterior.jpg",
+    partPhoto: "/images/repair/nxds10i-scroll.jpg",
+    extraPhoto: "/images/repair/nxds10i-tipseal.jpg",
+  },
+  {
     model: "Edwards E2M80",
     client: "C사",
     symptom: "내부 오염 · Exhaust Baffle 파손",
