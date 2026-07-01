@@ -118,6 +118,14 @@ const REPAIR_CASES: RepairCase[] = [
     photo: "/images/repair/e2m80-exterior.jpg",
     partPhoto: "/images/repair/e2m80-shaft.jpg",
   },
+  {
+    model: "Edwards GV80",
+    client: "B사",
+    symptom: "내부 오염 · 진공도 불량",
+    work: ["풀 오버홀", "베어링 교체", "씰·개스킷 교체", "내부 세정"],
+    photo: "/images/repair/gv80-exterior.jpg",
+    partPhoto: "/images/repair/gv80-internal.jpg",
+  },
 ];
 const EXTRA_MARGIN = 1.2; // 추가항목 마진
 
