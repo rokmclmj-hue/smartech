@@ -68,9 +68,19 @@ type RepairCase = {
   work: string[];
   photo: string;
   partPhoto?: string;
+  extraPhoto?: string;
 };
 
 const REPAIR_CASES: RepairCase[] = [
+  {
+    model: "Edwards iH1800MK5",
+    client: "T사",
+    symptom: "N2 Flow 센서 불량 · WARNING 알람",
+    work: ["N2 Flow 센서 교체", "내부 세정", "기능 점검"],
+    photo: "/images/repair/ih1800mk5-alarm.jpg",
+    partPhoto: "/images/repair/ih1800mk5-parts.jpg",
+    extraPhoto: "/images/repair/ih1800mk5-sensor.jpg",
+  },
   {
     model: "Edwards GV80",
     client: "B사",
@@ -1247,10 +1257,23 @@ export default function RepairPageClient() {
                   {c.partPhoto && (
                     <div className="mt-auto pt-3 border-t hair">
                       <div className="mono text-[9px] text-dim tracking-widest mb-1.5">PARTS</div>
-                      <div className="aspect-[16/9] relative overflow-hidden border hair">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={c.partPhoto} alt="수리 부품" className="w-full h-full object-cover" />
-                      </div>
+                      {c.extraPhoto ? (
+                        <div className="flex gap-1">
+                          <div className="flex-1 aspect-[4/3] relative overflow-hidden border hair">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={c.partPhoto} alt="수리 부품" className="w-full h-full object-cover" />
+                          </div>
+                          <div className="flex-1 aspect-[4/3] relative overflow-hidden border hair">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={c.extraPhoto} alt="수리 부품 2" className="w-full h-full object-cover" />
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="aspect-[16/9] relative overflow-hidden border hair">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={c.partPhoto} alt="수리 부품" className="w-full h-full object-cover" />
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
