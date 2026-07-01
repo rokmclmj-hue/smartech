@@ -73,6 +73,15 @@ type RepairCase = {
 
 const REPAIR_CASES: RepairCase[] = [
   {
+    model: "Edwards EH2600",
+    client: "J사",
+    symptom: "타이밍 기어 손상",
+    work: ["기어 교체 (×2)", "베어링 교체", "내부 세정", "기능 점검"],
+    photo: "/images/repair/eh2600-gears.jpg",
+    partPhoto: "/images/repair/eh2600-damage1.jpg",
+    extraPhoto: "/images/repair/eh2600-damage2.jpg",
+  },
+  {
     model: "Edwards nXDS10i",
     client: "K사",
     symptom: "팁씰 마모 · 베어링 손상",
