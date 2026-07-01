@@ -73,6 +73,33 @@ type RepairCase = {
 
 const REPAIR_CASES: RepairCase[] = [
   {
+    model: "Edwards RV5",
+    client: "S사",
+    symptom: "오일 오염 · 진공도 불량",
+    work: ["씰·가스켓 교체", "베어링 교체", "배기밸브 교체", "오일 교환"],
+    photo: "/images/repair/rv5-exterior.jpg",
+    partPhoto: "/images/repair/rv5-oil.jpg",
+    extraPhoto: "/images/repair/rv5-rotor.jpg",
+  },
+  {
+    model: "Edwards E2M1.5",
+    client: "S사",
+    symptom: "기본 수리 · 파트 교환",
+    work: ["씰·가스켓 교체", "베어링 교체", "배기밸브 교체", "오일 교환"],
+    photo: "/images/repair/e2m15-exterior.jpg",
+    partPhoto: "/images/repair/e2m15-internal.jpg",
+    extraPhoto: "/images/repair/e2m15-rotor.jpg",
+  },
+  {
+    model: "Edwards E2M0.7",
+    client: "S사",
+    symptom: "기본 수리 · 파트 교환",
+    work: ["씰·가스켓 교체", "베어링 교체", "배기밸브 교체", "오일 교환"],
+    photo: "/images/repair/e2m07-exterior.jpg",
+    partPhoto: "/images/repair/e2m07-seal.jpg",
+    extraPhoto: "/images/repair/e2m07-valve.jpg",
+  },
+  {
     model: "Edwards EH2600",
     client: "J사",
     symptom: "타이밍 기어 손상",
