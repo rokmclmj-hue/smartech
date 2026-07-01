@@ -73,6 +73,15 @@ type RepairCase = {
 
 const REPAIR_CASES: RepairCase[] = [
   {
+    model: "Edwards E2M80",
+    client: "C사",
+    symptom: "내부 오염 · Exhaust Baffle 파손",
+    work: ["풀 오버홀", "Exhaust Valve 교체", "Baffle 교체", "내부 세정"],
+    photo: "/images/repair/e2m80b-exterior.jpg",
+    partPhoto: "/images/repair/e2m80b-internal.jpg",
+    extraPhoto: "/images/repair/e2m80b-baffle.jpg",
+  },
+  {
     model: "Edwards iH1800MK5",
     client: "T사",
     symptom: "N2 Flow 센서 불량 · WARNING 알람",
