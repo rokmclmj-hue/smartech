@@ -69,7 +69,6 @@ type RepairCase = {
   photo: string;
   partPhoto?: string;
   extraPhoto?: string;
-  extraPhoto2?: string;
 };
 
 const REPAIR_CASES: RepairCase[] = [
@@ -1258,16 +1257,7 @@ export default function RepairPageClient() {
                   {c.partPhoto && (
                     <div className="mt-auto pt-3 border-t hair">
                       <div className="mono text-[9px] text-dim tracking-widest mb-1.5">PARTS</div>
-                      {c.extraPhoto2 ? (
-                        <div className="flex gap-1">
-                          {[c.partPhoto, c.extraPhoto, c.extraPhoto2].map((p, j) => (
-                            <div key={j} className="flex-1 aspect-[1/1] relative overflow-hidden border hair">
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img src={p} alt={`수리 부품 ${j + 1}`} className="w-full h-full object-cover" />
-                            </div>
-                          ))}
-                        </div>
-                      ) : c.extraPhoto ? (
+                      {c.extraPhoto ? (
                         <div className="flex gap-1">
                           {[c.partPhoto, c.extraPhoto].map((p, j) => (
                             <div key={j} className="flex-1 aspect-[4/3] relative overflow-hidden border hair">
