@@ -73,6 +73,15 @@ type RepairCase = {
 
 const REPAIR_CASES: RepairCase[] = [
   {
+    model: "Edwards XDS35i",
+    client: "N사",
+    symptom: "팁씰·베어링 마모 · 가스 발라스트 파손",
+    work: ["팁씰 교체", "베어링 교체", "가스 발라스트 교체"],
+    photo: "/images/repair/xds35i-b-exterior.jpg",
+    partPhoto: "/images/repair/xds35i-b-internal.jpg",
+    extraPhoto: "/images/repair/xds35i-b-gasballast.jpg",
+  },
+  {
     model: "Edwards RV5",
     client: "S사",
     symptom: "오일 오염 · 진공도 불량",
