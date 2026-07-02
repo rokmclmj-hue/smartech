@@ -43,13 +43,18 @@ function buildHtmlBody(opts: {
   quoteNo: string;
   company: string;
   contactName: string;
+  contactTitle: string | null;
   grandTotal: number;
   expiresAt: Date | null;
 }): string {
   const exp = opts.expiresAt ? fmtDate(opts.expiresAt) : "발행일 +14일";
+  const salutation = opts.contactTitle
+    ? `${opts.contactName} ${opts.contactTitle}님`
+    : `${opts.contactName} 님`;
   return `<div style="font-family:'Malgun Gothic','Apple SD Gothic Neo',Arial,sans-serif;color:#222;line-height:1.7;font-size:14px">
-  <p>${opts.company} ${opts.contactName} 님, 안녕하세요. <strong>(주)스마텍</strong>입니다.</p>
-  <p>요청하신 견적서를 첨부하여 송부드립니다. 검토 후 회신 부탁드립니다.</p>
+  <p>안녕하세요 ${salutation},<br>스마텍 이명재입니다.</p>
+  <p>귀사의 일익 번창하심을 기원합니다.</p>
+  <p>요청하신 견적서를 송부하오니, 검토 후 회신 부탁드립니다.</p>
   <table style="border-collapse:collapse;margin:18px 0;font-size:13px">
     <tr><td style="padding:6px 12px;color:#666;border:1px solid #ddd">견적번호</td>
         <td style="padding:6px 12px;border:1px solid #ddd"><strong>${opts.quoteNo}</strong></td></tr>
@@ -58,13 +63,12 @@ function buildHtmlBody(opts: {
     <tr><td style="padding:6px 12px;color:#666;border:1px solid #ddd">유효기간</td>
         <td style="padding:6px 12px;border:1px solid #ddd">${exp}</td></tr>
   </table>
-  <p style="color:#555;font-size:13px">
-    <strong>거래조건</strong><br>
-    · 결제: 세금계산서 발행 / 익월 말 결제<br>
-    · 납기: 국내재고 D+1 / 해외주문 D+14<br>
-    · 보증: 12개월 제품 보증
+  <p style="margin-top:24px">감사합니다.</p>
+  <p style="margin-top:16px;font-size:13px;color:#444;line-height:2">
+    <strong>SMARTECH.</strong><br>
+    T. 031-204-7170 &nbsp;·&nbsp; M. 010-3194-7170<br>
+    F. 031-206-7178 &nbsp;·&nbsp; <a href="https://smartechvacuum.com" style="color:#0d3a8a;text-decoration:none">smartechvacuum.com</a>
   </p>
-  <p style="margin-top:20px">감사합니다.<br><strong>(주)스마텍 영업팀</strong></p>
 </div>`;
 }
 
@@ -225,6 +229,7 @@ export async function POST(
           quoteNo,
           company: recipientCompany,
           contactName: recipientName,
+          contactTitle: quote.guestTitle ?? quote.user?.title ?? null,
           grandTotal,
           expiresAt: quote.expiresAt,
         }),
