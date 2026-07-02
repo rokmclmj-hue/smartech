@@ -25,8 +25,7 @@ Font.register({
 // 다운로드 시 저장되는 PDF 파일명 생성 — 항상 다운로드 시점 날짜 사용
 // 형식: {문서명}_YYYYMMDD_{업체명}_{품명}.pdf
 export function buildDownloadFilename(docLabel: string, company: string | null, item: string | null): string {
-  const now = new Date();
-  const yyyymmdd = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}`;
+  const yyyymmdd = new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" }).replace(/-/g, "");
   const sanitize = (s: string) => s.replace(/[\\/:*?"<>|]/g, "").trim();
   const co = sanitize(company ?? "업체미상") || "업체미상";
   const it = sanitize(item ?? "품명미상") || "품명미상";
