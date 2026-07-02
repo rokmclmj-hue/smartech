@@ -145,6 +145,15 @@ const REPAIR_CASES: RepairCase[] = [
     extraPhoto: "/images/repair/e2m80b-baffle.jpg",
   },
   {
+    model: "Pfeiffer Vacuum DUO2.5",
+    client: "자체",
+    symptom: "내부 오염 · 진공도 불량",
+    work: ["풀 오버홀", "내부 세척·클리닝", "씰·가스켓 교체"],
+    photo: "/images/repair/duo25-exterior.jpg",
+    partPhoto: "/images/repair/duo25-internal1.jpg",
+    extraPhoto: "/images/repair/duo25-internal2.jpg",
+  },
+  {
     model: "Edwards iH1800MK5",
     client: "T사",
     symptom: "N2 Flow 센서 불량 · WARNING 알람",
