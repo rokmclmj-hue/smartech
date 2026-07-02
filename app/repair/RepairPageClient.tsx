@@ -82,6 +82,15 @@ const REPAIR_CASES: RepairCase[] = [
     extraPhoto: "/images/repair/xds35i-b-gasballast.jpg",
   },
   {
+    model: "우성진공 W2V40",
+    client: "자체",
+    symptom: "내부 오염 · 모터슬리브 손상",
+    work: ["내부 세척", "씰·가스켓 교체", "모터슬리브 교체"],
+    photo: "/images/repair/w2v40-exterior.jpg",
+    partPhoto: "/images/repair/w2v40-internal.jpg",
+    extraPhoto: "/images/repair/w2v40-internal2.jpg",
+  },
+  {
     model: "Edwards RV5",
     client: "S사",
     symptom: "오일 오염 · 진공도 불량",
