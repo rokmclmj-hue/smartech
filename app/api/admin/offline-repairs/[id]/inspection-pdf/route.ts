@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAdminSession } from "@/lib/admin-auth";
-import { generateRepairInspectionPdf } from "@/lib/pdf";
+import { generateRepairInspectionPdf, buildDownloadFilename } from "@/lib/pdf";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -36,11 +36,14 @@ export async function GET(_req: NextRequest, { params }: Params) {
       selectedPhotos: job.files.map(f => ({ fileName: f.fileName, fileUrl: f.fileUrl })),
     });
 
+    const smartFilename = buildDownloadFilename("검사성적서", job.company?.companyName ?? null, job.pumpModel);
+    const encodedFilename = encodeURIComponent(smartFilename);
+
     return new NextResponse(Buffer.from(pdfBuffer).buffer as ArrayBuffer, {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `inline; filename="inspection_${job.jobNo}.pdf"`,
+        "Content-Disposition": `inline; filename="inspection_${job.jobNo}.pdf"; filename*=UTF-8''${encodedFilename}`,
         "Content-Length": String(pdfBuffer.length),
       },
     });

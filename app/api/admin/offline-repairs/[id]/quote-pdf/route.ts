@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAdminSession } from "@/lib/admin-auth";
-import { generateRepairQuotePdf } from "@/lib/pdf";
+import { generateRepairQuotePdf, buildDownloadFilename } from "@/lib/pdf";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -36,11 +36,14 @@ export async function GET(_req: NextRequest, { params }: Params) {
       quoteRemarks: job.quoteRemarks,
     });
 
+    const smartFilename = buildDownloadFilename("수리견적서", job.company?.companyName ?? null, job.pumpModel);
+    const encodedFilename = encodeURIComponent(smartFilename);
+
     return new NextResponse(Buffer.from(pdfBuffer).buffer as ArrayBuffer, {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `inline; filename="repair-quote_${job.jobNo}.pdf"`,
+        "Content-Disposition": `inline; filename="repair-quote_${job.jobNo}.pdf"; filename*=UTF-8''${encodedFilename}`,
         "Content-Length": String(pdfBuffer.length),
       },
     });

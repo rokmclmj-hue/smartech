@@ -3,7 +3,8 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { upload } from "@vercel/blob/client";
 
 
-type Company = { id: number; companyName: string };
+type CompanyContact = { id: number; name: string; title: string | null; tel: string | null; mobile: string | null; email: string | null };
+type Company = { id: number; companyName: string; contacts?: CompanyContact[] };
 type InspectionItem = {
   id: number; sortOrder: number; itemLabel: string;
   unit: string | null; spec: string | null;
@@ -154,6 +155,27 @@ function JobForm({ onSaved }: { onSaved: (newJobId: number) => void }) {
             <div className="flex items-center gap-2">
               <span className="text-[13px] font-semibold">{selectedCompany.companyName}</span>
               <button onClick={() => setSelectedCompany(null)} className="text-[11px] dim hover:text-edred">✕ 변경</button>
+            </div>
+          )}
+          {selectedCompany && selectedCompany.contacts && selectedCompany.contacts.length > 0 && (
+            <div className="space-y-1">
+              <div className="mono text-[10px] dim mb-1">등록된 담당자 (클릭하면 자동 입력)</div>
+              <div className="flex flex-wrap gap-2">
+                {selectedCompany.contacts.map(ct => (
+                  <button
+                    key={ct.id}
+                    onClick={() => {
+                      setContactName(ct.name);
+                      setContactEmail(ct.email ?? "");
+                      setContactPhone(ct.mobile || ct.tel || "");
+                    }}
+                    className="border hair px-3 py-1.5 text-[12px] hover:bg-ink/5 text-left"
+                  >
+                    <span className="font-semibold">{ct.name}</span>
+                    {ct.title && <span className="dim ml-1">({ct.title})</span>}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl">

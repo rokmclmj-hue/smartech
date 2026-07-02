@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAdminSession } from "@/lib/admin-auth";
-import { generateManualDeliveryNotePdf } from "@/lib/pdf";
+import { generateManualDeliveryNotePdf, buildDownloadFilename } from "@/lib/pdf";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -45,15 +45,10 @@ export async function GET(req: NextRequest, { params }: Params) {
       pdfBuffer.byteOffset + pdfBuffer.byteLength
     ) as ArrayBuffer;
 
-    // 스마트 파일명: 거래명세표_YYYYMMDD_거래처명(품목명 x Nea).pdf
-    const dateStr = note.createdAt.toISOString().slice(0, 10).replace(/-/g, "");
+    // 스마트 파일명: 거래명세표_YYYYMMDD(다운로드일)_거래처명_품명.pdf
     const firstItem = note.items[0];
-    const itemLabel = firstItem
-      ? note.items.length === 1
-        ? `${firstItem.description || firstItem.partNo || "품목"} x ${firstItem.quantity}ea`
-        : `${firstItem.description || firstItem.partNo || "품목"} x 외`
-      : "품목없음";
-    const smartFilename = `거래명세표_${dateStr}_${note.toCompany}(${itemLabel}).pdf`;
+    const itemLabel = firstItem ? (firstItem.description || firstItem.partNo || "품목") : null;
+    const smartFilename = buildDownloadFilename("거래명세표", note.toCompany, itemLabel);
     const encodedFilename = encodeURIComponent(smartFilename);
 
     return new NextResponse(arrayBuf, {
@@ -61,7 +56,7 @@ export async function GET(req: NextRequest, { params }: Params) {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": preview
-          ? `inline; filename="DN_${note.noteNo}.pdf"`
+          ? `inline; filename="DN_${note.noteNo}.pdf"; filename*=UTF-8''${encodedFilename}`
           : `attachment; filename="DN_${note.noteNo}.pdf"; filename*=UTF-8''${encodedFilename}`,
         "Content-Length": String(pdfBuffer.length),
       },
