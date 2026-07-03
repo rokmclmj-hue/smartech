@@ -272,7 +272,7 @@ export default function AboutPage() {
             <div className="space-y-0">
               {TIMELINE.map((item, i) => (
                 <div
-                  key={item.year}
+                  key={item.title}
                   className={`grid grid-cols-1 md:grid-cols-[120px_1fr] gap-0 md:gap-8 border-b hair last:border-b-0 ${
                     i % 2 === 0 ? "bg-paper" : "bg-white"
                   }`}
@@ -280,11 +280,11 @@ export default function AboutPage() {
                   {/* 연도 */}
                   <div className="px-4 md:px-6 pt-6 md:py-8 flex md:flex-col items-center md:items-end gap-3 md:gap-1">
                     <div className={`display text-[clamp(22px,2.5vw,32px)] tabular leading-none ${
-                      item.year === "2018" ? "text-edred" : "text-ink"
+                      item.title === "Edwards Korea Gold Award 수상" ? "text-edred" : "text-ink"
                     }`}>
                       {item.year}
                     </div>
-                    {item.year === "2018" && (
+                    {item.title === "Edwards Korea Gold Award 수상" && (
                       <div className="md:mt-1 border border-edred text-edred mono text-[9px] px-2 py-0.5 tracking-widest whitespace-nowrap">
                         GOLD AWARD
                       </div>
