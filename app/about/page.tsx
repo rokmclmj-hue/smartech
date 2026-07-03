@@ -205,7 +205,7 @@ export default function AboutPage() {
               <p className="text-[15px] leading-[1.8] text-[#2a2823]">
                 2018년 Edwards Korea Distributor Rewards Program에서 <strong>Gold Class</strong>를 수상했습니다.
                 판매 실적만이 아니라 고객 서비스 품질과 기술 지원 역량을 함께 평가해 부여되는 인증이에요.
-                이 자격은 Edwards 본사가 발행하는 공식 뉴스레터에 기록되며, 매년 갱신됩니다.
+                이 자격은 Edwards 본사가 발행하는 공식 뉴스레터에 기록됩니다.
               </p>
             </div>
           </div>
