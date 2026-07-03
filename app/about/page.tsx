@@ -81,7 +81,7 @@ const TIMELINE = [
     desc: "Edwards Korea Distributor Rewards Program — Gold Class 인증. 판매 실적과 서비스 품질 양면에서 공식 인정.",
   },
   {
-    year: "2024",
+    year: "2018",
     title: "천안 수리센터 신설",
     desc: "수원 본사에 더해 충남 천안에 전문 수리·오버홀 센터 개설. 전국 A/S 대응 체계 완성.",
   },
@@ -134,7 +134,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Edwards 외 타 브랜드 진공펌프 수리도 가능한가요?",
-    a: "제품 공급은 Edwards 전 라인업에 한합니다. 수리·오버홀은 Pfeiffer·Leybold·BOC Edwards 등 다양한 산업용 펌프도 상담 가능합니다.",
+    a: "제품 공급은 Edwards 전 라인업에 한합니다. 수리·오버홀은 Pfeiffer·Leybold·Busch 및 Local 제품 등 다양한 산업용 펌프도 상담 가능합니다.",
   },
   {
     q: "수리 후 품질 보증은 어떻게 됩니까?",
