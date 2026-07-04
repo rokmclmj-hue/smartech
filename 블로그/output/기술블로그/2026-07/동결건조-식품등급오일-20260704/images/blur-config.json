@@ -1,0 +1,5 @@
+{
+  "pump_box": [130, 1880, 2680, 3120],
+  "blur_radius": 55,
+  "source_image_size": [3000, 4000]
+}

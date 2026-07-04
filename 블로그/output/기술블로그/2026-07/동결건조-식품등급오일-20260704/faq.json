@@ -1,0 +1,46 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "동결건조 진공펌프는 평소 어떤 오일을 쓰나요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "RV3~RV12, E1M18·E2M18·E2M28은 Ultragrade 19를, E2M40·E2M80은 Ultragrade 70을 권장오일로 사용합니다. 부스터를 함께 쓰는 대형 라인은 EH 계열 부스터에 Ultragrade 20을 씁니다. 모두 탄화수소 계열 미네랄오일입니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "동결건조 진공펌프에 왜 식품등급오일이 필요한가요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "동결건조 공정은 챔버 내부가 최종 제품과 직접 맞닿는 구조가 많습니다. 오일 봉입식 펌프는 배기 라인을 통해 오일 증기가 챔버 쪽으로 역류할 위험이 있어, 원료가 배기 라인과 직접 접촉할 위험이 있는 라인이라면 오일 자체를 식품등급오일(H1 등급)로 관리해야 합니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "우리 라인에 식품등급오일이 필요한지 어떻게 확인하나요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "챔버와 배기 라인의 거리, 역류 방지 밸브 유무, 역류 이력 여부를 먼저 확인합니다. 원료가 배기 라인과 접촉할 구조라면 기본 미네랄오일(Ultragrade 19·70·20)에서 식품등급오일로 교체를 검토해야 합니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "RV·E2M 시리즈는 어떤 오일을 권장하나요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "RV3~RV12, E1M18·E2M18·E2M28은 Ultragrade 19를 권장오일로 사용합니다. E2M40·E2M80은 배기속도가 더 큰 모델로 Ultragrade 70을 권장오일로 사용하며, 코팅·제약 동결건조·플라즈마·진공열처리 응용에 쓰입니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "오일 접촉 리스크를 아예 없애려면 어떻게 하나요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "오일 접촉 자체가 없는 드라이(오일프리) 펌프로 전환하는 방법이 있습니다. GXS 드라이 스크류 펌프는 동결건조·코팅 등에 실제 사용되는 오일프리 구조이며, 다만 퍼지가스(질소 등) 공급이 별도로 필요합니다."
+      }
+    }
+  ]
+}

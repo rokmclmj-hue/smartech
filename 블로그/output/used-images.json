@@ -19,7 +19,8 @@
     "20210305_152723.jpg": "연구용-피라니-이온게이지-비교-20260613",
     "Screenshot_20260619_223721_Gallery.jpg": { "topic": "진공로-드라이펌프-선택기준-20260623", "date": "2026-06-19", "blurred": false, "source": "Desktop" },
     "20230914_103223.jpg": { "topic": "연구용-KF-ISO플랜지-선택법-20260625", "date": "2026-06-19", "blurred": false, "source": "Desktop" },
-    "20200824_095912.jpg": { "topic": "RV펌프-수리비용-3가지요소-20260627", "date": "2026-06-19", "blurred": false }
+    "20200824_095912.jpg": { "topic": "RV펌프-수리비용-3가지요소-20260627", "date": "2026-06-19", "blurred": false },
+    "2E2M80_동결건조_0260604_141754.jpg": { "topic": "동결건조-식품등급오일-20260704", "date": "2026-07-04", "blurred": true }
   },
   "AI생성이미지": {
     "스퍼터 공정 에드워드 드라이진공펌프": ["thumbnail.png", "body-1.png", "body-2.png", "body-3.png", "body-4.png", "body-5.png"],
@@ -34,6 +35,8 @@
     "진공건조-드라이펌프-선택기준-20260613": ["thumbnail.png", "field-1.png", "image-01.png", "image-02.png"],
     "동결건조-드라이펌프-선택기준-20260613": ["thumbnail.png", "field-1.png", "image-01.png", "image-02.png"],
     "연구용-피라니-이온게이지-비교-20260613": ["thumbnail.png", "field-1.png", "image-01.png", "image-02.png"],
-    "진공로-드라이펌프-선택기준-20260623": ["thumbnail.png", "field-1.png", "image-01.png", "image-02.png"]
+    "진공로-드라이펌프-선택기준-20260623": ["thumbnail.png", "field-1.png", "image-01.png", "image-02.png"],
+    "동결건조-식품등급오일-20260704": ["thumbnail.png", "field-1.png", "image-01.png", "image-02.png"],
+    "초전도-가속기-이온게이지-20260704": ["thumbnail.png", "field-1.png", "image-01.png", "image-02.png"]
   }
 }
