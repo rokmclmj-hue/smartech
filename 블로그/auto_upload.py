@@ -17,6 +17,9 @@ import os
 import time
 from datetime import datetime
 
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 MAX_RETRY = 3
 RETRY_DELAY = 30  # 업로드 실패 시 재시도 대기 시간 (초)
 
