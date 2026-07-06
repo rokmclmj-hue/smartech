@@ -1,8 +1,9 @@
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 import { prisma } from "@/lib/db";
 import { INDUSTRIES } from "@/lib/industries";
 
+// 제품 코드·명칭은 components/ProductCategories.tsx의 표시용 title과 동일하게 유지
 const PRODUCT_CATEGORIES = [
   { code: "RV 시리즈", title: "오일 로터리 베인 펌프 (소형)" },
   { code: "E2M 소형", title: "오일 로터리 베인 펌프 (E2M 소형)" },
@@ -12,10 +13,10 @@ const PRODUCT_CATEGORIES = [
   { code: "EH 시리즈", title: "루츠 부스터 펌프" },
   { code: "nXDS 시리즈", title: "드라이 스크롤 펌프 (소형)" },
   { code: "XDS 시리즈", title: "드라이 스크롤 펌프 (중형)" },
-  { code: "GXS 시리즈", title: "산업용 드라이 스크류 펌프" },
-  { code: "EXS 시리즈", title: "산업용 드라이 스크류 펌프" },
+  { code: "GXS 시리즈", title: "산업용 드라이 펌프" },
+  { code: "EXS 시리즈", title: "산업용 드라이 펌프" },
   { code: "iXH 시리즈", title: "반도체 드라이 펌프 (iXH)" },
-  { code: "nXRi 시리즈", title: "연구소용 멀티루츠 드라이 펌프" },
+  { code: "nXRi 시리즈", title: "연구소용 드라이 펌프" },
   { code: "iXL 시리즈", title: "반도체 드라이 펌프 (iXL)" },
   { code: "nEXT 시리즈", title: "터보분자 펌프" },
   { code: "nEXT Station", title: "터보 펌핑 스테이션" },
@@ -36,12 +37,13 @@ export async function GET() {
   const posts = await prisma.blogPost.findMany({
     where: { status: "PUBLISHED" },
     orderBy: { publishedAt: "desc" },
+    take: 200,
     select: { id: true, title: true, metaDesc: true, tags: true, category: true, publishedAt: true },
   });
 
   const blogLines = posts
     .map((p) => {
-      const date = p.publishedAt ? p.publishedAt.toISOString().slice(0, 10) : "";
+      const date = p.publishedAt ? p.publishedAt.toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" }) : "";
       const tags = p.tags ? ` [${p.tags}]` : "";
       return `- [${p.title}](https://www.smartechvacuum.com/blog/${p.id}) (${p.category}, ${date})${tags}${p.metaDesc ? `: ${p.metaDesc}` : ""}`;
     })

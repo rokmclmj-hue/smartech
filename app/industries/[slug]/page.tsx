@@ -37,6 +37,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       card: "summary_large_image",
       title: `${industry.title} 진공 솔루션 — 스마텍`,
       description: industry.tagline,
+      images: [industry.image],
     },
   };
 }
