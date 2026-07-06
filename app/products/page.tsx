@@ -12,11 +12,13 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "스마텍",
     locale: "ko_KR",
+    images: [{ url: "https://www.smartechvacuum.com/og-default.png", width: 1200, height: 630, alt: "스마텍 제품 카탈로그" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "제품 카탈로그 — 스마텍",
     description: "Edwards Vacuum 정품 진공펌프·부품 전 라인업.",
+    images: ["https://www.smartechvacuum.com/og-default.png"],
   },
 };
 

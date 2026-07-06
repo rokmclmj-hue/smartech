@@ -12,11 +12,13 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "스마텍",
     locale: "ko_KR",
+    images: [{ url: "https://www.smartechvacuum.com/og-default.png", width: 1200, height: 630, alt: "스마텍 수리 접수" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "수리 접수 — 스마텍",
     description: "Edwards 진공펌프 수리 접수. AI 모델 자동 판별·즉시 견적.",
+    images: ["https://www.smartechvacuum.com/og-default.png"],
   },
 };
 

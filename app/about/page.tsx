@@ -16,11 +16,13 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "스마텍",
     locale: "ko_KR",
+    images: [{ url: "https://www.smartechvacuum.com/og-default.png", width: 1200, height: 630, alt: "스마텍 회사 소개" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "회사 소개 — 스마텍",
     description: "Edwards Vacuum 공식 Gold Award 대리점.",
+    images: ["https://www.smartechvacuum.com/og-default.png"],
   },
 };
 

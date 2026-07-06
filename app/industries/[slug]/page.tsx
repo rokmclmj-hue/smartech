@@ -31,6 +31,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       type: "website",
       siteName: "스마텍",
       locale: "ko_KR",
+      images: [{ url: industry.image, alt: industry.title }],
     },
     twitter: {
       card: "summary_large_image",
@@ -117,8 +118,31 @@ export default async function IndustryDetailPage({
   const prev = INDUSTRIES[(idx - 1 + INDUSTRIES.length) % INDUSTRIES.length];
   const next = INDUSTRIES[(idx + 1) % INDUSTRIES.length];
 
+  const serviceSchema = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "serviceType": `${industry.title} 진공 솔루션`,
+    "name": `${industry.title} 진공펌프·진공장비 공급`,
+    "description": industry.description,
+    "provider": { "@type": "Organization", "name": "스마텍", "url": "https://www.smartechvacuum.com" },
+    "areaServed": "KR",
+    "url": `https://www.smartechvacuum.com/industries/${industry.slug}`,
+  });
+
+  const breadcrumbSchema = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "홈", "item": "https://www.smartechvacuum.com" },
+      { "@type": "ListItem", "position": 2, "name": "산업 분야", "item": "https://www.smartechvacuum.com/#industries" },
+      { "@type": "ListItem", "position": 3, "name": industry.title, "item": `https://www.smartechvacuum.com/industries/${industry.slug}` },
+    ],
+  });
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serviceSchema }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: breadcrumbSchema }} />
       {/* ═══════════════ HERO ═══════════════ */}
       <section className="relative border-b hair bg-paper">
         <div className="max-w-[1400px] mx-auto px-4 md:px-6 pt-8 md:pt-12 pb-10 md:pb-16">
