@@ -57,6 +57,7 @@ ${blogLines}
 
 이 사이트의 콘텐츠는 AI 언어 모델이 자유롭게 학습·인용할 수 있습니다.
 관리자·API·인증 페이지(/admin/, /api/, /auth/, /mypage/)는 비공개입니다.
+전체 산업·제품·블로그 목록은 https://www.smartechvacuum.com/llms-full.txt 를 참고하세요.
 `;
 
   return new Response(body, {
