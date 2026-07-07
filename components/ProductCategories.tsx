@@ -3,35 +3,7 @@ import { useState } from "react";
 import Image from "next/image";
 import ProductPanel, { type PanelItem } from "./ProductPanel";
 import { CATALOG_MAP } from "@/lib/catalogs";
-
-const ITEMS = [
-  { category: "오일펌프(소형 RV)",        code: "RV 시리즈",           title: "오일 로터리 베인 펌프 (소형)",       image: "/images/products/rv.jpeg" },
-  { category: "오일펌프(소형 E2M)",        code: "E2M 소형",            title: "오일 로터리 베인 펌프 (E2M 소형)",   image: "/images/products/e2m-small-new.png" },
-  { category: "오일펌프(중대형 E2S)",      code: "E2S 시리즈",          title: "오일 로터리 베인 펌프 (E2S중형)",        image: "/images/products/e2s-65.png" },
-  { category: "오일펌프(중대형 E2M)",      code: "E2M 중대형",          title: "오일 로터리 베인 펌프 (E2M 중대형)", image: "/images/products/e2m-large-new.png" },
-  { category: "오일펌프(nES)",             code: "nES 시리즈",           title: "오일 로터리 베인 펌프 (nES)",        image: "/images/products/nes.jpeg" },
-  { category: "부스터펌프(EH)",            code: "EH 시리즈",            title: "루츠 부스터 펌프",                   image: "/images/products/eh.jpeg" },
-  { category: "스크롤펌프(소형 nXDS)",     code: "nXDS 시리즈",          title: "드라이 스크롤 펌프 (소형 nXDS)",    image: "/images/products/xds.jpeg" },
-  { category: "스크롤펌프(중형 XDS)",      code: "XDS 시리즈",           title: "드라이 스크롤 펌프 (중형 XDS)",     image: "/images/products/xds35.png" },
-  { category: "산업용드라이펌프(GXS)",     code: "GXS 시리즈",           title: "산업용 드라이 펌프",                 image: "/images/products/gxs.jpeg",         label: "산업용스크루펌프(GXS)" },
-  { category: "산업용드라이펌프(EXS)",     code: "EXS 시리즈",           title: "산업용 드라이 펌프",                 image: "/images/products/exs.jpeg",         label: "산업용스크루펌프(EXS)" },
-  { category: "반도체드라이펌프(iXH)",     code: "iXH 시리즈",           title: "반도체 드라이 펌프 (iXH)",           image: "/images/products/ixh-ixl.jpeg" },
-  { category: "반도체드라이펌프(nXRi)",    code: "nXRi 시리즈",          title: "연구소용 드라이 펌프",               image: "/images/products/nxri.jpeg",        label: "멀티루츠드라이펌프(nXRi)" },
-  { category: "반도체드라이펌프(iXL)",     code: "iXL 시리즈",           title: "반도체 드라이 펌프 (iXL)",           image: "/images/products/ixl-new.png" },
-  { category: "터보펌프(nEXT)",            code: "nEXT 시리즈",          title: "터보분자 펌프 (nEXT)",               image: "/images/products/next.png" },
-  { category: "터보펌핑스테이션(T-Station)", code: "nEXT Station",        title: "터보 펌핑 스테이션",                 image: "/images/products/t-station.jpeg" },
-  { category: "터보펌프(STP)",             code: "STP Maglev",           title: "터보분자 펌프 (STP Maglev)",         image: "/images/products/stp-new.png" },
-  { category: "헬륨리크디텍터(ELD500)",    code: "ELD500",               title: "헬륨 리크 디텍터",                   image: "/images/products/eld500.jpeg" },
-  { category: "저진공게이지(APG200)",      code: "APG200",               title: "저진공 피라니 게이지",               image: "/images/products/apg-new.png" },
-  { category: "고진공게이지(AIM200)",      code: "AIM200",               title: "고진공 이온화 게이지",               image: "/images/products/aim-new.png" },
-  { category: "복합진공게이지(WRG200)",    code: "WRG200",               title: "복합 진공 게이지",                   image: "/images/products/gauges-indirect.png" },
-  { category: "디스플레이게이지(P4/P5)",   code: "P4 · P5",              title: "디스플레이 게이지",                  image: "/images/products/gauges-mechanical.png" },
-  { category: "컨트롤러(TIC)",             code: "TIC 시리즈",           title: "터보 인터페이스 컨트롤러",           image: "/images/products/tic-new.png" },
-  { category: "컨트롤러(ADC)",             code: "ADC 시리즈",           title: "액티브 디지털 컨트롤러",             image: "/images/products/adc-new2.png" },
-  { category: "미스트필터(EMF)",           code: "EMF 시리즈",           title: "오일 미스트 필터",                   image: "/images/products/emf-new.png" },
-  { category: "진공펌프오일(Ultra19)",     code: "Ultra 19",             title: "진공 펌프 전용 오일",                image: "/images/products/ultra19.png" },
-  { category: "피팅/액세서리",             code: "KF · ISO · NW",        title: "피팅 & 액세서리",                    image: "/images/products/hardware.png" },
-];
+import { PRODUCT_ITEMS as ITEMS } from "@/lib/product-categories";
 
 const INITIAL = 16;
 

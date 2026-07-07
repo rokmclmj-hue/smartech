@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminSession } from "@/lib/admin-auth";
 import { prisma } from "@/lib/db";
-import { generateRepairQuotePdf } from "@/lib/pdf";
+import { generateRepairQuotePdf, pdfResponse } from "@/lib/pdf";
 import { sendRepairQuote } from "@/lib/mailer";
 
 type Params = { params: Promise<{ id: string }> };
@@ -72,8 +72,7 @@ export async function GET(req: NextRequest, { params }: Params) {
   const repair = await prisma.repairRequest.findUnique({ where: { id: Number(id) } });
   if (!repair) return NextResponse.json({ error: "접수 없음" }, { status: 404 });
 
-  const { generateRepairQuotePdf: gen } = await import("@/lib/pdf");
-  const pdfBuffer = await gen({
+  const pdfBuffer = await generateRepairQuotePdf({
     jobNo: repair.repairNo,
     pumpMaker: repair.pumpMaker,
     pumpModel: repair.pumpModel,
@@ -96,12 +95,5 @@ export async function GET(req: NextRequest, { params }: Params) {
 
   const filename = `수리견적서_${repair.repairNo}.pdf`;
   const preview = new URL(req.url).searchParams.get("preview") === "1";
-  return new NextResponse(pdfBuffer.buffer as ArrayBuffer, {
-    headers: {
-      "Content-Type": "application/pdf",
-      "Content-Disposition": preview
-        ? `inline; filename*=UTF-8''${encodeURIComponent(filename)}`
-        : `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`,
-    },
-  });
+  return pdfResponse(pdfBuffer, `repair-quote_${repair.repairNo}.pdf`, filename, preview ? "inline" : "attachment");
 }

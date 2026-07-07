@@ -28,10 +28,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ mode: "no_contact" });
   }
 
-  // 기존 미사용 코드 만료 처리
+  // 기존 미사용 코드 만료 처리 (phone/email 중 실제 있는 값만 조건에 넣음 —
+  // undefined를 넣으면 Prisma가 조건 자체를 빼버려 OR 전체가 매칭되는 사고 방지)
+  const contactFilters = [
+    ...(user.phone ? [{ phone: user.phone }] : []),
+    ...(user.email ? [{ email: user.email }] : []),
+  ];
   await prisma.magicLinkToken.updateMany({
     where: {
-      OR: [{ phone: user.phone ?? undefined }, { email: user.email ?? undefined }],
+      OR: contactFilters,
       usedAt: null,
       expiresAt: { gt: new Date() },
     },

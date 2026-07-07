@@ -2,36 +2,11 @@ export const dynamic = "force-dynamic";
 
 import { prisma } from "@/lib/db";
 import { INDUSTRIES } from "@/lib/industries";
+import { PRODUCT_ITEMS } from "@/lib/product-categories";
 
-// 제품 코드·명칭은 components/ProductCategories.tsx의 표시용 title과 동일하게 유지
-const PRODUCT_CATEGORIES = [
-  { code: "RV 시리즈", title: "오일 로터리 베인 펌프 (소형)" },
-  { code: "E2M 소형", title: "오일 로터리 베인 펌프 (E2M 소형)" },
-  { code: "E2S 시리즈", title: "오일 로터리 베인 펌프 (E2S 중형)" },
-  { code: "E2M 중대형", title: "오일 로터리 베인 펌프 (E2M 중대형)" },
-  { code: "nES 시리즈", title: "오일 로터리 베인 펌프 (nES)" },
-  { code: "EH 시리즈", title: "루츠 부스터 펌프" },
-  { code: "nXDS 시리즈", title: "드라이 스크롤 펌프 (소형)" },
-  { code: "XDS 시리즈", title: "드라이 스크롤 펌프 (중형)" },
-  { code: "GXS 시리즈", title: "산업용 드라이 펌프" },
-  { code: "EXS 시리즈", title: "산업용 드라이 펌프" },
-  { code: "iXH 시리즈", title: "반도체 드라이 펌프 (iXH)" },
-  { code: "nXRi 시리즈", title: "연구소용 드라이 펌프" },
-  { code: "iXL 시리즈", title: "반도체 드라이 펌프 (iXL)" },
-  { code: "nEXT 시리즈", title: "터보분자 펌프" },
-  { code: "nEXT Station", title: "터보 펌핑 스테이션" },
-  { code: "STP Maglev", title: "터보분자 펌프 (Maglev)" },
-  { code: "ELD500", title: "헬륨 리크 디텍터" },
-  { code: "APG200", title: "저진공 피라니 게이지" },
-  { code: "AIM200", title: "고진공 이온화 게이지" },
-  { code: "WRG200", title: "복합 진공 게이지" },
-  { code: "P4 · P5", title: "디스플레이 게이지" },
-  { code: "TIC 시리즈", title: "터보 인터페이스 컨트롤러" },
-  { code: "ADC 시리즈", title: "액티브 디지털 컨트롤러" },
-  { code: "EMF 시리즈", title: "오일 미스트 필터" },
-  { code: "Ultra 19", title: "진공 펌프 전용 오일" },
-  { code: "KF · ISO · NW", title: "피팅 & 액세서리" },
-];
+// components/ProductCategories.tsx와 같은 lib/product-categories.ts를 참조 —
+// 두 곳에 각각 손으로 유지하다 이름이 어긋났던 문제 방지
+const PRODUCT_CATEGORIES = PRODUCT_ITEMS.map(({ code, title }) => ({ code, title }));
 
 export async function GET() {
   const posts = await prisma.blogPost.findMany({
