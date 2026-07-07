@@ -64,7 +64,7 @@ export async function POST(
   const noteNo = `SMT-${year}-D-${String(order.id).padStart(6, "0")}`;
 
   const subtotal = order.quote.items.reduce((s, i) => s + i.unitPrice * i.quantity, 0);
-  const grandTotal = order.quote.totalAmount ?? subtotal + Math.round(subtotal * VAT_RATE);
+  const grandTotal = subtotal + Math.round(subtotal * VAT_RATE);
 
   // 이메일 발송
   try {

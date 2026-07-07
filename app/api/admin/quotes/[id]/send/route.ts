@@ -220,8 +220,7 @@ export async function POST(
       (s, i) => s + i.unitPrice * i.quantity,
       0
     );
-    const grandTotal =
-      quote.totalAmount ?? subtotal + Math.round(subtotal * VAT_RATE);
+    const grandTotal = subtotal + Math.round(subtotal * VAT_RATE);
 
     try {
       await sendQuotePdf(recipientEmail, pdfBuffer, quoteNo, {

@@ -68,7 +68,7 @@ export async function GET(
     0
   );
   const vat = Math.round(subtotal * VAT_RATE);
-  const grandTotal = quote.totalAmount ?? subtotal + vat;
+  const grandTotal = subtotal + vat;
 
   const year = quote.createdAt.getFullYear();
   const seq = String(quote.id).padStart(6, "0");
