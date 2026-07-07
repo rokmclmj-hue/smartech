@@ -18,9 +18,13 @@ export async function GET(req: NextRequest) {
   return NextResponse.json(items);
 }
 
-// POST — 품목 추가
+// POST — 품목 추가 (관리자 세션 또는 BLOG_UPLOAD_SECRET Bearer 키로 인증 — 일괄 임포트 스크립트용)
 export async function POST(req: NextRequest) {
-  if (!(await getAdminSession()))
+  const secret = process.env.BLOG_UPLOAD_SECRET;
+  const auth = req.headers.get("Authorization");
+  const hasValidBearer = !!secret && auth === `Bearer ${secret}`;
+
+  if (!hasValidBearer && !(await getAdminSession()))
     return NextResponse.json({ error: "권한 없음" }, { status: 403 });
 
   const body = await req.json().catch(() => null);

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAdminSession } from "@/lib/admin-auth";
-import { generateRepairInspectionPdf, buildDownloadFilename } from "@/lib/pdf";
+import { generateRepairInspectionPdf, buildDownloadFilename, pdfResponse } from "@/lib/pdf";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -37,16 +37,8 @@ export async function GET(_req: NextRequest, { params }: Params) {
     });
 
     const smartFilename = buildDownloadFilename("검사성적서", job.company?.companyName ?? null, job.pumpModel);
-    const encodedFilename = encodeURIComponent(smartFilename);
 
-    return new NextResponse(Buffer.from(pdfBuffer).buffer as ArrayBuffer, {
-      status: 200,
-      headers: {
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `inline; filename="inspection_${job.jobNo}.pdf"; filename*=UTF-8''${encodedFilename}`,
-        "Content-Length": String(pdfBuffer.length),
-      },
-    });
+    return pdfResponse(pdfBuffer, `inspection_${job.jobNo}.pdf`, smartFilename, "inline");
   } catch (err) {
     console.error("[검사성적서 PDF 오류]", err);
     const msg = err instanceof Error ? err.message : String(err);

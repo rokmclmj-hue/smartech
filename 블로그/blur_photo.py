@@ -101,6 +101,12 @@ def main():
     # 7. 저장
     os.makedirs(os.path.dirname(os.path.abspath(dst)), exist_ok=True)
     result.save(dst, optimize=True)
+
+    # 8. 원본 크기 기록 — check_quality.py가 리사이즈된 field-*.png가 아닌
+    #    원본 좌표 기준으로 pump_box를 검증할 수 있도록 함
+    config["source_image_size"] = [w, h]
+    with open(config_path, "w", encoding="utf-8") as f:
+        json.dump(config, f, ensure_ascii=False, indent=2)
     size_mb = os.path.getsize(dst) / 1024 / 1024
     print(f"저장 완료: {dst} ({size_mb:.2f}MB, 1000x{new_h}px)")
     print()

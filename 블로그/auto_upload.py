@@ -75,15 +75,6 @@ def main():
         log(f"⚠️ [{label}] 업로드 항목이 비어 있음. 주말에 Claude로 주제 생성 필요.")
         sys.exit(0)
 
-    if post.get("uploaded"):
-        log(f"✅ [{label}] 이미 업로드 완료: {title}")
-        sys.exit(0)
-
-    if not post.get("approved"):
-        log(f"⏸️ [{label}] 승인 대기 중: {title}")
-        log(f"   → upload-queue.json 에서 \"{slot}\".approved 를 true 로 바꾸면 다음 실행 시 업로드됩니다.")
-        sys.exit(0)
-
     if dry_run:
         import urllib.request
         env_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
@@ -101,6 +92,15 @@ def main():
             log(f"❌ [테스트] 연결 실패: {api_url} → {e}")
             sys.exit(1)
         log(f"ℹ️ [테스트] 실제 업로드는 하지 않았습니다. --dry-run 모드.")
+        sys.exit(0)
+
+    if post.get("uploaded"):
+        log(f"✅ [{label}] 이미 업로드 완료: {title}")
+        sys.exit(0)
+
+    if not post.get("approved"):
+        log(f"⏸️ [{label}] 승인 대기 중: {title}")
+        log(f"   → upload-queue.json 에서 \"{slot}\".approved 를 true 로 바꾸면 다음 실행 시 업로드됩니다.")
         sys.exit(0)
 
     log(f"📤 [{label}] 업로드 시작: {title} (폴더: {folder})")

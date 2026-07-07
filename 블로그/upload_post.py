@@ -46,7 +46,8 @@ if os.path.exists(_QUEUE_FILE):
         _queue = json.load(_qf)
     _matched_slot = None
     for _slot in ("day1", "day2", "day3"):
-        if _queue.get(_slot, {}).get("folder", "").strip() == topic:
+        _slot_folder = _queue.get(_slot, {}).get("folder", "").strip()
+        if _slot_folder == topic or os.path.basename(_slot_folder) == topic:
             _matched_slot = _slot
             break
     if _matched_slot and not _queue[_matched_slot].get("approved"):

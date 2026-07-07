@@ -11,6 +11,7 @@ import {
   Font,
   type DocumentProps,
 } from "@react-pdf/renderer";
+import { NextResponse } from "next/server";
 import { VAT_RATE } from "./constants";
 import { SMARTECH_COMPANY } from "./company";
 
@@ -30,6 +31,32 @@ export function buildDownloadFilename(docLabel: string, company: string | null, 
   const co = sanitize(company ?? "업체미상") || "업체미상";
   const it = sanitize(item ?? "품명미상") || "품명미상";
   return `${docLabel}_${yyyymmdd}_${co}_${it}.pdf`;
+}
+
+// PDF Buffer → NextResponse 변환 공용 헬퍼
+// Buffer.buffer를 그대로 쓰면 Node의 내부 메모리 풀 때문에 작은 PDF가 깨질 수 있어
+// 항상 byteOffset~byteLength로 잘라낸다. asciiFilename은 영문 폴백, koreanFilename은
+// filename*=UTF-8''로 인코딩되는 실제 파일명.
+export function pdfResponse(
+  pdfBuffer: Buffer,
+  asciiFilename: string,
+  koreanFilename: string,
+  disposition: "inline" | "attachment" = "inline"
+): NextResponse {
+  const arrayBuf = pdfBuffer.buffer.slice(
+    pdfBuffer.byteOffset,
+    pdfBuffer.byteOffset + pdfBuffer.byteLength
+  ) as ArrayBuffer;
+  const encodedFilename = encodeURIComponent(koreanFilename);
+
+  return new NextResponse(arrayBuf, {
+    status: 200,
+    headers: {
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `${disposition}; filename="${asciiFilename}"; filename*=UTF-8''${encodedFilename}`,
+      "Content-Length": String(pdfBuffer.length),
+    },
+  });
 }
 
 export interface QuoteForPdf {
