@@ -246,13 +246,21 @@ with sync_playwright() as p:
 
 ---
 
-### 6단계 — naver.md 마커 치환
+### 6단계 — 최종 파일명 통일 (사진1, 사진2, 사진3 …)
 
-모든 이미지가 준비되면 naver.md의 `[IMAGE: 설명]` 마커를 실제 이미지 경로로 치환한다.
+썸네일을 제외한 본문 이미지는 현장사진(field-N)이든 AI 생성(image-NN)이든 구분하지 않고,
+**naver.md에 `[IMAGE: 설명]` 마커가 나오는 순서 그대로** `사진1.png`, `사진2.png`, `사진3.png` … 로 다시 이름 붙여 저장한다.
+
+- 2~5단계에서 만든 field-N.png / image-NN.png는 작업용 임시 이름이다. 이 단계에서 최종적으로 `사진1.png`부터 순번을 다시 매긴다.
+- 마커 개수와 최종 이미지 파일 개수가 반드시 일치해야 한다. 개수가 안 맞으면 이미지를 추가 제작하거나 마커를 정리해서 맞춘다 (개수 불일치 상태로 완료 처리 금지).
+
+### 7단계 — naver.md 마커 치환
+
+모든 이미지 이름 정리가 끝나면 naver.md의 `[IMAGE: 설명]` 마커를 실제 이미지 경로로 순서대로 치환한다.
 
 ```
 [IMAGE: 펌프 설치 현장 사진]
-→ ![펌프 설치 현장 사진](./images/field-1.png)
+→ ![펌프 설치 현장 사진](./images/사진1.png)
 ```
 
 ---
@@ -260,13 +268,12 @@ with sync_playwright() as p:
 ## 산출물
 
 - `블로그/output/[주제]/images/thumbnail.png`
-- `블로그/output/[주제]/images/image-01.png`, `image-02.png`, ... (AI 생성 본문 이미지)
-- `블로그/output/[주제]/images/field-1.png`, `field-2.png`, ... (블러 처리 완료 현장사진)
+- `블로그/output/[주제]/images/사진1.png`, `사진2.png`, `사진3.png`, ... (naver.md 마커 순서와 1:1 일치, 현장사진/AI생성 구분 없이 통일)
 - `블로그/output/processed-images/*_blurred.png` (블러 처리 캐시)
 - `블로그/output/used-images.json` (사용 이력 업데이트)
 - `블로그/output/[주제]/naver.md` (마커 → 실제 경로 치환 완료)
 
-> 파일명 규칙: AI 생성 본문 이미지는 `image-01.png`부터 순번 부여. 현장사진은 `field-1.png`부터 순번 부여. `body-N.png` 패턴 사용 금지.
+> 파일명 규칙: 작업 중간 단계(블러 처리 결과물은 field-N.png, AI 생성 직후는 image-NN.png)까지는 기존 방식대로 만들어도 되지만, **최종 저장 시에는 반드시 사진1.png부터 마커 순서대로 통일**한다. 2026-07-08부터 적용 (이전에 만든 글은 기존 이름 유지, 소급 변경 안 함).
 
 ## 완료 후 사용자 안내
 
