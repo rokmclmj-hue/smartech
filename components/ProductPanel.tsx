@@ -238,20 +238,28 @@ export default function ProductPanel({ item, onClose, catalogUrl }: Props) {
   const [bizNo, setBizNo] = useState("");
   const [bizLoading, setBizLoading] = useState(false);
   const [bizError, setBizError] = useState("");
+  const [otpStep, setOtpStep] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [otpContact, setOtpContact] = useState("");
 
   async function handleBizVerify(e: React.FormEvent) {
     e.preventDefault();
     setBizError("");
     setBizLoading(true);
     try {
-      const res = await fetch("/api/auth/verify-biz", {
+      const res = await fetch("/api/auth/biz-login-request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ businessNo: bizNo.replace(/[^0-9]/g, "") }),
       });
       const data = await res.json();
-      if (data.status !== "active") {
-        setBizError(data.message ?? "유효하지 않은 사업자번호입니다.");
+      if (!res.ok) {
+        setBizError(data.error ?? "유효하지 않은 사업자번호입니다.");
+        return;
+      }
+      if (data.mode === "otp_sent") {
+        setOtpContact(data.maskedPhone ?? data.maskedEmail ?? "등록된 연락처");
+        setOtpStep(true);
         return;
       }
       const result = await signIn("credentials", {
@@ -260,6 +268,18 @@ export default function ProductPanel({ item, onClose, catalogUrl }: Props) {
       });
       if (result?.ok) { setBizModalOpen(false); window.location.reload(); }
       else { setBizError("로그인에 실패했습니다. 다시 시도해 주세요."); }
+    } catch { setBizError("네트워크 오류가 발생했습니다."); }
+    finally { setBizLoading(false); }
+  }
+
+  async function handleOtpVerify(e: React.FormEvent) {
+    e.preventDefault();
+    setBizError("");
+    setBizLoading(true);
+    try {
+      const result = await signIn("credentials", { magicToken: otpCode.trim(), redirect: false });
+      if (result?.ok) { setBizModalOpen(false); window.location.reload(); }
+      else { setBizError("인증번호가 올바르지 않거나 만료됐습니다."); }
     } catch { setBizError("네트워크 오류가 발생했습니다."); }
     finally { setBizLoading(false); }
   }
@@ -353,16 +373,34 @@ export default function ProductPanel({ item, onClose, catalogUrl }: Props) {
               </div>
               <button onClick={() => setBizModalOpen(false)} className="text-gray-300 hover:text-gray-500 text-xl leading-none">✕</button>
             </div>
-            <form onSubmit={handleBizVerify} className="space-y-3">
-              <input type="text" value={bizNo} onChange={(e) => setBizNo(e.target.value)} required autoFocus
-                placeholder="사업자등록번호 10자리" maxLength={12}
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-smblue/30 bg-gray-50" />
-              {bizError && <p className="text-red-500 text-xs">{bizError}</p>}
-              <button type="submit" disabled={bizLoading}
-                className="w-full bg-smblue hover:bg-smblue/90 disabled:opacity-50 text-white font-semibold py-3 rounded-xl text-sm transition-colors">
-                {bizLoading ? "확인 중..." : "로그인하기"}
-              </button>
-            </form>
+            {!otpStep ? (
+              <form onSubmit={handleBizVerify} className="space-y-3">
+                <input type="text" value={bizNo} onChange={(e) => setBizNo(e.target.value)} required autoFocus
+                  placeholder="사업자등록번호 10자리" maxLength={12}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-smblue/30 bg-gray-50" />
+                {bizError && <p className="text-red-500 text-xs">{bizError}</p>}
+                <button type="submit" disabled={bizLoading}
+                  className="w-full bg-smblue hover:bg-smblue/90 disabled:opacity-50 text-white font-semibold py-3 rounded-xl text-sm transition-colors">
+                  {bizLoading ? "확인 중..." : "로그인하기"}
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleOtpVerify} className="space-y-3">
+                <p className="text-[11px] text-gray-400">{otpContact}로 보낸 인증번호 6자리를 입력해주세요</p>
+                <input type="text" value={otpCode} onChange={(e) => setOtpCode(e.target.value.replace(/[^0-9]/g, ""))} required autoFocus
+                  placeholder="인증번호 6자리" maxLength={6}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-center tracking-[0.3em] focus:outline-none focus:ring-2 focus:ring-smblue/30 bg-gray-50" />
+                {bizError && <p className="text-red-500 text-xs">{bizError}</p>}
+                <button type="submit" disabled={bizLoading}
+                  className="w-full bg-smblue hover:bg-smblue/90 disabled:opacity-50 text-white font-semibold py-3 rounded-xl text-sm transition-colors">
+                  {bizLoading ? "확인 중..." : "인증하고 로그인"}
+                </button>
+                <button type="button" onClick={() => { setOtpStep(false); setOtpCode(""); setBizError(""); }}
+                  className="w-full text-[12px] text-gray-400 hover:text-gray-600 py-1">
+                  ← 다시 입력하기
+                </button>
+              </form>
+            )}
           </div>
         </div>
       )}

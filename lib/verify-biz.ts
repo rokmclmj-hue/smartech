@@ -9,7 +9,7 @@ export interface BizVerifyResult {
 }
 
 // 사업자등록번호 체크섬 검증 (국세청 알고리즘)
-function isValidBizNoChecksum(digits: string): boolean {
+export function isValidBizNoChecksum(digits: string): boolean {
   if (digits.length !== 10) return false;
   const weights = [1, 3, 7, 1, 3, 7, 1, 3, 5];
   let sum = 0;

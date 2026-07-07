@@ -161,6 +161,19 @@ export async function notifyPartnerUpload(
 }
 
 /**
+ * 사업자번호 재로그인 인증코드를 고객 휴대폰으로 발송합니다.
+ */
+export async function sendBizLoginCode(phone: string, code: string): Promise<void> {
+  const service = getService();
+  const adminPhone = getAdminPhone();
+  await service.send({
+    to: phone,
+    from: adminPhone,
+    text: `[스마텍] 로그인 인증번호는 ${code} 입니다. (5분간 유효, 타인에게 알려주지 마세요)`,
+  });
+}
+
+/**
  * 수리 상태 변경 시 고객에게 SMS 알림.
  */
 export async function notifyRepairStatus(

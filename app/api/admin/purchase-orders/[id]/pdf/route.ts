@@ -57,12 +57,13 @@ export async function GET(req: NextRequest, { params }: Params) {
       pdfName = `PO_${order.orderNo}.pdf`;
     }
     const encodedName = encodeURIComponent(pdfName);
+    const asciiName = `PO_${order.orderNo}.pdf`;
 
     return new NextResponse(arrayBuf, {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `${preview ? "inline" : "attachment"}; filename*=UTF-8''${encodedName}`,
+        "Content-Disposition": `${preview ? "inline" : "attachment"}; filename="${asciiName}"; filename*=UTF-8''${encodedName}`,
         "Content-Length": String(pdfBuffer.length),
       },
     });

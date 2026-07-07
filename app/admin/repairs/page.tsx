@@ -156,11 +156,12 @@ function RepairRow({ repair, onRefresh }: { repair: Repair; onRefresh: () => voi
   async function updateStatus(newStatus: string) {
     setSaving(true);
     try {
-      await fetch("/api/admin/repairs", {
+      const res = await fetch("/api/admin/repairs", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: repair.id, status: newStatus }),
       });
+      if (!res.ok) throw new Error();
       setCurRepair(p => ({ ...p, status: newStatus }));
       onRefresh();
     } catch { alert("저장 실패"); }
@@ -171,14 +172,16 @@ function RepairRow({ repair, onRefresh }: { repair: Repair; onRefresh: () => voi
     setSaving(true);
     try {
       const extra = editExtra ? Number(editExtra) : 0;
-      await fetch("/api/admin/repairs", {
+      const res = await fetch("/api/admin/repairs", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: repair.id, status: curRepair.status, adminNote: editNote || null, extraAmount: extra, extraPartsName: editExtraName || null, quoteRemarks: editQuoteRemarks || null }),
       });
+      if (!res.ok) throw new Error();
       setCurRepair(p => ({ ...p, adminNote: editNote || null, extraAmount: extra, extraPartsName: editExtraName || null, quoteRemarks: editQuoteRemarks || null }));
       onRefresh();
-    } finally { setSaving(false); }
+    } catch { alert("저장 실패"); }
+    finally { setSaving(false); }
   }
 
   async function adminUpload(files: FileList) {

@@ -9,6 +9,32 @@ const transporter = nodemailer.createTransport({
 });
 
 /**
+ * 사업자번호 재로그인 인증코드를 이메일로 발송합니다.
+ */
+export async function sendBizLoginCodeEmail(to: string, code: string): Promise<void> {
+  await transporter.sendMail({
+    from: `"스마텍" <${process.env.GMAIL_USER}>`,
+    to,
+    subject: "[스마텍] 로그인 인증번호",
+    html: `
+      <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px 24px;background:#fff;border:1px solid #e5e7eb;">
+        <p style="font-size:15px;color:#111;margin-bottom:8px;">안녕하세요.</p>
+        <p style="font-size:14px;color:#374151;line-height:1.7;margin-bottom:24px;">
+          로그인 인증번호는 아래와 같습니다.<br>
+          <span style="color:#9ca3af;font-size:12px;">5분간 유효하며 1회만 사용 가능합니다.</span>
+        </p>
+        <div style="font-size:28px;font-weight:700;letter-spacing:0.1em;color:#c00020;">${code}</div>
+        <p style="margin-top:32px;font-size:12px;color:#9ca3af;line-height:1.6;">
+          본인이 요청하지 않은 경우 이 메일을 무시하셔도 됩니다.<br>
+          문의: 031-204-7170
+        </p>
+      </div>
+    `,
+    text: `스마텍 로그인 인증번호: ${code}\n\n5분간 유효합니다. 본인이 요청하지 않은 경우 무시하세요.`,
+  });
+}
+
+/**
  * 견적서 PDF를 첨부하여 이메일로 발송합니다.
  */
 export async function sendQuotePdf(

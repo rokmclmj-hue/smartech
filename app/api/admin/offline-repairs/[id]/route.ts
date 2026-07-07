@@ -56,16 +56,20 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     if (subEmail && updated.uploadToken) {
       const origin = process.env.NEXTAUTH_URL ?? "https://www.smartechvacuum.com";
       const uploadUrl = `${origin}/repair/offline-upload/${updated.uploadToken}`;
-      emailSent = true;
-      sendSubUploadLink({
-        to: subEmail,
-        jobNo: updated.jobNo,
-        pumpMaker: updated.pumpMaker,
-        pumpModel: updated.pumpModel,
-        serialNo: updated.serialNo,
-        uploadUrl,
-        expiresAt,
-      }).catch((e) => { emailSent = false; console.error("[협력사 이메일 발송 오류]", e); });
+      try {
+        await sendSubUploadLink({
+          to: subEmail,
+          jobNo: updated.jobNo,
+          pumpMaker: updated.pumpMaker,
+          pumpModel: updated.pumpModel,
+          serialNo: updated.serialNo,
+          uploadUrl,
+          expiresAt,
+        });
+        emailSent = true;
+      } catch (e) {
+        console.error("[협력사 이메일 발송 오류]", e);
+      }
     }
 
     return NextResponse.json({ token: updated.uploadToken, expiresAt: updated.tokenExpiresAt, emailSent });

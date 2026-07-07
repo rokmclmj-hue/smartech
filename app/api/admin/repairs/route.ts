@@ -17,7 +17,14 @@ export async function GET(req: NextRequest) {
   const page = Math.max(1, Number(searchParams.get("page") ?? 1));
   const limit = 20;
 
-  const where = status && status !== "ALL" ? { status } : {};
+  // IN_PROGRESS는 과거에 쓰이던 INSPECTION·COMPLETED 상태값도 같은 "수리중"으로 취급해야 함
+  // (STATUS_LABELS에서도 셋 다 동일 배지로 표시됨 — app/admin/repairs/page.tsx 참고)
+  const where =
+    status === "IN_PROGRESS"
+      ? { status: { in: ["IN_PROGRESS", "INSPECTION", "COMPLETED"] } }
+      : status && status !== "ALL"
+        ? { status }
+        : {};
 
   const [repairs, total] = await Promise.all([
     prisma.repairRequest.findMany({

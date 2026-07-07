@@ -5,6 +5,7 @@ import Google from "next-auth/providers/google";
 import { compare } from "bcryptjs";
 import { prisma } from "./db";
 import { normalizePhone } from "./phone";
+import { isValidBizNoChecksum } from "./verify-biz";
 
 const NOTIFY_TIERS = ["DEALER", "KEY_DEALER", "VIP_DEALER", "OEM"];
 
@@ -93,11 +94,14 @@ const providers: any[] = [
       // 사업자번호 간편 로그인
       if (credentials?.businessNo) {
         const digits = (credentials.businessNo as string).replace(/[^0-9]/g, "");
-        if (digits.length !== 10) return null;
+        if (!isValidBizNoChecksum(digits)) return null;
 
         // 1. 이미 가입된 사용자인지 확인
         let user = await prisma.user.findFirst({ where: { businessNo: digits } });
         if (user) {
+          // 연락처가 등록된 계정은 사업자번호만으로 즉시 로그인 불가 — /api/auth/biz-login-request로
+          // 받은 인증코드(magicToken)로만 로그인 가능. 연락처가 없는 계정만 기존 방식 유지.
+          if (user.phone || user.email) return null;
           return { id: String(user.id), name: user.name, tier: user.tier, company: user.company, businessNo: digits };
         }
 

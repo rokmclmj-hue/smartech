@@ -43,10 +43,10 @@ export async function POST(req: NextRequest) {
   let skipped = 0;
 
   for (const row of rows) {
-    const partNo = (
+    const partNo = String(
       row["partNo"] ?? row["코드번호"] ?? row["code"] ??
       row["Part No"] ?? row["Part NO"] ?? row["PartNo"] ?? ""
-    ) as string;
+    );
 
     if (!partNo.trim()) { skipped++; continue; }
 

@@ -94,7 +94,9 @@ export default function ProductsPageClient() {
 function BizLoginModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
   const [bizNo, setBizNo] = useState("");
   const [bizCompany, setBizCompany] = useState("");
-  const [step, setStep] = useState<"input" | "company">("input");
+  const [otpCode, setOtpCode] = useState("");
+  const [otpContact, setOtpContact] = useState("");
+  const [step, setStep] = useState<"input" | "company" | "otp">("input");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -103,16 +105,21 @@ function BizLoginModal({ onClose, onSuccess }: { onClose: () => void; onSuccess:
     setError("");
     setLoading(true);
     try {
-      const res = await fetch("/api/auth/verify-biz", {
+      const res = await fetch("/api/auth/biz-login-request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ businessNo: bizNo.replace(/[^0-9]/g, "") }),
       });
       const data = await res.json();
-      if (data.status === "active") {
-        setStep("company");
+      if (!res.ok) {
+        setError(data.error ?? "유효하지 않은 사업자번호입니다.");
+        return;
+      }
+      if (data.mode === "otp_sent") {
+        setOtpContact(data.maskedPhone ?? data.maskedEmail ?? "등록된 연락처");
+        setStep("otp");
       } else {
-        setError(data.message ?? "유효하지 않은 사업자번호입니다.");
+        setStep("company");
       }
     } catch {
       setError("네트워크 오류가 발생했습니다.");
@@ -135,6 +142,24 @@ function BizLoginModal({ onClose, onSuccess }: { onClose: () => void; onSuccess:
         onSuccess();
       } else {
         setError("로그인에 실패했습니다. 다시 시도해 주세요.");
+      }
+    } catch {
+      setError("네트워크 오류가 발생했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleOtpVerify(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      const result = await signIn("credentials", { magicToken: otpCode.trim(), redirect: false });
+      if (result?.ok) {
+        onSuccess();
+      } else {
+        setError("인증번호가 올바르지 않거나 만료됐습니다.");
       }
     } catch {
       setError("네트워크 오류가 발생했습니다.");
@@ -200,6 +225,37 @@ function BizLoginModal({ onClose, onSuccess }: { onClose: () => void; onSuccess:
             <button
               type="button"
               onClick={() => { setStep("input"); setError(""); }}
+              className="w-full text-xs text-gray-400 hover:text-gray-600 py-1"
+            >
+              번호 다시 입력
+            </button>
+          </form>
+        )}
+
+        {step === "otp" && (
+          <form onSubmit={handleOtpVerify} className="space-y-3">
+            <p className="text-[11px] text-gray-400">{otpContact}로 보낸 인증번호 6자리를 입력해주세요</p>
+            <input
+              type="text"
+              value={otpCode}
+              onChange={(e) => setOtpCode(e.target.value.replace(/[^0-9]/g, ""))}
+              required
+              autoFocus
+              placeholder="인증번호 6자리"
+              maxLength={6}
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-center tracking-[0.3em] focus:outline-none focus:ring-2 focus:ring-smblue/30 bg-gray-50"
+            />
+            {error && <p className="text-red-500 text-xs">{error}</p>}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-smblue hover:bg-smblue/90 disabled:opacity-50 text-white font-semibold py-3 rounded-xl text-sm transition-colors"
+            >
+              {loading ? "확인 중..." : "인증하고 로그인"}
+            </button>
+            <button
+              type="button"
+              onClick={() => { setStep("input"); setOtpCode(""); setError(""); }}
               className="w-full text-xs text-gray-400 hover:text-gray-600 py-1"
             >
               번호 다시 입력
