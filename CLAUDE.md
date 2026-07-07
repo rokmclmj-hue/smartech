@@ -22,8 +22,11 @@
 3. `git pull origin master` 를 실행해 로컬 master를 GitHub와 동기화한다.
 4. `git log --oneline origin/master..HEAD` 를 실행해 **push 안 된 커밋**이 있는지 확인한다.
    - push 안 된 커밋이 있으면 사용자에게 반드시 먼저 알린다: "⚠️ 라이브에 반영 안 된 작업이 N개 있어요. 먼저 push할까요?"
-5. 현재 작업과 관련된 프로젝트 상태를 파악한 후 사용자에게 한 줄로 요약한다.
-6. 그 후 사용자의 요청을 처리한다.
+5. **코드 리뷰 백로그 자동 점검** — `git fetch origin reviewed` 후 `git rev-list --count origin/reviewed..origin/master` 실행.
+   - **20개 미만**이면 사용자에게 한 줄만 언급 ("리뷰 안 된 커밋 N개 있어요") 하고 넘어간다.
+   - **20개 이상**이면 사용자에게 묻지 않고 바로 처리한다: 커밋 범위를 80개 안팎 단위로 나눠 로컬 `/code-review high` 8-에이전트 방식으로 리뷰 → 발견된 버그 수정 → 커밋·push → **`git push origin master:reviewed` 로 reviewed 브랜치를 master까지 전진**시켜 백로그를 완전히 해소한다. GitHub PR·Close·Merge 클릭은 필요 없다 (2026-07-07 250개 백로그 사고 이후 도입, [[project_github_actions_review]] 참고).
+6. 현재 작업과 관련된 프로젝트 상태를 파악한 후 사용자에게 한 줄로 요약한다.
+7. 그 후 사용자의 요청을 처리한다.
 
 > 이 규칙은 생략 불가. 메모리를 읽지 않으면 이전 논의를 반복하게 되어 사용자에게 불필요한 번거로움을 준다.
 
@@ -188,6 +191,9 @@ Tailwind 클래스로 `bg-edred`, `text-ink` 형태로 사용. 값 임의 변경
 2. **배포 확인**: `git log --oneline origin/master | head -3` 으로 push 반영 여부를 확인한다.
 3. **코드 리뷰 권장 알림**: 수정 파일이 3개 이상이거나 스키마·API·페이지를 동시에 건드린 경우, 아래 문구로 안내한다.
    > "이번 작업은 파일 N개를 수정했어요. 배포 전 품질 점검을 원하면 `/code-review ultra` 를 입력해 주세요."
+4. **리뷰 완료 시 reviewed 브랜치 전진 필수**: `/code-review ultra` 또는 로컬 리뷰로 코드 리뷰를 진행하고 지적사항을 수정·push했다면,
+   PR을 Close만 하고 끝내지 말고 반드시 `git push origin master:reviewed` 까지 실행해 리뷰 완료 지점을 갱신한다.
+   (Close만 하고 reviewed를 안 옮기면 다음 세션에 리뷰 안 된 커밋이 다시 쌓인다 — 2026-07-07 250개 백로그 사고 원인)
 
 > push 없이 세션을 끝내면 작업이 라이브에 반영되지 않는다. 이 규칙은 생략 불가.
 
