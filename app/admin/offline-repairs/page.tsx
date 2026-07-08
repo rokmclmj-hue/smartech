@@ -19,7 +19,7 @@ type Job = {
   pumpMaker: string; pumpModel: string; serialNo: string | null;
   voltage: string | null; repairReason: string | null;
   subName: string | null; subEmail: string | null;
-  company: { id: number; companyName: string } | null;
+  company: { id: number; companyName: string; contacts?: CompanyContact[] } | null;
   contactName: string | null; contactEmail: string | null; contactPhone: string | null;
   receivedDate: string; requestedDate: string | null;
   uploadToken: string | null; tokenExpiresAt: string | null; uploadedAt: string | null;
@@ -329,6 +329,9 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone, isSelected, onToggle
   const [editCompanyQ, setEditCompanyQ] = useState("");
   const [editCompanyResults, setEditCompanyResults] = useState<Company[]>([]);
   const [editSelectedCompany, setEditSelectedCompany] = useState<Company | null>(job.company);
+  const [editContactName, setEditContactName] = useState(job.contactName ?? "");
+  const [editContactEmail, setEditContactEmail] = useState(job.contactEmail ?? "");
+  const [editContactPhone, setEditContactPhone] = useState(job.contactPhone ?? "");
   const [savingCompany, setSavingCompany] = useState(false);
   const [adminUploading, setAdminUploading] = useState(false);
   const [adminUploadMsg, setAdminUploadMsg] = useState("");
@@ -368,7 +371,12 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone, isSelected, onToggle
       const res = await fetch(`/api/admin/offline-repairs/${job.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ companyId: editSelectedCompany?.id ?? null }),
+        body: JSON.stringify({
+          companyId: editSelectedCompany?.id ?? null,
+          contactName: editContactName || null,
+          contactEmail: editContactEmail || null,
+          contactPhone: editContactPhone || null,
+        }),
       });
       if (res.ok) { showToast("거래처 저장됨"); onRefresh(); }
       else showToast("저장 실패");
@@ -688,11 +696,49 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone, isSelected, onToggle
                   )}
                 </div>
               )}
-              <button onClick={handleSaveCompany} disabled={savingCompany}
-                className="border hair px-3 py-1.5 text-[11px] hover:bg-ink/5 shrink-0 disabled:opacity-50">
-                {savingCompany ? "저장 중..." : "저장"}
-              </button>
             </div>
+            {editSelectedCompany && editSelectedCompany.contacts && editSelectedCompany.contacts.length > 0 && (
+              <div className="space-y-1">
+                <div className="mono text-[10px] dim mb-1">등록된 담당자 (클릭하면 자동 입력)</div>
+                <div className="flex flex-wrap gap-2">
+                  {editSelectedCompany.contacts.map(ct => (
+                    <button
+                      key={ct.id}
+                      onClick={() => {
+                        setEditContactName(ct.name);
+                        setEditContactEmail(ct.email ?? "");
+                        setEditContactPhone(ct.mobile || ct.tel || "");
+                      }}
+                      className="border hair px-3 py-1.5 text-[12px] hover:bg-ink/5 text-left"
+                    >
+                      <span className="font-semibold">{ct.name}</span>
+                      {ct.title && <span className="dim ml-1">({ct.title})</span>}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl">
+              <div>
+                <div className="mono text-[10px] dim mb-1">담당자</div>
+                <input value={editContactName} onChange={e => setEditContactName(e.target.value)} placeholder="홍길동"
+                  className="w-full border hair px-3 py-1.5 text-[13px] focus:outline-none focus:border-ink" />
+              </div>
+              <div>
+                <div className="mono text-[10px] dim mb-1">이메일</div>
+                <input type="email" value={editContactEmail} onChange={e => setEditContactEmail(e.target.value)} placeholder="contact@company.com"
+                  className="w-full border hair px-3 py-1.5 text-[13px] mono focus:outline-none focus:border-ink" />
+              </div>
+              <div>
+                <div className="mono text-[10px] dim mb-1">전화</div>
+                <input value={editContactPhone} onChange={e => setEditContactPhone(e.target.value)} placeholder="02-0000-0000"
+                  className="w-full border hair px-3 py-1.5 text-[13px] focus:outline-none focus:border-ink" />
+              </div>
+            </div>
+            <button onClick={handleSaveCompany} disabled={savingCompany}
+              className="border hair px-3 py-1.5 text-[11px] hover:bg-ink/5 shrink-0 disabled:opacity-50">
+              {savingCompany ? "저장 중..." : "거래처·담당자 저장"}
+            </button>
           </div>
 
           {/* 사전 견적 발송 — 접수·물품수령 단계에서만 표시 */}

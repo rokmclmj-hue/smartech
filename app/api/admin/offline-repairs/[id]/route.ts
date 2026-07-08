@@ -110,7 +110,9 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     data: {
       ...(body.status && { status: body.status }),
       ...(body.memo !== undefined && { memo: body.memo }),
+      ...(body.contactName !== undefined && { contactName: body.contactName || null }),
       ...(body.contactEmail !== undefined && { contactEmail: body.contactEmail }),
+      ...(body.contactPhone !== undefined && { contactPhone: body.contactPhone || null }),
       ...(body.requestedDate !== undefined && { requestedDate: body.requestedDate ? new Date(body.requestedDate) : null }),
       // 수리 견적 필드 (Phase 2)
       ...(body.repairCost !== undefined && { repairCost: body.repairCost != null ? Math.round(Number(body.repairCost)) : null }),
