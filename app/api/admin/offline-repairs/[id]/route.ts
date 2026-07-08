@@ -15,7 +15,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
   const job = await prisma.offlineRepairJob.findUnique({
     where: { id: Number(id) },
     include: {
-      company: { select: { id: true, companyName: true } },
+      company: { include: { contacts: true } },
       inspectionItems: { orderBy: { sortOrder: "asc" } },
       files: { orderBy: { uploadedAt: "asc" } },
     },

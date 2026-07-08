@@ -33,7 +33,7 @@ export async function GET() {
 
   const jobs = await prisma.offlineRepairJob.findMany({
     include: {
-      company: { select: { id: true, companyName: true } },
+      company: { include: { contacts: true } },
       files: { select: { id: true, fileType: true, isSelected: true } },
       inspectionItems: { orderBy: { sortOrder: "asc" } },
     },
