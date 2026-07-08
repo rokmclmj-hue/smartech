@@ -672,7 +672,7 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone, isSelected, onToggle
               {editSelectedCompany ? (
                 <>
                   <span className="text-[13px] font-semibold">{editSelectedCompany.companyName}</span>
-                  <button onClick={() => { setEditSelectedCompany(null); setEditCompanyQ(""); }}
+                  <button onClick={() => { setEditSelectedCompany(null); setEditCompanyQ(""); setEditContactName(""); setEditContactEmail(""); setEditContactPhone(""); }}
                     className="text-[11px] dim hover:text-edred">✕ 변경</button>
                 </>
               ) : (
@@ -687,7 +687,7 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone, isSelected, onToggle
                     <div className="absolute z-10 top-full left-0 right-0 bg-paper border hair shadow-md">
                       {editCompanyResults.map(c => (
                         <button key={c.id}
-                          onClick={() => { setEditSelectedCompany(c); setEditCompanyQ(""); setEditCompanyResults([]); }}
+                          onClick={() => { setEditSelectedCompany(c); setEditCompanyQ(""); setEditCompanyResults([]); setEditContactName(""); setEditContactEmail(""); setEditContactPhone(""); }}
                           className="w-full text-left px-3 py-2 text-[13px] hover:bg-ink/5 border-b hair last:border-0">
                           {c.companyName}
                         </button>
