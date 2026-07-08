@@ -217,6 +217,15 @@ const REPAIR_CASES: RepairCase[] = [
     photo: "/images/repair/e2m80-exterior.jpg",
     partPhoto: "/images/repair/e2m80-shaft.jpg",
   },
+  {
+    model: "Edwards iQDP40",
+    client: "D사",
+    symptom: "기본수리",
+    work: ["Power PCA 교체", "Cooling coil 교체"],
+    photo: "/images/repair/iqdp40-exterior.jpg",
+    partPhoto: "/images/repair/iqdp40-cooling-coil.jpg",
+    extraPhoto: "/images/repair/iqdp40-internal.jpg",
+  },
 ];
 const EXTRA_MARGIN = 1.2; // 추가항목 마진
 
