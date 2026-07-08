@@ -73,6 +73,15 @@ type RepairCase = {
 
 const REPAIR_CASES: RepairCase[] = [
   {
+    model: "Edwards iQDP40",
+    client: "D사",
+    symptom: "기본수리",
+    work: ["Power PCA 교체", "Cooling coil 교체"],
+    photo: "/images/repair/iqdp40-exterior.jpg",
+    partPhoto: "/images/repair/iqdp40-cooling-coil.jpg",
+    extraPhoto: "/images/repair/iqdp40-internal.jpg",
+  },
+  {
     model: "Edwards XDS35i",
     client: "N사",
     symptom: "팁씰·베어링 마모 · 가스 발라스트 파손",
@@ -216,15 +225,6 @@ const REPAIR_CASES: RepairCase[] = [
     work: ["풀 오버홀", "베어링 교체", "씰 교체", "오일 세정"],
     photo: "/images/repair/e2m80-exterior.jpg",
     partPhoto: "/images/repair/e2m80-shaft.jpg",
-  },
-  {
-    model: "Edwards iQDP40",
-    client: "D사",
-    symptom: "기본수리",
-    work: ["Power PCA 교체", "Cooling coil 교체"],
-    photo: "/images/repair/iqdp40-exterior.jpg",
-    partPhoto: "/images/repair/iqdp40-cooling-coil.jpg",
-    extraPhoto: "/images/repair/iqdp40-internal.jpg",
   },
 ];
 const EXTRA_MARGIN = 1.2; // 추가항목 마진
