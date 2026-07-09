@@ -1011,7 +1011,7 @@ export default function RepairPageClient() {
                       </button>
                     ) : (
                       <Link
-                        href="/login"
+                        href="/auth/login"
                         className="flex items-center gap-2 px-4 py-2.5 border border-line text-[11px] text-dim hover:border-ink transition-all"
                       >
                         로그인 후 PDF 저장
