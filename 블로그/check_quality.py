@@ -97,11 +97,19 @@ def chk_field_photo(folder: str) -> dict:
     if not os.path.exists(img_dir):
         return {"pass": False, "reason": "images/ 폴더 없음", "files": []}
     files = [f for f in os.listdir(img_dir) if f.startswith("field-") and f.endswith((".png", ".jpg"))]
+    # 2026-07-08 최종 파일명 통일 규칙 이후: field-N.png가 사진N.png로 재저장되므로
+    # blur-config.json 존재 여부(=blur_photo.py로 실제 현장사진을 처리했다는 증거)를 대체 판정 기준으로 사용
+    if not files and os.path.exists(os.path.join(folder, "blur-config.json")):
+        files = ["(사진N.png로 통일됨 — blur-config.json 존재로 판정)"]
+    # image-maker.md 규칙: 현장사진을 찾을 수 없는 경우에만 AI 생성으로 전량 대체 가능.
+    # no-field-photo.md에 사유를 명시적으로 기록해둔 경우에만 통과 처리 (조용히 빠뜨린 경우와 구분)
+    if not files and os.path.exists(os.path.join(folder, "no-field-photo.md")):
+        files = ["(현장사진 없음 — no-field-photo.md에 사유 기록됨, AI 생성으로 전량 대체)"]
     ok = len(files) > 0
     return {
         "pass": ok,
         "files": files,
-        "reason": None if ok else "field-*.png 없음 — blur_photo.py로 처리 필요",
+        "reason": None if ok else "field-*.png 없음 & blur-config.json도 없음 — blur_photo.py로 처리하거나, 정말 없으면 no-field-photo.md에 사유를 기록",
     }
 
 
