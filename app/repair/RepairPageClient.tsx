@@ -73,6 +73,15 @@ type RepairCase = {
 
 const REPAIR_CASES: RepairCase[] = [
   {
+    model: "Edwards E2M0.7",
+    client: "A사",
+    symptom: "엔드실 가공 · 모터 베어링 교체 · 모듈 스크래치 발생",
+    work: ["엔드실 가공", "모터 베어링 교체", "모듈 스크래치 부위 수정"],
+    photo: "/images/repair/e2m07-b-exterior.jpg",
+    partPhoto: "/images/repair/e2m07-b-bearing.jpg",
+    extraPhoto: "/images/repair/e2m07-b-endshield.jpg",
+  },
+  {
     model: "Edwards iQDP40",
     client: "D사",
     symptom: "기본수리",
