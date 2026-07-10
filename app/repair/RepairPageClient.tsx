@@ -774,7 +774,7 @@ export default function RepairPageClient() {
               <button
                 disabled={!form.contactName || !form.contactPhone}
                 onClick={() => setStep(1)}
-                className="ml-auto px-8 py-4 bg-edred text-paper text-[14px] font-semibold hover:bg-ink transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                className="ml-auto px-8 py-4 bg-ink text-paper text-[14px] font-semibold hover:bg-edred transition-all disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 다음 단계 →
               </button>
