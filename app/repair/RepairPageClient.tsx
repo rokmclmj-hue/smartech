@@ -59,7 +59,7 @@ const SYMPTOMS = [
   { id: "other",         label: "기타 증상",           sub: "위 항목에 해당 없는 경우" },
 ];
 
-const STEPS = ["사진 업로드", "증상 입력", "수리 견적", "접수 완료"];
+const STEPS = ["접수 정보", "증상 입력", "수리 견적", "접수 완료"];
 
 type RepairCase = {
   model: string;
@@ -246,11 +246,9 @@ function getBaseMargin(pumpModel: string): number {
 }
 
 const PHOTO_SLOTS = [
-  { key: "nameplate", label: "명판 사진",       required: true,  hint: "모델명 스티커 — AI 인식 필수" },
-  { key: "side",      label: "옆면 전체 사진",  required: false, hint: "있으면 인식 정확도 높아짐" },
-  { key: "front",     label: "정면 사진",       required: false, hint: "선택 사항" },
-  { key: "back",      label: "뒷면 사진",       required: false, hint: "선택 사항" },
-  { key: "top",       label: "윗면 사진",       required: false, hint: "선택 사항" },
+  { key: "nameplate", label: "명판 사진",       required: true,  hint: "모델명 확인용" },
+  { key: "exterior",  label: "전체 외관 사진",  required: false, hint: "있으면 더 정확해요" },
+  { key: "damage",    label: "고장 부위 사진",  required: false, hint: "있으면 더 정확해요" },
 ];
 
 // ── 유틸 ──────────────────────────────────────────────────
@@ -278,12 +276,11 @@ export default function RepairPageClient() {
   const [repairNo, setRepairNo] = useState("");
   const [selectedExtras, setSelectedExtras] = useState<SelectedExtra[]>([]);
   const [showPartsDetail, setShowPartsDetail] = useState(false);
-  const [modelSearch, setModelSearch] = useState("");
   const [modelSearchFocus, setModelSearchFocus] = useState(false);
 
   // 사진 상태
   const [photos, setPhotos] = useState<Record<string, PhotoFile | null>>({
-    nameplate: null, side: null, front: null, back: null, top: null,
+    nameplate: null, exterior: null, damage: null,
   });
   const [aiResult, setAiResult] = useState<AiResult | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
@@ -501,16 +498,107 @@ export default function RepairPageClient() {
           </div>
         )}
 
-        {/* ── STEP 0: 사진 업로드 + AI 인식 ── */}
+        {/* ── STEP 0: 연락처 + 모델 확인 + 사진(선택) ── */}
         {step === 0 && (
           <div className="max-w-3xl">
-            <h2 className="text-[22px] font-bold tracking-tight mb-2">제품 사진을 올려주세요</h2>
-            <p className="text-[13px] text-dim mb-8">
-              명판과 옆면 사진은 필수입니다. 사진에서 모델명을 자동으로 인식합니다.
+            <h2 className="text-[22px] font-bold tracking-tight mb-2">연락처를 남겨주세요</h2>
+            <p className="text-[13px] text-dim mb-6">
+              담당자가 확인 후 안내드립니다.
             </p>
 
-            {/* 사진 업로드 슬롯 */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8">
+            {/* 연락처 */}
+            <div className="border border-line p-6 mb-10">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[12px] font-medium block mb-1.5">
+                    담당자 이름 <span className="text-edred">*</span>
+                  </label>
+                  <input type="text" value={form.contactName}
+                    onChange={(e) => setField("contactName", e.target.value)}
+                    placeholder="홍길동"
+                    className="w-full border border-line px-3 py-2.5 text-[14px] focus:outline-none focus:border-ink bg-paper" />
+                </div>
+                <div>
+                  <label className="text-[12px] font-medium block mb-1.5">
+                    연락처 <span className="text-edred">*</span>
+                  </label>
+                  <input type="tel" value={form.contactPhone}
+                    onChange={(e) => setField("contactPhone", phoneAutoFormat(e.target.value))}
+                    placeholder="010-0000-0000"
+                    className="w-full border border-line px-3 py-2.5 text-[14px] focus:outline-none focus:border-ink bg-paper tabular" />
+                </div>
+                <div>
+                  <label className="text-[12px] font-medium block mb-1.5">회사명 <span className="text-dim font-normal">(선택)</span></label>
+                  <input type="text" value={form.company}
+                    onChange={(e) => setField("company", e.target.value)}
+                    placeholder="(주)스마텍"
+                    className="w-full border border-line px-3 py-2.5 text-[14px] focus:outline-none focus:border-ink bg-paper" />
+                </div>
+                <div>
+                  <label className="text-[12px] font-medium block mb-1.5">이메일 <span className="text-dim font-normal">(선택)</span></label>
+                  <input type="email" value={form.contactEmail}
+                    onChange={(e) => setField("contactEmail", e.target.value)}
+                    placeholder="example@company.com"
+                    className="w-full border border-line px-3 py-2.5 text-[14px] focus:outline-none focus:border-ink bg-paper" />
+                </div>
+              </div>
+            </div>
+
+            {/* 모델명 검색 */}
+            <h3 className="text-[16px] font-bold tracking-tight mb-2">어떤 장비인가요?</h3>
+            <p className="text-[13px] text-dim mb-3">
+              모델명을 알고 계시면 검색해 주세요. 모르셔도 아래 사진으로 확인해 드립니다.
+            </p>
+            <div className="mb-10 relative">
+              <input
+                type="text"
+                value={form.pumpModel}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setField("pumpModel", v);
+                  const matched = kits.find((k) => k.pumpModel.toLowerCase() === v.toLowerCase());
+                  setField("selectedKitId", matched?.id ?? null);
+                  if (matched) setField("pumpFamily", matched.pumpFamily);
+                }}
+                onFocus={() => setModelSearchFocus(true)}
+                onBlur={() => setTimeout(() => setModelSearchFocus(false), 150)}
+                placeholder="예: nXDS10i, RV8, E2M18, EH500..."
+                className="w-full border border-line px-4 py-3 text-[14px] focus:outline-none focus:border-ink bg-paper"
+              />
+              {/* 검색 결과 드롭다운 */}
+              {modelSearchFocus && form.pumpModel.length >= 2 && (() => {
+                const matched = kits.filter(k =>
+                  k.pumpModel.toLowerCase().includes(form.pumpModel.toLowerCase())
+                ).slice(0, 6);
+                if (matched.length === 0) return null;
+                return (
+                  <div className="absolute left-0 right-0 z-20 border border-ink bg-paper shadow-lg">
+                    {matched.map(k => (
+                      <button
+                        key={k.id}
+                        onMouseDown={() => {
+                          setField("pumpModel", k.pumpModel);
+                          setField("selectedKitId", k.id);
+                          setField("pumpFamily", k.pumpFamily);
+                        }}
+                        className="w-full text-left px-4 py-3 text-[13px] hover:bg-ink hover:text-paper border-b border-line last:border-0 flex items-center justify-between"
+                      >
+                        <span className="font-medium">{k.pumpModel}</span>
+                        <span className="text-[11px] text-dim">{k.pumpFamily}</span>
+                      </button>
+                    ))}
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* 사진 업로드 (선택) */}
+            <h3 className="text-[16px] font-bold tracking-tight mb-2">사진을 올려주시면 더 빠르게 도와드려요</h3>
+            <p className="text-[13px] text-dim mb-6">
+              모델명을 자동으로 인식해드려요. 사진이 없어도 괜찮아요 — 모델명만 입력하셔도 접수됩니다.
+            </p>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
               {PHOTO_SLOTS.map((slot) => {
                 const photo = photos[slot.key];
                 return (
@@ -531,8 +619,6 @@ export default function RepairPageClient() {
                           ? "border-edred bg-edred/5 scale-[1.03]"
                           : photo
                           ? "border-ink"
-                          : slot.required
-                          ? "border-dashed border-edred/60 hover:border-edred"
                           : "border-dashed border-line hover:border-ink"
                       }`}
                     >
@@ -568,11 +654,11 @@ export default function RepairPageClient() {
                         </>
                       ) : (
                         <div className="text-center p-3 pointer-events-none">
-                          <div className={`text-[24px] mb-1 ${dragOver === slot.key ? "text-edred" : slot.required ? "text-edred/40" : "text-dim/40"}`}>
+                          <div className={`text-[24px] mb-1 ${dragOver === slot.key ? "text-edred" : "text-dim/40"}`}>
                             {dragOver === slot.key ? "↓" : "+"}
                           </div>
-                          <div className={`text-[11px] font-medium ${dragOver === slot.key ? "text-edred" : slot.required ? "text-edred/80" : "text-dim"}`}>
-                            {dragOver === slot.key ? "놓으면 업로드" : slot.required ? "필수" : "선택"}
+                          <div className={`text-[11px] font-medium ${dragOver === slot.key ? "text-edred" : "text-dim"}`}>
+                            {dragOver === slot.key ? "놓으면 업로드" : "선택"}
                           </div>
                         </div>
                       )}
@@ -592,52 +678,6 @@ export default function RepairPageClient() {
                   </div>
                 );
               })}
-            </div>
-
-            {/* 모델명 직접 검색 (사진 없는 경우) */}
-            <div className="mb-6 relative">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="flex-1 h-px bg-line" />
-                <span className="text-[11px] text-dim">또는 모델명으로 직접 검색</span>
-                <div className="flex-1 h-px bg-line" />
-              </div>
-              <input
-                type="text"
-                value={modelSearch}
-                onChange={(e) => setModelSearch(e.target.value)}
-                onFocus={() => setModelSearchFocus(true)}
-                onBlur={() => setTimeout(() => setModelSearchFocus(false), 150)}
-                placeholder="예: nXDS10i, RV8, E2M18, EH500..."
-                className="w-full border border-line px-4 py-3 text-[14px] focus:outline-none focus:border-ink bg-paper"
-              />
-              {/* 검색 결과 드롭다운 */}
-              {modelSearchFocus && modelSearch.length >= 2 && (() => {
-                const matched = kits.filter(k =>
-                  k.pumpModel.toLowerCase().includes(modelSearch.toLowerCase())
-                ).slice(0, 6);
-                if (matched.length === 0) return null;
-                return (
-                  <div className="absolute left-0 right-0 z-20 border border-ink bg-paper shadow-lg">
-                    {matched.map(k => (
-                      <button
-                        key={k.id}
-                        onMouseDown={() => {
-                          setField("pumpModel", k.pumpModel);
-                          setField("selectedKitId", k.id);
-                          setField("pumpFamily", k.pumpFamily);
-                          setModelSearch(k.pumpModel);
-                          setAiDone(true);
-                          setAiResult(null);
-                        }}
-                        className="w-full text-left px-4 py-3 text-[13px] hover:bg-ink hover:text-paper border-b border-line last:border-0 flex items-center justify-between"
-                      >
-                        <span className="font-medium">{k.pumpModel}</span>
-                        <span className="text-[11px] text-dim">{k.pumpFamily}</span>
-                      </button>
-                    ))}
-                  </div>
-                );
-              })()}
             </div>
 
             {/* AI 인식 버튼 / 결과 */}
@@ -693,7 +733,7 @@ export default function RepairPageClient() {
                         <div className="text-[12px] text-dim leading-relaxed">{aiResult.notes}</div>
                         {aiResult.confidence === "medium" && (
                           <p className="text-[11px] text-amber-700 mt-2">
-                            모델명을 직접 확인하거나 수정해 주세요.
+                            위 모델명 검색창에서 정확한 모델명인지 확인해 주세요.
                           </p>
                         )}
                       </>
@@ -705,63 +745,39 @@ export default function RepairPageClient() {
                         <div className="text-[12px] text-dim leading-relaxed mb-3">{aiResult.notes}</div>
                         <p className="text-[12px] leading-relaxed">
                           접수 후 담당자가 사진을 확인하고 직접 연락드립니다.
-                          아래에서 모델명을 직접 입력하거나, 그대로 접수하셔도 됩니다.
+                          위 모델명 검색창에 직접 입력하시거나, 그대로 접수하셔도 됩니다.
                         </p>
                       </>
                     )}
                   </div>
                 </div>
 
-                {/* 모델명 수정 입력 */}
-                <div className="mt-4 pt-4 border-t border-current/20 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-[11px] mono text-dim block mb-1">
-                      모델명 {aiResult.modelName ? "(수정 가능)" : "(직접 입력)"}
-                    </label>
-                    <input
-                      type="text"
-                      value={form.pumpModel}
-                      onChange={(e) => {
-                        const v = e.target.value;
-                        setField("pumpModel", v);
-                        const matched = kits.find(
-                          (k) => k.pumpModel.toLowerCase() === v.toLowerCase()
-                        );
-                        setField("selectedKitId", matched?.id ?? null);
-                        if (matched) setField("pumpFamily", matched.pumpFamily);
-                      }}
-                      placeholder="예: XDS35iE, nXDS10i, RV8"
-                      className="w-full border border-current/30 bg-paper px-3 py-2 text-[14px] focus:outline-none focus:border-ink"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[11px] mono text-dim block mb-1">시리얼 번호 (선택)</label>
-                    <input
-                      type="text"
-                      value={form.pumpSerial}
-                      onChange={(e) => setField("pumpSerial", e.target.value)}
-                      placeholder="S/N"
-                      className="w-full border border-current/30 bg-paper px-3 py-2 text-[14px] focus:outline-none focus:border-ink"
-                    />
-                  </div>
+                <div className="mt-4 pt-4 border-t border-current/20">
+                  <label className="text-[11px] mono text-dim block mb-1">시리얼 번호 (선택)</label>
+                  <input
+                    type="text"
+                    value={form.pumpSerial}
+                    onChange={(e) => setField("pumpSerial", e.target.value)}
+                    placeholder="S/N"
+                    className="w-full sm:w-1/2 border border-current/30 bg-paper px-3 py-2 text-[14px] focus:outline-none focus:border-ink"
+                  />
                 </div>
               </div>
             )}
 
             <div className="flex gap-3">
-              {!hasRequired && (
-                <p className="text-[12px] text-edred self-center">
-                  명판 사진과 옆면 사진은 필수입니다.
+              {(!form.contactName || !form.contactPhone) && (
+                <p className="text-[12px] text-dim self-center">
+                  이름과 연락처를 입력해 주세요.
                 </p>
               )}
-              {aiDone && (
-                <button
-                  onClick={() => setStep(1)}
-                  className="ml-auto px-8 py-4 bg-edred text-paper text-[14px] font-semibold hover:bg-ink transition-all"
-                >
-                  다음 단계 →
-                </button>
-              )}
+              <button
+                disabled={!form.contactName || !form.contactPhone}
+                onClick={() => setStep(1)}
+                className="ml-auto px-8 py-4 bg-edred text-paper text-[14px] font-semibold hover:bg-ink transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                다음 단계 →
+              </button>
             </div>
           </div>
         )}
@@ -1058,10 +1074,10 @@ export default function RepairPageClient() {
           </div>
         )}
 
-        {/* ── STEP 3: 연락처 + 접수 ── */}
+        {/* ── STEP 3: 접수 내용 확인 + 제출 ── */}
         {step === 3 && !submitted && (
           <div className="max-w-3xl">
-            <h2 className="text-[22px] font-bold tracking-tight mb-2">연락처 입력</h2>
+            <h2 className="text-[22px] font-bold tracking-tight mb-2">접수 내용을 확인해 주세요</h2>
             {form.isConsultRequest && (
               <div className="border border-edred/30 bg-edred/5 px-4 py-3 mb-6 text-[13px] text-edred">
                 상담 요청으로 접수됩니다 — 담당자가 직접 연락드립니다.
@@ -1074,40 +1090,30 @@ export default function RepairPageClient() {
             )}
             <div className="border border-line p-6 mb-8">
               <div className="mono text-[10px] tracking-widest text-dim mb-5">연락처 정보</div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-[14px]">
                 <div>
-                  <label className="text-[12px] font-medium block mb-1.5">
-                    담당자 이름 <span className="text-edred">*</span>
-                  </label>
-                  <input type="text" value={form.contactName}
-                    onChange={(e) => setField("contactName", e.target.value)}
-                    placeholder="홍길동"
-                    className="w-full border border-line px-3 py-2.5 text-[14px] focus:outline-none focus:border-ink bg-paper" />
+                  <div className="text-[12px] text-dim mb-1">담당자 이름</div>
+                  <div className="font-medium">{form.contactName || "—"}</div>
                 </div>
                 <div>
-                  <label className="text-[12px] font-medium block mb-1.5">
-                    연락처 <span className="text-edred">*</span>
-                  </label>
-                  <input type="tel" value={form.contactPhone}
-                    onChange={(e) => setField("contactPhone", phoneAutoFormat(e.target.value))}
-                    placeholder="010-0000-0000"
-                    className="w-full border border-line px-3 py-2.5 text-[14px] focus:outline-none focus:border-ink bg-paper tabular" />
+                  <div className="text-[12px] text-dim mb-1">연락처</div>
+                  <div className="font-medium tabular">{form.contactPhone || "—"}</div>
                 </div>
                 <div>
-                  <label className="text-[12px] font-medium block mb-1.5">회사명</label>
-                  <input type="text" value={form.company}
-                    onChange={(e) => setField("company", e.target.value)}
-                    placeholder="(주)스마텍"
-                    className="w-full border border-line px-3 py-2.5 text-[14px] focus:outline-none focus:border-ink bg-paper" />
+                  <div className="text-[12px] text-dim mb-1">회사명</div>
+                  <div className="font-medium">{form.company || "—"}</div>
                 </div>
                 <div>
-                  <label className="text-[12px] font-medium block mb-1.5">이메일</label>
-                  <input type="email" value={form.contactEmail}
-                    onChange={(e) => setField("contactEmail", e.target.value)}
-                    placeholder="example@company.com"
-                    className="w-full border border-line px-3 py-2.5 text-[14px] focus:outline-none focus:border-ink bg-paper" />
+                  <div className="text-[12px] text-dim mb-1">이메일</div>
+                  <div className="font-medium">{form.contactEmail || "—"}</div>
                 </div>
               </div>
+              <button
+                onClick={() => setStep(0)}
+                className="mt-5 text-[12px] text-dim underline hover:text-ink transition"
+              >
+                연락처 수정하기
+              </button>
             </div>
             <div className="flex gap-3">
               <button onClick={() => setStep(2)}
