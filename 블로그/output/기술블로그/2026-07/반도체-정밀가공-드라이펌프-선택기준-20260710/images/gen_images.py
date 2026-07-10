@@ -4,6 +4,35 @@ from playwright.sync_api import sync_playwright
 FONT = "'Pretendard Variable', 'Pretendard', 'Noto Sans KR', sans-serif"
 MONO = "'JetBrains Mono', monospace"
 
+# ── 썸네일 (1080x1080) ──────────────────────────────────────────
+thumbnail_html = f"""<!DOCTYPE html>
+<html><head><meta charset="utf-8"><style>
+  * {{ margin:0; padding:0; box-sizing:border-box; }}
+  body {{
+    width:1080px; height:1080px;
+    background: linear-gradient(135deg,#1a1a2e,#16213e);
+    display:flex; align-items:center; justify-content:center;
+    font-family:{FONT}; position:relative; overflow:hidden;
+  }}
+  .bg-circle {{ position:absolute; border-radius:50%; filter:blur(90px); opacity:0.22; }}
+  .bg-circle-1 {{ width:460px; height:460px; background:#c00020; top:-80px; left:-100px; }}
+  .bg-circle-2 {{ width:420px; height:420px; background:#0d3a8a; bottom:-100px; right:-80px; }}
+  .content {{ text-align:center; display:flex; flex-direction:column; gap:20px; align-items:center; padding:60px; }}
+  .badge {{ display:inline-block; background:rgba(192,0,32,0.15); border:1px solid rgba(192,0,32,0.5); color:#E46F75;
+    font-size:15px; font-weight:600; letter-spacing:0.12em; padding:7px 20px; border-radius:20px; text-transform:uppercase; }}
+  h1 {{ color:#FFFFFF; font-size:52px; font-weight:800; line-height:1.3; letter-spacing:-0.02em; max-width:840px; }}
+  .subtitle {{ color:#9B9590; font-size:22px; font-weight:400; letter-spacing:0.01em; }}
+</style></head>
+<body>
+  <div class="bg-circle bg-circle-1"></div>
+  <div class="bg-circle bg-circle-2"></div>
+  <div class="content">
+    <span class="badge">Semiconductor</span>
+    <h1>반도체 에칭·CMP 공정<br>드라이펌프 선택 기준</h1>
+    <p class="subtitle">부식성 가스부터 방식 선정까지</p>
+  </div>
+</body></html>"""
+
 # ── 사진1: 다단 드라이펌프 압력 구간별 구조 ─────────────────
 img1_html = f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8"><style>
@@ -187,6 +216,7 @@ def generate(html, path, width, height):
 
 base = r"C:\Users\rokmc\smartech\블로그\output\기술블로그\2026-07\반도체-정밀가공-드라이펌프-선택기준-20260710\images"
 
+generate(thumbnail_html, f"{base}\\thumbnail.png", 1080, 1080)
 generate(img1_html, f"{base}\\사진1.png", 1200, 520)
 generate(img2_html, f"{base}\\사진2.png", 1200, 520)
 generate(img3_html, f"{base}\\사진3.png", 1200, 520)
