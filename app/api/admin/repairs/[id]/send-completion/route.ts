@@ -38,7 +38,7 @@ export async function POST(_req: NextRequest, { params }: Params) {
   // 1. 거래명세표 PDF 생성
   const deliveryNotePdf = await generateManualDeliveryNotePdf({
     noteNo: repair.repairNo,
-    createdAt: new Date(),
+    issuedDate: new Date(),
     toCompany: repair.company ?? repair.contactName,
     toName: repair.contactName,
     toEmail: repair.contactEmail,

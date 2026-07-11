@@ -38,6 +38,14 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   const body = await req.json().catch(() => null);
   if (!body) return NextResponse.json({ error: "잘못된 요청" }, { status: 400 });
 
+  let issuedDate: Date | undefined;
+  if (body.issuedDate !== undefined) {
+    const parsed = new Date(body.issuedDate);
+    if (isNaN(parsed.getTime()))
+      return NextResponse.json({ error: "잘못된 날짜" }, { status: 400 });
+    issuedDate = parsed;
+  }
+
   const updated = await prisma.manualDeliveryNote.update({
     where: { id: nId },
     data: {
@@ -45,6 +53,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       ...(body.sentAt !== undefined && { sentAt: body.sentAt }),
       ...(body.sentTo !== undefined && { sentTo: body.sentTo }),
       ...(body.remarks !== undefined && { remarks: body.remarks?.trim() || null }),
+      ...(issuedDate !== undefined && { issuedDate }),
     },
   });
   return NextResponse.json({ ok: true, note: updated });

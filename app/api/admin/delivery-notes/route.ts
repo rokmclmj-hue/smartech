@@ -34,12 +34,15 @@ export async function POST(req: NextRequest) {
   const totalAmount = totalSupply + totalVat;
 
   const year = new Date().getFullYear();
+  const parsedIssuedDate = body.issuedDate ? new Date(body.issuedDate) : new Date();
+  const issuedDate = isNaN(parsedIssuedDate.getTime()) ? new Date() : parsedIssuedDate;
 
   // 트랜잭션으로 TEMP 생성 → 실제 번호 업데이트를 원자적으로 처리
   const [, updated] = await prisma.$transaction(async (tx) => {
     const note = await tx.manualDeliveryNote.create({
       data: {
         noteNo: "TEMP",
+        issuedDate,
         toCompany: body.toCompany.trim(),
         toName: body.toName?.trim() || null,
         toTitle: body.toTitle?.trim() || null,

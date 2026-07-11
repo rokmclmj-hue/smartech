@@ -428,6 +428,9 @@ model ManualDeliveryNote {
   noteNo          String   @unique  // SMT-YYYY-D-NNNNNN
   status          String   @default("DRAFT")  // DRAFT | SENT
 
+  // PDF에 표시되는 발행일 (관리자가 직접 지정 가능, 기본값=저장 시점)
+  issuedDate      DateTime @default(now())
+
   // 수신자 정보 (발행 시점 스냅샷)
   toCompany       String
   toName          String?

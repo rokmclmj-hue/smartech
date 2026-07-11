@@ -32,7 +32,7 @@ export async function POST(req: NextRequest, { params }: Params) {
 
   const pdf = await generateManualDeliveryNotePdf({
     noteNo: note.noteNo,
-    createdAt: note.createdAt,
+    issuedDate: note.issuedDate,
     toCompany: note.toCompany,
     toName: note.toName,
     toEmail: note.toEmail,

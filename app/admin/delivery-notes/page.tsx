@@ -17,6 +17,7 @@ type DeliveryNote = {
   id: number;
   noteNo: string;
   status: string;
+  issuedDate: string;
   toCompany: string;
   toName: string | null;
   toEmail: string | null;
@@ -101,6 +102,18 @@ function fmtDate(s: string) {
   return new Date(s).toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" });
 }
 
+function todayStr() {
+  const d = new Date();
+  const tz = d.getTimezoneOffset() * 60000;
+  return new Date(d.getTime() - tz).toISOString().slice(0, 10);
+}
+
+function dateInputStr(s: string) {
+  const d = new Date(s);
+  const tz = d.getTimezoneOffset() * 60000;
+  return new Date(d.getTime() - tz).toISOString().slice(0, 10);
+}
+
 const BLANK_ITEM: NoteItem = { partNo: "", description: "", quantity: 1, unitPrice: 0 };
 
 // ── 거래명세표 작성 폼 ─────────────────────────────
@@ -109,6 +122,9 @@ function NoteForm({ onSaved }: { onSaved: () => void }) {
   const [searchQ, setSearchQ] = useState("");
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [showDirect, setShowDirect] = useState(false);
+
+  // 발행일
+  const [issuedDate, setIssuedDate] = useState(todayStr());
 
   // 수신자 정보
   const [toCompany, setToCompany] = useState("");
@@ -250,6 +266,7 @@ function NoteForm({ onSaved }: { onSaved: () => void }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          issuedDate,
           toCompany, toName, toTitle, toEmail, toPhone, toBizNo,
           memo, remarks, includeBankInfo,
           items: items.map((it, idx) => ({ ...it, quantity: Number(it.quantity), unitPrice: Number(it.unitPrice), sortOrder: idx })),
@@ -312,6 +329,22 @@ function NoteForm({ onSaved }: { onSaved: () => void }) {
           </div>
         </div>
       )}
+
+      {/* 00 발행일 */}
+      <div className="border hair bg-paper">
+        <div className="px-5 py-3 border-b hair">
+          <span className="mono text-[10px] dim tracking-[0.12em]">00 / 발행일</span>
+        </div>
+        <div className="px-5 py-4">
+          <input
+            type="date"
+            value={issuedDate}
+            onChange={(e) => setIssuedDate(e.target.value)}
+            className="border hair px-3 py-1.5 text-[13px] mono focus:outline-none focus:border-ink"
+          />
+          <span className="ml-2 text-[11px] dim">PDF에 표시되는 발행일입니다. 기본값은 오늘 날짜예요.</span>
+        </div>
+      </div>
 
       {/* 01 수신자 */}
       <div className="border hair bg-paper">
@@ -513,8 +546,28 @@ function NoteRow({ note, onDelete }: { note: DeliveryNote; onDelete: () => void 
   const [toast, setToast] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [showSend, setShowSend] = useState(false);
+  const [editingDate, setEditingDate] = useState(false);
+  const [dateValue, setDateValue] = useState(dateInputStr(note.issuedDate));
+  const [savingDate, setSavingDate] = useState(false);
 
   useEffect(() => { setSendEmail(note.toEmail ?? ""); }, [note.toEmail]);
+  useEffect(() => { setDateValue(dateInputStr(note.issuedDate)); }, [note.issuedDate]);
+
+  async function handleSaveDate() {
+    setSavingDate(true);
+    try {
+      const res = await fetch(`/api/admin/delivery-notes/${note.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ issuedDate: dateValue }),
+      });
+      if (res.ok) { setEditingDate(false); setToast("발행일 수정 완료"); onDelete(); }
+      else setToast("발행일 수정 실패");
+    } finally {
+      setSavingDate(false);
+      setTimeout(() => setToast(null), 3000);
+    }
+  }
 
   async function handleSend() {
     if (!sendEmail.trim()) return;
@@ -550,7 +603,23 @@ function NoteRow({ note, onDelete }: { note: DeliveryNote; onDelete: () => void 
             <span className={`mono text-[10px] px-1.5 py-0.5 ${note.status === "SENT" ? "bg-green-100 text-green-700" : "bg-yellow-50 text-yellow-700"}`}>
               {note.status === "SENT" ? "발송완료" : "초안"}
             </span>
-            <span className="mono text-[10px] dim">{fmtDate(note.createdAt)}</span>
+            {editingDate ? (
+              <span className="flex items-center gap-1.5">
+                <input type="date" value={dateValue} onChange={(e) => setDateValue(e.target.value)}
+                  className="border hair px-1.5 py-0.5 text-[11px] mono focus:outline-none focus:border-ink" />
+                <button onClick={handleSaveDate} disabled={savingDate}
+                  className="mono text-[10px] bg-ink text-paper px-2 py-0.5 hover:bg-ink/90 disabled:opacity-50">
+                  {savingDate ? "저장중" : "저장"}
+                </button>
+                <button onClick={() => { setEditingDate(false); setDateValue(dateInputStr(note.issuedDate)); }}
+                  className="mono text-[10px] dim hover:text-ink">취소</button>
+              </span>
+            ) : (
+              <button onClick={() => setEditingDate(true)}
+                className="mono text-[10px] dim hover:text-ink hover:underline">
+                발행일 {fmtDate(note.issuedDate)} ✎
+              </button>
+            )}
           </div>
           <div className="text-[14px] font-semibold">{note.toCompany}</div>
           <div className="text-[12px] dim">

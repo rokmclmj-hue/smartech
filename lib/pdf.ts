@@ -870,7 +870,7 @@ export interface ManualDeliveryNoteItemForPdf {
 
 export interface ManualDeliveryNoteForPdf {
   noteNo: string;
-  createdAt: Date;
+  issuedDate: Date;
   toCompany: string;
   toName?: string | null;
   toTitle?: string | null;
@@ -884,7 +884,7 @@ export interface ManualDeliveryNoteForPdf {
 
 function ManualDeliveryNoteDocument({ data }: { data: ManualDeliveryNoteForPdf }) {
   const el = React.createElement;
-  const issued = new Date(data.createdAt);
+  const issued = new Date(data.issuedDate);
 
   const totalSupply = data.items.reduce((s, i) => s + i.unitPrice * i.quantity, 0);
   const totalVat = Math.round(totalSupply * VAT_RATE);

@@ -22,7 +22,7 @@ export async function GET(req: NextRequest, { params }: Params) {
   try {
     const pdfBuffer = await generateManualDeliveryNotePdf({
       noteNo: note.noteNo,
-      createdAt: note.createdAt,
+      issuedDate: note.issuedDate,
       toCompany: note.toCompany,
       toName: note.toName,
       toTitle: note.toTitle,
