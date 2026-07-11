@@ -558,7 +558,11 @@ export default function RepairPageClient() {
                   setField("pumpModel", v);
                   const matched = kits.find((k) => k.pumpModel.toLowerCase() === v.toLowerCase());
                   setField("selectedKitId", matched?.id ?? null);
-                  if (matched) setField("pumpFamily", matched.pumpFamily);
+                  if (matched) {
+                    setField("pumpFamily", matched.pumpFamily);
+                    setAiDone(true);
+                    setAiResult(null);
+                  }
                 }}
                 onFocus={() => setModelSearchFocus(true)}
                 onBlur={() => setTimeout(() => setModelSearchFocus(false), 150)}
@@ -580,6 +584,8 @@ export default function RepairPageClient() {
                           setField("pumpModel", k.pumpModel);
                           setField("selectedKitId", k.id);
                           setField("pumpFamily", k.pumpFamily);
+                          setAiDone(true);
+                          setAiResult(null);
                         }}
                         className="w-full text-left px-4 py-3 text-[13px] hover:bg-ink hover:text-paper border-b border-line last:border-0 flex items-center justify-between"
                       >
