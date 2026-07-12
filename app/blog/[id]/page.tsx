@@ -247,7 +247,7 @@ export default async function BlogPostPage({ params }: Props) {
     "dateModified": post.updatedAt.toISOString(),
     "url": `https://www.smartechvacuum.com/blog/${post.id}`,
     "publisher": { "@type": "Organization", "name": "스마텍", "url": "https://www.smartechvacuum.com" },
-    "author":    { "@type": "Organization", "name": "스마텍" },
+    "author":    { "@type": "Person", "name": "Robin", "worksFor": { "@type": "Organization", "name": "스마텍" } },
   });
 
   const breadcrumbSchema = JSON.stringify({
@@ -260,6 +260,22 @@ export default async function BlogPostPage({ params }: Props) {
     ],
   });
 
+  // 절차형 글에만 적용 — 현재는 id=22(수리 시 주의사항 7가지) 1편만 해당
+  const howtoSchema = post.id === 22 ? JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "진공펌프 수리 시 지켜야 할 절차",
+    "step": [
+      { "@type": "HowToStep", "name": "전원 차단 및 냉각", "text": "차단기를 잠그고 '유지보수 중' 태그를 부착한 뒤(LOTO), 최소 1시간 이상 펌프를 냉각시킵니다." },
+      { "@type": "HowToStep", "name": "고장 원인 진단", "text": "진공도·오일 상태·누설·소음·모터 상태를 점검해 오일 교체로 끝날지 내부 수리가 필요한지 판단합니다." },
+      { "@type": "HowToStep", "name": "보호 장비 착용", "text": "안전 고글, 내화학성 장갑, 방진·방독 마스크를 착용하고, 가연성 가스 처리 펌프는 질소로 내부를 퍼지한 뒤 분해합니다." },
+      { "@type": "HowToStep", "name": "오일 교체", "text": "펌프를 살짝 예열해 전원을 끈 뒤 오일을 완전히 배출하고, 새 오일로 3~5회 플러싱한 뒤 제조사 권장량을 채웁니다." },
+      { "@type": "HowToStep", "name": "부품 분해 및 재조립", "text": "분해한 순서대로 부품을 늘어놓고 역순으로 재조립합니다. 베인은 세트 전체 교체, 씰류는 육안 점검 후 교체합니다." },
+      { "@type": "HowToStep", "name": "수리 후 검증", "text": "진공도 측정, 누설 테스트, 시운전(소음·진동·과열 확인), 오일 레벨 점검의 4단계 검증을 거친 뒤 가동합니다." },
+      { "@type": "HowToStep", "name": "전문 업체 의뢰 여부 판단", "text": "진공도 1000 micron 이상 저하, 이상 소음·진동, 내부 부품 교체, 유해물질 처리 이력이 있다면 전문 업체에 맡깁니다." },
+    ],
+  }) : null;
+
   return (
     <>
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: articleSchema }} />
@@ -268,6 +284,12 @@ export default async function BlogPostPage({ params }: Props) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: post.faqSchema }}
+      />
+    )}
+    {howtoSchema && (
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: howtoSchema }}
       />
     )}
     <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-10 md:py-16">
@@ -290,6 +312,7 @@ export default async function BlogPostPage({ params }: Props) {
             <span className="mono text-[10px] dim">
               {formatDate(post.publishedAt ?? post.createdAt)}
             </span>
+            <span className="mono text-[10px] dim">Robin · 스마텍</span>
           </div>
 
           <h1 className="display text-[26px] md:text-[36px] leading-tight tracking-[-0.025em] mb-4">
