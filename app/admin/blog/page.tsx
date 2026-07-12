@@ -211,6 +211,9 @@ export default function AdminBlogPage() {
       .replace(/^---[\s\S]*?---\s*/m, "")
       // HTML 주석 제거
       .replace(/<!--[\s\S]*?-->/g, "")
+      // 첫 번째 이미지(썸네일)는 "사진" 번호에서 제외 — 본문 이미지(사진1.png, 사진2.png...)와 번호를 맞추기 위함
+      .replace(/\[IMAGE:\s*([^\]]*)\]/, (_, desc) => `\n\n[🖼 썸네일 — ${desc.trim() || "대표 이미지"}]\n\n`)
+      .replace(/!\[([^\]]*)\]\([^)]*\)/, (_, alt) => `\n\n[🖼 썸네일 — ${alt && alt.trim() ? alt.trim() : "대표 이미지"}]\n\n`)
       // [IMAGE: 설명] 마커 → 📷 사진 안내
       .replace(/\[IMAGE:\s*([^\]]*)\]/g, (_, desc) => {
         imgCount++;

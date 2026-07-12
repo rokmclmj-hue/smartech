@@ -119,7 +119,7 @@ img2_html = f"""<!DOCTYPE html>
   </div>
 </body></html>"""
 
-# ── 사진3: 스크류 펌프와 스크롤 펌프 구조 비교 ─────────────
+# ── 사진3: 다단(iXH) 구조와 스크롤(nXDS) 구조 비교 (2026-07-13 정정: 스크류→다단) ─────────────
 img3_html = f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8"><style>
   * {{ margin:0; padding:0; box-sizing:border-box; }}
@@ -142,22 +142,22 @@ img3_html = f"""<!DOCTYPE html>
   .spec-value {{ font-size:14px; font-weight:700; color:#E3DFD6; }}
 </style></head>
 <body>
-  <h2>스크류 방식 vs 스크롤 방식</h2>
+  <h2>다단(iXH) 구조 vs 스크롤(nXDS) 구조</h2>
   <div class="cards">
     <div class="card">
-      <div class="model-name" style="color:#E46F75;">스크류(screw)</div>
-      <div class="model-sub">고부하 · 파티클/부식 대응</div>
+      <div class="model-name" style="color:#E46F75;">다단(multi-stage) — iXH</div>
+      <div class="model-sub">고부하 · 부식성 가스 대응</div>
       <div class="divider"></div>
-      <div class="spec-row"><span class="spec-label">적용 공정</span><span class="spec-value">플라즈마 에칭</span></div>
-      <div class="spec-row"><span class="spec-label">유로</span><span class="spec-value">넓음 · 자정 능력</span></div>
+      <div class="spec-row"><span class="spec-label">적용 공정</span><span class="spec-value">Etch·Strip/Ashing</span></div>
+      <div class="spec-row"><span class="spec-label">구조</span><span class="spec-value">여러 단으로 압력 분산</span></div>
       <div class="spec-row"><span class="spec-label">부산물 대응</span><span class="spec-value">상대적으로 강함</span></div>
     </div>
     <div class="card">
-      <div class="model-name" style="color:#7EB3F7;">스크롤(scroll)</div>
-      <div class="model-sub">클린룸 민감 공정</div>
+      <div class="model-name" style="color:#7EB3F7;">스크롤(scroll) — nXDS</div>
+      <div class="model-sub">클린 · 오염 민감 공정</div>
       <div class="divider"></div>
-      <div class="spec-row"><span class="spec-label">적용 공정</span><span class="spec-value">웨이퍼 검사·리소그래피</span></div>
-      <div class="spec-row"><span class="spec-label">진동/오염</span><span class="spec-value">낮음</span></div>
+      <div class="spec-row"><span class="spec-label">적용 공정</span><span class="spec-value">계측·분석·R&D</span></div>
+      <div class="spec-row"><span class="spec-label">구조</span><span class="spec-value">헤르메틱 실링 · 오일리스</span></div>
       <div class="spec-row"><span class="spec-label">부산물 대응</span><span class="spec-value">고부하엔 부적합</span></div>
     </div>
   </div>

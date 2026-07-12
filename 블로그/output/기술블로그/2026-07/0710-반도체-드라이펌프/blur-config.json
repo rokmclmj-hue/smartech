@@ -1,5 +1,13 @@
 {
-  "pump_box": [1980, 2600, 3350, 4400],
-  "blur_radius": 90,
-  "source_image_size": [3456, 4608]
+  "pump_box": [
+    250,
+    0,
+    3150,
+    2450
+  ],
+  "blur_radius": 30,
+  "source_image_size": [
+    3528,
+    2964
+  ]
 }
