@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
 
   const multiplier = await getMultiplier(tier);
 
-  const items = matched.slice(0, 10).map((p) => ({
+  const items = matched.slice(0, 30).map((p) => ({
     id: p.id,
     partNo: p.partNo,
     description: p.description,

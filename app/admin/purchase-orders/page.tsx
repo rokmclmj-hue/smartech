@@ -154,7 +154,7 @@ function OrderForm({ onSaved, initialData }: { onSaved: () => void; initialData?
   useEffect(() => {
     if (productQ.length < 1) { setProductResults([]); return; }
     const t = setTimeout(async () => {
-      const res = await fetch(`/api/admin/products?search=${encodeURIComponent(productQ)}&limit=8`);
+      const res = await fetch(`/api/admin/products?search=${encodeURIComponent(productQ)}&limit=30`);
       if (res.ok) {
         const data = await res.json();
         setProductResults(data.items ?? []);
