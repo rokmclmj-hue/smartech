@@ -540,7 +540,7 @@ function QuoteDocument({ quote }: { quote: QuoteForPdf }) {
         ),
         el(View, { style: S.termRow },
           el(Text, { style: S.termLabel }, "WARRANTY"),
-          el(Text, { style: S.termValue }, "12개월 · Edwards 정품 보증")
+          el(Text, { style: S.termValue }, "12개월 · Edwards 정품 보증(소모품제외)")
         ),
         el(View, { style: { ...S.termRow, marginBottom: 0 } },
           el(Text, { style: S.termLabel }, "A / S"),
