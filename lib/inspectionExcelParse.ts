@@ -82,7 +82,8 @@ export function parseInspectionExcel(buffer: Buffer): ParsedInspectionRow[] | nu
       const oilType = pickChecked(row[o + 8], nextRow[o + 8]);
       const oilAction = pickChecked(row[o + 11], nextRow[o + 11]);
       const value = [oilType, oilAction].filter(Boolean).join(" / ");
-      parsed.push({ masterLabel, spec, value, pass: null, isNA: value === "" });
+      // Oil은 P/F 판정 대상이 아니라 Type/Action 선택 항목 — 정상 파싱되면 P(합격)로 표시
+      parsed.push({ masterLabel, spec, value, pass: value !== "" ? true : null, isNA: value === "" });
       continue;
     }
 
