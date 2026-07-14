@@ -72,6 +72,30 @@ export async function POST(req: NextRequest) {
     const masterLabel = LABEL_MAP[excelLabel];
     if (!masterLabel) continue; // 매핑 없는 항목 무시
 
+    // Oil 항목: 같은 셀블록이 2줄(Type: Fomblin/Mineral, Action: Charge/Drain)로 병합돼 있고
+    // 체크된 줄만 "■" 표시가 붙음. 다음 행(seq 없음)까지 같이 봐서 체크된 라벨만 뽑아낸다.
+    if (masterLabel === "Oil") {
+      const nextRow = rows[i + 1] ?? [];
+      const pickChecked = (cellA: unknown, cellB: unknown) => {
+        const clean = (s: string) => s.replace(/[■□]/g, "").trim();
+        const a = String(cellA ?? "");
+        const b = String(cellB ?? "");
+        if (a.includes("■")) return clean(a);
+        if (b.includes("■")) return clean(b);
+        return "";
+      };
+      const oilType = pickChecked(row[o + 8], nextRow[o + 8]);
+      const oilAction = pickChecked(row[o + 11], nextRow[o + 11]);
+
+      parsed.push({
+        masterLabel,
+        spec: String(row[o + 5] ?? "").trim(),
+        value: [oilType, oilAction].filter(Boolean).join(" / "),
+        rawPass: "", // Oil엔 P/F 판정 없이 Type/Action 선택만 있음
+      });
+      continue;
+    }
+
     parsed.push({
       masterLabel,
       spec:     String(row[o + 5] ?? "").trim(),
