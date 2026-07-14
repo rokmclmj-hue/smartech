@@ -329,7 +329,8 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone, isSelected, onToggle
   const [sending, setSending] = useState(false);
   const [kitLoaded, setKitLoaded] = useState(false);
   const [quoteItems, setQuoteItems] = useState<QuoteItem[]>(job.quoteItems ?? []);
-  useEffect(() => { setQuoteItems(job.quoteItems ?? []); }, [job.quoteItems]);
+  // job.id가 실제로 바뀔 때만(다른 건으로 전환) 동기화 — 매 refresh 시 편집 중인 내용 덮어쓰지 않음
+  useEffect(() => { setQuoteItems(job.quoteItems ?? []); }, [job.id]);
   const [matchedKit, setMatchedKit] = useState<MatchedKit | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [preQuoteCost, setPreQuoteCost] = useState("");
@@ -395,8 +396,12 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone, isSelected, onToggle
     } finally { setSavingCompany(false); }
   }
 
+  // 저장 시 이름 없는 품목은 걸러지므로(quoteItems.filter(it => it.name.trim())),
+  // 견적금액도 같은 기준으로 계산해야 화면 합계와 저장값이 일치한다.
   function recalcCost(items: QuoteItem[]) {
-    setRepairCost(String(items.reduce((s, it) => s + it.quantity * it.unitPrice, 0)));
+    setRepairCost(String(
+      items.filter(it => it.name.trim()).reduce((s, it) => s + it.quantity * it.unitPrice, 0)
+    ));
   }
 
   function findMatchedKit(kits: MatchedKit[]) {
@@ -419,7 +424,8 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone, isSelected, onToggle
         if (!repairPartsText && matched.parts.length) {
           setRepairPartsText(matched.parts.map(p => `${p.name}${p.quantity ? " × " + p.quantity : ""}`).join("\n"));
         }
-        if (quoteItems.length === 0 && matched.basePrice > 0) {
+        // 이미 저장된 견적(품목 또는 견적금액)이 있으면 자동 채우기로 덮어쓰지 않는다.
+        if (quoteItems.length === 0 && job.repairCost == null && matched.basePrice > 0) {
           const base: QuoteItem = {
             name: `기본수리 — ${job.pumpModel}`,
             quantity: 1,
