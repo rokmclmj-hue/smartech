@@ -2,34 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAdminSession } from "@/lib/admin-auth";
 import { put, del } from "@vercel/blob";
-import * as XLSX from "xlsx";
-
-const LABEL_MAP: Record<string, string> = {
-  "Vacuum Test(Combi)":  "Vacuum Test (Combi)",
-  "Vacuum Test(Single)": "Vacuum Test (Single)",
-  "Vacuum (Booster)":    "Vacuum (Booster)",
-  "Vacuum (Scroll)":     "Vacuum (Scroll)",
-  "Current (Combi)":     "Current (Combi)",
-  "Current (Single)":    "Current (Single)",
-  "Current (Booster)":   "Current (Booster)",
-  "Current (Scroll)":    "Current (Scroll)",
-  "Current (Rotary)":    "Current (Rotary)",
-  "Current (BP)":        "Current (Booster)",
-  "Current (RP)":        "Current (Rotary)",
-  "Body temp":           "Body temp",
-  "Body temp (Booster)": "Body temp (Booster)",
-  "Body temp (Scroll)":  "Body temp (Scroll)",
-  "Body temp (Rotary)":  "Body temp (Rotary)",
-  "Body temp (RP)":      "Body temp (Rotary)",
-  "Leak (sys.mod)":      "Leak (sys.mod)",
-  "Oil leak":            "Oil leak",
-  "Water leak":          "Water leak",
-  "Noise":               "Noise",
-  "Function test":       "Function test",
-  "Test time":           "Test time",
-  "Oil":                 "Oil",
-  "Oil ":                "Oil",
-};
+import { parseInspectionExcel } from "@/lib/inspectionExcelParse";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -89,64 +62,33 @@ export async function POST(req: NextRequest, { params }: Params) {
   if (!isExcel) return NextResponse.json({ ok: true, fileId: fileRecord.id });
 
   // Excel 파싱 → 검사성적서 자동 입력
-  let wb;
+  let parsed;
   try {
-    wb = XLSX.read(fileBuffer, { type: "buffer" });
+    parsed = parseInspectionExcel(fileBuffer);
   } catch {
     return NextResponse.json({ ok: false, fileId: fileRecord.id, matched: 0, warning: "엑셀 파일을 읽을 수 없습니다. 파일 형식(.xlsx/.xls)을 확인해 주세요." }, { status: 422 });
   }
-  const ws = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json<(string | number)[]>(ws, { header: 1, defval: "" });
-
-  let startRow = -1;
-  let o = 0;
-  for (let i = 0; i < rows.length; i++) {
-    if (Number(rows[i][0]) === 1) { startRow = i; o = 0; break; }
-    if (Number(rows[i][1]) === 1) { startRow = i; o = 1; break; }
-  }
 
   // Fix #2: 파싱 실패 시 경고 반환 (ok:false로 명확히)
-  if (startRow < 0)
+  if (parsed === null)
     return NextResponse.json({ ok: false, fileId: fileRecord.id, matched: 0, warning: "검사항목 테이블을 찾을 수 없습니다. 엑셀 파일 형식을 확인해 주세요." }, { status: 422 });
 
   const dbByLabel = Object.fromEntries(job.inspectionItems.map(it => [it.itemLabel, it]));
-  const updates: { id: number; spec: string | null; value: string; pass: boolean | null; isNA: boolean }[] = [];
-
-  for (let i = startRow; i < rows.length; i++) {
-    const row = rows[i];
-    if (!Number.isFinite(Number(row[o])) || Number(row[o]) < 1) continue;
-
-    const excelLabel = String(row[o + 1] ?? "").trim();
-    const masterLabel = LABEL_MAP[excelLabel];
-    if (!masterLabel) continue;
-
-    const dbItem = dbByLabel[masterLabel];
-    if (!dbItem) continue;
-
-    const spec     = String(row[o + 5] ?? "").trim();
-    const rawValue = String(row[o + 8] ?? "").trim();
-    const rawPass  = String(row[o + 11] ?? "").trim().toUpperCase();
-
-    const isDot = rawValue === "." || rawValue === "";
-    const isNA  = isDot && (rawPass === "." || rawPass === "");
-    const pass  = rawPass === "OK" || rawPass === "PASS" ? true
-                : rawPass === "NG" || rawPass === "FAIL" ? false
-                : null;
-
-    updates.push({ id: dbItem.id, spec: spec || null, value: isDot ? "" : rawValue, pass: isNA ? null : pass, isNA });
-  }
+  const updates = parsed
+    .map(p => ({ p, dbItem: dbByLabel[p.masterLabel] }))
+    .filter((x): x is { p: typeof parsed[number]; dbItem: (typeof job.inspectionItems)[number] } => !!x.dbItem);
 
   if (updates.length > 0) {
     await prisma.$transaction(
-      updates.map(u =>
+      updates.map(({ p, dbItem }) =>
         prisma.offlineRepairInspectionItem.update({
-          where: { id: u.id },
-          data: { spec: u.spec, value: u.value, pass: u.pass, isNA: u.isNA },
+          where: { id: dbItem.id },
+          data: { spec: p.spec, value: p.value, pass: p.pass, isNA: p.isNA },
         })
       )
     );
   }
 
-  const matched = updates.filter(u => !u.isNA).length;
+  const matched = updates.filter(({ p }) => !p.isNA).length;
   return NextResponse.json({ ok: true, fileId: fileRecord.id, matched });
 }
