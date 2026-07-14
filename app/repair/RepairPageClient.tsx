@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { SMARTECH_COMPANY } from "@/lib/company";
+import { REPAIR_EXTRA_MARGIN, getRepairBaseMargin } from "@/lib/repairPricing";
 import "@/app/quote/[id]/quote-styles.css";
 
 // ── 타입 ──────────────────────────────────────────────────
@@ -236,14 +237,8 @@ const REPAIR_CASES: RepairCase[] = [
     partPhoto: "/images/repair/e2m80-shaft.jpg",
   },
 ];
-const EXTRA_MARGIN = 1.2; // 추가항목 마진
-
-// 모델별 기본수리 마진 (nXDS·XDS35 계열 1.5, 그 외 1.8)
-function getBaseMargin(pumpModel: string): number {
-  const m = pumpModel.toLowerCase();
-  if (m.startsWith("nxds") || m.startsWith("xds35")) return 1.5;
-  return 1.8;
-}
+const EXTRA_MARGIN = REPAIR_EXTRA_MARGIN;
+const getBaseMargin = getRepairBaseMargin;
 
 const PHOTO_SLOTS = [
   { key: "nameplate", label: "명판 사진",       required: true,  hint: "모델명 확인용" },

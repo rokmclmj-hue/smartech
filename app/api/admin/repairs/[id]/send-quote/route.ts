@@ -36,8 +36,12 @@ export async function POST(req: NextRequest, { params }: Params) {
       contactEmail: email,
       contactPhone: repair.contactPhone,
       repairCost: repair.totalAmount,
-      extraPartsName: repair.extraPartsName ?? null,
-      extraAmount: repair.extraAmount > 0 ? repair.extraAmount : null,
+      items: [
+        { name: `기본수리 — ${repair.pumpModel}`, quantity: 1, unitPrice: repair.baseAmount },
+        ...(repair.extraAmount > 0
+          ? [{ name: repair.extraPartsName || "추가 파트 교체", quantity: 1, unitPrice: repair.extraAmount }]
+          : []),
+      ],
       repairPartsText: adminNote || null,
       inspectorName: null,
       quoteRemarks: repair.quoteRemarks ?? null,
@@ -86,8 +90,12 @@ export async function GET(req: NextRequest, { params }: Params) {
     contactEmail: repair.contactEmail ?? null,
     contactPhone: repair.contactPhone,
     repairCost: repair.totalAmount,
-    extraPartsName: repair.extraPartsName ?? null,
-    extraAmount: repair.extraAmount > 0 ? repair.extraAmount : null,
+    items: [
+      { name: `기본수리 — ${repair.pumpModel}`, quantity: 1, unitPrice: repair.baseAmount },
+      ...(repair.extraAmount > 0
+        ? [{ name: repair.extraPartsName || "추가 파트 교체", quantity: 1, unitPrice: repair.extraAmount }]
+        : []),
+    ],
     repairPartsText: repair.adminNote ?? null,
     inspectorName: null,
     quoteRemarks: repair.quoteRemarks ?? null,

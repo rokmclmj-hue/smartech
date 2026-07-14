@@ -20,6 +20,7 @@ export async function POST(req: NextRequest) {
       company: { select: { companyName: true } },
       inspectionItems: { orderBy: { sortOrder: "asc" } },
       files: { where: { isSelected: true, fileType: "PHOTO" }, orderBy: { uploadedAt: "asc" } },
+      quoteItems: { orderBy: { sortOrder: "asc" } },
     },
     orderBy: { id: "asc" },
   });
@@ -35,7 +36,9 @@ export async function POST(req: NextRequest) {
         receivedDate: job.receivedDate, requestedDate: job.requestedDate,
         companyName: job.company?.companyName ?? null,
         contactName: job.contactName, contactEmail: job.contactEmail, contactPhone: job.contactPhone,
-        repairCost: job.repairCost, repairPartsText: job.repairPartsText, inspectorName: job.inspectorName,
+        repairCost: job.repairCost,
+        items: job.quoteItems.map(it => ({ name: it.name, quantity: it.quantity, unitPrice: it.unitPrice })),
+        repairPartsText: job.repairPartsText, inspectorName: job.inspectorName,
         quoteRemarks: job.quoteRemarks,
       }),
       generateRepairInspectionPdf({

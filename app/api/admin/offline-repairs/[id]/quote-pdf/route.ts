@@ -12,7 +12,10 @@ export async function GET(_req: NextRequest, { params }: Params) {
   const { id } = await params;
   const job = await prisma.offlineRepairJob.findUnique({
     where: { id: Number(id) },
-    include: { company: { select: { companyName: true } } },
+    include: {
+      company: { select: { companyName: true } },
+      quoteItems: { orderBy: { sortOrder: "asc" } },
+    },
   });
   if (!job) return NextResponse.json({ error: "찾을 수 없음" }, { status: 404 });
 
@@ -31,6 +34,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
       contactEmail: job.contactEmail,
       contactPhone: job.contactPhone,
       repairCost: job.repairCost,
+      items: job.quoteItems.map(it => ({ name: it.name, quantity: it.quantity, unitPrice: it.unitPrice })),
       repairPartsText: job.repairPartsText,
       inspectorName: job.inspectorName,
       quoteRemarks: job.quoteRemarks,

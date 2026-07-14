@@ -18,6 +18,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
       company: { include: { contacts: true } },
       inspectionItems: { orderBy: { sortOrder: "asc" } },
       files: { orderBy: { uploadedAt: "asc" } },
+      quoteItems: { orderBy: { sortOrder: "asc" } },
     },
   });
   if (!job) return NextResponse.json({ error: "찾을 수 없음" }, { status: 404 });
@@ -122,6 +123,20 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       ...(body.subEmail !== undefined && { subEmail: body.subEmail || null }),
       ...(body.subName !== undefined && { subName: body.subName || null }),
       ...(body.companyId !== undefined && { companyId: body.companyId ?? null }),
+      // 견적 품목 (기본수리 + 추가파트) — 통째로 교체
+      ...(Array.isArray(body.quoteItems) && {
+        quoteItems: {
+          deleteMany: {},
+          create: (body.quoteItems as { name: string; quantity: number; unitPrice: number }[])
+            .filter(it => it.name?.trim())
+            .map((it, i) => ({
+              name: it.name.trim(),
+              quantity: Math.max(1, Math.round(Number(it.quantity) || 1)),
+              unitPrice: Math.round(Number(it.unitPrice) || 0),
+              sortOrder: i,
+            })),
+        },
+      }),
     },
   });
   return NextResponse.json(updated);

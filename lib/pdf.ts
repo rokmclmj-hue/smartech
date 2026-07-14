@@ -1443,6 +1443,12 @@ export async function generateRepairInspectionPdf(data: RepairInspectionForPdf):
 // ─────────────────────────────────────────────────
 // 수리견적서 PDF
 // ─────────────────────────────────────────────────
+export interface RepairQuoteItemForPdf {
+  name: string;
+  quantity: number;
+  unitPrice: number;
+}
+
 export interface RepairQuoteForPdf {
   jobNo: string;
   pumpMaker: string;
@@ -1456,10 +1462,9 @@ export interface RepairQuoteForPdf {
   contactName: string | null;
   contactEmail: string | null;
   contactPhone: string | null;
-  repairCost: number | null;       // totalAmount (기본+추가 합산)
-  extraPartsName?: string | null;  // 추가 파트 품목명
-  extraAmount?: number | null;     // 추가 파트비
-  repairPartsText: string | null;
+  repairCost: number | null;       // 합계 (품목 합계와 다를 수 있음 — 수동 조정된 최종 견적금액)
+  items: RepairQuoteItemForPdf[];  // 품목 목록 (기본수리 1줄 + 추가파트 N줄)
+  repairPartsText: string | null;  // 기본수리 교체부품 메모 (첫 품목 하단에 표시)
   inspectorName: string | null;
   quoteRemarks?: string | null;
 }
@@ -1468,10 +1473,11 @@ function RepairQuoteDocument({ data }: { data: RepairQuoteForPdf }) {
   const el = React.createElement;
   const issued = new Date();
   const year = issued.getFullYear();
-  const extra = (data.extraAmount ?? 0) > 0 ? (data.extraAmount ?? 0) : 0;
-  const base = Math.max(0, (data.repairCost ?? 0) - extra);
-  const vat = data.repairCost != null ? Math.round(data.repairCost * VAT_RATE) : 0;
-  const total = (data.repairCost ?? 0) + vat;
+  const itemsSum = data.items.reduce((s, it) => s + it.unitPrice * it.quantity, 0);
+  // repairCost가 직접 수정된 경우 그 값을 최종 견적금액으로 우선 사용, 없으면 품목 합계
+  const supply = data.repairCost ?? (data.items.length > 0 ? itemsSum : null);
+  const vat = supply != null ? Math.round(supply * VAT_RATE) : 0;
+  const total = (supply ?? 0) + vat;
 
   const partsOneLine = data.repairPartsText
     ?.split("\n")
@@ -1572,36 +1578,34 @@ function RepairQuoteDocument({ data }: { data: RepairQuoteForPdf }) {
           el(Text, { style: [S.thCell, { width: "10%", textAlign: "center" }] }, "수량"),
           el(Text, { style: [S.thCell, { width: "22%", textAlign: "right" }] }, "공급가  (VAT 별도)")
         ),
-        el(View, { style: S.tableRow },
-          el(Text, { style: [S.tdNormal, { width: "6%", textAlign: "center" }] }, "01"),
-          el(View, { style: { width: "62%", paddingRight: 8 } },
-            el(Text, { style: { fontSize: 9, fontFamily: "Pretendard", fontWeight: 700, color: "#111111", marginBottom: 4 } },
-              `기본수리 — ${data.pumpModel}`
-            ),
-            partsOneLine
-              ? el(Text, { style: { fontSize: 7, color: "#555555", lineHeight: 1.6 } }, partsOneLine)
-              : null
-          ),
-          el(Text, { style: [S.tdNormal, { width: "10%", textAlign: "center" }] }, "1식"),
-          el(Text, { style: [S.tdAmount, { width: "22%", textAlign: "right" }] },
-            data.repairCost != null ? fmt(extra > 0 ? base : data.repairCost) : "협의"
-          )
-        ),
-        extra > 0
-          ? el(View, { style: { ...S.tableRow, borderTop: "1 solid #E3DFD6" } },
-              el(Text, { style: [S.tdNormal, { width: "6%", textAlign: "center" }] }, "02"),
-              el(View, { style: { width: "62%", paddingRight: 8 } },
-                el(Text, { style: { fontSize: 9, fontFamily: "Pretendard", fontWeight: 700, color: "#111111", marginBottom: 4 } },
-                  "추가 파트 교체"
+        ...(data.items.length > 0
+          ? data.items.map((item, idx) =>
+              el(View, { key: String(idx), style: idx === 0 ? S.tableRow : { ...S.tableRow, borderTop: "1 solid #E3DFD6" } },
+                el(Text, { style: [S.tdNormal, { width: "6%", textAlign: "center" }] }, String(idx + 1).padStart(2, "0")),
+                el(View, { style: { width: "62%", paddingRight: 8 } },
+                  el(Text, { style: { fontSize: 9, fontFamily: "Pretendard", fontWeight: 700, color: "#111111", marginBottom: 4 } },
+                    item.name
+                  ),
+                  idx === 0 && partsOneLine
+                    ? el(Text, { style: { fontSize: 7, color: "#555555", lineHeight: 1.6 } }, partsOneLine)
+                    : null
                 ),
-                data.extraPartsName
-                  ? el(Text, { style: { fontSize: 7, color: "#555555", lineHeight: 1.6 } }, data.extraPartsName)
-                  : null
-              ),
-              el(Text, { style: [S.tdNormal, { width: "10%", textAlign: "center" }] }, "1식"),
-              el(Text, { style: [S.tdAmount, { width: "22%", textAlign: "right" }] }, fmt(extra))
+                el(Text, { style: [S.tdNormal, { width: "10%", textAlign: "center" }] }, String(item.quantity)),
+                el(Text, { style: [S.tdAmount, { width: "22%", textAlign: "right" }] }, fmt(item.unitPrice * item.quantity))
+              )
             )
-          : null
+          : [
+              el(View, { key: "empty", style: S.tableRow },
+                el(Text, { style: [S.tdNormal, { width: "6%", textAlign: "center" }] }, "01"),
+                el(View, { style: { width: "62%", paddingRight: 8 } },
+                  el(Text, { style: { fontSize: 9, fontFamily: "Pretendard", fontWeight: 700, color: "#111111" } },
+                    `기본수리 — ${data.pumpModel}`
+                  )
+                ),
+                el(Text, { style: [S.tdNormal, { width: "10%", textAlign: "center" }] }, "1"),
+                el(Text, { style: [S.tdAmount, { width: "22%", textAlign: "right" }] }, "협의")
+              ),
+            ])
       ),
 
       // ── 합계
@@ -1609,15 +1613,15 @@ function RepairQuoteDocument({ data }: { data: RepairQuoteForPdf }) {
         el(View, { style: S.summaryBox },
           el(View, { style: S.summaryRow },
             el(Text, { style: S.sumLabel }, "SUB-TOTAL"),
-            el(Text, { style: S.sumValue }, data.repairCost != null ? fmt(data.repairCost) : "—")
+            el(Text, { style: S.sumValue }, supply != null ? fmt(supply) : "—")
           ),
           el(View, { style: S.summaryRow },
             el(Text, { style: S.sumLabel }, "VAT (10%)"),
-            el(Text, { style: S.sumValue }, data.repairCost != null ? fmt(vat) : "—")
+            el(Text, { style: S.sumValue }, supply != null ? fmt(vat) : "—")
           ),
           el(View, { style: { ...S.summaryTotalRow, borderTop: "1.5 solid #0d3a8a" } },
             el(Text, { style: { ...S.sumTLabel, color: "#0d3a8a" } }, "GRAND TOTAL"),
-            el(Text, { style: { ...S.sumTValue, fontSize: 12, color: "#0d3a8a" } }, data.repairCost != null ? fmt(total) : "협의")
+            el(Text, { style: { ...S.sumTValue, fontSize: 12, color: "#0d3a8a" } }, supply != null ? fmt(total) : "협의")
           )
         )
       ),

@@ -600,8 +600,8 @@ model OfflineRepairJob {
   memo            String?
 
   // 수리 견적 (Phase 2)
-  repairCost      Int?
-  repairPartsText String?
+  repairCost      Int?      // 총 견적금액 (quoteItems 합계, 필요 시 직접 수정 가능)
+  repairPartsText String?   // 기본수리 교체부품 메모 (자유 입력, PDF 기본수리 항목 하단에 표시)
   inspectorName   String?
   quoteRemarks    String?
 
@@ -610,10 +610,24 @@ model OfflineRepairJob {
 
   inspectionItems OfflineRepairInspectionItem[]
   files           OfflineRepairFile[]
+  quoteItems      OfflineRepairQuoteItem[]
 
   @@index([companyId])
   @@index([status])
   @@index([uploadToken])
+}
+
+// 수리견적서 품목 (기본수리 1줄 + 추가파트 N줄) — 온라인 수리접수·거래명세표와 동일한 구조
+model OfflineRepairQuoteItem {
+  id          Int              @id @default(autoincrement())
+  jobId       Int
+  job         OfflineRepairJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  name        String           // "기본수리 — DUO3", "Blade 교체" 등
+  quantity    Int              @default(1)
+  unitPrice   Int              // 공급가 (고객가, 마진 반영된 값)
+  sortOrder   Int              @default(0)
+
+  @@index([jobId])
 }
 
 model OfflineRepairInspectionItem {

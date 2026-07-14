@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { upload } from "@vercel/blob/client";
+import { REPAIR_EXTRA_MARGIN, getRepairBaseMargin } from "@/lib/repairPricing";
 
 
 type CompanyContact = { id: number; name: string; title: string | null; tel: string | null; mobile: string | null; email: string | null };
@@ -14,6 +15,7 @@ type RepairFile = {
   id: number; fileType: string; fileName: string;
   fileUrl: string; fileSize: number | null; isSelected: boolean;
 };
+type QuoteItem = { id?: number; name: string; quantity: number; unitPrice: number };
 type Job = {
   id: number; jobNo: string; status: string;
   pumpMaker: string; pumpModel: string; serialNo: string | null;
@@ -27,6 +29,13 @@ type Job = {
   repairCost: number | null; repairPartsText: string | null; inspectorName: string | null; quoteRemarks: string | null;
   inspectionItems: InspectionItem[];
   files: RepairFile[];
+  quoteItems: QuoteItem[];
+};
+type KitExtra = { id: number; name: string; price: number };
+type MatchedKit = {
+  pumpModel: string; basePrice: number;
+  parts: { name: string; quantity: string | null }[];
+  extraParts: KitExtra[];
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -319,6 +328,9 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone, isSelected, onToggle
   const [sendEmail, setSendEmail] = useState(job.contactEmail ?? "");
   const [sending, setSending] = useState(false);
   const [kitLoaded, setKitLoaded] = useState(false);
+  const [quoteItems, setQuoteItems] = useState<QuoteItem[]>(job.quoteItems ?? []);
+  useEffect(() => { setQuoteItems(job.quoteItems ?? []); }, [job.quoteItems]);
+  const [matchedKit, setMatchedKit] = useState<MatchedKit | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [preQuoteCost, setPreQuoteCost] = useState("");
   const [preQuoteNote, setPreQuoteNote] = useState("");
@@ -383,40 +395,91 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone, isSelected, onToggle
     } finally { setSavingCompany(false); }
   }
 
-  // 패널 열릴 때 교체부품 비어있으면 수리 키트에서 자동 채우기
+  function recalcCost(items: QuoteItem[]) {
+    setRepairCost(String(items.reduce((s, it) => s + it.quantity * it.unitPrice, 0)));
+  }
+
+  function findMatchedKit(kits: MatchedKit[]) {
+    const model = job.pumpModel.toLowerCase();
+    return kits.find(k =>
+      model.includes(k.pumpModel.toLowerCase()) || k.pumpModel.toLowerCase().includes(model)
+    ) ?? null;
+  }
+
+  // 패널 열릴 때 수리 키트 매칭 (추가파트 버튼용) + 비어있으면 기본수리 자동 채우기
   useEffect(() => {
     if (!open || kitLoaded) return;
     setKitLoaded(true);
-    if (repairPartsText) return;
     fetch("/api/repair/kits")
       .then(r => r.json())
-      .then(({ kits }: { kits: Array<{ pumpModel: string; parts: Array<{ name: string; quantity: string | null }> }> }) => {
-        const model = job.pumpModel.toLowerCase();
-        const matched = kits.find(k =>
-          model.includes(k.pumpModel.toLowerCase()) || k.pumpModel.toLowerCase().includes(model)
-        );
-        if (matched?.parts.length) {
+      .then(({ kits }: { kits: MatchedKit[] }) => {
+        const matched = findMatchedKit(kits);
+        setMatchedKit(matched);
+        if (!matched) return;
+        if (!repairPartsText && matched.parts.length) {
           setRepairPartsText(matched.parts.map(p => `${p.name}${p.quantity ? " × " + p.quantity : ""}`).join("\n"));
+        }
+        if (quoteItems.length === 0 && matched.basePrice > 0) {
+          const base: QuoteItem = {
+            name: `기본수리 — ${job.pumpModel}`,
+            quantity: 1,
+            unitPrice: Math.round(matched.basePrice * getRepairBaseMargin(job.pumpModel)),
+          };
+          setQuoteItems([base]);
+          recalcCost([base]);
         }
       })
       .catch(() => {});
-  }, [open, kitLoaded, repairPartsText, job.pumpModel]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, kitLoaded]);
 
-  async function loadKitParts() {
-    try {
-      const { kits } = await fetch("/api/repair/kits").then(r => r.json()) as
-        { kits: Array<{ pumpModel: string; parts: Array<{ name: string; quantity: string | null }> }> };
-      const model = job.pumpModel.toLowerCase();
-      const matched = kits.find(k =>
-        model.includes(k.pumpModel.toLowerCase()) || k.pumpModel.toLowerCase().includes(model)
-      );
-      if (matched?.parts.length) {
-        setRepairPartsText(matched.parts.map(p => `${p.name}${p.quantity ? " × " + p.quantity : ""}`).join("\n"));
-        showToast("기본 파트 불러왔습니다");
-      } else {
-        showToast("해당 모델 기본 파트 없음");
-      }
-    } catch { showToast("불러오기 실패"); }
+  // "기본 파트 불러오기" 버튼 — 교체부품 메모 + 기본수리 품목(마진 반영)을 다시 채움
+  function loadKitParts() {
+    if (!matchedKit) { showToast("해당 모델 기본 파트 없음"); return; }
+    if (matchedKit.parts.length) {
+      setRepairPartsText(matchedKit.parts.map(p => `${p.name}${p.quantity ? " × " + p.quantity : ""}`).join("\n"));
+    }
+    if (matchedKit.basePrice > 0) {
+      const base: QuoteItem = {
+        name: `기본수리 — ${job.pumpModel}`,
+        quantity: 1,
+        unitPrice: Math.round(matchedKit.basePrice * getRepairBaseMargin(job.pumpModel)),
+      };
+      setQuoteItems(prev => {
+        const next = prev.length > 0 ? [base, ...prev.slice(1)] : [base];
+        recalcCost(next);
+        return next;
+      });
+    }
+    showToast("기본 파트 불러왔습니다");
+  }
+
+  function addExtraFromKit(extra: KitExtra) {
+    setQuoteItems(prev => {
+      const next = [...prev, { name: extra.name, quantity: 1, unitPrice: Math.round(extra.price * REPAIR_EXTRA_MARGIN) }];
+      recalcCost(next);
+      return next;
+    });
+  }
+
+  function addBlankQuoteItem() {
+    setQuoteItems(prev => [...prev, { name: "", quantity: 1, unitPrice: 0 }]);
+  }
+
+  function updateQuoteItem(idx: number, field: keyof QuoteItem, value: string | number) {
+    setQuoteItems(prev => {
+      const next = prev.map((it, i) => i === idx ? { ...it, [field]: value } : it);
+      recalcCost(next);
+      return next;
+    });
+  }
+
+  function removeQuoteItem(idx: number) {
+    setQuoteItems(prev => {
+      const next = prev.filter((_, i) => i !== idx);
+      recalcCost(next);
+      return next;
+    });
   }
 
   async function handleDelete(e: React.MouseEvent) {
@@ -475,6 +538,7 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone, isSelected, onToggle
           repairPartsText: repairPartsText || null,
           inspectorName: inspectorName || null,
           quoteRemarks: quoteRemarks.trim() || null,
+          quoteItems: quoteItems.filter(it => it.name.trim()),
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -922,9 +986,58 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone, isSelected, onToggle
           {/* 수리 견적 입력 */}
           <div className="space-y-2">
             <div className="mono text-[10px] dim tracking-[0.1em]">— 수리견적서 작성</div>
+
+            {/* 품목 (기본수리 + 추가파트) — 대행견적서·거래명세표와 동일한 품목 편집 방식 */}
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <div className="mono text-[10px] dim">품목 (기본수리 + 추가파트 — 저장 시 견적서 PDF에 그대로 반영)</div>
+                <button onClick={loadKitParts} className="mono text-[9px] text-smblue hover:underline">
+                  기본수리 불러오기 ↺
+                </button>
+              </div>
+
+              {quoteItems.length > 0 && (
+                <div className="border hair overflow-hidden mb-2">
+                  <div className="grid grid-cols-[3fr_1fr_1.5fr_1.5fr_auto] gap-0 bg-ink/5 px-3 py-1.5">
+                    {["품목명", "수량", "단가", "소계", ""].map(h => (
+                      <div key={h} className="mono text-[9px] dim uppercase tracking-[0.06em]">{h}</div>
+                    ))}
+                  </div>
+                  {quoteItems.map((it, idx) => (
+                    <div key={idx} className="grid grid-cols-[3fr_1fr_1.5fr_1.5fr_auto] gap-1 px-3 py-1.5 border-t hair items-center">
+                      <input value={it.name} onChange={e => updateQuoteItem(idx, "name", e.target.value)}
+                        placeholder="품목명"
+                        className="border hair px-2 py-1 text-[12px] focus:outline-none focus:border-ink" />
+                      <input type="number" min={1} value={it.quantity}
+                        onChange={e => updateQuoteItem(idx, "quantity", Math.max(1, Number(e.target.value) || 1))}
+                        className="border hair px-2 py-1 text-[12px] text-center mono focus:outline-none focus:border-ink" />
+                      <input type="number" min={0} value={it.unitPrice}
+                        onChange={e => updateQuoteItem(idx, "unitPrice", Number(e.target.value) || 0)}
+                        className="border hair px-2 py-1 text-[12px] text-right mono focus:outline-none focus:border-ink" />
+                      <div className="mono text-[12px] text-right pr-1">{(it.quantity * it.unitPrice).toLocaleString()}</div>
+                      <button onClick={() => removeQuoteItem(idx)} className="text-[14px] text-dim hover:text-edred transition-colors px-1">×</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex gap-2 flex-wrap items-center">
+                <button onClick={addBlankQuoteItem}
+                  className="border hair px-3 py-1 text-[11px] mono hover:bg-ink/5 transition-colors">
+                  + 품목 직접 추가
+                </button>
+                {matchedKit?.extraParts.map(extra => (
+                  <button key={extra.id} onClick={() => addExtraFromKit(extra)}
+                    className="border hair px-3 py-1 text-[11px] hover:bg-ink/5 transition-colors">
+                    + {extra.name} ({Math.round(extra.price * REPAIR_EXTRA_MARGIN).toLocaleString()}원)
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
-                <div className="mono text-[10px] dim mb-1">견적금액 (원, 공급가)</div>
+                <div className="mono text-[10px] dim mb-1">견적금액 (원, 공급가 — 품목 합계 자동계산, 직접 수정 가능)</div>
                 <input
                   type="number" value={repairCost}
                   onChange={e => setRepairCost(e.target.value)}

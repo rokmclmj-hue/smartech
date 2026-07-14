@@ -20,6 +20,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       company: { select: { companyName: true } },
       inspectionItems: { orderBy: { sortOrder: "asc" } },
       files: { where: { isSelected: true, fileType: "PHOTO" }, orderBy: { uploadedAt: "asc" } },
+      quoteItems: { orderBy: { sortOrder: "asc" } },
     },
   });
   if (!job) return NextResponse.json({ error: "찾을 수 없음" }, { status: 404 });
@@ -43,6 +44,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         contactEmail: job.contactEmail,
         contactPhone: job.contactPhone,
         repairCost: job.repairCost,
+        items: job.quoteItems.map(it => ({ name: it.name, quantity: it.quantity, unitPrice: it.unitPrice })),
         repairPartsText: job.repairPartsText,
         inspectorName: job.inspectorName,
         quoteRemarks: job.quoteRemarks,
