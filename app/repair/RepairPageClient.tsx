@@ -74,6 +74,15 @@ type RepairCase = {
 
 const REPAIR_CASES: RepairCase[] = [
   {
+    model: "Pfeiffer DUO3",
+    client: "H대",
+    symptom: "기본수리 · 모터 교체",
+    work: ["씰·가스켓 교체", "베어링 교체", "오일 교환", "모터 교체"],
+    photo: "/images/repair/duo3-exterior.jpg",
+    partPhoto: "/images/repair/duo3-motor.jpg",
+    extraPhoto: "/images/repair/duo3-rotor.jpg",
+  },
+  {
     model: "Edwards E2M0.7",
     client: "A사",
     symptom: "엔드실 가공 · 모터 베어링 교체 · 모듈 스크래치 발생",
