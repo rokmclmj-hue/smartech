@@ -12,7 +12,7 @@ export async function GET(req: Request) {
 
   if (id) {
     const rows = await prisma.$queryRaw<Record<string, unknown>[]>`
-      SELECT id, title, category, status, "metaDesc", tags, content, "naverContent", "sourceFile", photos,
+      SELECT id, slug, title, category, status, "metaDesc", tags, content, "naverContent", "sourceFile", photos,
              "publishedAt", "createdAt", "updatedAt"
       FROM "BlogPost" WHERE id = ${Number(id)}
     `;
@@ -63,6 +63,11 @@ export async function PATCH(req: Request) {
   const { id, ...updates } = body;
   if (!id) return NextResponse.json({ error: "id 필수" }, { status: 400 });
 
+  // slug는 unique 컬럼이라 빈 문자열이 여러 건 저장되면 충돌 → null로 정규화
+  if ("slug" in updates) {
+    updates.slug = updates.slug?.trim() || null;
+  }
+
   // 발행 처리 시 publishedAt 자동 세팅
   if (updates.status === "PUBLISHED") {
     const existing = await prisma.blogPost.findUnique({ where: { id: Number(id) } });
@@ -82,7 +87,15 @@ export async function PATCH(req: Request) {
 
   // 나머지 필드 업데이트
   if (Object.keys(updates).length > 0) {
-    await prisma.blogPost.update({ where: { id: Number(id) }, data: updates });
+    try {
+      await prisma.blogPost.update({ where: { id: Number(id) }, data: updates });
+    } catch (e: unknown) {
+      const isUniqueSlugConflict = typeof e === "object" && e !== null && "code" in e && e.code === "P2002";
+      if (isUniqueSlugConflict) {
+        return NextResponse.json({ error: "이미 사용 중인 슬러그입니다" }, { status: 409 });
+      }
+      throw e;
+    }
   }
 
   // 발행 시 IndexNow로 빙에 즉시 알림 (챗GPT 크롤링 촉진)
@@ -91,6 +104,7 @@ export async function PATCH(req: Request) {
     // 프로덕션 도메인에서만 IndexNow 전송 (프리뷰 배포 제외)
     if (siteUrl.includes("smartechvacuum.com")) {
       const indexNowKey = process.env.INDEXNOW_KEY ?? "f868dd92e4a94e2cb6ec60c397058e84";
+      const current = await prisma.blogPost.findUnique({ where: { id: Number(id) }, select: { slug: true } });
       fetch("https://www.bing.com/indexnow", {
         method: "POST",
         headers: { "Content-Type": "application/json; charset=utf-8" },
@@ -98,7 +112,7 @@ export async function PATCH(req: Request) {
           host: "smartechvacuum.com",
           key: indexNowKey,
           keyLocation: `${siteUrl}/${indexNowKey}.txt`,
-          urlList: [`${siteUrl}/blog/${id}`],
+          urlList: [`${siteUrl}/blog/${current?.slug ?? id}`],
         }),
       }).catch(() => {}); // 실패해도 발행은 정상 처리
     }

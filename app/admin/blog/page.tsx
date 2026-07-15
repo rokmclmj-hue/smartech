@@ -67,6 +67,7 @@ type Post = {
 };
 
 type PostDetail = Post & {
+  slug: string | null;
   content: string;
   naverContent: string;
   metaDesc: string;
@@ -98,6 +99,7 @@ export default function AdminBlogPage() {
   const [editMeta, setEditMeta] = useState("");
   const [editTags, setEditTags] = useState("");
   const [editCategory, setEditCategory] = useState("");
+  const [editSlug, setEditSlug] = useState("");
   const [editMode, setEditMode] = useState(false);
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
 
@@ -133,6 +135,7 @@ export default function AdminBlogPage() {
       setEditMeta(data.metaDesc);
       setEditTags(data.tags);
       setEditCategory(data.category);
+      setEditSlug(data.slug ?? "");
     } finally {
       setDetailLoading(false);
     }
@@ -153,15 +156,17 @@ export default function AdminBlogPage() {
           metaDesc: editMeta,
           tags: editTags,
           category: editCategory,
+          slug: editSlug,
         }),
       });
       if (res.ok) {
         showToast("저장되었습니다", true);
         setEditMode(false);
-        setSelected({ ...selected, title: editTitle, content: editContent, metaDesc: editMeta, tags: editTags, category: editCategory });
+        setSelected({ ...selected, title: editTitle, content: editContent, metaDesc: editMeta, tags: editTags, category: editCategory, slug: editSlug || null });
         load();
       } else {
-        showToast("저장 실패", false);
+        const err = await res.json().catch(() => ({}));
+        showToast(err.error ?? "저장 실패", false);
       }
     } finally {
       setSaving(false);
@@ -425,6 +430,21 @@ export default function AdminBlogPage() {
                 <div className="border hair p-4 space-y-3 bg-ink/[0.015]">
                   <div className="mono text-[9px] tracking-[0.18em] dim uppercase">SEO 정보</div>
                   <div className="space-y-2">
+                    <div>
+                      <div className="mono text-[9px] dim mb-1">
+                        URL 슬러그 <span className="opacity-60">(영문 소문자·하이픈만, 예: edwards-rv3-oil-pump)</span>
+                      </div>
+                      {editMode ? (
+                        <input
+                          value={editSlug}
+                          onChange={(e) => setEditSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))}
+                          placeholder="비워두면 /blog/{id} 숫자 주소로 발행됩니다"
+                          className="w-full text-[13px] border hair px-2 py-1.5 bg-transparent focus:outline-none focus:border-ink"
+                        />
+                      ) : (
+                        <div className="text-[13px]">{selected.slug ? `/blog/${selected.slug}` : "— (숫자 URL 사용 중)"}</div>
+                      )}
+                    </div>
                     <div>
                       <div className="mono text-[9px] dim mb-1">카테고리</div>
                       {editMode ? (
