@@ -239,6 +239,12 @@ export default function AdminBlogPage() {
       // 굵게·기울임 기호 제거
       .replace(/\*\*([^*]+)\*\*/g, "$1")
       .replace(/\*([^*]+)\*/g, "$1")
+      // 마크다운 표 구분선(|---|---|) 통째로 제거 — 작성 규칙 위반으로 표가 남아있는 경우 대비
+      .replace(/^\|?[\s:-]*-[\s:|-]*\|[\s:|-]*$/gm, "")
+      // 남은 표 행(| a | b |)은 원문 그대로 보여주기보단 가운데점으로 이어 붙여 최소한 읽히게 함
+      .replace(/^\|(.+)\|\s*$/gm, (_, inner: string) =>
+        inner.split("|").map((c) => c.trim()).filter(Boolean).join(" · ")
+      )
       // 구분선 제거
       .replace(/^---+$/gm, "")
       // 3줄 이상 빈 줄 → 2줄로
