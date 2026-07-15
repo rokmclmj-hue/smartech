@@ -13,14 +13,14 @@ export async function GET() {
     where: { status: "PUBLISHED" },
     orderBy: { publishedAt: "desc" },
     take: 200,
-    select: { id: true, title: true, metaDesc: true, tags: true, category: true, publishedAt: true },
+    select: { id: true, slug: true, title: true, metaDesc: true, tags: true, category: true, publishedAt: true },
   });
 
   const blogLines = posts
     .map((p) => {
       const date = p.publishedAt ? p.publishedAt.toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" }) : "";
       const tags = p.tags ? ` [${p.tags}]` : "";
-      return `- [${p.title}](https://www.smartechvacuum.com/blog/${p.id}) (${p.category}, ${date})${tags}${p.metaDesc ? `: ${p.metaDesc}` : ""}`;
+      return `- [${p.title}](https://www.smartechvacuum.com/blog/${p.slug ?? p.id}) (${p.category}, ${date})${tags}${p.metaDesc ? `: ${p.metaDesc}` : ""}`;
     })
     .join("\n");
 

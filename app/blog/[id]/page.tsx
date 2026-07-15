@@ -2,19 +2,31 @@ export const revalidate = 3600;
 
 import { prisma } from "@/lib/db";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import type { Metadata } from "next";
 
 type Props = { params: Promise<{ id: string }> };
 
+// URL 파라미터가 숫자면(레거시 /blog/{id}) 그 글을 찾고, 문자열이면(신규 /blog/{slug}) 슬러그로 찾는다.
+async function findPostByParam(param: string) {
+  if (/^\d+$/.test(param)) {
+    return prisma.blogPost.findUnique({
+      where: { id: Number(param), status: "PUBLISHED" },
+      select: { id: true, slug: true, title: true, metaDesc: true, tags: true, content: true, publishedAt: true },
+    });
+  }
+  return prisma.blogPost.findUnique({
+    where: { slug: param, status: "PUBLISHED" },
+    select: { id: true, slug: true, title: true, metaDesc: true, tags: true, content: true, publishedAt: true },
+  });
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const post = await prisma.blogPost.findUnique({
-    where: { id: Number(id), status: "PUBLISHED" },
-    select: { title: true, metaDesc: true, tags: true, content: true, publishedAt: true },
-  });
+  const post = await findPostByParam(id);
   if (!post) return { title: "스마텍 블로그" };
 
+  const canonicalPath = post.slug ?? String(post.id);
   const ogImage =
     post.content.match(/!\[[^\]]*\]\((https?:\/\/[^\)]+)\)/)?.[1] ??
     "https://www.smartechvacuum.com/og-default.png";
@@ -23,11 +35,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: `${post.title} — 스마텍`,
     description: post.metaDesc || undefined,
     keywords: post.tags || undefined,
-    alternates: { canonical: `https://www.smartechvacuum.com/blog/${id}` },
+    alternates: { canonical: `https://www.smartechvacuum.com/blog/${canonicalPath}` },
     openGraph: {
       title: `${post.title} — 스마텍`,
       description: post.metaDesc || undefined,
-      url: `https://www.smartechvacuum.com/blog/${id}`,
+      url: `https://www.smartechvacuum.com/blog/${canonicalPath}`,
       type: "article",
       publishedTime: post.publishedAt?.toISOString(),
       images: [{ url: ogImage, alt: post.title }],
@@ -188,18 +200,31 @@ function renderMarkdown(text: string) {
 }
 
 export default async function BlogPostPage({ params }: Props) {
-  const { id } = await params;
-  const rows = await prisma.$queryRaw<Record<string, unknown>[]>`
-    SELECT id, title, category, status, "metaDesc", tags, content, photos,
-           "faqSchema", "publishedAt", "createdAt", "updatedAt"
-    FROM "BlogPost" WHERE id = ${Number(id)} AND status = 'PUBLISHED'
-  `;
+  const { id: param } = await params;
+  const isNumeric = /^\d+$/.test(param);
+
+  const rows = isNumeric
+    ? await prisma.$queryRaw<Record<string, unknown>[]>`
+        SELECT id, slug, title, category, status, "metaDesc", tags, content, photos,
+               "faqSchema", "publishedAt", "createdAt", "updatedAt"
+        FROM "BlogPost" WHERE id = ${Number(param)} AND status = 'PUBLISHED'
+      `
+    : await prisma.$queryRaw<Record<string, unknown>[]>`
+        SELECT id, slug, title, category, status, "metaDesc", tags, content, photos,
+               "faqSchema", "publishedAt", "createdAt", "updatedAt"
+        FROM "BlogPost" WHERE slug = ${param} AND status = 'PUBLISHED'
+      `;
   if (!rows.length) return notFound();
   const post = rows[0] as {
-    id: number; title: string; category: string; status: string;
+    id: number; slug: string | null; title: string; category: string; status: string;
     metaDesc: string; tags: string; content: string; photos: string | null;
     faqSchema: string; publishedAt: Date | null; createdAt: Date; updatedAt: Date;
   };
+
+  // 레거시 숫자 URL(/blog/{id})로 접근했는데 슬러그가 있으면 새 URL로 영구 리다이렉트
+  if (isNumeric && post.slug) {
+    permanentRedirect(`/blog/${post.slug}`);
+  }
 
   let postPhotos: string[] = [];
   try { postPhotos = post.photos ? JSON.parse(post.photos) : []; } catch {}
@@ -217,7 +242,7 @@ export default async function BlogPostPage({ params }: Props) {
         },
         orderBy: { publishedAt: "desc" },
         take: 3,
-        select: { id: true, title: true, metaDesc: true, publishedAt: true, createdAt: true },
+        select: { id: true, slug: true, title: true, metaDesc: true, publishedAt: true, createdAt: true },
       })
     : [];
   // 태그 매칭 부족 시 카테고리로 보충
@@ -226,7 +251,7 @@ export default async function BlogPostPage({ params }: Props) {
       where: { category: post.category, id: { not: post.id }, status: "PUBLISHED" },
       orderBy: { publishedAt: "desc" },
       take: 3,
-      select: { id: true, title: true, metaDesc: true, publishedAt: true, createdAt: true },
+      select: { id: true, slug: true, title: true, metaDesc: true, publishedAt: true, createdAt: true },
     });
   }
 
@@ -245,7 +270,7 @@ export default async function BlogPostPage({ params }: Props) {
     "articleBody": post.content.replace(/[#*`!\[\]()]/g, "").slice(0, 2000),
     "datePublished": (post.publishedAt ?? post.createdAt).toISOString(),
     "dateModified": post.updatedAt.toISOString(),
-    "url": `https://www.smartechvacuum.com/blog/${post.id}`,
+    "url": `https://www.smartechvacuum.com/blog/${post.slug ?? post.id}`,
     "publisher": { "@type": "Organization", "name": "스마텍", "url": "https://www.smartechvacuum.com" },
     "author":    { "@type": "Person", "name": "Robin", "url": "https://www.smartechvacuum.com/about/robin", "worksFor": { "@type": "Organization", "name": "스마텍" } },
   });
@@ -256,7 +281,7 @@ export default async function BlogPostPage({ params }: Props) {
     "itemListElement": [
       { "@type": "ListItem", "position": 1, "name": "홈",    "item": "https://www.smartechvacuum.com" },
       { "@type": "ListItem", "position": 2, "name": "블로그", "item": "https://www.smartechvacuum.com/blog" },
-      { "@type": "ListItem", "position": 3, "name": post.title, "item": `https://www.smartechvacuum.com/blog/${post.id}` },
+      { "@type": "ListItem", "position": 3, "name": post.title, "item": `https://www.smartechvacuum.com/blog/${post.slug ?? post.id}` },
     ],
   });
 
@@ -465,7 +490,7 @@ export default async function BlogPostPage({ params }: Props) {
               {relatedPosts.map((r) => (
                 <Link
                   key={r.id}
-                  href={`/blog/${r.id}`}
+                  href={`/blog/${r.slug ?? r.id}`}
                   className="group flex flex-col gap-1.5 border hair p-4 hover:border-ink/30 transition-colors"
                 >
                   <span className="text-[14px] font-semibold leading-snug group-hover:text-edred transition-colors">

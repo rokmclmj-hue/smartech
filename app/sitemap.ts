@@ -12,7 +12,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // 발행된 블로그 글
     prisma.blogPost.findMany({
       where: { status: "PUBLISHED" },
-      select: { id: true, updatedAt: true },
+      select: { id: true, slug: true, updatedAt: true },
       orderBy: { publishedAt: "desc" },
     }),
     // 개별 제품 페이지
@@ -22,7 +22,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ]);
 
   const blogEntries: MetadataRoute.Sitemap = posts.map((post) => ({
-    url: `${BASE_URL}/blog/${post.id}`,
+    url: `${BASE_URL}/blog/${post.slug ?? post.id}`,
     lastModified: post.updatedAt,
     changeFrequency: "monthly",
     priority: 0.7,

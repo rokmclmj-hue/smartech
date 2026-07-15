@@ -343,6 +343,7 @@ model KnownContact {
 // 블로그 게시글 (AI 파이프라인 생성 + 직접 작성)
 model BlogPost {
   id           Int       @id @default(autoincrement())
+  slug         String?   @unique // SEO용 의미형 URL (/blog/edwards-rv-oil-pump 등). 없으면 /blog/{id}로 접근
   title        String
   content      String
   naverContent String    @default("")  // 네이버 블로그 전용 버전 (naver.md)

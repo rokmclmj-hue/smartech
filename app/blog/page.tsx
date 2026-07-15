@@ -64,6 +64,7 @@ export default async function BlogListPage({ searchParams }: { searchParams: Sea
       take: PAGE_SIZE,
       select: {
         id: true,
+        slug: true,
         title: true,
         metaDesc: true,
         category: true,
@@ -137,7 +138,7 @@ export default async function BlogListPage({ searchParams }: { searchParams: Sea
               return (
                 <Link
                   key={post.id}
-                  href={`/blog/${post.id}`}
+                  href={`/blog/${post.slug ?? post.id}`}
                   className="group flex flex-col border hair bg-paper hover:border-ink/30 transition-colors"
                 >
                   <div className={`px-5 py-2.5 border-b ${colorClass}`}>

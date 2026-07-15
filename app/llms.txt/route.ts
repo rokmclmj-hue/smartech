@@ -7,11 +7,11 @@ export async function GET() {
     where: { status: "PUBLISHED" },
     orderBy: { publishedAt: "desc" },
     take: 30,
-    select: { id: true, title: true, metaDesc: true },
+    select: { id: true, slug: true, title: true, metaDesc: true },
   });
 
   const blogLines = posts
-    .map((p) => `- [${p.title}](https://www.smartechvacuum.com/blog/${p.id})${p.metaDesc ? `: ${p.metaDesc}` : ""}`)
+    .map((p) => `- [${p.title}](https://www.smartechvacuum.com/blog/${p.slug ?? p.id})${p.metaDesc ? `: ${p.metaDesc}` : ""}`)
     .join("\n");
 
   const body = `# 스마텍 (Smartech) — Edwards Vacuum 한국 공식 대리점
