@@ -75,9 +75,9 @@ export default function Home() {
               <div className="grid grid-cols-3 gap-2.5">
                 {/* Hero cell — Editorial typography (col-span-2, row-span-2) */}
                 <div className="bento-hero col-span-2 row-span-2 relative bg-white border hair p-5 md:p-6 flex flex-col justify-between overflow-hidden">
-                  {/* Top kicker — brand and origin */}
+                  {/* Top kicker — 대표 개인 경력(2006) ≠ 스마텍 설립(2011), 혼동 방지를 위해 명확히 라벨링 */}
                   <div className="flex items-baseline justify-between text-[10.5px] mono dim tracking-[0.18em] uppercase">
-                    <span>Smartech</span>
+                    <span>대표 진공산업 경력</span>
                     <span>Since 2006</span>
                   </div>
 
@@ -105,7 +105,7 @@ export default function Home() {
                       </span>
                     </div>
                     <div className="mt-2.5 text-[11px] dim leading-snug">
-                      still operating · <span className="text-edred font-semibold">Edwards</span> 코리아 공식 대리점
+                      스마텍 설립 2011년 · <span className="text-edred font-semibold">Edwards</span> 코리아 공식 대리점
                     </div>
                   </div>
 
@@ -469,7 +469,7 @@ const STEPS = [
   },
   {
     title: "30년경력수리전문",
-    desc: "30년 이상 Edwards 펌프를 다뤄온 전문가가 직접 분해·점검·조립하며 가동 중단 시간을 최소화 합니다.",
+    desc: "Edwards 및 산업용 진공펌프 수리 경력 30년의 전담 엔지니어가 직접 분해·점검·조립하며 가동 중단 시간을 최소화 합니다.",
   },
 ];
 

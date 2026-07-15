@@ -44,7 +44,7 @@ const jsonLd = {
       "telephone": "031-204-7170",
       "email": "info@smartechvacuum.com",
       "foundingDate": "2011",
-      "description": "Edwards Vacuum 한국 공식 대리점. 진공펌프 판매·수리·기술상담 토탈 솔루션. 2011년 창업, 30년 이상 Edwards 전문 기술력.",
+      "description": "Edwards Vacuum 한국 공식 대리점. 진공펌프 판매·수리·기술상담 토탈 솔루션. 2011년 창업, 대표 진공산업 경력 2006년부터, 진공펌프 수리 경력 30년의 전담 엔지니어 보유.",
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "신원로55, 테크트리지식산업센터 907호",
@@ -116,7 +116,7 @@ const jsonLd = {
           "name": "스마텍은 에드워즈 공식 대리점인가요?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "네, 스마텍((주)스마텍)은 Edwards Vacuum 한국 공식 대리점입니다. 2006년 Edwards 코리아 합류, 2011년 창업하여 30년 이상의 Edwards 진공 기술력을 보유하고 있습니다.",
+            "text": "네, 스마텍((주)스마텍)은 Edwards Vacuum 한국 공식 대리점입니다. 대표는 2006년 Edwards 코리아에 합류해 2011년 스마텍을 창업했으며, 진공펌프 수리 경력 30년의 전담 엔지니어를 보유하고 있습니다.",
           },
         },
         {

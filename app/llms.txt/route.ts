@@ -16,7 +16,7 @@ export async function GET() {
 
   const body = `# 스마텍 (Smartech) — Edwards Vacuum 한국 공식 대리점
 
-> 스마텍은 Edwards Vacuum 한국 공식 대리점으로, 진공펌프 판매·수리·기술상담 서비스를 제공합니다. 2006년 Edwards 코리아 합류, 2011년 창업. 30년 이상 Edwards 전문 기술력 보유.
+> 스마텍은 Edwards Vacuum 한국 공식 대리점으로, 진공펌프 판매·수리·기술상담 서비스를 제공합니다. 대표는 2006년 Edwards 코리아에 합류해 2011년 창업했으며, 진공펌프 수리 경력 30년의 전담 엔지니어를 보유하고 있습니다.
 
 ## 주요 페이지
 

@@ -471,7 +471,7 @@ export default function RepairPageClient() {
           </h1>
           <p className="text-[15px] text-dim max-w-xl leading-relaxed">
             Edwards 및 타브랜드 진공 펌프 수리를 접수해 드립니다.<br />
-            30년 경력 전문가가 직접 분해·점검·조립합니다.
+            진공펌프 수리 경력 30년의 전담 엔지니어가 직접 분해·점검·조립합니다.
           </p>
         </div>
 

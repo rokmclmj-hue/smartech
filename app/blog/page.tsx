@@ -96,7 +96,7 @@ export default async function BlogListPage({ searchParams }: { searchParams: Sea
           기술 정보 &amp; 현장 이야기
         </h1>
         <p className="mt-4 text-[15px] leading-[1.7] dim max-w-xl">
-          에드워드 진공펌프 30년 현장 경험을 바탕으로, 수리·납기·기술 정보를 정직하게 정리합니다.
+          진공펌프 수리 경력 30년의 전담 엔지니어와 현장 경험을 바탕으로, 수리·납기·기술 정보를 정직하게 정리합니다.
         </p>
       </div>
 

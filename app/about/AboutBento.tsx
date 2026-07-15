@@ -19,7 +19,7 @@ export default function AboutBento() {
         {/* Hero cell */}
         <div className="bento-hero col-span-2 row-span-2 relative bg-white border hair p-5 md:p-6 flex flex-col justify-between overflow-hidden">
           <div className="flex items-baseline justify-between text-[10.5px] mono dim tracking-[0.18em] uppercase">
-            <span>Smartech</span>
+            <span>대표 진공산업 경력</span>
             <span>Since 2006</span>
           </div>
           <div className="mt-6 md:mt-8">
@@ -43,7 +43,7 @@ export default function AboutBento() {
               </span>
             </div>
             <div className="mt-2.5 text-[11px] dim leading-snug">
-              still operating ·{" "}
+              스마텍 설립 2011년 ·{" "}
               <span className="text-edred font-semibold">Edwards</span> 코리아 공식 대리점
             </div>
           </div>
