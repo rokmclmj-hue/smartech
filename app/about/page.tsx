@@ -189,6 +189,9 @@ export default function AboutPage() {
               </div>
             ))}
           </div>
+          <p className="mono text-[10.5px] text-dim px-8 py-4 border-t hair">
+            2011년 설립 이후 누적 · 내부 ERP·세금계산서 기준 · 취소·반품 건 제외, 동일 고객의 복수 납품은 개별 건으로 계산
+          </p>
         </div>
       </section>
 
