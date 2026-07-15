@@ -247,7 +247,7 @@ export default async function BlogPostPage({ params }: Props) {
     "dateModified": post.updatedAt.toISOString(),
     "url": `https://www.smartechvacuum.com/blog/${post.id}`,
     "publisher": { "@type": "Organization", "name": "스마텍", "url": "https://www.smartechvacuum.com" },
-    "author":    { "@type": "Person", "name": "Robin", "worksFor": { "@type": "Organization", "name": "스마텍" } },
+    "author":    { "@type": "Person", "name": "Robin", "url": "https://www.smartechvacuum.com/about/robin", "worksFor": { "@type": "Organization", "name": "스마텍" } },
   });
 
   const breadcrumbSchema = JSON.stringify({
@@ -312,7 +312,9 @@ export default async function BlogPostPage({ params }: Props) {
             <span className="mono text-[10px] dim">
               {formatDate(post.publishedAt ?? post.createdAt)}
             </span>
-            <span className="mono text-[10px] dim">Robin · 스마텍</span>
+            <Link href="/about/robin" className="mono text-[10px] dim hover:text-edred transition-colors">
+              Robin · 스마텍
+            </Link>
           </div>
 
           <h1 className="display text-[26px] md:text-[36px] leading-tight tracking-[-0.025em] mb-4">
