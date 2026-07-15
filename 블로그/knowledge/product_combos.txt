@@ -77,27 +77,27 @@ GXS/EXS + EH 조합은 스마텍 현장 확인 기준 (아래 별도 표 참조)
 
 ---
 
-## GXS(스크류) vs iGX/iH/iXH(클로) — 작동 방식 자체가 다름
+## GXS(스크류) vs iGX/iH/iXH(루츠+클로) — 작동 방식 자체가 다름
 
 같은 "드라이펌프"라도 GXS 계열과 iGX/iH/iXH 계열은 압축 메커니즘이 다르다. 블로그·상담에서 "이건 무슨 방식이냐"를 설명할 때 아래 구분을 근거로 쓴다.
-(출처: Edwards 공식 비교자료 + Edwards Dry Pump 공식 라인업 표. 소규모 비교자료는 iGX/iH를 "Roots & Claw"로, 전체 라인업 공식표는 "Claw"로만 표기 — 라인업표가 더 포괄적인 공식 자료라 이를 기준으로 하되, 로터 형태상 루츠형 클로 구조라는 설명도 함께 남겨둠)
+(출처: Edwards 공식 비교자료 + Edwards Dry Pump 공식 라인업 표. 라인업표는 지면상 "Claw"로 줄여 표기했지만, 정확한 메커니즘은 **Roots & Claw**임 — 대표님 확인, 2026-07-16)
 
-| 구분 | GXS (Screw, 스크류) | iGX/iH/iXH (Claw, 클로) |
+| 구분 | GXS (Screw, 스크류) | iGX/iH/iXH (Roots & Claw, 루츠+클로) |
 |---|---|---|
-| 압축 메커니즘 | 다단(multi-stage) 스크류 로터 | 클로(claw) 로터 방식 |
+| 압축 메커니즘 | 다단(multi-stage) 스크류 로터 | 루츠+클로 로터 방식 |
 | 장점 | 압축 시 발생열을 이용해 많은 양의 가스를 처리 가능 (가스 부하가 큰 공정에 강함) | 대기압에서 목표 압력까지 최단 시간 배기 가능. 솔벤트 처리 능력 우수 |
 | 약점 | 대기압→목표압력 도달 시간이 상대적으로 오래 걸림. 솔벤트 처리 능력이 약함 | 공정 부산물(파우더 등) 처리 능력이 약함. 하부(Claw 밑부분)에 솔벤트 등 물질이 적층될 수 있음 |
 | 적합 공정 예시 | 태양광, 동결건조, 살균, 코팅, 금속, 리크검사, 챔버 배기, 식품포장, 고순도 가스 실린더 충전 등 | RTA, Strip/Ashing, Oxide/Silicon/Metal Etch, Implant Source, HDP-CVD, SACVD, MOCVD, PECVD, LPCVD, ALD 등 반도체 클린/하시(harsh) 공정 |
 
-**주의**: iGX/iH/iXH는 그 자체가 "클로 방식의 완결된 주 펌프"이지, EH 시리즈처럼 GXS/EXS에 별도로 붙이는 "부스터"가 아니다. iGX/iH/iXH를 "루츠 부스터"라고 부르면 안 된다 — 루츠 부스터는 EH 계열을 가리키는 말이다(위 "GXS 드라이 단독 + EH 부스터" 섹션 참고).
+**주의**: iGX/iH/iXH는 그 자체가 "루츠+클로 방식의 완결된 주 펌프"이지, EH 시리즈처럼 GXS/EXS에 별도로 붙이는 "부스터"가 아니다. iGX/iH/iXH를 "루츠 부스터"라고 부르면 안 된다 — 루츠 부스터는 EH 계열을 가리키는 말이다(위 "GXS 드라이 단독 + EH 부스터" 섹션 참고).
 
 ## Edwards 드라이펌프 전체 라인업 (공식 자료 기준, Series·Mechanism·용량)
 
 | Series | Mechanism | 소형~대형 모델 | 조합(Dry+Booster) 예 | 용량 범위(L) | 주요 적용 공정 |
 |---|---|---|---|---|---|
-| iGX | Claw | GX100 ~ GX1000 | Dry only ~ 100+1000 | 1,750 ~ 13,300 | RTA, Strip/Ashing, Oxide/Silicon/Metal Etch, Implant Source (클린 공정) |
-| iH | Claw | iH80 ~ iH1800 | Dry only ~ 160+1800 | 1,600 ~ 30,000 | HDP-CVD, RTP, SACVD, MOCVD, PECVD, LPCVD, ALD (하시 공정) |
-| iXH | Claw | iXH610 ~ iXH4550 | 100+600 ~ 500+4500 | 10,000 ~ 70,000 | iH와 동일(하시 공정), 대용량 |
+| iGX | Roots & Claw | GX100 ~ GX1000 | Dry only ~ 100+1000 | 1,750 ~ 13,300 | RTA, Strip/Ashing, Oxide/Silicon/Metal Etch, Implant Source (클린 공정) |
+| iH | Roots & Claw | iH80 ~ iH1800 | Dry only ~ 160+1800 | 1,600 ~ 30,000 | HDP-CVD, RTP, SACVD, MOCVD, PECVD, LPCVD, ALD (하시 공정) |
+| iXH | Roots & Claw | iXH610 ~ iXH4550 | 100+600 ~ 500+4500 | 10,000 ~ 70,000 | iH와 동일(하시 공정), 대용량 |
 | GXS | Screw | GXS160 ~ GXS450/2600 | Dry only ~ 450+2600 | 2,600 ~ 32,000 | 태양광, 동결건조, 살균, 코팅, 금속, 리크검사, 챔버배기, 식품포장, 가스실린더 충전 |
 | iXL | Screw | iXL250Q ~ iXL500R | 250+1800 ~ 500+3000 | 30,000 ~ 50,000 | Load Lock (GXS와 구동 메커니즘은 같으나 N2 공급 구조가 다름) |
 | nXDS/XDS | Scroll | nXDS6i ~ XDS35 | Dry only | 100 ~ 550 | 질량분석기(GCMS/LCMS), 전자현미경(SEM/TEM), 건조기, 글로브박스, 빔라인, 가속기, 동결건조, 증류/추출/여과, 원심분리기 |
