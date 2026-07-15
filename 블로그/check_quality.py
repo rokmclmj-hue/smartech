@@ -4,7 +4,7 @@ check_quality.py — 블로그 글 업로드 전 통합 품질 검수 게이트
 사용법: python check_quality.py <글폴더경로>
 예시:  python check_quality.py "2026-06/진공건조-드라이펌프-선택기준-20260613"
 
-검수 항목 (8개):
+검수 항목 (9개):
   1. 글자수   — final.md 마크다운 제거 후 2,000자 이상
   2. 메타설명 — meta.txt description 비어있지 않음
   3. 현장사진 — field-*.png 최소 1장 존재
@@ -13,6 +13,7 @@ check_quality.py — 블로그 글 업로드 전 통합 품질 검수 게이트
   6. GEO형식  — ## 스마텍 H2 섹션 없음 (홍보 섹션 금지)
   7. 연락처   — 문의: 전화번호 단독 줄 없음 (홈페이지 자동 표시로 중복 방지)
   8. 네이버글 — naver.md 글자수 1,500자↑ + [IMAGE] 마커 1개↑ + 해시태그 + 서명
+  9. 표문법금지 — final.md·naver.md 둘 다 마크다운 표(|---|) 문법 없음
 
 결과: quality-log.jsonl 에 항목별 상세 기록 (임계값 조정 시 참고)
 종료코드: 0=전체통과, 1=하나이상반려
@@ -245,6 +246,24 @@ def chk_naver_md(folder: str) -> dict:
     }
 
 
+def chk_no_table(folder: str) -> dict:
+    """final.md·naver.md 둘 다 마크다운 표(|---|) 문법 금지 (writer.md 규칙).
+    2026-07-16 사고: content(final.md 소스)만 검사하고 naverContent(naver.md 소스)는
+    검사 안 해서 16편이 그대로 발행됨 — 반드시 두 파일 모두 검사한다."""
+    errors = []
+    for fname in ("final.md", "naver.md"):
+        path = os.path.join(folder, fname)
+        if not os.path.exists(path):
+            continue
+        content = _strip_code_fences(open(path, encoding="utf-8").read())
+        table_lines = [l for l in content.splitlines() if re.match(r"^\|.*\|\s*$", l.strip())]
+        if table_lines:
+            errors.append(f"{fname}에 표 문법 {len(table_lines)}줄 (writer.md '마크다운 표 금지' 위반)")
+
+    ok = len(errors) == 0
+    return {"pass": ok, "reason": " / ".join(errors) if errors else None}
+
+
 def chk_geo_format(folder: str) -> dict:
     path = os.path.join(folder, "final.md")
     if not os.path.exists(path):
@@ -321,6 +340,7 @@ def run(folder_arg: str) -> bool:
         "geo_format":  chk_geo_format(folder),
         "no_contact":  chk_no_contact(folder),
         "naver_md":    chk_naver_md(folder),
+        "no_table":    chk_no_table(folder),
     }
 
     labels = {
@@ -332,6 +352,7 @@ def run(folder_arg: str) -> bool:
         "geo_format":  "GEO형식",
         "no_contact":  "연락처중복",
         "naver_md":    "네이버글",
+        "no_table":    "표문법금지",
     }
 
     failed = []
