@@ -5,8 +5,6 @@ const nextConfig: NextConfig = {
     return [
       // 구 사이트 URL → 새 사이트 대응 페이지로 리다이렉트 (301 영구이동)
       { source: "/INTRO/:path*",    destination: "/",          permanent: true },
-      { source: "/Products",        destination: "/",          permanent: true },
-      { source: "/Products/:path*", destination: "/",          permanent: true },
       { source: "/About-Us",        destination: "/about",     permanent: true },
       { source: "/견적문의",             destination: "/quote",     permanent: true },
       { source: "/blog/14",         destination: "/blog",      permanent: true },
