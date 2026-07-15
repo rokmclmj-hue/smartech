@@ -1,6 +1,7 @@
 import { MetadataRoute } from "next";
 import { prisma } from "@/lib/db";
 import { INDUSTRIES } from "@/lib/industries";
+import { allModelSlugs } from "@/lib/product-specs";
 
 export const dynamic = "force-dynamic";
 
@@ -33,6 +34,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
+  // 모델 단위 스펙 소개 페이지 (예: /products/edwards-rv3) — SKU 페이지와 별개로 검색 노출용
+  const modelEntries: MetadataRoute.Sitemap = allModelSlugs().map((slug) => ({
+    url: `${BASE_URL}/products/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: "monthly",
+    priority: 0.7,
+  }));
+
   const industryEntries: MetadataRoute.Sitemap = INDUSTRIES.map((ind) => ({
     url: `${BASE_URL}/industries/${ind.slug}`,
     lastModified: new Date(),
@@ -55,6 +64,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...industryEntries,
     // 개별 제품 페이지
     ...productEntries,
+    // 모델 단위 스펙 소개 페이지
+    ...modelEntries,
     // 개별 블로그 글
     ...blogEntries,
   ];

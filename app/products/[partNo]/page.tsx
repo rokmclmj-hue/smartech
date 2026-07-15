@@ -7,24 +7,43 @@ import { getMultiplier, formatKRW } from "@/lib/pricing";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import AddToQuoteButton from "./AddToQuoteButton";
+import ModelDetail from "./ModelDetail";
+import { findModelBySlug } from "@/lib/product-specs";
 
 export async function generateMetadata({ params }: { params: Promise<{ partNo: string }> }): Promise<Metadata> {
   const { partNo: raw } = await params;
   const partNo = decodeURIComponent(raw);
   const product = await prisma.product.findUnique({ where: { partNo }, select: { description: true } });
-  if (!product) return { title: "스마텍" };
-  return {
-    title: `${product.description} (${partNo}) — 스마텍 | Edwards Vacuum`,
-    description: `Edwards ${product.description} 파트번호 ${partNo}. 스마텍에서 정품 공급·견적·문의.`,
-    alternates: { canonical: `https://www.smartechvacuum.com/products/${encodeURIComponent(partNo)}` },
-  };
+  if (product) {
+    return {
+      title: `${product.description} (${partNo}) — 스마텍 | Edwards Vacuum`,
+      description: `Edwards ${product.description} 파트번호 ${partNo}. 스마텍에서 정품 공급·견적·문의.`,
+      alternates: { canonical: `https://www.smartechvacuum.com/products/${encodeURIComponent(partNo)}` },
+    };
+  }
+
+  const modelInfo = findModelBySlug(partNo);
+  if (modelInfo) {
+    return {
+      title: `Edwards ${modelInfo.model} 사양·가격 — 스마텍 | Edwards Vacuum`,
+      description: `Edwards ${modelInfo.model} 배기속도·도달압력·플랜지 등 공식 카탈로그 사양. 스마텍에서 정품 공급·견적 문의.`,
+      alternates: { canonical: `https://www.smartechvacuum.com/products/${encodeURIComponent(partNo)}` },
+    };
+  }
+
+  return { title: "스마텍" };
 }
 
 export default async function ProductDetailPage({ params }: { params: Promise<{ partNo: string }> }) {
   const { partNo: rawPartNo } = await params;
   const partNo = decodeURIComponent(rawPartNo);
   const product = await prisma.product.findUnique({ where: { partNo } });
-  if (!product) return notFound();
+
+  if (!product) {
+    const modelInfo = findModelBySlug(partNo);
+    if (modelInfo) return <ModelDetail {...modelInfo} />;
+    return notFound();
+  }
 
   const session = await auth();
   const tier = (session?.user as { tier?: string })?.tier ?? "PUBLIC";
