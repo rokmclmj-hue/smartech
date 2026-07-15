@@ -140,9 +140,16 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
                         window.removeEventListener("afterprint", restore);
                       };
                       window.addEventListener("afterprint", restore);
-                      window.print();
-                      // iOS/Android: afterprint 미발생 대비 — 2초 후 강제 복원
-                      fallbackTimer = setTimeout(restore, 2000);
+                      // 모바일에서는 header/main을 숨긴 스타일이 화면에 반영(페인트)되기 전에
+                      // 인쇄 스냅샷이 찍혀 원래 페이지 내용이 함께 인쇄되는 경우가 있어
+                      // 다음 프레임까지 한 번 기다린 후 인쇄를 호출한다.
+                      requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                          window.print();
+                          // iOS/Android: afterprint 미발생 대비 — 2초 후 강제 복원
+                          fallbackTimer = setTimeout(restore, 2000);
+                        });
+                      });
                     }
                   }}
                 >
