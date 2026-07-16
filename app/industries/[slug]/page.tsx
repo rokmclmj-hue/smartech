@@ -304,7 +304,7 @@ export default async function IndustryDetailPage({
                   실제 시뮬레이션으로 <span className="italic text-edred">확인된 것</span>
                 </h2>
                 <p className="mt-4 text-[13px] dim max-w-[48ch]">
-                  Edwards 공식 시뮬레이션 데이터를 기반으로 한 실전 엔지니어링 노트입니다. 회사명·수치는 보안상 범위·일반화 처리했습니다.
+                  Edwards 공식 시뮬레이션 데이터를 기반으로 한 실전 기술 인사이트입니다. 회사명·수치는 보안상 범위·일반화 처리했습니다.
                 </p>
               </div>
             </div>

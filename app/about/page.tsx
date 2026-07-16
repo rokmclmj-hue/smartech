@@ -308,34 +308,39 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ══════════════ CASE STUDY (자리 확보) ══════════════ */}
+      {/* ══════════════ CASE STUDY ══════════════ */}
       <section className="border-b hair py-16 md:py-24 bg-paper">
         <div className="max-w-[1400px] mx-auto px-4 md:px-6">
           <div className="mono text-[11px] dim tracking-widest mb-3">— 03 · CASE STUDIES</div>
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10">
             <div>
               <h2 className="display text-[clamp(28px,3.5vw,48px)] leading-[1.1]">
-                실제 고객 <span className="italic text-edred">성과 사례</span>
+                시뮬레이션 검증으로 <span className="italic text-edred">이어진 도입</span>
               </h2>
-              <p className="mt-3 text-[14px] text-dim max-w-[48ch] leading-relaxed">
-                "우리가 인증받았다"가 아니라 "당신 같은 고객에게 실제로 성과를 냈다"는 이야기.
-                사례 수집 완료 후 순차 공개합니다.
+              <p className="mt-3 text-[14px] text-dim max-w-[52ch] leading-relaxed">
+                Edwards 공식 시뮬레이션으로 배기 성능을 사전 검증한 뒤 실제 구매·설치까지 이어진 사례입니다.
+                회사명·공정 조건은 보안상 비공개 처리했습니다.
               </p>
             </div>
             <div className="shrink-0 mono text-[11px] text-dim border hair px-4 py-2 self-start md:self-auto">
-              수집 중 — 업데이트 예정
+              시뮬레이션 기반 검증 사례
             </div>
           </div>
 
-          {/* 플레이스홀더 카드 */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {[
-              { industry: "반도체 제조", model: "Edwards iH 시리즈", hint: "드라이 펌프 PM 주기화 → 비계획 다운타임 단축" },
-              { industry: "디스플레이", model: "Edwards GXS 시리즈", hint: "공정 부산물 오염 → 오버홀 후 배기 성능 복원" },
-              { industry: "연구기관",   model: "Edwards nEXT 터보펌프", hint: "진공도 불량 → 원인 진단 + 부품 교체" },
+              { industry: "2차전지 제조", model: "Edwards EXS 드라이 스크류", hint: "전해질 디개싱 다채널 배기 시뮬레이션 검증 후 도입, 현장 안정 가동 중" },
+              { industry: "반도체·디스플레이", model: "Edwards GXS/EXS 콤비", hint: "로드락·버퍼 챔버 다단 배기 라인 구성을 시뮬레이션으로 검증 후 구매 결정" },
+              { industry: "디스플레이 기판 처리", model: "Edwards iXH", hint: "로드락~트랜스퍼 다단 챔버 배기 시뮬레이션 검증 후 설치, 현장 안정 가동 중" },
+              { industry: "금속 열처리(진공로)", model: "Edwards GXS + EH 부스터", hint: "오일씰 대비 드라이 방식의 도달시간 우위를 시뮬레이션으로 확인 후 도입" },
+              { industry: "제약(동결건조)", model: "Edwards 드라이 콤비 펌프", hint: "모터 용량 제약 조건에서 부스터 조합으로 스펙 충족을 검증 후 도입" },
+              { industry: "특수가스 취급 설비", model: "Edwards 오일프리 스크롤", hint: "부식성·폭발성 가스 대응 오일프리 방식을 검증 후 도입, 현장 안정 가동 중" },
+              { industry: "특수가스 순도관리 설비", model: "Edwards 터보펌프 + 백킹펌프", hint: "고순도 요구 스펙을 만족하는 터보펌프 조합을 검증 후 도입" },
+              { industry: "초전도 소재 제조", model: "Edwards GXS 드라이 콤비", hint: "오일 역류(오염) 리스크 회피를 위해 드라이 방식을 검증 후 선정" },
+              { industry: "디스플레이 포토 공정", model: "Edwards EXS 콤비", hint: "택트타임 단축을 위해 콤비형(부스터 통합) 펌프로 전환을 검증 후 도입" },
             ].map((c) => (
-              <div key={c.industry} className="border hair bg-white flex flex-col overflow-hidden opacity-50">
-                <div className="h-1.5 bg-line w-full" />
+              <div key={c.industry} className="border hair bg-white flex flex-col overflow-hidden">
+                <div className="h-1.5 bg-edred w-full" />
                 <div className="p-6 flex-1 flex flex-col gap-4">
                   <div className="flex items-start justify-between gap-2">
                     <div>
@@ -346,11 +351,7 @@ export default function AboutPage() {
                   </div>
                   <div className="border-t hair pt-4">
                     <div className="mono text-[9px] text-dim tracking-widest mb-2">OUTCOME</div>
-                    <div className="text-[13px] text-dim leading-[1.6] italic">{c.hint}</div>
-                  </div>
-                  <div className="mt-auto pt-3 border-t hair">
-                    <div className="h-2.5 bg-line rounded w-3/4" />
-                    <div className="h-2.5 bg-line rounded w-1/2 mt-2" />
+                    <div className="text-[13px] text-dim leading-[1.6]">{c.hint}</div>
                   </div>
                 </div>
               </div>
@@ -358,11 +359,12 @@ export default function AboutPage() {
           </div>
 
           <p className="mt-6 text-[12px] text-dim">
-            고객 동의 하에 실명·수치 데이터와 함께 공개합니다. 사례 제공을 원하시면{" "}
+            시뮬레이션 리포트 기반으로 정리한 사례이며, 개별 공정 조건·수치는 고객사 보안을 위해 범위·일반화 처리했습니다.
+            더 상세한 데이터가 필요하시면{" "}
             <a href="mailto:info@smartechvacuum.com" className="underline hover:text-edred transition-colors">
               info@smartechvacuum.com
             </a>
-            으로 연락해 주세요.
+            으로 문의해 주세요.
           </p>
         </div>
       </section>
