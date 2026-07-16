@@ -291,6 +291,44 @@ export default async function IndustryDetailPage({
         </div>
       </section>
 
+      {/* ═══════════════ ENGINEERING NOTES (실제 시뮬레이션 데이터 기반) ═══════════════ */}
+      {industry.engineeringNotes && industry.engineeringNotes.length > 0 && (
+        <section className="border-b hair py-20 bg-[#F6F4EF]">
+          <div className="max-w-[1400px] mx-auto px-6">
+            <div className="grid grid-cols-12 gap-6 mb-12">
+              <div className="col-span-12 lg:col-span-6">
+                <div className="mono text-[11px] dim mb-4">
+                  — 04 · FIELD DATA
+                </div>
+                <h2 className="display text-[34px] leading-[1.1]">
+                  실제 시뮬레이션으로 <span className="italic text-edred">확인된 것</span>
+                </h2>
+                <p className="mt-4 text-[13px] dim max-w-[48ch]">
+                  Edwards 공식 시뮬레이션 데이터를 기반으로 한 실전 엔지니어링 노트입니다. 회사명·수치는 보안상 범위·일반화 처리했습니다.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-0 border-t border-l hair">
+              {industry.engineeringNotes.map((note, i) => (
+                <div
+                  key={i}
+                  className="p-7 border-r border-b hair bg-paper flex gap-4"
+                >
+                  <div className="mono text-[11px] text-edred shrink-0 pt-1">
+                    {String(i + 1).padStart(2, "0")}
+                  </div>
+                  <div>
+                    <div className="text-[15px] font-semibold mb-2">{note.title}</div>
+                    <div className="text-[13.5px] leading-[1.7] text-[#2a2823]">{note.body}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ═══════════════ PREV / NEXT ═══════════════ */}
       <section className="border-b hair">
         <div className="grid grid-cols-1 md:grid-cols-2 divide-x hair">
