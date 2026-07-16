@@ -66,6 +66,11 @@ export async function PATCH(req: Request) {
   // slug는 unique 컬럼이라 빈 문자열이 여러 건 저장되면 충돌 → null로 정규화
   if ("slug" in updates) {
     updates.slug = updates.slug?.trim() || null;
+    // 숫자로만 된 슬러그는 /blog/[id]의 레거시 숫자 URL 판별 로직과 충돌해
+    // 해당 글이 자기 슬러그로는 영영 접근 불가능해짐 — 저장 자체를 막는다
+    if (updates.slug && /^\d+$/.test(updates.slug)) {
+      return NextResponse.json({ error: "슬러그는 숫자로만 구성할 수 없습니다 (예: 123)" }, { status: 400 });
+    }
   }
 
   // 발행 처리 시 publishedAt 자동 세팅

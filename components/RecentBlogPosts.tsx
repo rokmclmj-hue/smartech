@@ -18,7 +18,7 @@ export default async function RecentBlogPosts() {
     where: { status: "PUBLISHED" },
     orderBy: { publishedAt: "desc" },
     take: 3,
-    select: { id: true, title: true, metaDesc: true, category: true, publishedAt: true, createdAt: true },
+    select: { id: true, slug: true, title: true, metaDesc: true, category: true, publishedAt: true, createdAt: true },
   });
 
   // 발행된 글이 없으면 섹션 자체를 숨김
@@ -39,7 +39,7 @@ export default async function RecentBlogPosts() {
           </div>
           <div className="col-span-12 lg:col-span-4 lg:col-start-9 flex items-end pb-2">
             <p className="text-[14px] leading-[1.8] text-[#6A6660]">
-              30년 경력 현장 경험을 바탕으로<br />
+              진공펌프 수리 경력 30년의 전담 엔지니어와 현장 경험을 바탕으로<br />
               수리·납기·기술 정보를 정직하게 정리합니다.
             </p>
           </div>
@@ -53,7 +53,7 @@ export default async function RecentBlogPosts() {
             return (
               <Link
                 key={post.id}
-                href={`/blog/${post.id}`}
+                href={`/blog/${post.slug ?? post.id}`}
                 className="group border-r border-b hair p-8 flex flex-col gap-4 hover:bg-ink hover:text-paper transition-colors"
               >
                 {/* 카테고리 + 날짜 */}

@@ -12,10 +12,11 @@ export default async function ModelDetail({ category, model, index }: ModelLooku
 
   // 같은 카테고리 안에서 이 모델 코드로 시작하는 실제 판매 SKU만 추려서 보여준다
   // (예: "RV3" → "RV3 100-127V/200-254V 50/60Hz" 같은 파생 SKU들)
+  // DB에서 먼저 contains로 좁혀서 가져온 뒤 JS에서 단어 경계로 정밀 필터링 —
+  // take로 자르면 카테고리 내 제품이 많을 때 실제 SKU가 누락될 수 있어 제거함
   const candidates = await prisma.product.findMany({
-    where: { category },
+    where: { category, description: { contains: model, mode: "insensitive" } },
     select: { partNo: true, description: true },
-    take: 200,
   });
   const boundary = new RegExp(`(^|[^A-Za-z0-9])${escapeRegex(model)}([^A-Za-z0-9]|$)`, "i");
   const relatedSkus = candidates.filter((p) => boundary.test(p.description));

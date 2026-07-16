@@ -42,7 +42,7 @@ function convertTablesInText(text) {
   while (i < lines.length) {
     const line = lines[i];
     const isTableHeader = /^\|.*\|\s*$/.test(line.trim());
-    const nextIsSeparator = i + 1 < lines.length && /^\|?[\s:-]+\|[\s:|-]+$/.test(lines[i + 1].trim());
+    const nextIsSeparator = i + 1 < lines.length && /^\|?[\s:-]+\|[\s:|-]*$/.test(lines[i + 1].trim());
     if (isTableHeader && nextIsSeparator) {
       const block = [lines[i], lines[i + 1]];
       let j = i + 2;
