@@ -22,7 +22,9 @@
     "20200824_095912.jpg": { "topic": "RV펌프-수리비용-3가지요소-20260627", "date": "2026-06-19", "blurred": false },
     "2E2M80_동결건조_0260604_141754.jpg": { "topic": "동결건조-식품등급오일-20260704", "date": "2026-07-04", "blurred": true },
     "현장사진_스퍼터장비_E2M275+EH2600.jpg": { "topic": "0710-반도체-드라이펌프", "date": "2026-07-10", "blurred": true },
-    "GCMS분석장비_진공펌프_20260710.jpg": { "topic": "0710-의료용진공펌프", "date": "2026-07-10", "blurred": true }
+    "GCMS분석장비_진공펌프_20260710.jpg": { "topic": "0710-의료용진공펌프", "date": "2026-07-10", "blurred": true },
+    "nXDS6i turbo pumping system.jpg": { "topic": "0718-가속기-드라이펌프", "date": "2026-07-18", "blurred": true },
+    "진공펌프 현장연결 배관사진.jpeg": { "topic": "0718-수냉공랭-드라이펌프", "date": "2026-07-18", "blurred": true }
   },
   "AI생성이미지": {
     "스퍼터 공정 에드워드 드라이진공펌프": ["thumbnail.png", "body-1.png", "body-2.png", "body-3.png", "body-4.png", "body-5.png"],
@@ -39,6 +41,9 @@
     "연구용-피라니-이온게이지-비교-20260613": ["thumbnail.png", "field-1.png", "image-01.png", "image-02.png"],
     "진공로-드라이펌프-선택기준-20260623": ["thumbnail.png", "field-1.png", "image-01.png", "image-02.png"],
     "동결건조-식품등급오일-20260704": ["thumbnail.png", "field-1.png", "image-01.png", "image-02.png"],
-    "초전도-가속기-이온게이지-20260704": ["thumbnail.png", "field-1.png", "image-01.png", "image-02.png"]
+    "초전도-가속기-이온게이지-20260704": ["thumbnail.png", "field-1.png", "image-01.png", "image-02.png"],
+    "0718-가속기-드라이펌프": ["thumbnail.png", "field-1.png", "사진2.png", "사진3.png"],
+    "0718-수냉공랭-드라이펌프": ["thumbnail.png", "사진2.png", "사진3.png"],
+    "0718-용접브레이징-드라이펌프": ["thumbnail.png", "사진1.png", "사진2.png", "사진3.png", "사진4.png", "사진5.png"]
   }
 }

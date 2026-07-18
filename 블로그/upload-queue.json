@@ -1,23 +1,23 @@
 {
-  "_week": "2026-W29",
-  "_created": "2026-07-10",
+  "_week": "2026-W30",
+  "_created": "2026-07-18",
   "_note": "토/일에 Claude가 자동으로 채워줌. 직접 수정 금지.",
   "day1": {
-    "folder": "기술블로그/2026-07/0710-반도체-드라이펌프",
-    "title": "반도체 에칭·CMP 공정 드라이펌프 선택 기준 — 부식성 가스부터 방식 선정까지",
-    "uploaded": true,
-    "approved": true
+    "folder": "기술블로그/2026-07/0718-가속기-드라이펌프",
+    "title": "대형 과학장비 러프 진공 — 가속기·핵융합 드라이펌프 선택 기준",
+    "uploaded": false,
+    "approved": false
   },
   "day2": {
-    "folder": "기술블로그/2026-07/0710-태양전지-드라이펌프",
-    "title": "태양광 태양전지 제조 공정 드라이펌프 선택 기준 — 대면적 배기부터 청정도까지",
-    "uploaded": true,
-    "approved": true
+    "folder": "기술블로그/2026-07/0718-수냉공랭-드라이펌프",
+    "title": "수냉식 vs 공랭식 드라이펌프 선택 기준",
+    "uploaded": false,
+    "approved": false
   },
   "day3": {
-    "folder": "기술블로그/2026-07/0710-의료용진공펌프",
-    "title": "의료·생명공학 진공 시스템 드라이펌프 선택 기준 — 오일 프리부터 동결건조까지",
-    "uploaded": true,
-    "approved": true
+    "folder": "기술블로그/2026-07/0718-용접브레이징-드라이펌프",
+    "title": "전자빔 용접·진공 브레이징 드라이펌프 선택 기준",
+    "uploaded": false,
+    "approved": false
   }
 }
