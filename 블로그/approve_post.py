@@ -5,8 +5,20 @@ approve_post.py — upload-queue.json approved=true 설정 후 upload_post.py �
   python approve_post.py "2026-06/진공건조-드라이펌프-선택기준-20260613"
 """
 import sys, json, os, subprocess, tempfile, shutil
+from datetime import datetime
 
 sys.stdout.reconfigure(encoding="utf-8")
+
+LOG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "upload-log.txt")
+
+
+def log(msg):
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    line = f"[{timestamp}] {msg}"
+    print(line)
+    with open(LOG_FILE, "a", encoding="utf-8") as f:
+        f.write(line + "\n")
+
 
 folder = sys.argv[1].strip() if len(sys.argv) > 1 else None
 if not folder:
@@ -68,3 +80,4 @@ except Exception:
     os.unlink(tmp_path)
     raise
 print(f"[OK] {matched} → uploaded=true 기록 완료")
+log(f"✅ [수동승인/approve_post.py] 업로드 완료: {queue[matched].get('title', folder)} (폴더: {folder})")

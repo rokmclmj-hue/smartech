@@ -95,7 +95,7 @@ img2_html = f"""<!DOCTYPE html>
   <div class="note">물의 삼중점: 0°C · 약 6 mbar — 이보다 낮은 조건에서 승화</div>
 </body></html>"""
 
-# ── 사진3: 스크류 드라이펌프 재생모드 작동 흐름 ─────────────
+# ── 사진3: 스크류 드라이펌프 오일프리 유지보수 흐름 ─────────────
 img3_html = f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8"><style>
   * {{ margin:0; padding:0; box-sizing:border-box; }}
@@ -109,7 +109,7 @@ img3_html = f"""<!DOCTYPE html>
   .arrow {{ color:#7EB3F7; font-size:28px; }}
 </style></head>
 <body>
-  <h2>스크류 드라이펌프 — 재생모드 작동 흐름</h2>
+  <h2>스크류 드라이펌프 — 오일프리 유지보수 흐름</h2>
   <div class="flow">
     <div class="box">
       <div class="box-title">① 공정 종료</div>
@@ -117,8 +117,8 @@ img3_html = f"""<!DOCTYPE html>
     </div>
     <div class="arrow">→</div>
     <div class="box">
-      <div class="box-title">② 재생 모드 가동</div>
-      <div class="box-desc">내부 잔류 수분·오염 빠르게 건조</div>
+      <div class="box-title">② 오일 점검·교환 불필요</div>
+      <div class="box-desc">100% 오일프리라 별도 점검 없이 바로 대기</div>
     </div>
     <div class="arrow">→</div>
     <div class="box">
@@ -157,7 +157,7 @@ img4_html = f"""<!DOCTYPE html>
     <div class="card good">
       <span class="tag good">규제 적합</span>
       <div class="card-title">무오일 드라이 스크류 펌프</div>
-      <div class="card-desc">오일 교환 불필요, 재생모드로 반복 배치 처리량을 안정적으로 유지합니다.</div>
+      <div class="card-desc">오일 교환 불필요, 배치 종료 직후 바로 다음 배치를 가동할 수 있습니다.</div>
     </div>
   </div>
 </body></html>"""
@@ -194,7 +194,7 @@ img5_html = f"""<!DOCTYPE html>
       <div class="model-sub">산업용 드라이 스크류 펌프</div>
       <div class="divider"></div>
       <div class="spec-row"><span class="spec-label">용도</span><span class="spec-value">대형 동결건조·생산라인</span></div>
-      <div class="spec-row"><span class="spec-label">특징</span><span class="spec-value">재생모드 · 고배기량</span></div>
+      <div class="spec-row"><span class="spec-label">특징</span><span class="spec-value">오일프리 · 고배기량</span></div>
     </div>
   </div>
 </body></html>"""
