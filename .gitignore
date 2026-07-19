@@ -48,6 +48,10 @@ tunnel.log
 
 # typescript
 *.tsbuildinfo
+
+# python cache
+__pycache__/
+*.pyc
 next-env.d.ts
 
 # database
