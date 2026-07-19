@@ -465,6 +465,14 @@ export default async function BlogPostPage({ params }: Props) {
             >
               031-204-7170
             </a>
+            <a
+              href="https://www.youtube.com/@%EC%8A%A4%EB%A7%88%ED%85%8D%EC%A7%84%EA%B3%B5%ED%8E%8C%ED%94%84"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mono text-[11px] tracking-[0.1em] uppercase border border-black bg-white text-black px-5 py-2.5 hover:bg-black hover:text-white transition-colors"
+            >
+              유튜브 채널 →
+            </a>
           </div>
           {/* 관련 제품 페이지 바로가기 */}
           {productKeyword && (

@@ -226,6 +226,7 @@ keywords: [키워드, ...]
 Tel : 031 204 7170
 info@smartechvacuum.com
 www.smartechvacuum.com
+유튜브 : https://www.youtube.com/@스마텍진공펌프
 
 ```
 
