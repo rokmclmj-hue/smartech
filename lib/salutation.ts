@@ -3,8 +3,8 @@ export function formatSalutation(
   title?: string | null,
   fallback = "담당자"
 ): string {
-  const trimmedName = name?.trim();
+  const trimmedName = name?.trim().replace(/ ?님$/, "");
   if (!trimmedName) return `${fallback}님`;
-  const trimmedTitle = title?.trim();
+  const trimmedTitle = title?.trim().replace(/ ?님$/, "");
   return trimmedTitle ? `${trimmedName} ${trimmedTitle}님` : `${trimmedName}님`;
 }
