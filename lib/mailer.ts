@@ -177,9 +177,10 @@ export async function sendManualDeliveryNote(opts: {
   noteNo: string;
   toCompany: string;
   contactName?: string | null;
+  contactTitle?: string | null;
   bodyText?: string;
 }): Promise<void> {
-  const contact = formatSalutation(opts.contactName);
+  const contact = formatSalutation(opts.contactName, opts.contactTitle);
   await transporter.sendMail({
     from: `"스마텍" <${process.env.GMAIL_USER}>`,
     to: opts.to,

@@ -53,6 +53,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     noteNo: note.noteNo,
     toCompany: note.toCompany,
     contactName: note.toName,
+    contactTitle: note.toTitle,
     bodyText: body.bodyText ?? undefined,
   });
 
