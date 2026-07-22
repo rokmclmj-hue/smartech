@@ -57,6 +57,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     pdfBuffer: pdf,
     orderNo: order.orderNo,
     toCompany: order.toCompany,
+    contactName: order.toName,
     bodyText: body.bodyText ?? order.message ?? undefined,
     subject: body.subject ?? undefined,
   });
