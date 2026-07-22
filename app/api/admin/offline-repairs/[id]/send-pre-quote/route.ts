@@ -31,7 +31,7 @@ export async function POST(req: NextRequest, { params }: Params) {
 
   const estimatedCost: number | null = body.estimatedCost ? Number(body.estimatedCost) : null;
   const note: string = body.note ?? "";
-  const companyName = job.company?.companyName ?? job.contactName ?? "고객사";
+  const companyName = job.company?.companyName ?? "고객사";
   const contact = job.contactName?.trim() ? `${job.contactName.trim()}님` : "담당자님";
 
   const costLine = estimatedCost != null
