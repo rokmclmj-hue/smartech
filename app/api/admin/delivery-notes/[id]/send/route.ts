@@ -52,6 +52,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     pdfBuffer: pdf,
     noteNo: note.noteNo,
     toCompany: note.toCompany,
+    contactName: note.toName,
     bodyText: body.bodyText ?? undefined,
   });
 

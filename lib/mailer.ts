@@ -175,15 +175,17 @@ export async function sendManualDeliveryNote(opts: {
   pdfBuffer: Buffer;
   noteNo: string;
   toCompany: string;
+  contactName?: string | null;
   bodyText?: string;
 }): Promise<void> {
+  const contact = opts.contactName?.trim() ? `${opts.contactName.trim()}님` : "담당자님";
   await transporter.sendMail({
     from: `"스마텍" <${process.env.GMAIL_USER}>`,
     to: opts.to,
     subject: `[스마텍] 거래명세표 ${opts.noteNo} 발송드립니다.`,
     text:
       opts.bodyText ??
-      `${opts.toCompany} 담당자님, 안녕하세요.\n\n스마텍입니다.\n거래명세표(${opts.noteNo})를 첨부하여 드립니다.\n궁금하신 사항이 있으시면 언제든 연락 주세요.\n\n감사합니다.\n(주)스마텍`,
+      `${opts.toCompany} ${contact}, 안녕하세요.\n\n스마텍입니다.\n거래명세표(${opts.noteNo})를 첨부하여 드립니다.\n궁금하신 사항이 있으시면 언제든 연락 주세요.\n\n감사합니다.\n(주)스마텍`,
     attachments: [
       {
         filename: `거래명세표_${opts.noteNo}.pdf`,
