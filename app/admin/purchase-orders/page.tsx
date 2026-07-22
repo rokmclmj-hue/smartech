@@ -248,7 +248,7 @@ function OrderForm({ onSaved, initialData }: { onSaved: () => void; initialData?
       const sendRes = await fetch(`/api/admin/purchase-orders/${saveData.id}/send`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ toEmail, ccEmails, bodyText: ensureSignature(message, toCompany, ""), subject: makeSubject(department, items) }),
+        body: JSON.stringify({ toEmail, ccEmails, bodyText: ensureSignature(message, toCompany, "", toName), subject: makeSubject(department, items) }),
       });
       const sendData = await sendRes.json();
       if (!sendRes.ok) { setError(sendData.error ?? "메일 발송 오류가 발생했습니다."); return; }
@@ -471,7 +471,7 @@ function OrderForm({ onSaved, initialData }: { onSaved: () => void; initialData?
               <div className="flex gap-3">
                 <span className="mono text-[10px] dim w-12 shrink-0 mt-0.5">본문</span>
                 <pre className="text-[12px] whitespace-pre-wrap leading-relaxed flex-1 max-h-32 overflow-y-auto">
-                  {ensureSignature(message, toCompany, "") || "(본문 없음)"}
+                  {ensureSignature(message, toCompany, "", toName) || "(본문 없음)"}
                 </pre>
               </div>
             </div>
@@ -492,11 +492,11 @@ function OrderForm({ onSaved, initialData }: { onSaved: () => void; initialData?
   );
 }
 
-const DEFAULT_MAIL_BODY = (toCompany: string, orderNo: string) =>
-  `${toCompany} 담당자님, 안녕하세요.\n\n스마텍입니다.\n발주서(${orderNo})를 첨부하여 드립니다.\n납기 확인 후 회신 부탁드립니다.\n\n감사합니다.\n이명재 배상`;
+const DEFAULT_MAIL_BODY = (toCompany: string, orderNo: string, toName?: string | null) =>
+  `${toCompany} ${toName?.trim() ? `${toName.trim()}님` : "담당자님"}, 안녕하세요.\n\n스마텍입니다.\n발주서(${orderNo})를 첨부하여 드립니다.\n납기 확인 후 회신 부탁드립니다.\n\n감사합니다.\n이명재 배상`;
 
-function ensureSignature(msg: string, toCompany: string, orderNo: string): string {
-  const base = msg || DEFAULT_MAIL_BODY(toCompany, orderNo);
+function ensureSignature(msg: string, toCompany: string, orderNo: string, toName?: string | null): string {
+  const base = msg || DEFAULT_MAIL_BODY(toCompany, orderNo, toName);
   if (base.includes("이명재 배상")) return base;
   return base + "\n이명재 배상";
 }
@@ -514,14 +514,14 @@ function OrderRow({ order, onDelete, onCopy }: { order: PurchaseOrder; onDelete:
   const [previewOpen, setPreviewOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [mailBody, setMailBody] = useState(
-    ensureSignature(order.message ?? "", order.toCompany, order.orderNo)
+    ensureSignature(order.message ?? "", order.toCompany, order.orderNo, order.toName)
   );
 
   useEffect(() => {
     setSendEmail(order.toEmail ?? "");
     setCcInput(order.ccEmails ?? "");
-    setMailBody(ensureSignature(order.message ?? "", order.toCompany, order.orderNo));
-  }, [order.toEmail, order.ccEmails, order.message, order.toCompany, order.orderNo]);
+    setMailBody(ensureSignature(order.message ?? "", order.toCompany, order.orderNo, order.toName));
+  }, [order.toEmail, order.ccEmails, order.message, order.toCompany, order.orderNo, order.toName]);
 
   const totalSupply = order.items.reduce((s, i) => s + i.unitPrice * i.quantity, 0);
   const grand = Math.round(totalSupply * 1.1);

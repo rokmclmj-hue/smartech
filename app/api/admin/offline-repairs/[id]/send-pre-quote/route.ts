@@ -32,6 +32,7 @@ export async function POST(req: NextRequest, { params }: Params) {
   const estimatedCost: number | null = body.estimatedCost ? Number(body.estimatedCost) : null;
   const note: string = body.note ?? "";
   const companyName = job.company?.companyName ?? job.contactName ?? "고객사";
+  const contact = job.contactName?.trim() ? `${job.contactName.trim()}님` : "담당자님";
 
   const costLine = estimatedCost != null
     ? `예상 수리 비용: ${estimatedCost.toLocaleString("ko-KR")}원 (부가세 별도)`
@@ -40,7 +41,7 @@ export async function POST(req: NextRequest, { params }: Params) {
   const bodyText = [
     `[스마텍 수리 사전 견적 안내]`,
     ``,
-    `${companyName} 담당자님, 안녕하십니까.`,
+    `${companyName} ${contact}, 안녕하십니까.`,
     `스마텍에서 접수하신 장비의 사전 견적을 안내해 드립니다.`,
     ``,
     `■ 접수 정보`,
