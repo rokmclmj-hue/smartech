@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { formatSalutation } from "./salutation";
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -178,7 +179,7 @@ export async function sendManualDeliveryNote(opts: {
   contactName?: string | null;
   bodyText?: string;
 }): Promise<void> {
-  const contact = opts.contactName?.trim() ? `${opts.contactName.trim()}님` : "담당자님";
+  const contact = formatSalutation(opts.contactName);
   await transporter.sendMail({
     from: `"스마텍" <${process.env.GMAIL_USER}>`,
     to: opts.to,
@@ -206,7 +207,7 @@ export async function sendManualPurchaseOrder(opts: {
   bodyText?: string;
   subject?: string;
 }): Promise<void> {
-  const contact = opts.contactName?.trim() ? `${opts.contactName.trim()}님` : "담당자님";
+  const contact = formatSalutation(opts.contactName);
   await transporter.sendMail({
     from: `"스마텍" <${process.env.GMAIL_USER}>`,
     to: opts.to,

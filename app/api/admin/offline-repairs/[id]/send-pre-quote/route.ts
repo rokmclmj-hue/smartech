@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAdminSession } from "@/lib/admin-auth";
+import { formatSalutation } from "@/lib/salutation";
 import nodemailer from "nodemailer";
 
 type Params = { params: Promise<{ id: string }> };
@@ -32,7 +33,7 @@ export async function POST(req: NextRequest, { params }: Params) {
   const estimatedCost: number | null = body.estimatedCost ? Number(body.estimatedCost) : null;
   const note: string = body.note ?? "";
   const companyName = job.company?.companyName ?? "고객사";
-  const contact = job.contactName?.trim() ? `${job.contactName.trim()}님` : "담당자님";
+  const contact = formatSalutation(job.contactName);
 
   const costLine = estimatedCost != null
     ? `예상 수리 비용: ${estimatedCost.toLocaleString("ko-KR")}원 (부가세 별도)`

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
+import { formatSalutation } from "@/lib/salutation";
 
 // ── 타입 ──────────────────────────────────────────
 type OrderItem = {
@@ -493,7 +494,7 @@ function OrderForm({ onSaved, initialData }: { onSaved: () => void; initialData?
 }
 
 const DEFAULT_MAIL_BODY = (toCompany: string, orderNo: string, toName?: string | null) =>
-  `${toCompany} ${toName?.trim() ? `${toName.trim()}님` : "담당자님"}, 안녕하세요.\n\n스마텍입니다.\n발주서(${orderNo})를 첨부하여 드립니다.\n납기 확인 후 회신 부탁드립니다.\n\n감사합니다.\n이명재 배상`;
+  `${toCompany} ${formatSalutation(toName)}, 안녕하세요.\n\n스마텍입니다.\n발주서(${orderNo})를 첨부하여 드립니다.\n납기 확인 후 회신 부탁드립니다.\n\n감사합니다.\n이명재 배상`;
 
 function ensureSignature(msg: string, toCompany: string, orderNo: string, toName?: string | null): string {
   const base = msg || DEFAULT_MAIL_BODY(toCompany, orderNo, toName);
