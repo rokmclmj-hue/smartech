@@ -14,6 +14,7 @@ import {
 import { NextResponse } from "next/server";
 import { VAT_RATE } from "./constants";
 import { SMARTECH_COMPANY } from "./company";
+import { computeRepairQuoteAmounts } from "./repairQuoteAmounts";
 
 Font.register({
   family: "Pretendard",
@@ -1473,11 +1474,7 @@ function RepairQuoteDocument({ data }: { data: RepairQuoteForPdf }) {
   const el = React.createElement;
   const issued = new Date();
   const year = issued.getFullYear();
-  const itemsSum = data.items.reduce((s, it) => s + it.unitPrice * it.quantity, 0);
-  // repairCost가 직접 수정된 경우 그 값을 최종 견적금액으로 우선 사용, 없으면 품목 합계
-  const supply = data.repairCost ?? (data.items.length > 0 ? itemsSum : null);
-  const vat = supply != null ? Math.round(supply * VAT_RATE) : 0;
-  const total = (supply ?? 0) + vat;
+  const { supply, vat, total } = computeRepairQuoteAmounts(data.repairCost, data.items);
 
   const partsOneLine = data.repairPartsText
     ?.split("\n")

@@ -11,7 +11,8 @@
     "db:seed": "tsx scripts/import-products.ts",
     "import-prices": "tsx scripts/import-prices.ts",
     "lint": "eslint \"app/**/*.{ts,tsx}\" \"components/**/*.{ts,tsx}\" \"lib/**/*.{ts,tsx}\"",
-    "seo-check": "node scripts/seo-check.mjs"
+    "seo-check": "node scripts/seo-check.mjs",
+    "test:repair-quote": "tsx scripts/test-repair-quote-amounts.mts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
