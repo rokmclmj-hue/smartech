@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { getAdminSession } from "@/lib/admin-auth";
 import { randomUUID } from "crypto";
 import { sendSubUploadLink } from "@/lib/mailer";
+import { resolveCompanyId } from "@/lib/known-company";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -106,6 +107,10 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   }
 
   // 상태·기본정보·견적 수정
+  const companyId = (body.companyId !== undefined || body.companyName !== undefined)
+    ? await resolveCompanyId(body.companyId, body.companyName)
+    : undefined;
+
   const updated = await prisma.offlineRepairJob.update({
     where: { id: nId },
     data: {
@@ -122,7 +127,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       ...(body.quoteRemarks !== undefined && { quoteRemarks: body.quoteRemarks || null }),
       ...(body.subEmail !== undefined && { subEmail: body.subEmail || null }),
       ...(body.subName !== undefined && { subName: body.subName || null }),
-      ...(body.companyId !== undefined && { companyId: body.companyId ?? null }),
+      ...(companyId !== undefined && { companyId }),
       // 견적 품목 (기본수리 + 추가파트) — 통째로 교체
       ...(Array.isArray(body.quoteItems) && {
         quoteItems: {

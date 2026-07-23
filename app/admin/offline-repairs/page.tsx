@@ -118,6 +118,7 @@ function JobForm({ onSaved }: { onSaved: (newJobId: number) => void }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           companyId: selectedCompany?.id ?? null,
+          companyName: selectedCompany ? undefined : companyQ.trim(),
           items,
           subName, subEmail: subEmail || null, contactName, contactEmail, contactPhone,
           receivedDate, requestedDate: requestedDate || null, memo,
@@ -158,6 +159,9 @@ function JobForm({ onSaved }: { onSaved: (newJobId: number) => void }) {
                   </button>
                 ))}
               </div>
+            )}
+            {!selectedCompany && companyQ.trim() && companyResults.length === 0 && (
+              <div className="text-[11px] dim mt-1">검색 결과 없음 — 저장하면 &quot;{companyQ.trim()}&quot; 이름으로 새 거래처가 등록됩니다.</div>
             )}
           </div>
           {selectedCompany && (
@@ -386,6 +390,7 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone, isSelected, onToggle
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           companyId: editSelectedCompany?.id ?? null,
+          companyName: editSelectedCompany ? undefined : editCompanyQ.trim(),
           contactName: editContactName || null,
           contactEmail: editContactEmail || null,
           contactPhone: editContactPhone || null,
@@ -763,6 +768,9 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone, isSelected, onToggle
                         </button>
                       ))}
                     </div>
+                  )}
+                  {editCompanyQ.trim() && editCompanyResults.length === 0 && (
+                    <div className="text-[11px] dim mt-1">검색 결과 없음 — 저장하면 &quot;{editCompanyQ.trim()}&quot; 이름으로 새 거래처가 등록됩니다.</div>
                   )}
                 </div>
               )}

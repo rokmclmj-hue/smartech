@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAdminSession } from "@/lib/admin-auth";
+import { resolveCompanyId } from "@/lib/known-company";
 
 // 전 모델 공통 마스터 항목 (엑셀 파싱 후 해당 항목만 isNA: false로 전환)
 const DEFAULT_ITEMS = [
@@ -58,6 +59,7 @@ export async function POST(req: NextRequest) {
 
   const year = new Date().getFullYear();
   const createdIds: number[] = [];
+  const companyId = await resolveCompanyId(body.companyId, body.companyName);
 
   await prisma.$transaction(async (tx) => {
     for (const item of rawItems) {
@@ -71,7 +73,7 @@ export async function POST(req: NextRequest) {
           repairReason: item.repairReason?.trim() || null,
           subName:      body.subName?.trim() || null,
           subEmail:     body.subEmail?.trim() || null,
-          companyId:    body.companyId ? Number(body.companyId) : null,
+          companyId,
           contactName:  body.contactName?.trim() || null,
           contactEmail: body.contactEmail?.trim() || null,
           contactPhone: body.contactPhone?.trim() || null,
