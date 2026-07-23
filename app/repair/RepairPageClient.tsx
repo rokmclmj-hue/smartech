@@ -74,6 +74,15 @@ type RepairCase = {
 
 const REPAIR_CASES: RepairCase[] = [
   {
+    model: "Edwards nXDS20i",
+    client: "E사",
+    symptom: "기본수리",
+    work: ["팁씰 교체", "베어링 교체"],
+    photo: "/images/repair/nxds20i-exterior.jpg",
+    partPhoto: "/images/repair/nxds20i-tipseal.jpg",
+    extraPhoto: "/images/repair/nxds20i-internal.jpg",
+  },
+  {
     model: "Pfeiffer DUO3",
     client: "H대",
     symptom: "기본수리 · 모터 교체",
