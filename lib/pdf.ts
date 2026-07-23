@@ -1603,7 +1603,7 @@ function RepairQuoteDocument({ data }: { data: RepairQuoteForPdf }) {
                   )
                 ),
                 el(Text, { style: [S.tdNormal, { width: "10%", textAlign: "center" }] }, "1"),
-                el(Text, { style: [S.tdAmount, { width: "22%", textAlign: "right" }] }, "협의")
+                el(Text, { style: [S.tdAmount, { width: "22%", textAlign: "right" }] }, supply != null ? fmt(supply) : "협의")
               ),
             ])
       ),
