@@ -389,8 +389,14 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone, isSelected, onToggle
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          companyId: editSelectedCompany?.id ?? null,
-          companyName: editSelectedCompany ? undefined : editCompanyQ.trim(),
+          // 거래처를 새로 선택했거나 검색어를 입력한 경우에만 거래처 필드를 보낸다.
+          // 둘 다 비어있으면(예: "✕ 변경" 후 재선택 없이 담당자 정보만 고친 경우) 보내지 않아
+          // 기존 연결이 실수로 지워지지 않도록 한다.
+          ...(editSelectedCompany
+            ? { companyId: editSelectedCompany.id }
+            : editCompanyQ.trim()
+            ? { companyName: editCompanyQ.trim() }
+            : {}),
           contactName: editContactName || null,
           contactEmail: editContactEmail || null,
           contactPhone: editContactPhone || null,

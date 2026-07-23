@@ -107,9 +107,14 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   }
 
   // 상태·기본정보·견적 수정
-  const companyId = (body.companyId !== undefined || body.companyName !== undefined)
-    ? await resolveCompanyId(body.companyId, body.companyName)
-    : undefined;
+  let companyId: number | null | undefined = undefined;
+  if (body.companyId !== undefined || body.companyName !== undefined) {
+    try {
+      companyId = await resolveCompanyId(body.companyId, body.companyName);
+    } catch {
+      return NextResponse.json({ error: "거래처 저장 실패 (잠시 후 다시 시도해주세요)" }, { status: 500 });
+    }
+  }
 
   const updated = await prisma.offlineRepairJob.update({
     where: { id: nId },

@@ -59,35 +59,40 @@ export async function POST(req: NextRequest) {
 
   const year = new Date().getFullYear();
   const createdIds: number[] = [];
-  const companyId = await resolveCompanyId(body.companyId, body.companyName);
 
-  await prisma.$transaction(async (tx) => {
-    for (const item of rawItems) {
-      const created = await tx.offlineRepairJob.create({
-        data: {
-          jobNo: "TEMP",
-          pumpMaker:    item.pumpMaker?.trim() || "EDWARDS",
-          pumpModel:    item.pumpModel!.trim(),
-          serialNo:     item.serialNo?.trim() || null,
-          voltage:      item.voltage?.trim() || null,
-          repairReason: item.repairReason?.trim() || null,
-          subName:      body.subName?.trim() || null,
-          subEmail:     body.subEmail?.trim() || null,
-          companyId,
-          contactName:  body.contactName?.trim() || null,
-          contactEmail: body.contactEmail?.trim() || null,
-          contactPhone: body.contactPhone?.trim() || null,
-          receivedDate: body.receivedDate ? new Date(body.receivedDate) : new Date(),
-          requestedDate: body.requestedDate ? new Date(body.requestedDate) : null,
-          memo:         body.memo?.trim() || null,
-          inspectionItems: { create: DEFAULT_ITEMS },
-        },
-      });
-      const jobNo = `SMT-${year}-R-${String(created.id).padStart(6, "0")}`;
-      await tx.offlineRepairJob.update({ where: { id: created.id }, data: { jobNo } });
-      createdIds.push(created.id);
-    }
-  });
+  try {
+    await prisma.$transaction(async (tx) => {
+      // 같은 트랜잭션 안에서 거래처를 찾거나 만든다 — 이후 단계가 실패하면 거래처 생성도 함께 롤백된다.
+      const companyId = await resolveCompanyId(body.companyId, body.companyName, tx);
+      for (const item of rawItems) {
+        const created = await tx.offlineRepairJob.create({
+          data: {
+            jobNo: "TEMP",
+            pumpMaker:    item.pumpMaker?.trim() || "EDWARDS",
+            pumpModel:    item.pumpModel!.trim(),
+            serialNo:     item.serialNo?.trim() || null,
+            voltage:      item.voltage?.trim() || null,
+            repairReason: item.repairReason?.trim() || null,
+            subName:      body.subName?.trim() || null,
+            subEmail:     body.subEmail?.trim() || null,
+            companyId,
+            contactName:  body.contactName?.trim() || null,
+            contactEmail: body.contactEmail?.trim() || null,
+            contactPhone: body.contactPhone?.trim() || null,
+            receivedDate: body.receivedDate ? new Date(body.receivedDate) : new Date(),
+            requestedDate: body.requestedDate ? new Date(body.requestedDate) : null,
+            memo:         body.memo?.trim() || null,
+            inspectionItems: { create: DEFAULT_ITEMS },
+          },
+        });
+        const jobNo = `SMT-${year}-R-${String(created.id).padStart(6, "0")}`;
+        await tx.offlineRepairJob.update({ where: { id: created.id }, data: { jobNo } });
+        createdIds.push(created.id);
+      }
+    });
+  } catch {
+    return NextResponse.json({ error: "수리접수 저장 실패 (잠시 후 다시 시도해주세요)" }, { status: 500 });
+  }
 
   return NextResponse.json({ id: createdIds[0], ids: createdIds }, { status: 201 });
 }
