@@ -1,6 +1,8 @@
 // 수리견적서 PDF 금액 계산 회귀 테스트
 // 2026-07-23: 추가파트 없을 때 견적금액이 무시되고 "협의"로 나오던 버그(커밋 c769ff9) 재발 방지용.
 // 실행: npx tsx scripts/test-repair-quote-amounts.mts
+// 이 환경의 tsx가 .ts→CJS 변환 파일의 named export를 정적으로 인식 못 하는 버그가 있어
+// default import로 우회함 (named import 시 "does not provide an export" 에러 발생)
 import mod from "../lib/repairQuoteAmounts";
 const { computeRepairQuoteAmounts } = mod as unknown as typeof import("../lib/repairQuoteAmounts");
 
