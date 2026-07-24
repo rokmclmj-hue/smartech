@@ -159,6 +159,9 @@ export async function PATCH(req: NextRequest) {
       subject: `Re: ${task.subject}`,
       text: finalDraft ?? task.aiDraft ?? "",
       attachments,
+      // 원본 문의 메일의 Message-ID를 참조해 진짜 스레드 회신으로 연결 (고객 메일함에서 원본과 이어져 보임)
+      inReplyTo: task.gmailMessageId,
+      references: task.gmailMessageId,
     });
 
     await prisma.emailTask.update({

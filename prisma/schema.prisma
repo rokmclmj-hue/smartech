@@ -69,6 +69,7 @@ model Quote {
   totalAmount         Float?
   sentAt              DateTime?
   sendCount           Int         @default(0)
+  sentChannel         String?     // SYSTEM(자동발송) | MANUAL(PDF저장 후 수동발송) — sentAt이 채워질 때만 의미 있음
   createdByAdminId    Int?
   guestName           String?
   guestCompany        String?

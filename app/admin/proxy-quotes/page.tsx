@@ -183,6 +183,8 @@ function AdminProxyQuotesInner() {
   const [sent, setSent] = useState(false);
   const [attachFiles, setAttachFiles] = useState<{ name: string; base64: string; contentType: string }[]>([]);
   const [sentAttachCount, setSentAttachCount] = useState(0);
+  const [markingManual, setMarkingManual] = useState(false);
+  const [manualSent, setManualSent] = useState(false);
 
   // 저장된 회사 서류 (사업자등록증·통장사본)
   type DocInfo = { url: string | null; name: string | null };
@@ -583,6 +585,29 @@ function AdminProxyQuotesInner() {
     }
   }
 
+  async function markManualSent() {
+    if (!doneQuoteId) return;
+    setMarkingManual(true);
+    try {
+      const res = await fetch("/api/admin/quotes", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ quoteId: doneQuoteId, action: "markManualSent" }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        toast.error(data.error ?? "기록에 실패했습니다.");
+        return;
+      }
+      setManualSent(true);
+      toast.success("수동 발송으로 기록했습니다.");
+    } catch {
+      toast.error("네트워크 오류가 발생했습니다.");
+    } finally {
+      setMarkingManual(false);
+    }
+  }
+
   // ── 발행 완료 화면 ────────────────────────────────────────
 
   if (doneQuoteId) {
@@ -702,10 +727,26 @@ function AdminProxyQuotesInner() {
               📄 견적서 보기 · PDF 저장 →
             </a>
 
+            {/* 구글메일 등으로 직접 보낸 경우 — 발송 여부만 기록 */}
+            {manualSent ? (
+              <div className="border border-green-500/40 rounded-md px-4 py-2.5 text-[12px] text-center text-green-600">
+                ✓ 수동 발송으로 기록됨
+              </div>
+            ) : (
+              <button
+                onClick={markManualSent}
+                disabled={markingManual}
+                className="text-[12px] dim hover:text-ink transition-colors text-center disabled:opacity-40"
+              >
+                {markingManual ? "기록 중…" : "위 PDF를 직접 메일로 보내셨나요? → 발송 기록만 남기기"}
+              </button>
+            )}
+
             {/* 새 견적 작성 */}
             <button
               onClick={() => {
                 setDoneQuoteId(null); setSent(false); setSentAttachCount(0);
+                setManualSent(false);
                 setLines([]); clearCustomer();
                 router.replace("/admin/proxy-quotes");
               }}

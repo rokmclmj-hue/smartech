@@ -260,6 +260,7 @@ export async function POST(
         data: {
           sentAt: new Date(),
           sendCount: { increment: 1 },
+          sentChannel: "SYSTEM",
           ...(quote.status !== "CONFIRMED" ? { status: "SENT" } : {}),
         },
       });

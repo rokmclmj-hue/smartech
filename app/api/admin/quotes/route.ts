@@ -101,5 +101,23 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ ok: true, status: quote.status });
   }
 
+  if (action === "markManualSent") {
+    // PDF 저장 후 구글메일 등으로 직접 보낸 경우 — 발송 여부만 시스템에 기록
+    const existing = await prisma.quote.findUnique({ where: { id: quoteId } });
+    if (!existing) {
+      return NextResponse.json({ error: "견적을 찾을 수 없습니다" }, { status: 404 });
+    }
+    const quote = await prisma.quote.update({
+      where: { id: quoteId },
+      data: {
+        sentAt: new Date(),
+        sendCount: { increment: 1 },
+        sentChannel: "MANUAL",
+        ...(existing.status !== "CONFIRMED" ? { status: "SENT" } : {}),
+      },
+    });
+    return NextResponse.json({ ok: true, status: quote.status, sentChannel: quote.sentChannel });
+  }
+
   return NextResponse.json({ error: "유효하지 않은 action" }, { status: 400 });
 }
