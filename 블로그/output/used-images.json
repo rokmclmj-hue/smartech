@@ -44,6 +44,9 @@
     "초전도-가속기-이온게이지-20260704": ["thumbnail.png", "field-1.png", "image-01.png", "image-02.png"],
     "0718-가속기-드라이펌프": ["thumbnail.png", "field-1.png", "사진2.png", "사진3.png"],
     "0718-수냉공랭-드라이펌프": ["thumbnail.png", "사진2.png", "사진3.png"],
-    "0718-용접브레이징-드라이펌프": ["thumbnail.png", "사진1.png", "사진2.png", "사진3.png", "사진4.png", "사진5.png"]
+    "0718-용접브레이징-드라이펌프": ["thumbnail.png", "사진1.png", "사진2.png", "사진3.png", "사진4.png", "사진5.png"],
+    "0727-진공도-단위": ["thumbnail.png", "사진1.png", "사진2.png", "사진3.png", "사진4.png"],
+    "0729-배기속도-컨덕턴스": ["thumbnail.png", "사진1.png", "사진2.png"],
+    "0731-백스트리밍": ["thumbnail.png", "사진1.png", "사진2.png", "사진3.png", "사진4.png"]
   }
 }

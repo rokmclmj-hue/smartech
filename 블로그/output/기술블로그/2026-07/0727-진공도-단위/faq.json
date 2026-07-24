@@ -1,0 +1,54 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "1 Torr는 몇 mbar인가요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "1 Torr는 1.3333 mbar(4/3 mbar)입니다. 반대로 1 mbar는 0.75 Torr(3/4 Torr)입니다. mbar 값에 0.75를 곱하면 Torr, Torr 값에 1.333을 곱하면 mbar가 됩니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "mbar와 Pa는 어떻게 환산하나요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "1 mbar는 100 Pa입니다. mbar 값에 100을 곱하면 Pa가 됩니다. Torr를 Pa로 바꾸려면 mbar↔Torr, mbar↔Pa 환산계수를 조합해 계산하며 1 Torr는 약 133.3 Pa입니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "저진공, 중진공, 고진공, 초고진공은 각각 어떤 압력 범위인가요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "저진공(RV)은 대기압~1 mbar, 중진공(MV)은 1~10⁻³ mbar, 고진공(HV)은 10⁻³~10⁻⁷ mbar입니다. 초고진공(UHV) 이후 구간은 자료마다 경계 표기가 달라, 10⁻⁷~10⁻¹⁴ mbar를 하나로 묶기도 하고 10⁻¹² mbar 미만을 극초고진공(XHV)으로 별도 구분하기도 합니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "제조사마다 압력 단위 표기가 다른 이유는 무엇인가요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Edwards, Leybold, Pfeiffer 같은 유럽·영국계 제조사는 mbar를 데이터시트 기본 단위로 쓰고, 미국계 자료·문헌은 Torr를 여전히 널리 씁니다. 학술 논문과 표준 규격은 SI 단위인 Pa를 기준으로 삼습니다. 사양서를 비교할 때는 단위부터 맞추는 것이 순서입니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "고진공 이상에서는 왜 이온화 게이지를 쓰나요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "저진공·중진공 구간은 다이아프램·부르동관·정전용량식 같은 기계식(직접식) 게이지로 측정하지만, 10⁻³ mbar 이하로 내려가면 일반 기계식 게이지로는 측정이 안 됩니다. 이 구간부터는 냉음극형(Penning), 열음극형(Bayard-Alpert) 같은 이온화 게이지가 쓰이며, 주기적인 세정과 재교정이 필요합니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "초고진공 영역의 미세 누설은 어떻게 검출하나요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "초고진공 영역의 미세 누설 검출에는 헬륨 리크 검출기가 사용됩니다. 10⁻⁷ mbar·L/s 이하의 누설까지 감지할 수 있는 사실상 유일한 방법입니다."
+      }
+    }
+  ]
+}
