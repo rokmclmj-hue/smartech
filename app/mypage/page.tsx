@@ -244,7 +244,6 @@ export default function MypagePage() {
               {quotes.map((q) => {
                 const quoteNo = fmtQuoteNo(q.id, q.createdAt);
                 const subtotal = q.items.reduce((s, i) => s + i.unitPrice * i.quantity, 0);
-                const grand = subtotal + Math.round(subtotal * 0.1);
                 const totalQty = q.items.reduce((s, i) => s + i.quantity, 0);
 
                 return (
@@ -271,8 +270,8 @@ export default function MypagePage() {
                     {/* 금액 + 품목 수 */}
                     <div className="flex items-center gap-4 mb-4 py-3 border-y border-line">
                       <div>
-                        <div className="text-[10px] text-dim mb-0.5">총액 (VAT 포함)</div>
-                        <div className="font-bold text-[18px]">{grand.toLocaleString("ko-KR")}원</div>
+                        <div className="text-[10px] text-dim mb-0.5">총액 (VAT 별도)</div>
+                        <div className="font-bold text-[18px]">{subtotal.toLocaleString("ko-KR")}원</div>
                       </div>
                       <div className="w-px h-8 bg-line" />
                       <div>
@@ -363,7 +362,6 @@ export default function MypagePage() {
                 const quoteNo = fmtQuoteNo(order.quote.id, order.quote.createdAt);
                 const orderNo = `SMT-${new Date(order.createdAt).getFullYear()}-O-${String(order.id).padStart(6, "0")}`;
                 const subtotal = order.quote.items.reduce((s, i) => s + i.unitPrice * i.quantity, 0);
-                const grand = subtotal + Math.round(subtotal * 0.1);
                 const totalQty = order.quote.items.reduce((s, i) => s + i.quantity, 0);
                 const currentStepIdx = ORDER_STATUS_STEPS.findIndex((s) => s.key === order.status);
 
@@ -419,8 +417,8 @@ export default function MypagePage() {
                     {/* 금액 + 품목 */}
                     <div className="flex items-center gap-4 mb-4 py-3 border-y border-line">
                       <div>
-                        <div className="text-[10px] text-dim mb-0.5">총액 (VAT 포함)</div>
-                        <div className="font-bold text-[18px]">{grand.toLocaleString("ko-KR")}원</div>
+                        <div className="text-[10px] text-dim mb-0.5">총액 (VAT 별도)</div>
+                        <div className="font-bold text-[18px]">{subtotal.toLocaleString("ko-KR")}원</div>
                       </div>
                       <div className="w-px h-8 bg-line" />
                       <div>
