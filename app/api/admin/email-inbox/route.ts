@@ -153,6 +153,10 @@ export async function PATCH(req: NextRequest) {
     const sendFrom = `"스마텍" <info@smartechvacuum.com>`;
     const replyAddress = replyTo ?? task.fromEmail;
 
+    // 원본 메일에 진짜 Message-ID가 없으면(lib/gmail-imap.ts가 uid-N으로 대체) 회신 헤더를 넣지 않는다
+    // — 형식이 안 맞는 값을 억지로 넣으면 스레딩이 조용히 실패하므로 이 경우는 그냥 일반 메일로 보낸다
+    const isRealMessageId = /^<.+@.+>$/.test(task.gmailMessageId);
+
     await transporter.sendMail({
       from: sendFrom,
       to: replyAddress,
@@ -160,8 +164,7 @@ export async function PATCH(req: NextRequest) {
       text: finalDraft ?? task.aiDraft ?? "",
       attachments,
       // 원본 문의 메일의 Message-ID를 참조해 진짜 스레드 회신으로 연결 (고객 메일함에서 원본과 이어져 보임)
-      inReplyTo: task.gmailMessageId,
-      references: task.gmailMessageId,
+      ...(isRealMessageId ? { inReplyTo: task.gmailMessageId, references: task.gmailMessageId } : {}),
     });
 
     await prisma.emailTask.update({

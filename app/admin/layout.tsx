@@ -90,7 +90,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             {NAV_ITEMS.map((item, index) => {
               const active = isActive(item);
               const prevGroup = NAV_ITEMS[index - 1]?.group;
-              const groupBoundary = index > 0 && item.group !== prevGroup;
+              const groupBoundary = index > 0 && !!item.group && item.group !== prevGroup;
               const showSep = index > 0;
               const count = item.badgeKey ? badgeCounts[item.badgeKey] ?? 0 : 0;
               return (
