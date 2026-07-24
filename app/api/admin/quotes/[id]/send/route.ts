@@ -4,6 +4,7 @@ import { logAudit } from "@/lib/audit";
 import { prisma } from "@/lib/db";
 import { generateQuotePdf, type QuoteForPdf } from "@/lib/pdf";
 import { sendQuotePdf } from "@/lib/mailer";
+import { VAT_RATE } from "@/lib/constants";
 
 function stripCompanyPrefix(name: string): string {
   return name
@@ -50,6 +51,8 @@ function buildHtmlBody(opts: {
   const salutation = opts.contactTitle
     ? `${opts.contactName} ${opts.contactTitle}님`
     : `${opts.contactName} 님`;
+  const vat = Math.round(opts.subtotal * VAT_RATE);
+  const grandTotal = opts.subtotal + vat;
   return `<div style="font-family:'Malgun Gothic','Apple SD Gothic Neo',Arial,sans-serif;color:#222;line-height:1.7;font-size:14px">
   <p>안녕하세요 ${salutation},<br>스마텍 이명재입니다.</p>
   <p>귀사의 일익 번창하심을 기원합니다.</p>
@@ -57,8 +60,12 @@ function buildHtmlBody(opts: {
   <table style="border-collapse:collapse;margin:18px 0;font-size:13px">
     <tr><td style="padding:6px 12px;color:#666;border:1px solid #ddd">견적번호</td>
         <td style="padding:6px 12px;border:1px solid #ddd"><strong>${opts.quoteNo}</strong></td></tr>
-    <tr><td style="padding:6px 12px;color:#666;border:1px solid #ddd">총액 (VAT 별도)</td>
-        <td style="padding:6px 12px;border:1px solid #ddd"><strong>${fmtKRW(opts.subtotal)}</strong></td></tr>
+    <tr><td style="padding:6px 12px;color:#666;border:1px solid #ddd">공급가액</td>
+        <td style="padding:6px 12px;border:1px solid #ddd">${fmtKRW(opts.subtotal)}</td></tr>
+    <tr><td style="padding:6px 12px;color:#666;border:1px solid #ddd">부가세 (10%)</td>
+        <td style="padding:6px 12px;border:1px solid #ddd">${fmtKRW(vat)}</td></tr>
+    <tr><td style="padding:6px 12px;color:#666;border:1px solid #ddd">총액</td>
+        <td style="padding:6px 12px;border:1px solid #ddd"><strong>${fmtKRW(grandTotal)}</strong></td></tr>
     <tr><td style="padding:6px 12px;color:#666;border:1px solid #ddd">유효기간</td>
         <td style="padding:6px 12px;border:1px solid #ddd">${exp}</td></tr>
   </table>
