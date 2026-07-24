@@ -4,7 +4,6 @@ import { logAudit } from "@/lib/audit";
 import { prisma } from "@/lib/db";
 import { generateDeliveryNotePdf, type DeliveryNoteForPdf } from "@/lib/pdf";
 import { sendDeliveryNotePdf } from "@/lib/mailer";
-import { VAT_RATE } from "@/lib/constants";
 
 export async function POST(
   _req: NextRequest,
@@ -64,11 +63,10 @@ export async function POST(
   const noteNo = `SMT-${year}-D-${String(order.id).padStart(6, "0")}`;
 
   const subtotal = order.quote.items.reduce((s, i) => s + i.unitPrice * i.quantity, 0);
-  const grandTotal = subtotal + Math.round(subtotal * VAT_RATE);
 
   // 이메일 발송
   try {
-    await sendDeliveryNotePdf(email, pdf as unknown as Buffer, noteNo, { company, contactName, grandTotal });
+    await sendDeliveryNotePdf(email, pdf as unknown as Buffer, noteNo, { company, contactName, subtotal });
   } catch (e) {
     console.error("[ship/mail]", e);
     return NextResponse.json({ error: "메일 발송 실패: " + (e instanceof Error ? e.message : "알 수 없음") }, { status: 500 });

@@ -4,7 +4,6 @@ import { logAudit } from "@/lib/audit";
 import { prisma } from "@/lib/db";
 import { generateQuotePdf, type QuoteForPdf } from "@/lib/pdf";
 import { sendQuotePdf } from "@/lib/mailer";
-import { VAT_RATE } from "@/lib/constants";
 
 function stripCompanyPrefix(name: string): string {
   return name
@@ -44,7 +43,7 @@ function buildHtmlBody(opts: {
   company: string;
   contactName: string;
   contactTitle: string | null;
-  grandTotal: number;
+  subtotal: number;
   expiresAt: Date | null;
 }): string {
   const exp = opts.expiresAt ? fmtDate(opts.expiresAt) : "발행일 +14일";
@@ -58,8 +57,8 @@ function buildHtmlBody(opts: {
   <table style="border-collapse:collapse;margin:18px 0;font-size:13px">
     <tr><td style="padding:6px 12px;color:#666;border:1px solid #ddd">견적번호</td>
         <td style="padding:6px 12px;border:1px solid #ddd"><strong>${opts.quoteNo}</strong></td></tr>
-    <tr><td style="padding:6px 12px;color:#666;border:1px solid #ddd">총액 (VAT 포함)</td>
-        <td style="padding:6px 12px;border:1px solid #ddd"><strong>${fmtKRW(opts.grandTotal)}</strong></td></tr>
+    <tr><td style="padding:6px 12px;color:#666;border:1px solid #ddd">총액 (VAT 별도)</td>
+        <td style="padding:6px 12px;border:1px solid #ddd"><strong>${fmtKRW(opts.subtotal)}</strong></td></tr>
     <tr><td style="padding:6px 12px;color:#666;border:1px solid #ddd">유효기간</td>
         <td style="padding:6px 12px;border:1px solid #ddd">${exp}</td></tr>
   </table>
@@ -220,7 +219,6 @@ export async function POST(
       (s, i) => s + i.unitPrice * i.quantity,
       0
     );
-    const grandTotal = subtotal + Math.round(subtotal * VAT_RATE);
 
     try {
       await sendQuotePdf(recipientEmail, pdfBuffer, quoteNo, {
@@ -229,7 +227,7 @@ export async function POST(
           company: recipientCompany,
           contactName: recipientName,
           contactTitle: quote.guestTitle ?? quote.user?.title ?? null,
-          grandTotal,
+          subtotal,
           expiresAt: quote.expiresAt,
         }),
         pdfFilename,

@@ -125,7 +125,7 @@ export async function sendDeliveryNotePdf(
   to: string,
   pdfBuffer: Buffer,
   noteNo: string,
-  opts: { company: string; contactName: string; grandTotal: number }
+  opts: { company: string; contactName: string; subtotal: number }
 ): Promise<void> {
   const fmt = (n: number) => "₩" + n.toLocaleString("ko-KR");
   await transporter.sendMail({
@@ -138,8 +138,8 @@ export async function sendDeliveryNotePdf(
   <table style="border-collapse:collapse;margin:18px 0;font-size:13px">
     <tr><td style="padding:6px 12px;color:#666;border:1px solid #ddd">명세표 번호</td>
         <td style="padding:6px 12px;border:1px solid #ddd"><strong>${noteNo}</strong></td></tr>
-    <tr><td style="padding:6px 12px;color:#666;border:1px solid #ddd">공급가액 (VAT 포함)</td>
-        <td style="padding:6px 12px;border:1px solid #ddd"><strong>${fmt(opts.grandTotal)}</strong></td></tr>
+    <tr><td style="padding:6px 12px;color:#666;border:1px solid #ddd">공급가액 (VAT 별도)</td>
+        <td style="padding:6px 12px;border:1px solid #ddd"><strong>${fmt(opts.subtotal)}</strong></td></tr>
   </table>
   <p style="color:#555;font-size:13px">세금계산서는 별도 안내드리겠습니다.</p>
   <p style="margin-top:20px">감사합니다.<br><strong>(주)스마텍 영업팀</strong><br>
