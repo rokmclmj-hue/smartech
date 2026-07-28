@@ -209,16 +209,21 @@ export default function AdminBlogPage() {
 
   const copyForNaver = () => {
     if (!selected) return;
+    const hasNaverContent = !!selected.naverContent;
     const source = selected.naverContent || selected.content;
     let imgCount = 0;
-    const text = source
+    let stripped = source
       // frontmatter 제거
       .replace(/^---[\s\S]*?---\s*/m, "")
       // HTML 주석 제거
-      .replace(/<!--[\s\S]*?-->/g, "")
-      // 첫 번째 이미지(썸네일)는 "사진" 번호에서 제외 — 본문 이미지(사진1.png, 사진2.png...)와 번호를 맞추기 위함
-      .replace(/\[IMAGE:\s*([^\]]*)\]/, (_, desc) => `\n\n[🖼 썸네일 — ${desc.trim() || "대표 이미지"}]\n\n`)
-      .replace(/!\[([^\]]*)\]\([^)]*\)/, (_, alt) => `\n\n[🖼 썸네일 — ${alt && alt.trim() ? alt.trim() : "대표 이미지"}]\n\n`)
+      .replace(/<!--[\s\S]*?-->/g, "");
+    // naver.md는 썸네일 마커 없이 [IMAGE] 전부가 본문 사진이라 이 처리를 건너뜀 — content(final.md)만 첫 이미지가 실제 thumbnail.png
+    if (!hasNaverContent) {
+      stripped = stripped
+        .replace(/\[IMAGE:\s*([^\]]*)\]/, (_, desc) => `\n\n[🖼 썸네일 — ${desc.trim() || "대표 이미지"}]\n\n`)
+        .replace(/!\[([^\]]*)\]\([^)]*\)/, (_, alt) => `\n\n[🖼 썸네일 — ${alt && alt.trim() ? alt.trim() : "대표 이미지"}]\n\n`);
+    }
+    const text = stripped
       // [IMAGE: 설명] 마커 → 📷 사진 안내
       .replace(/\[IMAGE:\s*([^\]]*)\]/g, (_, desc) => {
         imgCount++;
