@@ -1,6 +1,6 @@
 import { MetadataRoute } from "next";
 
-const PRIVATE_PATHS = ["/admin/", "/api/", "/auth/", "/mypage/"];
+const PRIVATE_PATHS = ["/admin/", "/api/", "/auth/", "/mypage/", "/catalogs/"];
 
 // AI 크롤러 등 이름별 User-agent 규칙은 와일드카드(*) 규칙을 대체하므로
 // 관리자·인증 경로 disallow를 매 규칙에 똑같이 넣어야 함
