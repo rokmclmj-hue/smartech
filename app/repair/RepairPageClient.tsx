@@ -65,6 +65,7 @@ const STEPS = ["접수 정보", "증상 입력", "수리 견적", "접수 완료
 type RepairCase = {
   model: string;
   client: string;
+  date: string;
   symptom: string;
   work: string[];
   photo: string;
@@ -76,6 +77,7 @@ const REPAIR_CASES: RepairCase[] = [
   {
     model: "Edwards nXDS20i",
     client: "E사",
+    date: "2026.07.23",
     symptom: "기본수리",
     work: ["팁씰 교체", "베어링 교체"],
     photo: "/images/repair/nxds20i-exterior.jpg",
@@ -85,6 +87,7 @@ const REPAIR_CASES: RepairCase[] = [
   {
     model: "Pfeiffer DUO3",
     client: "H대",
+    date: "2026.07.14",
     symptom: "기본수리 · 모터 교체",
     work: ["씰·가스켓 교체", "베어링 교체", "오일 교환", "모터 교체"],
     photo: "/images/repair/duo3-exterior.jpg",
@@ -94,6 +97,7 @@ const REPAIR_CASES: RepairCase[] = [
   {
     model: "Edwards E2M0.7",
     client: "A사",
+    date: "2026.07.10",
     symptom: "엔드실 가공 · 모터 베어링 교체 · 모듈 스크래치 발생",
     work: ["엔드실 가공", "모터 베어링 교체", "모듈 스크래치 부위 수정"],
     photo: "/images/repair/e2m07-b-exterior.jpg",
@@ -103,6 +107,7 @@ const REPAIR_CASES: RepairCase[] = [
   {
     model: "Edwards iQDP40",
     client: "D사",
+    date: "2026.07.08",
     symptom: "기본수리",
     work: ["Power PCA 교체", "Cooling coil 교체"],
     photo: "/images/repair/iqdp40-exterior.jpg",
@@ -112,6 +117,7 @@ const REPAIR_CASES: RepairCase[] = [
   {
     model: "Edwards XDS35i",
     client: "N사",
+    date: "2026.07.02",
     symptom: "팁씰·베어링 마모 · 가스 발라스트 파손",
     work: ["팁씰 교체", "베어링 교체", "가스 발라스트 교체"],
     photo: "/images/repair/xds35i-b-exterior.jpg",
@@ -121,6 +127,7 @@ const REPAIR_CASES: RepairCase[] = [
   {
     model: "우성진공 W2V40",
     client: "자체",
+    date: "2026.07.02",
     symptom: "내부 오염 · 모터슬리브 손상",
     work: ["내부 세척", "씰·가스켓 교체", "모터슬리브 교체"],
     photo: "/images/repair/w2v40-exterior.jpg",
@@ -130,6 +137,7 @@ const REPAIR_CASES: RepairCase[] = [
   {
     model: "Edwards RV5",
     client: "S사",
+    date: "2026.07.01",
     symptom: "오일 오염 · 진공도 불량",
     work: ["씰·가스켓 교체", "베어링 교체", "배기밸브 교체", "오일 교환"],
     photo: "/images/repair/rv5-exterior.jpg",
@@ -139,6 +147,7 @@ const REPAIR_CASES: RepairCase[] = [
   {
     model: "Edwards E2M1.5",
     client: "S사",
+    date: "2026.07.01",
     symptom: "기본 수리 · 파트 교환",
     work: ["씰·가스켓 교체", "베어링 교체", "배기밸브 교체", "오일 교환"],
     photo: "/images/repair/e2m15-exterior.jpg",
@@ -148,6 +157,7 @@ const REPAIR_CASES: RepairCase[] = [
   {
     model: "Edwards E2M0.7",
     client: "S사",
+    date: "2026.07.01",
     symptom: "기본 수리 · 파트 교환",
     work: ["씰·가스켓 교체", "베어링 교체", "배기밸브 교체", "오일 교환"],
     photo: "/images/repair/e2m07-exterior.jpg",
@@ -157,6 +167,7 @@ const REPAIR_CASES: RepairCase[] = [
   {
     model: "Edwards EH2600",
     client: "J사",
+    date: "2026.07.01",
     symptom: "타이밍 기어 손상",
     work: ["기어 교체 (×2)", "베어링 교체", "내부 세정", "기능 점검"],
     photo: "/images/repair/eh2600-gears.jpg",
@@ -166,6 +177,7 @@ const REPAIR_CASES: RepairCase[] = [
   {
     model: "Edwards nXDS10i",
     client: "K사",
+    date: "2026.07.01",
     symptom: "팁씰 마모 · 베어링 손상",
     work: ["팁씰 교체", "베어링 교체", "스크롤 세정", "기능 점검"],
     photo: "/images/repair/nxds10i-exterior.jpg",
@@ -175,6 +187,7 @@ const REPAIR_CASES: RepairCase[] = [
   {
     model: "Edwards E2M80",
     client: "C사",
+    date: "2026.07.01",
     symptom: "내부 오염 · Exhaust Baffle 파손",
     work: ["풀 오버홀", "Exhaust Valve 교체", "Baffle 교체", "내부 세정"],
     photo: "/images/repair/e2m80b-exterior.jpg",
@@ -184,6 +197,7 @@ const REPAIR_CASES: RepairCase[] = [
   {
     model: "Pfeiffer Vacuum DUO2.5",
     client: "자체",
+    date: "2026.07.02",
     symptom: "내부 오염 · 진공도 불량",
     work: ["풀 오버홀", "내부 세척·클리닝", "씰·가스켓 교체"],
     photo: "/images/repair/duo25-exterior.jpg",
@@ -193,6 +207,7 @@ const REPAIR_CASES: RepairCase[] = [
   {
     model: "Edwards iH1800MK5",
     client: "T사",
+    date: "2026.07.01",
     symptom: "N2 Flow 센서 불량 · WARNING 알람",
     work: ["N2 Flow 센서 교체", "내부 세정", "기능 점검"],
     photo: "/images/repair/ih1800mk5-alarm.jpg",
@@ -202,6 +217,7 @@ const REPAIR_CASES: RepairCase[] = [
   {
     model: "Edwards GV80",
     client: "B사",
+    date: "2026.07.01",
     symptom: "내부 오염 · 진공도 불량",
     work: ["풀 오버홀", "베어링 교체", "씰·개스킷 교체", "내부 세정"],
     photo: "/images/repair/gv80-exterior.jpg",
@@ -210,6 +226,7 @@ const REPAIR_CASES: RepairCase[] = [
   {
     model: "Edwards iH1800HTX",
     client: "G사",
+    date: "2026.06.15",
     symptom: "공정 부산물 오염 · 배기 불량",
     work: ["풀 오버홀", "오염물 완전 제거", "씰·베어링 교체"],
     photo: "/images/repair/ih1800-contamination.jpg",
@@ -218,6 +235,7 @@ const REPAIR_CASES: RepairCase[] = [
   {
     model: "Edwards XDS35iE",
     client: "A사",
+    date: "2026.06.15",
     symptom: "스크롤 팁 마모 · 베어링 손상",
     work: ["스크롤 팁 씰 교체", "베어링 교체", "내부 세정"],
     photo: "/images/repair/xds35i-wear.jpg",
@@ -226,6 +244,7 @@ const REPAIR_CASES: RepairCase[] = [
   {
     model: "Edwards RV3",
     client: "S사",
+    date: "2026.06.15",
     symptom: "오일 오염 · 진공 불량",
     work: ["풀 오버홀", "베인 교체", "오일 세정"],
     photo: "/images/repair/rv3-disassembly.jpg",
@@ -233,6 +252,7 @@ const REPAIR_CASES: RepairCase[] = [
   {
     model: "Edwards E2M28",
     client: "E사",
+    date: "2026.06.15",
     symptom: "오일 오염 · 진공 불량",
     work: ["풀 오버홀", "베인 교체", "씰 교체", "오일 세정"],
     photo: "/images/repair/e2m28-exterior.jpg",
@@ -241,6 +261,7 @@ const REPAIR_CASES: RepairCase[] = [
   {
     model: "Edwards EH500",
     client: "H사",
+    date: "2026.06.15",
     symptom: "베어링 파손 · 심각한 내부 오염",
     work: ["베어링 교체 (×2)", "씰·개스킷 교체", "로터 세정"],
     photo: "/images/repair/eh500-casing.jpg",
@@ -249,6 +270,7 @@ const REPAIR_CASES: RepairCase[] = [
   {
     model: "Edwards E2M80",
     client: "A사",
+    date: "2026.06.15",
     symptom: "오일 오염 · 축 마모 · 진공 불량",
     work: ["풀 오버홀", "베어링 교체", "씰 교체", "오일 세정"],
     photo: "/images/repair/e2m80-exterior.jpg",
@@ -1361,7 +1383,7 @@ export default function RepairPageClient() {
                   <img src={c.photo} alt={c.symptom} className="w-full h-full object-cover" />
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent px-4 py-3">
                     <div className="text-paper text-[13px] font-semibold leading-tight">{c.model}</div>
-                    <div className="text-paper/50 text-[10px] mono">{c.client}</div>
+                    <div className="text-paper/50 text-[10px] mono">{c.client} · {c.date}</div>
                   </div>
                 </div>
                 {/* 내용 */}
