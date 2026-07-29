@@ -75,6 +75,16 @@ type RepairCase = {
 
 const REPAIR_CASES: RepairCase[] = [
   {
+    model: "Edwards E2M0.7",
+    client: "F사",
+    date: "2026.07.30",
+    symptom: "내부 오염 · 기본수리",
+    work: ["내부 세척", "씰·가스켓 교체", "베어링 교체", "오일 교환"],
+    photo: "/images/repair/e2m07-c-exterior.jpg",
+    partPhoto: "/images/repair/e2m07-c-part1.jpg",
+    extraPhoto: "/images/repair/e2m07-c-part2.jpg",
+  },
+  {
     model: "Edwards nXDS20i",
     client: "E사",
     date: "2026.07.23",
@@ -1383,13 +1393,16 @@ export default function RepairPageClient() {
                   <img src={c.photo} alt={c.symptom} className="w-full h-full object-cover" />
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent px-4 py-3">
                     <div className="text-paper text-[13px] font-semibold leading-tight">{c.model}</div>
-                    <div className="text-paper/50 text-[10px] mono">{c.client} · {c.date}</div>
+                    <div className="text-paper/50 text-[10px] mono">{c.client}</div>
                   </div>
                 </div>
                 {/* 내용 */}
                 <div className="p-4 flex-1 flex flex-col gap-3">
                   <div>
-                    <div className="mono text-[9px] text-edred tracking-widest mb-1">SYMPTOM</div>
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="mono text-[9px] text-edred tracking-widest">SYMPTOM</div>
+                      <div className="mono text-[9px] text-dim tracking-widest">{c.date}</div>
+                    </div>
                     <div className="text-[13px] font-semibold leading-snug">{c.symptom}</div>
                   </div>
                   <div>
