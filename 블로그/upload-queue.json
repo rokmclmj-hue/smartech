@@ -1,23 +1,23 @@
 {
-  "_week": "2026-W31",
-  "_created": "2026-07-24",
+  "_week": "2026-W32",
+  "_created": "2026-07-31",
   "_note": "토/일에 Claude가 자동으로 채워줌. 직접 수정 금지.",
   "day1": {
-    "folder": "기술블로그/2026-07/0727-진공도-단위",
-    "title": "진공도 단위 완전정리 Torr·mbar·Pa 환산법과 진공 구간",
-    "uploaded": true,
+    "folder": "기술블로그/2026-08/0803-베어링소음진단",
+    "title": "진공펌프 베어링 마모·소음 진단법",
+    "uploaded": false,
     "approved": true
   },
   "day2": {
-    "folder": "기술블로그/2026-07/0729-배기속도-컨덕턴스",
-    "title": "배기속도만 믿고 펌프 고르면 안 되는 이유 — 컨덕턴스 공식 정리",
-    "uploaded": true,
+    "folder": "기술블로그/2026-08/0805-수소오일로터리",
+    "title": "수소 설비 오일로터리펌프 사용 시 주의사항",
+    "uploaded": false,
     "approved": true
   },
   "day3": {
-    "folder": "기술블로그/2026-07/0731-백스트리밍",
-    "title": "진공펌프 백스트리밍이란? 오일 증기 오염과 방지법",
-    "uploaded": true,
+    "folder": "기술블로그/2026-08/0807-미스트필터선택",
+    "title": "오일로터리펌프 미스트필터 선택법",
+    "uploaded": false,
     "approved": true
   }
 }
