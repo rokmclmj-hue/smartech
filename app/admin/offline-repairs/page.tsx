@@ -179,8 +179,8 @@ function JobForm({ onSaved }: { onSaved: (newJobId: number) => void }) {
                     key={ct.id}
                     onClick={() => {
                       setContactName(ct.name);
-                      if (ct.email) setContactEmail(ct.email);
-                      if (ct.mobile || ct.tel) setContactPhone(ct.mobile || ct.tel || "");
+                      setContactEmail(ct.email ?? "");
+                      setContactPhone(ct.mobile || ct.tel || "");
                     }}
                     className="border hair px-3 py-1.5 text-[12px] hover:bg-ink/5 text-left"
                   >
@@ -790,8 +790,8 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone, isSelected, onToggle
                       key={ct.id}
                       onClick={() => {
                         setEditContactName(ct.name);
-                        if (ct.email) setEditContactEmail(ct.email);
-                        if (ct.mobile || ct.tel) setEditContactPhone(ct.mobile || ct.tel || "");
+                        setEditContactEmail(ct.email ?? "");
+                        setEditContactPhone(ct.mobile || ct.tel || "");
                       }}
                       className="border hair px-3 py-1.5 text-[12px] hover:bg-ink/5 text-left"
                     >
