@@ -5,7 +5,7 @@
   "day1": {
     "folder": "기술블로그/2026-08/0803-베어링소음진단",
     "title": "진공펌프 베어링 마모·소음 진단법",
-    "uploaded": false,
+    "uploaded": true,
     "approved": true
   },
   "day2": {
@@ -17,7 +17,7 @@
   "day3": {
     "folder": "기술블로그/2026-08/0807-미스트필터선택",
     "title": "오일로터리펌프 미스트필터 선택법",
-    "uploaded": false,
+    "uploaded": true,
     "approved": true
   }
 }

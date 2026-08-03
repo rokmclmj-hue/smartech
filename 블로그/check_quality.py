@@ -114,6 +114,28 @@ def chk_field_photo(folder: str) -> dict:
     }
 
 
+def chk_image_size(folder: str) -> dict:
+    # 2026-08-04 사고 재발 방지: 원본 그대로 저장된 사진(4MB 초과)이 홈페이지 업로드 시
+    # 413 Request Entity Too Large로 조용히 실패해 라이브 글에서 사진이 빠지는 사고가 있었음.
+    img_dir = os.path.join(folder, "images")
+    if not os.path.exists(img_dir):
+        return {"pass": True, "note": "images/ 없어 건너뜀"}
+    MAX_BYTES = 4 * 1024 * 1024
+    oversized = []
+    for f in os.listdir(img_dir):
+        if not f.endswith((".png", ".jpg", ".jpeg")):
+            continue
+        size = os.path.getsize(os.path.join(img_dir, f))
+        if size > MAX_BYTES:
+            oversized.append(f"{f} ({size / 1024 / 1024:.1f}MB)")
+    ok = len(oversized) == 0
+    return {
+        "pass": ok,
+        "files": oversized,
+        "reason": None if ok else f"4MB 초과 파일 발견 — 업로드 시 413 오류로 사진이 빠짐. 1000px로 축소 후 재저장하세요: {', '.join(oversized)}",
+    }
+
+
 def chk_exif(folder: str) -> dict:
     try:
         from PIL import Image as PILImage
@@ -335,6 +357,7 @@ def run(folder_arg: str) -> bool:
         "char_count":  chk_char_count(folder),
         "meta_desc":   chk_meta_desc(folder),
         "field_photo": chk_field_photo(folder),
+        "image_size":  chk_image_size(folder),
         "exif":        chk_exif(folder),
         "pump_box":    chk_pump_box(folder),
         "geo_format":  chk_geo_format(folder),
@@ -347,6 +370,7 @@ def run(folder_arg: str) -> bool:
         "char_count":  "글자수",
         "meta_desc":   "메타설명",
         "field_photo": "현장사진",
+        "image_size":  "사진용량",
         "exif":        "EXIF 회전",
         "pump_box":    "펌프좌표",
         "geo_format":  "GEO형식",
