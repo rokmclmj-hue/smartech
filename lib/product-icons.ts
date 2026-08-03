@@ -1,6 +1,8 @@
 // 제품 partNo / description 으로 적합한 SVG 아이콘 파일 결정
 // 아이콘 파일 위치: /public/images/products/icons/{name}.svg
 
+import { PRODUCT_ITEMS } from "./product-categories";
+
 const ICON_BASE = "/images/products/icons";
 
 // 우선순위 순서대로 매칭 (긴 키워드부터 — 부분 매칭 충돌 방지)
@@ -85,10 +87,23 @@ const PHOTO_RULES: Array<[RegExp, string]> = [
   [/\bRV\d*\b/i,                    "rv.jpeg"],
 ];
 
-const FALLBACK_PHOTO = "rv.jpeg";
+// 미분류/매칭 실패 시 기본값 — 특정 펌프로 오인되지 않도록 중립적인 피팅/액세서리 사진 사용
+const FALLBACK_PHOTO = "hardware.png";
 
-// partNo + description → 실제 제품 사진 URL 반환
-export function getProductPhotoUrl(partNo: string, description: string): string {
+// DB의 category 값(product-categories.ts의 PRODUCT_ITEMS)과 동일한 문자열을 사용하므로
+// 카테고리 문자열 → 사진 파일명 맵을 여기서 파생시켜 단일 출처를 유지한다.
+const CATEGORY_PHOTO_MAP: Record<string, string> = Object.fromEntries(
+  PRODUCT_ITEMS.map((item) => [item.category, item.image.replace(`${PHOTO_BASE}/`, "")])
+);
+
+// partNo + description + category → 실제 제품 사진 URL 반환
+// 1순위: DB category 정확 매칭 (가장 정확 — 1,014개 중 1,009개가 이 경로로 매칭됨)
+// 2순위: partNo/description 모델명 정규식 매칭 (category가 없거나 "기타"인 경우 보완)
+// 3순위: 중립 기본 이미지 (특정 펌프로 오인되지 않는 피팅/액세서리 사진)
+export function getProductPhotoUrl(partNo: string, description: string, category?: string | null): string {
+  if (category && CATEGORY_PHOTO_MAP[category]) {
+    return `${PHOTO_BASE}/${CATEGORY_PHOTO_MAP[category]}`;
+  }
   const haystack = `${partNo} ${description}`;
   for (const [pattern, file] of PHOTO_RULES) {
     if (pattern.test(haystack)) return `${PHOTO_BASE}/${file}`;

@@ -9,6 +9,7 @@ import { notFound } from "next/navigation";
 import AddToQuoteButton from "./AddToQuoteButton";
 import ModelDetail from "./ModelDetail";
 import { findModelBySlug } from "@/lib/product-specs";
+import { getProductPhotoUrl } from "@/lib/product-icons";
 
 export async function generateMetadata({ params }: { params: Promise<{ partNo: string }> }): Promise<Metadata> {
   const { partNo: raw } = await params;
@@ -57,12 +58,15 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const displayPrice = Math.round(product.costPrice * multiplier);
   const isLoggedIn = !!session;
   const isPending = tier === "PENDING";
+  const photoUrl = getProductPhotoUrl(product.partNo, product.description, product.category);
+  const photoAbsoluteUrl = `https://www.smartechvacuum.com${photoUrl}`;
 
   const productSchema = JSON.stringify({
     "@context": "https://schema.org",
     "@type": "Product",
     "name": product.description,
     "description": `Edwards ${product.description} — 파트번호 ${product.partNo}. 스마텍(Edwards Vacuum 한국 공식 대리점)에서 정품 공급·견적·수리 상담.`,
+    "image": photoAbsoluteUrl,
     "brand": { "@type": "Brand", "name": "Edwards Vacuum" },
     "manufacturer": { "@type": "Organization", "name": "Edwards Vacuum" },
     "sku": product.partNo,
@@ -112,6 +116,14 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
           {product.isImportant && (
             <span className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full mb-4 inline-block">주요 제품</span>
           )}
+          <div className="w-full h-48 md:h-56 bg-gray-50 border border-gray-100 rounded-xl overflow-hidden mb-4">
+            <img
+              src={photoUrl}
+              alt={`Edwards ${product.description} (${product.partNo})`}
+              className="w-full h-full object-contain p-4"
+              loading="lazy"
+            />
+          </div>
           <h1 className="text-xl md:text-2xl font-bold text-slate-800 mt-2 mb-1 leading-snug">
             {product.description}
           </h1>
