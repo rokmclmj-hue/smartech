@@ -8,6 +8,7 @@ Claude 없이 독립 실행 가능. Python만 있으면 됨.
   python auto_upload.py --slot day2              (수요일, 실제 업로드)
   python auto_upload.py --slot day3              (금요일, 실제 업로드)
   python auto_upload.py --slot day1 --dry-run   (연결만 확인, 업로드 안 함)
+  python auto_upload.py --slot day3 --force     (예정 요일이 아니어도 강제 업로드)
 """
 
 import json
@@ -34,6 +35,14 @@ SLOT_LABEL = {
     "day3": "금요일",
 }
 
+# datetime.weekday(): 월=0 ... 일=6
+SLOT_WEEKDAY = {
+    "day1": 0,
+    "day2": 2,
+    "day3": 4,
+}
+WEEKDAY_NAMES = ["월", "화", "수", "목", "금", "토", "일"]
+
 
 def log(msg):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -46,6 +55,7 @@ def log(msg):
 def main():
     slot = None
     dry_run = "--dry-run" in sys.argv
+    force = "--force" in sys.argv
 
     if "--slot" in sys.argv:
         idx = sys.argv.index("--slot")
@@ -102,6 +112,14 @@ def main():
         log(f"⏸️ [{label}] 승인 대기 중: {title}")
         log(f"   → upload-queue.json 에서 \"{slot}\".approved 를 true 로 바꾸면 다음 실행 시 업로드됩니다.")
         sys.exit(0)
+
+    if not force:
+        today_weekday = datetime.now().weekday()
+        expected_weekday = SLOT_WEEKDAY[slot]
+        if today_weekday != expected_weekday:
+            log(f"⏸️ [{label}] 아직 예정 요일이 아님 (예정: {label}, 오늘: {WEEKDAY_NAMES[today_weekday]}요일). 업로드 건너뜀.")
+            log(f"   예정보다 먼저 올리려면 --force 옵션을 추가하세요.")
+            sys.exit(0)
 
     log(f"📤 [{label}] 업로드 시작: {title} (폴더: {folder})")
 
