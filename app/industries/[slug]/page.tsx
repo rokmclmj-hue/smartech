@@ -140,10 +140,26 @@ export default async function IndustryDetailPage({
     ],
   });
 
+  const faqSchema =
+    industry.faq && industry.faq.length > 0
+      ? JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": industry.faq.map((item) => ({
+            "@type": "Question",
+            "name": item.q,
+            "acceptedAnswer": { "@type": "Answer", "text": item.a },
+          })),
+        })
+      : null;
+
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serviceSchema }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: breadcrumbSchema }} />
+      {faqSchema && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: faqSchema }} />
+      )}
       {/* ═══════════════ HERO ═══════════════ */}
       <section className="relative border-b hair bg-paper">
         <div className="max-w-[1400px] mx-auto px-4 md:px-6 pt-8 md:pt-12 pb-10 md:pb-16">
@@ -321,6 +337,41 @@ export default async function IndustryDetailPage({
                   <div>
                     <div className="text-[15px] font-semibold mb-2">{note.title}</div>
                     <div className="text-[13.5px] leading-[1.7] text-[#2a2823]">{note.body}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ═══════════════ FAQ (실제 상담·블로그 데이터 기반) ═══════════════ */}
+      {industry.faq && industry.faq.length > 0 && (
+        <section className="border-b hair py-20">
+          <div className="max-w-[1400px] mx-auto px-6">
+            <div className="grid grid-cols-12 gap-6 mb-12">
+              <div className="col-span-12 lg:col-span-6">
+                <div className="mono text-[11px] dim mb-4">
+                  — 05 · FAQ
+                </div>
+                <h2 className="display text-[34px] leading-[1.1]">
+                  자주 <span className="italic text-edred">묻는 질문</span>
+                </h2>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 border-t hair">
+              {industry.faq.map((item, i) => (
+                <div
+                  key={i}
+                  className="p-7 border-b hair bg-paper flex gap-4"
+                >
+                  <div className="mono text-[11px] text-edred shrink-0 pt-1">
+                    {String(i + 1).padStart(2, "0")}
+                  </div>
+                  <div>
+                    <div className="text-[15px] font-semibold mb-2">{item.q}</div>
+                    <div className="text-[13.5px] leading-[1.7] text-[#2a2823]">{item.a}</div>
                   </div>
                 </div>
               ))}
