@@ -4,7 +4,17 @@ const PRIVATE_PATHS = ["/admin/", "/api/", "/auth/", "/mypage/", "/catalogs/"];
 
 // AI 크롤러 등 이름별 User-agent 규칙은 와일드카드(*) 규칙을 대체하므로
 // 관리자·인증 경로 disallow를 매 규칙에 똑같이 넣어야 함
-const AI_CRAWLERS = ["GPTBot", "Claude-Web", "ClaudeBot", "CCBot", "PerplexityBot", "Googlebot-Extended"];
+const AI_CRAWLERS = [
+  "GPTBot",
+  "OAI-SearchBot",
+  "ChatGPT-User",
+  "Claude-Web",
+  "ClaudeBot",
+  "CCBot",
+  "PerplexityBot",
+  "Perplexity-User",
+  "Google-Extended",
+];
 
 export default function robots(): MetadataRoute.Robots {
   return {
