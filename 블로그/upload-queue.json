@@ -11,13 +11,13 @@
   "day2": {
     "folder": "기술블로그/2026-08/0805-수소오일로터리",
     "title": "수소 설비 오일로터리펌프 사용 시 주의사항",
-    "uploaded": false,
+    "uploaded": true,
     "approved": true
   },
   "day3": {
-    "folder": "기술블로그/2026-08/0807-미스트필터선택",
-    "title": "오일로터리펌프 미스트필터 선택법",
-    "uploaded": true,
+    "folder": "기술블로그/2026-08/0805-의료바이오게이지",
+    "title": "의료·바이오 공정 진공 측정, 위생 기준에 맞는 게이지 선택 기준",
+    "uploaded": false,
     "approved": true
   }
 }
