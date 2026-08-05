@@ -75,6 +75,16 @@ type RepairCase = {
 
 const REPAIR_CASES: RepairCase[] = [
   {
+    model: "Edwards GV80",
+    client: "A사",
+    date: "2026.08.05",
+    symptom: "기본수리",
+    work: ["립씰 교체", "베어링 교체", "오링 교체", "그 외"],
+    photo: "/images/repair/gv80-b-exterior.jpg",
+    partPhoto: "/images/repair/gv80-b-bearing.jpg",
+    extraPhoto: "/images/repair/gv80-b-internal.jpg",
+  },
+  {
     model: "Edwards E2M0.7",
     client: "F사",
     date: "2026.07.30",
