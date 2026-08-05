@@ -94,6 +94,7 @@ export default function ProductsPageClient() {
 function BizLoginModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
   const [bizNo, setBizNo] = useState("");
   const [bizCompany, setBizCompany] = useState("");
+  const [bizContact, setBizContact] = useState("");
   const [otpCode, setOtpCode] = useState("");
   const [otpContact, setOtpContact] = useState("");
   const [step, setStep] = useState<"input" | "company" | "otp">("input");
@@ -118,8 +119,16 @@ function BizLoginModal({ onClose, onSuccess }: { onClose: () => void; onSuccess:
       if (data.mode === "otp_sent") {
         setOtpContact(data.maskedPhone ?? data.maskedEmail ?? "등록된 연락처");
         setStep("otp");
-      } else {
+      } else if (data.mode === "new") {
         setStep("company");
+      } else {
+        // 기존 계정(연락처 미등록) — 상호명·담당자 정보 이미 있으므로 바로 로그인
+        const result = await signIn("credentials", {
+          businessNo: bizNo.replace(/[^0-9]/g, ""),
+          redirect: false,
+        });
+        if (result?.ok) onSuccess();
+        else setError("로그인에 실패했습니다. 다시 시도해 주세요.");
       }
     } catch {
       setError("네트워크 오류가 발생했습니다.");
@@ -136,6 +145,7 @@ function BizLoginModal({ onClose, onSuccess }: { onClose: () => void; onSuccess:
       const result = await signIn("credentials", {
         businessNo: bizNo.replace(/[^0-9]/g, ""),
         companyName: bizCompany,
+        contactName: bizContact,
         redirect: false,
       });
       if (result?.ok) {
@@ -212,6 +222,14 @@ function BizLoginModal({ onClose, onSuccess }: { onClose: () => void; onSuccess:
               required
               autoFocus
               placeholder="상호명 입력 (예: (주)스마텍)"
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-smblue/30 bg-gray-50"
+            />
+            <input
+              type="text"
+              value={bizContact}
+              onChange={(e) => setBizContact(e.target.value)}
+              required
+              placeholder="담당자 이름"
               className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-smblue/30 bg-gray-50"
             />
             {error && <p className="text-red-500 text-xs">{error}</p>}

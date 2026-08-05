@@ -89,6 +89,7 @@ const providers: any[] = [
       // 사업자번호 간편 로그인
       businessNo: { label: "사업자등록번호", type: "text" },
       companyName: { label: "상호명", type: "text" },
+      contactName: { label: "담당자 이름", type: "text" },
     },
     async authorize(credentials) {
       // 사업자번호 간편 로그인
@@ -105,9 +106,11 @@ const providers: any[] = [
           return { id: String(user.id), name: user.name, tier: user.tier, company: user.company, businessNo: digits };
         }
 
-        // 2. 신규 가입 — 상호명은 선택(없으면 사업자번호로 대체)
+        // 2. 신규 가입 — 상호명·담당자 이름은 선택(없으면 사업자번호로 대체)
         const companyName = ((credentials.companyName as string) || "").trim()
           || `사업자_${digits}`;
+        const contactName = ((credentials.contactName as string) || "").trim()
+          || companyName;
 
         // 3. KnownCompany에서 사업자번호로 등급 조회
         let tier: string = "ENDUSER"; // 기본 일반회원 등급
@@ -119,7 +122,7 @@ const providers: any[] = [
         // 4. 계정 생성
         user = await prisma.user.create({
           data: {
-            name: companyName,
+            name: contactName,
             company: companyName,
             passwordHash: "",
             tier,

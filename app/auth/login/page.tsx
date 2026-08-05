@@ -18,9 +18,11 @@ function LoginContent() {
 
   // 사업자번호 로그인 상태
   const [bizNo, setBizNo] = useState("");
+  const [bizCompany, setBizCompany] = useState("");
+  const [bizContact, setBizContact] = useState("");
   const [bizLoading, setBizLoading] = useState(false);
   const [bizError, setBizError] = useState("");
-  const [otpStep, setOtpStep] = useState(false);
+  const [bizStep, setBizStep] = useState<"input" | "company" | "otp">("input");
   const [otpCode, setOtpCode] = useState("");
   const [otpContact, setOtpContact] = useState("");
 
@@ -45,13 +47,41 @@ function LoginContent() {
 
       if (data.mode === "otp_sent") {
         setOtpContact(data.maskedPhone ?? data.maskedEmail ?? "등록된 연락처");
-        setOtpStep(true);
+        setBizStep("otp");
         return;
       }
 
-      // 신규 가입 또는 연락처 미등록 계정 — 기존 방식대로 즉시 로그인
+      if (data.mode === "new") {
+        setBizStep("company");
+        return;
+      }
+
+      // 연락처 미등록 기존 계정 — 기존 방식대로 즉시 로그인
       const result = await signIn("credentials", {
         businessNo: bizNo.replace(/[^0-9]/g, ""),
+        redirect: false,
+      });
+      if (result?.ok) {
+        router.replace("/");
+      } else {
+        setBizError("로그인에 실패했습니다. 다시 시도해 주세요.");
+      }
+    } catch {
+      setBizError("네트워크 오류가 발생했습니다.");
+    } finally {
+      setBizLoading(false);
+    }
+  }
+
+  async function handleBizCompanySubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setBizError("");
+    setBizLoading(true);
+    try {
+      const result = await signIn("credentials", {
+        businessNo: bizNo.replace(/[^0-9]/g, ""),
+        companyName: bizCompany,
+        contactName: bizContact,
         redirect: false,
       });
       if (result?.ok) {
@@ -128,7 +158,7 @@ function LoginContent() {
             </svg>
             <p className="text-sm font-semibold text-smblue tracking-tight">사업자번호로 로그인</p>
           </div>
-          {!otpStep ? (
+          {bizStep === "input" && (
             <>
               <p className="text-[11px] text-gray-400 text-center mb-3">사업자번호 입력 후 바로 로그인 · 우대 금액 확인</p>
               <form onSubmit={handleBizVerify} className="space-y-2">
@@ -151,7 +181,46 @@ function LoginContent() {
                 </button>
               </form>
             </>
-          ) : (
+          )}
+          {bizStep === "company" && (
+            <>
+              <p className="text-[11px] text-green-600 text-center mb-3">✓ 정상 사업자 확인 완료</p>
+              <form onSubmit={handleBizCompanySubmit} className="space-y-2">
+                <input
+                  type="text"
+                  value={bizCompany}
+                  onChange={(e) => setBizCompany(e.target.value)}
+                  required
+                  placeholder="상호명 입력 (예: (주)스마텍)"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-smblue/30 bg-gray-50"
+                />
+                <input
+                  type="text"
+                  value={bizContact}
+                  onChange={(e) => setBizContact(e.target.value)}
+                  required
+                  placeholder="담당자 이름"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-smblue/30 bg-gray-50"
+                />
+                {bizError && <p className="text-red-500 text-xs">{bizError}</p>}
+                <button
+                  type="submit"
+                  disabled={bizLoading}
+                  className="w-full bg-smblue hover:bg-smblue/90 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition-colors text-sm"
+                >
+                  {bizLoading ? "확인 중..." : "가입하고 로그인"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setBizStep("input"); setBizError(""); }}
+                  className="w-full text-[12px] text-gray-400 hover:text-gray-600 py-1"
+                >
+                  번호 다시 입력
+                </button>
+              </form>
+            </>
+          )}
+          {bizStep === "otp" && (
             <>
               <p className="text-[11px] text-gray-400 text-center mb-3">{otpContact}로 보낸 인증번호 6자리를 입력해주세요</p>
               <form onSubmit={handleOtpVerify} className="space-y-2">
@@ -174,7 +243,7 @@ function LoginContent() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => { setOtpStep(false); setOtpCode(""); setBizError(""); }}
+                  onClick={() => { setBizStep("input"); setOtpCode(""); setBizError(""); }}
                   className="w-full text-[12px] text-gray-400 hover:text-gray-600 py-1"
                 >
                   ← 다시 입력하기
