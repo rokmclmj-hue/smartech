@@ -75,11 +75,21 @@ type RepairCase = {
 
 const REPAIR_CASES: RepairCase[] = [
   {
+    model: "Edwards nXDS20i",
+    client: "B사",
+    date: "2026.08.05",
+    symptom: "기본수리",
+    work: ["팁씰 교체", "베어링 교체", "오링 교체", "스프링 교체", "너트 교체", "엔드캡 교체", "밸브패드 교체", "기타"],
+    photo: "/images/repair/nxds20i-b-exterior.jpg",
+    partPhoto: "/images/repair/nxds20i-b-bearing.jpg",
+    extraPhoto: "/images/repair/nxds20i-b-tipseal.jpg",
+  },
+  {
     model: "Edwards GV80",
     client: "A사",
     date: "2026.08.05",
     symptom: "기본수리",
-    work: ["립씰 교체", "베어링 교체", "오링 교체", "그 외"],
+    work: ["립씰 교체", "슬리브 교체", "이너링 교체", "베어링 교체", "오링 교체", "개스킷 교체", "커플링 교체", "기타"],
     photo: "/images/repair/gv80-b-exterior.jpg",
     partPhoto: "/images/repair/gv80-b-bearing.jpg",
     extraPhoto: "/images/repair/gv80-b-internal.jpg",
