@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 import "./quote/[id]/quote-styles.css";
 import Navbar from "@/components/Navbar";
@@ -178,25 +179,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
           crossOrigin=""
         />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){var h=[
+        <Script id="async-fonts" strategy="afterInteractive">
+          {`(function(){var h=[
 "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap",
 "https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
-];h.forEach(function(u){var l=document.createElement('link');l.rel='stylesheet';l.href=u;l.crossOrigin='';document.head.appendChild(l);});})();`,
-          }}
-        />
-        <noscript>
-          <link
-            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap"
-            rel="stylesheet"
-          />
-          <link
-            rel="stylesheet"
-            href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
-            crossOrigin=""
-          />
-        </noscript>
+];h.forEach(function(u){var l=document.createElement('link');l.rel='stylesheet';l.href=u;l.crossOrigin='';document.head.appendChild(l);});})();`}
+        </Script>
       </head>
       <body className="min-h-screen bg-paper text-ink antialiased" suppressHydrationWarning>
         <SessionProvider>
