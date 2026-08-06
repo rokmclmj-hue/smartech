@@ -350,6 +350,7 @@ const PAY_LABELS: Record<string, string> = {
 
 function pdfPaymentLabel(term: string | null | undefined, taxInvoice: boolean): string {
   if (term && PAY_LABELS[term]) return PAY_LABELS[term];
+  if (term) return term;
   return taxInvoice ? "세금계산서 발행 · 익월 말 결제" : "납품 전 현금결제";
 }
 

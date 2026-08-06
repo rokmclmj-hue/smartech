@@ -196,6 +196,9 @@ function AdminProxyQuotesInner() {
 
   // 결제조건
   const [paymentTerm, setPaymentTerm] = useState<string | null>(null);
+  const [customPaymentText, setCustomPaymentText] = useState("");
+  const effectivePaymentTerm =
+    paymentTerm === "c" ? (customPaymentText.trim() || null) : paymentTerm;
 
   // 비고
   const [note, setNote] = useState("");
@@ -494,8 +497,8 @@ function AdminProxyQuotesInner() {
       // 홈페이지 등록 회원이면 customerId, 거래처/직접입력이면 guest
       const body =
         selectedCustomer?.source === "user"
-          ? { customerId: selectedCustomer.id, items: itemsPayload, paymentTerm: paymentTerm ?? undefined, note: note || undefined }
-          : { guest, items: itemsPayload, paymentTerm: paymentTerm ?? undefined, note: note || undefined, saveToCompany: showDirect ? saveToCompany : false };
+          ? { customerId: selectedCustomer.id, items: itemsPayload, paymentTerm: effectivePaymentTerm ?? undefined, note: note || undefined }
+          : { guest, items: itemsPayload, paymentTerm: effectivePaymentTerm ?? undefined, note: note || undefined, saveToCompany: showDirect ? saveToCompany : false };
 
       const res = await fetch("/api/admin/proxy-quotes", {
         method: "POST",
@@ -1252,13 +1255,22 @@ function AdminProxyQuotesInner() {
           {paymentTerm && (
             <button
               type="button"
-              onClick={() => setPaymentTerm(null)}
+              onClick={() => { setPaymentTerm(null); setCustomPaymentText(""); }}
               className="mono text-[10px] dim hover:text-edred transition-colors px-2"
             >
               초기화
             </button>
           )}
         </div>
+        {paymentTerm === "c" && (
+          <input
+            type="text"
+            value={customPaymentText}
+            onChange={(e) => setCustomPaymentText(e.target.value)}
+            placeholder="결제조건을 직접 입력하세요 (예: 계약금 50% / 납품 전 50%)"
+            className="mt-2 w-full max-w-md border hair rounded-md px-3 py-2 text-[13px] focus:outline-none focus:border-smblue"
+          />
+        )}
       </div>
 
       {/* 05 / 비고 */}
@@ -1386,11 +1398,13 @@ function AdminProxyQuotesInner() {
               </div>
 
               {/* 결제조건 */}
-              {paymentTerm && (
+              {effectivePaymentTerm && (
                 <div className="border hair rounded-md p-4">
                   <div className="mono text-[9px] tracking-[0.15em] uppercase dim mb-1">결제조건</div>
                   <div className="text-[14px] font-medium text-ink">
-                    {PAY_OPTIONS.find((o) => o.value === paymentTerm)?.label ?? paymentTerm}
+                    {paymentTerm === "c"
+                      ? effectivePaymentTerm
+                      : PAY_OPTIONS.find((o) => o.value === paymentTerm)?.label ?? effectivePaymentTerm}
                   </div>
                 </div>
               )}

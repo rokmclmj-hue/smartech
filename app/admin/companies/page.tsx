@@ -44,6 +44,8 @@ const TIER_COLOR: Record<string, string> = {
 
 const EMPTY_FORM = { name: "", title: "", tel: "", mobile: "", email: "" };
 
+const PAY_PRESET_VALUES = ["a", "b", "d", "e"];
+
 const PAY_OPTIONS = [
   { value: "a", label: "납품 전 현금" },
   { value: "b", label: "계약30%/납품전70%" },
@@ -69,6 +71,8 @@ export default function AdminCompaniesPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
+  const [customPaymentInput, setCustomPaymentInput] = useState("");
+  const [editingCustomPayment, setEditingCustomPayment] = useState(false);
 
   async function load() {
     setLoading(true);
@@ -369,7 +373,7 @@ export default function AdminCompaniesPage() {
                   ) : filtered.map((c) => (
                     <tr
                       key={c.id}
-                      onClick={() => { setSelected(c); cancelForm(); setEditingName(false); setNameInput(""); }}
+                      onClick={() => { setSelected(c); cancelForm(); setEditingName(false); setNameInput(""); setEditingCustomPayment(false); setCustomPaymentInput(""); }}
                       className={`cursor-pointer transition-colors ${
                         selected?.id === c.id ? "bg-edred/5 border-l-2 border-l-edred" : "hover:bg-ink/[0.02]"
                       }`}
@@ -458,21 +462,59 @@ export default function AdminCompaniesPage() {
                 <div className="mt-2.5">
                   <div className="mono text-[9px] tracking-[0.12em] uppercase dim mb-1.5">결제조건</div>
                   <div className="flex flex-wrap gap-1">
-                    {PAY_OPTIONS.map((o) => (
-                      <button
-                        key={o.value}
-                        type="button"
-                        onClick={() => savePaymentTerm(selected.paymentTerm === o.value ? null : o.value)}
-                        className={`mono text-[9px] tracking-[0.04em] border px-2 py-0.5 rounded transition-colors ${
-                          selected.paymentTerm === o.value
-                            ? "bg-smblue text-white border-smblue"
-                            : "hair dim hover:text-ink"
-                        }`}
-                      >
-                        {o.label}
-                      </button>
-                    ))}
+                    {PAY_OPTIONS.map((o) => {
+                      const isCustomBtn = o.value === "c";
+                      const active = isCustomBtn
+                        ? selected.paymentTerm !== null && !PAY_PRESET_VALUES.includes(selected.paymentTerm)
+                        : selected.paymentTerm === o.value;
+                      return (
+                        <button
+                          key={o.value}
+                          type="button"
+                          onClick={() => {
+                            if (isCustomBtn) {
+                              if (active) {
+                                savePaymentTerm(null);
+                                setEditingCustomPayment(false);
+                                setCustomPaymentInput("");
+                              } else {
+                                setCustomPaymentInput(active ? selected.paymentTerm ?? "" : "");
+                                setEditingCustomPayment(true);
+                              }
+                            } else {
+                              setEditingCustomPayment(false);
+                              savePaymentTerm(selected.paymentTerm === o.value ? null : o.value);
+                            }
+                          }}
+                          className={`mono text-[9px] tracking-[0.04em] border px-2 py-0.5 rounded transition-colors ${
+                            active
+                              ? "bg-smblue text-white border-smblue"
+                              : "hair dim hover:text-ink"
+                          }`}
+                        >
+                          {o.label}
+                        </button>
+                      );
+                    })}
                   </div>
+                  {editingCustomPayment && (
+                    <div className="flex gap-1 mt-1.5">
+                      <input
+                        type="text"
+                        value={customPaymentInput}
+                        onChange={(e) => setCustomPaymentInput(e.target.value)}
+                        placeholder="결제조건 직접 입력"
+                        className="border hair rounded-sm px-2 py-0.5 text-[10px] flex-1 focus:outline-none focus:border-smblue"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => { savePaymentTerm(customPaymentInput.trim() || null); setEditingCustomPayment(false); }}
+                        className="mono text-[9px] px-2 py-0.5 rounded bg-smblue text-white"
+                      >
+                        저장
+                      </button>
+                    </div>
+                  )}
                 </div>
                 <div className="mt-2.5">
                   <div className="mono text-[9px] tracking-[0.12em] uppercase dim mb-1.5">사업자등록번호</div>
