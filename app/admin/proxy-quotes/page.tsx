@@ -201,7 +201,7 @@ function AdminProxyQuotesInner() {
     paymentTerm === "c" ? (customPaymentText.trim() || null) : paymentTerm;
 
   // 비고
-  const [note, setNote] = useState("");
+  const [note, setNote] = useState("납기는 구매 시점에 따라서 변동 될 수 있습니다. 감사합니다.");
 
   // 거래처 저장 옵션
   const [saveToCompany, setSaveToCompany] = useState(true);
