@@ -166,15 +166,37 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="" />
         <link
+          rel="preload"
+          as="style"
           href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap"
-          rel="stylesheet"
         />
         <link
-          rel="stylesheet"
+          rel="preload"
+          as="style"
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
           crossOrigin=""
         />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var h=[
+"https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap",
+"https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+];h.forEach(function(u){var l=document.createElement('link');l.rel='stylesheet';l.href=u;l.crossOrigin='';document.head.appendChild(l);});})();`,
+          }}
+        />
+        <noscript>
+          <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap"
+            rel="stylesheet"
+          />
+          <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+            crossOrigin=""
+          />
+        </noscript>
       </head>
       <body className="min-h-screen bg-paper text-ink antialiased" suppressHydrationWarning>
         <SessionProvider>
