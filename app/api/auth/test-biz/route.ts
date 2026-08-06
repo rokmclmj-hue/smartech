@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "관리자만 접근 가능" }, { status: 403 });
   }
 
-  const apiKey = process.env.DATA_GO_KR_BIZ_KEY;
+  const apiKey = process.env.BIZ_API_KEY;
   const result: Record<string, unknown> = {
     hasKey: !!apiKey,
     keyLength: apiKey?.length ?? 0,

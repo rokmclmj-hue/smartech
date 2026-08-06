@@ -32,11 +32,11 @@ export async function verifyBusinessNo(rawNo: string): Promise<BizVerifyResult> 
     return { status: "invalid", message: "유효하지 않은 사업자등록번호 형식입니다." };
   }
 
-  const apiKey = process.env.DATA_GO_KR_BIZ_KEY;
+  const apiKey = process.env.BIZ_API_KEY;
 
   // API 키가 없거나 승인 안 된 경우 → 체크섬 통과 시 active로 허용 (임시)
   if (!apiKey) {
-    console.warn("[verify-biz] DATA_GO_KR_BIZ_KEY 없음 — 체크섬 검증만 사용");
+    console.warn("[verify-biz] BIZ_API_KEY 없음 — 체크섬 검증만 사용");
     return { status: "active", message: "정상 사업자번호 형식입니다." };
   }
 
