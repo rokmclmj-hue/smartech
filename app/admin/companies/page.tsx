@@ -473,14 +473,8 @@ export default function AdminCompaniesPage() {
                           type="button"
                           onClick={() => {
                             if (isCustomBtn) {
-                              if (active) {
-                                savePaymentTerm(null);
-                                setEditingCustomPayment(false);
-                                setCustomPaymentInput("");
-                              } else {
-                                setCustomPaymentInput(active ? selected.paymentTerm ?? "" : "");
-                                setEditingCustomPayment(true);
-                              }
+                              setCustomPaymentInput(active ? selected.paymentTerm ?? "" : "");
+                              setEditingCustomPayment(true);
                             } else {
                               setEditingCustomPayment(false);
                               savePaymentTerm(selected.paymentTerm === o.value ? null : o.value);
@@ -512,6 +506,13 @@ export default function AdminCompaniesPage() {
                         className="mono text-[9px] px-2 py-0.5 rounded bg-smblue text-white"
                       >
                         저장
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setEditingCustomPayment(false)}
+                        className="mono text-[9px] dim hover:text-edred px-1"
+                      >
+                        취소
                       </button>
                     </div>
                   )}
