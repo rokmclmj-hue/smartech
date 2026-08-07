@@ -26,6 +26,7 @@ const NAV_ITEMS = [
   { href: "/admin/settings", label: "설정" },
   { href: "/admin/blog", label: "블로그" },
   { href: "/admin/email-inbox", label: "이메일", badgeKey: "email" as const },
+  { href: "/admin/x-posts", label: "X콘텐츠", badgeKey: "xposts" as const },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -49,6 +50,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     fetch("/api/admin/inventory/reorder")
       .then(r => r.json())
       .then(d => setBadgeCounts((prev) => ({ ...prev, inventory: d.total ?? 0 })))
+      .catch(() => {});
+    fetch("/api/admin/x-posts?status=PENDING")
+      .then(r => r.json())
+      .then(d => setBadgeCounts((prev) => ({ ...prev, xposts: d.total ?? 0 })))
       .catch(() => {});
   }, [pathname]);
 
