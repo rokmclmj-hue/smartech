@@ -52,23 +52,46 @@ function buildOAuthHeader(method: string, url: string, extraParams: Record<strin
 // 호출부에서 이 에러는 "APPROVED로 되돌려 재시도 허용" 대신 별도 처리해야 함(중복 게시 방지)
 export class PostedButUnconfirmedError extends Error {}
 
+// 실제 값은 절대 반환하지 않고 길이·공백여부·앞뒤 1글자만 노출 — Vercel에 저장된 값이
+// 육안으로 봤을 때 정상적인 형태인지(복붙 실수로 빈 값/공백/따옴표가 안 섞였는지) 확인하기 위한 진단용
+function describeSecret(name: string, value: string | undefined) {
+  if (!value) return { name, present: false };
+  return {
+    name,
+    present: true,
+    length: value.length,
+    hasWhitespace: /\s/.test(value),
+    hasQuotes: /["']/.test(value),
+    hyphenCount: (value.match(/-/g) ?? []).length, // Access Token은 보통 "숫자열-문자열" 형태(하이픈 1개)
+    edges: `${value[0]}...${value[value.length - 1]}`,
+  };
+}
+
 // 트윗을 올리지 않고 키가 유효한지만 확인 — GET /2/users/me (부작용 없음, 진단용)
-export async function verifyXAuth(): Promise<{ ok: boolean; detail: string }> {
+export async function verifyXAuth(): Promise<{ ok: boolean; detail: string; keys: unknown[] }> {
+  const keys = [
+    describeSecret("X_API_KEY", process.env.X_API_KEY),
+    describeSecret("X_API_SECRET", process.env.X_API_SECRET),
+    describeSecret("X_ACCESS_TOKEN", process.env.X_ACCESS_TOKEN),
+    describeSecret("X_ACCESS_TOKEN_SECRET", process.env.X_ACCESS_TOKEN_SECRET),
+  ];
+
   const url = "https://api.x.com/2/users/me";
   try {
     const authHeader = buildOAuthHeader("GET", url);
     const res = await fetch(url, { headers: { Authorization: authHeader } });
     const text = await res.text();
     if (res.ok) {
-      return { ok: true, detail: text };
+      return { ok: true, detail: text, keys };
     }
     const wwwAuth = res.headers.get("www-authenticate");
     return {
       ok: false,
       detail: `(${res.status}) ${text}${wwwAuth ? ` | WWW-Authenticate: ${wwwAuth}` : ""}`,
+      keys,
     };
   } catch (e) {
-    return { ok: false, detail: e instanceof Error ? e.message : String(e) };
+    return { ok: false, detail: e instanceof Error ? e.message : String(e), keys };
   }
 }
 

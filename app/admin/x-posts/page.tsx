@@ -43,7 +43,7 @@ export default function AdminXPostsPage() {
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [testing, setTesting] = useState(false);
-  const [testResult, setTestResult] = useState<{ ok: boolean; detail: string } | null>(null);
+  const [testResult, setTestResult] = useState<{ ok: boolean; detail: string; keys?: unknown[] } | null>(null);
 
   const showToast = (msg: string, ok: boolean) => {
     setToast({ msg, ok });
@@ -170,6 +170,12 @@ export default function AdminXPostsPage() {
         <div className={`border p-3 mb-6 text-[12px] font-mono whitespace-pre-wrap break-all ${testResult.ok ? "border-green-300 bg-green-50 text-green-800" : "border-red-300 bg-red-50 text-red-800"}`}>
           {testResult.ok ? "✅ 연결 성공 — 키가 유효합니다\n" : "❌ 연결 실패\n"}
           {testResult.detail}
+          {testResult.keys && (
+            <>
+              {"\n\n[키 상태 — 실제 값은 안 보이고 형태만 확인]\n"}
+              {JSON.stringify(testResult.keys, null, 2)}
+            </>
+          )}
         </div>
       )}
 
