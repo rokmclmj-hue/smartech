@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { postToX } from "@/lib/x-post";
 
 async function requireAdmin() {
   const session = await auth();
@@ -65,6 +66,23 @@ export async function PATCH(req: NextRequest) {
       data: { status: "REJECTED", adminNote: adminNote ?? null },
     });
     return NextResponse.json({ ok: true });
+  }
+
+  // 실제 X 게시 — 승인된 글에 대해 관리자가 명시적으로 "게시" 버튼을 눌렀을 때만 호출됨
+  if (action === "publish") {
+    if (post.status !== "APPROVED") {
+      return NextResponse.json({ error: "승인된 글만 게시할 수 있습니다" }, { status: 400 });
+    }
+    try {
+      const result = await postToX(post.content);
+      await prisma.xPost.update({
+        where: { id: postId },
+        data: { status: "POSTED", postedAt: new Date(), tweetId: result.id },
+      });
+      return NextResponse.json({ ok: true, tweetId: result.id });
+    } catch (e) {
+      return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 502 });
+    }
   }
 
   return NextResponse.json({ error: "잘못된 action" }, { status: 400 });

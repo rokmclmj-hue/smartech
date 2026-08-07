@@ -11,6 +11,7 @@ type XPost = {
   createdAt: string;
   approvedAt: string | null;
   postedAt: string | null;
+  tweetId: string | null;
 };
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
@@ -106,8 +107,9 @@ export default function AdminXPostsPage() {
     }
   };
 
-  const handleAction = async (action: "approve" | "reject") => {
+  const handleAction = async (action: "approve" | "reject" | "publish") => {
     if (!selected) return;
+    if (action === "publish" && !confirm("이 글을 지금 X에 실제로 게시할까요? 게시 후에는 X에서 직접 삭제해야 합니다.")) return;
     setSaving(true);
     try {
       const res = await fetch("/api/admin/x-posts", {
@@ -115,11 +117,15 @@ export default function AdminXPostsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: selected.id, action }),
       });
+      const data = await res.json().catch(() => ({}));
       if (res.ok) {
-        showToast(action === "approve" ? "승인되었습니다" : "반려되었습니다", true);
+        const msg = action === "approve" ? "승인되었습니다" : action === "reject" ? "반려되었습니다" : "X에 게시되었습니다";
+        showToast(msg, true);
         setSelected(null);
         load();
         loadCounts();
+      } else {
+        showToast(data.error ?? "처리 실패", false);
       }
     } finally {
       setSaving(false);
@@ -286,10 +292,24 @@ export default function AdminXPostsPage() {
               )}
 
               {selected.status === "APPROVED" && (
-                <div className="border hair p-3 bg-ink/[0.015]">
-                  <div className="mono text-[10px] tracking-[0.1em] uppercase text-dim mb-1">게시 대기</div>
-                  <div className="text-[12px] dim">X API 키 발급 후 자동 게시 기능이 연결됩니다. 그 전까지는 승인된 글을 수동으로 X에 게시해주세요.</div>
-                </div>
+                <button
+                  onClick={() => handleAction("publish")}
+                  disabled={saving}
+                  className="w-full mono text-[10px] tracking-[0.1em] uppercase bg-edred text-white px-4 py-2.5 hover:brightness-110 transition-all disabled:opacity-50"
+                >
+                  {saving ? "게시 중..." : "지금 X에 게시"}
+                </button>
+              )}
+
+              {selected.status === "POSTED" && selected.tweetId && (
+                <a
+                  href={`https://x.com/smartechvacuum/status/${selected.tweetId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block text-center border hair px-4 py-2.5 text-[12px] text-edred hover:border-edred transition-colors"
+                >
+                  게시된 글 보기 →
+                </a>
               )}
 
               {selected.adminNote && (
