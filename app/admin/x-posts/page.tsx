@@ -15,10 +15,11 @@ type XPost = {
 };
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  PENDING:  { label: "대기중",   color: "bg-yellow-100 text-yellow-700" },
-  APPROVED: { label: "승인됨",   color: "bg-green-100 text-green-700" },
-  REJECTED: { label: "반려됨",   color: "bg-red-100 text-red-600" },
-  POSTED:   { label: "게시됨",   color: "bg-ink/10 text-dim" },
+  PENDING:    { label: "대기중",     color: "bg-yellow-100 text-yellow-700" },
+  APPROVED:   { label: "승인됨",     color: "bg-green-100 text-green-700" },
+  PUBLISHING: { label: "게시 확인중", color: "bg-orange-100 text-orange-700" },
+  REJECTED:   { label: "반려됨",     color: "bg-red-100 text-red-600" },
+  POSTED:     { label: "게시됨",     color: "bg-ink/10 text-dim" },
 };
 
 function formatDate(s: string) {
@@ -121,6 +122,11 @@ export default function AdminXPostsPage() {
       if (res.ok) {
         const msg = action === "approve" ? "승인되었습니다" : action === "reject" ? "반려되었습니다" : "X에 게시되었습니다";
         showToast(msg, true);
+        setSelected(null);
+        load();
+        loadCounts();
+      } else if (data.needsManualCheck) {
+        showToast("게시 결과를 확인 못했습니다 — X 계정에서 직접 확인해주세요", false);
         setSelected(null);
         load();
         loadCounts();
@@ -299,6 +305,13 @@ export default function AdminXPostsPage() {
                 >
                   {saving ? "게시 중..." : "지금 X에 게시"}
                 </button>
+              )}
+
+              {selected.status === "PUBLISHING" && (
+                <div className="border border-orange-300 p-3 bg-orange-50">
+                  <div className="mono text-[10px] tracking-[0.1em] uppercase text-orange-700 mb-1">확인 필요</div>
+                  <div className="text-[12px] text-orange-800">X에 실제로 게시됐는지 확인하지 못했습니다. X 계정(@smartechvacuum)에서 직접 확인해주세요. 중복 게시를 막기 위해 이 글은 재게시할 수 없도록 잠겨 있습니다.</div>
+                </div>
               )}
 
               {selected.status === "POSTED" && selected.tweetId && (

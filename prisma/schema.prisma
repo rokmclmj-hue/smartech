@@ -417,7 +417,7 @@ model XPost {
   content    String    @db.Text // AI 생성 초안 (280자 이내)
 
   // 관리자 처리
-  // PENDING | APPROVED | REJECTED | POSTED
+  // PENDING | APPROVED | REJECTED | PUBLISHING(게시 시도 중 — 중복게시 방지용 임시 상태) | POSTED
   status     String    @default("PENDING")
   adminNote  String?
   approvedAt DateTime?
