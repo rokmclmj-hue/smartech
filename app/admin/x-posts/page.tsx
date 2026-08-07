@@ -25,33 +25,63 @@ function formatDate(s: string) {
   return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
 }
 
+const STATUS_TABS = ["PENDING", "APPROVED", "POSTED", "REJECTED", "ALL"] as const;
+
 export default function AdminXPostsPage() {
   const [posts, setPosts] = useState<XPost[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
   const [filter, setFilter] = useState<"PENDING" | "APPROVED" | "POSTED" | "REJECTED" | "ALL">("PENDING");
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [selected, setSelected] = useState<XPost | null>(null);
   const [saving, setSaving] = useState(false);
   const [topic, setTopic] = useState("");
   const [generating, setGenerating] = useState(false);
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
+  const [counts, setCounts] = useState<Record<string, number>>({});
 
   const showToast = (msg: string, ok: boolean) => {
     setToast({ msg, ok });
     setTimeout(() => setToast(null), 3000);
   };
 
+  const loadCounts = useCallback(async () => {
+    const results = await Promise.all(
+      STATUS_TABS.map((tab) => fetch(`/api/admin/x-posts?status=${tab}`).then((r) => r.json()))
+    );
+    const next: Record<string, number> = {};
+    STATUS_TABS.forEach((tab, i) => { next[tab] = results[i].total ?? 0; });
+    setCounts(next);
+  }, []);
+
   const load = useCallback(async () => {
     setLoading(true);
+    setPage(1);
     try {
-      const res = await fetch(`/api/admin/x-posts?status=${filter}`);
+      const res = await fetch(`/api/admin/x-posts?status=${filter}&page=1`);
       const data = await res.json();
       setPosts(data.posts ?? []);
+      setTotal(data.total ?? 0);
     } finally {
       setLoading(false);
     }
   }, [filter]);
 
-  useEffect(() => { load(); }, [load]);
+  const loadMore = async () => {
+    const nextPage = page + 1;
+    setLoadingMore(true);
+    try {
+      const res = await fetch(`/api/admin/x-posts?status=${filter}&page=${nextPage}`);
+      const data = await res.json();
+      setPosts((prev) => [...prev, ...(data.posts ?? [])]);
+      setPage(nextPage);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  useEffect(() => { load(); loadCounts(); }, [load, loadCounts]);
 
   const handleGenerate = async () => {
     if (!topic.trim()) return;
@@ -67,6 +97,7 @@ export default function AdminXPostsPage() {
         showToast("초안이 생성되었습니다", true);
         setTopic("");
         if (filter === "PENDING" || filter === "ALL") load();
+        loadCounts();
       } else {
         showToast(data.error ?? "생성 실패", false);
       }
@@ -88,18 +119,11 @@ export default function AdminXPostsPage() {
         showToast(action === "approve" ? "승인되었습니다" : "반려되었습니다", true);
         setSelected(null);
         load();
+        loadCounts();
       }
     } finally {
       setSaving(false);
     }
-  };
-
-  const counts = {
-    PENDING: posts.filter((p) => p.status === "PENDING").length,
-    APPROVED: posts.filter((p) => p.status === "APPROVED").length,
-    POSTED: posts.filter((p) => p.status === "POSTED").length,
-    REJECTED: posts.filter((p) => p.status === "REJECTED").length,
-    ALL: posts.length,
   };
 
   return (
@@ -133,7 +157,7 @@ export default function AdminXPostsPage() {
 
       {/* 필터 탭 */}
       <div className="flex items-center gap-1 mb-6 border-b hair">
-        {(["PENDING", "APPROVED", "POSTED", "REJECTED", "ALL"] as const).map((tab) => {
+        {STATUS_TABS.map((tab) => {
           const label = tab === "ALL" ? "전체" : STATUS_LABELS[tab]?.label ?? tab;
           return (
             <button
@@ -144,7 +168,7 @@ export default function AdminXPostsPage() {
               }`}
             >
               {label}
-              <span className="ml-1.5 mono text-[10px] text-dim">({counts[tab]})</span>
+              <span className="ml-1.5 mono text-[10px] text-dim">({counts[tab] ?? 0})</span>
               {filter === tab && (
                 <span className="absolute left-0 right-0 -bottom-px h-0.5 bg-edred" />
               )}
@@ -189,6 +213,18 @@ export default function AdminXPostsPage() {
               </button>
             );
           })}
+        </div>
+      )}
+
+      {!loading && posts.length < total && (
+        <div className="flex justify-center mt-4">
+          <button
+            onClick={loadMore}
+            disabled={loadingMore}
+            className="mono text-[10px] tracking-[0.1em] uppercase border hair text-dim px-4 py-2 hover:border-ink hover:text-ink transition-colors disabled:opacity-50"
+          >
+            {loadingMore ? "불러오는 중..." : `더보기 (${posts.length} / ${total})`}
+          </button>
         </div>
       )}
 

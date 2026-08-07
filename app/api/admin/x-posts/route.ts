@@ -43,12 +43,17 @@ export async function PATCH(req: NextRequest) {
   const { id, action, adminNote } = body;
   // action: "approve" | "reject"
 
-  const post = await prisma.xPost.findUnique({ where: { id: Number(id) } });
+  const postId = Number(id);
+  if (!id || isNaN(postId)) {
+    return NextResponse.json({ error: "잘못된 ID" }, { status: 400 });
+  }
+
+  const post = await prisma.xPost.findUnique({ where: { id: postId } });
   if (!post) return NextResponse.json({ error: "글 없음" }, { status: 404 });
 
   if (action === "approve") {
     await prisma.xPost.update({
-      where: { id: Number(id) },
+      where: { id: postId },
       data: { status: "APPROVED", adminNote: adminNote ?? null, approvedAt: new Date() },
     });
     return NextResponse.json({ ok: true });
@@ -56,7 +61,7 @@ export async function PATCH(req: NextRequest) {
 
   if (action === "reject") {
     await prisma.xPost.update({
-      where: { id: Number(id) },
+      where: { id: postId },
       data: { status: "REJECTED", adminNote: adminNote ?? null },
     });
     return NextResponse.json({ ok: true });
