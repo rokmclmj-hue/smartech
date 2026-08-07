@@ -8,8 +8,9 @@ function percentEncode(str: string): string {
   );
 }
 
-// POST /2/tweets는 쿼리·폼 파라미터가 없으므로 서명 대상은 oauth_* 파라미터뿐 (JSON 본문은 서명에 포함하지 않음)
-function buildOAuthHeader(method: string, url: string): string {
+// 쿼리 파라미터가 있는 GET 요청은 그 파라미터도 서명 대상에 포함해야 함 (OAuth 1.0a 스펙)
+// POST /2/tweets처럼 JSON 본문뿐인 요청은 extraParams 없이 호출 — 서명 대상은 oauth_* 파라미터뿐
+function buildOAuthHeader(method: string, url: string, extraParams: Record<string, string> = {}): string {
   const apiKey = process.env.X_API_KEY;
   const apiSecret = process.env.X_API_SECRET;
   const accessToken = process.env.X_ACCESS_TOKEN;
@@ -27,9 +28,10 @@ function buildOAuthHeader(method: string, url: string): string {
     oauth_version: "1.0",
   };
 
-  const paramString = Object.keys(oauthParams)
+  const allParams = { ...oauthParams, ...extraParams };
+  const paramString = Object.keys(allParams)
     .sort()
-    .map((k) => `${percentEncode(k)}=${percentEncode(oauthParams[k])}`)
+    .map((k) => `${percentEncode(k)}=${percentEncode(allParams[k])}`)
     .join("&");
 
   const baseString = [method.toUpperCase(), percentEncode(url), percentEncode(paramString)].join("&");
@@ -50,6 +52,26 @@ function buildOAuthHeader(method: string, url: string): string {
 // 호출부에서 이 에러는 "APPROVED로 되돌려 재시도 허용" 대신 별도 처리해야 함(중복 게시 방지)
 export class PostedButUnconfirmedError extends Error {}
 
+// 트윗을 올리지 않고 키가 유효한지만 확인 — GET /2/users/me (부작용 없음, 진단용)
+export async function verifyXAuth(): Promise<{ ok: boolean; detail: string }> {
+  const url = "https://api.x.com/2/users/me";
+  try {
+    const authHeader = buildOAuthHeader("GET", url);
+    const res = await fetch(url, { headers: { Authorization: authHeader } });
+    const text = await res.text();
+    if (res.ok) {
+      return { ok: true, detail: text };
+    }
+    const wwwAuth = res.headers.get("www-authenticate");
+    return {
+      ok: false,
+      detail: `(${res.status}) ${text}${wwwAuth ? ` | WWW-Authenticate: ${wwwAuth}` : ""}`,
+    };
+  } catch (e) {
+    return { ok: false, detail: e instanceof Error ? e.message : String(e) };
+  }
+}
+
 // 승인된 글을 실제 X(트위터)에 게시 — 관리자가 "게시" 버튼을 눌렀을 때만 호출됨
 export async function postToX(content: string): Promise<{ id: string }> {
   const url = "https://api.x.com/2/tweets";
@@ -64,7 +86,7 @@ export async function postToX(content: string): Promise<{ id: string }> {
     body: JSON.stringify({ text: content }),
   });
 
-  let data: { detail?: string; title?: string; data?: { id?: string } } | undefined;
+  let data: { detail?: string; title?: string; errors?: unknown; data?: { id?: string } } | undefined;
   try {
     data = await res.json();
   } catch {
@@ -77,8 +99,9 @@ export async function postToX(content: string): Promise<{ id: string }> {
   }
 
   if (!res.ok) {
-    const detail = data?.detail || data?.title || JSON.stringify(data);
-    throw new Error(`X 게시 실패 (${res.status}): ${detail}`);
+    const wwwAuth = res.headers.get("www-authenticate");
+    const detail = data?.detail || data?.title || JSON.stringify(data?.errors ?? data);
+    throw new Error(`X 게시 실패 (${res.status}): ${detail}${wwwAuth ? ` | ${wwwAuth}` : ""}`);
   }
   if (!data?.data?.id) {
     throw new PostedButUnconfirmedError(

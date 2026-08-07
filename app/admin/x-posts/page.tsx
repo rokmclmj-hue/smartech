@@ -42,6 +42,8 @@ export default function AdminXPostsPage() {
   const [generating, setGenerating] = useState(false);
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
   const [counts, setCounts] = useState<Record<string, number>>({});
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState<{ ok: boolean; detail: string } | null>(null);
 
   const showToast = (msg: string, ok: boolean) => {
     setToast({ msg, ok });
@@ -138,12 +140,38 @@ export default function AdminXPostsPage() {
     }
   };
 
+  const handleTestAuth = async () => {
+    setTesting(true);
+    setTestResult(null);
+    try {
+      const res = await fetch("/api/admin/x-posts/test-auth");
+      const data = await res.json();
+      setTestResult(data);
+    } finally {
+      setTesting(false);
+    }
+  };
+
   return (
     <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-8">
       <div className="flex items-baseline gap-4 mb-6">
         <h1 className="display text-[28px] md:text-[32px] tracking-[-0.03em]">X콘텐츠</h1>
         <span className="mono text-[10px] tracking-[0.18em] dim uppercase">Approval Queue</span>
+        <button
+          onClick={handleTestAuth}
+          disabled={testing}
+          className="ml-auto mono text-[10px] tracking-[0.1em] uppercase border hair text-dim px-3 py-1.5 hover:border-ink hover:text-ink transition-colors disabled:opacity-50"
+        >
+          {testing ? "확인 중..." : "X 연결 테스트 (글 안 올림)"}
+        </button>
       </div>
+
+      {testResult && (
+        <div className={`border p-3 mb-6 text-[12px] font-mono whitespace-pre-wrap break-all ${testResult.ok ? "border-green-300 bg-green-50 text-green-800" : "border-red-300 bg-red-50 text-red-800"}`}>
+          {testResult.ok ? "✅ 연결 성공 — 키가 유효합니다\n" : "❌ 연결 실패\n"}
+          {testResult.detail}
+        </div>
+      )}
 
       {/* 새 초안 생성 */}
       <div className="border hair p-4 mb-6 bg-ink/[0.015] space-y-3">
