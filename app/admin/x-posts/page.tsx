@@ -145,8 +145,12 @@ export default function AdminXPostsPage() {
     setTestResult(null);
     try {
       const res = await fetch("/api/admin/x-posts/test-auth");
-      const data = await res.json();
-      setTestResult(data);
+      const data: { ok?: boolean; detail?: string; error?: string; keys?: unknown[] } = await res.json().catch(() => ({}));
+      setTestResult({
+        ok: data.ok ?? false,
+        detail: data.detail ?? data.error ?? "응답을 읽을 수 없습니다",
+        keys: data.keys,
+      });
     } finally {
       setTesting(false);
     }

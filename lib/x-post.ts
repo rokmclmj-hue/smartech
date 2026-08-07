@@ -8,9 +8,9 @@ function percentEncode(str: string): string {
   );
 }
 
-// 쿼리 파라미터가 있는 GET 요청은 그 파라미터도 서명 대상에 포함해야 함 (OAuth 1.0a 스펙)
-// POST /2/tweets처럼 JSON 본문뿐인 요청은 extraParams 없이 호출 — 서명 대상은 oauth_* 파라미터뿐
-function buildOAuthHeader(method: string, url: string, extraParams: Record<string, string> = {}): string {
+// 지금 쓰는 두 요청(GET /2/users/me, POST /2/tweets) 모두 쿼리·폼 파라미터가 없는 JSON/무본문
+// 요청이라 서명 대상은 oauth_* 파라미터뿐 — 쿼리 파라미터가 필요한 호출이 생기면 그때 추가할 것
+function buildOAuthHeader(method: string, url: string): string {
   const apiKey = process.env.X_API_KEY;
   const apiSecret = process.env.X_API_SECRET;
   const accessToken = process.env.X_ACCESS_TOKEN;
@@ -28,10 +28,9 @@ function buildOAuthHeader(method: string, url: string, extraParams: Record<strin
     oauth_version: "1.0",
   };
 
-  const allParams = { ...oauthParams, ...extraParams };
-  const paramString = Object.keys(allParams)
+  const paramString = Object.keys(oauthParams)
     .sort()
-    .map((k) => `${percentEncode(k)}=${percentEncode(allParams[k])}`)
+    .map((k) => `${percentEncode(k)}=${percentEncode(oauthParams[k])}`)
     .join("&");
 
   const baseString = [method.toUpperCase(), percentEncode(url), percentEncode(paramString)].join("&");
@@ -56,6 +55,9 @@ export class PostedButUnconfirmedError extends Error {}
 // 육안으로 봤을 때 정상적인 형태인지(복붙 실수로 빈 값/공백/따옴표가 안 섞였는지) 확인하기 위한 진단용
 function describeSecret(name: string, value: string | undefined) {
   if (!value) return { name, present: false };
+  // 값이 너무 짧으면(오타·잘못된 값) edges가 사실상 전체 값을 그대로 노출하게 되므로
+  // 정상 키 길이(20자 이상)일 때만 앞뒤 1글자를 보여준다
+  const edges = value.length >= 20 ? `${value[0]}...${value[value.length - 1]}` : "(너무 짧음 — 값 확인 필요)";
   return {
     name,
     present: true,
@@ -63,7 +65,7 @@ function describeSecret(name: string, value: string | undefined) {
     hasWhitespace: /\s/.test(value),
     hasQuotes: /["']/.test(value),
     hyphenCount: (value.match(/-/g) ?? []).length, // Access Token은 보통 "숫자열-문자열" 형태(하이픈 1개)
-    edges: `${value[0]}...${value[value.length - 1]}`,
+    edges,
   };
 }
 
@@ -109,7 +111,7 @@ export async function postToX(content: string): Promise<{ id: string }> {
     body: JSON.stringify({ text: content }),
   });
 
-  let data: { detail?: string; title?: string; errors?: unknown; data?: { id?: string } } | undefined;
+  let data: { detail?: string; title?: string; errors?: unknown[]; data?: { id?: string } } | undefined;
   try {
     data = await res.json();
   } catch {
@@ -123,7 +125,7 @@ export async function postToX(content: string): Promise<{ id: string }> {
 
   if (!res.ok) {
     const wwwAuth = res.headers.get("www-authenticate");
-    const detail = data?.detail || data?.title || JSON.stringify(data?.errors ?? data);
+    const detail = data?.detail || data?.title || JSON.stringify(data?.errors?.length ? data.errors : data);
     throw new Error(`X 게시 실패 (${res.status}): ${detail}${wwwAuth ? ` | ${wwwAuth}` : ""}`);
   }
   if (!data?.data?.id) {
