@@ -11,10 +11,12 @@ function percentEncode(str: string): string {
 // 지금 쓰는 두 요청(GET /2/users/me, POST /2/tweets) 모두 쿼리·폼 파라미터가 없는 JSON/무본문
 // 요청이라 서명 대상은 oauth_* 파라미터뿐 — 쿼리 파라미터가 필요한 호출이 생기면 그때 추가할 것
 function buildOAuthHeader(method: string, url: string): string {
-  const apiKey = process.env.X_API_KEY;
-  const apiSecret = process.env.X_API_SECRET;
-  const accessToken = process.env.X_ACCESS_TOKEN;
-  const accessTokenSecret = process.env.X_ACCESS_TOKEN_SECRET;
+  // Vercel 환경변수 입력창(textarea)에 붙여넣을 때 끝에 줄바꿈이 섞여 들어오는 경우가 흔해서
+  // trim()으로 방어 — 이 줄바꿈 하나 때문에 서명이 안 맞아 401이 났던 사례가 있었음
+  const apiKey = process.env.X_API_KEY?.trim();
+  const apiSecret = process.env.X_API_SECRET?.trim();
+  const accessToken = process.env.X_ACCESS_TOKEN?.trim();
+  const accessTokenSecret = process.env.X_ACCESS_TOKEN_SECRET?.trim();
   if (!apiKey || !apiSecret || !accessToken || !accessTokenSecret) {
     throw new Error("X API 키가 설정되지 않았습니다 (Vercel 환경변수 확인 필요)");
   }
