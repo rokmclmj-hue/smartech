@@ -212,17 +212,23 @@ python 블로그/blur_photo.py "원본경로" "블로그/output/[주제]/images/
 - **브랜드 텍스트 삽입 금지**: SMARTECH, SMARTECH VACUUM, 전화번호, 웹사이트 모두 금지
 
 #### 🔴 썸네일 여백 규칙 — 반드시 준수
+
+**주의**: `padding: 60px`는 텍스트 블록 자체의 안쪽 여백일 뿐, 1080×1080 캔버스 전체의 위아래 시각적 공백을 줄여주지 않는다. 짧은 텍스트를 flex 중앙정렬하면 캔버스 상하로 큰 빈 공간이 남는다 — 이 공백을 줄이려면 **패딩이 아니라 폰트 크기·줄간격을 키워 텍스트 블록 자체의 높이를 늘려야 한다** (2026-08-05 의료바이오게이지 글 작업에서 4번 수정 끝에 확정된 사이즈, 아래 값을 매번 처음부터 적용할 것 — "조금씩 키우며 시행착오" 금지).
+
 - 전체 레이아웃은 `display:flex; flex-direction:column; justify-content:center; align-items:center` 로 중앙 정렬
-- **위아래 패딩: 60px 이하** (기존 과도한 여백 금지)
-- 텍스트 요소 간 간격(`gap` 또는 `margin`): 16px~24px 이내로 좁게
-- 텍스트 블록 전체를 하나의 `<div>`로 묶어 세로 여백을 최소화
+- **최소 폰트 크기 기준** (이보다 작게 시작하지 말 것):
+  - 카테고리 뱃지: 42px
+  - 제목(h1): 84px
+  - 부제: 60px
+  - 텍스트 블록 사이 `gap`: 64px
+- 위 크기로 만든 뒤 Read 도구로 실제 렌더링 결과를 확인해서, 캔버스 위/아래 빈 여백의 합이 전체 높이(1080px)의 **30% 이하**인지 검사한다. 넘으면 폰트·gap을 더 키운다 (패딩을 줄이는 방식으로 해결하지 말 것).
 - HTML 예시 구조:
   ```html
   <body style="margin:0; width:1080px; height:1080px; display:flex; align-items:center; justify-content:center; background: linear-gradient(135deg,#1a1a2e,#16213e);">
-    <div style="text-align:center; padding:60px; display:flex; flex-direction:column; gap:20px; align-items:center;">
-      <span style="...카테고리 뱃지..."></span>
-      <h1 style="...제목..."></h1>
-      <p style="...부제..."></p>
+    <div style="text-align:center; padding:60px; display:flex; flex-direction:column; gap:64px; align-items:center;">
+      <span style="font-size:42px; ...카테고리 뱃지..."></span>
+      <h1 style="font-size:84px; ...제목..."></h1>
+      <p style="font-size:60px; ...부제..."></p>
     </div>
   </body>
   ```
@@ -276,6 +282,7 @@ with sync_playwright() as p:
 - [ ] 텍스트가 이미지 경계 안에 완전히 포함됐는가
 - [ ] 텍스트와 배경 간 명도 대비가 충분한가 (어두운 배경 = 밝은 텍스트)
 - [ ] 이미지 하단 빈 여백이 전체 높이의 20% 이하인가
+- [ ] **(썸네일 전용) 위/아래 빈 여백의 합이 전체 높이의 30% 이하인가** — 넘으면 위 "썸네일 여백 규칙"의 폰트 크기 기준으로 재생성 (패딩만 줄이는 방식 금지)
 - [ ] **본문 이미지에 전화번호·웹사이트·회사명이 없는가** (있으면 즉시 제거 후 재생성)
 
 문제가 있으면 수정 후 재확인. 3회 후에도 문제 남으면 주석 달고 다음으로 넘어간다.
@@ -289,6 +296,8 @@ with sync_playwright() as p:
 
 - 2~5단계에서 만든 field-N.png / image-NN.png는 작업용 임시 이름이다. 이 단계에서 최종적으로 `사진1.png`부터 순번을 다시 매긴다.
 - 마커 개수와 최종 이미지 파일 개수가 반드시 일치해야 한다. 개수가 안 맞으면 이미지를 추가 제작하거나 마커를 정리해서 맞춘다 (개수 불일치 상태로 완료 처리 금지).
+- 🔴 **"다시 이름 붙인다"는 복사(copy)가 아니라 이동(rename/move)이다.** field-N.png를 사진N.png로 **복사만 하고 원본 field-N.png를 남겨두면 images 폴더에 같은 사진이 두 번 들어가는 사고**가 난다(2026-08-08 0814-재가동전점검사항 글에서 field-1.png와 사진1.png가 완전히 같은 파일로 중복 발견). Python이면 `shutil.move()` 또는 `os.rename()`을 쓰고, PowerShell 명령을 쓴다면 `Copy-Item` 대신 `Move-Item`을 쓴다. 이미 복사해버렸다면 6단계 마지막에 반드시 `ls images/`로 폴더 안 파일 목록을 확인해서 field-N.png / image-NN.png 잔재가 없는지 검사하고, 남아있으면 삭제한다.
+- **6단계 완료 조건**: `ls images/` 결과에 `thumbnail.png`와 `사진1.png ~ 사진N.png`만 있어야 한다. `field-*.png`나 `image-*.png` 이름이 하나라도 남아있으면 완료 처리 금지.
 
 ### 7단계 — naver.md는 마커를 그대로 둔다 / final.md에 실제 경로를 채운다
 
