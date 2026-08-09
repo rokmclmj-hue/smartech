@@ -268,6 +268,46 @@ def chk_naver_md(folder: str) -> dict:
     }
 
 
+def chk_image_marker_match(folder: str) -> dict:
+    """naver.md의 [IMAGE:] 마커 개수와 images/ 폴더의 사진N.png 실제 파일 개수가
+    일치하는지 자동 대조한다. [THUMBNAIL] 마커는 thumbnail.png 재사용 자리라 카운트에서 제외.
+    2026-08-10 사고: 마커는 4개인데 실제 사진 파일은 3개만 만들어져 네이버 복사 시
+    사진 개수·캡션이 밀리는 문제가 반복 발생 — 이 검증이 없어서 품질검수를 그대로 통과했었음."""
+    path = os.path.join(folder, "naver.md")
+    if not os.path.exists(path):
+        return {"pass": False, "reason": "naver.md 없음"}
+    content = open(path, encoding="utf-8").read()
+
+    image_marker_count = len(re.findall(r"\[IMAGE:", content))
+    thumbnail_marker_count = len(re.findall(r"\[THUMBNAIL\]", content))
+
+    img_dir = os.path.join(folder, "images")
+    photo_files = []
+    if os.path.isdir(img_dir):
+        photo_files = sorted(
+            f for f in os.listdir(img_dir) if re.match(r"^사진\d+\.png$", f)
+        )
+    thumbnail_exists = os.path.isdir(img_dir) and os.path.exists(os.path.join(img_dir, "thumbnail.png"))
+
+    errors = []
+    if thumbnail_marker_count > 1:
+        errors.append(f"[THUMBNAIL] 마커 {thumbnail_marker_count}개 (1개만 허용)")
+    if thumbnail_marker_count == 1 and not thumbnail_exists:
+        errors.append("[THUMBNAIL] 마커는 있는데 images/thumbnail.png 없음")
+    if image_marker_count != len(photo_files):
+        errors.append(
+            f"[IMAGE:] 마커 {image_marker_count}개 vs 사진N.png 파일 {len(photo_files)}개 불일치"
+        )
+
+    ok = len(errors) == 0
+    return {
+        "pass": ok,
+        "image_markers": image_marker_count,
+        "photo_files": len(photo_files),
+        "reason": " / ".join(errors) if errors else None,
+    }
+
+
 def chk_no_table(folder: str) -> dict:
     """final.md·naver.md 둘 다 마크다운 표(|---|) 문법 금지 (writer.md 규칙).
     2026-07-16 사고: content(final.md 소스)만 검사하고 naverContent(naver.md 소스)는
@@ -364,6 +404,7 @@ def run(folder_arg: str) -> bool:
         "no_contact":  chk_no_contact(folder),
         "naver_md":    chk_naver_md(folder),
         "no_table":    chk_no_table(folder),
+        "img_match":   chk_image_marker_match(folder),
     }
 
     labels = {
@@ -377,6 +418,7 @@ def run(folder_arg: str) -> bool:
         "no_contact":  "연락처중복",
         "naver_md":    "네이버글",
         "no_table":    "표문법금지",
+        "img_match":   "사진개수대조",
     }
 
     failed = []
@@ -411,6 +453,8 @@ def run(folder_arg: str) -> bool:
                 detail = ""
         elif key in ("geo_format", "no_contact"):
             detail = res.get("note", "통과") if res["pass"] else ""
+        elif key == "img_match":
+            detail = f"마커 {res.get('image_markers',0)}개 / 파일 {res.get('photo_files',0)}개"
         else:
             detail = ""
 

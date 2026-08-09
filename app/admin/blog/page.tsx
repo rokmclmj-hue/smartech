@@ -216,7 +216,9 @@ export default function AdminBlogPage() {
       // frontmatter 제거
       .replace(/^---[\s\S]*?---\s*/m, "")
       // HTML 주석 제거
-      .replace(/<!--[\s\S]*?-->/g, "");
+      .replace(/<!--[\s\S]*?-->/g, "")
+      // [THUMBNAIL] 마커(2026-08-10 도입) → 썸네일 안내. naver.md 전용 마커라 [IMAGE:]보다 먼저 처리
+      .replace(/\[THUMBNAIL\]/g, "\n\n[🖼 썸네일 — thumbnail.png를 여기에 붙여주세요]\n\n");
     // naver.md는 썸네일 마커 없이 [IMAGE] 전부가 본문 사진이라 이 처리를 건너뜀 — content(final.md)만 첫 이미지가 실제 thumbnail.png
     if (!hasNaverContent) {
       stripped = stripped

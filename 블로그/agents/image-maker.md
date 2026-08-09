@@ -294,8 +294,9 @@ with sync_playwright() as p:
 썸네일을 제외한 본문 이미지는 현장사진(field-N)이든 AI 생성(image-NN)이든 구분하지 않고,
 **naver.md에 `[IMAGE: 설명]` 마커가 나오는 순서 그대로** `사진1.png`, `사진2.png`, `사진3.png` … 로 다시 이름 붙여 저장한다.
 
+- 🔴 **`[THUMBNAIL]` 마커는 파일 생성 대상이 아니다.** naver.md 도입부 직후의 `[THUMBNAIL]` 마커는 thumbnail.png를 그대로 재사용하는 자리이므로, 이 자리에 쓸 새 사진을 따로 만들지 않는다. `사진1.png`은 `[THUMBNAIL]` 다음에 나오는 **첫 번째 `[IMAGE: 설명]` 마커**부터 대응시킨다.
 - 2~5단계에서 만든 field-N.png / image-NN.png는 작업용 임시 이름이다. 이 단계에서 최종적으로 `사진1.png`부터 순번을 다시 매긴다.
-- 마커 개수와 최종 이미지 파일 개수가 반드시 일치해야 한다. 개수가 안 맞으면 이미지를 추가 제작하거나 마커를 정리해서 맞춘다 (개수 불일치 상태로 완료 처리 금지).
+- 마커 개수(`[IMAGE: 설명]`만 카운트, `[THUMBNAIL]` 제외)와 최종 이미지 파일 개수가 반드시 일치해야 한다. 개수가 안 맞으면 이미지를 추가 제작하거나 마커를 정리해서 맞춘다 (개수 불일치 상태로 완료 처리 금지). check_quality.py가 이 대조를 자동 검증한다(2026-08-10 추가).
 - 🔴 **"다시 이름 붙인다"는 복사(copy)가 아니라 이동(rename/move)이다.** field-N.png를 사진N.png로 **복사만 하고 원본 field-N.png를 남겨두면 images 폴더에 같은 사진이 두 번 들어가는 사고**가 난다(2026-08-08 0814-재가동전점검사항 글에서 field-1.png와 사진1.png가 완전히 같은 파일로 중복 발견). Python이면 `shutil.move()` 또는 `os.rename()`을 쓰고, PowerShell 명령을 쓴다면 `Copy-Item` 대신 `Move-Item`을 쓴다. 이미 복사해버렸다면 6단계 마지막에 반드시 `ls images/`로 폴더 안 파일 목록을 확인해서 field-N.png / image-NN.png 잔재가 없는지 검사하고, 남아있으면 삭제한다.
 - **6단계 완료 조건**: `ls images/` 결과에 `thumbnail.png`와 `사진1.png ~ 사진N.png`만 있어야 한다. `field-*.png`나 `image-*.png` 이름이 하나라도 남아있으면 완료 처리 금지.
 
