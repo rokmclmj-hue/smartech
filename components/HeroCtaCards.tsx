@@ -9,7 +9,7 @@ export default function HeroCtaCards() {
       <div className="grid grid-cols-2 gap-2.5">
         <div
           onClick={() => document.getElementById("b2b")?.scrollIntoView({ behavior: "smooth" })}
-          className="group border border-edred bg-edred text-paper p-5 flex flex-col justify-center items-center sm:justify-between sm:items-start min-h-[132px] hover:bg-ink hover:border-ink transition-all cursor-pointer"
+          className="group border border-edred bg-edred text-paper p-5 flex flex-col justify-center items-center sm:justify-between sm:items-start min-h-[132px] hover:bg-edred3 hover:border-edred3 transition-all cursor-pointer"
         >
           <div className="hidden sm:block text-[9px] mono tracking-widest opacity-50">DIRECT QUOTE</div>
           <div className="text-center sm:text-left">
@@ -20,7 +20,7 @@ export default function HeroCtaCards() {
 
         <div
           onClick={() => router.push("/repair")}
-          className="group border border-ink bg-ink text-paper p-5 flex flex-col justify-center items-center sm:justify-between sm:items-start min-h-[132px] hover:bg-edred hover:border-edred transition-all cursor-pointer"
+          className="group border border-ink bg-ink text-paper p-5 flex flex-col justify-center items-center sm:justify-between sm:items-start min-h-[132px] hover:bg-smblue hover:border-smblue transition-all cursor-pointer"
         >
           <div className="hidden sm:block text-[9px] mono tracking-widest opacity-50">REPAIR</div>
           <div className="text-center sm:text-left">

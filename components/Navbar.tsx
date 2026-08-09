@@ -80,14 +80,16 @@ export default function Navbar() {
             <div className="display text-[28px] md:text-[32px] tracking-[-0.045em]">
               Smartech<span style={{ color: "#c00020" }}>.</span>
             </div>
-            <span className="hidden md:block w-px h-6 bg-ink/60" aria-hidden />
-            <div className="hidden md:block text-[10px] mono tracking-[0.22em] dim uppercase">
+            <span className="hidden lg:block w-px h-6 bg-ink/60" aria-hidden />
+            <div className="hidden lg:block text-[10px] mono tracking-[0.22em] dim uppercase">
               Vacuum · Since 2011
             </div>
           </Link>
 
-          {/* 데스크탑 네비 */}
-          <nav className="hidden md:flex items-center gap-8 text-[16px] font-medium">
+          {/* 데스크탑 네비 — lg(1024px) 이상에서만 표시. 갤럭시 폴드8 펼침 화면(~900px)처럼
+              md(768px)는 넘지만 6개 메뉴가 한 줄에 안 들어가는 중간 너비에서 글자가
+              개별 줄바꿈되는 문제 방지 (2026-08-09) */}
+          <nav className="hidden lg:flex items-center gap-5 xl:gap-8 text-[14px] xl:text-[16px] font-medium whitespace-nowrap">
             <Link href="/#industries" className="hover:text-edred transition-colors">산업 활용</Link>
             <Link href="/#products" className="hover:text-edred transition-colors">제품 카탈로그</Link>
             <Link href="/#solution" className="hover:text-edred transition-colors">토탈 솔루션</Link>
@@ -104,7 +106,7 @@ export default function Navbar() {
             {session ? (
               <>
                 {/* 데스크탑 전용 버튼 묶음 — wrapper로 hidden 처리해야 chip 클래스와 충돌 없음 */}
-                <div className="hidden md:flex items-center gap-2">
+                <div className="hidden lg:flex items-center gap-2">
                   <span className="text-[11px] mono dim">
                     {(session.user as { company?: string })?.company}
                   </span>
@@ -135,7 +137,7 @@ export default function Navbar() {
                 </div>
               </>
             ) : (
-              <div className="hidden md:flex items-center gap-2">
+              <div className="hidden lg:flex items-center gap-2">
                 <Link href="/repair" className="chip !border-ink hover:bg-ink hover:text-paper transition">
                   견적 문의 →
                 </Link>
@@ -149,7 +151,7 @@ export default function Navbar() {
             {session && (
               <Link
                 href="/quote"
-                className="md:hidden print:hidden relative p-2 text-ink/70 hover:text-edred transition min-h-[44px] min-w-[44px] flex items-center justify-center"
+                className="lg:hidden print:hidden relative p-2 text-ink/70 hover:text-edred transition min-h-[44px] min-w-[44px] flex items-center justify-center"
                 aria-label={`견적 카트 ${cartCount}개`}
               >
                 {/* 카트 아이콘 */}
@@ -166,7 +168,7 @@ export default function Navbar() {
 
             {/* 햄버거 버튼 */}
             <button
-              className="md:hidden print:hidden ml-1 text-ink/60 hover:text-ink transition min-h-[44px] min-w-[44px] flex items-center justify-center"
+              className="lg:hidden print:hidden ml-1 text-ink/60 hover:text-ink transition min-h-[44px] min-w-[44px] flex items-center justify-center"
               onClick={() => setMenuOpen(!menuOpen)}
               aria-label={menuOpen ? "메뉴 닫기" : "메뉴 열기"}
               aria-expanded={menuOpen}
@@ -190,7 +192,7 @@ export default function Navbar() {
       {/* 모바일 드로어 오버레이 */}
       {menuOpen && (
         <div
-          className="md:hidden print:hidden fixed inset-0 z-30 bg-ink/40 backdrop-blur-sm"
+          className="lg:hidden print:hidden fixed inset-0 z-30 bg-ink/40 backdrop-blur-sm"
           onClick={() => setMenuOpen(false)}
           aria-hidden="true"
         />
@@ -198,7 +200,7 @@ export default function Navbar() {
 
       {/* 모바일 드로어 패널 */}
       <div
-        className={`md:hidden print:hidden fixed top-0 right-0 z-50 h-full w-[280px] bg-paper shadow-2xl transform transition-transform duration-300 ease-out ${
+        className={`lg:hidden print:hidden fixed top-0 right-0 z-50 h-full w-[280px] bg-paper shadow-2xl transform transition-transform duration-300 ease-out ${
           menuOpen ? "translate-x-0" : "translate-x-full"
         }`}
         role="dialog"
