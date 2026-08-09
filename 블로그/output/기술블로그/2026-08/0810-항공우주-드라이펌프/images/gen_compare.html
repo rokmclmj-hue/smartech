@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  body { margin:0; width:1200px; padding:60px; box-sizing:border-box; background:#0f1420; font-family:'Malgun Gothic',sans-serif; }
+  h2 { color:#ffffff; font-size:34px; margin:0 0 36px 0; text-align:center; }
+  .grid { display:flex; gap:32px; }
+  .card { flex:1; background:#1a2233; border-radius:20px; padding:36px; border:1px solid #2c3a54; }
+  .card h3 { color:#7fb8ec; font-size:28px; margin:0 0 6px 0; }
+  .card .desc { color:#8b96ac; font-size:18px; margin:0 0 24px 0; }
+  .row { display:flex; justify-content:space-between; padding:14px 0; border-bottom:1px solid #2c3a54; }
+  .row:last-child { border-bottom:none; }
+  .label { color:#c4cede; font-size:20px; }
+  .val { color:#ffffff; font-size:20px; font-weight:700; }
+  .accent { color:#c00020; }
+</style>
+</head>
+<body>
+  <h2>대형 챔버용 GXS  vs  소형 챔버용 nXDS</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>GXS 드라이 스크류</h3>
+      <p class="desc">지름 3~6m급 대형 TVAC 챔버</p>
+      <div class="row"><span class="label">배기속도</span><span class="val">160 ~ 740 m³/h</span></div>
+      <div class="row"><span class="label">소음</span><span class="val">64 dB(A) 미만</span></div>
+      <div class="row"><span class="label">부스터 연결</span><span class="val accent">EH 시리즈 별도 가능</span></div>
+      <div class="row"><span class="label">용도</span><span class="val">챔버 초기 배기(러핑)</span></div>
+    </div>
+    <div class="card">
+      <h3>nXDS 드라이 스크롤</h3>
+      <p class="desc">벤치탑급 소형 시험 설비</p>
+      <div class="row"><span class="label">배기속도</span><span class="val">6.2 ~ 22.0 m³/h</span></div>
+      <div class="row"><span class="label">소음</span><span class="val">52 dB(A)</span></div>
+      <div class="row"><span class="label">부스터 연결</span><span class="val accent">터보펌프 백킹용</span></div>
+      <div class="row"><span class="label">용도</span><span class="val">소형 챔버·터보펌프 백킹</span></div>
+    </div>
+  </div>
+</body>
+</html>
