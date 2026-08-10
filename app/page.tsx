@@ -434,7 +434,12 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="mt-10 flex flex-wrap justify-between gap-3 text-[11px] mono dim">
+          <div className="mt-8 pt-5 border-t hair text-[11px] mono dim flex items-center gap-2">
+            <span>파트너사</span>
+            <a href="https://houseman.co.kr" target="_blank" rel="noopener noreferrer" className="hover:text-edred transition-colors underline underline-offset-2">하우스맨</a>
+          </div>
+
+          <div className="mt-4 flex flex-wrap justify-between gap-3 text-[11px] mono dim">
             <div>© 2026 SMARTECH · ALL RIGHTS RESERVED</div>
             <div>VACUUM TOTAL SOLUTION / EDWARDS KR</div>
           </div>
