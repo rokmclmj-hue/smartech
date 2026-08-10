@@ -56,6 +56,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/about`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
     // 작성자(Robin) 소개
     { url: `${BASE_URL}/about/robin`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
+    // 협력사
+    { url: `${BASE_URL}/partners`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
     // 블로그 목록
     { url: `${BASE_URL}/blog`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
     // 제품 카탈로그
