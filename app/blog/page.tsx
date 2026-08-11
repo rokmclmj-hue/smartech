@@ -12,10 +12,11 @@ const CATEGORY_COLORS: Record<string, string> = {
   "기술문의": "bg-purple-50 text-purple-700 border-purple-100",
   "단종문의": "bg-yellow-50 text-yellow-700 border-yellow-100",
   "수리문의": "bg-orange-50 text-orange-700 border-orange-100",
+  "보도자료": "bg-edred/10 text-edred border-edred/20",
   "일반":     "bg-ink/5 text-dim border-ink/10",
 };
 
-const CATEGORIES = ["기술문의", "수리문의", "견적문의", "납기문의", "단종문의"];
+const CATEGORIES = ["기술문의", "수리문의", "견적문의", "납기문의", "단종문의", "보도자료"];
 
 function formatDate(d: Date) {
   return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;

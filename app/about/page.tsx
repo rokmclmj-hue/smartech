@@ -380,6 +380,13 @@ export default function AboutPage() {
           <div className="space-y-0 border-t hair">
             {[
               {
+                source: "보도자료",
+                date: "2026년 8월",
+                title: "스마텍 × 하우스맨, AI 예방점검·전국 인프라 결합 업무협약 체결",
+                desc: "시설관리 전문기업 하우스맨과 AI 기반 예방점검·현장 대응 자동화를 위한 업무협약(MOU) 체결. 수원·천안 거점을 활용한 전국 확장 추진.",
+                href: "/blog/83",
+              },
+              {
                 source: "Edwards Korea 뉴스레터",
                 date: "2019년 1월",
                 title: "Distributor Rewards Program — 스마텍 Gold Class 인증",
@@ -402,9 +409,15 @@ export default function AboutPage() {
                   <div className="text-[13px] text-dim leading-relaxed">{item.desc}</div>
                 </div>
                 <div className="col-span-12 md:col-span-1 flex md:justify-end">
-                  <span className="mono text-[9px] text-dim/60 border hair px-2 py-1 self-start">
-                    CLOSED
-                  </span>
+                  {item.href ? (
+                    <Link href={item.href} className="mono text-[9px] text-edred border border-edred/30 px-2 py-1 self-start hover:bg-edred hover:text-paper transition-colors">
+                      자세히 →
+                    </Link>
+                  ) : (
+                    <span className="mono text-[9px] text-dim/60 border hair px-2 py-1 self-start">
+                      CLOSED
+                    </span>
+                  )}
                 </div>
               </div>
             ))}
