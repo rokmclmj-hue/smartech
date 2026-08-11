@@ -6,6 +6,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   "기술문의": "text-purple-600",
   "단종문의": "text-yellow-600",
   "수리문의": "text-orange-600",
+  "보도자료": "text-edred",
   "일반":     "text-dim",
 };
 
