@@ -24,7 +24,6 @@ export async function GET(req: NextRequest) {
       user: { select: { name: true, company: true, email: true } },
       items: {
         include: { product: { select: { partNo: true, description: true } } },
-        take: 5,
       },
     },
     orderBy: { createdAt: "desc" },
