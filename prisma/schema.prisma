@@ -319,7 +319,6 @@ model KnownCompany {
   updatedAt     DateTime           @updatedAt
   contacts      KnownContact[]
   offlineRepairs OfflineRepairJob[]
-  repairReports RepairReport[]
 
   @@index([phone])
   @@index([email])
@@ -685,117 +684,6 @@ model OfflineRepairFile {
   uploadedAt  DateTime         @default(now())
 
   @@index([jobId])
-}
-
-// ─────────────────────────────────────────────────
-// TEMC 외주 수선보고서 — 외주업체 작성 → 관리자 검토 → 고객 열람
-// ─────────────────────────────────────────────────
-
-model RepairReport {
-  id              Int       @id @default(autoincrement())
-  reportNo        String    @unique // TEMC-YYMMDD-NN
-
-  companyId       Int?
-  company         KnownCompany? @relation(fields: [companyId], references: [id], onDelete: SetNull)
-
-  // 펌프 정보 (Phase 1: 자유 입력 필드 — 별도 Pump 마스터는 다음 단계에서 추가)
-  pumpModel       String
-  pumpSerial      String?
-  pumpLocation    String?
-  pumpAssetNo     String?   // 향후 이력 대시보드 그룹핑 키로 재사용 가능하도록 미리 확보
-
-  symptomText     String?   @db.Text // 이상현상
-  reasonText      String?   @db.Text // 수리사유
-
-  // DRAFT → SENT_TO_SUB → SUBMITTED → REVIEWED → SENT_TO_CUSTOMER → VIEWED
-  status          String    @default("DRAFT")
-
-  subName         String?
-  subEmail        String?
-  adminNote       String?
-
-  receivedDate    DateTime  @default(now())
-  repairedDate    DateTime?
-
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-
-  items           RepairReportItem[]
-  photos          RepairReportPhoto[]
-  submitTokens    RepairReportSubmitToken[]
-  viewTokens      RepairReportViewToken[]
-
-  @@index([companyId])
-  @@index([status])
-}
-
-// CHECKLIST(예상수리내용) / MEASUREMENT(측정치표) / PART(부품교환내역) 3섹션을
-// 관리자가 자유롭게 행 추가·수정할 수 있도록 하나의 제네릭 테이블로 표현
-model RepairReportItem {
-  id          Int          @id @default(autoincrement())
-  reportId    Int
-  report      RepairReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
-
-  section     String       // CHECKLIST | MEASUREMENT | PART
-  sortOrder   Int          @default(0)
-  label       String
-
-  isChecked   Boolean      @default(false) // CHECKLIST 전용
-
-  specValue   String?                      // MEASUREMENT 전용 (정상치)
-  measured    String?                      // MEASUREMENT 전용 (측정치)
-  judgment    String?                      // MEASUREMENT 전용 (판정)
-
-  quantity    String?                      // PART 전용
-  partNo      String?                      // PART 전용
-
-  remark      String?
-
-  @@index([reportId, section])
-}
-
-// 분해사진 / 정비사진
-model RepairReportPhoto {
-  id          Int          @id @default(autoincrement())
-  reportId    Int
-  report      RepairReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
-
-  section     String       // DISASSEMBLY | MAINTENANCE
-  fileName    String
-  fileUrl     String
-  fileSize    Int?
-  sortOrder   Int          @default(0)
-  isSelected  Boolean      @default(true)
-  createdAt   DateTime     @default(now())
-
-  @@index([reportId, section])
-}
-
-// 외주업체 제출용 토큰 (로그인 없음)
-model RepairReportSubmitToken {
-  id         String       @id @default(cuid())
-  reportId   Int
-  report     RepairReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
-  token      String       @unique @default(cuid())
-  expiresAt  DateTime
-  usedAt     DateTime?
-  createdAt  DateTime     @default(now())
-
-  @@index([token])
-}
-
-// 고객(TEMC) 열람용 토큰 (로그인 없음, 제출 토큰과 별도)
-model RepairReportViewToken {
-  id         String       @id @default(cuid())
-  reportId   Int
-  report     RepairReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
-  token      String       @unique @default(cuid())
-  expiresAt  DateTime
-  viewedAt   DateTime?
-  viewCount  Int          @default(0)
-  createdAt  DateTime     @default(now())
-
-  @@index([token])
 }
 
 model ChatLog {

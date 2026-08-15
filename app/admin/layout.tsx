@@ -14,7 +14,6 @@ const NAV_ITEMS = [
   { href: "/admin", label: "대시보드", exact: true },
   { href: "/admin/offline-repairs", label: "수리접수" },
   { href: "/admin/repairs", label: "온라인수리" },
-  { href: "/admin/repair-reports", label: "TEMC수선보고서" },
   { href: "/admin/proxy-quotes", label: "대행견적", group: "sales" },
   { href: "/admin/quotes", label: "견적", group: "sales", badgeKey: "quotes" as const },
   { href: "/admin/orders", label: "주문", group: "sales" },
