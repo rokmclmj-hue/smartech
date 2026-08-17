@@ -89,3 +89,12 @@ backup-users-*.json
 
 # Claude Code workspace
 /.claude/
+
+# YouTube API OAuth 비밀정보 + 토큰 (절대 커밋 금지)
+/블로그/youtube/
+
+# 배경음악 mp3 (대용량 바이너리, 코드 아님)
+/블로그/assets/music/
+
+# 숏츠 렌더링 임시 산출물
+/블로그/shorts/output/
