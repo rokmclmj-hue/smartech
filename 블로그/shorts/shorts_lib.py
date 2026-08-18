@@ -86,7 +86,9 @@ def render_scene(image_path, caption_lines, duration_s, highlight_words=None,
         frame = bg.copy()
 
         if is_full_bleed:
-            fs = src.convert("RGB").resize((int(W * zoom), int(H * zoom)), Image.LANCZOS)
+            src_rgb = src.convert("RGB")
+            scale = max(W / src_rgb.width, H / src_rgb.height) * zoom
+            fs = src_rgb.resize((int(src_rgb.width * scale), int(src_rgb.height * scale)), Image.LANCZOS)
             left = (fs.width - W) // 2
             top = (fs.height - H) // 2
             frame = fs.crop((left, top, left + W, top + H))
