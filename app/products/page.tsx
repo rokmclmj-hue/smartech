@@ -22,6 +22,21 @@ export const metadata: Metadata = {
   },
 };
 
+const collectionSchema = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "제품 카탈로그 — 스마텍",
+  "description": "Edwards Vacuum 정품 진공펌프·부품 전 라인업. RV·E2M·GXS·nXDS·nEXT·STP·iXH 카탈로그.",
+  "url": "https://www.smartechvacuum.com/products",
+  "isPartOf": { "@type": "WebSite", "name": "스마텍", "url": "https://www.smartechvacuum.com" },
+  "about": { "@type": "Brand", "name": "Edwards Vacuum" },
+});
+
 export default function ProductsPage() {
-  return <ProductsPageClient />;
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: collectionSchema }} />
+      <ProductsPageClient />
+    </>
+  );
 }

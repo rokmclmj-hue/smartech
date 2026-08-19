@@ -37,33 +37,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 모델 단위 스펙 소개 페이지 (예: /products/edwards-rv3) — SKU 페이지와 별개로 검색 노출용
   const modelEntries: MetadataRoute.Sitemap = allModelSlugs().map((slug) => ({
     url: `${BASE_URL}/products/${slug}`,
-    lastModified: new Date(),
     changeFrequency: "monthly",
     priority: 0.7,
   }));
 
   const industryEntries: MetadataRoute.Sitemap = INDUSTRIES.map((ind) => ({
     url: `${BASE_URL}/industries/${ind.slug}`,
-    lastModified: new Date(),
     changeFrequency: "monthly",
     priority: 0.8,
   }));
 
   return [
     // 홈
-    { url: BASE_URL, lastModified: new Date(), changeFrequency: "weekly", priority: 1.0 },
+    { url: BASE_URL, changeFrequency: "weekly", priority: 1.0 },
     // 회사 소개
-    { url: `${BASE_URL}/about`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
+    { url: `${BASE_URL}/about`, changeFrequency: "monthly", priority: 0.8 },
     // 작성자(Robin) 소개
-    { url: `${BASE_URL}/about/robin`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
+    { url: `${BASE_URL}/about/robin`, changeFrequency: "monthly", priority: 0.6 },
     // 협력사
-    { url: `${BASE_URL}/partners`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+    { url: `${BASE_URL}/partners`, changeFrequency: "monthly", priority: 0.5 },
     // 블로그 목록
-    { url: `${BASE_URL}/blog`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
+    { url: `${BASE_URL}/blog`, changeFrequency: "daily", priority: 0.9 },
     // 제품 카탈로그
-    { url: `${BASE_URL}/products`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
+    { url: `${BASE_URL}/products`, changeFrequency: "weekly", priority: 0.8 },
     // 수리 접수
-    { url: `${BASE_URL}/repair`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
+    { url: `${BASE_URL}/repair`, changeFrequency: "monthly", priority: 0.8 },
     // 산업 분야 20개
     ...industryEntries,
     // 개별 제품 페이지

@@ -22,6 +22,26 @@ export const metadata: Metadata = {
   },
 };
 
+const repairServiceSchema = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "serviceType": "Edwards 진공펌프 수리·오버홀",
+  "name": "수리 접수 — 스마텍",
+  "description": "Edwards 진공펌프(RV·E2M·GXS·nXDS·iXH·nEXT·STP) 수리 접수. AI 모델 자동 판별·수리비 즉시 견적·사진 업로드.",
+  "url": "https://www.smartechvacuum.com/repair",
+  "provider": {
+    "@type": "Organization",
+    "name": "스마텍",
+    "url": "https://www.smartechvacuum.com",
+  },
+  "areaServed": "KR",
+});
+
 export default function RepairPage() {
-  return <RepairPageClient />;
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: repairServiceSchema }} />
+      <RepairPageClient />
+    </>
+  );
 }
