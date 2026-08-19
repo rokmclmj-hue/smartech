@@ -204,40 +204,43 @@ function VisitorSection({ stats }: { stats: DashboardStats }) {
           <>
             {/* 미처리 */}
             {pending.map((v) => (
-              <div key={v.id} className="flex items-center gap-3 px-5 py-3 hover:bg-ink/[0.02]">
-                {/* 연락완료 체크 */}
-                <button onClick={() => toggleContact(v.id)}
-                  className="shrink-0 w-5 h-5 border-2 border-ink/30 rounded hover:border-edred transition-colors flex items-center justify-center">
-                </button>
-                {/* 업체 정보 */}
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[14px] font-medium text-ink truncate">{v.company}</span>
-                    <span className={`mono text-[9px] px-1.5 py-[1px] rounded shrink-0 ${TIER_COLOR[v.tier] ?? "bg-gray-100 text-gray-600"}`}>
-                      {v.tierLabel}
-                    </span>
-                  </div>
-                  <div className="text-[11px] dim">{v.name}{v.phone ? ` · ${v.phone}` : ""}</div>
-                </div>
-                {/* 시간 */}
-                <div className="mono text-[11px] dim shrink-0">{formatTime(v.lastLoginAt)}</div>
-                {/* 빠른 액션 */}
-                <div className="flex gap-1.5 shrink-0">
-                  {v.phone && (
-                    <a href={`tel:${v.phone}`}
-                      className="mono text-[10px] border hair rounded px-2 py-1 dim hover:text-edred hover:border-edred transition-colors">
-                      전화
-                    </a>
-                  )}
-                  <Link href={`/admin/proxy-quotes?company=${encodeURIComponent(v.company)}`}
-                    className="mono text-[10px] border hair rounded px-2 py-1 dim hover:text-edred hover:border-edred transition-colors">
-                    견적
-                  </Link>
-                  <button onClick={() => rejectVisitor(v.id, v.company)}
-                    disabled={rejecting === v.id}
-                    className="mono text-[10px] border border-edred/40 text-edred/70 rounded px-2 py-1 hover:bg-edred hover:text-paper hover:border-edred disabled:opacity-40 transition-colors">
-                    {rejecting === v.id ? "…" : "거절"}
+              <div key={v.id} className="flex flex-col gap-2 px-5 py-3 hover:bg-ink/[0.02] sm:flex-row sm:items-center sm:gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  {/* 연락완료 체크 */}
+                  <button onClick={() => toggleContact(v.id)}
+                    className="shrink-0 w-5 h-5 border-2 border-ink/30 rounded hover:border-edred transition-colors flex items-center justify-center">
                   </button>
+                  {/* 업체 정보 */}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[14px] font-medium text-ink truncate">{v.company}</span>
+                      <span className={`mono text-[9px] px-1.5 py-[1px] rounded shrink-0 ${TIER_COLOR[v.tier] ?? "bg-gray-100 text-gray-600"}`}>
+                        {v.tierLabel}
+                      </span>
+                    </div>
+                    <div className="text-[11px] dim truncate">{v.name}{v.phone ? ` · ${v.phone}` : ""}</div>
+                  </div>
+                </div>
+                {/* 시간 + 빠른 액션 (모바일: 아래 줄 전체폭, 데스크톱: 오른쪽 정렬) */}
+                <div className="flex items-center justify-between gap-2 pl-8 sm:pl-0 sm:shrink-0">
+                  <div className="mono text-[11px] dim shrink-0">{formatTime(v.lastLoginAt)}</div>
+                  <div className="flex gap-1.5 shrink-0">
+                    {v.phone && (
+                      <a href={`tel:${v.phone}`}
+                        className="mono text-[10px] border hair rounded px-2 py-1 dim hover:text-edred hover:border-edred transition-colors">
+                        전화
+                      </a>
+                    )}
+                    <Link href={`/admin/proxy-quotes?company=${encodeURIComponent(v.company)}`}
+                      className="mono text-[10px] border hair rounded px-2 py-1 dim hover:text-edred hover:border-edred transition-colors">
+                      견적
+                    </Link>
+                    <button onClick={() => rejectVisitor(v.id, v.company)}
+                      disabled={rejecting === v.id}
+                      className="mono text-[10px] border border-edred/40 text-edred/70 rounded px-2 py-1 hover:bg-edred hover:text-paper hover:border-edred disabled:opacity-40 transition-colors">
+                      {rejecting === v.id ? "…" : "거절"}
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
