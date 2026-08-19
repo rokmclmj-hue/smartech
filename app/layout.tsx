@@ -3,6 +3,7 @@ import Script from "next/script";
 import "./globals.css";
 import "./quote/[id]/quote-styles.css";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import QuoteBar from "@/components/QuoteBar";
 import { SessionProvider } from "./providers";
 
@@ -190,6 +191,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SessionProvider>
           <Navbar />
           <main>{children}</main>
+          <Footer />
           <QuoteBar />
         </SessionProvider>
       </body>
