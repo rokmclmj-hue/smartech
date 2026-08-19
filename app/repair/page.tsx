@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import RepairPageClient from "./RepairPageClient";
+import { REPAIR_CASES } from "@/lib/repair-cases";
 
 export const metadata: Metadata = {
   title: "수리 접수 — 스마텍 | Edwards 진공펌프 수리·오버홀",
@@ -37,10 +38,31 @@ const repairServiceSchema = JSON.stringify({
   "areaServed": "KR",
 });
 
+const repairCasesSchema = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "스마텍 진공펌프 수리 사례",
+  "description": "스마텍이 실제로 수리·오버홀한 Edwards 등 진공펌프 사례 목록. 모델·증상·작업 내역·작업일을 공개합니다.",
+  "numberOfItems": REPAIR_CASES.length,
+  "itemListElement": REPAIR_CASES.map((c, i) => ({
+    "@type": "ListItem",
+    "position": i + 1,
+    "item": {
+      "@type": "Service",
+      "name": `${c.model} 수리 사례`,
+      "serviceType": "진공펌프 수리·오버홀",
+      "provider": { "@type": "Organization", "name": "스마텍" },
+      "description": `증상: ${c.symptom} / 작업 내역: ${c.work.join(", ")}`,
+      "dateCreated": c.date.replaceAll(".", "-"),
+    },
+  })),
+});
+
 export default function RepairPage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: repairServiceSchema }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: repairCasesSchema }} />
       <RepairPageClient />
     </>
   );
