@@ -366,24 +366,26 @@ ITEMS.append(("촉매연구소-TStation85D-납품사례", [
           ["오일없는 XDD1", "다이어프램 백킹펌프"], ["오일없는"], dur=4.5),
 ]))
 
-# ---------------- 실행 ----------------
-results = []
-start_num = 2
-for i, (name, scenes) in enumerate(ITEMS):
-    num = start_num + i
-    out_path = os.path.join(OUT_DIR, f"{num}.{name}.mp4")
-    print(f"[{num}/{start_num + len(ITEMS) - 1}] {name} 렌더링 시작...")
-    try:
-        build_video(scenes, out_path)
-        n_scenes = len(scenes)
-        total_dur = sum(s["duration"] for s in scenes) + 4.0
-        results.append((num, name, "성공", n_scenes, f"{total_dur:.1f}s"))
-        print(f"  완료: {out_path}")
-    except Exception as e:
-        results.append((num, name, f"실패: {e}", 0, "-"))
-        print(f"  실패: {e}")
-        traceback.print_exc()
+START_NUM = 2
 
-print("\n=== 최종 결과 ===")
-for r in results:
-    print(r)
+if __name__ == "__main__":
+    # ---------------- 실행 ----------------
+    results = []
+    for i, (name, scenes) in enumerate(ITEMS):
+        num = START_NUM + i
+        out_path = os.path.join(OUT_DIR, f"{num}.{name}.mp4")
+        print(f"[{num}/{START_NUM + len(ITEMS) - 1}] {name} 렌더링 시작...")
+        try:
+            build_video(scenes, out_path)
+            n_scenes = len(scenes)
+            total_dur = sum(s["duration"] for s in scenes) + 4.0
+            results.append((num, name, "성공", n_scenes, f"{total_dur:.1f}s"))
+            print(f"  완료: {out_path}")
+        except Exception as e:
+            results.append((num, name, f"실패: {e}", 0, "-"))
+            print(f"  실패: {e}")
+            traceback.print_exc()
+
+    print("\n=== 최종 결과 ===")
+    for r in results:
+        print(r)

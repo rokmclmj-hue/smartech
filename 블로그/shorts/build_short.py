@@ -25,6 +25,7 @@ scenes = [
          highlight=["1.5~2년", "2~3년"], duration=4.5),
 ]
 
-out_path = os.path.join(out_dir, "1.베어링소음진단.mp4")
-build_video(scenes, out_path)
-print(f"완료: {out_path}")
+if __name__ == "__main__":
+    out_path = os.path.join(out_dir, "1.베어링소음진단.mp4")
+    build_video(scenes, out_path)
+    print(f"완료: {out_path}")

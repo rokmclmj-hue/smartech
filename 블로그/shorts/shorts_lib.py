@@ -136,6 +136,33 @@ def render_closing():
     return frames
 
 
+def _srt_timestamp(seconds: float) -> str:
+    ms_total = round(seconds * 1000)
+    h, rem = divmod(ms_total, 3600_000)
+    m, rem = divmod(rem, 60_000)
+    s, ms = divmod(rem, 1000)
+    return f"{h:02d}:{m:02d}:{s:02d},{ms:03d}"
+
+
+def scenes_to_srt(scenes, closing_duration=4.0) -> str:
+    """scenes 리스트(build_video와 동일 입력)를 유튜브 CC 자막(SRT) 텍스트로 변환.
+    caption 없는 씬(오프닝 썸네일 등)은 자막 없이 건너뛴다."""
+    lines = []
+    t = 0.0
+    idx = 1
+    for sc in scenes:
+        dur = sc["duration"]
+        caption = sc.get("caption")
+        if caption:
+            lines.append(str(idx))
+            lines.append(f"{_srt_timestamp(t)} --> {_srt_timestamp(t + dur)}")
+            lines.append(" ".join(caption))
+            lines.append("")
+            idx += 1
+        t += dur
+    return "\n".join(lines)
+
+
 def build_video(scenes, out_path, music_path=MUSIC_PATH, tmp_dir=None):
     """
     scenes: [{image, caption(list[str] or None), highlight(list[str] or None),
