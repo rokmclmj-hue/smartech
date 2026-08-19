@@ -205,7 +205,7 @@ function VisitorSection({ stats }: { stats: DashboardStats }) {
             {/* 미처리 */}
             {pending.map((v) => (
               <div key={v.id} className="flex flex-col gap-2 px-5 py-3 hover:bg-ink/[0.02] sm:flex-row sm:items-center sm:gap-3">
-                <div className="flex items-center gap-3 min-w-0">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
                   {/* 연락완료 체크 */}
                   <button onClick={() => toggleContact(v.id)}
                     className="shrink-0 w-5 h-5 border-2 border-ink/30 rounded hover:border-edred transition-colors flex items-center justify-center">
@@ -218,10 +218,10 @@ function VisitorSection({ stats }: { stats: DashboardStats }) {
                         {v.tierLabel}
                       </span>
                     </div>
-                    <div className="text-[11px] dim truncate">{v.name}{v.phone ? ` · ${v.phone}` : ""}</div>
+                    <div className="text-[11px] dim">{v.name}{v.phone ? ` · ${v.phone}` : ""}</div>
                   </div>
                 </div>
-                {/* 시간 + 빠른 액션 (모바일: 아래 줄 전체폭, 데스크톱: 오른쪽 정렬) */}
+                {/* 시간 + 빠른 액션 (모바일: 아래 줄 전체폭, 데스크톱: 오른쪽 정렬. pl-8 = 체크박스 w-5(20px)+gap-3(12px)) */}
                 <div className="flex items-center justify-between gap-2 pl-8 sm:pl-0 sm:shrink-0">
                   <div className="mono text-[11px] dim shrink-0">{formatTime(v.lastLoginAt)}</div>
                   <div className="flex gap-1.5 shrink-0">
@@ -252,16 +252,18 @@ function VisitorSection({ stats }: { stats: DashboardStats }) {
                   <span className="mono text-[10px] tracking-[0.1em] dim uppercase">✓ 연락완료 {done.length}건</span>
                 </div>
                 {done.map((v) => (
-                  <div key={v.id} className="flex items-center gap-3 px-5 py-2.5 opacity-40">
-                    <button onClick={() => toggleContact(v.id)}
-                      className="shrink-0 w-5 h-5 border-2 border-edred rounded bg-edred/10 flex items-center justify-center text-edred text-[10px]">
-                      ✓
-                    </button>
-                    <div className="min-w-0 flex-1">
-                      <div className="text-[13px] font-medium text-ink line-through truncate">{v.company}</div>
-                      <div className="text-[11px] dim">{v.name}</div>
+                  <div key={v.id} className="flex flex-col gap-1 px-5 py-2.5 opacity-40 sm:flex-row sm:items-center sm:gap-3">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <button onClick={() => toggleContact(v.id)}
+                        className="shrink-0 w-5 h-5 border-2 border-edred rounded bg-edred/10 flex items-center justify-center text-edred text-[10px]">
+                        ✓
+                      </button>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-[13px] font-medium text-ink line-through truncate">{v.company}</div>
+                        <div className="text-[11px] dim">{v.name}</div>
+                      </div>
                     </div>
-                    <div className="mono text-[11px] dim shrink-0">{formatTime(v.lastLoginAt)}</div>
+                    <div className="mono text-[11px] dim shrink-0 pl-8 sm:pl-0">{formatTime(v.lastLoginAt)}</div>
                   </div>
                 ))}
               </>
