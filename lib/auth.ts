@@ -112,8 +112,8 @@ const providers: any[] = [
         const contactName = ((credentials.contactName as string) || "").trim()
           || companyName;
 
-        // 3. KnownCompany에서 사업자번호로 등급 조회
-        let tier: string = "ENDUSER"; // 기본 일반회원 등급
+        // 3. KnownCompany에서 사업자번호로 등급 조회 — 매칭 안 되면 관리자 승인 전까지 PENDING
+        let tier: string = "PENDING";
         const known = await prisma.knownCompany.findFirst({
           where: { businessNo: digits },
         });

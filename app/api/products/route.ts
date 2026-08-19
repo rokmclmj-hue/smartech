@@ -68,13 +68,13 @@ export async function GET(req: NextRequest) {
 
   const session = await auth();
   const tier = (session?.user as any)?.tier ?? "PUBLIC";
-  const showPrice = tier !== "PENDING";
+  const showPrice = tier !== "PENDING" && tier !== "REJECTED";
   const multiplier = showPrice ? await getMultiplier(tier) : null;
 
   const result = products.map((p) => ({
     ...p,
     displayPrice: showPrice && multiplier ? Math.round(p.costPrice * multiplier) : null,
-    priceStatus: tier === "PENDING" ? "pending" : "visible",
+    priceStatus: !showPrice ? "pending" : "visible",
   }));
 
   return NextResponse.json({ products: result, total, page, limit });

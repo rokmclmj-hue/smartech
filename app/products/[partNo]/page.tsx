@@ -49,9 +49,9 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const session = await auth();
   const tier = (session?.user as { tier?: string })?.tier ?? "PUBLIC";
 
-  // PUBLIC·PENDING 모두 공개 가격(PUBLIC 배율)으로 표시
+  // PUBLIC·PENDING·REJECTED 모두 공개 가격(PUBLIC 배율)으로 표시
   // 등급명은 고객에게 절대 노출하지 않음
-  const pricingTier = (tier === "PUBLIC" || tier === "GUEST" || tier === "PENDING")
+  const pricingTier = (tier === "PUBLIC" || tier === "GUEST" || tier === "PENDING" || tier === "REJECTED")
     ? "PUBLIC"
     : tier;
   const multiplier = await getMultiplier(pricingTier);

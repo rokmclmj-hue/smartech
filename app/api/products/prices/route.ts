@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
   }
 
   const tier = (session.user as any).tier as string;
-  if (tier === "PENDING") {
+  if (tier === "PENDING" || tier === "REJECTED") {
     return NextResponse.json({ error: "승인 대기 중입니다" }, { status: 403 });
   }
 

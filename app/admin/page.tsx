@@ -124,6 +124,8 @@ function VisitorSection({ stats }: { stats: DashboardStats }) {
   const [tab, setTab] = useState<VisitorTab>("today");
   // 연락완료: localStorage에 userId set으로 저장
   const [contacted, setContacted] = useState<Set<number>>(new Set());
+  const [rejected, setRejected] = useState<Set<number>>(new Set());
+  const [rejecting, setRejecting] = useState<number | null>(null);
   const storageKey = "visitor_contacted";
 
   useEffect(() => {
@@ -142,6 +144,21 @@ function VisitorSection({ stats }: { stats: DashboardStats }) {
     });
   }
 
+  async function rejectVisitor(id: number, company: string) {
+    if (!confirm(`"${company}" 계정을 거절 처리하시겠습니까?\n가격조회·견적요청이 즉시 차단됩니다. (회원 데이터는 보존됩니다)`)) return;
+    setRejecting(id);
+    try {
+      const res = await fetch("/api/admin/users", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: id, action: "delete" }),
+      });
+      if (res.ok) setRejected((prev) => new Set(prev).add(id));
+    } finally {
+      setRejecting(null);
+    }
+  }
+
   const TAB_LIST: { key: VisitorTab; label: string; visitors: VisitorItem[] }[] = [
     { key: "today", label: `오늘 ${stats.todayVisitors.length}`, visitors: stats.todayVisitors },
     { key: "week",  label: `이번 주 ${stats.weekVisitors.length}`, visitors: stats.weekVisitors },
@@ -149,8 +166,9 @@ function VisitorSection({ stats }: { stats: DashboardStats }) {
   ];
 
   const current = TAB_LIST.find((t) => t.key === tab)!;
-  const pending = current.visitors.filter((v) => !contacted.has(v.id));
-  const done    = current.visitors.filter((v) => contacted.has(v.id));
+  const visible = current.visitors.filter((v) => !rejected.has(v.id));
+  const pending = visible.filter((v) => !contacted.has(v.id));
+  const done    = visible.filter((v) => contacted.has(v.id));
 
   function formatTime(iso: string | null) {
     if (!iso) return "—";
@@ -180,7 +198,7 @@ function VisitorSection({ stats }: { stats: DashboardStats }) {
 
       {/* 목록 */}
       <div className="divide-y hair max-h-[400px] overflow-auto">
-        {current.visitors.length === 0 ? (
+        {visible.length === 0 ? (
           <div className="py-10 text-center text-[13px] dim">방문 기록이 없습니다</div>
         ) : (
           <>
@@ -215,6 +233,11 @@ function VisitorSection({ stats }: { stats: DashboardStats }) {
                     className="mono text-[10px] border hair rounded px-2 py-1 dim hover:text-edred hover:border-edred transition-colors">
                     견적
                   </Link>
+                  <button onClick={() => rejectVisitor(v.id, v.company)}
+                    disabled={rejecting === v.id}
+                    className="mono text-[10px] border border-edred/40 text-edred/70 rounded px-2 py-1 hover:bg-edred hover:text-paper hover:border-edred disabled:opacity-40 transition-colors">
+                    {rejecting === v.id ? "…" : "거절"}
+                  </button>
                 </div>
               </div>
             ))}

@@ -37,8 +37,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "품목이 없습니다." }, { status: 400 });
   }
 
-  // PENDING/미승인 등급은 견적 요청 불가
-  if (tier === "PENDING") {
+  // PENDING/거절된 등급은 견적 요청 불가
+  if (tier === "PENDING" || tier === "REJECTED") {
     return NextResponse.json(
       { error: "관리자 승인 후 견적 요청이 가능합니다." },
       { status: 403 }
