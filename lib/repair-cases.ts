@@ -52,6 +52,7 @@ export const REPAIR_CASES: RepairCase[] = [
     photo: "/images/repair/e2m07-c-exterior.jpg",
     partPhoto: "/images/repair/e2m07-c-part1.jpg",
     extraPhoto: "/images/repair/e2m07-c-part2.jpg",
+    reportPdf: "/documents/repair-reports/e2m07-c-inspection.pdf",
   },
   {
     model: "Edwards nXDS20i",
