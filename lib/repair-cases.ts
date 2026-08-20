@@ -73,6 +73,7 @@ export const REPAIR_CASES: RepairCase[] = [
     photo: "/images/repair/duo3-exterior.jpg",
     partPhoto: "/images/repair/duo3-motor.jpg",
     extraPhoto: "/images/repair/duo3-rotor.jpg",
+    reportPdf: "/documents/repair-reports/duo3-h-inspection.pdf",
   },
   {
     model: "Edwards E2M0.7",
@@ -93,6 +94,7 @@ export const REPAIR_CASES: RepairCase[] = [
     photo: "/images/repair/iqdp40-exterior.jpg",
     partPhoto: "/images/repair/iqdp40-cooling-coil.jpg",
     extraPhoto: "/images/repair/iqdp40-internal.jpg",
+    reportPdf: "/documents/repair-reports/iqdp40-d-inspection.pdf",
   },
   {
     model: "Edwards XDS35i",
