@@ -1209,6 +1209,17 @@ export default function RepairPageClient() {
                       )}
                     </div>
                   )}
+                  {c.reportPdf && (
+                    <a
+                      href={c.reportPdf}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-2 flex items-center justify-between text-[11px] border hair px-3 py-2 text-edred hover:bg-edred/5"
+                    >
+                      <span className="mono tracking-widest">검사성적서 PDF 보기</span>
+                      <span>→</span>
+                    </a>
+                  )}
                 </div>
               </div>
             )) : (

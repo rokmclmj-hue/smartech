@@ -7,9 +7,21 @@ export type RepairCase = {
   photo: string;
   partPhoto?: string;
   extraPhoto?: string;
+  reportPdf?: string; // 검사성적서 PDF (고객사·담당자 익명화 완료본)
 };
 
 export const REPAIR_CASES: RepairCase[] = [
+  {
+    model: "Edwards GV80",
+    client: "C사",
+    date: "2026.08.20",
+    symptom: "기본수리",
+    work: ["립씰 교체", "슬리브 교체", "이너링 교체", "베어링 교체", "오링 교체", "개스킷 교체", "커플링 교체", "기타"],
+    photo: "/images/repair/gv80-c-exterior.jpg",
+    partPhoto: "/images/repair/gv80-c-bearing.jpg",
+    extraPhoto: "/images/repair/gv80-c-internal.jpg",
+    reportPdf: "/documents/repair-reports/gv80-c-inspection.pdf",
+  },
   {
     model: "Edwards nXDS20i",
     client: "B사",
