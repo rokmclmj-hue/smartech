@@ -31,6 +31,7 @@ export const REPAIR_CASES: RepairCase[] = [
     photo: "/images/repair/nxds20i-b-exterior.jpg",
     partPhoto: "/images/repair/nxds20i-b-bearing.jpg",
     extraPhoto: "/images/repair/nxds20i-b-tipseal.jpg",
+    reportPdf: "/documents/repair-reports/nxds20i-b-inspection.pdf",
   },
   {
     model: "Edwards GV80",
