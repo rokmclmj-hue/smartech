@@ -75,7 +75,7 @@ function fmtDate(s: string) {
 
 function toDateInput(d: Date | string) {
   const date = typeof d === "string" ? new Date(d) : d;
-  return date.toISOString().slice(0, 10);
+  return date.toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" });
 }
 
 const BLANK_ITEM: OrderItem = { partNo: "", description: "", quantity: 1, unitPrice: 0 };
