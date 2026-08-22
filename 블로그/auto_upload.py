@@ -33,6 +33,8 @@ SLOT_LABEL = {
     "day1": "월요일",
     "day2": "수요일",
     "day3": "금요일",
+    "day4": "화요일",
+    "day5": "목요일",
 }
 
 # datetime.weekday(): 월=0 ... 일=6
@@ -40,6 +42,8 @@ SLOT_WEEKDAY = {
     "day1": 0,
     "day2": 2,
     "day3": 4,
+    "day4": 1,
+    "day5": 3,
 }
 WEEKDAY_NAMES = ["월", "화", "수", "목", "금", "토", "일"]
 
@@ -62,8 +66,8 @@ def main():
         if idx + 1 < len(sys.argv):
             slot = sys.argv[idx + 1]
 
-    if slot not in ("day1", "day2", "day3"):
-        log("❌ 슬롯 인수가 없거나 잘못됨. --slot day1 / day2 / day3 중 하나 필요.")
+    if slot not in ("day1", "day2", "day3", "day4", "day5"):
+        log("❌ 슬롯 인수가 없거나 잘못됨. --slot day1~day5 중 하나 필요.")
         sys.exit(1)
 
     label = SLOT_LABEL[slot]

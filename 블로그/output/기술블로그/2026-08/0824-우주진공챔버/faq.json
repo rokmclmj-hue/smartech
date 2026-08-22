@@ -1,0 +1,46 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "열진공챔버(TVAC)는 무엇인가요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "TVAC(Thermal Vacuum Chamber)는 인공위성·우주선 부품과 추진 시스템을 발사 전에 시험하기 위해 우주의 진공을 재현하는 설비입니다. 진공도와 온도를 동시에 통제해 우주 환경을 지상에서 미리 겪게 합니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "TVAC는 얼마나 높은 진공도를 만드나요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "임무 프로파일에 따라 저진공부터 초고진공(UHV)까지 구현합니다. 초고진공은 통상 10⁻⁷ hPa(mbar) 이하로 정의됩니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "우주 환경의 온도차는 챔버에서 어떻게 재현하나요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "그늘에서는 영하 80도 이하, 태양광이 닿는 쪽은 영상 180도까지 온도차를 극저온 냉각 시스템과 가열 기술로 함께 재현합니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "크라이오펌프는 다른 진공펌프와 무엇이 다른가요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "오일로터리펌프나 드라이펌프는 기체를 기계적으로 밀어내지만, 크라이오펌프는 극저온 표면에 기체 분자를 얼려 붙잡는 흡착 방식입니다. 오염이 거의 없어 초고진공이 필요한 설비에 주로 쓰입니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "TVAC 챔버는 펌프 한 대로 구성되나요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "아닙니다. 러핑펌프로 저진공까지 낮추고, 터보펌프로 고진공까지 올린 뒤, 초고진공 구간에서 크라이오펌프나 이온펌프를 추가하는 단계별 구성이 일반적입니다."
+      }
+    }
+  ]
+}
