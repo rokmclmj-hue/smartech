@@ -14,6 +14,9 @@ const nextConfig: NextConfig = {
       { source: "/blog/14",         destination: "/blog",      permanent: true },
       { source: "/blog/15",         destination: "/blog",      permanent: true },
       { source: "/blog/16",         destination: "/blog",      permanent: true },
+      { source: "/blog/63",         destination: "/blog",      permanent: true },
+      { source: "/blog/64",         destination: "/blog",      permanent: true },
+      { source: "/blog/65",         destination: "/blog",      permanent: true },
       // 2026-08-10 서치콘솔 404 재점검 — /Products/view/* 규칙은 /products 전체를
       // 삼키는 사고(0fca8d3)로 삭제됐던 것을 "view/" 세그먼트 포함한 좁은 패턴으로 재추가.
       // 🔴 bare "/Products"(경로 없음)는 일부러 추가 안 함 — Next.js redirects()가
@@ -24,6 +27,8 @@ const nextConfig: NextConfig = {
       { source: "/%EA%B3%B5%EC%A7%80%EC%82%AC%ED%95%AD", destination: "/", permanent: true }, // /공지사항
       { source: "/Location",         destination: "/about",     permanent: true },
       { source: "/%EC%A0%9C%ED%92%88-%EC%83%81%EC%84%B8", destination: "/products", permanent: true }, // /제품-상세
+      // 2026-08-24 서치콘솔 404 재점검 — /service 소문자 라우트가 없어 대소문자 충돌 위험 없음(0fca8d3와 다름)
+      { source: "/Service",          destination: "/",          permanent: true },
     ];
   },
   serverExternalPackages: ["bcryptjs", "@prisma/client", "prisma", "xlsx", "sharp"],
