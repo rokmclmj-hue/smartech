@@ -343,8 +343,10 @@ const QS = StyleSheet.create({
 });
 
 const PAY_LABELS: Record<string, string> = {
-  d: "납품 전 현금결제",
-  e: "정기결제 (익월 말일)",
+  a: "납품 전 현금",
+  b: "계약30%/납품전70%",
+  d: "계약30%/익월말일70%",
+  e: "정기결제(익월말일)",
   c: "담당자 협의",
 };
 
@@ -538,7 +540,7 @@ function QuoteDocument({ quote }: { quote: QuoteForPdf }) {
         ),
         el(View, { style: S.termRow },
           el(Text, { style: S.termLabel }, "DELIVERY"),
-          el(Text, { style: S.termValue }, "국내 재고분 D+1 / 해외 발주분 D+14 (협의)")
+          el(Text, { style: S.termValue }, "국내 재고분 D+1 / 해외발주분(협의)")
         ),
         el(View, { style: S.termRow },
           el(Text, { style: S.termLabel }, "WARRANTY"),

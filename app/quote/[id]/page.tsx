@@ -625,7 +625,7 @@ export default function QuoteDetailPage() {
           <div className="section-label">— SECTION 06 · TERMS</div>
           <div className="terms">
             <div className="row"><span className="k">PAYMENT</span><span className="v">{paymentLabel(quote.paymentTerm, quote.taxInvoiceRequested)}</span></div>
-            <div className="row"><span className="k">DELIVERY</span><span className="v">국내 재고분 D+1 / 해외 발주분 D+14 (협의)</span></div>
+            <div className="row"><span className="k">DELIVERY</span><span className="v">국내 재고분 D+1 / 해외발주분(협의)</span></div>
             <div className="row"><span className="k">WARRANTY</span><span className="v">12개월 · Edwards 정품 보증(소모품제외)</span></div>
             <div className="row"><span className="k">A / S</span><span className="v">현장 서비스 · 기술지원</span></div>
           </div>
@@ -762,7 +762,7 @@ export default function QuoteDetailPage() {
         )}
         <div className="p-terms">
           <div className="row"><span className="k">Payment</span><span className="v">{paymentLabel(quote.paymentTerm, quote.taxInvoiceRequested)}</span></div>
-          <div className="row"><span className="k">Delivery</span><span className="v">국내 재고분 D+1 / 해외 발주분 D+14 (협의)</span></div>
+          <div className="row"><span className="k">Delivery</span><span className="v">국내 재고분 D+1 / 해외발주분(협의)</span></div>
           <div className="row"><span className="k">Warranty</span><span className="v">12개월 · Edwards 정품 보증(소모품제외)</span></div>
           <div className="row"><span className="k">A / S</span><span className="v">현장 서비스 · 기술지원</span></div>
         </div>
