@@ -1,34 +1,34 @@
 {
-  "_week": "2026-W35",
-  "_created": "2026-08-22",
-  "_note": "이번 주만 5편(월~금). 토/일에 Claude가 자동으로 채워줌. 직접 수정 금지.",
+  "_week": "2026-W36",
+  "_created": "2026-08-28",
+  "_note": "이번 주도 월~금 5편. day1·day2는 W35 목/금 몫 이월. 토/일에 Claude가 자동으로 채워줌. 직접 수정 금지.",
   "day1": {
-    "folder": "기술블로그/2026-08/0824-우주진공챔버",
-    "title": "인공위성·우주선을 지상에서 시험하는 법 — 우주 진공을 재현하는 챔버",
-    "uploaded": true,
-    "approved": true
-  },
-  "day2": {
-    "folder": "기술블로그/2026-08/0825-모빌리티-드라이펌프",
-    "title": "전기차 배터리 팩·모터 라인, 셀 말고 어디에 진공이 필요할까",
-    "uploaded": false,
-    "approved": true
-  },
-  "day3": {
-    "folder": "기술블로그/2026-08/0826-청소기-산업진공",
-    "title": "집 청소기와 공장 진공펌프, 둘 다 \"진공\"인데 뭐가 다를까",
-    "uploaded": false,
-    "approved": true
-  },
-  "day4": {
     "folder": "기술블로그/2026-08/0827-ESS-진공게이지",
     "title": "ESS 배터리 전해질 주입, 진공도는 어떤 게이지로 잴까",
     "uploaded": false,
     "approved": true
   },
-  "day5": {
+  "day2": {
     "folder": "기술블로그/2026-08/0828-임플로전-안전",
     "title": "진공 챔버 임플로전(내파) 사고 원인과 안전 점검 기준",
+    "uploaded": false,
+    "approved": true
+  },
+  "day3": {
+    "folder": "기술블로그/2026-09/0903-진공로-오일로터리",
+    "title": "진공 열처리로 백킹펌프, 오일로터리펌프를 써도 되는가",
+    "uploaded": false,
+    "approved": true
+  },
+  "day4": {
+    "folder": "기술블로그/2026-09/0904-리사이클링-드라이펌프",
+    "title": "재활용 공정 드라이펌프, 부식성 가스에 견디는 조건 정리",
+    "uploaded": false,
+    "approved": true
+  },
+  "day5": {
+    "folder": "기술블로그/2026-09/0905-리튬1차전지-드라이펌프",
+    "title": "리튬 1차전지 건조 공정, 드라이펌프 전환을 검토해야 하는 이유",
     "uploaded": false,
     "approved": true
   }
