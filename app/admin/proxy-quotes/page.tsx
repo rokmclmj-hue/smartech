@@ -1125,14 +1125,14 @@ function AdminProxyQuotesInner() {
           03 / 견적 품목 ({lines.length}건)
         </label>
         <div className="border hair rounded-md overflow-hidden">
-          {/* 헤더 */}
-          <div className="grid grid-cols-[80px_1fr_65px_55px_28px] sm:grid-cols-[100px_1fr_90px_80px_120px_120px_36px] gap-2 px-3 py-2.5 border-b hair bg-ink/5 mono text-[9px] tracking-[0.15em] uppercase dim">
+          {/* 헤더 — PC만 (모바일은 카드형이라 헤더 없음) */}
+          <div className="hidden sm:grid sm:grid-cols-[100px_1fr_90px_80px_120px_120px_36px] gap-2 px-3 py-2.5 border-b hair bg-ink/5 mono text-[9px] tracking-[0.15em] uppercase dim">
             <div>파트번호</div>
             <div>제품명</div>
             <div className="text-center">납기(주)</div>
             <div className="text-right">수량(Q&apos;ty)</div>
-            <div className="hidden sm:block text-right">단가</div>
-            <div className="hidden sm:block text-right">소계</div>
+            <div className="text-right">단가</div>
+            <div className="text-right">소계</div>
             <div />
           </div>
 
@@ -1145,38 +1145,83 @@ function AdminProxyQuotesInner() {
             const lineTotal = l.unitPrice * l.quantity;
             const priceOverridden = l.unitPrice !== l.defaultUnitPrice;
             return (
-              <div key={l.key}
-                className="grid grid-cols-[80px_1fr_65px_55px_28px] sm:grid-cols-[100px_1fr_90px_80px_120px_120px_36px] gap-2 px-3 py-2 border-b hair last:border-b-0 items-center">
-                {/* 파트번호 — 항상 수정 가능 */}
-                <input type="text" value={l.partNo} placeholder="파트번호"
-                  onChange={(e) => updatePartNo(l.key, e.target.value)}
-                  className="w-full border hair rounded px-2 py-1 text-[11px] font-mono focus:outline-none focus:border-edred bg-transparent" />
-                {/* 제품명 */}
-                <input type="text" value={l.description} placeholder="제품명"
-                  onChange={(e) => updateDescription(l.key, e.target.value)}
-                  className="w-full border hair rounded px-2 py-1 text-[13px] focus:outline-none focus:border-edred bg-transparent" />
-                {/* 납기 */}
-                <input type="text" value={l.leadTime} placeholder="납기"
-                  onChange={(e) => updateLeadTime(l.key, e.target.value)}
-                  className="w-full border hair rounded px-2 py-1 text-[12px] text-center focus:outline-none focus:border-edred bg-transparent" />
-                {/* 수량 */}
-                <input type="number" min={1} value={l.quantity}
-                  inputMode="numeric"
-                  onKeyDown={(e) => { if ([".", "-", "+", "e"].includes(e.key)) e.preventDefault(); }}
-                  onChange={(e) => updateQty(l.key, parseInt(e.target.value) || 1)}
-                  className="w-full text-right border hair rounded px-2 py-1 text-[13px] focus:outline-none focus:border-edred" />
-                {/* 단가 — PC만 */}
-                <div className="relative hidden sm:block">
-                  <input type="number" min={0} value={l.unitPrice}
-                    onChange={(e) => updatePrice(l.key, parseInt(e.target.value) || 0)}
-                    className={`w-full text-right border rounded px-2 py-1 text-[13px] focus:outline-none focus:border-edred ${priceOverridden ? "border-edred" : "hair"}`} />
-                  {priceOverridden && (
-                    <span className="absolute -top-2 right-1 mono text-[8px] bg-edred text-white px-1 rounded tracking-wider">수정</span>
-                  )}
+              <div key={l.key} className="border-b hair last:border-b-0">
+                {/* 모바일 카드형 (2줄) */}
+                <div className="sm:hidden px-3 py-3 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <input type="text" value={l.partNo} placeholder="파트번호"
+                      onChange={(e) => updatePartNo(l.key, e.target.value)}
+                      className="w-[80px] shrink-0 border hair rounded px-2 py-1 text-[11px] font-mono focus:outline-none focus:border-edred bg-transparent" />
+                    <input type="text" value={l.description} placeholder="제품명"
+                      onChange={(e) => updateDescription(l.key, e.target.value)}
+                      className="flex-1 min-w-0 border hair rounded px-2 py-1 text-[13px] focus:outline-none focus:border-edred bg-transparent" />
+                    <button onClick={() => removeLine(l.key)} className="dim hover:text-edred text-[14px] shrink-0 px-1">✕</button>
+                  </div>
+                  <div className="grid grid-cols-4 gap-1.5">
+                    <div>
+                      <div className="mono text-[8px] dim mb-0.5 uppercase tracking-wide">납기</div>
+                      <input type="text" value={l.leadTime} placeholder="납기"
+                        onChange={(e) => updateLeadTime(l.key, e.target.value)}
+                        className="w-full border hair rounded px-1.5 py-1 text-[11px] text-center focus:outline-none focus:border-edred bg-transparent" />
+                    </div>
+                    <div>
+                      <div className="mono text-[8px] dim mb-0.5 uppercase tracking-wide">수량</div>
+                      <input type="number" min={1} value={l.quantity}
+                        inputMode="numeric"
+                        onKeyDown={(e) => { if ([".", "-", "+", "e"].includes(e.key)) e.preventDefault(); }}
+                        onChange={(e) => updateQty(l.key, parseInt(e.target.value) || 1)}
+                        className="w-full text-right border hair rounded px-1.5 py-1 text-[11px] focus:outline-none focus:border-edred" />
+                    </div>
+                    <div className="relative">
+                      <div className="mono text-[8px] dim mb-0.5 uppercase tracking-wide">단가</div>
+                      <input type="number" min={0} value={l.unitPrice}
+                        inputMode="numeric"
+                        onChange={(e) => updatePrice(l.key, parseInt(e.target.value) || 0)}
+                        className={`w-full text-right border rounded px-1.5 py-1 text-[11px] focus:outline-none focus:border-edred ${priceOverridden ? "border-edred" : "hair"}`} />
+                      {priceOverridden && (
+                        <span className="absolute -top-1.5 right-0 mono text-[7px] bg-edred text-white px-1 rounded tracking-wider">수정</span>
+                      )}
+                    </div>
+                    <div>
+                      <div className="mono text-[8px] dim mb-0.5 uppercase tracking-wide">소계</div>
+                      <div className="text-right text-[12px] font-medium text-ink py-1">{fmt(lineTotal)}</div>
+                    </div>
+                  </div>
                 </div>
-                {/* 소계 — PC만 */}
-                <div className="hidden sm:block text-right text-[13px] font-medium text-ink">{fmt(lineTotal)}</div>
-                <button onClick={() => removeLine(l.key)} className="dim hover:text-edred text-[14px] text-center">✕</button>
+
+                {/* PC 그리드형 */}
+                <div className="hidden sm:grid sm:grid-cols-[100px_1fr_90px_80px_120px_120px_36px] gap-2 px-3 py-2 items-center">
+                  {/* 파트번호 — 항상 수정 가능 */}
+                  <input type="text" value={l.partNo} placeholder="파트번호"
+                    onChange={(e) => updatePartNo(l.key, e.target.value)}
+                    className="w-full border hair rounded px-2 py-1 text-[11px] font-mono focus:outline-none focus:border-edred bg-transparent" />
+                  {/* 제품명 */}
+                  <input type="text" value={l.description} placeholder="제품명"
+                    onChange={(e) => updateDescription(l.key, e.target.value)}
+                    className="w-full border hair rounded px-2 py-1 text-[13px] focus:outline-none focus:border-edred bg-transparent" />
+                  {/* 납기 */}
+                  <input type="text" value={l.leadTime} placeholder="납기"
+                    onChange={(e) => updateLeadTime(l.key, e.target.value)}
+                    className="w-full border hair rounded px-2 py-1 text-[12px] text-center focus:outline-none focus:border-edred bg-transparent" />
+                  {/* 수량 */}
+                  <input type="number" min={1} value={l.quantity}
+                    inputMode="numeric"
+                    onKeyDown={(e) => { if ([".", "-", "+", "e"].includes(e.key)) e.preventDefault(); }}
+                    onChange={(e) => updateQty(l.key, parseInt(e.target.value) || 1)}
+                    className="w-full text-right border hair rounded px-2 py-1 text-[13px] focus:outline-none focus:border-edred" />
+                  {/* 단가 */}
+                  <div className="relative">
+                    <input type="number" min={0} value={l.unitPrice}
+                      onChange={(e) => updatePrice(l.key, parseInt(e.target.value) || 0)}
+                      className={`w-full text-right border rounded px-2 py-1 text-[13px] focus:outline-none focus:border-edred ${priceOverridden ? "border-edred" : "hair"}`} />
+                    {priceOverridden && (
+                      <span className="absolute -top-2 right-1 mono text-[8px] bg-edred text-white px-1 rounded tracking-wider">수정</span>
+                    )}
+                  </div>
+                  {/* 소계 */}
+                  <div className="text-right text-[13px] font-medium text-ink">{fmt(lineTotal)}</div>
+                  <button onClick={() => removeLine(l.key)} className="dim hover:text-edred text-[14px] text-center">✕</button>
+                </div>
               </div>
             );
           })}
