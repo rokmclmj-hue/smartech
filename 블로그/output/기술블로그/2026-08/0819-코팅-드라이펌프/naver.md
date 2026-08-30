@@ -55,6 +55,8 @@ GXS·EXS 모두 비접촉식 장수명 씰과 씰 퍼지(shaft seal purge) 구�
 
 ---
 
+제품 문의·견적은 아래 채널로 받고 있습니다.
+
 Tel : 031 204 7170
 info@smartechvacuum.com
 www.smartechvacuum.com

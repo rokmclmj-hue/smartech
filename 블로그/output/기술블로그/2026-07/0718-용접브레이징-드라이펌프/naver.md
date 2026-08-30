@@ -59,6 +59,8 @@ GXS는 논캔틸레버 양단 지지축 구조로 진동이 낮고, 5리터 물 
 
 ---
 
+제품 문의·견적은 아래 채널로 받고 있습니다.
+
 Tel : 031 204 7170
 info@smartechvacuum.com
 www.smartechvacuum.com

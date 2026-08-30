@@ -44,6 +44,8 @@ RV 펌프 오일은 Edwards 기준으로 500~1,000시간마다 교환을 권장�
 
 ---
 
+제품 문의·견적은 아래 채널로 받고 있습니다.
+
 Tel : 031 204 7170
 info@smartechvacuum.com
 www.smartechvacuum.com

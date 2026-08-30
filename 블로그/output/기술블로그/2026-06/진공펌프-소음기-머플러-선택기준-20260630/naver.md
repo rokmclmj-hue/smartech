@@ -52,6 +52,8 @@ GXS 계열 펌프 대부분은 배기구가 사이드(측면) 방향으로 나�
 
 ---
 
+제품 문의·견적은 아래 채널로 받고 있습니다.
+
 Tel : 031 204 7170
 info@smartechvacuum.com
 www.smartechvacuum.com

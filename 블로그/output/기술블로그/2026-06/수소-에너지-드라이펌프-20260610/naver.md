@@ -86,6 +86,8 @@ GXS와 EXS 중 어떤 게 맞는지, 부스터 조합이 필요한지 — 현장
 
 ---
 
+제품 문의·견적은 아래 채널로 받고 있습니다.
+
 Tel : 031 204 7170  
 info@smartechvacuum.com  
 www.smartechvacuum.com

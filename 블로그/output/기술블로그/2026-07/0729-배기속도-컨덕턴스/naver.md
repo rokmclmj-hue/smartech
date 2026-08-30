@@ -56,6 +56,8 @@ IXH610 도입을 검토하던 반도체 관련 업체 담당자가 이런 질문
 
 ---
 
+관련 상담은 아래 연락처로 편하게 남겨주세요.
+
 Tel : 031 204 7170
 info@smartechvacuum.com
 www.smartechvacuum.com

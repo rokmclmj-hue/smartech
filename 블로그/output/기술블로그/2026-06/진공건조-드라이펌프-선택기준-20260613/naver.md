@@ -57,6 +57,8 @@ EXS 시리즈는 VFD(인버터)가 내장되어 대기압에서 진공 구간까
 
 ---
 
+관련 상담은 아래 연락처로 편하게 남겨주세요.
+
 Tel : 031 204 7170
 info@smartechvacuum.com
 www.smartechvacuum.com

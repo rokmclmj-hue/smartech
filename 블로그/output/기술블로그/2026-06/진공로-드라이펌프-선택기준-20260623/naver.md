@@ -183,6 +183,8 @@ EXS의 도달진공도가 GXS보다 한 자릿수 높게(1×10⁻² mbar) 표기
 
 ---
 
+추가로 궁금한 점은 아래로 문의해 주세요.
+
 Tel : 031 204 7170
 info@smartechvacuum.com
 www.smartechvacuum.com

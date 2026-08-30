@@ -76,6 +76,8 @@ OLED 패널 1장의 단가가 높은 라인에서 불량 한 건의 손실은 �
 
 ---
 
+관련 상담은 아래 연락처로 편하게 남겨주세요.
+
 Tel : 031 204 7170
 info@smartechvacuum.com
 www.smartechvacuum.com

@@ -40,6 +40,8 @@ Edwards는 소형 RV3·RV5·RV8·RV12에 방폭 모터를 옵션으로 제공하
 
 ---
 
+관련 상담은 아래 연락처로 편하게 남겨주세요.
+
 Tel : 031 204 7170
 info@smartechvacuum.com
 www.smartechvacuum.com

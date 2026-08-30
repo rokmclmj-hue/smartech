@@ -104,6 +104,8 @@ GXS의 핵심 특성은 다음과 같습니다.
 
 ---
 
+추가로 궁금한 점은 아래로 문의해 주세요.
+
 Tel : 031 204 7170
 info@smartechvacuum.com
 www.smartechvacuum.com

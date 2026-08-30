@@ -31,8 +31,8 @@ h1 {{ font-size:88px; color:#ffffff; line-height:1.32; font-weight:800; }}
 COMPARE_HTML = f"""
 <html><head><style>
 {FONT_CSS}
-body {{ width:1200px; height:800px; background: linear-gradient(135deg,#14213d,#1f3a5f); display:flex; align-items:center; justify-content:center; }}
-.wrap {{ width:1080px; display:flex; flex-direction:column; gap:36px; }}
+body {{ width:1200px; background: linear-gradient(135deg,#14213d,#1f3a5f); display:flex; align-items:center; justify-content:center; }}
+.wrap {{ width:1080px; padding:40px; display:flex; flex-direction:column; gap:36px; }}
 .title {{ font-size:40px; color:#ffffff; font-weight:700; text-align:center; margin-bottom:10px; }}
 .cards {{ display:flex; gap:28px; justify-content:center; }}
 .card {{ flex:1; background:#1c2f4e; border-radius:20px; padding:34px 28px; border:1px solid #34527a; }}
@@ -54,8 +54,8 @@ body {{ width:1200px; height:800px; background: linear-gradient(135deg,#14213d,#
 VAPOR_HTML = f"""
 <html><head><style>
 {FONT_CSS}
-body {{ width:1200px; height:800px; background: linear-gradient(135deg,#14213d,#1f3a5f); display:flex; align-items:center; justify-content:center; }}
-.wrap {{ display:flex; align-items:center; gap:70px; }}
+body {{ width:1200px; background: linear-gradient(135deg,#14213d,#1f3a5f); display:flex; align-items:center; justify-content:center; }}
+.wrap {{ padding:40px; display:flex; align-items:center; gap:70px; }}
 .chamber {{ position:relative; width:280px; height:280px; border:6px solid #6b7690; border-radius:16px; background: radial-gradient(circle, #1c2f4e, #0d1626 80%); display:flex; align-items:center; justify-content:center; }}
 .dots {{ position:absolute; width:10px; height:10px; background:#ffca7a; border-radius:50%; opacity:0.7; }}
 .gauge {{ font-size:60px; }}
@@ -85,8 +85,8 @@ body {{ width:1200px; height:800px; background: linear-gradient(135deg,#14213d,#
 STAGES_HTML = f"""
 <html><head><style>
 {FONT_CSS}
-body {{ width:1200px; height:800px; background: linear-gradient(135deg,#14213d,#1f3a5f); display:flex; align-items:center; justify-content:center; }}
-.wrap {{ width:1080px; display:flex; flex-direction:column; gap:30px; }}
+body {{ width:1200px; background: linear-gradient(135deg,#14213d,#1f3a5f); display:flex; align-items:center; justify-content:center; }}
+.wrap {{ width:1080px; padding:40px; display:flex; flex-direction:column; gap:30px; }}
 .title {{ font-size:38px; color:#ffffff; font-weight:700; text-align:center; margin-bottom:6px; }}
 .row {{ display:flex; align-items:center; justify-content:center; gap:0; }}
 .step {{ background:#1c2f4e; border:1px solid #34527a; border-radius:16px; padding:20px 18px; width:210px; text-align:center; }}
@@ -116,8 +116,8 @@ body {{ width:1200px; height:800px; background: linear-gradient(135deg,#14213d,#
 RANGE_HTML = f"""
 <html><head><style>
 {FONT_CSS}
-body {{ width:1200px; height:800px; background: linear-gradient(135deg,#14213d,#1f3a5f); display:flex; align-items:center; justify-content:center; }}
-.wrap {{ width:1080px; display:flex; flex-direction:column; gap:30px; }}
+body {{ width:1200px; background: linear-gradient(135deg,#14213d,#1f3a5f); display:flex; align-items:center; justify-content:center; }}
+.wrap {{ width:1080px; padding:40px; display:flex; flex-direction:column; gap:30px; }}
 .title {{ font-size:38px; color:#ffffff; font-weight:700; text-align:center; margin-bottom:6px; }}
 .row {{ display:flex; align-items:center; justify-content:center; gap:0; }}
 .step {{ background:#1c2f4e; border:1px solid #34527a; border-radius:16px; padding:24px 26px; width:270px; text-align:center; }}
@@ -149,20 +149,20 @@ with sync_playwright() as p:
     page.screenshot(path=os.path.join(IMG_DIR, "thumbnail.png"))
 
     page.set_content(COMPARE_HTML)
-    page.set_viewport_size({"width": 1200, "height": 800})
-    page.screenshot(path=os.path.join(IMG_DIR, "사진1.png"))
+    page.set_viewport_size({"width": 1200, "height": 1400})
+    page.locator(".wrap").screenshot(path=os.path.join(IMG_DIR, "사진1.png"))
 
     page.set_content(VAPOR_HTML)
-    page.set_viewport_size({"width": 1200, "height": 800})
-    page.screenshot(path=os.path.join(IMG_DIR, "사진2.png"))
+    page.set_viewport_size({"width": 1200, "height": 1400})
+    page.locator(".wrap").screenshot(path=os.path.join(IMG_DIR, "사진2.png"))
 
     page.set_content(RANGE_HTML)
-    page.set_viewport_size({"width": 1200, "height": 800})
-    page.screenshot(path=os.path.join(IMG_DIR, "사진3.png"))
+    page.set_viewport_size({"width": 1200, "height": 1400})
+    page.locator(".wrap").screenshot(path=os.path.join(IMG_DIR, "사진3.png"))
 
     page.set_content(STAGES_HTML)
-    page.set_viewport_size({"width": 1200, "height": 800})
-    page.screenshot(path=os.path.join(IMG_DIR, "사진4.png"))
+    page.set_viewport_size({"width": 1200, "height": 1400})
+    page.locator(".wrap").screenshot(path=os.path.join(IMG_DIR, "사진4.png"))
 
     browser.close()
 

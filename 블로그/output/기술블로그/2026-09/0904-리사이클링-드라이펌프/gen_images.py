@@ -14,9 +14,9 @@ THUMBNAIL_HTML = f"""
 <html><head><style>
 {FONT_CSS}
 body {{ width:1080px; height:1080px; background: linear-gradient(135deg,#1e2a1a,#2d3d24); display:flex; align-items:center; justify-content:center; }}
-.wrap {{ text-align:center; padding:60px; display:flex; flex-direction:column; gap:64px; align-items:center; }}
-.badge {{ font-size:42px; color:#a8b89a; letter-spacing:2px; border:2px solid #566b48; border-radius:44px; padding:16px 42px; }}
-h1 {{ font-size:84px; color:#ffffff; line-height:1.32; font-weight:800; }}
+.wrap {{ text-align:center; padding:40px; display:flex; flex-direction:column; gap:130px; align-items:center; }}
+.badge {{ font-size:60px; color:#a8b89a; letter-spacing:2px; border:2px solid #566b48; border-radius:44px; padding:32px 64px; }}
+h1 {{ font-size:118px; color:#ffffff; line-height:1.3; font-weight:800; }}
 .sub {{ font-size:60px; color:#c9e07a; line-height:1.4; }}
 </style></head>
 <body>
@@ -31,11 +31,11 @@ h1 {{ font-size:84px; color:#ffffff; line-height:1.32; font-weight:800; }}
 SLUG_HTML = f"""
 <html><head><style>
 {FONT_CSS}
-body {{ width:1200px; height:800px; background: linear-gradient(135deg,#1e2a1a,#2d3d24); display:flex; align-items:center; justify-content:center; }}
-.wrap {{ display:flex; align-items:center; gap:70px; }}
-.icon {{ position:relative; width:280px; height:280px; border:6px solid #6b8060; border-radius:16px; background: radial-gradient(circle, #263420, #10160c 80%); display:flex; align-items:center; justify-content:center; font-size:70px; }}
+body {{ width:1300px; }}
+.wrap {{ width:1200px; background: linear-gradient(135deg,#1e2a1a,#2d3d24); padding:52px 48px; display:flex; align-items:center; gap:70px; }}
+.icon {{ position:relative; width:280px; height:280px; border:6px solid #6b8060; border-radius:16px; background: radial-gradient(circle, #263420, #10160c 80%); display:flex; align-items:center; justify-content:center; font-size:70px; flex-shrink:0; }}
 .info {{ max-width:480px; }}
-.info h2 {{ font-size:34px; color:#ffffff; margin-bottom:24px; }}
+.info h2 {{ font-size:34px; color:#ffffff; margin-bottom:22px; }}
 .info p {{ font-size:22px; color:#c9d4c0; line-height:1.7; margin-bottom:14px; }}
 .dot {{ color:#c9e07a; }}
 </style></head>
@@ -55,14 +55,14 @@ body {{ width:1200px; height:800px; background: linear-gradient(135deg,#1e2a1a,#
 PURGE_HTML = f"""
 <html><head><style>
 {FONT_CSS}
-body {{ width:1200px; height:800px; background: linear-gradient(135deg,#1e2a1a,#2d3d24); display:flex; align-items:center; justify-content:center; }}
-.wrap {{ width:1080px; display:flex; flex-direction:column; gap:30px; }}
-.title {{ font-size:38px; color:#ffffff; font-weight:700; text-align:center; margin-bottom:6px; }}
+body {{ width:1300px; }}
+.wrap {{ width:1200px; background: linear-gradient(135deg,#1e2a1a,#2d3d24); padding:44px; display:flex; flex-direction:column; gap:28px; }}
+.title {{ font-size:38px; color:#ffffff; font-weight:700; text-align:center; }}
 .row {{ display:flex; align-items:center; justify-content:center; gap:22px; }}
 .step {{ background:#263420; border:1px solid #445934; border-radius:16px; padding:22px 18px; width:230px; text-align:center; }}
 .step .t {{ font-size:21px; color:#ffffff; font-weight:600; margin-bottom:8px; }}
 .step .d {{ font-size:15px; color:#a8b89a; }}
-.foot {{ font-size:19px; color:#8ea081; text-align:center; margin-top:10px; }}
+.foot {{ font-size:19px; color:#8ea081; text-align:center; }}
 </style></head>
 <body>
   <div class="wrap">
@@ -80,11 +80,11 @@ body {{ width:1200px; height:800px; background: linear-gradient(135deg,#1e2a1a,#
 GAS_HTML = f"""
 <html><head><style>
 {FONT_CSS}
-body {{ width:1200px; height:800px; background: linear-gradient(135deg,#1e2a1a,#2d3d24); display:flex; align-items:center; justify-content:center; }}
-.wrap {{ width:1080px; display:flex; flex-direction:column; gap:36px; }}
-.title {{ font-size:40px; color:#ffffff; font-weight:700; text-align:center; margin-bottom:10px; }}
+body {{ width:1300px; }}
+.wrap {{ width:1200px; background: linear-gradient(135deg,#1e2a1a,#2d3d24); padding:44px; display:flex; flex-direction:column; gap:32px; }}
+.title {{ font-size:40px; color:#ffffff; font-weight:700; text-align:center; }}
 .cards {{ display:flex; gap:24px; justify-content:center; }}
-.card {{ flex:1; background:#263420; border-radius:20px; padding:28px 22px; border:1px solid #445934; }}
+.card {{ flex:1; background:#263420; border-radius:20px; padding:26px 22px; border:1px solid #445934; }}
 .card h2 {{ font-size:23px; color:#ffffff; margin-bottom:12px; }}
 .card p {{ font-size:18px; color:#c9d4c0; line-height:1.6; }}
 </style></head>
@@ -109,16 +109,16 @@ with sync_playwright() as p:
     page.screenshot(path=os.path.join(IMG_DIR, "thumbnail.png"))
 
     page.set_content(SLUG_HTML)
-    page.set_viewport_size({"width": 1200, "height": 800})
-    page.screenshot(path=os.path.join(IMG_DIR, "사진1.png"))
+    page.set_viewport_size({"width": 1300, "height": 1400})
+    page.locator(".wrap").screenshot(path=os.path.join(IMG_DIR, "사진1.png"))
 
     page.set_content(PURGE_HTML)
-    page.set_viewport_size({"width": 1200, "height": 800})
-    page.screenshot(path=os.path.join(IMG_DIR, "사진2.png"))
+    page.set_viewport_size({"width": 1300, "height": 1400})
+    page.locator(".wrap").screenshot(path=os.path.join(IMG_DIR, "사진2.png"))
 
     page.set_content(GAS_HTML)
-    page.set_viewport_size({"width": 1200, "height": 800})
-    page.screenshot(path=os.path.join(IMG_DIR, "사진3.png"))
+    page.set_viewport_size({"width": 1300, "height": 1400})
+    page.locator(".wrap").screenshot(path=os.path.join(IMG_DIR, "사진3.png"))
 
     browser.close()
 

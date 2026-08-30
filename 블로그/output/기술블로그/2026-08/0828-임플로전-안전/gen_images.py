@@ -21,10 +21,10 @@ body {{
   background: linear-gradient(135deg,#1a0f0f,#2e1a1a);
   display:flex; align-items:center; justify-content:center;
 }}
-.wrap {{ text-align:center; padding:30px; display:flex; flex-direction:column; gap:170px; align-items:center; }}
-.badge {{ font-size:58px; color:#c7a0a0; letter-spacing:2px; border:2px solid #5a4040; border-radius:44px; padding:24px 58px; }}
-h1 {{ font-size:82px; color:#ffffff; line-height:1.32; font-weight:800; white-space:nowrap; }}
-.sub {{ font-size:80px; color:#ff8e8e; line-height:1.4; }}
+.wrap {{ text-align:center; padding:40px; display:flex; flex-direction:column; gap:136px; align-items:center; }}
+.badge {{ font-size:60px; color:#c7a0a0; letter-spacing:2px; border:2px solid #5a4040; border-radius:44px; padding:32px 64px; }}
+h1 {{ font-size:120px; color:#ffffff; line-height:1.3; font-weight:800; white-space:nowrap; }}
+.sub {{ font-size:100px; color:#ff8e8e; line-height:1.4; }}
 </style></head>
 <body>
   <div class="wrap">
@@ -39,14 +39,14 @@ h1 {{ font-size:82px; color:#ffffff; line-height:1.32; font-weight:800; white-sp
 COMPARE_HTML = f"""
 <html><head><style>
 {FONT_CSS}
-body {{ width:1200px; height:800px; background: linear-gradient(135deg,#1a0f0f,#2e1a1a); display:flex; align-items:center; justify-content:center; }}
-.wrap {{ width:1080px; display:flex; flex-direction:column; gap:64px; }}
+body {{ width:1300px; }}
+.wrap {{ width:1200px; background: linear-gradient(135deg,#1a0f0f,#2e1a1a); padding:48px; display:flex; flex-direction:column; gap:40px; }}
 .title {{ font-size:48px; color:#ffffff; font-weight:700; text-align:center; }}
 .row {{ display:flex; gap:40px; justify-content:center; }}
-.card {{ flex:1; background:#241515; border:1px solid #4a2c2c; border-radius:20px; padding:40px 32px; text-align:center; }}
-.card h2 {{ font-size:34px; color:#ffffff; margin-bottom:20px; }}
+.card {{ flex:1; background:#241515; border:1px solid #4a2c2c; border-radius:20px; padding:36px 32px; text-align:center; }}
+.card h2 {{ font-size:34px; color:#ffffff; margin-bottom:18px; }}
 .card p {{ font-size:24px; color:#c9b3b3; line-height:1.6; }}
-.arrowbox {{ font-size:56px; margin:20px 0; }}
+.arrowbox {{ font-size:56px; margin:16px 0; }}
 .out {{ color:#ff8e8e; }}
 .in {{ color:#8ea6ff; }}
 .foot {{ font-size:23px; color:#9a8080; text-align:center; }}
@@ -75,10 +75,10 @@ body {{ width:1200px; height:800px; background: linear-gradient(135deg,#1a0f0f,#
 CHECK_HTML = f"""
 <html><head><style>
 {FONT_CSS}
-body {{ width:1200px; height:800px; background: linear-gradient(135deg,#1a0f0f,#2e1a1a); display:flex; align-items:center; justify-content:center; }}
-.wrap {{ width:1080px; display:flex; flex-direction:column; gap:56px; }}
+body {{ width:1300px; }}
+.wrap {{ width:1200px; background: linear-gradient(135deg,#1a0f0f,#2e1a1a); padding:48px; display:flex; flex-direction:column; gap:36px; }}
 .title {{ font-size:48px; color:#ffffff; font-weight:700; text-align:center; }}
-.list {{ display:flex; flex-direction:column; gap:26px; }}
+.list {{ display:flex; flex-direction:column; gap:24px; }}
 .item {{ display:flex; align-items:center; gap:24px; background:#241515; border:1px solid #4a2c2c; border-radius:16px; padding:28px 34px; }}
 .mark {{ font-size:34px; color:#8ee6a0; }}
 .txt {{ font-size:27px; color:#e8dcdc; }}
@@ -99,13 +99,13 @@ body {{ width:1200px; height:800px; background: linear-gradient(135deg,#1a0f0f,#
 PROTECT_HTML = f"""
 <html><head><style>
 {FONT_CSS}
-body {{ width:1200px; height:800px; background: linear-gradient(135deg,#1a0f0f,#2e1a1a); display:flex; align-items:center; justify-content:center; }}
-.wrap {{ width:1080px; display:flex; flex-direction:column; gap:60px; }}
+body {{ width:1300px; }}
+.wrap {{ width:1200px; background: linear-gradient(135deg,#1a0f0f,#2e1a1a); padding:48px; display:flex; flex-direction:column; gap:36px; }}
 .title {{ font-size:48px; color:#ffffff; font-weight:700; text-align:center; }}
 .row {{ display:flex; gap:28px; justify-content:center; }}
-.card {{ flex:1; background:#241515; border:1px solid #4a2c2c; border-radius:20px; padding:40px 30px; text-align:center; }}
-.icon {{ font-size:52px; margin-bottom:20px; }}
-.card h2 {{ font-size:29px; color:#ffffff; margin-bottom:14px; }}
+.card {{ flex:1; background:#241515; border:1px solid #4a2c2c; border-radius:20px; padding:36px 30px; text-align:center; }}
+.icon {{ font-size:52px; margin-bottom:18px; }}
+.card h2 {{ font-size:29px; color:#ffffff; margin-bottom:12px; }}
 .card p {{ font-size:22px; color:#c9b3b3; line-height:1.55; }}
 </style></head>
 <body>
@@ -124,14 +124,14 @@ body {{ width:1200px; height:800px; background: linear-gradient(135deg,#1a0f0f,#
 CHAMBER_HTML = f"""
 <html><head><style>
 {FONT_CSS}
-body {{ width:1200px; height:800px; background: linear-gradient(135deg,#1a0f0f,#2e1a1a); display:flex; align-items:center; justify-content:center; }}
-.wrap {{ display:flex; align-items:center; gap:70px; }}
-.chamber {{ position:relative; width:420px; height:340px; border-radius:24px; border:8px solid #6b7690; background:#10142c; }}
+body {{ width:1300px; }}
+.wrap {{ width:1200px; background: linear-gradient(135deg,#1a0f0f,#2e1a1a); padding:56px 48px; display:flex; align-items:center; gap:70px; }}
+.chamber {{ position:relative; width:420px; height:340px; border-radius:24px; border:8px solid #6b7690; background:#10142c; flex-shrink:0; }}
 .viewport {{ position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:150px; height:150px; border-radius:50%; border:6px solid #ff8e8e; background: radial-gradient(circle, #2a1a1a, #10142c); }}
 .label {{ position:absolute; bottom:-46px; left:50%; transform:translateX(-50%); font-size:20px; color:#ff8e8e; white-space:nowrap; }}
 .info {{ max-width:480px; }}
-.info h2 {{ font-size:44px; color:#ffffff; margin-bottom:26px; }}
-.info p {{ font-size:26px; color:#c9b3b3; line-height:1.75; margin-bottom:20px; }}
+.info h2 {{ font-size:44px; color:#ffffff; margin-bottom:24px; }}
+.info p {{ font-size:26px; color:#c9b3b3; line-height:1.75; margin-bottom:18px; }}
 .dot {{ color:#ff8e8e; }}
 </style></head>
 <body>
@@ -159,20 +159,20 @@ with sync_playwright() as p:
     page.screenshot(path=os.path.join(IMG_DIR, "thumbnail.png"))
 
     page.set_content(COMPARE_HTML)
-    page.set_viewport_size({"width": 1200, "height": 800})
-    page.screenshot(path=os.path.join(IMG_DIR, "사진1.png"))
+    page.set_viewport_size({"width": 1300, "height": 1400})
+    page.locator(".wrap").screenshot(path=os.path.join(IMG_DIR, "사진1.png"))
 
     page.set_content(CHECK_HTML)
-    page.set_viewport_size({"width": 1200, "height": 800})
-    page.screenshot(path=os.path.join(IMG_DIR, "사진2.png"))
+    page.set_viewport_size({"width": 1300, "height": 1400})
+    page.locator(".wrap").screenshot(path=os.path.join(IMG_DIR, "사진2.png"))
 
     page.set_content(PROTECT_HTML)
-    page.set_viewport_size({"width": 1200, "height": 800})
-    page.screenshot(path=os.path.join(IMG_DIR, "사진3.png"))
+    page.set_viewport_size({"width": 1300, "height": 1400})
+    page.locator(".wrap").screenshot(path=os.path.join(IMG_DIR, "사진3.png"))
 
     page.set_content(CHAMBER_HTML)
-    page.set_viewport_size({"width": 1200, "height": 800})
-    page.screenshot(path=os.path.join(IMG_DIR, "사진4.png"))
+    page.set_viewport_size({"width": 1300, "height": 1400})
+    page.locator(".wrap").screenshot(path=os.path.join(IMG_DIR, "사진4.png"))
 
     browser.close()
 
