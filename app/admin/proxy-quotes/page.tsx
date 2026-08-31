@@ -1172,15 +1172,17 @@ function AdminProxyQuotesInner() {
                         onChange={(e) => updateQty(l.key, parseInt(e.target.value) || 1)}
                         className="w-full text-right border hair rounded px-1.5 py-1 text-[11px] focus:outline-none focus:border-edred" />
                     </div>
-                    <div className="relative">
+                    <div>
                       <div className="mono text-[8px] dim mb-0.5 uppercase tracking-wide">단가</div>
-                      <input type="number" min={0} value={l.unitPrice}
-                        inputMode="numeric"
-                        onChange={(e) => updatePrice(l.key, parseInt(e.target.value) || 0)}
-                        className={`w-full text-right border rounded px-1.5 py-1 text-[11px] focus:outline-none focus:border-edred ${priceOverridden ? "border-edred" : "hair"}`} />
-                      {priceOverridden && (
-                        <span className="absolute -top-1.5 right-0 mono text-[7px] bg-edred text-white px-1 rounded tracking-wider">수정</span>
-                      )}
+                      <div className="relative">
+                        <input type="number" min={0} value={l.unitPrice}
+                          inputMode="numeric"
+                          onChange={(e) => updatePrice(l.key, parseInt(e.target.value) || 0)}
+                          className={`w-full text-right border rounded px-1.5 py-1 text-[11px] focus:outline-none focus:border-edred ${priceOverridden ? "border-edred" : "hair"}`} />
+                        {priceOverridden && (
+                          <span className="absolute -top-1.5 right-0 mono text-[7px] bg-edred text-white px-1 rounded tracking-wider">수정</span>
+                        )}
+                      </div>
                     </div>
                     <div>
                       <div className="mono text-[8px] dim mb-0.5 uppercase tracking-wide">소계</div>
@@ -1212,6 +1214,7 @@ function AdminProxyQuotesInner() {
                   {/* 단가 */}
                   <div className="relative">
                     <input type="number" min={0} value={l.unitPrice}
+                      inputMode="numeric"
                       onChange={(e) => updatePrice(l.key, parseInt(e.target.value) || 0)}
                       className={`w-full text-right border rounded px-2 py-1 text-[13px] focus:outline-none focus:border-edred ${priceOverridden ? "border-edred" : "hair"}`} />
                     {priceOverridden && (
