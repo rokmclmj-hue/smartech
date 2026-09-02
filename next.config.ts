@@ -29,6 +29,9 @@ const nextConfig: NextConfig = {
       { source: "/%EC%A0%9C%ED%92%88-%EC%83%81%EC%84%B8", destination: "/products", permanent: true }, // /제품-상세
       // 2026-08-24 서치콘솔 404 재점검 — /service 소문자 라우트가 없어 대소문자 충돌 위험 없음(0fca8d3와 다름)
       { source: "/Service",          destination: "/",          permanent: true },
+      // 2026-09-03 서치콘솔 404 재점검 — 출처불명 잘못된 링크(백링크·크롤러 오류로 추정), 안전하게 홈으로 리다이렉트
+      { source: "/smartechvacuum",   destination: "/",          permanent: true },
+      { source: "/&",                destination: "/",          permanent: true },
     ];
   },
   serverExternalPackages: ["bcryptjs", "@prisma/client", "prisma", "xlsx", "sharp"],
