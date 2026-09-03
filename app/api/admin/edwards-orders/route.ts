@@ -10,9 +10,12 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const status = searchParams.get("status");
 
-  const where = status
-    ? { status }
-    : { status: { in: ["OPEN", "PENDING_CONFIRM"] } };
+  const where =
+    status === "ALL"
+      ? {}
+      : status
+      ? { status }
+      : { status: { in: ["OPEN", "PENDING_CONFIRM"] } };
 
   const items = await prisma.edwardsOpenOrder.findMany({
     where,

@@ -20,7 +20,7 @@ const NAV_ITEMS = [
   { href: "/admin/delivery-notes", label: "거래명세표", group: "sales" },
   { href: "/admin/inventory", label: "재고", group: "inventory", badgeKey: "inventory" as const },
   { href: "/admin/purchase-orders", label: "발주서", group: "inventory" },
-  { href: "/admin/edwards-orders", label: "본사발주", group: "inventory", badgeKey: "edwardsOrders" as const },
+  { href: "/admin/edwards-orders", label: "오픈오더", group: "inventory", badgeKey: "edwardsOrders" as const },
   { href: "/admin/products", label: "제품" },
   { href: "/admin/users", label: "고객" },
   { href: "/admin/companies", label: "거래처" },
@@ -191,7 +191,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   item.group && item.group !== prevGroup
                     ? item.group === "sales"
                       ? "판매 흐름 — 대행견적 → 견적 → 주문 → 거래명세표"
-                      : "재고·발주 흐름 — 재고 → 발주서 → 본사발주"
+                      : "재고·발주 흐름 — 재고 → 발주서 → 오픈오더"
                     : null;
                 const count = item.badgeKey ? badgeCounts[item.badgeKey] ?? 0 : 0;
                 return (

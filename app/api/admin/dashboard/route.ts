@@ -109,6 +109,12 @@ export async function GET() {
         orderBy: { lastLoginAt: "desc" },
         take: 100,
       }),
+
+      // 수리접수(오프라인) 단계별 건수 — 대시보드 "한눈에 보기"용
+      prisma.offlineRepairJob.groupBy({ by: ["status"], _count: { _all: true } }),
+
+      // 온라인수리 단계별 건수
+      prisma.repairRequest.groupBy({ by: ["status"], _count: { _all: true } }),
     ]);
   }
 
@@ -137,7 +143,18 @@ export async function GET() {
     todayVisitors,
     weekVisitors,
     monthVisitors,
+    offlineRepairStatusRaw,
+    onlineRepairStatusRaw,
   ] = results;
+
+  const offlineRepairStatus: Record<string, number> = {};
+  for (const g of offlineRepairStatusRaw as { status: string; _count: { _all: number } }[]) {
+    offlineRepairStatus[g.status] = g._count._all;
+  }
+  const onlineRepairStatus: Record<string, number> = {};
+  for (const g of onlineRepairStatusRaw as { status: string; _count: { _all: number } }[]) {
+    onlineRepairStatus[g.status] = g._count._all;
+  }
 
   // 매출 계산
   const revenueTotal = monthRevenue.reduce((sum, order) => {
@@ -196,5 +213,7 @@ export async function GET() {
       lastLoginAt: u.lastLoginAt?.toISOString() ?? null,
       loginCount: u.loginCount,
     })),
+    offlineRepairStatus,
+    onlineRepairStatus,
   });
 }

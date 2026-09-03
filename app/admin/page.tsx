@@ -38,7 +38,90 @@ type DashboardStats = {
   todayVisitors: VisitorItem[];
   weekVisitors: VisitorItem[];
   monthVisitors: VisitorItem[];
+  offlineRepairStatus: Record<string, number>;
+  onlineRepairStatus: Record<string, number>;
 };
+
+// ─── 수리접수·온라인수리 단계별 현황 (한눈에 보기) ─────────
+// 각 페이지의 STATUS_LABELS와 동일한 라벨·순서 사용 (app/admin/offline-repairs, app/admin/repairs)
+const OFFLINE_REPAIR_STAGES: { key: string; label: string; color: string }[] = [
+  { key: "RECEIVED",      label: "접수",     color: "bg-blue-50 text-blue-700" },
+  { key: "ITEM_RECEIVED", label: "물품수령", color: "bg-sky-50 text-sky-700" },
+  { key: "SENT_TO_SUB",   label: "외주발송", color: "bg-yellow-50 text-yellow-700" },
+  { key: "WORKING",       label: "작업중",   color: "bg-orange-50 text-orange-700" },
+  { key: "UPLOADED",      label: "업로드완료", color: "bg-purple-50 text-purple-700" },
+  { key: "QUOTE_SENT",    label: "견적발송", color: "bg-teal-50 text-teal-700" },
+  { key: "CONFIRMED",     label: "수리확정", color: "bg-green-50 text-green-700" },
+];
+const ONLINE_REPAIR_STAGES: { key: string; label: string; color: string }[] = [
+  { key: "RECEIVED",    label: "접수완료", color: "bg-blue-100 text-blue-700" },
+  { key: "IN_PROGRESS", label: "수리중",   color: "bg-yellow-100 text-yellow-700" },
+];
+// 온라인수리는 IN_PROGRESS/INSPECTION/COMPLETED를 "수리중" 한 단계로 합쳐 표시 (app/admin/repairs와 동일 기준)
+const ONLINE_IN_PROGRESS_KEYS = ["IN_PROGRESS", "INSPECTION", "COMPLETED"];
+
+function RepairStatusSection({ stats }: { stats: DashboardStats }) {
+  const offlineTotal = Object.entries(stats.offlineRepairStatus)
+    .filter(([k]) => k !== "DELIVERED")
+    .reduce((sum, [, v]) => sum + v, 0);
+  const offlineDelivered = stats.offlineRepairStatus["DELIVERED"] ?? 0;
+
+  const onlineInProgress = ONLINE_IN_PROGRESS_KEYS.reduce((sum, k) => sum + (stats.onlineRepairStatus[k] ?? 0), 0);
+  const onlineReceived = stats.onlineRepairStatus["RECEIVED"] ?? 0;
+  const onlineTotal = onlineInProgress + onlineReceived;
+  const onlineDelivered = stats.onlineRepairStatus["DELIVERED"] ?? 0;
+
+  return (
+    <div className="grid sm:grid-cols-2 gap-4">
+      {/* 수리접수(오프라인) */}
+      <Link href="/admin/offline-repairs" className="border hair bg-paper p-5 hover:border-edred/60 transition-colors block">
+        <div className="flex items-center justify-between mb-3">
+          <div className="mono text-[10px] tracking-[0.15em] uppercase dim">수리접수 · 오프라인</div>
+          <div className="text-[20px] font-semibold text-ink">{offlineTotal}<span className="text-[12px] dim font-normal">건 진행중</span></div>
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {OFFLINE_REPAIR_STAGES.map((s) => {
+            const count = stats.offlineRepairStatus[s.key] ?? 0;
+            if (count === 0) return null;
+            return (
+              <span key={s.key} className={`mono text-[10px] px-2 py-1 rounded ${s.color}`}>
+                {s.label} {count}
+              </span>
+            );
+          })}
+          {offlineTotal === 0 && <span className="text-[12px] dim">진행중인 건 없음</span>}
+        </div>
+        {offlineDelivered > 0 && (
+          <div className="mt-2 mono text-[10px] dim">완료 {offlineDelivered}건 (전체 누적)</div>
+        )}
+      </Link>
+
+      {/* 온라인수리 */}
+      <Link href="/admin/repairs" className="border hair bg-paper p-5 hover:border-edred/60 transition-colors block">
+        <div className="flex items-center justify-between mb-3">
+          <div className="mono text-[10px] tracking-[0.15em] uppercase dim">온라인수리</div>
+          <div className="text-[20px] font-semibold text-ink">{onlineTotal}<span className="text-[12px] dim font-normal">건 진행중</span></div>
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {onlineReceived > 0 && (
+            <span className={`mono text-[10px] px-2 py-1 rounded ${ONLINE_REPAIR_STAGES[0].color}`}>
+              {ONLINE_REPAIR_STAGES[0].label} {onlineReceived}
+            </span>
+          )}
+          {onlineInProgress > 0 && (
+            <span className={`mono text-[10px] px-2 py-1 rounded ${ONLINE_REPAIR_STAGES[1].color}`}>
+              {ONLINE_REPAIR_STAGES[1].label} {onlineInProgress}
+            </span>
+          )}
+          {onlineTotal === 0 && <span className="text-[12px] dim">진행중인 건 없음</span>}
+        </div>
+        {onlineDelivered > 0 && (
+          <div className="mt-2 mono text-[10px] dim">완료 {onlineDelivered}건 (전체 누적)</div>
+        )}
+      </Link>
+    </div>
+  );
+}
 
 // ─── GA 방문자 분석 섹션 ─────────────────────────────────────
 function GaSection() {
@@ -426,6 +509,11 @@ export default function AdminDashboard() {
           <KpiPanels stats={stats} pendingCount={users.length} />
         </div>
 
+        {/* 수리접수 · 온라인수리 한눈에 보기 */}
+        <div className="mb-6 sm:mb-10">
+          <RepairStatusSection stats={stats} />
+        </div>
+
         <div className="flex items-center justify-between px-4 py-2.5 border hair bg-paper mb-6">
           <div className="flex items-center gap-2">
             <span className="mono text-[10px] tracking-[0.12em] text-green-600">● ALL CLEAR</span>
@@ -491,6 +579,9 @@ export default function AdminDashboard() {
 
       {/* KPI 4 패널 */}
       <KpiPanels stats={stats} pendingCount={users.length} />
+
+      {/* 수리접수 · 온라인수리 한눈에 보기 */}
+      <RepairStatusSection stats={stats} />
 
       {/* 오늘 / 이번 주 방문 업체 */}
       <VisitorSection stats={stats} />

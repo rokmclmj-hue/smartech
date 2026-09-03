@@ -33,7 +33,7 @@ function MadBadge({ item }: { item: EdwardsOpenOrder }) {
   if (diffDays === 0) return null;
   const pulled = diffDays < 0;
   return (
-    <span className={`ml-2 mono text-[10px] font-bold ${pulled ? "text-emerald-700" : "text-edred"}`}>
+    <span className={`ml-2 mono text-[10px] font-bold ${pulled ? "text-smblue" : "text-edred"}`}>
       {pulled ? "▲당겨짐" : "▼밀림"} {Math.abs(diffDays)}일
     </span>
   );
@@ -106,6 +106,7 @@ export default function EdwardsOrdersPage() {
   const [uploading, setUploading] = useState(false);
   const [tab, setTab] = useState<"active" | "delivered">("active");
   const fileRef = useRef<HTMLInputElement>(null);
+  const [supplierSuggestions, setSupplierSuggestions] = useState<string[]>([]);
 
   const load = useCallback(async (which: "active" | "delivered") => {
     setLoading(true);
@@ -115,9 +116,16 @@ export default function EdwardsOrdersPage() {
     setLoading(false);
   }, []);
 
-  useEffect(() => { load(tab); }, [tab, load]);
+  // 발주업체 자동완성은 현재 탭에 상관없이 전체 이력에서 뽑아야 진행중/입고완료 어느 쪽에서든 다 보임
+  const loadSupplierSuggestions = useCallback(async () => {
+    const res = await fetch("/api/admin/edwards-orders?status=ALL");
+    const data = await res.json();
+    const names = new Set<string>((data.items ?? []).map((i: EdwardsOpenOrder) => i.supplier).filter(Boolean));
+    setSupplierSuggestions([...names] as string[]);
+  }, []);
 
-  const supplierSuggestions = [...new Set(items.map((i) => i.supplier).filter((s): s is string => !!s))];
+  useEffect(() => { load(tab); }, [tab, load]);
+  useEffect(() => { loadSupplierSuggestions(); }, [loadSupplierSuggestions]);
 
   async function handleUpload(file: File) {
     setUploading(true);
@@ -127,10 +135,12 @@ export default function EdwardsOrdersPage() {
       const res = await fetch("/api/admin/edwards-orders/upload", { method: "POST", body: fd });
       const data = await res.json();
       if (!res.ok) { toastError(data.error ?? "업로드 실패"); return; }
+      const skippedNote = data.skippedRows > 0 ? `, 인식 실패 ${data.skippedRows}건(확인 필요)` : "";
       success(
-        `업로드 완료 — 신규 ${data.created}건, MAD변경 ${data.madChanged}건, 입고완료 후보 ${data.disappeared}건`
+        `업로드 완료 — 신규 ${data.created}건, MAD변경 ${data.madChanged}건, 입고완료 후보 ${data.disappeared}건${skippedNote}`
       );
       load(tab);
+      loadSupplierSuggestions();
     } catch {
       toastError("업로드 중 오류가 발생했습니다");
     } finally {
