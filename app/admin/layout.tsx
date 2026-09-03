@@ -93,11 +93,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* 상단 빨간 띠 — 진공 압력 게이지 (홈페이지와 동일) */}
       <RedTape />
 
-      {/* 스티키 상단 헤더 */}
+      {/* 스티키 상단 헤더 — 메뉴가 16개로 늘어나서 콘텐츠 폭(1400px)보다 넓게 씀 */}
       <header className="sticky top-0 z-40 bg-paper/90 backdrop-blur border-b hair">
-        <div className="max-w-[1400px] mx-auto px-4 md:px-6 h-14 md:h-16 flex items-center justify-between gap-4 md:gap-6">
-          {/* 데스크톱 네비 */}
-          <nav className="hidden lg:flex flex-1 items-center justify-between mr-6">
+        <div className="max-w-[1900px] mx-auto px-4 md:px-6 h-14 md:h-16 flex items-center justify-between gap-3 md:gap-5">
+          {/* 데스크톱 네비 — 폭이 부족하면 줄바꿈 대신 가로 스크롤 (whitespace-nowrap+shrink-0로 글자 중간에 안 깨지게) */}
+          <nav className="hidden lg:flex flex-1 items-center overflow-x-auto admin-nav-scroll mr-4 min-w-0">
             {NAV_ITEMS.map((item, index) => {
               const active = isActive(item);
               const prevGroup = NAV_ITEMS[index - 1]?.group;
@@ -105,7 +105,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               const showSep = index > 0;
               const count = item.badgeKey ? badgeCounts[item.badgeKey] ?? 0 : 0;
               return (
-                <div key={item.href} className="flex items-center">
+                <div key={item.href} className="flex items-center shrink-0">
                   {showSep && (
                     <span
                       className={groupBoundary ? "w-px h-5 bg-edred/30 shrink-0" : "w-px h-3.5 bg-ink/15 shrink-0"}
@@ -114,11 +114,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   )}
                   <Link
                     href={item.href}
-                    className={`group relative px-3 py-2 transition-colors ${
+                    className={`group relative px-2.5 py-2 shrink-0 whitespace-nowrap transition-colors ${
                       active ? "text-ink" : "text-dim hover:text-ink"
                     }`}
                   >
-                    <span className="flex items-center gap-1.5 text-[16px] font-medium tracking-tight">
+                    <span className="flex items-center gap-1 text-[13px] font-medium tracking-tight whitespace-nowrap">
                       {item.label}
                       {count > 0 && (
                         <span className="mono text-[9px] font-bold bg-edred text-white px-1.5 py-px rounded-full">
@@ -127,7 +127,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                       )}
                     </span>
                     {active && (
-                      <span className="absolute left-3 right-3 -bottom-px h-0.5 bg-edred" />
+                      <span className="absolute left-2.5 right-2.5 -bottom-px h-0.5 bg-edred" />
                     )}
                   </Link>
                 </div>
