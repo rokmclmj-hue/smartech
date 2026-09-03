@@ -122,7 +122,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                       active ? "text-ink" : "text-dim hover:text-ink"
                     }`}
                   >
-                    <span className="flex items-center gap-1 text-[15px] font-medium tracking-tight whitespace-nowrap">
+                    <span className="flex items-center gap-1 text-[16px] font-medium tracking-tight whitespace-nowrap">
                       {item.label}
                       {count > 0 && (
                         <span className="mono text-[9px] font-bold bg-edred text-white px-1.5 py-px rounded-full">
@@ -212,7 +212,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         active ? "text-ink" : "text-dim"
                       }`}
                     >
-                      <span className="flex items-center gap-2 text-[16px] font-medium tracking-tight">
+                      <span className="flex items-center gap-2 text-[17px] font-medium tracking-tight">
                         {item.label}
                         {count > 0 && (
                           <span className="mono text-[9px] font-bold bg-edred text-white px-1.5 py-px rounded-full">
