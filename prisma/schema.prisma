@@ -585,6 +585,31 @@ model InventoryItem {
   @@index([isActive])
 }
 
+// 에드워드 본사 Open Orders 추적 (본사에 오픈 불가, 스마텍 내부관리용)
+// 매주 본사 Open Orders 엑셀 업로드 → documentNo+itemLine 기준 자동 비교(diff)
+// ─────────────────────────────────────────────────
+model EdwardsOpenOrder {
+  id            Int       @id @default(autoincrement())
+  poNumber      String                        // SMT-2026-P-000052 | PO-260323SV01
+  documentNo    String                        // 본사 SAP 오더 번호
+  itemLine      String                        // PO 내 라인 번호 (001600)
+  materialCode  String                        // 자재코드 (A73501983)
+  description   String                        // 품명
+  quantity      Int
+  currentMad    DateTime                      // 최신 납기 예정일 (Material Availability Date)
+  previousMad   DateTime?                     // 직전 스냅샷 MAD (당겨짐/밀림 비교용)
+  supplier      String?                       // 발주업체 (자유입력, 본사는 모르는 정보라 스마텍이 직접 태깅)
+  status        String    @default("OPEN")    // OPEN | PENDING_CONFIRM | DELIVERED
+  manualPurchaseOrderId Int?                  // SMT-* 형식이면 기존 발주서(ManualPurchaseOrder)와 연결
+  firstSeenAt   DateTime  @default(now())     // 최초로 업로드 시트에서 발견된 시각
+  lastSeenAt    DateTime  @default(now())     // 마지막으로 시트에 존재했던 시각
+  deliveredAt   DateTime?                     // "입고완료" 확정 시각
+
+  @@unique([documentNo, itemLine])
+  @@index([status])
+  @@index([supplier])
+}
+
 // AI 챗봇 대화 기록
 // ─────────────────────────────────────────────────
 // 오프라인 수리 접수 시스템
