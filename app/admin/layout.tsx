@@ -95,9 +95,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* 스티키 상단 헤더 — 메뉴가 16개로 늘어나서 콘텐츠 폭(1400px)보다 넓게 씀 */}
       <header className="sticky top-0 z-40 bg-paper/90 backdrop-blur border-b hair">
-        <div className="max-w-[1900px] mx-auto px-4 md:px-6 h-14 md:h-16 flex items-center justify-between gap-3 md:gap-5">
+        {/* lg 이상: 좌측 빈 칸(1fr)·네비(auto)·우측 정보(1fr)로 3분할해서 네비를 화면 정중앙에 배치.
+            모바일(lg 미만)은 원래대로 flex 2단(네비 숨김+우측만) — 그리드로 안 바꿔서 기존 동작 그대로 유지 */}
+        <div className="max-w-[1900px] mx-auto px-4 md:px-6 h-14 md:h-16 flex lg:grid lg:grid-cols-[1fr_auto_1fr] items-center justify-between gap-3 md:gap-5">
+          <div className="hidden lg:block" aria-hidden />
+
           {/* 데스크톱 네비 — 폭이 부족하면 줄바꿈 대신 가로 스크롤 (whitespace-nowrap+shrink-0로 글자 중간에 안 깨지게) */}
-          <nav className="hidden lg:flex flex-1 items-center overflow-x-auto admin-nav-scroll mr-4 min-w-0">
+          <nav className="hidden lg:flex items-center overflow-x-auto admin-nav-scroll min-w-0">
             {NAV_ITEMS.map((item, index) => {
               const active = isActive(item);
               const prevGroup = NAV_ITEMS[index - 1]?.group;
@@ -114,11 +118,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   )}
                   <Link
                     href={item.href}
-                    className={`group relative px-2.5 py-2 shrink-0 whitespace-nowrap transition-colors ${
+                    className={`group relative px-3 py-2 shrink-0 whitespace-nowrap transition-colors ${
                       active ? "text-ink" : "text-dim hover:text-ink"
                     }`}
                   >
-                    <span className="flex items-center gap-1 text-[13px] font-medium tracking-tight whitespace-nowrap">
+                    <span className="flex items-center gap-1 text-[15px] font-medium tracking-tight whitespace-nowrap">
                       {item.label}
                       {count > 0 && (
                         <span className="mono text-[9px] font-bold bg-edred text-white px-1.5 py-px rounded-full">
@@ -127,7 +131,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                       )}
                     </span>
                     {active && (
-                      <span className="absolute left-2.5 right-2.5 -bottom-px h-0.5 bg-edred" />
+                      <span className="absolute left-3 right-3 -bottom-px h-0.5 bg-edred" />
                     )}
                   </Link>
                 </div>
