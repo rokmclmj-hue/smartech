@@ -70,6 +70,7 @@ function RepairStatusSection({ stats }: { stats: DashboardStats }) {
   const onlineReceived = stats.onlineRepairStatus["RECEIVED"] ?? 0;
   const onlineTotal = onlineInProgress + onlineReceived;
   const onlineDelivered = stats.onlineRepairStatus["DELIVERED"] ?? 0;
+  const onlineCancelled = stats.onlineRepairStatus["CANCELLED"] ?? 0;
 
   return (
     <div className="grid sm:grid-cols-2 gap-4">
@@ -115,8 +116,10 @@ function RepairStatusSection({ stats }: { stats: DashboardStats }) {
           )}
           {onlineTotal === 0 && <span className="text-[12px] dim">진행중인 건 없음</span>}
         </div>
-        {onlineDelivered > 0 && (
-          <div className="mt-2 mono text-[10px] dim">완료 {onlineDelivered}건 (전체 누적)</div>
+        {(onlineDelivered > 0 || onlineCancelled > 0) && (
+          <div className="mt-2 mono text-[10px] dim">
+            완료 {onlineDelivered}건{onlineCancelled > 0 ? ` · 취소 ${onlineCancelled}건` : ""} (전체 누적)
+          </div>
         )}
       </Link>
     </div>

@@ -101,7 +101,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="hidden lg:block" aria-hidden />
 
           {/* 데스크톱 네비 — 폭이 부족하면 줄바꿈 대신 가로 스크롤 (whitespace-nowrap+shrink-0로 글자 중간에 안 깨지게) */}
-          <nav className="hidden lg:flex items-center overflow-x-auto admin-nav-scroll min-w-0">
+          {/* overflow-x-auto를 걸면 브라우저가 overflow-y도 auto로 강제 계산해서(스펙상 동작)
+              -bottom-px에 붙는 활성탭 밑줄이 잘릴 수 있음 — pb로 여유를 줘서 스크롤 영역 안에 들어오게 함 */}
+          <nav className="hidden lg:flex items-center overflow-x-auto admin-nav-scroll min-w-0 pb-0.5">
             {NAV_ITEMS.map((item, index) => {
               const active = isActive(item);
               const prevGroup = NAV_ITEMS[index - 1]?.group;

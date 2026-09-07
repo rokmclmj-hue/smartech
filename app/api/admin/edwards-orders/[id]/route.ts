@@ -29,11 +29,18 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   }
 
   if (body.action === "toggleHqReceived") {
-    const current = await prisma.edwardsOpenOrder.findUnique({ where: { id: orderId }, select: { hqReceived: true } });
-    if (!current)
+    // 읽고-다시-쓰기 대신 DB가 한 번에 뒤집도록 해서 빠른 연속 클릭에도 토글이 씹히지 않게 함
+    const [toggled] = await prisma.$queryRaw<{ id: number }[]>`
+      UPDATE "EdwardsOpenOrder"
+      SET "hqReceived" = NOT "hqReceived",
+          "hqReceivedAt" = CASE WHEN NOT "hqReceived" THEN now() ELSE NULL END
+      WHERE id = ${orderId}
+      RETURNING id
+    `;
+    if (!toggled)
       return NextResponse.json({ error: "존재하지 않는 품목입니다" }, { status: 404 });
-    data.hqReceived = !current.hqReceived;
-    data.hqReceivedAt = data.hqReceived ? new Date() : null;
+    const updated = await prisma.edwardsOpenOrder.findUnique({ where: { id: orderId } });
+    return NextResponse.json(updated);
   } else if (body.action === "confirmDelivered") {
     // 안전장치: "입고완료 후보(PENDING_CONFIRM)" 상태일 때만 확정 가능 — UI는 이미 이 상태에서만
     // 버튼을 보여주지만, API 자체에서도 막아야 다른 경로(중복클릭·오래된 탭 등)로 우회 못 함

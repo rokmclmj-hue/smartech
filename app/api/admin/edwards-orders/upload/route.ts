@@ -41,7 +41,7 @@ function sameDate(a: Date | null, b: Date | null) {
 function parseQuantity(raw: unknown): number {
   if (typeof raw === "number" && isFinite(raw)) return raw;
   const n = parseInt(String(raw), 10);
-  return isFinite(n) && !isNaN(n) ? n : 1;
+  return isFinite(n) ? n : 1;
 }
 
 export async function POST(req: NextRequest) {
@@ -141,7 +141,7 @@ export async function POST(req: NextRequest) {
 
   const now = new Date();
   const seenKeys = new Set<string>();
-  let created = 0, madChanged = 0, reappeared = 0, unchanged = 0, skippedDelivered = 0;
+  let created = 0, madChanged = 0, reappeared = 0, unchanged = 0, skippedDelivered = 0, disappearedCount = 0;
 
   // 전체를 하나의 트랜잭션으로 묶어 중간에 실패해도 부분 반영되지 않도록 함
   await prisma.$transaction(async (tx) => {
@@ -204,22 +204,29 @@ export async function POST(req: NextRequest) {
         unchanged++;
       }
 
-      const updatedRow = await tx.edwardsOpenOrder.update({ where: { id: found.id }, data });
-      existingMap.set(key, updatedRow);
+      // status를 읽었던 값 그대로 조건에 걸어 업데이트 — 업로드가 진행되는 동안 관리자가
+      // PATCH([id])로 먼저 상태를 바꿔놨다면(예: 입고완료 확정) 매칭 0건이 되어 그 변경을 덮어쓰지 않음
+      const { count } = await tx.edwardsOpenOrder.updateMany({
+        where: { id: found.id, status: found.status },
+        data,
+      });
+      if (count === 0) {
+        skippedDelivered++;
+        continue;
+      }
+      existingMap.set(key, { ...found, ...data } as typeof found);
     }
 
     // 이번 시트에 없어진 OPEN 품목 → 입고완료 후보(PENDING_CONFIRM)로 표시 (자동 확정 아님, 사람 확인 필요)
     const disappearedRows = existing.filter(
       (e) => e.status === "OPEN" && !seenKeys.has(`${e.documentNo}|${e.itemLine}`)
     );
+    disappearedCount = disappearedRows.length;
     for (const e of disappearedRows) {
-      await tx.edwardsOpenOrder.update({ where: { id: e.id }, data: { status: "PENDING_CONFIRM" } });
+      // 같은 이유로 status: "OPEN" 조건을 걸어 그 사이 상태가 바뀐 건은 건드리지 않음
+      await tx.edwardsOpenOrder.updateMany({ where: { id: e.id, status: "OPEN" }, data: { status: "PENDING_CONFIRM" } });
     }
   }, { timeout: 30000, maxWait: 10000 });
-
-  const disappearedCount = existing.filter(
-    (e) => e.status === "OPEN" && !seenKeys.has(`${e.documentNo}|${e.itemLine}`)
-  ).length;
 
   return NextResponse.json({
     ok: true,

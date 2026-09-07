@@ -204,14 +204,18 @@ export default function EdwardsOrdersPage() {
   }
 
   async function toggleRequireFullShipment(poNumber: string) {
-    const next = !(poSettings[poNumber] ?? true);
+    const prevValue = poSettings[poNumber] ?? true;
+    const next = !prevValue;
     setPoSettings((prev) => ({ ...prev, [poNumber]: next }));
     const res = await fetch("/api/admin/edwards-orders/po-groups", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ poNumber, requireFullShipment: next }),
     });
-    if (!res.ok) toastError("PO 설정 저장 실패");
+    if (!res.ok) {
+      toastError("PO 설정 저장 실패");
+      setPoSettings((prev) => ({ ...prev, [poNumber]: prevValue }));
+    }
   }
 
   function toggleCollapsed(poNumber: string) {
