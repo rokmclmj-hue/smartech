@@ -12,6 +12,17 @@ export type RepairCase = {
 
 export const REPAIR_CASES: RepairCase[] = [
   {
+    model: "Edwards RV5",
+    client: "Q사",
+    date: "2026.09.07",
+    symptom: "기본수리",
+    work: ["개스킷 교체", "오일씰 교체", "립씰 교체", "오링 교체", "슬리브 교체", "베어링 교체", "배기밸브 교체", "기타"],
+    photo: "/images/repair/rv5-b-rotor.jpg",
+    partPhoto: "/images/repair/rv5-b-sleeve.jpg",
+    extraPhoto: "/images/repair/rv5-b-parts.jpg",
+    reportPdf: "/documents/repair-reports/rv5-b-inspection.pdf",
+  },
+  {
     model: "Edwards GV80",
     client: "C사",
     date: "2026.08.20",
