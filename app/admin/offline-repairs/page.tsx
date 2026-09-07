@@ -2,6 +2,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { upload } from "@vercel/blob/client";
 import { REPAIR_EXTRA_MARGIN, getRepairBaseMargin } from "@/lib/repairPricing";
+import { formatSalutation } from "@/lib/salutation";
 
 
 type CompanyContact = { id: number; name: string; title: string | null; tel: string | null; mobile: string | null; email: string | null };
@@ -178,7 +179,7 @@ function JobForm({ onSaved }: { onSaved: (newJobId: number) => void }) {
                   <button
                     key={ct.id}
                     onClick={() => {
-                      setContactName(ct.name);
+                      setContactName(formatSalutation(ct.name, ct.title));
                       setContactEmail(ct.email ?? "");
                       setContactPhone(ct.mobile || ct.tel || "");
                     }}
@@ -789,7 +790,7 @@ function JobRow({ job, onRefresh, autoOpen, onAutoOpenDone, isSelected, onToggle
                     <button
                       key={ct.id}
                       onClick={() => {
-                        setEditContactName(ct.name);
+                        setEditContactName(formatSalutation(ct.name, ct.title));
                         setEditContactEmail(ct.email ?? "");
                         setEditContactPhone(ct.mobile || ct.tel || "");
                       }}
