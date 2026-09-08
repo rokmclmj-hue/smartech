@@ -132,6 +132,18 @@ Tailwind v4 사용 중 — `tailwind.config.js` 생성 금지, `@apply` 방식 �
 새 Codex 세션에서도 아래 작업들은 긴 설명 없이 한 줄로 요청할 수 있습니다.
 (이 문서와 루트 `AGENTS.md`를 세션 시작 시 먼저 읽었다는 전제)
 
+### 0) 세션 시작·종료 시 git 동기화 (Claude Code와 동일한 습관)
+
+Claude Code는 매 대화 시작 시 `git pull origin master`를 자동 실행해 최신 상태로
+동기화하는 규칙이 `CLAUDE.md`에 있습니다. Astra도 동일하게 적용합니다.
+
+- **세션 시작 시**: 첫 작업을 받기 전에 `git pull origin master`를 먼저 실행해
+  Claude Code가 그동안 push한 최신 내용을 받아옵니다. 충돌(conflict)이 뜨면
+  바로 진행하지 말고 사용자에게 먼저 알립니다.
+- **작업 완료 시**: 사용자가 "커밋하고 push 해줘"라고 요청하면 `git add`, `git commit`,
+  `git push origin master`를 실행합니다. push 없이 세션을 끝내면 작업이 라이브에
+  반영되지 않으므로, 세션을 마무리하기 전에 커밋·push 여부를 사용자에게 확인합니다.
+
 ### 1) 블로그 주제 후보 뽑기
 
 한 줄 요청 예: `이번 주 O요일 블로그 주제 후보 3개 뽑아줘`
