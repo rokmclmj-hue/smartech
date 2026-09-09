@@ -89,6 +89,10 @@ backup-users-*.json
 
 # Claude Code workspace
 /.claude/
+# Local agent settings, task backups and private historical memory
+**/.claude/
+/블로그/scheduler-backups/
+/docs/memory/private-claude-snapshot/
 
 # YouTube API OAuth 비밀정보 + 토큰 (절대 커밋 금지)
 /블로그/youtube/

@@ -30,11 +30,11 @@ for (const page of pages) {
 
   const label = rel.replace("./app/", "app/").replace(/\\/g, "/");
 
-  if (!hasMetadata && !isClient) {
-    console.log(`❌ metadata 없음          : ${label}`);
+  if (isClient) {
+    console.log(`⚠️  use client (서버 래퍼 필요) : ${label}`);
     issues++;
-  } else if (isClient && !hasMetadata) {
-    console.log(`⚠️  use client (래퍼 필요) : ${label}`);
+  } else if (!hasMetadata) {
+    console.log(`❌ metadata 없음          : ${label}`);
     issues++;
   } else if (hasMetadata && !hasCanonical) {
     console.log(`🔸 canonical 누락         : ${label}`);
@@ -46,7 +46,7 @@ for (const page of pages) {
 
 console.log("─".repeat(70));
 if (issues === 0) {
-  console.log("\n✨ 모든 페이지 SEO 정상!\n");
+  console.log("\n✨ 대상 페이지의 metadata·canonical 선언 검사 통과.\n실제 응답·색인·본문 품질·성능은 별도 점검이 필요합니다.\n");
 } else {
   console.log(`\n총 ${issues}개 문제 발견. 수정 후 다시 확인하세요.\n`);
   process.exit(1);

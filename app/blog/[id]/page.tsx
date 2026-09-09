@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import type { Metadata } from "next";
+import { formatBlogInline, prepareBlogBody, getBlogDescription, getBlogImage } from "@/lib/blog-inline";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -27,18 +28,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!post) return { title: "스마텍 블로그" };
 
   const canonicalPath = post.slug ?? String(post.id);
-  const ogImage =
-    post.content.match(/!\[[^\]]*\]\((https?:\/\/[^\)]+)\)/)?.[1] ??
+  const description = getBlogDescription(post.content, post.title, post.metaDesc);
+  const ogImage = getBlogImage(post.content) ??
     "https://www.smartechvacuum.com/og-default.png";
 
   return {
     title: `${post.title} — 스마텍`,
-    description: post.metaDesc || undefined,
+    description,
     keywords: post.tags || undefined,
     alternates: { canonical: `https://www.smartechvacuum.com/blog/${canonicalPath}` },
     openGraph: {
       title: `${post.title} — 스마텍`,
-      description: post.metaDesc || undefined,
+      description,
       url: `https://www.smartechvacuum.com/blog/${canonicalPath}`,
       type: "article",
       publishedTime: post.publishedAt?.toISOString(),
@@ -49,7 +50,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     twitter: {
       card: "summary_large_image",
       title: `${post.title} — 스마텍`,
-      description: post.metaDesc || undefined,
+      description,
       images: [ogImage],
     },
   };
@@ -73,19 +74,12 @@ function renderMarkdown(text: string) {
         {listBuffer.map((item, j) => (
           <li key={j} className="text-[15px] leading-relaxed flex gap-2">
             <span className="text-edred shrink-0 mt-1">—</span>
-            <span dangerouslySetInnerHTML={{ __html: inlineFormat(item) }} />
+            <span>{formatBlogInline(item)}</span>
           </li>
         ))}
       </ul>
     );
     listBuffer = [];
-  }
-
-  function inlineFormat(s: string): string {
-    return s
-      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-      .replace(/\*(.+?)\*/g, "<em>$1</em>")
-      .replace(/`(.+?)`/g, '<code class="bg-ink/10 px-1 py-0.5 rounded text-[13px] mono">$1</code>');
   }
 
   while (i < lines.length) {
@@ -110,9 +104,9 @@ function renderMarkdown(text: string) {
     if (line.startsWith("# ")) {
       flushList();
       elements.push(
-        <h1 key={`h1-${i}`} className="display text-[24px] md:text-[28px] leading-tight tracking-[-0.02em] mt-8 mb-3">
+        <h2 key={`h1-${i}`} className="display text-[24px] md:text-[28px] leading-tight tracking-[-0.02em] mt-8 mb-3">
           {line.slice(2)}
-        </h1>
+        </h2>
       );
       i++;
       continue;
@@ -154,7 +148,7 @@ function renderMarkdown(text: string) {
         <ol key={`ol-${i}`} className="space-y-2 pl-1 my-4 list-decimal list-inside">
           {olItems.map((item, j) => (
             <li key={j} className="text-[15px] leading-relaxed">
-              <span dangerouslySetInnerHTML={{ __html: inlineFormat(item) }} />
+              <span>{formatBlogInline(item)}</span>
             </li>
           ))}
         </ol>
@@ -189,8 +183,7 @@ function renderMarkdown(text: string) {
       <p
         key={`p-${i}`}
         className="text-[15px] leading-[1.8] my-3"
-        dangerouslySetInnerHTML={{ __html: inlineFormat(line) }}
-      />
+      >{formatBlogInline(line)}</p>
     );
     i++;
   }
@@ -256,6 +249,8 @@ export default async function BlogPostPage({ params }: Props) {
   }
 
   const tags = post.tags ? post.tags.split(/[,\s]+/).filter(Boolean) : [];
+  const content = prepareBlogBody(post.content, post.title);
+  const description = getBlogDescription(post.content, post.title, post.metaDesc);
 
   // 본문·태그에서 제품 모델 키워드 추출 → 제품 페이지 링크용
   const PRODUCT_MODELS = ["RV", "E2M", "E2S", "nES", "nXDS", "XDS", "EH", "GXS", "EXS", "iXH", "nXRi", "iXL", "nEXT", "STP", "ELD500", "APG", "AIM", "WRG"];
@@ -266,7 +261,8 @@ export default async function BlogPostPage({ params }: Props) {
     "@context": "https://schema.org",
     "@type": "Article",
     "headline": post.title,
-    "description": post.metaDesc || undefined,
+    "description": description,
+    "image": getBlogImage(content),
     "articleBody": post.content.replace(/[#*`!\[\]()]/g, "").slice(0, 2000),
     "datePublished": (post.publishedAt ?? post.createdAt).toISOString(),
     "dateModified": post.updatedAt.toISOString(),
@@ -303,18 +299,18 @@ export default async function BlogPostPage({ params }: Props) {
 
   return (
     <>
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: articleSchema }} />
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: breadcrumbSchema }} />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: articleSchema.replace(/</g, "\\u003c") }} />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: breadcrumbSchema.replace(/</g, "\\u003c") }} />
     {post.faqSchema && (
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: post.faqSchema }}
+        dangerouslySetInnerHTML={{ __html: post.faqSchema.replace(/</g, "\\u003c") }}
       />
     )}
     {howtoSchema && (
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: howtoSchema }}
+        dangerouslySetInnerHTML={{ __html: howtoSchema.replace(/</g, "\\u003c") }}
       />
     )}
     <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-10 md:py-16">
@@ -358,7 +354,6 @@ export default async function BlogPostPage({ params }: Props) {
           {/* 상단 사진 (글 시작 바로 아래) */}
           {postPhotos[0] && (
             <div className="mb-8">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={`/api/photos?serve=${encodeURIComponent(postPhotos[0])}`}
                 alt="현장 사진" className="w-full object-cover max-h-[420px]" />
             </div>
@@ -366,8 +361,8 @@ export default async function BlogPostPage({ params }: Props) {
 
           {/* 본문 앞부분 (첫 번째 ~ 두 번째 ## 소제목 전까지) */}
           {renderMarkdown((() => {
-            if (!postPhotos[1] && !postPhotos[2]) return post.content;
-            const lines = post.content.split('\n');
+            if (!postPhotos[1] && !postPhotos[2]) return content;
+            const lines = content.split('\n');
             let h2 = 0;
             for (let i = 0; i < lines.length; i++) {
               if (lines[i].startsWith('## ')) h2++;
@@ -379,7 +374,6 @@ export default async function BlogPostPage({ params }: Props) {
           {/* 중간 사진 (두 번째 소제목 앞) */}
           {postPhotos[1] && (
             <div className="my-8">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={`/api/photos?serve=${encodeURIComponent(postPhotos[1])}`}
                 alt="현장 사진" className="w-full object-cover max-h-[380px]" />
             </div>
@@ -387,7 +381,7 @@ export default async function BlogPostPage({ params }: Props) {
 
           {/* 본문 뒷부분 */}
           {(postPhotos[1] || postPhotos[2]) && renderMarkdown((() => {
-            const lines = post.content.split('\n');
+            const lines = content.split('\n');
             let h2 = 0;
             for (let i = 0; i < lines.length; i++) {
               if (lines[i].startsWith('## ')) h2++;
@@ -408,7 +402,6 @@ export default async function BlogPostPage({ params }: Props) {
           {/* 하단 사진 (마지막 소제목 앞) */}
           {postPhotos[2] && (
             <div className="my-8">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={`/api/photos?serve=${encodeURIComponent(postPhotos[2])}`}
                 alt="현장 사진" className="w-full object-cover max-h-[380px]" />
             </div>
@@ -416,7 +409,7 @@ export default async function BlogPostPage({ params }: Props) {
 
           {/* 본문 맨 끝부분 (마지막 소제목 이후) */}
           {postPhotos[2] && renderMarkdown((() => {
-            const lines = post.content.split('\n');
+            const lines = content.split('\n');
             let h2 = 0, split2 = 0;
             for (let i = 0; i < lines.length; i++) {
               if (lines[i].startsWith('## ')) { h2++; if (h2 === 2) split2 = i; }

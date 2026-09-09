@@ -100,53 +100,6 @@ const jsonLd = {
       "areaServed": { "@type": "Country", "name": "대한민국" },
       "url": "https://www.smartechvacuum.com/repair",
     },
-    {
-      "@type": "FAQPage",
-      "@id": "https://www.smartechvacuum.com/#faq",
-      "url": "https://www.smartechvacuum.com",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "에드워즈 진공펌프 수리는 어디서 맡기나요?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "스마텍은 Edwards Vacuum 한국 공식 대리점으로, 수원 본사와 천안 수리센터에서 Edwards 진공펌프 전 라인업(RV·E2M·GXS·nXDS·nEXT 등) 수리·오버홀 서비스를 제공합니다. 전화 031-204-7170으로 문의하시거나 홈페이지에서 온라인 수리접수가 가능합니다.",
-          },
-        },
-        {
-          "@type": "Question",
-          "name": "스마텍은 에드워즈 공식 대리점인가요?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "네, 스마텍((주)스마텍)은 Edwards Vacuum 한국 공식 대리점입니다. 대표는 2006년 Edwards 코리아에 합류해 2011년 스마텍을 창업했으며, 진공펌프 수리 경력 30년의 전담 엔지니어를 보유하고 있습니다.",
-          },
-        },
-        {
-          "@type": "Question",
-          "name": "Edwards RV 오일펌프와 E2M 오일펌프의 차이는 무엇인가요?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "RV 시리즈는 소형(0.6~25 m³/h) 저소음 범용 오일 로터리 베인 펌프이며, E2M 시리즈는 소형~중대형(2~275 m³/h)까지 폭넓은 용량을 커버하는 투단 로터리 베인 펌프입니다. 연구소·반도체·디스플레이 등 고진공 공정에는 E2M이 적합하고, 일반 산업용 저진공에는 RV가 많이 사용됩니다.",
-          },
-        },
-        {
-          "@type": "Question",
-          "name": "Edwards GXS와 EXS 드라이펌프의 차이는 무엇인가요?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "GXS는 일반 산업용 드라이 스크류 진공펌프이며, EXS는 부식성·유해 가스 환경에 특화된 드라이 스크류 진공펌프입니다. 반도체·디스플레이·화학 공정 등 부식성 가스가 발생하는 환경에는 EXS가 적합합니다.",
-          },
-        },
-        {
-          "@type": "Question",
-          "name": "진공펌프 오버홀 후 보증 기간은 얼마인가요?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "스마텍의 Edwards 진공펌프 오버홀 서비스는 Edwards 정품 부품만 사용하며, 수리 후 보증 조건은 펌프 모델 및 수리 내용에 따라 다릅니다. 정확한 보증 기간은 031-204-7170으로 문의해 주세요.",
-          },
-        },
-      ],
-    },
   ],
 };
 

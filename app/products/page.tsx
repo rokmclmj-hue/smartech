@@ -36,6 +36,20 @@ export default function ProductsPage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: collectionSchema }} />
+      <header className="border-b hair">
+        <div className="max-w-7xl mx-auto px-6 pt-14 pb-10">
+          <div className="mono text-[10.5px] tracking-[0.18em] uppercase text-dim mb-4">
+            CATALOG · <span className="text-edred">EDWARDS</span> KOREA
+          </div>
+          <h1 className="display text-[44px] md:text-[64px] leading-[0.98] tracking-[-0.04em]">
+            전 제품 카탈로그<span className="text-edred">.</span>
+          </h1>
+          <p className="mt-4 text-sm md:text-base text-dim max-w-2xl leading-relaxed">
+            스마텍이 공급하는 <span className="text-edred font-semibold">Edwards</span> 진공펌프·게이지·컨트롤러·액세서리 전 라인업.
+            파트번호·모델명으로 검색하고, 로그인 후 우대 가격을 확인하실 수 있습니다.
+          </p>
+        </div>
+      </header>
       <ProductsPageClient />
     </>
   );

@@ -49,7 +49,7 @@ export default function Home() {
             {/* Headline */}
             <div className="col-span-12 lg:col-span-7">
               <RotatingHero />
-              <p className="mt-8 max-w-xl text-[15px] leading-[1.7] text-[#2a2823] hero-rise" style={{ ["--rd" as never]: ".55s" }}>
+              <p className="mt-0 md:mt-8 max-w-xl text-[15px] leading-[1.7] text-[#2a2823]">
                 스마텍은 <span className="text-edred font-semibold">Edwards</span> 코리아의 공식 파트너로서,
                 20대 핵심 진공 산업 전반에 걸쳐 고객사별 맞춤형 하이엔드 진공 솔루션을 제공합니다.
               </p>

@@ -1,4 +1,5 @@
 import { CATALOG_MAP } from "@/lib/catalogs";
+import Image from "next/image";
 
 type Item = {
   code: string;
@@ -39,9 +40,11 @@ export default function ProductShowcase() {
               rel={catalog ? "noopener noreferrer" : undefined}
               className="showcase-photo group relative shrink-0 block w-[200px] md:w-[220px] h-[170px] md:h-[185px] bg-white/75 backdrop-blur-sm border hair overflow-hidden hover:border-edred transition-colors"
             >
-              <img
+              <Image
                 src={p.image}
                 alt={p.title}
+                fill
+                sizes="(max-width: 767px) 200px, 220px"
                 className="absolute inset-0 w-full h-full object-contain p-3 transition-transform duration-[600ms] ease-out group-hover:scale-110"
                 loading="lazy"
               />
