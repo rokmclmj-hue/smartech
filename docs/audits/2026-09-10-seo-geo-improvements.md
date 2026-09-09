@@ -38,7 +38,12 @@
 
 - 수정 전 동일 공개 주소 모바일 Lighthouse: 성능 55, LCP 약 7.80초, 전송량 4,237,873바이트. 2026-09-10 KST 측정. 각 측정은 단일 실험실 결과이며 검색 순위·실사용자 성과가 아니다.
 - Lighthouse 브라우저 임시 폴더 정리에서 EPERM이 났으나 보고서가 생성됐고 runtimeError가 없는 것을 확인했다.
-- 최종 원격 커밋·Vercel 배포·공개 재검사·성능 비교는 완료 후 이 문서와 작업 기록에 추가한다.
+- 코드 커밋 `a5ae84c3ceab8b4352e4071341bd2e229f3a176a`를 master에 push하고 원격 해시 일치를 확인했다. [Vercel 배포](https://vercel.com/rokmclmj-hues-projects/smartech/Av4faKbQJEqBhJmk4chk12vMA7uC) success 확인.
+- 배포 후 공개 홈페이지 5개 페이지 검사 통과: HTTP 200, H1 1개씩, 제품 목록 초기 H1 존재, 설명 누락 보완, 고정 재고/공통 FAQ 제거. RV12 검색 결과 영역의 실제 제품 링크에 RV12가 포함되는 것까지 확인했다. 브라우저 오류 0.
+- 같은 공개 주소·동일 Lighthouse 설정의 모바일 비교: **성능 55→80, LCP 7.80→2.97초, 전송량 4,237,873→3,094,873바이트(약 27% 감소)**. CLS 0.00053→0.00145. 각 1회 측정으로 인과효과·실사용자 성능·검색 성과를 보장하지 않는다. LCP 2.5초 이하 목표에는 아직 도달하지 않았다.
+- TBT(검사 중 화면 반응을 막은 누적 시간)는 376→524ms로 늘었다. 전체 성능 지표가 모두 개선된 것은 아니며 초기 JavaScript 실행·외부 스크립트 비용은 추가 분석 대상이다. 접근성 97·권장 기술 준수 100·Lighthouse SEO 100은 전후 동일하다.
+- 측정 시각: 수정 전 9/10 06:11 KST, 수정 후 9/10 07:22 KST. [설정·측정 요약·공개 브라우저 검증](2026-09-10-seo-verification.json). 원시 Lighthouse 보고서는 로컬 `tools/seo-before-2026-09-10.json`, `tools/seo-after-2026-09-10.json`에 보존했다.
+- 재검증 명령: `node scripts/verify-seo-browser.mjs https://www.smartechvacuum.com live-check --verify`. 이 명령은 읽기 전용 공개 페이지 검사이며 문의·로그인·DB 쓰기를 실행하지 않는다.
 
 ## 남은 진단 항목
 

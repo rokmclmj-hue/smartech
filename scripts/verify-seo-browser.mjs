@@ -63,8 +63,8 @@ try {
     await page.goto(base + '/products?q=RV12', { waitUntil: 'domcontentloaded' });
     await page.getByPlaceholder('예: RV12, A70316934, nXDS, TIC...').waitFor();
     assert.equal(await page.getByPlaceholder('예: RV12, A70316934, nXDS, TIC...').inputValue(), 'RV12');
-    await page.waitForFunction(() => document.querySelectorAll('a[href^="/products/"]').length > 0, { timeout: 30000 });
-    results.search = { query: 'RV12', productLinks: await page.locator('a[href^="/products/"]').count() };
+    await page.waitForFunction(() => [...document.querySelectorAll('main a[href^="/products/"]')].some(a => /RV12/i.test(a.textContent)), undefined, { timeout: 30000 });
+    results.search = { query: 'RV12', productLinks: await page.locator('main a[href^="/products/"]').count() };
     assert.equal(results.errors.length, 0, 'browser errors');
   }
 } finally {

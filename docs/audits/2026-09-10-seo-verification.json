@@ -1,0 +1,562 @@
+{
+  "codeCommit": "a5ae84c3ceab8b4352e4071341bd2e229f3a176a",
+  "deployment": "https://vercel.com/rokmclmj-hues-projects/smartech/Av4faKbQJEqBhJmk4chk12vMA7uC",
+  "measurements": [
+    {
+      "label": "before",
+      "rawPath": "tools/seo-before-2026-09-10.json",
+      "measuredAt": "2026-09-09T21:11:27.226Z",
+      "url": "https://www.smartechvacuum.com/",
+      "lighthouseVersion": "13.4.1",
+      "configSettings": {
+        "output": [
+          "json"
+        ],
+        "maxWaitForFcp": 30000,
+        "maxWaitForLoad": 45000,
+        "pauseAfterFcpMs": 1000,
+        "pauseAfterLoadMs": 1000,
+        "networkQuietThresholdMs": 1000,
+        "cpuQuietThresholdMs": 1000,
+        "formFactor": "mobile",
+        "throttling": {
+          "rttMs": 150,
+          "throughputKbps": 1638.4,
+          "requestLatencyMs": 562.5,
+          "downloadThroughputKbps": 1474.5600000000002,
+          "uploadThroughputKbps": 675,
+          "cpuSlowdownMultiplier": 4
+        },
+        "throttlingMethod": "simulate",
+        "screenEmulation": {
+          "mobile": true,
+          "width": 412,
+          "height": 823,
+          "deviceScaleFactor": 1.75,
+          "disabled": false
+        },
+        "emulatedUserAgent": "Mozilla/5.0 (Linux; Android 11; moto g power (2022)) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Mobile Safari/537.36",
+        "auditMode": false,
+        "gatherMode": false,
+        "clearStorageTypes": [
+          "file_systems",
+          "shader_cache",
+          "service_workers",
+          "cache_storage"
+        ],
+        "disableStorageReset": false,
+        "debugNavigation": false,
+        "channel": "cli",
+        "usePassiveGathering": false,
+        "disableFullPageScreenshot": false,
+        "skipAboutBlank": false,
+        "blankPage": "about:blank",
+        "ignoreStatusCode": false,
+        "locale": "en-US",
+        "blockedUrlPatterns": null,
+        "additionalTraceCategories": null,
+        "extraHeaders": null,
+        "precomputedLanternData": null,
+        "onlyAudits": null,
+        "onlyCategories": [
+          "performance",
+          "accessibility",
+          "best-practices",
+          "seo"
+        ],
+        "skipAudits": null
+      },
+      "categories": {
+        "performance": 55.00000000000001,
+        "accessibility": 97,
+        "best-practices": 100,
+        "seo": 100
+      },
+      "metrics": {
+        "largest-contentful-paint": 7801.995999999999,
+        "first-contentful-paint": 4795.193499999999,
+        "total-blocking-time": 375.8895000000016,
+        "cumulative-layout-shift": 0.0005298098597937957,
+        "total-byte-weight": 4237873
+      }
+    },
+    {
+      "label": "after",
+      "rawPath": "tools/seo-after-2026-09-10.json",
+      "measuredAt": "2026-09-09T22:22:39.391Z",
+      "url": "https://www.smartechvacuum.com/",
+      "lighthouseVersion": "13.4.1",
+      "configSettings": {
+        "output": [
+          "json"
+        ],
+        "maxWaitForFcp": 30000,
+        "maxWaitForLoad": 45000,
+        "pauseAfterFcpMs": 1000,
+        "pauseAfterLoadMs": 1000,
+        "networkQuietThresholdMs": 1000,
+        "cpuQuietThresholdMs": 1000,
+        "formFactor": "mobile",
+        "throttling": {
+          "rttMs": 150,
+          "throughputKbps": 1638.4,
+          "requestLatencyMs": 562.5,
+          "downloadThroughputKbps": 1474.5600000000002,
+          "uploadThroughputKbps": 675,
+          "cpuSlowdownMultiplier": 4
+        },
+        "throttlingMethod": "simulate",
+        "screenEmulation": {
+          "mobile": true,
+          "width": 412,
+          "height": 823,
+          "deviceScaleFactor": 1.75,
+          "disabled": false
+        },
+        "emulatedUserAgent": "Mozilla/5.0 (Linux; Android 11; moto g power (2022)) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Mobile Safari/537.36",
+        "auditMode": false,
+        "gatherMode": false,
+        "clearStorageTypes": [
+          "file_systems",
+          "shader_cache",
+          "service_workers",
+          "cache_storage"
+        ],
+        "disableStorageReset": false,
+        "debugNavigation": false,
+        "channel": "cli",
+        "usePassiveGathering": false,
+        "disableFullPageScreenshot": false,
+        "skipAboutBlank": false,
+        "blankPage": "about:blank",
+        "ignoreStatusCode": false,
+        "locale": "en-US",
+        "blockedUrlPatterns": null,
+        "additionalTraceCategories": null,
+        "extraHeaders": null,
+        "precomputedLanternData": null,
+        "onlyAudits": null,
+        "onlyCategories": [
+          "performance",
+          "accessibility",
+          "best-practices",
+          "seo"
+        ],
+        "skipAudits": null
+      },
+      "categories": {
+        "performance": 80,
+        "accessibility": 97,
+        "best-practices": 100,
+        "seo": 100
+      },
+      "metrics": {
+        "largest-contentful-paint": 2968.816,
+        "first-contentful-paint": 1891.545,
+        "total-blocking-time": 523.5,
+        "cumulative-layout-shift": 0.0014543178477806466,
+        "total-byte-weight": 3094873
+      }
+    }
+  ],
+  "browser": {
+    "base": "https://www.smartechvacuum.com",
+    "checkedAt": "2026-09-09T22:17:33.062Z",
+    "pages": [
+      {
+        "path": "/",
+        "status": 200,
+        "initialH1Count": 1,
+        "title": "스마텍 — Edwards Vacuum 한국 공식 대리점 | 진공 토탈 솔루션",
+        "h1": [
+          "세계 1등 진공을,한국의 속도로."
+        ],
+        "description": "Edwards Vacuum 한국 공식 대리점 스마텍. 2006년 Edwards 코리아 합류, 2011년 창업. RV·E2M·GXS·nXDS·STP·nEXT 전 라인업 · 딜러/OEM/소비자 등급별 가격 · 온라인 견적 시스템.",
+        "canonical": "https://www.smartechvacuum.com/",
+        "schemas": [
+          "Organization",
+          "LocalBusiness",
+          "LocalBusiness",
+          "Service"
+        ],
+        "hero": {
+          "opacity": "1",
+          "animation": "none",
+          "marginTop": "0px",
+          "text": "스마텍은 Edwards 코리아의 공식 파트너로서, 20대 핵심 진공 산업 전반에 걸쳐 고객사별 맞춤형 하이엔드 진공 솔루션을 제공합니다."
+        },
+        "showcase": [
+          {
+            "src": "https://www.smartechvacuum.com/_next/image?url=%2Fimages%2Fproducts%2Frv.jpeg&w=384&q=75",
+            "sizes": "(max-width: 767px) 200px, 220px",
+            "loaded": false,
+            "box": {
+              "width": 198,
+              "height": 168
+            }
+          },
+          {
+            "src": "https://www.smartechvacuum.com/_next/image?url=%2Fimages%2Fproducts%2Fxds.jpeg&w=384&q=75",
+            "sizes": "(max-width: 767px) 200px, 220px",
+            "loaded": false,
+            "box": {
+              "width": 198,
+              "height": 168
+            }
+          },
+          {
+            "src": "https://www.smartechvacuum.com/_next/image?url=%2Fimages%2Fproducts%2Feh.jpeg&w=384&q=75",
+            "sizes": "(max-width: 767px) 200px, 220px",
+            "loaded": false,
+            "box": {
+              "width": 198,
+              "height": 168
+            }
+          },
+          {
+            "src": "https://www.smartechvacuum.com/_next/image?url=%2Fimages%2Fproducts%2Fgxs.jpeg&w=384&q=75",
+            "sizes": "(max-width: 767px) 200px, 220px",
+            "loaded": false,
+            "box": {
+              "width": 198,
+              "height": 168
+            }
+          },
+          {
+            "src": "https://www.smartechvacuum.com/_next/image?url=%2Fimages%2Fproducts%2Fexs.jpeg&w=384&q=75",
+            "sizes": "(max-width: 767px) 200px, 220px",
+            "loaded": false,
+            "box": {
+              "width": 198,
+              "height": 168
+            }
+          },
+          {
+            "src": "https://www.smartechvacuum.com/_next/image?url=%2Fimages%2Fproducts%2Fixh-ixl.jpeg&w=3840&q=75",
+            "sizes": "(max-width: 767px) 200px, 220px",
+            "loaded": false,
+            "box": {
+              "width": 198,
+              "height": 168
+            }
+          },
+          {
+            "src": "https://www.smartechvacuum.com/_next/image?url=%2Fimages%2Fproducts%2Fnext.png&w=3840&q=75",
+            "sizes": "(max-width: 767px) 200px, 220px",
+            "loaded": false,
+            "box": {
+              "width": 198,
+              "height": 168
+            }
+          },
+          {
+            "src": "https://www.smartechvacuum.com/_next/image?url=%2Fimages%2Fproducts%2Fnext-m.jpeg&w=3840&q=75",
+            "sizes": "(max-width: 767px) 200px, 220px",
+            "loaded": false,
+            "box": {
+              "width": 198,
+              "height": 168
+            }
+          },
+          {
+            "src": "https://www.smartechvacuum.com/_next/image?url=%2Fimages%2Fproducts%2Fgauges-indirect.png&w=384&q=75",
+            "sizes": "(max-width: 767px) 200px, 220px",
+            "loaded": true,
+            "box": {
+              "width": 198,
+              "height": 168
+            }
+          },
+          {
+            "src": "https://www.smartechvacuum.com/_next/image?url=%2Fimages%2Fproducts%2Feld500.jpeg&w=384&q=75",
+            "sizes": "(max-width: 767px) 200px, 220px",
+            "loaded": true,
+            "box": {
+              "width": 198,
+              "height": 168
+            }
+          },
+          {
+            "src": "https://www.smartechvacuum.com/_next/image?url=%2Fimages%2Fproducts%2Fhardware.png&w=384&q=75",
+            "sizes": "(max-width: 767px) 200px, 220px",
+            "loaded": true,
+            "box": {
+              "width": 198,
+              "height": 168
+            }
+          },
+          {
+            "src": "https://www.smartechvacuum.com/_next/image?url=%2Fimages%2Fproducts%2Frv.jpeg&w=384&q=75",
+            "sizes": "(max-width: 767px) 200px, 220px",
+            "loaded": true,
+            "box": {
+              "width": 198,
+              "height": 168
+            }
+          },
+          {
+            "src": "https://www.smartechvacuum.com/_next/image?url=%2Fimages%2Fproducts%2Fxds.jpeg&w=384&q=75",
+            "sizes": "(max-width: 767px) 200px, 220px",
+            "loaded": true,
+            "box": {
+              "width": 198,
+              "height": 168
+            }
+          },
+          {
+            "src": "https://www.smartechvacuum.com/_next/image?url=%2Fimages%2Fproducts%2Feh.jpeg&w=384&q=75",
+            "sizes": "(max-width: 767px) 200px, 220px",
+            "loaded": true,
+            "box": {
+              "width": 198,
+              "height": 168
+            }
+          },
+          {
+            "src": "https://www.smartechvacuum.com/_next/image?url=%2Fimages%2Fproducts%2Fgxs.jpeg&w=384&q=75",
+            "sizes": "(max-width: 767px) 200px, 220px",
+            "loaded": true,
+            "box": {
+              "width": 198,
+              "height": 168
+            }
+          },
+          {
+            "src": "https://www.smartechvacuum.com/_next/image?url=%2Fimages%2Fproducts%2Fexs.jpeg&w=384&q=75",
+            "sizes": "(max-width: 767px) 200px, 220px",
+            "loaded": true,
+            "box": {
+              "width": 198,
+              "height": 168
+            }
+          },
+          {
+            "src": "https://www.smartechvacuum.com/_next/image?url=%2Fimages%2Fproducts%2Fixh-ixl.jpeg&w=3840&q=75",
+            "sizes": "(max-width: 767px) 200px, 220px",
+            "loaded": false,
+            "box": {
+              "width": 198,
+              "height": 168
+            }
+          },
+          {
+            "src": "https://www.smartechvacuum.com/_next/image?url=%2Fimages%2Fproducts%2Fnext.png&w=3840&q=75",
+            "sizes": "(max-width: 767px) 200px, 220px",
+            "loaded": false,
+            "box": {
+              "width": 198,
+              "height": 168
+            }
+          },
+          {
+            "src": "https://www.smartechvacuum.com/_next/image?url=%2Fimages%2Fproducts%2Fnext-m.jpeg&w=3840&q=75",
+            "sizes": "(max-width: 767px) 200px, 220px",
+            "loaded": false,
+            "box": {
+              "width": 198,
+              "height": 168
+            }
+          },
+          {
+            "src": "https://www.smartechvacuum.com/_next/image?url=%2Fimages%2Fproducts%2Fgauges-indirect.png&w=384&q=75",
+            "sizes": "(max-width: 767px) 200px, 220px",
+            "loaded": false,
+            "box": {
+              "width": 198,
+              "height": 168
+            }
+          },
+          {
+            "src": "https://www.smartechvacuum.com/_next/image?url=%2Fimages%2Fproducts%2Feld500.jpeg&w=384&q=75",
+            "sizes": "(max-width: 767px) 200px, 220px",
+            "loaded": false,
+            "box": {
+              "width": 198,
+              "height": 168
+            }
+          },
+          {
+            "src": "https://www.smartechvacuum.com/_next/image?url=%2Fimages%2Fproducts%2Fhardware.png&w=384&q=75",
+            "sizes": "(max-width: 767px) 200px, 220px",
+            "loaded": false,
+            "box": {
+              "width": 198,
+              "height": 168
+            }
+          }
+        ],
+        "images": 0
+      },
+      {
+        "path": "/products",
+        "status": 200,
+        "initialH1Count": 1,
+        "title": "제품 카탈로그 — 스마텍 | Edwards Vacuum 정품 부품",
+        "h1": [
+          "전 제품 카탈로그."
+        ],
+        "description": "Edwards Vacuum 정품 진공펌프·부품 전 라인업. RV·E2M·GXS·nXDS·nEXT·STP·iXH 카탈로그. 딜러/OEM/소비자 등급별 가격·온라인 견적.",
+        "canonical": "https://www.smartechvacuum.com/products",
+        "schemas": [
+          "Organization",
+          "LocalBusiness",
+          "LocalBusiness",
+          "Service",
+          "CollectionPage"
+        ],
+        "hero": null,
+        "showcase": [],
+        "images": 0
+      },
+      {
+        "path": "/products/A41821946",
+        "status": 200,
+        "initialH1Count": 1,
+        "title": "EDS200 Air Blast US 60Hz (A41821946) — 스마텍 | Edwards Vacuum",
+        "h1": [
+          "EDS200 Air Blast US 60Hz"
+        ],
+        "description": "Edwards EDS200 Air Blast US 60Hz 파트번호 A41821946. 스마텍에서 정품 공급·견적·문의.",
+        "canonical": "https://www.smartechvacuum.com/products/A41821946",
+        "schemas": [
+          "Organization",
+          "LocalBusiness",
+          "LocalBusiness",
+          "Service",
+          "Product"
+        ],
+        "product": {
+          "@context": "https://schema.org",
+          "@type": "Product",
+          "name": "EDS200 Air Blast US 60Hz",
+          "description": "Edwards EDS200 Air Blast US 60Hz — 파트번호 A41821946. 스마텍(Edwards Vacuum 한국 공식 대리점)에서 정품 공급·견적·수리 상담.",
+          "image": "https://www.smartechvacuum.com/images/products/exs.jpeg",
+          "brand": {
+            "@type": "Brand",
+            "name": "Edwards Vacuum"
+          },
+          "manufacturer": {
+            "@type": "Organization",
+            "name": "Edwards Vacuum"
+          },
+          "sku": "A41821946",
+          "offers": {
+            "@type": "Offer",
+            "priceCurrency": "KRW",
+            "price": 38130000,
+            "url": "https://www.smartechvacuum.com/products/A41821946",
+            "seller": {
+              "@type": "Organization",
+              "name": "스마텍",
+              "url": "https://www.smartechvacuum.com"
+            }
+          }
+        },
+        "hero": null,
+        "showcase": [],
+        "images": 0
+      },
+      {
+        "path": "/blog/96",
+        "status": 200,
+        "initialH1Count": 1,
+        "title": "리튬 1차전지 건조 공정, 드라이펌프 전환을 검토해야 하는 이유 — 스마텍",
+        "h1": [
+          "리튬 1차전지 건조 공정, 드라이펌프 전환을 검토해야 하는 이유"
+        ],
+        "description": "리튬 1차전지 제조 라인에서 전해질 용제 증기로 인한 펌프 부식 문제와 드라이펌프 전환을 검토하는 이유를 실제 현장 사례로 정리했습니다",
+        "canonical": "https://www.smartechvacuum.com/blog/96",
+        "schemas": [
+          "Organization",
+          "LocalBusiness",
+          "LocalBusiness",
+          "Service",
+          "Article",
+          "BreadcrumbList",
+          "FAQPage"
+        ],
+        "article": {
+          "@context": "https://schema.org",
+          "@type": "Article",
+          "headline": "리튬 1차전지 건조 공정, 드라이펌프 전환을 검토해야 하는 이유",
+          "description": "리튬 1차전지 제조 라인에서 전해질 용제 증기로 인한 펌프 부식 문제와 드라이펌프 전환을 검토하는 이유를 실제 현장 사례로 정리했습니다",
+          "image": "https://k1bzaxgjue0tdirt.public.blob.vercel-storage.com/blog/1788905476676-thumbnail.png",
+          "articleBody": "<-- 수치검증: A항목 1개 확인GXS 공식 Drying 적용목록 — 리튬이온 건조 / B항목 0개 / C항목 1개 확인GXS=드라이 스크류, 무급유 / D항목 0개 / 삭제 0개 / 교체 0개 -->\n---\ncategory: 기술문의\n---\n\n 리튬 1차전지 건조 공정, 드라이펌프 전환을 검토해야 하는 이유\n\n리튬 1차전지 건조 공정 드라이펌프 선택https://k1bzaxgjue0tdirt.public.blob.vercel-storage.com/blog/1788905476676-thumbnail.png\n\n리튬 1차전지비충전식 제조 라인에서 오랫동안 수봉식water-sealed 진공펌프를 써오다가 건식드라이 펌프로 교체를 검토하는 사례가 있습니다. 계기는 대체로 같습니다. 전해질 용제 증기가 배기 라인을 타고 펌프 쪽으로 넘어가는 문제입니다. 카보네이트계 전해질 용제DMC 등가 단기간에는 큰 문제를 일으키지 않아 보여도, 장기간 노출이 누적되면 실seal이나 다른 내부 부품이 빠르게 마모되거나 부식되는 결과로 이어집니다. 펌프 내구성만으로 이 문제를 완전히 막을 수는 없다는 것이 현장에서 확인된 설명입니다.\n\n 필터로는 근본 해결이 어려운 이유\n\n전해질 용제 증기가 배기 라인을 타고 펌프로 유입되는 경로https://k1bzaxgjue0tdirt.public.blob.vercel-storage.com/blog/1788905477849-%EC%82%AC%EC%A7%841.png\n\n배기 전단에 필터를 추가하는 방법도 검토 대상에 오릅니다. 하지만 실제로는 근본적인 해결책이 되지 못합니다. 필터 수명이 약 3개월 정도로 짧아 주기적인 교체가 필요하고, 필터 자체가 공정 디개싱탈기 시 압력과 펌핑 속도에 영향을 줄 수 있다는 우려가 있습니다. 하나의 문제를 필터로 막으려다 다른 공정 변수를 흔드는 셈이 됩니다.\n\n 드라이펌프가 대안으로 검토되는 이유\n\n드라이 스크류 펌프는 무급유오일리스 구조입니다. 오일이 없으므로 전해질 용제가 오일과 반응해 오일 자체가 열화되는 경로가 애초에 존재하지 않습니다. 다만 이것이 전해질 용제가 펌프 내부 금속이나 씰 부품을 부식시키는 문제까지 완전히 없애준다는 뜻은 아닙니다. 이 부분은 여전히 재질과 씰 사양을 적절히 선정하는 문제로 남습니다. 리튬이온이차전지 건조 공정에는 드라이 스크류 펌프가 공식 적용 사례로 명시돼 있고, 리튬 1차전지도 전극·세퍼레이터 건조 단계에서 유사하게 저압·저수분 환경이 요구된다는 점에서 비슷한 방식이 적용될 여지가 있습니다.\n\n 수봉식과 드라이 방식의 차이\n\n무급유 드라이펌프 구조 개념도https://k1bzaxgjue0tdirt.public.blob.vercel-storage.com/blog/1788905478374-%EC%82%AC%EC%A7%842.png\n\n수봉식 펌프는 압력 처리 방식 자체가 일반 드라이 진공펌프와 다릅니다. 배터리 제조 분야에서는 수봉식보다 드라이 방식이 더 자주 검토되는 편입니다. 다만 어느 쪽이 무조건 낫다고 단정할 수는 없습니다. 현재 사용 중인 모델, 배관 상태, 취급하는 전해질 종류를 먼저 확인한 뒤 판단해야 하는 문제입니다.\n\n 리튬이온과 1차전지, 공식 자료 기준의 차이\n\n한 가지 짚어둘 점은, 진공펌프 제조사의 공식 적용 공정 목록에는 \"리튬이온 배터리 건조\"가 명시돼 있지만 \"리튬 1차전지 건조\"가 별도 항목으로 나와 있지는 않다는 것입니다. 1차전지는 충전이 불가능한 일회용 배터리로, 리튬이온이차전지과 전극·전해질 구성이 다릅니다. 다만 두 경우 모두 건조 단계에서 저압·저수분 환경을 요구한다는 공정 목적 자체는 유사하기 때문에, 리튬이온 건조 공정에 적용되는 드라이펌프 방식이 1차전지 건조에도 유사하게 적용될 여지가 있는 것으로 보입니다. 정확한 스펙은 실제 공정 조건목표 진공도, 처리 물량, 전해질 종류을 확인한 뒤 결정해야 합니다.\n\n 전환을 검토할 때 확인할 것들\n\n전해질 용제 증기 문제로 드라이 전환을 고려한다면, 펌프 모델만 바꾼다고 끝나는 것이 아닙니다. 배관이 노후된 상태라면 배관 교체까지 함께 검토",
+          "datePublished": "2026-09-08T22:11:18.883Z",
+          "dateModified": "2026-09-08T22:11:18.887Z",
+          "url": "https://www.smartechvacuum.com/blog/96",
+          "publisher": {
+            "@type": "Organization",
+            "name": "스마텍",
+            "url": "https://www.smartechvacuum.com"
+          },
+          "author": {
+            "@type": "Person",
+            "name": "Robin",
+            "url": "https://www.smartechvacuum.com/about/robin",
+            "worksFor": {
+              "@type": "Organization",
+              "name": "스마텍"
+            }
+          }
+        },
+        "hero": null,
+        "showcase": [],
+        "images": 3
+      },
+      {
+        "path": "/blog/battery-manufacturing-dry-pump-pfpe-oil",
+        "status": 200,
+        "initialH1Count": 1,
+        "title": "2차전지 제조 공정에서 드라이펌프 및 PFPE 오일 진공펌프가 필요한 이유 — 스마텍",
+        "h1": [
+          "2차전지 제조 공정에서 드라이펌프 및 PFPE 오일 진공펌프가 필요한 이유"
+        ],
+        "description": "이차전지(리튬이온 배터리) 제조 공정에는 NMP 용제, LiPF6 전해액, HF(불화수소) 등 일반 진공펌프 오일을 빠르게 열화시키는 화학 물질이 존재합니다. 이 환경에서 드라이펌프 또는 PFPE 오일을 사용하는 진공펌프가 필요한 이유를 공정 단계별로 설명합니다.",
+        "canonical": "https://www.smartechvacuum.com/blog/battery-manufacturing-dry-pump-pfpe-oil",
+        "schemas": [
+          "Organization",
+          "LocalBusiness",
+          "LocalBusiness",
+          "Service",
+          "Article",
+          "BreadcrumbList",
+          "FAQPage"
+        ],
+        "article": {
+          "@context": "https://schema.org",
+          "@type": "Article",
+          "headline": "2차전지 제조 공정에서 드라이펌프 및 PFPE 오일 진공펌프가 필요한 이유",
+          "description": "이차전지(리튬이온 배터리) 제조 공정에는 NMP 용제, LiPF6 전해액, HF(불화수소) 등 일반 진공펌프 오일을 빠르게 열화시키는 화학 물질이 존재합니다. 이 환경에서 드라이펌프 또는 PFPE 오일을 사용하는 진공펌프가 필요한 이유를 공정 단계별로 설명합니다.",
+          "image": "https://k1bzaxgjue0tdirt.public.blob.vercel-storage.com/blog/1781244688658-thumbnail.png",
+          "articleBody": "<-- 수치검증: A항목 7개 확인 / B항목 0개 확인 / 삭제 0개 / 교체 0개 -->\n\n 2차전지 제조 공정에서 드라이펌프 및 PFPE 오일 진공펌프가 필요한 이유\n\n2차전지 제조 공정 진공펌프 선택 — 드라이펌프와 PFPE 오일 가이드https://k1bzaxgjue0tdirt.public.blob.vercel-storage.com/blog/1781244688658-thumbnail.png\n\n이차전지리튬이온 배터리 제조 공정에는 NMP 용제, LiPF6 전해액, HF불화수소 등 일반 진공펌프 오일을 빠르게 열화시키는 화학 물질이 존재합니다. 이 환경에서 드라이펌프 또는 PFPE 오일을 사용하는 진공펌프가 필요한 이유를 공정 단계별로 설명합니다.\n\n 2차전지 공정에서 진공이 필요한 단계\n\n2차전지 공정 단계별 진공 적용 흐름 다이어그램https://k1bzaxgjue0tdirt.public.blob.vercel-storage.com/blog/1781244689644-image-01.png\n\n배터리 제조 과정에서 진공 기술이 적용되는 주요 단계는 다음과 같습니다.\n\n- 공정 단계: 전극 건조 — 진공 목적: NMP 제거, 수분 40ppm 이하 달성 / 주요 위험 물질: NMP 증기 대량 발생\n- 공정 단계: NMP 회수 — 진공 목적: 용제 재활용, 환경 규제 대응 / 주요 위험 물질: NMP 고농도 증기\n- 공정 단계: 전해액 주입·디개싱 — 진공 목적: 기포 없는 균일 주입, 기포 제거 / 주요 위험 물질: LiPF6, HF 가능\n- 공정 단계: 셀 봉합·화성 — 진공 목적: 밀봉, 초기 충방전 가스 처리 / 주요 위험 물질: CO₂, H₂, HF 가스\n\n전해액 디개싱 공정의 요구 진공도는 0.1 mbar 이하입니다. ✅ Edwards GXS Application Note\n\n 드라이펌프가 필요한 이유 — 공정 가스와 오일의 완전 격리\n\n이차전지 공정 진공펌프 유형별 비교표https://k1bzaxgjue0tdirt.public.blob.vercel-storage.com/blog/1781244690477-image-02.png\n\n오일식 로터리베인 펌프E2M, RV 등는 공정 가스가 오일 속을 통과하는 구조입니다. NMP 증기가 오일에 흡수되어 점도를 낮추고, LiPF6가 수분과 반응해 생성된 HF가 오일을 부식시킵니다. 결과적으로 점도 저하 → 도달 진공도 악화 → 슬러지 형성 → 교환 주기 단축의 악순환이 반복됩니다.\n\n드라이 스크류 펌프GXS 등는 공정 가스 경로에 오일이 없습니다. 기어박스 윤활유는 별도 격리 공간에 있으며, 샤프트 씰 퍼지 구조가 공정 가스의 침투를 차단합니다. NMP·HF 환경에서도 오일 열화 문제가 원천적으로 발생하지 않으며, 오일 역류backstreaming가 없어 배터리 전극 오염 위험도 없습니다.\n\n PFPE 오일 진공펌프 — 오일식이 불가피한 경우의 선택\n\n드라이펌프 도입이 어려운 경우, 오일식 진공펌프에 PFPE퍼플루오로폴리에테르 오일을 사용하는 방법이 있습니다.\n\nPFPE 오일은 탄소-불소 결합으로만 구성된 합성 오일입니다. 거의 모든 유기 용제에 불용성이어서 NMP와 섞이지 않고, HF 등 부식성 가스에도 반응하지 않습니다. 유해 공정 조건이 일반 탄화수소 오일을 빠르게 파괴하는 환경에서 PFPE 오일이 사용됩니다. ✅ edwardsvacuum.com — Vacuum pump oil and fluids\n\n단, PFPE 오일을 사용하더라도 오일식 펌프의 구조적 한계공정 가스와 오일의 직접 접촉는 유지됩니다. 일반 오일 대비 수명이 훨씬 길지만, 전극 오염 위험역류은 드라이펌프와 같은 수준으로 해결되지 않습니다.\n\n GXS 드라이펌프의 이차전지 공정 적합 특성\n\nEdwards GXS 드라이 스크류 펌프 이차전지 공정 현장https://k1bzaxgjue0tdirt.public.blob.vercel-storage.com/blog/1781244691138-field-1.png\n\nEdwards GXS 산업용 드라이 스크류 펌프는 이차전지 전 공정에 걸쳐 적용되는 표준 솔루션입니",
+          "datePublished": "2026-06-12T06:11:32.546Z",
+          "dateModified": "2026-08-30T23:26:29.334Z",
+          "url": "https://www.smartechvacuum.com/blog/battery-manufacturing-dry-pump-pfpe-oil",
+          "publisher": {
+            "@type": "Organization",
+            "name": "스마텍",
+            "url": "https://www.smartechvacuum.com"
+          },
+          "author": {
+            "@type": "Person",
+            "name": "Robin",
+            "url": "https://www.smartechvacuum.com/about/robin",
+            "worksFor": {
+              "@type": "Organization",
+              "name": "스마텍"
+            }
+          }
+        },
+        "hero": null,
+        "showcase": [],
+        "images": 4
+      }
+    ],
+    "errors": [],
+    "search": {
+      "query": "RV12",
+      "productLinks": 48
+    }
+  }
+}
