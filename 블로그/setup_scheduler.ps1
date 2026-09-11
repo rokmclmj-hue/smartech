@@ -1,62 +1,77 @@
-# SmartechBlog Auto Upload - Windows Task Scheduler Setup
-# Run once only.
-# How to run: ! powershell -ExecutionPolicy Bypass -File "C:\Users\rokmc\smartech\블로그\setup_scheduler.ps1"
+# SmartechBlog: Monday/Thursday from 2026-09-14, 09:00 Korea time.
+# Preview: powershell -File .\setup_scheduler.ps1 -WhatIf
+# Apply after reviewing the preview. Existing task XML is backed up first.
+[CmdletBinding(SupportsShouldProcess = $true)]
+param()
 
-$python = "C:\Users\rokmc\AppData\Local\Programs\Python\Python312\python.exe"
-$script = "C:\Users\rokmc\smartech\블로그\auto_upload.py"
-$workdir = "C:\Users\rokmc\smartech\블로그"
-$logfile = "C:\Users\rokmc\smartech\블로그\upload-log.txt"
+$ErrorActionPreference = 'Stop'
+$pythonWindowless = 'C:\Users\rokmc\AppData\Local\Programs\Python\Python312\pythonw.exe'
+$script = Join-Path $PSScriptRoot 'auto_upload.py'
+$logfile = Join-Path $PSScriptRoot 'upload-log.txt'
+$backupDir = Join-Path $PSScriptRoot ('scheduler-backups\' + (Get-Date -Format 'yyyyMMdd-HHmmss-fff'))
 
+if ((Get-TimeZone).Id -ne 'Korea Standard Time') {
+    throw 'Task triggers require Windows time zone Korea Standard Time. No task was changed.'
+}
+foreach ($required in @($pythonWindowless, $script)) {
+    if (-not (Test-Path -LiteralPath $required -PathType Leaf)) {
+        throw "Required file missing: $required"
+    }
+}
+
+# Hidden marks the scheduler entry; pythonw and CREATE_NO_WINDOW in Python
+# prevent the console itself from opening (QuickEdit click/pause protection).
 $settings = New-ScheduledTaskSettingsSet `
     -StartWhenAvailable `
+    -Hidden `
     -RunOnlyIfNetworkAvailable:$false `
     -ExecutionTimeLimit (New-TimeSpan -Minutes 30) `
     -MultipleInstances IgnoreNew
 
-# Monday - day1
-$action1 = New-ScheduledTaskAction `
-    -Execute $python `
-    -Argument "`"$script`" --slot day1" `
-    -WorkingDirectory $workdir
-$trigger1 = New-ScheduledTaskTrigger -Weekly -DaysOfWeek Monday -At "09:00"
-Register-ScheduledTask `
-    -TaskName "SmartechBlog_Day1_Monday" `
-    -Action $action1 `
-    -Trigger $trigger1 `
-    -Settings $settings `
-    -RunLevel Highest `
-    -Force | Out-Null
+$existing = @(Get-ScheduledTask | Where-Object {
+    $_.TaskPath -eq '\' -and $_.TaskName -like 'SmartechBlog_*'
+})
 
-# Wednesday - day2
-$action2 = New-ScheduledTaskAction `
-    -Execute $python `
-    -Argument "`"$script`" --slot day2" `
-    -WorkingDirectory $workdir
-$trigger2 = New-ScheduledTaskTrigger -Weekly -DaysOfWeek Wednesday -At "09:00"
-Register-ScheduledTask `
-    -TaskName "SmartechBlog_Day2_Wednesday" `
-    -Action $action2 `
-    -Trigger $trigger2 `
-    -Settings $settings `
-    -RunLevel Highest `
-    -Force | Out-Null
+# Back up before any registration or disabling. Unrelated jobs are not changed.
+foreach ($task in $existing) {
+    if ($PSCmdlet.ShouldProcess($task.TaskName, 'Back up existing task XML')) {
+        New-Item -ItemType Directory -Path $backupDir -Force | Out-Null
+        Export-ScheduledTask -TaskName $task.TaskName -TaskPath $task.TaskPath |
+            Set-Content -LiteralPath (Join-Path $backupDir ($task.TaskName + '.xml')) -Encoding Unicode
+    }
+}
 
-# Friday - day3
-$action3 = New-ScheduledTaskAction `
-    -Execute $python `
-    -Argument "`"$script`" --slot day3" `
-    -WorkingDirectory $workdir
-$trigger3 = New-ScheduledTaskTrigger -Weekly -DaysOfWeek Friday -At "09:00"
-Register-ScheduledTask `
-    -TaskName "SmartechBlog_Day3_Friday" `
-    -Action $action3 `
-    -Trigger $trigger3 `
-    -Settings $settings `
-    -RunLevel Highest `
-    -Force | Out-Null
+$plan = @(
+    @{ Name = 'SmartechBlog_Day1_Monday'; Slot = 'day1'; Day = 'Monday'; Start = '2026-09-14T09:00:00' },
+    @{ Name = 'SmartechBlog_Day2_Thursday'; Slot = 'day2'; Day = 'Thursday'; Start = '2026-09-17T09:00:00' }
+)
 
-Write-Host "Done:"
-Write-Host "  SmartechBlog_Day1_Monday    (Mon 09:00)"
-Write-Host "  SmartechBlog_Day2_Wednesday (Wed 09:00)"
-Write-Host "  SmartechBlog_Day3_Friday    (Fri 09:00)"
+foreach ($item in $plan) {
+    $action = New-ScheduledTaskAction -Execute $pythonWindowless `
+        -Argument "`"$script`" --slot $($item.Slot)" -WorkingDirectory $PSScriptRoot
+    $trigger = New-ScheduledTaskTrigger -Weekly -DaysOfWeek $item.Day -At '09:00'
+    $trigger.StartBoundary = $item.Start
+    if ($PSCmdlet.ShouldProcess($item.Name, "Register hidden weekly task starting $($item.Start)")) {
+        Register-ScheduledTask -TaskName $item.Name -Action $action -Trigger $trigger `
+            -Settings $settings -RunLevel Highest -Force | Out-Null
+        Add-Content -LiteralPath $logfile -Encoding UTF8 -Value "[$(Get-Date -Format s)] Registered $($item.Name), start=$($item.Start), backup=$backupDir"
+    }
+}
+
+# Friday 09/11 awaits an explicit user upload request, so disable its automatic
+# job too. auto_upload.py retains pre-transition day3 compatibility.
+# Keep old definitions recoverable: disable, never delete.
+foreach ($task in $existing) {
+    if ($task.TaskName -match '^SmartechBlog_Day[2-5]_' -and
+        $task.TaskName -ne 'SmartechBlog_Day2_Thursday') {
+        if ($PSCmdlet.ShouldProcess($task.TaskName, 'Disable legacy Wednesday/Friday/temporary task')) {
+            Disable-ScheduledTask -TaskName $task.TaskName -TaskPath $task.TaskPath | Out-Null
+            Add-Content -LiteralPath $logfile -Encoding UTF8 -Value "[$(Get-Date -Format s)] Disabled $($task.TaskName), backup=$backupDir"
+        }
+    }
+}
+
+Write-Host 'Plan: Monday day1 from 2026-09-14; Thursday day2 from 2026-09-17, 09:00 KST.'
+Write-Host 'Queue and approval flags are unchanged. Friday 09/11 needs an explicit user request.'
+Write-Host "Existing definitions backup (when applied): $backupDir"
 Write-Host "Log: $logfile"
