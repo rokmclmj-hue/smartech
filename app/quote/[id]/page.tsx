@@ -72,21 +72,37 @@ function DeliveryModal({
   onClose,
   onConfirm,
   onInquiry,
+  initialName,
+  initialPhone,
 }: {
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm: (name: string, phone: string) => void;
   onInquiry: (name: string, phone: string) => void;
+  initialName: string;
+  initialPhone: string;
 }) {
   const [mode, setMode] = useState<"choose" | "inquiry">("choose");
-  const [contactName, setContactName] = useState("");
-  const [contactPhone, setContactPhone] = useState("");
+  const [contactName, setContactName] = useState(initialName);
+  const [contactPhone, setContactPhone] = useState(initialPhone);
   const [submitting, setSubmitting] = useState(false);
 
-  async function handleInquiry() {
+  function validateContact() {
     if (!contactName.trim() || !contactPhone.trim()) {
-      alert("이름과 전화번호를 입력해 주세요.");
-      return;
+      alert("연락 받을 담당자 이름과 전화번호를 입력해 주세요.");
+      return false;
     }
+    return true;
+  }
+
+  async function handleConfirmClick() {
+    if (!validateContact()) return;
+    setSubmitting(true);
+    await onConfirm(contactName, contactPhone);
+    setSubmitting(false);
+  }
+
+  async function handleInquiry() {
+    if (!validateContact()) return;
     setSubmitting(true);
     await onInquiry(contactName, contactPhone);
     setSubmitting(false);
@@ -108,19 +124,55 @@ function DeliveryModal({
             <h2 style={{ fontSize: 16, letterSpacing: "0.14em", color: "#3A8DD0", textTransform: "uppercase", marginBottom: 8 }}>
               — DELIVERY · 납기 확인
             </h2>
-            <p style={{ fontSize: 12, color: "#7A8B9D", marginBottom: 24 }}>
-              주문 확정 전에 납기 일정을 확인해 주세요.
+            <p style={{ fontSize: 12, color: "#7A8B9D", marginBottom: 20 }}>
+              주문 확정 전에 납기 일정과 연락처를 확인해 주세요.
             </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 20 }}>
+              <div>
+                <label style={{ fontSize: 10, color: "#7A8B9D", letterSpacing: "0.14em", textTransform: "uppercase" }}>
+                  Name · 담당자
+                </label>
+                <input
+                  type="text"
+                  value={contactName}
+                  onChange={(e) => setContactName(e.target.value)}
+                  placeholder="홍길동"
+                  style={{
+                    width: "100%", marginTop: 6, padding: "10px 12px",
+                    background: "#0A0E14", border: "1px solid #2A3441", color: "#E6EEF6",
+                    fontFamily: "inherit", fontSize: 13, outline: "none",
+                  }}
+                />
+              </div>
+              <div>
+                <label style={{ fontSize: 10, color: "#7A8B9D", letterSpacing: "0.14em", textTransform: "uppercase" }}>
+                  Tel · 전화번호
+                </label>
+                <input
+                  type="tel"
+                  value={contactPhone}
+                  onChange={(e) => setContactPhone(e.target.value)}
+                  placeholder="010-0000-0000"
+                  style={{
+                    width: "100%", marginTop: 6, padding: "10px 12px",
+                    background: "#0A0E14", border: "1px solid #2A3441", color: "#E6EEF6",
+                    fontFamily: "inherit", fontSize: 13, outline: "none",
+                  }}
+                />
+              </div>
+            </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               <button
-                onClick={onConfirm}
+                onClick={handleConfirmClick}
+                disabled={submitting}
                 style={{
                   background: "#27AE60", color: "#0A0E14", border: "1px solid #27AE60",
                   padding: "12px", fontSize: 12, letterSpacing: "0.1em", textTransform: "uppercase",
-                  fontFamily: "inherit", cursor: "pointer",
+                  fontFamily: "inherit", cursor: submitting ? "not-allowed" : "pointer",
+                  opacity: submitting ? 0.5 : 1,
                 }}
               >
-                [ 납기 문제 없음 — 주문 확정 ]
+                {submitting ? "[ 처리 중... ]" : "[ 납기 문제 없음 — 주문 확정 ]"}
               </button>
               <button
                 onClick={() => setMode("inquiry")}
@@ -264,11 +316,13 @@ export default function QuoteDetailPage() {
       .catch(() => setLoading(false));
   }, [status, quoteId, router]);
 
-  async function handleConfirm() {
+  async function handleConfirm(contactName: string, contactPhone: string) {
     const res = await fetch("/api/orders", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ quoteId: parseInt(quoteId), deliveryIssue: false }),
+      body: JSON.stringify({
+        quoteId: parseInt(quoteId), deliveryIssue: false, contactName, contactPhone,
+      }),
     });
     setShowModal(false);
     if (res.ok) setOrderDone(true);
@@ -778,6 +832,8 @@ export default function QuoteDetailPage() {
           onClose={() => setShowModal(false)}
           onConfirm={handleConfirm}
           onInquiry={handleInquiry}
+          initialName={quote.user.name}
+          initialPhone={quote.user.phone ?? ""}
         />
       )}
     </div>
