@@ -7,9 +7,10 @@
 
 작성일: 2026-09-09
 작성 주체: Claude Code (Sonnet 5)
-갱신 방식: 자동 동기화 아님 — **이 문서를 만든 시점의 스냅샷**입니다.
-이후 Claude와 Astra가 각자 작업하면 서로 아는 내용이 어긋날(drift) 수 있으니,
-정기적으로 이 파일을 다시 정리해서 갱신해야 합니다.
+최종 갱신: 2026-09-09, Astra — 대표님 승인으로 Codex 중심 운영·월목 주2편 전환.
+갱신 방식: 에이전트가 작업 완료 시 직접 갱신. 자동 기억이나 자동 동기화를 가정하지 않습니다.
+현재 합의·후속 작업은 `docs/memory/README.md` → `docs/memory/current-state.md`,
+완료·검증 이력은 `docs/astra_work_log.md`를 함께 읽습니다. 과거 검증 기록보다 최신 사용자 지시가 우선합니다.
 
 ---
 
@@ -62,6 +63,8 @@ Tailwind v4 사용 중 — `tailwind.config.js` 생성 금지, `@apply` 방식 �
 - 새 npm 패키지 추가 금지 (사용자 승인 필요)
 - 현재 허용된 패키지: `@anthropic-ai/sdk`, `@prisma/client`, `@react-pdf/renderer`,
   `@vercel/blob`, `bcryptjs`, `next-auth`, `nodemailer`, `solapi`, `xlsx`, `react-countup`
+- 위 10개는 기존 규칙의 허용 목록이며 실제 설치 목록 전체가 아닙니다. `package.json`에는
+  프레임워크·개발 도구 외 `imapflow` 등도 이미 있습니다. 기존 설치분을 임의 삭제하지 않습니다.
 - axios, Zustand, date-fns 같은 대체 라이브러리 도입 금지
 
 ## 5. 블로그 콘텐츠 규칙
@@ -70,7 +73,9 @@ Tailwind v4 사용 중 — `tailwind.config.js` 생성 금지, `@apply` 방식 �
 - **마크다운 표 형식 금지** — `writer.md` 규칙. 표 대신 다른 형식 사용
 - 블로그 글을 지칭할 때는 완성 기사 제목이 아니라 **VS Code 탐색기 폴더명**으로 지칭
   (예: "0904-리사이클링-드라이펌프")
-- 업로드 주기: 주 3편(월·수·금) — 필요 시 대표님이 스케줄 조정
+- 업로드 주기: **2026-09-14부터 월·목 주 2편**, 두 글 모두 Astra로 준비.
+  다음주 후보는 5개 중 대표님이 2개 선택한 뒤 작성. 50편은 SEO 인정 기준이 아닙니다.
+- `0911-아웃가스-원리`는 금요일 대표님의 업로드 요청 대기. 원고 작성·사진 승인·예약 승인·실제 발행은 별도 상태입니다.
 - 주제 구성: 매트릭스(산업별 특화) 기반 글만 뽑지 말고, 산업 무관한 일반 진공이론/안전 주의사항 계열 글도 1~2개씩 항상 섞을 것
 - 업로드 자동화 스케줄러(Windows 작업 스케줄러)는 콘솔창 QuickEdit 모드에서 클릭하면 멈추는 버그가 있었음 → Hidden 모드로 해결됨
 
@@ -80,8 +85,10 @@ Tailwind v4 사용 중 — `tailwind.config.js` 생성 금지, `@apply` 방식 �
   `generateMetadata` 포함
 - `"use client"` 페이지는 metadata 선언 불가 → 서버 컴포넌트 래퍼 패턴 필수
   (인터랙티브 코드는 `*Client.tsx`로 분리, `page.tsx`는 서버 컴포넌트로 metadata만 선언)
-- 각 페이지 metadata에 `alternates: { canonical: "https://smartechvacuum.com/경로" }` 필수
-- 점검: `npm run seo-check`
+- 각 페이지 metadata에 `alternates: { canonical: "https://www.smartechvacuum.com/경로" }` 필수.
+  실제 라이브 www 주소와 일치시킵니다. 서버 래퍼는 metadata와 화면 컴포넌트를 함께 담당할 수 있습니다.
+- 점검: `npm run seo-check` (PowerShell 실행 정책이 막으면 `npm.cmd run seo-check`).
+  선언 검사이며 종합 SEO 점수·색인·AI 인용 검증이 아닙니다.
 
 ## 7. 보안 수칙
 
@@ -95,10 +102,15 @@ Tailwind v4 사용 중 — `tailwind.config.js` 생성 금지, `@apply` 방식 �
 - 정의된 구조와 범위를 벗어나지 않는다. 새 기능/구조 추가는 금지 — 필요 시 제안 후 승인받는다
 - 한 번에 하나의 작업만 수행, 30~60분 내 데모 가능한 결과를 만든다
 - 불확실하면 추측하지 말고 필요한 질문만 하고 진행한다
-- 작업(코드 수정, 설정 변경 등)이 완료되면 그 내용을 기록해 남긴다 (Astra 쪽에서는 이 문서나
-  별도 로그 파일에 직접 기록 — Claude의 MEMORY.md 자동 기억 시스템은 Astra가 접근 못 함)
-- 작업 완료 후 커밋 + `git push origin master`로 라이브에 반영해야 실제 배포됨 (push 안 하면
-  라이브에 반영 안 됨)
+- 작업 완료 시 `docs/astra_work_log.md`에 변경·검증·미완료·다음 행동을 기록하고,
+  합의가 바뀌면 `docs/memory/current-state.md`와 해당 규칙도 갱신합니다.
+- Claude 메모리 파일은 권한이 있으면 직접 읽을 수 있습니다. 자동 로딩·자동 기록·훅 실행이
+  이어지는 것은 아니므로 Astra가 읽고 기록할 책임이 있습니다.
+- 승인된 작업은 변경 검증 → 해당 파일만 커밋 → push 전 diff 검토 → `git push origin master`
+  → 원격 커밋 확인 → Vercel 상태/라이브 동작 확인 순서로 마무리합니다.
+  Git push는 코드 배포 요청입니다. 블로그 DB 발행·네이버 발행·Windows 예약 적용은 각각 별도입니다.
+- 30~60분은 검증 가능한 작업 단위 원칙입니다. 여러 단계 진행을 이미 승인받았으면 각 단위를
+  검증·기록하고 이어갑니다. 승인된 작업마다 같은 허락을 반복해서 받지 않습니다.
 - 커밋 메시지는 한글로 간결하게, 변경 이유 중심으로 작성
 
 ## 9. 사용자(대표님) 관련 — 커뮤니케이션 방식
@@ -112,10 +124,10 @@ Tailwind v4 사용 중 — `tailwind.config.js` 생성 금지, `@apply` 방식 �
   하지 않음
 - 여러 방법을 한꺼번에 나열하지 않기 (혼란 방지)
 
-## 10. Claude 전용이라 Astra가 호환 못 하는 것 (참고용)
+## 10. Claude 기록 인수와 Astra의 기록 책임
 
-이 프로젝트에는 Claude Code 전용 자동 기억/설정 시스템이 있습니다. Astra는 이를 직접 읽을 수
-없으므로, 필요한 내용은 이 문서에 사람이 요약해서 옮겨야 합니다.
+Claude 전용 자동 기능과 파일 접근은 다릅니다. 이번 환경에서 `CLAUDE.md`, 외부 `MEMORY.md`,
+개별 메모리를 읽을 수 있음을 확인했습니다. 자동 로더·슬래시 명령·훅의 호환은 별개입니다.
 
 - `CLAUDE.md` 규칙 파일 (Claude 전용 규칙 로더)
 - `MEMORY.md` + 개별 메모리 파일들 (`C:\Users\rokmc\.claude\projects\...\memory\`) — 프로젝트
@@ -123,7 +135,9 @@ Tailwind v4 사용 중 — `tailwind.config.js` 생성 금지, `@apply` 방식 �
 - `.claude/settings.json` 훅 설정
 - Claude 스킬/슬래시 명령어 (`/code-review`, `/loop` 등)
 
-호환 가능한 것: 코드 파일 전체, git 커밋 이력, `AGENTS.md`(Codex 네이티브 규칙 파일 — 그대로 읽힘)
+코드·git 이력·Markdown 규칙은 직접 읽고 검토합니다. Claude 명령어를 실행한 것처럼 보고하지 않습니다.
+과거 메모리 원본은 수정하지 않고 로컬 비공개 스냅샷과 해시 목록으로 보존합니다.
+범위·위치·읽은 기록은 `docs/memory/README.md`에 있으며, 고객 정보가 섞인 원문은 git에 올리지 않습니다.
 
 ---
 
@@ -134,15 +148,12 @@ Tailwind v4 사용 중 — `tailwind.config.js` 생성 금지, `@apply` 방식 �
 
 ### 0) 세션 시작·종료 시 git 동기화 (Claude Code와 동일한 습관)
 
-Claude Code는 매 대화 시작 시 `git pull origin master`를 자동 실행해 최신 상태로
-동기화하는 규칙이 `CLAUDE.md`에 있습니다. Astra도 동일하게 적용합니다.
-
-- **세션 시작 시**: 첫 작업을 받기 전에 `git pull origin master`를 먼저 실행해
-  Claude Code가 그동안 push한 최신 내용을 받아옵니다. 충돌(conflict)이 뜨면
-  바로 진행하지 말고 사용자에게 먼저 알립니다.
-- **작업 완료 시**: 사용자가 "커밋하고 push 해줘"라고 요청하면 `git add`, `git commit`,
-  `git push origin master`를 실행합니다. push 없이 세션을 끝내면 작업이 라이브에
-  반영되지 않으므로, 세션을 마무리하기 전에 커밋·push 여부를 사용자에게 확인합니다.
+- **세션 시작**: 규칙·메모리 → `git status --short` → `git fetch origin master reviewed`
+  → 원격/로컬 차이 확인 → 안전할 때 `git pull --ff-only origin master`.
+  기존 미커밋 변경을 덮어쓰거나 자동 stash/reset하지 않습니다. 공유 작업 중이면 파일 소유 범위를 구분합니다.
+- 승인된 작업의 커밋·push는 루트 `CLAUDE.md`의 종료 규칙대로 진행합니다. 다른 사람의 변경이나
+  이전 미확인 커밋을 무조건 포함하지 않습니다. 플랫폼 권한 차단은 이유와 실제 완료 범위를 기록합니다.
+- reviewed는 해당 범위를 실제 검토했을 때만 이동합니다. 일부 파일 검토로 미검토 커밋 전체를 완료 처리하지 않습니다.
 
 ### 1) 블로그 주제 후보 뽑기
 
@@ -153,11 +164,10 @@ Claude Code는 매 대화 시작 시 `git pull origin master`를 자동 실행�
 - `블로그/knowledge/industry-product-matrix.md` (산업별 주제 매트릭스)
 - `블로그/knowledge/topic-tracker.json` (이미 다룬 주제 이력 — 중복 방지)
 
-**신선도 확인 (2026-09-09 사고 재발 방지)**: 이 두 파일이 실제 발행 폴더(`블로그/output/기술블로그/`)보다
-오래됐을 수 있습니다. 후보를 뽑기 전에 `블로그/output/기술블로그/`의 최근 월 폴더를 훑어보고,
-`topic-tracker.json`의 `completed_topics`나 매트릭스 체크(✅)에 없는 최근 발행글이 있으면 먼저
-반영(추가)한 뒤에 후보를 뽑습니다. (2026-09-09에 한 달치 누락이 방치돼 있던 것을 발견해 수동으로
-바로잡은 적 있음 — 매번 같은 실수가 반복되지 않도록 확인 단계를 넣음)
+**신선도 확인**: tracker·매트릭스·원고 폴더·예약 큐·공개 사이트맵을 대조합니다.
+로컬 원고의 존재나 completed_topics는 공개됐다는 증거가 아닙니다.
+공개 상태는 API 성공 결과·관리 화면·실제 공개 URL 등으로 확인하고, 미확인은 그대로 기록합니다.
+후보 단계에서도 미발행 원고를 중복 대상에 포함하며, 후보만으로 완료·예약·로테이션을 갱신하지 않습니다.
 
 후보를 낼 때 지킬 것:
 - 산업별 특화 주제 위주로 하되, 후보 중 1개는 일반 진공이론·안전 주의사항 계열로 포함
@@ -171,16 +181,15 @@ Claude Code는 매 대화 시작 시 `git pull origin master`를 자동 실행�
 - [ ] `.env`, API 키 등 비밀값이 코드에 하드코딩되지 않았는지 확인
 - [ ] 새 `page.tsx`를 만들었다면 metadata/canonical 규칙(6번 항목) 준수 확인
 - [ ] 커밋 메시지에 변경 이유를 한글로 간결하게 작성
-- [ ] push 후 `git log --oneline origin/master | head -3`로 실제 반영 확인
+- [ ] push 후 `git rev-parse HEAD`, `git ls-remote origin refs/heads/master`로 원격 커밋 일치 확인
+- [ ] Vercel 배포 성공과 변경한 라이브 동작 확인. 확인 못 했으면 코드 push와 배포 확인을 구분
 - [ ] 이 문서(`docs/astra_handoff.md`)나 별도 로그에 작업 내용 기록 (10번 항목 참고)
 
-### 3) 아스트라에게 없는 기능 — 사람 검토 필요
+### 3) 검토 책임
 
-Claude Code에는 `/code-review` 같은 자동 코드 검토 기능이 있지만, **Astra(Codex CLI)에는
-동일한 기능이 없습니다.** 아래 경우엔 push 전에 사람(대표님 또는 Claude Code)이 한 번 더
-검토하는 것을 권장한다고 안내합니다.
-- 수정 파일이 3개 이상인 작업
-- DB 스키마, API 응답 포맷, 인증 관련 변경이 섞인 작업
+Astra도 코드·diff·테스트·실제 응답을 검토할 수 있습니다. Claude 전용 `/code-review`의 자동
+이식 여부와 검토 능력을 혼동하지 않습니다. 수정 파일이 많으면 공통 영향과 누락을 추가 점검합니다.
+보호 파일 승인 원칙은 그대로이며, 검토 내용·범위·검증 한계를 기록합니다.
 
 ---
 
@@ -219,7 +228,6 @@ Codex CLI(`gpt-6-astra medium`)에 이 문서와 `AGENTS.md`를 읽힌 뒤, 3라
 
 ## 주의사항 (재확인)
 
-- 이 문서는 **스냅샷**입니다. Claude와 Astra를 병행 사용하면서 한쪽에서만 반영한 규칙 변경은
-  자동으로 다른 쪽에 전달되지 않습니다. 중요한 규칙이 바뀌면 양쪽 파일(`CLAUDE.md`와 이 문서)을
-  사람이 직접 동기화해야 합니다.
+- 아래 과거 검증 기록의 월수금·접근 불가 설명은 작성 당시 이력입니다. 현재 운영은 위 최신 규칙을 따릅니다.
+- 중요한 규칙이 바뀌면 담당 에이전트가 `CLAUDE.md`·이 문서·관련 블로그 규칙과 현재 메모리를 함께 갱신합니다.
 - 루트의 `AGENTS.md`는 절대 이 문서로 덮어쓰지 않습니다. 별도 파일로 유지합니다.

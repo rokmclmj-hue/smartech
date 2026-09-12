@@ -1,0 +1,12 @@
+{
+  "url": "http://127.0.0.1:3101/blog/96",
+  "status": 200,
+  "h1_before": 2,
+  "h1_after": 1,
+  "title_same": true,
+  "canonical_same": true,
+  "images_before": 3,
+  "images_after": 3,
+  "jsonld_errors": 0,
+  "note": "Local production build; read-only published post; no DB writes"
+}

@@ -1,5 +1,8 @@
 @AGENTS.md
 
+> 2026-09-09 대표님 승인: 앞으로 Codex/Astra 중심으로 작업한다. 최신 사용자 지시가 과거 메모리보다
+> 우선한다. `docs/astra_handoff.md`, `docs/memory/README.md`, `docs/memory/current-state.md`도 함께 읽는다.
+
 ---
 
 ## 🔍 작업 시작 전 필수 확인 — 생략 불가, 예외 없음
@@ -17,14 +20,18 @@
 
 ## 🔁 세션 시작 규칙 — 매 대화 시작 시 반드시 실행
 
-1. `C:\Users\rokmc\.claude\projects\C--Users-rokmc-smartech\memory\MEMORY.md` 를 읽는다.
-2. MEMORY.md에 링크된 관련 메모리 파일들을 읽는다.
-3. `git pull origin master` 를 실행해 로컬 master를 GitHub와 동기화한다.
+1. `docs/memory/README.md`, `docs/memory/current-state.md`, `docs/astra_work_log.md` 최신 항목을 읽는다.
+2. 관련 과거 이력이 필요하면 Claude 원본 `C:\Users\rokmc\.claude\projects\C--Users-rokmc-smartech\memory\MEMORY.md`와
+   연결 파일 또는 로컬 스냅샷을 읽는다. 파일은 읽을 수 있지만 자동 기억·훅 실행을 가정하지 않는다.
+3. `git status --short`로 기존 변경을 먼저 확인하고 `git fetch origin master reviewed` 후 차이를 점검한다.
+   안전할 때 `git pull --ff-only origin master`로 동기화한다. 자동 stash/reset/충돌 덮어쓰기는 금지한다.
 4. `git log --oneline origin/master..HEAD` 를 실행해 **push 안 된 커밋**이 있는지 확인한다.
    - push 안 된 커밋이 있으면 사용자에게 반드시 먼저 알린다: "⚠️ 라이브에 반영 안 된 작업이 N개 있어요. 먼저 push할까요?"
-5. **코드 리뷰 백로그 자동 점검** — `git fetch origin reviewed` 후 `git rev-list --count origin/reviewed..origin/master` 실행.
+5. **코드 리뷰 백로그 자동 점검** — `git rev-list --count origin/reviewed..origin/master` 실행.
    - **20개 미만**이면 사용자에게 한 줄만 언급 ("리뷰 안 된 커밋 N개 있어요") 하고 넘어간다.
-   - **20개 이상**이면 사용자에게 묻지 않고 바로 처리한다: 커밋 범위를 80개 안팎 단위로 나눠 로컬 `/code-review high` 8-에이전트 방식으로 리뷰 → 발견된 버그 수정 → 커밋·push → **`git push origin master:reviewed` 로 reviewed 브랜치를 master까지 전진**시켜 백로그를 완전히 해소한다. GitHub PR·Close·Merge 클릭은 필요 없다 (2026-07-07 250개 백로그 사고 이후 도입, [[project_github_actions_review]] 참고).
+   - **20개 이상**이면 승인된 백로그 검토를 진행한다. 사용 중인 도구에서 가능한 diff 검토·테스트를 사용하며,
+     Claude 전용 명령을 실행했다고 가정하지 않는다. 실제 검토한 연속 커밋 범위까지만 reviewed를 이동한다.
+     부분 검토로 전체 백로그를 완료 처리하지 않는다. 도구별 에이전트 수·검토 기능 제한을 따른다.
 6. 현재 작업과 관련된 프로젝트 상태를 파악한 후 사용자에게 한 줄로 요약한다.
 7. 그 후 사용자의 요청을 처리한다.
 
@@ -43,10 +50,11 @@
 - 사용자가 중요한 결정을 내렸을 때 (예: "이 방식으로 하기로 했다")
 
 ### 저장 절차
-1. 관련 메모리 파일이 이미 있으면 → 해당 파일을 업데이트한다.
-2. 없으면 → 새 파일을 만들고 MEMORY.md 인덱스에 추가한다.
-3. 코드 커밋이 있으면 커밋 해시도 함께 기록한다.
-4. 수동 작업(코드 없음)도 반드시 기록한다 — git에 안 남기 때문.
+1. 합의·현재 상태는 `docs/memory/current-state.md`, 완료·검증·실패·다음 행동은 `docs/astra_work_log.md`에 기록한다.
+2. 상세 기록이 필요하면 `docs/memory/` 또는 `docs/audits/`에 파일을 만들고 메모리 인덱스에 연결한다.
+3. 코드 커밋 해시를 후속 기록에 남긴다. 같은 커밋 안에 자기 해시를 미리 만들지 않는다.
+4. Windows 예약·외부 서비스 등 코드 밖의 작업도 결과와 확인 방법을 기록한다. 요청·시도·성공을 구분한다.
+5. Claude 원본은 역사 기록으로 보존한다. 고객 정보가 포함될 수 있는 전체 메모리 원문은 git에 올리지 않는다.
 
 > 이 규칙은 생략 불가. 저장 안 하면 다음 대화에서 사용자가 같은 질문을 반복해야 하는 번거로움이 생긴다.
 
@@ -93,8 +101,8 @@
 - 시니어 엔지니어로서 기존 구조를 존중하며, 단순하고 안정적인 구현을 한다.
 
 ## 모델 사용 원칙
-- 단순/반복/사소한 작업은 Sonnet 기준의 정확성과 안정성을 따른다.
-- 복잡한 설계/문제 해결은 Opus 수준의 사고로 처리하되, 범위를 벗어나지 않는다.
+- 대표님은 Astra high로 전환했다. 새 블로그 두 편과 기존 글 개선 모두 근거 확인·검토를 포함해 진행한다.
+- 모델 이름이나 추론 설정을 품질·SEO 성과의 보증으로 설명하지 않는다. 도구에서 확인되지 않은 설정 변경을 주장하지 않는다.
 
 ## 핵심 원칙
 - 정의된 구조와 범위를 벗어나지 않는다.
@@ -114,9 +122,9 @@
 - 확신 없는 내용은 생성하지 않는다.
 
 ## 🛑 STOP 원칙
-- 수직 슬라이스 1개 완성 시 즉시 멈추고 사용자 승인을 받는다.
-- 30~60분 내 데모 불가 시, 과도한 작업으로 간주하고 되돌린다.
-- 두 턴 연속 작업 지속 시도 시, 무한루프로 간주하고 중단한다.
+- 30~60분 내 검증 가능한 단위로 나누고 각 단위의 결과를 기록한다.
+- 여러 단계를 이미 승인받았다면 해당 범위에서 계속 진행한다. 승인받은 일마다 같은 허락을 반복 요청하지 않는다.
+- 범위가 늘어나거나 보호 파일 변경이 필요하면 해당 작업을 분리해 제안한다. 시간 경과만으로 기존 작업을 되돌리지 않는다.
 
 ---
 
@@ -163,6 +171,7 @@ Tailwind 클래스로 `bg-edred`, `text-ink` 형태로 사용. 값 임의 변경
 | `.claude/settings.json` | Claude 훅 설정 |
 | `app/api/chat/route.ts` | 실시간 AI 문의란 스트리밍 처리. API 응답 포맷 변경 금지 |
 | `components/FloatingChat.tsx` | 챗봇 팝업 UI. 구조 변경 금지 |
+| `AGENTS.md` (루트) | Codex가 읽는 규칙 파일. 승인 없이 덮어쓰지 않음 |
 
 ---
 
@@ -172,6 +181,7 @@ Tailwind 클래스로 `bg-edred`, `text-ink` 형태로 사용. 값 임의 변경
 - **새 npm 패키지 추가 금지** (사용자 승인 필요). 현재 허용된 패키지:
   `@anthropic-ai/sdk`, `@prisma/client`, `@react-pdf/renderer`, `@vercel/blob`,
   `bcryptjs`, `next-auth`, `nodemailer`, `solapi`, `xlsx`, `react-countup`
+- 위 10개는 기존 허용 규칙이며 설치 목록 전체가 아니다. 현재 `package.json`의 `imapflow` 등 기존 의존성을 임의 삭제하지 않는다.
 - **새 라이브러리로 교체 금지**: 예) axios 도입, Zustand 도입, date-fns 도입 등
 
 ---
@@ -180,20 +190,19 @@ Tailwind 클래스로 `bg-edred`, `text-ink` 형태로 사용. 값 임의 변경
 
 ### Vercel 자동 배포
 - **`master` 브랜치에 직접 push한다.** push하면 Vercel이 자동으로 라이브 서버에 배포한다.
-- 브랜치 없이 master에서 바로 작업 → 커밋 → `git push origin master` → 배포 완료.
+- master에서 작업 → 검증·커밋 → push 전 diff 검토 → `git push origin master` → Vercel·라이브 확인.
+  push 성공만으로 배포 성공이라고 보고하지 않는다. 블로그 DB 발행과 Windows 예약 등록은 별도 작업이다.
 - 대규모 변경이나 미리보기가 필요할 때만 `feature/` 브랜치를 사용한다.
 
 ### 🚀 세션 마무리 규칙 — 작업 종료 전 반드시 실행
 
 작업이 완료됐다고 판단되면 아래 순서대로 진행한다.
 
-1. **커밋 + push**: 작업 내용을 커밋하고 `git push origin master` 로 라이브에 반영한다.
-2. **배포 확인**: `git log --oneline origin/master | head -3` 으로 push 반영 여부를 확인한다.
-3. **코드 리뷰 권장 알림**: 수정 파일이 3개 이상이거나 스키마·API·페이지를 동시에 건드린 경우, 아래 문구로 안내한다.
-   > "이번 작업은 파일 N개를 수정했어요. 배포 전 품질 점검을 원하면 `/code-review ultra` 를 입력해 주세요."
-4. **리뷰 완료 시 reviewed 브랜치 전진 필수**: `/code-review ultra` 또는 로컬 리뷰로 코드 리뷰를 진행하고 지적사항을 수정·push했다면,
-   PR을 Close만 하고 끝내지 말고 반드시 `git push origin master:reviewed` 까지 실행해 리뷰 완료 지점을 갱신한다.
-   (Close만 하고 reviewed를 안 옮기면 다음 세션에 리뷰 안 된 커밋이 다시 쌓인다 — 2026-07-07 250개 백로그 사고 원인)
+1. **변경 확인·검증**: 기존 사용자 변경과 이번 변경을 구분하고 필요한 테스트를 수행한다. 파일을 명시해 stage한다.
+2. **커밋 → 검토 → push**: 한글 커밋 후 원격 기준 diff를 검토하고 문제없으면 push한다. 이미 승인된 작업의 일반 종료 절차다.
+3. **원격·배포 확인**: `git rev-parse HEAD`와 `git ls-remote origin refs/heads/master`를 대조한 뒤 Vercel 상태·변경 화면을 확인한다.
+4. **reviewed 기록**: 마지막 검토 지점부터 새 커밋까지 전부 검토한 경우만 그 지점으로 전진한다. 일부 파일만 검토했다면 범위를 기록하고 전체 완료로 표시하지 않는다.
+5. **기록·인계**: 로그·현재 메모리·관련 규칙을 갱신한다. 권한 차단이나 배포 미확인은 완료 항목과 나눠 보고한다.
 
 > push 없이 세션을 끝내면 작업이 라이브에 반영되지 않는다. 이 규칙은 생략 불가.
 
@@ -224,5 +233,12 @@ Tailwind 클래스로 `bg-edred`, `text-ink` 형태로 사용. 값 임의 변경
 - `"use client"` 페이지는 metadata 선언 불가 → **서버 컴포넌트 래퍼 패턴** 필수:
   1. 인터랙티브 코드는 `*Client.tsx` 파일로 분리
   2. `page.tsx`는 서버 컴포넌트로 metadata만 선언하고 `<*Client />`를 렌더링
-- 각 페이지 metadata에는 반드시 `alternates: { canonical: "https://smartechvacuum.com/경로" }` 를 포함한다.
-- 점검: `npm run seo-check` 로 전체 페이지 SEO 상태 확인 가능.
+- 각 페이지 metadata에는 반드시 `alternates: { canonical: "https://www.smartechvacuum.com/경로" }` 를 포함한다.
+- 점검: `npm run seo-check`는 metadata·canonical 선언 검사다. 실제 공개 응답·색인·내용·성능 검증은 별도로 한다.
+
+## 블로그 최신 합의 — 2026-09-09
+
+- 2026-09-14부터 월·목 주2편. 후보5개 중 대표님이2개 선택한 뒤 작성한다.
+- 일반 진공이론·안전 주제도 후보에1개 포함. tracker뿐 아니라 미발행 원고·공개 URL도 중복 확인한다.
+- 금요일 `0911-아웃가스-원리`는 그날 대표님의 업로드 요청 대기. 코드 push가 글 발행 승인은 아니다.
+- 원고·사진 확인, 예약 승인, 즉시 업로드를 구분한다. 세부 절차는 `블로그/CLAUDE.md`가 담당한다.
