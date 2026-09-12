@@ -1,5 +1,5 @@
 {
-  "_comment": "블로그 주제 선정 로테이션 상태 추적 파일. 주제 선정 후 반드시 업데이트할 것.",
+  "_comment": "작성완료 주제 이력. 후보만으로 갱신하지 않는다. completed_topics는 공개 완료를 뜻하지 않으며 발행 상태는 별도 확인한다.",
   "_last_updated": "2026-09-09",
 
   "current_industry_index": 10,
@@ -50,7 +50,13 @@
     { "industry": "공통/안전", "product": "기타", "title": "진공 챔버 임플로전(내파) 사고 원인과 안전 점검 기준", "folder": "기술블로그/2026-08/0828-임플로전-안전" },
     { "industry": "진공로", "product": "B.오일로터리펌프", "title": "진공로 백킹 펌프로 오일로터리펌프를 선택할 때 주의점", "folder": "기술블로그/2026-09/0903-진공로-오일로터리" },
     { "industry": "리사이클링", "product": "A.드라이펌프", "title": "폐기물 처리·재활용 공정의 드라이펌프 선택", "folder": "기술블로그/2026-09/0904-리사이클링-드라이펌프" },
-    { "industry": "리튬 1차전지", "product": "A.드라이펌프", "title": "리튬 1차전지 제조 건조 공정의 드라이펌프", "folder": "기술블로그/2026-09/0905-리튬1차전지-드라이펌프" }
+    { "industry": "리튬 1차전지", "product": "A.드라이펌프", "title": "리튬 1차전지 제조 건조 공정의 드라이펌프", "folder": "기술블로그/2026-09/0905-리튬1차전지-드라이펌프" },
+    { "industry": "식품·제약 동결건조", "product": "A.드라이펌프", "title": "동결건조 공정에 적합한 진공펌프 선택", "folder": "기술블로그/2026-06/동결건조-드라이펌프-선택기준-20260613", "publication_status": "unverified" },
+    { "industry": "연구 및 분석", "product": "C.진공게이지", "title": "연구용 진공 측정 — 피라니 게이지 vs 이온 게이지, 언제 무엇을 써야 하나", "folder": "기술블로그/2026-06/연구용-피라니-이온게이지-비교-20260613", "publication_status": "unverified" },
+    { "industry": "진공 오븐/건조", "product": "A.드라이펌프", "title": "진공 건조 공정에서 드라이펌프를 선택하는 3가지 기준", "folder": "기술블로그/2026-06/진공건조-드라이펌프-선택기준-20260613", "publication_status": "unverified" },
+    { "industry": "공통/진공이론", "product": "기타", "title": "진공 챔버 아웃가스, 계속 나오는 기체의 원인", "folder": "기술블로그/2026-09/0911-아웃가스-원리", "publication_status": "draft" },
+    { "industry": "초미세 가공(반도체)", "product": "E.부품/배관", "title": "반도체 진공 배관, 전해연마 표면은 언제 필요할까?", "folder": "기술블로그/2026-09/0914-반도체-전해연마-배관", "publication_status": "draft" },
+    { "industry": "공통/진공이론", "product": "기타", "title": "진공에서는 물이 왜 낮은 온도에서 끓을까? 끓음과 증발의 차이", "folder": "기술블로그/2026-09/0917-진공-물-끓음", "publication_status": "draft" }
   ],
 
   "used_consultation_records": [

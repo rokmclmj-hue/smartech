@@ -287,6 +287,29 @@
       "사진2.png",
       "사진3.png",
       "사진4.png"
+    ],
+    "0911-아웃가스-원리": [
+      "thumbnail.png",
+      "사진1.png",
+      "사진2.png",
+      "사진4.png"
+    ],
+    "0914-반도체-전해연마-배관": [
+      "thumbnail.png",
+      "사진1.png"
+    ],
+    "0917-진공-물-끓음": [
+      "thumbnail.png",
+      "사진1.png"
     ]
+  },
+  "제품참고이미지": {
+    "0911-아웃가스-원리": {
+      "source": "public/images/products/hardware.png",
+      "output": "사진3.png",
+      "date": "2026-09-09",
+      "edited": false,
+      "note": "진공 부품 참고 이미지. 현장사진 아님. 원본 그대로 복사."
+    }
   }
 }

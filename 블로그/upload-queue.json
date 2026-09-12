@@ -1,17 +1,19 @@
 {
-  "_week": "2026-W37",
-  "_created": "2026-09-07",
-  "_note": "W36 carryover(day4·day5)를 W37 day1·day2로 배치. day3(금)은 아직 새 주제 선정 필요.",
+  "_week": "2026-W38",
+  "_created": "2026-09-12",
+  "_note": "품질검사 재통과 완료, 사진 확인 완료. 사용자가 해당 날짜에 직접 업로드 명령을 실행할 예정 — 자동 업로드 아님.",
   "day1": {
-    "folder": "기술블로그/2026-09/0904-리사이클링-드라이펌프",
-    "title": "재활용 공정 드라이펌프, 부식성 가스에 견디는 조건 정리",
-    "uploaded": true,
-    "approved": true
+    "folder": "기술블로그/2026-09/0914-반도체-전해연마-배관",
+    "title": "반도체 진공 배관, 전해연마 표면은 언제 필요할까?",
+    "scheduled_date": "2026-09-14",
+    "uploaded": false,
+    "approved": false
   },
   "day2": {
-    "folder": "기술블로그/2026-09/0905-리튬1차전지-드라이펌프",
-    "title": "리튬 1차전지 건조 공정, 드라이펌프 전환을 검토해야 하는 이유",
-    "uploaded": true,
-    "approved": true
+    "folder": "기술블로그/2026-09/0917-진공-물-끓음",
+    "title": "진공에서는 물이 왜 낮은 온도에서 끓을까?",
+    "scheduled_date": "2026-09-17",
+    "uploaded": false,
+    "approved": false
   }
 }
