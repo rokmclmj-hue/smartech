@@ -75,6 +75,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
       "priceCurrency": "KRW",
       "price": displayPrice,
       "url": `https://www.smartechvacuum.com/products/${encodeURIComponent(product.partNo)}`,
+      "availability": "https://schema.org/InStock",
       "seller": { "@type": "Organization", "name": "스마텍", "url": "https://www.smartechvacuum.com" },
     },
   });
