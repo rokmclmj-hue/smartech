@@ -1,5 +1,13 @@
 # 현재 합의와 다음 작업
 
+## 2026-09-13 Search Console 구조화 데이터 경고 — availability 필드 추가·수정
+
+- Search Console이 판매자 목록/제품 스니펫 구조화 데이터에서 `offers.availability` 누락을 경고(심각하지 않은 문제).
+- 1차: `app/products/[partNo]/page.tsx`의 productSchema에 `"availability": "https://schema.org/InStock"` 고정값 추가(대표님 선택, 검토 대안은 `PreOrder`). 커밋 `997d757`.
+- 2차(코드리뷰에서 발견·수정): InStock 고정이면 품절(`stock<=0`)·단종(`isDiscontinued`) 제품도 "재고있음"으로 잘못 노출됨. `product.isDiscontinued`→`Discontinued`, `stock<=0`→`OutOfStock`, 그 외 `InStock`으로 분기하도록 수정. 커밋 `72dd1cc`.
+- 화면(UI)에는 재고 문구 자체가 없어 사용자 화면 영향 없음. 구글 크롤링 반영은 며칠~몇 주 소요.
+- push 완료, `reviewed` 포인터도 `72dd1cc`로 전진 완료.
+
 ## 2026-09-11 최신 상태 — 블로그 자동 업로드
 
 - `블로그/auto_upload.py`의 `uploaded` 상태 버그를 수정했다. `True`는 이미 업로드된 것으로 건너뛰고, `False` 또는 `None`은 미업로드로 처리하며, 문자열 등 이상값은 중단한다.
