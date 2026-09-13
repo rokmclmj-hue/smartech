@@ -263,7 +263,7 @@ export default async function BlogPostPage({ params }: Props) {
     "headline": post.title,
     "description": description,
     "image": getBlogImage(content),
-    "articleBody": post.content.replace(/[#*`!\[\]()]/g, "").slice(0, 2000),
+    "articleBody": content.replace(/[#*`!\[\]()]/g, "").slice(0, 2000),
     "datePublished": (post.publishedAt ?? post.createdAt).toISOString(),
     "dateModified": post.updatedAt.toISOString(),
     "url": `https://www.smartechvacuum.com/blog/${post.slug ?? post.id}`,
