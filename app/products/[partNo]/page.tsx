@@ -60,6 +60,11 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const isPending = tier === "PENDING";
   const photoUrl = getProductPhotoUrl(product.partNo, product.description, product.category);
   const photoAbsoluteUrl = `https://www.smartechvacuum.com${photoUrl}`;
+  const availability = product.isDiscontinued
+    ? "https://schema.org/Discontinued"
+    : product.stock <= 0
+      ? "https://schema.org/OutOfStock"
+      : "https://schema.org/InStock";
 
   const productSchema = JSON.stringify({
     "@context": "https://schema.org",
@@ -75,7 +80,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
       "priceCurrency": "KRW",
       "price": displayPrice,
       "url": `https://www.smartechvacuum.com/products/${encodeURIComponent(product.partNo)}`,
-      "availability": "https://schema.org/InStock",
+      "availability": availability,
       "seller": { "@type": "Organization", "name": "스마텍", "url": "https://www.smartechvacuum.com" },
     },
   });
