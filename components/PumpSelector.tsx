@@ -327,6 +327,36 @@ export default function PumpSelector() {
   const [dbSearchResults, setDbSearchResults] = useState<FlatItem[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
 
+  // 카테고리 세부검색은 JSON을 품목 구조(파트번호·이름)로만 쓰고,
+  // 가격은 항상 DB에서 실시간으로 가져온다 (JSON 고정가는 원가 변경이 반영되지 않는 문제가 있었음 — 2026-09-14).
+  const [categoryPrices, setCategoryPrices] = useState<Record<string, number | null>>({});
+  const [categoryPriceLoading, setCategoryPriceLoading] = useState(false);
+
+  useEffect(() => {
+    const seriesKey = selectedCategory?.seriesKey;
+    if (!seriesKey) return;
+    const allItems = productData[seriesKey] as { partNo: string; desc: string }[];
+    const partNos = Array.from(new Set(allItems.map((i) => i.partNo)));
+    if (partNos.length === 0) return;
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      setCategoryPriceLoading(true);
+      try {
+        const res = await fetch(`/api/products?partNos=${encodeURIComponent(partNos.join(","))}&limit=${partNos.length}`, { signal: controller.signal });
+        const data = await res.json();
+        const products: { partNo: string; displayPrice: number | null }[] = data.products ?? [];
+        const map: Record<string, number | null> = {};
+        for (const p of products) map[p.partNo] = p.displayPrice;
+        setCategoryPrices(map);
+      } catch (e) {
+        if ((e as Error).name !== "AbortError") setCategoryPrices({});
+      } finally {
+        setCategoryPriceLoading(false);
+      }
+    }, 0);
+    return () => { clearTimeout(timer); controller.abort(); };
+  }, [selectedCategory?.seriesKey]);
+
   useEffect(() => {
     if (selectedCategory || search.trim().length < 1 || tab !== "search") {
       setDbSearchResults([]);
@@ -503,7 +533,7 @@ export default function PumpSelector() {
 
   // ── 카탈로그 검색 ─────────────────────────────────────────
   const productItems = selectedCategory?.seriesKey
-    ? (productData[selectedCategory.seriesKey] as { partNo: string; desc: string; price: number }[]).filter(
+    ? (productData[selectedCategory.seriesKey] as { partNo: string; desc: string }[]).filter(
         (item) =>
           !search ||
           item.desc.toLowerCase().includes(search.toLowerCase()) ||
@@ -942,7 +972,11 @@ export default function PumpSelector() {
                             </div>
                             <div className="shrink-0 ml-4 flex items-center gap-2">
                               <div className="text-[12px] font-semibold text-[#c00020]">
-                                {item.price.toLocaleString()}원
+                                {categoryPriceLoading
+                                  ? "확인 중..."
+                                  : categoryPrices[item.partNo] != null
+                                  ? categoryPrices[item.partNo]!.toLocaleString() + "원"
+                                  : "문의"}
                               </div>
                               <button
                                 onClick={() => handleAddToCart(item.partNo, item.desc)}
