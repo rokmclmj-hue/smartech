@@ -1,5 +1,12 @@
 # 현재 합의와 다음 작업
 
+## 2026-09-14 제품 단가 버그 근본 수정 — 카테고리별 세부검색 DB 실시간화 (커밋 3f83979)
+
+- 계기: 대표님이 EMF20/EMF3 단가가 높게 세팅돼 있어 DB에서 직접 수정, 확인 과정에서 2026-06-18에 미해결로 남았던 "카테고리 선택 후 세부검색은 여전히 `lib/productCatalog.json` 고정가 사용" 버그를 재발견.
+- 대표님 결정: JSON 값을 수동 삭제하지 말고 코드로 근본 해결. `app/api/products`에 `partNos` 다건조회 파라미터 추가 + `PumpSelector.tsx` 세부검색 목록이 이제 DB 실시간 가격을 표시하도록 수정.
+- 이 컴포넌트는 EM(미스트필터)뿐 아니라 JSON에 정의된 전체 카테고리가 공유해서, 다른 카테고리의 동일 잠재 버그도 함께 해소됨.
+- `tsc`·`eslint`(신규 코드 기준)·`next build` 통과, 로컬·라이브 API 응답으로 실제 DB 가격 반영 확인 완료. push·배포·라이브 검증 모두 완료.
+
 ## 2026-09-14 블로그 월요일 발행 — 0914-반도체-전해연마-배관 (id=97)
 
 - `0914-반도체-전해연마-배관` 발행 완료: https://www.smartechvacuum.com/blog/97 (`approve_post.py`, upload-queue.json day1 approved/uploaded=true).
