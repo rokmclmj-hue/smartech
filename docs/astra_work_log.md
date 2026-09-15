@@ -1,5 +1,13 @@
 # Astra 작업 기록
 
+## 2026-09-15 — (클로드) X 글자수 버그 코드 수정 + 잔여 초안 5건 축약 (커밋 cb8b672)
+
+- 아래 Astra 조사·시험게시 성공을 이어받아 클로드가 코드 수정. `lib/x-text-length.ts`에 X 공식 weightedLength(한글·CJK·전각 2자) 계산 함수 추가.
+- 적용 범위 3곳: `app/api/admin/x-posts/generate/route.ts`(초안 생성 시 검사), `app/api/admin/x-posts/route.ts`의 PATCH publish 액션(게시 직전 사전검사 — 초과 시 400으로 막아 X에 보내지 않음), `app/admin/x-posts/page.tsx`(상세 패널 글자수 표시, 초과 시 빨간색).
+- DB에서 PENDING·APPROVED 잔여 5건(id 1~5)을 조회해 전부 X 기준 초과임을 확인(예: id=3 화면 226자 vs 실제 388자). 각 글의 핵심 메시지는 유지하고 문장만 줄여 content 필드만 직접 수정(topic·status 등 다른 필드 불변), 축약 후 전부 280자 이내로 재검증.
+- `npx tsc --noEmit` 통과 확인 후 커밋(최초 커밋에 attribution 누락 발견해 amend로 정정) → `git push origin master` → `git rev-parse HEAD`와 `git ls-remote origin refs/heads/master` 대조로 원격 반영 확인.
+- 미확인 사항: 실제 "게시" 버튼 클릭으로 5건이 정상 게시되는지는 대표님 확인 필요(코드상 검증은 완료, 실게시 테스트는 남음).
+
 ## 2026-09-15 — X 게시 403 재조사·기존 글 1건 축약 후 게시 성공
 
 - Claude 원본 `project_x_grok_content.md`와 GitHub X 연동 이력을 확인했다. 당시 읽기·쓰기 권한, 토큰 재발급, 크레딧 충전, 새 앱 생성 후에도 403이 지속되어 보류한 기록이 있다. 과거의 "X 플랫폼 버그 확정"은 현재 확정 원인으로 취급하지 않는다.
