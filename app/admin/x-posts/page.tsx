@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { getXWeightedLength } from "@/lib/x-text-length";
 
 type XPost = {
   id: number;
@@ -309,7 +310,9 @@ export default function AdminXPostsPage() {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <div className="mono text-[9px] tracking-[0.18em] dim uppercase">본문</div>
-                  <div className="mono text-[9px] dim">{selected.content.length} / 280자</div>
+                  <div className={`mono text-[9px] ${getXWeightedLength(selected.content) > 280 ? "text-red-600 font-bold" : "dim"}`}>
+                    {getXWeightedLength(selected.content)} / 280자 (X 기준, 한글 2자 계산)
+                  </div>
                 </div>
                 <div className="text-[14px] leading-relaxed whitespace-pre-wrap border hair p-4 bg-ink/[0.015]">
                   {selected.content}

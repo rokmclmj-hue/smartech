@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import Anthropic from "@anthropic-ai/sdk";
 import type { Session } from "next-auth";
+import { getXWeightedLength } from "@/lib/x-text-length";
 
 function isAdmin(session: Session | null) {
   return (session?.user as { tier?: string })?.tier === "ADMIN";
@@ -29,7 +30,7 @@ export async function POST(req: NextRequest) {
 ${topic.trim()}
 
 ## 작성 규칙
-- X(트위터)에 올릴 글이므로 공백 포함 280자 이내로 작성 (한글 기준, 절대 초과 금지)
+- X(트위터)에 올릴 글이므로 280자 이내로 작성. X는 한글 한 글자를 2자로 계산하므로 한글 기준 약 140자 이내로 짧게 작성 (절대 초과 금지)
 - 출처 없는 수치·스펙은 지어내지 말고, 구체적 숫자가 필요하면 "제품별로 확인이 필요합니다" 식으로 안내
 - "~에 따르면", "공식 자료에 따르면" 같은 인용 문구 금지 — 본인이 전문가로서 직접 말하듯 작성
 - 과장된 홍보 문구·감탄사·이모지 남발 금지
@@ -53,8 +54,8 @@ ${topic.trim()}
     if (!jsonMatch) throw new Error("JSON 파싱 실패");
     const parsed = JSON.parse(jsonMatch[0]) as { content: string };
 
-    if (!parsed.content || parsed.content.length > 280) {
-      return NextResponse.json({ error: "생성된 글이 280자를 초과했습니다. 다시 시도해주세요." }, { status: 422 });
+    if (!parsed.content || getXWeightedLength(parsed.content) > 280) {
+      return NextResponse.json({ error: "생성된 글이 X 기준 280자(한글은 2자로 계산)를 초과했습니다. 다시 시도해주세요." }, { status: 422 });
     }
 
     const post = await prisma.xPost.create({
