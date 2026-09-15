@@ -39,6 +39,18 @@ type DeptContact = {
   defaultMessage: string | null;
 };
 
+// 대행견적서 이력 (에드워드 발주 시 "이력불러오기" 대상 — /api/admin/proxy-quotes/history 재사용)
+type QuoteHistoryItem = {
+  id: number;
+  quoteNo: string;
+  createdAt: string;
+  company: string;
+  contactName: string;
+  subtotal: number;
+  itemCount: number;
+  previewItems: { productId: number | null; partNo: string; description: string; quantity: number; unitPrice: number }[];
+};
+
 function fmt(n: number) {
   return n.toLocaleString("ko-KR") + " 원";
 }
@@ -109,6 +121,13 @@ function OrderForm({ onSaved, initialData }: { onSaved: () => void; initialData?
   const [productResults, setProductResults] = useState<{ id: number; partNo: string; description: string; costPrice: number }[]>([]);
   const [focusedItemIdx, setFocusedItemIdx] = useState<number | null>(null);
 
+  // 대행견적서 이력 불러오기
+  const [showHistory, setShowHistory] = useState(false);
+  const [historyQ, setHistoryQ] = useState("");
+  const [historyItems, setHistoryItems] = useState<QuoteHistoryItem[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyApplying, setHistoryApplying] = useState(false);
+
   // 상태
   const [saving, setSaving] = useState(false);
   const [savingAndSend, setSavingAndSend] = useState(false);
@@ -163,6 +182,81 @@ function OrderForm({ onSaved, initialData }: { onSaved: () => void; initialData?
     }, 200);
     return () => clearTimeout(t);
   }, [productQ]);
+
+  // 대행견적서 이력 검색 (모달 열려있을 때만)
+  useEffect(() => {
+    if (!showHistory) return;
+    let abort = false;
+    const t = setTimeout(async () => {
+      if (abort) return;
+      setHistoryLoading(true);
+      try {
+        const res = await fetch(`/api/admin/proxy-quotes/history?q=${encodeURIComponent(historyQ)}`);
+        const data = await res.json();
+        if (!abort) setHistoryItems(data.items ?? []);
+      } catch {
+        if (!abort) setHistoryItems([]);
+      } finally {
+        if (!abort) setHistoryLoading(false);
+      }
+    }, 250);
+    return () => { abort = true; clearTimeout(t); };
+  }, [showHistory, historyQ]);
+
+  // 대행견적서 품목을 발주서에 반영 — 판매가(unitPrice)가 아니라 각 품목의 원가(Product.costPrice)로 채운다.
+  // productId가 있으면 그걸로 우선 조회한다 — 견적 당시 저장된 customPartNo 문자열이 이후 품번 정정 등으로
+  // 현재 카탈로그와 달라져도(productId는 그대로 유효), 실물과 다른 파트번호로 발주 나가는 걸 막기 위함.
+  async function loadFromHistory(h: QuoteHistoryItem) {
+    setHistoryApplying(true);
+    try {
+      const withId = h.previewItems.filter((i) => i.productId != null);
+      const withoutId = h.previewItems.filter((i) => i.productId == null);
+
+      const byId = new Map<number, { id: number; partNo: string; costPrice: number }>();
+      const ids = Array.from(new Set(withId.map((i) => i.productId as number)));
+      if (ids.length > 0) {
+        const res = await fetch(`/api/products?ids=${ids.join(",")}`);
+        if (res.ok) {
+          const data = await res.json();
+          for (const p of data.products ?? []) byId.set(p.id, p);
+        }
+      }
+
+      const byPartNo = new Map<string, { id: number; partNo: string; costPrice: number }>();
+      const fallbackPartNos = Array.from(new Set(withoutId.map((i) => i.partNo.trim()).filter(Boolean)));
+      if (fallbackPartNos.length > 0) {
+        const res = await fetch(`/api/products?partNos=${encodeURIComponent(fallbackPartNos.join(","))}`);
+        if (res.ok) {
+          const data = await res.json();
+          for (const p of data.products ?? []) byPartNo.set(p.partNo, p);
+        }
+      }
+
+      let unmatchedCount = 0;
+      const newItems: OrderItem[] = h.previewItems.map((i) => {
+        const matched = i.productId != null ? byId.get(i.productId) : (i.partNo.trim() ? byPartNo.get(i.partNo.trim()) : undefined);
+        if (!matched) unmatchedCount++;
+        return {
+          // 매칭되면 현재 카탈로그의 실제 파트번호로 갱신 (견적 당시 문자열이 이후 정정됐을 수 있음)
+          partNo: matched?.partNo ?? i.partNo,
+          description: i.description,
+          quantity: i.quantity,
+          unitPrice: matched?.costPrice ?? 0,
+          productId: matched?.id ?? i.productId ?? null,
+        };
+      });
+
+      setItems(newItems.length > 0 ? newItems : [{ ...BLANK_ITEM }]);
+      setShowHistory(false);
+      if (unmatchedCount > 0) {
+        setError(`"${h.company}" 이력을 불러왔습니다. 다만 ${unmatchedCount}개 품목은 현재 카탈로그에서 원가를 찾지 못해 0원으로 표시됩니다 — 직접 입력해주세요.`);
+      } else {
+        setError("");
+      }
+    } finally {
+      setHistoryApplying(false);
+    }
+  }
 
   function addItem() {
     setItems((prev) => [...prev, { ...BLANK_ITEM }]);
@@ -343,10 +437,16 @@ function OrderForm({ onSaved, initialData }: { onSaved: () => void; initialData?
       <div className="border hair bg-paper">
         <div className="px-5 py-3 border-b hair flex items-center justify-between">
           <span className="mono text-[10px] dim tracking-[0.12em]">03 / 발주 품목 <span className="text-edred">— 단가 필수</span></span>
-          <button onClick={addItem}
-            className="bg-smblue text-paper px-3 py-1 text-[11px] mono hover:brightness-110 transition-colors">
-            + 품목 추가
-          </button>
+          <div className="flex gap-2">
+            <button onClick={() => setShowHistory(true)}
+              className="border hair px-3 py-1 text-[11px] mono hover:bg-ink/5 transition-colors">
+              📋 대행견적 이력불러오기
+            </button>
+            <button onClick={addItem}
+              className="bg-smblue text-paper px-3 py-1 text-[11px] mono hover:brightness-110 transition-colors">
+              + 품목 추가
+            </button>
+          </div>
         </div>
         <div className="px-5 py-4 space-y-2">
           {/* 상품 검색 */}
@@ -440,6 +540,65 @@ function OrderForm({ onSaved, initialData }: { onSaved: () => void; initialData?
           {savingAndSend ? "발송 중..." : "저장 + 메일 송부"}
         </button>
       </div>
+
+      {/* 대행견적서 이력불러오기 모달 */}
+      {showHistory && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-16 px-4">
+          <div className="w-full max-w-2xl bg-paper border hair rounded-lg shadow-2xl flex flex-col max-h-[75vh]">
+            <div className="flex items-center justify-between px-5 py-4 border-b hair">
+              <div>
+                <div className="mono text-[10px] tracking-[0.15em] uppercase dim mb-1">QUOTE HISTORY</div>
+                <h2 className="text-[18px] font-bold text-ink">대행견적서 이력불러오기</h2>
+                <div className="text-[11px] dim mt-1">품목·수량만 가져오고 단가는 고객 청구가 대신 현재 원가(Product.costPrice)로 자동 기재됩니다.</div>
+              </div>
+              <button onClick={() => setShowHistory(false)} className="dim hover:text-edred text-[20px]">✕</button>
+            </div>
+            <div className="px-5 py-3 border-b hair flex gap-2">
+              <input
+                type="text"
+                value={historyQ}
+                onChange={(e) => setHistoryQ(e.target.value)}
+                placeholder="업체명 또는 담당자로 검색 (예: 인포라드)"
+                className="flex-1 border hair rounded-md px-3 py-2 text-[14px] focus:outline-none focus:border-smblue"
+                autoFocus
+              />
+              {historyQ && (
+                <button type="button" onClick={() => setHistoryQ("")}
+                  className="shrink-0 border hair rounded-md px-3 py-2 text-[12px] dim hover:text-ink transition-colors">
+                  전체 보기
+                </button>
+              )}
+            </div>
+            <div className="overflow-auto flex-1">
+              {historyLoading || historyApplying ? (
+                <div className="px-5 py-8 text-center text-[13px] dim">{historyApplying ? "원가 조회 중…" : "불러오는 중…"}</div>
+              ) : historyItems.length === 0 ? (
+                <div className="px-5 py-8 text-center text-[13px] dim">대행견적서 이력이 없습니다.</div>
+              ) : historyItems.map((h) => (
+                <button key={h.id} type="button" onClick={() => loadFromHistory(h)}
+                  className="w-full text-left px-5 py-4 border-b hair last:border-b-0 hover:bg-smblue/5 transition-colors">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="text-[15px] font-semibold text-ink truncate mb-1">{h.company}</div>
+                      <div className="text-[12px] dim mb-1.5">
+                        {h.contactName} · {h.quoteNo} · {new Date(h.createdAt).toLocaleDateString("ko-KR")}
+                      </div>
+                      <div className="text-[11px] dim truncate">
+                        {h.previewItems.slice(0, 3).map((i) => i.description || i.partNo).join(" / ")}
+                        {h.itemCount > 3 && ` 외 ${h.itemCount - 3}건`}
+                      </div>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <div className="text-[13px] font-bold text-dim">{fmt(h.subtotal)}</div>
+                      <div className="mono text-[10px] dim">청구가 참고용 · {h.itemCount}개 품목</div>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 이메일 미리보기 모달 */}
       {previewOpen && (

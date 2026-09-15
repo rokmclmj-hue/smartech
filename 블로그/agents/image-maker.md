@@ -325,6 +325,11 @@ with sync_playwright() as p:
 - 마커 개수(`[IMAGE: 설명]`만 카운트, `[THUMBNAIL]` 제외)와 최종 이미지 파일 개수가 반드시 일치해야 한다. 개수가 안 맞으면 이미지를 추가 제작하거나 마커를 정리해서 맞춘다 (개수 불일치 상태로 완료 처리 금지). check_quality.py가 이 대조를 자동 검증한다(2026-08-10 추가).
 - 🔴 **"다시 이름 붙인다"는 복사(copy)가 아니라 이동(rename/move)이다.** field-N.png를 사진N.png로 **복사만 하고 원본 field-N.png를 남겨두면 images 폴더에 같은 사진이 두 번 들어가는 사고**가 난다(2026-08-08 0814-재가동전점검사항 글에서 field-1.png와 사진1.png가 완전히 같은 파일로 중복 발견). Python이면 `shutil.move()` 또는 `os.rename()`을 쓰고, PowerShell 명령을 쓴다면 `Copy-Item` 대신 `Move-Item`을 쓴다. 이미 복사해버렸다면 6단계 마지막에 반드시 `ls images/`로 폴더 안 파일 목록을 확인해서 field-N.png / image-NN.png 잔재가 없는지 검사하고, 남아있으면 삭제한다.
 - **6단계 완료 조건**: `ls images/` 결과에 `thumbnail.png`와 `사진1.png ~ 사진N.png`만 있어야 한다. `field-*.png`나 `image-*.png` 이름이 하나라도 남아있으면 완료 처리 금지.
+- 🔴 **파일명이 달라도 내용이 같은 사진이 섞여 들어갈 수 있다 — 반드시 해시로 대조한다** (2026-09-14 재발: 0914-반도체-전해연마-배관에서 thumbnail.png와 사진1.png가 완전히 같은 파일이었고, 사진3.png는 미발행 다른 글의 사진3.png와 동일 파일(`public/images/products/hardware.png` 재사용)이었음 — 둘 다 사용자가 육안으로 발견, check_quality.py는 파일 개수만 세서 못 잡음). 6단계 완료 전 반드시 아래를 실행해 같은 글 안에서, 그리고 다른 미발행 글 폴더와도 완전히 동일한 파일이 없는지 확인한다:
+  ```bash
+  find output -iname "*.png" | xargs md5sum | sort | uniq -w32 -D
+  ```
+  결과에 두 줄 이상 찍히는 해시(=중복 파일)가 있으면, 그중 하나를 다른 이미지로 재생성하고 caption도 실제 내용에 맞게 고친다.
 
 ### 7단계 — naver.md는 마커를 그대로 둔다 / final.md에 실제 경로를 채운다
 

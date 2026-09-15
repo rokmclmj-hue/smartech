@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { postToX, PostedButUnconfirmedError } from "@/lib/x-post";
+import { getXWeightedLength } from "@/lib/x-text-length";
 
 async function requireAdmin() {
   const session = await auth();
@@ -70,6 +71,12 @@ export async function PATCH(req: NextRequest) {
 
   // 실제 X 게시 — 승인된 글에 대해 관리자가 명시적으로 "게시" 버튼을 눌렀을 때만 호출됨
   if (action === "publish") {
+    // X는 한글 등을 2자로 계산하므로, 사전에 걸러 헛된 403 재현을 막는다.
+    const weighted = getXWeightedLength(post.content);
+    if (weighted > 280) {
+      return NextResponse.json({ error: `X 기준 글자 수 초과(${weighted}/280자, 한글은 2자로 계산). 본문을 줄인 뒤 다시 승인·게시하세요.` }, { status: 400 });
+    }
+
     // status를 원자적으로 APPROVED → PUBLISHING 으로 바꿔서 "선점"한다.
     // findUnique로 상태를 읽고 나서 update하는 방식은 두 요청(더블클릭·중복 탭)이 동시에
     // 통과해 같은 글이 X에 두 번 게시될 수 있어, updateMany의 where 조건 자체로 경쟁을 막는다.

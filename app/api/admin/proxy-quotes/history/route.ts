@@ -49,6 +49,7 @@ export async function GET(req: NextRequest) {
       subtotal,
       itemCount: q.items.length,
       previewItems: q.items.map((i) => ({
+        productId: i.productId ?? null,
         partNo: i.customPartNo ?? i.product?.partNo ?? "",
         description: i.customDescription ?? i.product?.description ?? "",
         quantity: i.quantity,
