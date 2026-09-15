@@ -1,5 +1,14 @@
 # Astra 작업 기록
 
+## 2026-09-15 — (클로드) 블로그 발행 → X 초안 자동생성 연결 (커밋 1a3411a)
+
+- 대표님이 "새로 생성되는 블로그에 맞춰 X 글도 초안 작성해서 게시하면 좋겠지?"라고 물어, "발행 시 초안만 자동 생성하고 게시는 계속 수동 승인"으로 제안 → "연결하자" 승인받고 진행.
+- `scripts/generate-x-posts-from-blog.mjs`에 `--id 123` 옵션 추가: 블로그 글 1건만 지정해 X 초안 생성(기존 무작위 N건 배치 모드는 그대로 유지), 이미 사용된 id는 스킵.
+- `블로그/approve_post.py` 수정: 기존엔 `subprocess.run`으로 `upload_post.py`를 실행하며 출력을 캡처하지 않았음. `Popen`으로 바꿔 콘솔에 실시간 출력은 그대로 하면서 `"[SUCCESS] id="` 줄을 정규식으로 파싱해 새로 발행된 블로그 id를 얻고, 업로드 성공 직후 `node scripts/generate-x-posts-from-blog.mjs --id {새id}`를 자동 호출.
+- 안전장치 유지: X 게시 자체는 자동화하지 않음. 생성된 초안은 여전히 PENDING 상태로 쌓이고 관리자가 `/admin/x-posts`에서 직접 승인·게시 버튼을 눌러야 실제 게시됨. X 초안 생성이 실패해도 블로그 발행 자체는 영향받지 않도록 예외 분리(WARN 로그만 남기고 종료코드 실패 처리 안 함).
+- 검증: 실제 approve_post.py 전체 실행은 하지 않고(중복 발행 위험 회피), 동일한 subprocess 호출 방식을 별도로 시뮬레이션해 blog id=76 기준 정상 생성 확인. `--id` 옵션의 dedup(이미 사용된 id 스킵)·not-found(존재하지 않는 id) 케이스도 개별 테스트로 확인.
+- `node --check`·`eslint`·`python -m py_compile` 모두 통과 확인 후 커밋·push, `git rev-parse HEAD`/`git ls-remote`로 원격 일치 확인.
+
 ## 2026-09-15 — (클로드) X 글자수 버그 코드 수정 + 잔여 초안 5건 축약 (커밋 cb8b672)
 
 - 아래 Astra 조사·시험게시 성공을 이어받아 클로드가 코드 수정. `lib/x-text-length.ts`에 X 공식 weightedLength(한글·CJK·전각 2자) 계산 함수 추가.
