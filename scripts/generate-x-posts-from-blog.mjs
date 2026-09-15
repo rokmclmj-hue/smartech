@@ -1,6 +1,8 @@
 // 발행된 블로그 글을 소스로 X(트위터) 초안을 생성해 PENDING 상태로 XPost에 적재한다.
 // 블로그 원문을 그대로 올리지 않고, 핵심 한 줄 요약(hook) + 블로그 링크로 재가공한다.
-// 사용법: node --env-file=.env scripts/generate-x-posts-from-blog.mjs [개수(기본10)]
+// 사용법:
+//   node --env-file=.env scripts/generate-x-posts-from-blog.mjs [개수(기본10)]   — 미사용 블로그 글 중 무작위 N건
+//   node --env-file=.env scripts/generate-x-posts-from-blog.mjs --id 123          — 특정 블로그 글 1건만 (신규 발행 직후 자동 호출용)
 import { PrismaClient } from "@prisma/client";
 import Anthropic from "@anthropic-ai/sdk";
 
@@ -70,17 +72,10 @@ ${excerpt}
 }
 
 async function main() {
-  const count = Math.min(Number(process.argv[2]) || 10, 30);
+  const idFlagIndex = process.argv.indexOf("--id");
+  const singleId = idFlagIndex !== -1 ? Number(process.argv[idFlagIndex + 1]) : null;
 
-  const [blogPosts, existingXPosts] = await Promise.all([
-    prisma.blogPost.findMany({
-      where: { status: "PUBLISHED" },
-      select: { id: true, slug: true, title: true, content: true },
-      orderBy: { publishedAt: "desc" },
-    }),
-    prisma.xPost.findMany({ select: { topic: true } }),
-  ]);
-
+  const existingXPosts = await prisma.xPost.findMany({ select: { topic: true } });
   const usedBlogIds = new Set(
     existingXPosts
       .map((p) => p.topic.match(/\(id=(\d+)\)/)?.[1])
@@ -88,15 +83,40 @@ async function main() {
       .map(Number)
   );
 
-  const candidates = blogPosts.filter((p) => !usedBlogIds.has(p.id));
-  // 최신 글에 쏠리지 않도록 섞는다
-  for (let i = candidates.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+  let targets;
+  if (singleId) {
+    const post = await prisma.blogPost.findUnique({
+      where: { id: singleId },
+      select: { id: true, slug: true, title: true, content: true },
+    });
+    if (!post) {
+      console.log(`[실패] id=${singleId} 블로그 글을 찾을 수 없습니다.`);
+      await prisma.$disconnect();
+      return;
+    }
+    if (usedBlogIds.has(post.id)) {
+      console.log(`[건너뜀] id=${singleId} 이미 X 초안이 있습니다.`);
+      await prisma.$disconnect();
+      return;
+    }
+    targets = [post];
+    console.log(`대상 블로그 글 1건 (id=${singleId} 지정)`);
+  } else {
+    const count = Math.min(Number(process.argv[2]) || 10, 30);
+    const blogPosts = await prisma.blogPost.findMany({
+      where: { status: "PUBLISHED" },
+      select: { id: true, slug: true, title: true, content: true },
+      orderBy: { publishedAt: "desc" },
+    });
+    const candidates = blogPosts.filter((p) => !usedBlogIds.has(p.id));
+    // 최신 글에 쏠리지 않도록 섞는다
+    for (let i = candidates.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+    }
+    targets = candidates.slice(0, count);
+    console.log(`대상 블로그 글 ${targets.length}건 (전체 발행 ${blogPosts.length}건 중 미사용 ${candidates.length}건)`);
   }
-
-  const targets = candidates.slice(0, count);
-  console.log(`대상 블로그 글 ${targets.length}건 (전체 발행 ${blogPosts.length}건 중 미사용 ${candidates.length}건)`);
 
   let created = 0;
   for (const post of targets) {
