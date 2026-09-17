@@ -1,5 +1,13 @@
 # Astra 작업 기록
 
+## 2026-09-17 — (클로드) W39 블로그 2편 원고 완성 — 0921-항공우주-오일로터리, 0924-질소퍼지-안전
+
+- 대표님이 다음주 월·목(9/21·9/24) 주제 후보 4개 요청 → topic-tracker.json(current_industry_index=10)·industry-product-matrix.md 대조해 후보 4개 제시, "2번 4번" 선택받음.
+- 두 편을 fork 서브에이전트 2개로 병렬 작성(리서치→글쓰기 5종+final.md→이미지→check_quality.py). 각 fork에 기존 발행글과의 중복 회피·이미지 중복 금지(0914·0917 재발 패턴 주의)·topic-tracker/upload-queue 직접 수정 금지·업로드 스크립트 실행 금지를 명시했다.
+- 완료 후 서브에이전트 자기보고를 그대로 믿지 않고 check_quality.py를 직접 재실행해 통과 확인, 두 폴더 이미지 9장 MD5를 서로 대조해 중복 없음도 재검증했다.
+- 사진 승인 받은 뒤 upload-queue.json을 W39(day1=0921, day2=0924, approved=true·uploaded=false)로 교체, topic-tracker.json completed_topics에 2건 추가(publication_status=draft), industry-product-matrix.md 항공우주 B칸 ✅ 처리. 일반주제(질소퍼지)는 매트릭스·current_industry_index 변경 없음.
+- **다음 행동**: 9/21·9/24 해당일에 `python 블로그/approve_post.py "[폴더경로]"`로 실제 업로드 필요(Windows 자동예약 미적용 상태 지속). 두 원고 모두 아직 미발행.
+
 ## 2026-09-17 — (클로드) 목요일 블로그 발행 — 0917-진공-물-끓음 (id=98)
 
 - 대표님 요청 "홈페이지 블로그 글 목요일 업로드 해줄래" → `upload-queue.json` day2(`0917-진공-물-끓음`, scheduled_date 2026-09-17) 확인, 원고·검수는 완료 상태였으나 업로드 전 이미지 전체 MD5 재대조 중 **사진1이 썸네일과 완전 동일 파일**인 문제 발견(0914 때와 같은 재발 패턴). 다른 발행/미발행 글과의 교차 중복은 없음.
