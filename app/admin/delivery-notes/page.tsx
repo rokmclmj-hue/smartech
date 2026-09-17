@@ -71,6 +71,20 @@ type HistoryItem = {
   }[];
 };
 
+// 대행견적서 이력 (업체로 나간 견적 — /api/admin/proxy-quotes/history 재사용)
+type QuoteHistoryItem = {
+  id: number;
+  quoteNo: string;
+  createdAt: string;
+  company: string;
+  contactName: string;
+  email: string | null;
+  phone: string | null;
+  subtotal: number;
+  itemCount: number;
+  previewItems: { productId: number | null; partNo: string; description: string; quantity: number; unitPrice: number }[];
+};
+
 function formatBizNo(raw: string): string {
   const digits = raw.replace(/\D/g, "").slice(0, 10);
   if (digits.length <= 3) return digits;
@@ -148,6 +162,12 @@ function NoteForm({ onSaved }: { onSaved: () => void }) {
   const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
 
+  // 대행견적서 이력 불러오기 모달
+  const [showQuoteHistory, setShowQuoteHistory] = useState(false);
+  const [quoteHistoryQ, setQuoteHistoryQ] = useState("");
+  const [quoteHistoryItems, setQuoteHistoryItems] = useState<QuoteHistoryItem[]>([]);
+  const [quoteHistoryLoading, setQuoteHistoryLoading] = useState(false);
+
   // 상태
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -192,6 +212,26 @@ function NoteForm({ onSaved }: { onSaved: () => void }) {
     return () => clearTimeout(t);
   }, [historyQ, showHistory]);
 
+  // 대행견적서 이력 검색 (모달 열려있을 때만)
+  useEffect(() => {
+    if (!showQuoteHistory) return;
+    let abort = false;
+    const t = setTimeout(async () => {
+      if (abort) return;
+      setQuoteHistoryLoading(true);
+      try {
+        const res = await fetch(`/api/admin/proxy-quotes/history?q=${encodeURIComponent(quoteHistoryQ)}`);
+        const data = await res.json();
+        if (!abort) setQuoteHistoryItems(data.items ?? []);
+      } catch {
+        if (!abort) setQuoteHistoryItems([]);
+      } finally {
+        if (!abort) setQuoteHistoryLoading(false);
+      }
+    }, 250);
+    return () => { abort = true; clearTimeout(t); };
+  }, [showQuoteHistory, quoteHistoryQ]);
+
   function selectCustomer(r: SearchResult) {
     setToCompany(r.company);
     setToName(r.contacts[0]?.name ?? r.name);
@@ -225,6 +265,26 @@ function NoteForm({ onSaved }: { onSaved: () => void }) {
     setShowDirect(true);
     setShowHistory(false);
     setHistoryQ("");
+  }
+
+  // 대행견적서 품목을 거래명세표에 반영 — 원가가 아니라 견적 당시 판매가(unitPrice, 고객 청구가) 그대로 채운다.
+  function loadFromQuoteHistory(h: QuoteHistoryItem) {
+    setToCompany(h.company);
+    setToName(h.contactName ?? "");
+    setToTitle("");
+    setToEmail(h.email ?? "");
+    setToPhone(h.phone ? formatPhone(h.phone) : "");
+    setToBizNo("");
+    setItems(h.previewItems.length > 0 ? h.previewItems.map((i) => ({
+      partNo: i.partNo,
+      description: i.description,
+      quantity: i.quantity,
+      unitPrice: i.unitPrice,
+      productId: i.productId ?? null,
+    })) : [{ ...BLANK_ITEM }]);
+    setShowDirect(true);
+    setShowQuoteHistory(false);
+    setQuoteHistoryQ("");
   }
 
   function addItem() {
@@ -330,6 +390,57 @@ function NoteForm({ onSaved }: { onSaved: () => void }) {
         </div>
       )}
 
+      {/* 대행견적서 이력불러오기 모달 */}
+      {showQuoteHistory && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-start justify-center pt-20 px-4">
+          <div className="bg-paper w-full max-w-xl shadow-2xl border hair flex flex-col max-h-[70vh]">
+            <div className="px-5 py-4 border-b hair shrink-0">
+              <div className="flex items-center justify-between">
+                <span className="mono text-[11px] tracking-[0.12em] uppercase">대행견적서 이력불러오기</span>
+                <button onClick={() => setShowQuoteHistory(false)} className="text-[16px] dim hover:text-ink">✕</button>
+              </div>
+              <div className="text-[11px] dim mt-1">업체·품목·수량과 함께, 단가는 견적 당시 판매가(고객 청구가) 그대로 불러옵니다.</div>
+            </div>
+            <div className="px-5 py-3 border-b hair shrink-0">
+              <input
+                autoFocus
+                value={quoteHistoryQ}
+                onChange={(e) => setQuoteHistoryQ(e.target.value)}
+                placeholder="업체명 또는 담당자로 검색 (비우면 전체 최신순)"
+                className="w-full border hair px-3 py-2 text-[13px] focus:outline-none focus:border-ink"
+              />
+            </div>
+            <div className="overflow-y-auto flex-1">
+              {quoteHistoryLoading ? (
+                <div className="mono text-[11px] dim text-center py-8">— 검색 중</div>
+              ) : quoteHistoryItems.length === 0 ? (
+                <div className="mono text-[11px] dim text-center py-8">— 대행견적서 이력이 없습니다</div>
+              ) : (
+                quoteHistoryItems.map((h) => (
+                  <button
+                    key={h.id}
+                    onClick={() => loadFromQuoteHistory(h)}
+                    className="w-full text-left px-5 py-3.5 hover:bg-ink/5 border-b hair last:border-0 transition-colors"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-medium text-[13px]">{h.company}</span>
+                      <span className="mono text-[10px] text-edred shrink-0">{h.quoteNo}</span>
+                    </div>
+                    <div className="text-[11px] dim mt-0.5">
+                      {h.contactName} · {fmtDate(h.createdAt)} · {h.itemCount}개 품목 · {fmt(h.subtotal)}
+                    </div>
+                    <div className="text-[11px] dim mt-0.5 truncate">
+                      {h.previewItems.slice(0, 3).map((i) => i.description || i.partNo).join(", ")}
+                      {h.itemCount > 3 && ` 외 ${h.itemCount - 3}건`}
+                    </div>
+                  </button>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 00 발행일 */}
       <div className="border hair bg-paper">
         <div className="px-5 py-3 border-b hair">
@@ -350,12 +461,20 @@ function NoteForm({ onSaved }: { onSaved: () => void }) {
       <div className="border hair bg-paper">
         <div className="px-5 py-3 border-b hair flex items-center justify-between gap-2">
           <span className="mono text-[10px] dim tracking-[0.12em]">01 / 수신자</span>
-          <button
-            onClick={() => setShowHistory(true)}
-            className="mono text-[10px] border hair px-3 py-1 hover:bg-ink/5 transition-colors tracking-[0.06em]"
-          >
-            ↩ 이전 명세표 불러오기
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowQuoteHistory(true)}
+              className="mono text-[10px] border hair px-3 py-1 hover:bg-ink/5 transition-colors tracking-[0.06em]"
+            >
+              🧾 대행견적 이력불러오기
+            </button>
+            <button
+              onClick={() => setShowHistory(true)}
+              className="mono text-[10px] border hair px-3 py-1 hover:bg-ink/5 transition-colors tracking-[0.06em]"
+            >
+              ↩ 이전 명세표 불러오기
+            </button>
+          </div>
         </div>
         <div className="px-5 py-4 space-y-3">
           {/* 통합 검색 */}

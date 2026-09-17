@@ -4,7 +4,7 @@ approve_post.py — upload-queue.json approved=true 설정 후 upload_post.py �
 사용법:
   python approve_post.py "2026-06/진공건조-드라이펌프-선택기준-20260613"
 """
-import sys, json, os, subprocess, tempfile, shutil
+import sys, json, os, re, subprocess, tempfile, shutil
 from datetime import datetime
 
 sys.stdout.reconfigure(encoding="utf-8")
@@ -58,13 +58,20 @@ else:
     print("[BLOCKED] upload-queue.json을 찾을 수 없습니다.")
     sys.exit(1)
 
-result = subprocess.run(
+proc = subprocess.Popen(
     [sys.executable, os.path.join(os.path.dirname(__file__), "upload_post.py"), folder],
-    check=False,
+    stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding="utf-8", bufsize=1,
 )
+uploaded_blog_id = None
+for line in proc.stdout:
+    print(line, end="")
+    m = re.search(r"\[SUCCESS\] id=(\d+)", line)
+    if m:
+        uploaded_blog_id = m.group(1)
+proc.wait()
 
-if result.returncode != 0:
-    print(f"[ERROR] upload_post.py가 실패했습니다 (exit {result.returncode}). 위 오류 메시지를 확인하세요.")
+if proc.returncode != 0:
+    print(f"[ERROR] upload_post.py가 실패했습니다 (exit {proc.returncode}). 위 오류 메시지를 확인하세요.")
     sys.exit(1)
 
 # 업로드 성공 → uploaded=true 기록 (스케줄러 중복 업로드 방지)
@@ -81,3 +88,20 @@ except Exception:
     raise
 print(f"[OK] {matched} → uploaded=true 기록 완료")
 log(f"✅ [수동승인/approve_post.py] 업로드 완료: {queue[matched].get('title', folder)} (폴더: {folder})")
+
+# 발행된 블로그 글 기반 X(트위터) 초안 자동 생성 (PENDING, 게시는 여전히 관리자 수동 승인)
+if uploaded_blog_id:
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    print(f"\n=== X 초안 자동 생성 (블로그 id={uploaded_blog_id}) ===")
+    x_result = subprocess.run(
+        ["node", "--env-file=.env", "scripts/generate-x-posts-from-blog.mjs", "--id", uploaded_blog_id],
+        cwd=project_root, check=False,
+    )
+    if x_result.returncode != 0:
+        print("[WARN] X 초안 자동 생성 실패 — 블로그 발행 자체는 정상 완료됨. 필요하면 수동 실행:")
+        print(f"  node --env-file=.env scripts/generate-x-posts-from-blog.mjs --id {uploaded_blog_id}")
+        log(f"⚠️ X 초안 자동생성 실패 (블로그 id={uploaded_blog_id}) — 블로그 발행은 정상")
+    else:
+        log(f"✅ X 초안 자동생성 완료 (블로그 id={uploaded_blog_id}), /admin/x-posts에서 승인 대기")
+else:
+    print("[INFO] 업로드 로그에서 블로그 id를 찾지 못해 X 초안 자동 생성을 건너뜁니다.")

@@ -13,8 +13,13 @@ export async function GET(req: NextRequest) {
   const limit = Math.min(parseInt(searchParams.get("limit") ?? "24"), 2000);
 
   const idsParam = searchParams.get("ids");
+  const partNosParam = searchParams.get("partNos");
 
   const where: any = {};
+  if (partNosParam) {
+    const partNos = partNosParam.split(",").map((s) => s.trim()).filter(Boolean);
+    if (partNos.length > 0) where.partNo = { in: partNos };
+  }
   if (idsParam) {
     const ids = idsParam.split(",").map(Number).filter((n) => !isNaN(n) && n > 0);
     if (ids.length > 0) where.id = { in: ids };
