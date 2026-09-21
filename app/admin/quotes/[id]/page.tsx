@@ -35,10 +35,12 @@ interface QuoteDetailProduct {
 interface QuoteDetailItem {
   id: number;
   quoteId: number;
-  productId: number;
+  productId: number | null;
   quantity: number;
   unitPrice: number;
-  product: QuoteDetailProduct;
+  customPartNo: string | null;
+  customDescription: string | null;
+  product: QuoteDetailProduct | null;
 }
 
 interface QuoteDetailOrder {
@@ -61,7 +63,12 @@ interface QuoteDetail {
   sentAt: string | null;
   sendCount: number;
   createdByAdminId: number | null;
-  user: QuoteDetailUser;
+  guestName: string | null;
+  guestCompany: string | null;
+  guestEmail: string | null;
+  guestPhone: string | null;
+  guestTier: string | null;
+  user: QuoteDetailUser | null;
   createdByAdmin: QuoteDetailAdmin | null;
   items: QuoteDetailItem[];
   order: QuoteDetailOrder | null;
@@ -108,6 +115,17 @@ const TIER_COLOR: Record<string, string> = {
 };
 
 // ── 포맷 헬퍼 ────────────────────────────────────────────────
+
+function getRecipient(q: QuoteDetail) {
+  return {
+    company: q.user?.company ?? q.guestCompany ?? "",
+    name: q.user?.name ?? q.guestName ?? "",
+    email: q.user?.email ?? q.guestEmail ?? "",
+    phone: q.user?.phone ?? q.guestPhone ?? null,
+    businessNo: q.user?.businessNo ?? null,
+    tier: q.guestTier ?? q.user?.tier ?? "ENDUSER",
+  };
+}
 
 function fmtKRW(n: number): string {
   return "₩" + Math.round(n).toLocaleString("ko-KR");
@@ -163,7 +181,7 @@ export default function AdminQuoteDetailPage() {
     if (!quote) return;
     if (!force) {
       const ok = await confirm({
-        message: `${quote.user.email} 으로 견적서를 발송하시겠습니까?`,
+        message: `${getRecipient(quote).email} 으로 견적서를 발송하시겠습니까?`,
         confirmLabel: "발송",
       });
       if (!ok) return;
@@ -238,7 +256,7 @@ export default function AdminQuoteDetailPage() {
     if (!quote) return;
     const ok = await confirm({
       message: "이 견적을 발주 확정 처리하시겠습니까?",
-      detail: `${quote.user.company} · ${fmtKRW(quote.grandTotal)} (VAT 포함)\n확정 후 재고가 차감되고 주문이 생성됩니다.`,
+      detail: `${getRecipient(quote).company} · ${fmtKRW(quote.grandTotal)} (VAT 포함)\n확정 후 재고가 차감되고 주문이 생성됩니다.`,
       confirmLabel: "발주 확정",
       destructive: true,
     });
@@ -288,6 +306,7 @@ export default function AdminQuoteDetailPage() {
   }
 
   const expiresAt = quote.expiresAt ?? null;
+  const recipient = getRecipient(quote);
 
   // ── 렌더링: 본문 ─────────────────────────────────────────
   return (
@@ -362,24 +381,24 @@ export default function AdminQuoteDetailPage() {
               TO · 수신
             </div>
             <div className="text-[18px] font-medium text-ink">
-              {quote.user.company} 귀중
+              {recipient.company} 귀중
             </div>
             <div className="flex items-center gap-2 mt-1">
               <span
                 className={`mono text-[9px] tracking-[0.1em] uppercase border px-1.5 py-0.5 ${
-                  TIER_COLOR[quote.user.tier] ?? "border-line text-dim"
+                  TIER_COLOR[recipient.tier] ?? "border-line text-dim"
                 }`}
               >
-                {quote.user.tier}
+                {recipient.tier}
               </span>
             </div>
-            <InfoLine label="담당자" value={quote.user.name} />
-            <InfoLine label="E-mail" value={quote.user.email} />
-            {quote.user.phone && (
-              <InfoLine label="Tel" value={quote.user.phone} />
+            <InfoLine label="담당자" value={recipient.name} />
+            <InfoLine label="E-mail" value={recipient.email} />
+            {recipient.phone && (
+              <InfoLine label="Tel" value={recipient.phone} />
             )}
-            {quote.user.businessNo && (
-              <InfoLine label="사업자번호" value={quote.user.businessNo} />
+            {recipient.businessNo && (
+              <InfoLine label="사업자번호" value={recipient.businessNo} />
             )}
           </div>
 
@@ -434,11 +453,13 @@ export default function AdminQuoteDetailPage() {
                     {String(idx + 1).padStart(2, "0")}
                   </td>
                   <td className="px-4 py-3 mono text-[12px] text-ink font-medium">
-                    {item.product.partNo}
+                    {item.customPartNo ?? item.product?.partNo ?? "—"}
                   </td>
-                  <td className="px-4 py-3 text-ink">{item.product.description}</td>
+                  <td className="px-4 py-3 text-ink">
+                    {item.customDescription ?? item.product?.description ?? "—"}
+                  </td>
                   <td className="px-4 py-3 mono text-[11px] dim">
-                    {item.product.category ?? "—"}
+                    {item.product?.category ?? "—"}
                   </td>
                   <td className="px-4 py-3 mono text-[12px] text-ink tabular-nums">
                     {item.quantity}
