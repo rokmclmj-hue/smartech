@@ -230,3 +230,11 @@
 - 증상: 견적내역에서 견적번호(#188 등) 클릭 시 "This page couldn't load"(Next.js 오류 화면, 크롬·엣지 동일). 원인은 `Quote.userId`·`QuoteItem.productId`가 nullable(대행견적·직접입력 품목)인데 `app/admin/quotes/[id]/page.tsx`가 항상 있다고 가정한 것.
 - 수정: `guest*`/`custom*` 필드로 대체 표시(`getRecipient` 헬퍼). API는 변경 없음. `tsc --noEmit` 오류 0, push 완료, 대표님이 라이브에서 정상 표시 확인.
 - 대행견적(회원계정 없음)의 "발주 확정"은 `confirm/route.ts:34-37`에서 "견적에 사용자 정보가 없습니다"로 거절됨(Order.userId 필수). 의도된 제한이며 대표님 결정으로 그대로 둔다(버튼 숨김·스키마 변경 없음). 필요해지면 회원계정이 아닌 거래처·담당자 연결 방식을 먼저 검토.
+
+## 2026-09-21 — Vercel "Deployment Storage 100%" 메일 확인 (코드 변경 없음)
+
+- 메일: 무료 플랜 Deployment Storage(10GB) 100% 사용 안내. 업그레이드 문의.
+- 확인: `vercel ls`로 본 배포 사본은 9/15에 144개 → 9/21에 8개(Vercel이 오래된 배포를 정리한 것으로 추정, 원인은 미확인). 대표님이 보내준 Usage 화면은 Deployment Storage 0 B / 10 GB, Functions Storage 0 B / 10 GB, Blob 318MB / 1GB 등 전 항목 여유.
+- 메일(100%)과 Usage 화면(0 B)이 서로 안 맞는 이유는 미확인. 9/7 Functions Storage 75% 알림도 실제 문제 없이 지나간 전례가 있다.
+- 결정(대표님): Pro 업그레이드 불필요. 앞으로 용량 메일이 와도 사이트와 push 배포가 정상이면 무시한다. 이상하면 Vercel 지원에 "Usage는 0인데 100% 메일이 온 이유"를 문의(대표님 계정으로).
+- 삭제·설정 변경 없음. 루트의 미추적 임시파일(`all-deployments.txt`, `fetch-all-deployments.sh`, `vercel-deployments.json`)은 git에 올리지 않았고 정리는 미결정.
