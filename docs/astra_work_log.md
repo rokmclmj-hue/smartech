@@ -224,3 +224,9 @@
 - `npx tsc --noEmit` 통과, `npx eslint app/admin/delivery-notes/page.tsx`는 이 파일에 원래 있던 `react-hooks/set-state-in-effect` 6건만 남고 신규 오류 0(수정 전 stash 비교로 확인), `npx next build` 성공.
 - `git push origin master` 완료, `git rev-parse HEAD`와 `git ls-remote origin refs/heads/master` 해시 일치(`210e12b`) 확인. Vercel 실제 배포 화면·라이브 동작은 아직 미확인 — 다음 세션에서 대표님 확인 필요.
 - 상세 기록: 원본 메모리 `project_purchase_delivery.md`.
+
+## 2026-09-21 — 견적 상세 페이지 오류 수정 (커밋 36ff4b8)
+
+- 증상: 견적내역에서 견적번호(#188 등) 클릭 시 "This page couldn't load"(Next.js 오류 화면, 크롬·엣지 동일). 원인은 `Quote.userId`·`QuoteItem.productId`가 nullable(대행견적·직접입력 품목)인데 `app/admin/quotes/[id]/page.tsx`가 항상 있다고 가정한 것.
+- 수정: `guest*`/`custom*` 필드로 대체 표시(`getRecipient` 헬퍼). API는 변경 없음. `tsc --noEmit` 오류 0, push 완료, 대표님이 라이브에서 정상 표시 확인.
+- 대행견적(회원계정 없음)의 "발주 확정"은 `confirm/route.ts:34-37`에서 "견적에 사용자 정보가 없습니다"로 거절됨(Order.userId 필수). 의도된 제한이며 대표님 결정으로 그대로 둔다(버튼 숨김·스키마 변경 없음). 필요해지면 회원계정이 아닌 거래처·담당자 연결 방식을 먼저 검토.
