@@ -1,6 +1,6 @@
 {
   "_comment": "작성완료 주제 이력. 후보만으로 갱신하지 않는다. completed_topics는 공개 완료를 뜻하지 않으며 발행 상태는 별도 확인한다.",
-  "_last_updated": "2026-09-17",
+  "_last_updated": "2026-09-22",
   "current_industry_index": 10,
   "completed_topics": [
     {
@@ -333,6 +333,13 @@
       "product": "기타",
       "title": "진공펌프를 끌 때 질소로 벤트해야 하는 이유",
       "folder": "기술블로그/2026-09/0924-질소퍼지-안전",
+      "publication_status": "draft"
+    },
+    {
+      "industry": "공통/실생활",
+      "product": "기타",
+      "title": "진공 포장기는 어떻게 공기를 빼고, 왜 음식이 오래갈까",
+      "folder": "기술블로그/2026-09/0928-진공포장기-원리",
       "publication_status": "draft"
     }
   ],
