@@ -1,5 +1,12 @@
 # 현재 합의와 다음 작업
 
+## 2026-09-23 X 콘텐츠 승인글 하루 1개씩 자동 게시 시작 (커밋 a450ca1)
+
+- 지금까지는 `/admin/x-posts`에서 관리자가 승인 후 "게시" 버튼을 직접 눌러야 실제 X 게시가 됐음. 이제 매일 11:00(KST) Windows 작업 스케줄러(`SmartechXAutoPublish_Daily`)가 승인(APPROVED)된 글 중 가장 오래 기다린 1건을 자동 게시.
+- 스크립트: `scripts/auto-publish-x-post.mjs`(핵심 로직) + `scripts/run-x-auto-publish.bat` + `scripts/setup-x-auto-publish-scheduler.ps1`(등록용, 이미 실행 완료). 로그는 `x-auto-publish.log`(git-ignored).
+- 2026-09-23 기준 승인 대기 27건. 하루 1개씩 나가므로 전부 게시되는 데 약 27일 소요. 급하게 여러 개를 한꺼번에 내보내고 싶으면 관리자 화면에서 수동 "게시"도 병행 가능(자동화와 충돌 안 함 — 원자적 상태전환으로 이중게시 방지).
+- **다음 확인**: 오늘 11:00 첫 자동 게시 성공 여부를 `x-auto-publish.log`와 `/admin/x-posts` POSTED 탭에서 확인.
+
 ## 2026-09-17 W39 블로그 2편 원고 완성 (예약, 미발행)
 
 - 월(9/21) `0921-항공우주-오일로터리`, 목(9/24) `0924-질소퍼지-안전` 원고·사진 승인 완료, upload-queue.json에 approved=true·uploaded=false로 등록.

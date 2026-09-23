@@ -1,5 +1,17 @@
 # Astra 작업 기록
 
+## 2026-09-23 — (클로드) X 콘텐츠 승인글 하루 1개씩 자동 게시 (커밋 a450ca1)
+
+- 대표님이 "승인된 글들을 매번 내가 직접 게시하고 있다"며 자동화 요청. 기존 `/admin/x-posts` 흐름을 확인하니 APPROVED까지만 자동이고 실제 X 게시는 항상 관리자가 "게시" 버튼을 눌러야 했음(`app/api/admin/x-posts/route.ts`).
+- 이 컴퓨터에서 자동 실행(Windows 작업 스케줄러) vs Vercel 24시간 서버 실행 중 선택 요청 → "이 컴퓨터에서 자동 실행" 선택받음(vercel.json은 보호파일이라 서버쪽은 추가 승인 필요했을 것).
+- `scripts/auto-publish-x-post.mjs` 신규 작성: `route.ts`의 publish 로직(원자적 APPROVED→PUBLISHING 선점, 글자수 280자 검사, 게시확인실패시 PUBLISHING 잠금 유지)과 `lib/x-post.ts`의 OAuth 1.0a 서명 로직을 인라인 복제(`.mjs`에서 `.ts` 직접 import 불가 — `generate-x-posts-from-blog.mjs`와 동일 기존 패턴). `--dry-run` 옵션으로 실제 게시 없이 검증 가능.
+- `--dry-run`으로 먼저 검증(승인대기 27건 중 가장 오래된 id=12를 정확히 선택 확인) 후 실제 게시 코드는 아직 실행하지 않은 채 스케줄러만 등록.
+- `scripts/run-x-auto-publish.bat`(한글 없음, 인코딩 문제 회피) + `scripts/setup-x-auto-publish-scheduler.ps1`(블로그 `setup_scheduler.ps1`과 동일 패턴: KST 시간대 검사, Hidden, 기존 작업 XML 백업) 작성.
+- 스케줄러 등록은 관리자 권한 필요해서 최초 시도(`Access is denied`) → 대표님이 관리자 PowerShell 직접 열어 재실행 → `SmartechXAutoPublish_Daily` 등록 확인(State=Ready, NextRunTime=2026-09-23 11:00).
+- 매일 11:00(KST) 승인글 중 가장 오래된 1건 자동 게시, 실패 시 로그(`x-auto-publish.log`, git-ignored)에 남기고 APPROVED로 되돌려 다음날 재시도. 게시 확인 실패(PostedButUnconfirmedError)는 PUBLISHING 잠금 유지해 중복게시 방지.
+- 커밋 `a450ca1` push, `git ls-remote`로 원격 일치 확인. 이 변경은 Vercel 앱 코드가 아니라 로컬 스크립트라 Vercel 배포와 무관.
+- **다음 확인 필요**: 오늘(2026-09-23) 11:00 실제 첫 자동 게시가 성공했는지 `x-auto-publish.log`와 `/admin/x-posts` POSTED 탭에서 확인.
+
 ## 2026-09-20 — (클로드) 현장사례 발행 — 0918-Y대-E2M18 (id=99)
 
 - 대표님이 데스크톱 사진 1장(`E2M18_납품사.jpg`)과 함께 "진공오븐용 E2M18 납품, 기존 RV12 용량부족으로 업그레이드" 구두 정보 제공. 날짜(9/18)와 학교명(연세대 첨단과학기술연구관, 리서치 참고용·비공개)을 확인 질문으로 받아 `블로그/data/cases/20260918_납품_Y대_E2M18/`에 케이스 등록.
