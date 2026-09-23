@@ -1,0 +1,29 @@
+{
+  "method": "Original HTML/CSS rendered with Playwright",
+  "images": {
+    "thumbnail.png": {
+      "width": 1080,
+      "height": 1080,
+      "bytes": 283015
+    },
+    "사진1.png": {
+      "width": 1200,
+      "height": 391,
+      "bytes": 97495
+    },
+    "사진2.png": {
+      "width": 1200,
+      "height": 448,
+      "bytes": 118985
+    },
+    "사진3.png": {
+      "width": 1200,
+      "height": 448,
+      "bytes": 116756
+    }
+  },
+  "thumbnail_margins": {
+    "top_percent": 18.06,
+    "bottom_percent": 18.98
+  }
+}
