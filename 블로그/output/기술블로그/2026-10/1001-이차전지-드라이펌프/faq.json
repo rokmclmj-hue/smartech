@@ -1,0 +1,46 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "이차전지 제조에서 진공은 어느 단계에 쓰이나요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Edwards는 슬러리 혼합(기포 방지), 건조(가혹한 조건에서 수분 제거), 전해액 주입 후 파우치 밀봉의 세 단계에서 진공을 쓴다고 설명합니다. 어느 모델을 어느 단계에 쓰는지는 해당 자료에 명시되어 있지 않습니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "전해액 탈기 공정은 왜 압력 관리가 까다로운가요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "전해액을 채운 셀이 제대로 충방전되려면 탈기 공정에서 안정적으로 0.1 mbar 미만의 진공압력을 유지해야 합니다(Edwards). 이 압력을 지속적으로 유지해야 해서 펌프의 연속 운전 안정성이 중요합니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "이차전지 공정에 오일식 펌프를 쓰면 왜 문제가 되나요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "전해액 관련 공정가스(디메톡시에탄, 디옥솔레인, 육불화인산리튬 등)가 오일씰 펌프의 기어박스로 유입되면 오일이 쉽게 오염되어 잦은 오일 교환과 가동 중단으로 이어진다고 Edwards는 설명합니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "GXS 드라이펌프가 이차전지 공정에 적합한 근거가 있나요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Edwards GXS 브로슈어의 적용 공정 목록 중 건조(Drying) 항목에 'Lithium-Ion battery drying'이 명시되어 있습니다. GXS는 진보된 씰링 기술로 공정 물질이 기어박스에 유입되는 것을 막아 기어오일 오염을 없앤다고 설명합니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "이차전지 공정에 특정 GXS 부스터 조합이 정해져 있나요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "이번 조사에서는 전해액 탈기 전용으로 특정 GXS 부스터 조합을 권장한 공식 자료를 확인하지 못했습니다. 셀 크기, 챔버 용적, 목표 사이클 시간에 따라 필요한 배기속도가 달라지므로 실제 공정 조건을 기준으로 확인하는 것이 안전합니다."
+      }
+    }
+  ]
+}
