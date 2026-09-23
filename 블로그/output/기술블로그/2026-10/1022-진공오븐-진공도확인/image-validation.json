@@ -1,0 +1,29 @@
+{
+  "method": "Body diagrams: Original HTML/CSS via Playwright. Thumbnail: real Edwards E2M18 product photo (public/images/products/e2m.png), see no-field-photo.md.",
+  "images": {
+    "thumbnail.png": {
+      "width": 1080,
+      "height": 1080,
+      "bytes": 362067
+    },
+    "사진1.png": {
+      "width": 1200,
+      "height": 532,
+      "bytes": 130676
+    },
+    "사진2.png": {
+      "width": 1200,
+      "height": 479,
+      "bytes": 141371
+    },
+    "사진3.png": {
+      "width": 1200,
+      "height": 444,
+      "bytes": 126845
+    }
+  },
+  "thumbnail_margins": {
+    "top_percent": 5.56,
+    "bottom_percent": 6.11
+  }
+}
