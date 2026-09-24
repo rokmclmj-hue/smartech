@@ -215,7 +215,7 @@ function OrderForm({ onSaved, initialData }: { onSaved: () => void; initialData?
       const byId = new Map<number, { id: number; partNo: string; costPrice: number }>();
       const ids = Array.from(new Set(withId.map((i) => i.productId as number)));
       if (ids.length > 0) {
-        const res = await fetch(`/api/products?ids=${ids.join(",")}`);
+        const res = await fetch(`/api/products?ids=${ids.join(",")}&limit=${ids.length}`);
         if (res.ok) {
           const data = await res.json();
           for (const p of data.products ?? []) byId.set(p.id, p);
@@ -225,7 +225,7 @@ function OrderForm({ onSaved, initialData }: { onSaved: () => void; initialData?
       const byPartNo = new Map<string, { id: number; partNo: string; costPrice: number }>();
       const fallbackPartNos = Array.from(new Set(withoutId.map((i) => i.partNo.trim()).filter(Boolean)));
       if (fallbackPartNos.length > 0) {
-        const res = await fetch(`/api/products?partNos=${encodeURIComponent(fallbackPartNos.join(","))}`);
+        const res = await fetch(`/api/products?partNos=${encodeURIComponent(fallbackPartNos.join(","))}&limit=${fallbackPartNos.length}`);
         if (res.ok) {
           const data = await res.json();
           for (const p of data.products ?? []) byPartNo.set(p.partNo, p);
