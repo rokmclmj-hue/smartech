@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { SMARTECH_COMPANY } from "@/lib/company";
-import { REPAIR_EXTRA_MARGIN, getRepairBaseMargin } from "@/lib/repairPricing";
 import { REPAIR_CASES } from "@/lib/repair-cases";
 import "@/app/quote/[id]/quote-styles.css";
 
@@ -15,13 +14,13 @@ type RepairKit = {
   pumpMaker: string;
   pumpModel: string;
   modelGroup: string | null;
-  basePrice: number;   // 원가 (고객가 = × 1.4)
+  customerPrice: number;   // 서버가 계산한 고객가 (0이면 상담 필요)
   description: string | null;
   parts: { id: number; name: string; quantity: string | null }[];
-  extraParts: { id: number; category: string; name: string; price: number }[]; // price = 원가 (× 1.2)
+  extraParts: { id: number; category: string; name: string; customerPrice: number }[]; // 서버가 계산한 고객가
 };
 
-type SelectedExtra = { id: number; category: string; name: string; costPrice: number };
+type SelectedExtra = { id: number; category: string; name: string; customerPrice: number };
 
 type PhotoFile = { file: File; preview: string; label: string };
 
@@ -62,9 +61,6 @@ const SYMPTOMS = [
 ];
 
 const STEPS = ["접수 정보", "증상 입력", "수리 견적", "접수 완료"];
-
-const EXTRA_MARGIN = REPAIR_EXTRA_MARGIN;
-const getBaseMargin = getRepairBaseMargin;
 
 const PHOTO_SLOTS = [
   { key: "nameplate", label: "명판 사진",       required: true,  hint: "모델명 확인용" },
@@ -164,10 +160,9 @@ export default function RepairPageClient() {
     );
   }
 
-  const baseMargin = getBaseMargin(form.pumpModel);
-  const baseCustomerPrice = selectedKit ? Math.round(selectedKit.basePrice * baseMargin) : 0;
+  const baseCustomerPrice = selectedKit ? selectedKit.customerPrice : 0;
   const extraCustomerTotal = selectedExtras.reduce(
-    (sum, e) => sum + Math.round(e.costPrice * EXTRA_MARGIN), 0
+    (sum, e) => sum + e.customerPrice, 0
   );
   const totalCustomerPrice = baseCustomerPrice + extraCustomerTotal;
 
@@ -797,7 +792,7 @@ export default function RepairPageClient() {
                 <div className="space-y-2">
                   {selectedKit.extraParts.map((extra) => {
                     const isSelected = selectedExtras.some((e) => e.id === extra.id);
-                    const customerPrice = Math.round(extra.price * EXTRA_MARGIN);
+                    const customerPrice = extra.customerPrice;
                     return (
                       <label
                         key={extra.id}
@@ -815,7 +810,7 @@ export default function RepairPageClient() {
                           <div className="text-[11px] text-dim">{extra.name}</div>
                         </div>
                         <div className="text-right shrink-0">
-                          {extra.price > 0 ? (
+                          {customerPrice > 0 ? (
                             <>
                               <div className="text-[15px] font-bold tabular">{formatPrice(customerPrice)}</div>
                               <div className="text-[10px] text-dim">VAT 별도</div>
@@ -828,7 +823,7 @@ export default function RepairPageClient() {
                           type="checkbox"
                           className="hidden"
                           checked={isSelected}
-                          onChange={() => toggleExtra({ id: extra.id, category: extra.category, name: extra.name, costPrice: extra.price })}
+                          onChange={() => toggleExtra({ id: extra.id, category: extra.category, name: extra.name, customerPrice })}
                         />
                       </label>
                     );
@@ -1104,7 +1099,7 @@ export default function RepairPageClient() {
                     <span className="desc-ko">{e.name}</span>
                   </td>
                   <td className="num-col">1식</td>
-                  <td className="num-col">₩ {Math.round(e.costPrice * EXTRA_MARGIN).toLocaleString("ko-KR")}</td>
+                  <td className="num-col">₩ {e.customerPrice.toLocaleString("ko-KR")}</td>
                 </tr>
               ))}
             </tbody>
