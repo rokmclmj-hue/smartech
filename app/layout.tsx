@@ -51,6 +51,7 @@ const jsonLd = {
         "https://www.youtube.com/channel/UCGVGHByF7EQzRIBXvWkJNEw",
         "https://blog.naver.com/smartechvacuum",
         "https://x.com/smartechvacuum",
+        "https://www.google.com/maps?cid=2249450778476640442",
       ],
       "description": "Edwards Vacuum 한국 공식 대리점. 진공펌프 판매·수리·기술상담 토탈 솔루션. 2011년 창업, 대표 진공산업 경력 2006년부터, 진공펌프 수리 경력 30년의 전담 엔지니어 보유.",
       "address": {
