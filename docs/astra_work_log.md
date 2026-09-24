@@ -1,5 +1,14 @@
 # Astra 작업 기록
 
+## 2026-09-24 — (클로드) 원가·내부정보 노출 재발방지 자동검사 (커밋 a3ce1c8)
+
+- `scripts/check-public-leaks.mjs` 신규: ①기본=라이브(또는 `--base`) 공개 API 7개·페이지 6개를 비로그인으로 열어 costPrice·basePrice·tier2/3Price·supplierName·passwordHash·adminNote·selectedExtrasJson 검사 ②`--static`=원가·개인정보 다루는 공개 route 16개의 해시를 `scripts/public-api-reviewed.json`과 대조, 바뀌면 실패 ③`--approve --base 로컬`=실검사 통과 시에만 해시 등록.
+- `.git/hooks/pre-push`(로컬 전용, git 미추적)에 `--static` 연결 → Claude·Astra·대표님 누가 push해도 동작. a3ce1c8 push 때 실제로 실행·통과 확인.
+- 검증: products route에 costPrice를 일부러 되살려 --static "변경됨" 차단 + 로컬 실검사 "노출 4건" 확인 후 원복.
+- 등록 전 16개 파일 직접 검토 중 고객 본인 응답 노출 3곳 추가 수정: /api/quote/[id]/detail(품목 Product 전체→품번·품명·카테고리), /api/repair GET(adminNote·selectedExtrasJson 제외), /api/repair/[repairNo](비관리자 adminNote·키트원가 제외). 로그인 필요 경로라 로컬에서는 401만 확인, 로그인 상태 실확인은 미실시.
+- CLAUDE.md·astra_handoff.md 보안수칙에 규칙 추가. Vercel success, 라이브 검사 13/13 통과.
+- 한계: 검사 목록에 없는 새 공개 주소는 --static의 "미검토" 감지에 의존. 페이지 HTML 검사는 목록 6곳만.
+
 ## 2026-09-24 — (클로드) 🔴 수리 키트 API 원가·마진 노출 수정 (커밋 a528d9d)
 
 - 공개 API 점검 중 발견: `/api/repair/kits`가 비로그인에게 수리 원가(basePrice 30종)·추가부품 원가(41개)를 보내고 /repair 페이지가 브라우저에서 마진(1.5/1.8, 1.2)을 곱함. 2026-05-21 최초 구현부터.
