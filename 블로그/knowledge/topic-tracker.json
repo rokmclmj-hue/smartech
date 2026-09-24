@@ -1,6 +1,6 @@
 {
   "_comment": "작성완료 주제 이력. 후보만으로 갱신하지 않는다. completed_topics는 공개 완료를 뜻하지 않으며 발행 상태는 별도 확인한다.",
-  "_last_updated": "2026-09-23",
+  "_last_updated": "2026-09-24",
   "current_industry_index": 10,
   "completed_topics": [
     {
@@ -396,6 +396,13 @@
       "product": "기타",
       "title": "고도가 높아지면 과자 봉지가 부푸는 이유 — 대기압과 진공의 차이",
       "folder": "기술블로그/2026-10/1026-고도-과자봉지",
+      "publication_status": "draft"
+    },
+    {
+      "industry": "태양광 에너지",
+      "product": "B.오일로터리펌프",
+      "title": "태양광 패널 생산 라인의 오일로터리 백킹펌프 선택",
+      "folder": "기술블로그/2026-10/1029-태양광-오일로터리",
       "publication_status": "draft"
     }
   ],
