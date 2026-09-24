@@ -25,7 +25,8 @@ export async function GET(
   const quote = await prisma.quote.findUnique({
     where: { id: quoteId },
     include: {
-      items: { include: { product: true } },
+      // 고객 화면에는 품번·품명만 필요 — 원가(costPrice) 등 Product 전체를 보내지 않는다 (2026-09-24)
+      items: { include: { product: { select: { id: true, partNo: true, description: true, category: true } } } },
       user: { select: { name: true, company: true, email: true, phone: true } },
       order: { select: { id: true, status: true } },
     },

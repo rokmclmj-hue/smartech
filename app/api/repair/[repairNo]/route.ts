@@ -33,5 +33,17 @@ export async function GET(
     return NextResponse.json({ error: "권한이 없습니다." }, { status: 403 });
   }
 
-  return NextResponse.json({ repair });
+  if (isAdmin) return NextResponse.json({ repair });
+
+  // 고객 본인에게는 관리자 메모·수리 원가(키트 basePrice 등)를 보내지 않는다 — 2026-09-24
+  const { adminNote: _adminNote, selectedExtrasJson: _extras, kit, ...rest } = repair;
+  void _adminNote; void _extras;
+  return NextResponse.json({
+    repair: {
+      ...rest,
+      kit: kit
+        ? { id: kit.id, pumpFamily: kit.pumpFamily, pumpMaker: kit.pumpMaker, pumpModel: kit.pumpModel, modelGroup: kit.modelGroup, parts: kit.parts.map((pt) => ({ id: pt.id, name: pt.name, quantity: pt.quantity })) }
+        : null,
+    },
+  });
 }

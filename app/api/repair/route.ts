@@ -94,8 +94,10 @@ export async function GET() {
     return NextResponse.json({ error: "로그인이 필요합니다." }, { status: 401 });
   }
 
+  // 고객 본인 조회 — 관리자 메모·선택항목 원가 JSON은 제외 (2026-09-24)
   const repairs = await prisma.repairRequest.findMany({
     where: { userId: Number(session.user.id) },
+    omit: { adminNote: true, selectedExtrasJson: true },
     include: {
       files: { select: { fileType: true, fileName: true, fileUrl: true } },
       statusLogs: { orderBy: { createdAt: "asc" } },

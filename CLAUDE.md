@@ -224,6 +224,12 @@ Tailwind 클래스로 `bg-edred`, `text-ink` 형태로 사용. 값 임의 변경
   `ANTHROPIC_API_KEY`, `DATABASE_URL`, `SOLAPI_*`, `VERCEL_BLOB_*`,
   `KAKAO_CLIENT_SECRET`, `GOOGLE_CLIENT_SECRET`, `GMAIL_*`, `NEXTAUTH_SECRET`
 - 코드 리뷰 중 위 패턴이 발견되면 즉시 경고하고 작업을 중단한다.
+- **공개 응답에 원가·내부정보 금지** (2026-09-24 원가 노출 사고): 로그인 없이 또는 고객 본인이 받는 API·페이지 응답에
+  `costPrice`·`basePrice`·`tier2/3Price`·`supplierName`·`adminNote`·`passwordHash` 등을 보내지 않는다.
+  DB 행을 통째로(`...row`, `include`/`select` 없는 find) 보내지 말고 필요한 항목만 골라 보낸다. 가격은 서버에서 계산한 판매가만 보낸다.
+- `.git/hooks/pre-push`가 `node scripts/check-public-leaks.mjs --static`을 실행한다. 원가·개인정보를 다루는 공개 파일이 바뀌면 push가 멈춘다.
+  해결: 로컬 서버(`npx next dev -p 3100`) → `node scripts/check-public-leaks.mjs --approve --base http://localhost:3100` →
+  바뀐 `scripts/public-api-reviewed.json` 함께 커밋. `--no-verify`로 우회 금지. push·배포 후 `node scripts/check-public-leaks.mjs`로 라이브 재확인.
 
 ---
 
