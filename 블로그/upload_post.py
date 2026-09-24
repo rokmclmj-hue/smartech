@@ -270,3 +270,30 @@ except urllib.error.HTTPError as e:
 except Exception as e:
     print(f"[ERROR] {e}")
     sys.exit(1)
+
+# ── X(트위터) 대기글 자동 생성 ─────────────────────────
+# 수동(approve_post.py)·자동 예약(auto_upload.py)·직접 업로드가 모두 이 파일을 거치므로 여기서 한 번만 호출한다.
+# 게시는 하지 않고 PENDING으로만 만든다(관리자 승인·게시는 /admin/x-posts). 같은 글은 스크립트가 중복 생성하지 않는다.
+# 실패해도 블로그 업로드는 이미 끝났으므로 종료코드를 바꾸지 않는다(auto_upload.py가 종료코드로 성공을 판단함).
+def create_x_draft(blog_id):
+    import subprocess
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    print(f"\n=== X 대기글 자동 생성 (블로그 id={blog_id}) ===", flush=True)
+    try:
+        r = subprocess.run(
+            ["node", "--env-file=.env", "scripts/generate-x-posts-from-blog.mjs", "--id", str(blog_id)],
+            cwd=project_root, capture_output=True, text=True, encoding="utf-8", errors="replace",
+            timeout=180, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+        )
+        if r.stdout:
+            print(r.stdout.strip())
+        if r.returncode != 0:
+            print(f"[WARN] X 대기글 생성 실패(exit {r.returncode}) — 블로그 발행은 정상. 수동 실행: "
+                  f"node --env-file=.env scripts/generate-x-posts-from-blog.mjs --id {blog_id}")
+            if r.stderr:
+                print(r.stderr.strip()[-500:])
+    except Exception as e:
+        print(f"[WARN] X 대기글 생성 실행 오류: {e} — 블로그 발행은 정상. 수동 실행: "
+              f"node --env-file=.env scripts/generate-x-posts-from-blog.mjs --id {blog_id}")
+
+create_x_draft(result["id"])
