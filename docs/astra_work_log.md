@@ -1,5 +1,13 @@
 # Astra 작업 기록
 
+## 2026-09-24 — (클로드) X 자동게시 대기열 막힘 수정(c129a1c) → 열쇠 없어 자동게시 보류 결정
+
+- c129a1c: 글자수 초과·X 400/403 거절은 그 글만 PENDING+adminNote로 돌려보내고 다음 글 시도, 키없음·401·429·5xx는 상태 유지 후 exit 1(스케줄러에 실패로 표시). dry-run·키없음·가짜키401 시험 통과.
+- 열쇠 확보 시도: `vercel env pull --environment=production`으로 X_* 4개 이름은 받았으나 값이 비어 있음(Sensitive 저장 추정, 미확인). 추가 확인은 Claude Code 안전장치가 비밀값 접근으로 차단. 빈 `.env.x.local`은 삭제.
+- 대표님: 원본 열쇠 파일 위치를 모름 → **자동게시 보류** 결정. X 사이트에서 재발급 금지(기존 키 무효화 시 수동 "게시" 버튼도 멈춤).
+- `SmartechXAutoPublish_Daily` 비활성화는 권한 부족(Access is denied) → 대표님이 관리자 PowerShell에서 `Disable-ScheduledTask -TaskName SmartechXAutoPublish_Daily` 실행 필요. 꺼지기 전까지는 매일 실패 기록만 남고 글 상태는 안 바뀜.
+- 게시됨 12건(id 1~11, 20) X 공개 oEmbed로 전부 200·@smartechvacuum 계정 일치 확인.
+
 ## 2026-09-24 — (클로드) 원가·내부정보 노출 재발방지 자동검사 (커밋 a3ce1c8)
 
 - `scripts/check-public-leaks.mjs` 신규: ①기본=라이브(또는 `--base`) 공개 API 7개·페이지 6개를 비로그인으로 열어 costPrice·basePrice·tier2/3Price·supplierName·passwordHash·adminNote·selectedExtrasJson 검사 ②`--static`=원가·개인정보 다루는 공개 route 16개의 해시를 `scripts/public-api-reviewed.json`과 대조, 바뀌면 실패 ③`--approve --base 로컬`=실검사 통과 시에만 해시 등록.
