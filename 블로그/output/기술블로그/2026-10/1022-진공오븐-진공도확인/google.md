@@ -14,13 +14,13 @@ category: 기술문의
 
 ![배기부터 응축기 전환까지 이어지는 건조 단계](./images/사진1.png)
 
-Leybold는 배치식 진공 건조 공정을 네 단계로 설명한다. 가스 발라스트 펌프와 루츠펌프로 용기를 배기하는 단계, 재료를 가열하며 수증기압이 올라가면 콘덴서(응축기) 두 개를 연결하는 단계, 그다음 메인 콘덴서를 우회하는 단계, 마지막으로 중간 콘덴서를 우회하는 단계다. 수분 함량은 시간이 지날수록 점점 느리게 줄어드는 경향을 보인다고도 설명한다. ([Leybold — How does the drying process work with a vacuum pump system](https://www.leybold.com/en-us/knowledge/vacuum-fundamentals/vacuum-generation/how-does-the-drying-process-work))
+스마텍이 Leybold 자료(How does the drying process work with a vacuum pump system, https://www.leybold.com/en-us/knowledge/vacuum-fundamentals/vacuum-generation/how-does-the-drying-process-work)를 확인한 결과, 배치식 진공 건조 공정은 네 단계로 나뉜다. 가스 발라스트 펌프와 루츠펌프로 용기를 배기하는 단계, 재료를 가열하며 수증기압이 올라가면 콘덴서(응축기) 두 개를 연결하는 단계, 그다음 메인 콘덴서를 우회하는 단계, 마지막으로 중간 콘덴서를 우회하는 단계다. 수분 함량은 시간이 지날수록 점점 느리게 줄어드는 경향을 보인다.
 
 ## 압력이 특정 값 아래로 떨어지면 펌프 구성이 바뀐다
 
 ![수분 압력에 따라 펌프 구성이 전환되는 지점](./images/사진2.png)
 
-Leybold의 한 건조 공정 예시에서는, 챔버 내 수분 압력이 27 mbar 아래로 떨어지면 루츠펌프를 추가로 가동한다. 최종 건조 단계에서는 약 6.5×10⁻² mbar까지 압력을 더 낮춘다. 이 수치는 특정 건조 공정 예시에 나온 값이며, 모든 진공 오븐에 그대로 적용되는 절대 기준은 아니다. 자신의 설비가 어느 압력대에서 어떻게 반응하는지는 실제 운전 이력으로 직접 확인해야 한다. ([Leybold — How to select a vacuum pump for drying applications](https://www.leybold.com/en-in/knowledge/vacuum-fundamentals/vacuum-generation/pump-selection-for-drying-process))
+스마텍이 Leybold 자료(How to select a vacuum pump for drying applications, https://www.leybold.com/en-in/knowledge/vacuum-fundamentals/vacuum-generation/pump-selection-for-drying-process)를 확인한 결과, 한 건조 공정 예시에서는 챔버 내 수분 압력이 27 mbar 아래로 떨어지면 루츠펌프를 추가로 가동하고 최종 건조 단계에서는 약 6.5×10⁻² mbar까지 압력을 더 낮추는 것으로 확인된다. 이 수치는 특정 건조 공정 예시에 나온 값이며, 모든 진공 오븐에 그대로 적용되는 절대 기준은 아니다. 자신의 설비가 어느 압력대에서 어떻게 반응하는지는 실제 운전 이력으로 직접 확인해야 한다.
 
 로터리베인(오일) 펌프를 백킹 펌프로 쓸 때는 그 펌프의 수증기 허용치(예시 자료에서는 60 mbar)를 넘지 않도록 앞단의 루츠펌프가 수증기압을 먼저 낮춰줘야 한다. 가스 발라스트를 쓰는 백킹 펌프는 수증기압이 약 0.65 mbar에 이를 때까지 루츠펌프와 함께 배기를 담당한다는 예시도 있다.
 

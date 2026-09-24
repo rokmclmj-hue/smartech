@@ -14,9 +14,9 @@ category: 기술문의
 
 ![배기, 밀봉, 대기 개방으로 이어지는 한 사이클](./images/사진1.png)
 
-Atlas Copco는 진공 포장의 기본을 "포장하기 전에 봉지에서 공기를 빼고 밀봉하는 것"으로 설명한다. 플라스틱 필름 봉지에 제품을 넣고, 안의 공기를 빼고, 밀봉하는 순서다. ([Atlas Copco — vacuum packaged food](https://www.atlascopco.com/en-us/vacuum-solutions/blog/vacuum-packaged-food))
+스마텍이 Atlas Copco 자료(vacuum packaged food, https://www.atlascopco.com/en-us/vacuum-solutions/blog/vacuum-packaged-food)를 확인한 결과, 진공 포장의 기본은 "포장하기 전에 봉지에서 공기를 빼고 밀봉하는 것"으로 설명된다. 플라스틱 필름 봉지에 제품을 넣고, 안의 공기를 빼고, 밀봉하는 순서다.
 
-산업용 포장은 크게 세 방식으로 나뉜다. 필름을 열로 수축시키는 슈링크, 필름이 제품 표면을 감싸는 스킨 포장, 공기를 뺀 뒤 CO₂·질소 등 혼합가스를 채우는 MAP(가스 치환 포장)다. MAP은 공기를 빼는 것과 가스를 채우는 것이 한 세트여서 열성형기나 트레이 실러 같은 설비에서 쓴다. 회전식(캐러셀) 포장기는 처리량이 가장 높아 큰 육류 덩어리나 치즈 포장에 쓴다고 Leybold는 설명한다. ([Leybold — Food Packaging](https://www.leybold.com/en/applications-and-industries/food-processing-and-packaging/food-packaging))
+산업용 포장은 크게 세 방식으로 나뉜다. 필름을 열로 수축시키는 슈링크, 필름이 제품 표면을 감싸는 스킨 포장, 공기를 뺀 뒤 CO₂·질소 등 혼합가스를 채우는 MAP(가스 치환 포장)이다. MAP은 공기를 빼는 것과 가스를 채우는 것이 한 세트여서 열성형기나 트레이 실러 같은 설비에서 쓴다. 회전식(캐러셀) 포장기는 처리량이 가장 높아 큰 육류 덩어리나 치즈 포장에 쓴다.
 
 밀봉이 끝나고 마지막에 바깥 공기가 들어오면, 봉지 안은 낮은 압력이고 바깥은 대기압이라 그 차이가 필름을 눌러 제품에 밀착시킨다. 예를 들어 봉지 안이 약 10,000 Pa라면 바깥과의 차이는 약 91,325 Pa이고, 이는 1cm²당 약 9.1N의 힘이다(직접 계산한 값). 봉지가 딱딱하게 조여지는 것은 이 압력 차 때문이며, 부서지기 쉬운 식품은 이 힘에 눌릴 수 있다.
 
@@ -24,7 +24,7 @@ Atlas Copco는 진공 포장의 기본을 "포장하기 전에 봉지에서 공�
 
 ![최종 압력에 따라 남는 산소 비율이 달라지는 관계](./images/사진2.png)
 
-표준 대기압은 101,325 Pa이다. ([NIST CODATA](https://physics.nist.gov/cgi-bin/cuu/Value?stdatm=)) 밀폐된 공간의 공기를 이상기체로 보면, 배기 후 남는 산소의 비율은 대략 최종 압력을 101,325 Pa로 나눈 값이다.
+표준 대기압은 101,325 Pa다(NIST CODATA). 밀폐된 공간의 공기를 이상기체로 보면, 배기 후 남는 산소의 비율은 대략 최종 압력을 101,325 Pa로 나눈 값이다.
 
 이 값은 직접 계산한 추정치이며 특정 기기의 실측값이 아니다. 예를 들어 약 10,000 Pa까지 빼면 처음 산소의 약 10%가 남고, 약 1,000 Pa까지 빼면 약 1%가 남는다. 반대로 압력이 절반(약 50,000 Pa)에 머물면 산소도 절반 가까이 남는다. 이 계산에는 식품에서 나오는 수분과 가스, 봉지 안에 갇힌 잔류 공기가 들어 있지 않다. 그래서 "완전히 제거된다"는 표현은 실제와 맞지 않는다. 가정용 기기가 실제로 어디까지 빼는지는 이번 조사에서 확인하지 못해 수치를 싣지 않는다.
 
@@ -38,7 +38,7 @@ Leybold는 자사 펌프가 "밀봉 전 낮은 압력"을 만들어 식품 유�
 
 ![진공 포장이 늦추는 것과 대신하지 못하는 것](./images/사진3.png)
 
-산소가 줄면 산소를 쓰는 부패균과 곰팡이의 성장이 느려진다. 하지만 산소 없이도 자라는 균은 그렇지 않다. 미국 FDA의 수산물 위해요소 지침은, 산소를 줄인 포장에서는 호기성 부패균의 성장이 느려지는 동안 보툴리눔 독소가 부패 징후 없이 만들어질 수 있다고 경고한다. 냉장만이 방어선인 제품은 포장부터 섭취까지 3.3°C(38°F) 이하를 유지하도록 한다. ([FDA — Chapter 13](https://www.fda.gov/files/food/published/Fish-and-Fishery-Products-Hazards-and-Controls-Guidance-Chapter-13-Download.pdf))
+산소가 줄면 산소를 쓰는 부패균과 곰팡이의 성장이 느려진다. 하지만 산소 없이도 자라는 균은 그렇지 않다. 스마텍이 미국 FDA 수산물 위해요소 지침(Fish and Fishery Products Hazards and Controls Guidance, Chapter 13, https://www.fda.gov/files/food/published/Fish-and-Fishery-Products-Hazards-and-Controls-Guidance-Chapter-13-Download.pdf)을 확인한 결과, 산소를 줄인 포장에서는 호기성 부패균의 성장이 느려지는 동안 보툴리눔 독소가 부패 징후 없이 만들어질 수 있다는 경고가 확인된다. 냉장만이 방어선인 제품은 포장부터 섭취까지 3.3°C(38°F) 이하를 유지하도록 한다.
 
 이 지침은 어류 제품에 대한 것이라 모든 가정용 식품에 그대로 옮길 수는 없다. 다만 "진공 포장했으니 실온에 두어도 된다"는 생각은 위험하다는 점은 분명하다. 진공 포장은 냉장·냉동을 보완할 뿐 대신하지 않는다.
 
@@ -46,7 +46,7 @@ Leybold는 자사 펌프가 "밀봉 전 낮은 압력"을 만들어 식품 유�
 
 ![수증기 응축을 막는 가스 발라스트](./images/사진4.png)
 
-식품에는 수분이 많다. 배기 중 나온 수증기가 펌프 안에서 응축되면 오일과 섞여 윤활이 나빠진다. Leybold는 가스 발라스트가 압축이 끝나기 전에 소량의 공기를 넣어 압축비를 최대 10:1로 낮추고, 수증기가 응축되기 전에 밖으로 밀어낸다고 설명한다. 이 효과를 얻으려면 펌프가 운전 온도에 도달해 있어야 하고 발라스트 밸브가 열려 있어야 한다. ([Leybold — gas ballast](https://www.leybold.com/en-us/knowledge/vacuum-fundamentals/vacuum-generation/how-does-a-gas-ballast-work))
+식품에는 수분이 많다. 배기 중 나온 수증기가 펌프 안에서 응축되면 오일과 섞여 윤활이 나빠진다. 스마텍이 Leybold 자료(gas ballast, https://www.leybold.com/en-us/knowledge/vacuum-fundamentals/vacuum-generation/how-does-a-gas-ballast-work)를 확인한 결과, 가스 발라스트는 압축이 끝나기 전에 소량의 공기를 넣어 압축비를 최대 10:1로 낮추고 수증기가 응축되기 전에 밖으로 밀어낸다. 이 효과를 얻으려면 펌프가 운전 온도에 도달해 있어야 하고 발라스트 밸브가 열려 있어야 한다.
 
 포장기용 펌프에는 오일 밀봉 로터리 베인 펌프와 건식 펌프가 모두 쓰인다. 건식은 산소 호환 오일이 필요 없고 유지보수 부담이 적다고 Leybold가 설명하는 반면, 오일식은 발라스트와 오일 관리가 성능을 좌우한다. 회전식 포장기는 펌프를 설비 가까이 두어 사이클마다 긴 배관을 다시 배기하지 않게 하면 처리량과 에너지 면에서 유리하다는 것도 같은 자료의 설명이다.
 

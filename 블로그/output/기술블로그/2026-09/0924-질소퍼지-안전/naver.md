@@ -10,7 +10,7 @@
 
 ## 끄기 전에 먼저 할 일이 있습니다
 
-Edwards는 오일씰 로터리베인 펌프를 정지하기 전, 무부하(zero load) 상태에서 가스 발라스트 밸브를 열고 잠시 더 운전해 오일 속 콘덴세이트(응축수)를 배출시키는 절차를 권장합니다. 원문은 "run the pump (again on zero load with the gas ballast valve open, to purge the oil of condensates) before shutting down"이며, 이 절차를 거치면 부식 가능성이 크게 줄어든다고 설명합니다. (출처: Edwards — 8 top tips for working with oil-sealed rotary vane pumps)
+스마텍이 Edwards 공식 매뉴얼(8 Top Tips for Working with Oil-Sealed Rotary Vane Pumps)을 확인한 결과, 오일씰 로터리베인 펌프를 정지하기 전 무부하(zero load) 상태에서 가스 발라스트 밸브를 열고 잠시 더 운전해 오일 속 콘덴세이트(응축수)를 배출시키는 절차가 권장되는 것으로 확인됩니다. 원문은 "run the pump (again on zero load with the gas ballast valve open, to purge the oil of condensates) before shutting down"이며, 이 절차를 거치면 부식 가능성이 크게 줄어든다고 설명합니다.
 
 [IMAGE: 정지 직전 무부하 운전으로 콘덴세이트 배출]
 
@@ -18,9 +18,7 @@ Edwards는 오일씰 로터리베인 펌프를 정지하기 전, 무부하(zero 
 
 ## 응축이 왜 이렇게 문제가 될까요
 
-수증기가 기체 상태 그대로 배출되지 않고 펌프 내부에서 액체로 응축되면, 다시 증발시켜야만 배기할 수 있어 도달진공 회복 시간이 훨씬 길어집니다. Edwards는 "Allowing water vapour to condense inside a pump will make the time to recover ultimate pressure much longer than if it remains in vapour phase because it has to be re-evaporated before it can be pumped out"라고 설명합니다. (출처: Edwards — How to pump condensable vapours?)
-
-Pfeiffer Vacuum도 같은 흐름을 명시합니다. "Condensate formation inside the pump increases the ultimate pressure, results in corrosion and at worst to total failure of the pump" — 응축이 도달압력 상승, 부식, 최악의 경우 펌프 고장까지 이어진다는 뜻입니다. (출처: Pfeiffer Vacuum Know-How, 4.7 Roots Vacuum Pumps)
+수증기가 기체 상태 그대로 배출되지 않고 펌프 내부에서 액체로 응축되면, 다시 증발시켜야만 배기할 수 있어 도달진공 회복 시간이 훨씬 길어집니다. 스마텍이 Edwards와 Pfeiffer Vacuum의 기술자료(How to pump condensable vapours? / Know-How 4.7 Roots Vacuum Pumps)를 각각 확인한 결과, 두 제조사 모두 같은 인과관계를 설명합니다. 응축이 도달압력 상승과 부식, 최악의 경우 펌프 고장으로까지 이어진다는 것입니다.
 
 [IMAGE: 응축부터 도달진공 저하·부식으로 이어지는 흐름]
 
@@ -28,15 +26,15 @@ Pfeiffer Vacuum도 같은 흐름을 명시합니다. "Condensate formation insid
 
 "질소를 쓴다"는 결론은 같아도 상황마다 목적이 다릅니다. 이 셋을 구분하지 않으면 절차를 잘못 적용하기 쉽습니다.
 
-- **정비 작업 시작 전**: Edwards 안전 매뉴얼은 "Vent and purge the pumping system with nitrogen before starting maintenance work"라고 명시합니다. 정비 중 잔류 유해가스에 작업자가 노출되지 않도록 하는 목적입니다.
-- **정지 후 단기 보관·출하**: Pfeiffer는 루츠 펌프 기준으로 "the suction chamber can be phosphated, vented with nitrogen and vacuum sealed in order to provide short-term surface protection, e.g. for warehousing and shipment"라고 설명합니다. 정지 직후 내부를 질소로 채워 밀봉하면 보관 중 표면이 공기 중 수분에 노출되지 않습니다.
-- **가동 중 축 관통부 보호**: 정지와 무관하게 가동 중에도 적용되는 항목입니다. Pfeiffer는 "Inert gases, mostly nitrogen (N2), are used as the sealing gas"라며, 작동실과 기어실 사이 축 관통부에 실링가스를 넣어 윤활유 희석과 가스 침투 위험을 줄인다고 설명합니다.
+- **정비 작업 시작 전**: 정비를 시작하기 전에는 배관·펌프 내부를 질소로 벤트·퍼지해야 합니다. 정비 중 잔류 유해가스에 작업자가 노출되지 않도록 하는 목적입니다.
+- **정지 후 단기 보관·출하**: 정지 직후 내부를 질소로 채워 밀봉하면 보관 중 표면이 공기 중 수분에 노출되지 않습니다. 루츠 펌프의 경우 흡입 챔버를 인산 처리하고 질소로 벤트한 뒤 진공 밀봉해 단기 보관·출하 시 표면을 보호하는 방식도 쓰입니다.
+- **가동 중 축 관통부 보호**: 정지와 무관하게 가동 중에도 적용되는 항목입니다. 작동실과 기어실 사이 축 관통부에는 대개 질소 같은 불활성가스를 실링가스로 넣어, 윤활유 희석과 공정가스 침투 위험을 줄입니다.
 
 [IMAGE: 세 가지 상황별 질소 사용 목적]
 
 ## 가연성·반응성 증기를 다루셨다면
 
-"When pumping potentially flammable vapours inert gas such as nitrogen should be used as the ballast gas"라는 원칙도 있습니다. (출처: Edwards — How to pump condensable vapours?) 이는 "정지 후 벤트"가 아니라 "가동 중 가스 발라스트에 넣는 기체 종류"를 다루지만, 원리는 같습니다. 반응성이 있는 기체 환경에서는 공기(산소·수분)와의 접촉 자체를 줄이는 방향으로 일관되게 움직여야 한다는 것입니다.
+스마텍이 같은 Edwards 자료를 확인한 결과, "When pumping potentially flammable vapours inert gas such as nitrogen should be used as the ballast gas"라는 원칙도 함께 명시돼 있습니다. 이는 "정지 후 벤트"가 아니라 "가동 중 가스 발라스트에 넣는 기체 종류"를 다루지만, 원리는 같습니다. 반응성이 있는 기체 환경에서는 공기(산소·수분)와의 접촉 자체를 줄이는 방향으로 일관되게 움직여야 한다는 것입니다.
 
 귀사 공정이 가연성·반응성 가스를 다룬다면, 정지 직전 클린업 운전 단계부터 발라스트 가스를 질소로 바꾸는 편이 정지 후 벤트만 질소로 하고 그 전 단계는 공기로 두는 것보다 일관된 절차입니다.
 

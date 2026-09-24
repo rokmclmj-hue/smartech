@@ -14,7 +14,7 @@ category: 기술문의
 
 ![열려 있는 발라스트 밸브가 도달압력을 막는 구조](./images/사진1.png)
 
-Edwards는 펌프가 도달압력에 이르지 못하는 가장 흔한 원인으로 가스 발라스트 밸브가 열려 있는 상태를 꼽는다. 밸브가 열려 있으면 펌프는 절대 도달압력에 이르지 못한다. ([Edwards — Why Your Vacuum Pump Keeps Failing](https://www.edwardsvacuum.com/en-us/vacuum-pumps/knowledge/applications/whyyourvacuumpumpkeepsfailing-6commonmaintenancemistakes))
+스마텍이 Edwards 자료(Why Your Vacuum Pump Keeps Failing, https://www.edwardsvacuum.com/en-us/vacuum-pumps/knowledge/applications/whyyourvacuumpumpkeepsfailing-6commonmaintenancemistakes)를 확인한 결과, 펌프가 도달압력에 이르지 못하는 가장 흔한 원인은 가스 발라스트 밸브가 열려 있는 상태로 확인된다. 밸브가 열려 있으면 펌프는 절대 도달압력에 이르지 못한다.
 
 발라스트는 수증기가 많은 공정을 처리할 때 일부러 여는 밸브다. 그 공정이 끝난 뒤 닫는 것을 잊으면 이후 배기할 때마다 압력이 매번 계속 높게 남는다. 펌프다운이 느려졌다면 가장 먼저 확인할 항목이다.
 
@@ -42,7 +42,7 @@ Edwards는 펌프가 도달압력에 이르지 못하는 가장 흔한 원인으
 
 ## 원인 5 — 새로 넣은 부품·시료의 표면 오염
 
-새로 넣은 부품이나 대기에 오래 노출됐던 시료는 표면에 붙어 있던 기체를 배기 중에 계속 내놓는다. Edwards는 아웃가스를 줄이는 방법으로 세정·베이크아웃, 표면처리(기계연마·전해연마), 코팅을 통한 패시베이션, 건조가스 퍼지·백필을 제시한다. 적절한 세정만으로 아웃가스율을 50%에서 최대 10만 배까지 줄일 수 있다고 설명하며, 재료 준비가 충분하지 않으면 초고진공 도달 자체가 매우 어렵다고 강조한다. ([Edwards — Four ways to reduce outgassing in vacuum systems](https://www.edwardsvacuum.com/en-us/vacuum-pumps/knowledge/applications/four-ways-to-reduce-outgassing-in-vacuum-systems))
+새로 넣은 부품이나 대기에 오래 노출됐던 시료는 표면에 붙어 있던 기체를 배기 중에 계속 내놓는다. 스마텍이 Edwards 자료(Four ways to reduce outgassing in vacuum systems, https://www.edwardsvacuum.com/en-us/vacuum-pumps/knowledge/applications/four-ways-to-reduce-outgassing-in-vacuum-systems)를 확인한 결과, 아웃가스를 줄이는 방법으로 세정·베이크아웃, 표면처리(기계연마·전해연마), 코팅을 통한 패시베이션, 건조가스 퍼지·백필이 제시된다. 적절한 세정만으로 아웃가스율을 50%에서 최대 10만 배까지 줄일 수 있으며, 재료 준비가 충분하지 않으면 초고진공 도달 자체가 매우 어렵다는 점도 확인된다.
 
 ## 확인 순서를 정리하면
 

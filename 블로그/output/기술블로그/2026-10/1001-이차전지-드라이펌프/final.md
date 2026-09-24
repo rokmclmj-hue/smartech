@@ -14,7 +14,7 @@ category: 기술문의
 
 ![슬러리 혼합, 건조, 밀봉 세 단계에서의 진공 적용](./images/사진1.png)
 
-Edwards는 이차전지 제조의 진공 적용을 세 단계로 설명한다. 먼저 슬러리를 섞는 초기 혼합 단계에서 페이스트에 기포가 들어가지 않도록 진공을 적용한다. 다음으로 건조 단계에서는 매우 가혹한 조건에서 수분을 제거하는 데 진공을 쓴다. 마지막으로 전해액을 주입한 뒤 배터리 파우치를 실제로 밀봉하는 작업도 진공 상태에서 이뤄진다. ([Edwards — Lithium-Ion Battery Production](https://www.edwardsvacuum.com/en-us/vacuum-pumps/our-markets/energy-solutions/lithium-ion-battery-production))
+스마텍이 Edwards 자료(Lithium-Ion Battery Production, https://www.edwardsvacuum.com/en-us/vacuum-pumps/our-markets/energy-solutions/lithium-ion-battery-production)를 확인한 결과, 이차전지 제조의 진공 적용은 세 단계로 나뉜다. 먼저 슬러리를 섞는 초기 혼합 단계에서 페이스트에 기포가 들어가지 않도록 진공을 적용한다. 다음으로 건조 단계에서는 매우 가혹한 조건에서 수분을 제거하는 데 진공을 쓴다. 마지막으로 전해액을 주입한 뒤 배터리 파우치를 실제로 밀봉하는 작업도 진공 상태에서 이뤄진다.
 
 이 페이지는 오일씰 로터리베인과 드라이펌프를 포함한 다양한 라인업이 있다고만 설명하고, 어느 모델을 어느 단계에 써야 하는지는 명시하지 않는다. 아래 내용은 그중 건조·탈기 단계에 해당하는 근거다.
 
@@ -22,7 +22,7 @@ Edwards는 이차전지 제조의 진공 적용을 세 단계로 설명한다. �
 
 ![전해액 탈기 공정의 압력 요구와 공정가스](./images/사진2.png)
 
-전해액을 채운 셀은 리튬 이온이 자유롭게 이동해야 충방전이 제대로 되는데, 이를 위해 탈기 공정에서 안정적으로 0.1 mbar 미만의 진공압력을 요구한다. 이 압력을 지속적으로 유지해야 하므로 펌프가 안정적으로 연속 운전할 수 있어야 한다. ([Edwards — Why are dry pumps better for Li-ion battery electrolyte degassing?](https://www.edwardsvacuum.com/en-us/knowledge/applications/why-are-dry-pumps-better-for-li-ion-battery-electrolyte-degassing))
+전해액을 채운 셀은 리튬 이온이 자유롭게 이동해야 충방전이 제대로 되는데, 스마텍이 Edwards 자료(Why are dry pumps better for Li-ion battery electrolyte degassing?, https://www.edwardsvacuum.com/en-us/knowledge/applications/why-are-dry-pumps-better-for-li-ion-battery-electrolyte-degassing)를 확인한 결과, 탈기 공정은 안정적으로 0.1 mbar 미만의 진공압력을 요구하는 것으로 확인된다. 이 압력을 지속적으로 유지해야 하므로 펌프가 안정적으로 연속 운전할 수 있어야 한다.
 
 전해액 관련 공정가스에는 디메톡시에탄(DME), 디옥솔레인, 육불화인산리튬(LiPF6) 등이 포함된다. 이런 물질이 오일씰 펌프의 기어박스로 들어가면 오일이 쉽게 오염되고, 그 결과 잦은 오일 교환으로 유지보수 비용과 가동 중단 손실이 커진다는 것이 Edwards의 설명이다.
 

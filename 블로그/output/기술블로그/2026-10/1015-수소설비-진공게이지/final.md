@@ -14,7 +14,7 @@ category: 기술문의
 
 ![질소로 교정된 게이지와 다른 가스의 실제 압력 환산](./images/사진1.png)
 
-Edwards는 진공게이지 제조사가 보통 질소로 교정하며, 질소를 측정할 때 보정계수는 1이라고 설명한다. 다른 가스를 측정할 때는 실제 압력을 Pi = (SN2÷Si) × PN2라는 식으로 환산해야 한다. 즉 화면에 뜬 숫자를 그대로 믿으면 안 되고, 측정하는 가스에 맞는 보정계수를 곱해야 실제 압력을 알 수 있다는 뜻이다. ([Edwards — Seven factors affecting the sensitivity of vacuum gauges](https://www.edwardsvacuum.com/en-us/vacuum-pumps/knowledge/applications/seven-factors-affecting-the-sensitivity-of-vacuum-gauges))
+스마텍이 Edwards 자료(Seven factors affecting the sensitivity of vacuum gauges, https://www.edwardsvacuum.com/en-us/vacuum-pumps/knowledge/applications/seven-factors-affecting-the-sensitivity-of-vacuum-gauges)를 확인한 결과, 진공게이지 제조사는 보통 질소로 교정하며 질소를 측정할 때 보정계수는 1로 확인된다. 다른 가스를 측정할 때는 실제 압력을 Pi = (SN2÷Si) × PN2라는 식으로 환산해야 한다. 즉 화면에 뜬 숫자를 그대로 믿으면 안 되고, 측정하는 가스에 맞는 보정계수를 곱해야 실제 압력을 알 수 있다는 뜻이다.
 
 Edwards는 열식(피라니 계열) 게이지의 경우 무거운 분자일수록 더 큰 보정계수가 필요한 경향이 있다고 설명한다. 수소는 공기(질소)보다 가벼운 분자이므로, 이 원리에 따르면 질소 기준 표시값과 실제 수소 압력 사이에 차이가 생긴다는 결론이 나온다. 다만 정확한 방향과 배수는 게이지 모델마다 다르며, 수소 전용 보정계수 수치는 이번 조사에서 확인하지 못했다.
 
@@ -22,7 +22,7 @@ Edwards는 열식(피라니 계열) 게이지의 경우 무거운 분자일수�
 
 ![피라니와 이온화 게이지 모두 가스 종류에 영향받는 이유](./images/사진2.png)
 
-Pfeiffer는 피라니(열전도) 게이지의 압력 표시값이 측정하는 가스 종류에 따라 달라진다고 설명한다. 질소·공기는 좋은 선형성을 보이지만 가벼운 가스(헬륨)와 무거운 가스(아르곤)는 뚜렷한 편차를 보인다는 것이다. 냉음극(콜드캐소드) 이온화 게이지도 마찬가지로 가스 종류에 따라 다른 압력을 나타내며, 예를 들어 헬륨은 공기보다 낮은 압력으로 표시된다고 설명한다. 열음극(핫캐소드) 이온화 게이지 역시 가스 의존적이다. ([Pfeiffer Vacuum — Total Pressure Measurement Fundamentals](https://www.pfeiffervacuum.com/us/en/knowledge/vacuum-technology/knowledge-book/5-vacuum-measuring-equipment/5_1_fundamentals_of_total_pressure_measurement/))
+스마텍이 Pfeiffer 자료(Total Pressure Measurement Fundamentals, https://www.pfeiffervacuum.com/us/en/knowledge/vacuum-technology/knowledge-book/5-vacuum-measuring-equipment/5_1_fundamentals_of_total_pressure_measurement/)를 확인한 결과, 피라니(열전도) 게이지의 압력 표시값은 측정하는 가스 종류에 따라 달라지는 것으로 확인된다. 질소·공기는 좋은 선형성을 보이지만 가벼운 가스(헬륨)와 무거운 가스(아르곤)는 뚜렷한 편차를 보인다. 냉음극(콜드캐소드) 이온화 게이지도 마찬가지로 가스 종류에 따라 다른 압력을 나타내며, 예를 들어 헬륨은 공기보다 낮은 압력으로 표시된다. 열음극(핫캐소드) 이온화 게이지 역시 가스 의존적이다.
 
 ## 가스에 영향받지 않는 방식도 있다
 

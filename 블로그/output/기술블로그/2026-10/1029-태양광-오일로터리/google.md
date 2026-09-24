@@ -14,13 +14,13 @@ category: 기술문의
 
 ![대형 유리 코팅 PVD와 결정 성장 공정의 오일로터리 표준 위치](./images/사진1.png)
 
-Leybold는 대형 건축용 유리 코팅 인라인 PVD 시스템에서 SOGEVAC 오일씰 로터리베인 펌프가 오일씰 표준 펌프라고 설명한다. 또한 태양광 결정 성장(잉곳 성장) 공정, 특히 실리콘카바이드 응용에서는 PFPE 오일을 쓰는 TRIVAC이 오일씰 표준 솔루션이라고 밝힌다. 이 공정에 함께 쓰이는 부스터(루츠블로워) RUVAC는 시스템 규모에 따라 250~7,000 m³/h 범위로 제공된다. ([Leybold — Solar Technology](https://www.leybold.com/en/applications-and-industries/solar-technology))
+스마텍이 Leybold 자료(Solar Technology, https://www.leybold.com/en/applications-and-industries/solar-technology)를 확인한 결과, 대형 건축용 유리 코팅 인라인 PVD 시스템에서는 SOGEVAC 오일씰 로터리베인 펌프가 오일씰 표준 펌프로 확인된다. 또한 태양광 결정 성장(잉곳 성장) 공정, 특히 실리콘카바이드 응용에서는 PFPE 오일을 쓰는 TRIVAC이 오일씰 표준 솔루션이다. 이 공정에 함께 쓰이는 부스터(루츠블로워) RUVAC는 시스템 규모에 따라 250~7,000 m³/h 범위로 제공된다.
 
 ## 순도가 중요한 공정에서는 드라이로 이동하고 있다
 
 ![오일 배출이 없는 드라이 스크류가 필요한 박막 공정](./images/사진2.png)
 
-Leybold는 태양광 제조에서 순도와 오일 프리 솔루션이 필수적이라고 설명하며, 드라이(무오일) 압축 펌프는 오일 배출이 없어 오일이 공정 쪽으로 넘어갈 위험을 피한다고 밝힌다. CIGS·CdTe·헤테로접합(HJT) 같은 박막 코팅 공정에 쓰이는 가스는 드라이 스크류 펌프가 처리한다. 로드락을 빠르게 배기해야 하는 경우에도 오일씰보다 드라이 스크류 쪽이 강조되는데, 이는 먼지와 유독 도핑가스를 다루는 공정에서 씰링 구조가 유리하기 때문이라는 것이 Leybold의 설명이다. ([Leybold — Solar Coating](https://www.leybold.com/en-us/applications-and-industries/solar-technology/solar-coating))
+스마텍이 Leybold 자료(Solar Coating, https://www.leybold.com/en-us/applications-and-industries/solar-technology/solar-coating)를 확인한 결과, 태양광 제조에서는 순도와 오일 프리 솔루션이 필수적이며 드라이(무오일) 압축 펌프는 오일 배출이 없어 오일이 공정 쪽으로 넘어갈 위험을 피할 수 있다. CIGS·CdTe·헤테로접합(HJT) 같은 박막 코팅 공정에 쓰이는 가스는 드라이 스크류 펌프가 처리한다. 로드락을 빠르게 배기해야 하는 경우에도 오일씰보다 드라이 스크류 쪽이 강조되는데, 이는 먼지와 유독 도핑가스를 다루는 공정에서 씰링 구조가 유리하기 때문이다.
 
 ## 오일로터리를 쓸 때는 오일 종류가 선택 기준이 된다
 
