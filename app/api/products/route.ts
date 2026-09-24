@@ -76,11 +76,17 @@ export async function GET(req: NextRequest) {
   const showPrice = tier !== "PENDING" && tier !== "REJECTED";
   const multiplier = showPrice ? await getMultiplier(tier) : null;
 
-  const result = products.map((p) => ({
-    ...p,
-    displayPrice: showPrice && multiplier ? Math.round(p.costPrice * multiplier) : null,
-    priceStatus: !showPrice ? "pending" : "visible",
-  }));
+  // 원가·공급처 등 내부 정보는 관리자에게만 보낸다 (발주서 이력불러오기가 costPrice 사용).
+  // 공개 응답에 ...p를 그대로 내보내 비로그인 방문자에게도 원가가 노출되던 문제 수정 — 2026-09-24.
+  const isAdmin = tier === "ADMIN";
+  const result = products.map((p) => {
+    const { costPrice, supplierName, department, minStock, orderQty, ...publicFields } = p;
+    const displayPrice = showPrice && multiplier ? Math.round(costPrice * multiplier) : null;
+    const priceStatus = !showPrice ? "pending" : "visible";
+    return isAdmin
+      ? { ...publicFields, costPrice, supplierName, department, minStock, orderQty, displayPrice, priceStatus }
+      : { ...publicFields, displayPrice, priceStatus };
+  });
 
   return NextResponse.json({ products: result, total, page, limit });
 }
