@@ -1,5 +1,14 @@
 # Astra 작업 기록
 
+## 2026-09-24 — (클로드) 🔴 제품 API 원가 노출 보안 문제 수정 (커밋 24ddac6)
+
+- 코드리뷰 백로그(34커밋, origin/reviewed..5a7f27d) 검토 중 발견. `/api/products`가 `...p`로 Product 전체 필드를 응답해 **로그인 없이도 전 제품 1,030개의 원가(costPrice)·공급처·재고 등**이 원본 응답(JSON)에 포함됨. 화면에는 표시 안 됨. 2026-04-19 최초 커밋부터 존재 → 6/6 오픈 이후 계속 노출. 대표님이 브라우저로 직접 확인함.
+- 수정: costPrice·supplierName·department·minStock·orderQty는 세션 tier=ADMIN일 때만 포함, 그 외엔 displayPrice만. stock은 PumpSelector "국내 재고 보유" 표시에 쓰여 유지.
+- 검증: tsc 통과, 로컬 dev 비로그인 원가 0/1030, 라이브 배포 후 동일 확인(원가 0/1030, 판매가 1030/1030). 관리자 원가 경로(발주서 이력불러오기)는 로그인 필요해 로컬 미검증 → 대표님 실사용 확인 필요.
+- 다른 공개 API(chat, quote, quote/request, products/prices)는 서버에서 판매가만 계산해 보내 노출 없음 확인.
+- 같은 리뷰의 기타 발견: ① X 자동게시(SmartechXAutoPublish_Daily)가 9/23·9/24 모두 "X API 키 없음"으로 실패(로컬 .env에 X_* 없음, 수동 버튼 게시 12건은 Vercel 키로 정상). 스케줄러 결과코드는 0이라 성공처럼 보임 ② 가장 오래된 승인글이 계속 실패하면 뒤 글이 전부 막히는 구조 ③ 발주서 25개↑ 원가 0원 → 다른 세션이 354acb1로 이미 수정.
+- reviewed 포인터는 아직 이동 안 함(X 자동게시 문제 처리 후 이동 예정).
+
 ## 2026-09-23 — (클로드) X 콘텐츠 승인글 하루 1개씩 자동 게시 (커밋 a450ca1)
 
 - 대표님이 "승인된 글들을 매번 내가 직접 게시하고 있다"며 자동화 요청. 기존 `/admin/x-posts` 흐름을 확인하니 APPROVED까지만 자동이고 실제 X 게시는 항상 관리자가 "게시" 버튼을 눌러야 했음(`app/api/admin/x-posts/route.ts`).
