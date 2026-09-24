@@ -250,3 +250,11 @@
 - 메일(100%)과 Usage 화면(0 B)이 서로 안 맞는 이유는 미확인. 9/7 Functions Storage 75% 알림도 실제 문제 없이 지나간 전례가 있다.
 - 결정(대표님): Pro 업그레이드 불필요. 앞으로 용량 메일이 와도 사이트와 push 배포가 정상이면 무시한다. 이상하면 Vercel 지원에 "Usage는 0인데 100% 메일이 온 이유"를 문의(대표님 계정으로).
 - 삭제·설정 변경 없음. 루트의 미추적 임시파일(`all-deployments.txt`, `fetch-all-deployments.sh`, `vercel-deployments.json`)은 git에 올리지 않았고 정리는 미결정.
+
+## 2026-09-24 — 목요일 자동발행 스케줄러 버그 수정 + 9/24 수동발행 + W40 큐 등록
+
+- 발견: `SmartechBlog_Day2_Wednesday` 작업이 실제로 요일 트리거=수요일로 등록돼 있어, 큐의 목요일(day2) 예약이 매주 "발행일 불일치"로 건너뛰어짐(9/23 로그 확인). 9/17 전환 이후 목요일 자동발행이 한 번도 성공한 적 없었던 근본 원인.
+- 조치: 대표님이 관리자 PowerShell에서 `setup_scheduler.ps1` 재실행. `SmartechBlog_Day2_Thursday`(트리거=목요일, DaysOfWeek=16) 신규 생성 확인, 기존 `Day2_Wednesday`·`Day3_Friday`는 Disabled로 전환 확인.
+- 오늘(9/24) 밀렸던 `0924-질소퍼지-안전`은 `approve_post.py`로 수동 발행(id=101, https://www.smartechvacuum.com/blog/101, curl 200 확인).
+- `upload-queue.json`을 W40(9/28 월·10/1 목)으로 갱신, 썸네일 확인 후 대표님 승인받아 approved=true 설정. `auto_upload.py --dry-run`으로 day1/day2 모두 "정상 대기" 확인.
+- 남은 4주(10/5·10/8, 10/12·10/15, 10/19·10/22, 10/26·10/29)는 매주 시작 전 같은 방식으로 큐를 갱신해야 한다 — 큐 파일 구조가 한 번에 한 주만 담는 방식이라 자동으로 이어지지 않는다. 다음 세션 시작 시 반드시 확인.
