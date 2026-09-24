@@ -46,6 +46,12 @@ const jsonLd = {
       "telephone": "031-204-7170",
       "email": "info@smartechvacuum.com",
       "foundingDate": "2011",
+      // 공식 채널 — 검색엔진·AI가 같은 회사로 연결하도록 (이름이 비슷한 해외 업체와 구분 목적, 2026-09-25)
+      "sameAs": [
+        "https://www.youtube.com/channel/UCGVGHByF7EQzRIBXvWkJNEw",
+        "https://blog.naver.com/smartechvacuum",
+        "https://x.com/smartechvacuum",
+      ],
       "description": "Edwards Vacuum 한국 공식 대리점. 진공펌프 판매·수리·기술상담 토탈 솔루션. 2011년 창업, 대표 진공산업 경력 2006년부터, 진공펌프 수리 경력 30년의 전담 엔지니어 보유.",
       "address": {
         "@type": "PostalAddress",
