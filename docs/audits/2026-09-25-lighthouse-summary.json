@@ -1,0 +1,101 @@
+{
+ "lh-home-mobile": {
+  "fetchTime": "2026-09-24T21:02:31.264Z",
+  "url": "https://www.smartechvacuum.com/",
+  "lighthouse": "13.4.1",
+  "scores": {
+   "performance": 71,
+   "accessibility": 97,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "LCP_s": 3.51,
+  "TBT_ms": 522,
+  "CLS": 0.0012,
+  "bytes": 3096932
+ },
+ "lh2-home-mobile": {
+  "fetchTime": "2026-09-24T21:03:57.702Z",
+  "url": "https://www.smartechvacuum.com/",
+  "lighthouse": "13.4.1",
+  "scores": {
+   "performance": 52,
+   "accessibility": 97,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "LCP_s": 8.44,
+  "TBT_ms": 450,
+  "CLS": 0.0014,
+  "bytes": 3096771
+ },
+ "lh3-home-mobile": {
+  "fetchTime": "2026-09-24T21:07:40.407Z",
+  "url": "https://www.smartechvacuum.com/",
+  "lighthouse": "13.4.1",
+  "scores": {
+   "performance": 58
+  },
+  "LCP_s": 8.43,
+  "TBT_ms": 274,
+  "CLS": 0.0014,
+  "bytes": 3096992
+ },
+ "lh4-home-mobile": {
+  "fetchTime": "2026-09-24T21:07:59.366Z",
+  "url": "https://www.smartechvacuum.com/",
+  "lighthouse": "13.4.1",
+  "scores": {
+   "performance": 53
+  },
+  "LCP_s": 8.75,
+  "TBT_ms": 396,
+  "CLS": 0.0014,
+  "bytes": 3096917
+ },
+ "lh-home-desktop": {
+  "fetchTime": "2026-09-24T21:02:56.101Z",
+  "url": "https://www.smartechvacuum.com/",
+  "lighthouse": "13.4.1",
+  "scores": {
+   "performance": 88,
+   "accessibility": 97,
+   "best-practices": 100,
+   "seo": 100
+  },
+  "LCP_s": 2.22,
+  "TBT_ms": 20,
+  "CLS": 0.0036,
+  "bytes": 4789023
+ },
+ "lh-blog-mobile": {
+  "fetchTime": "2026-09-24T21:03:18.507Z",
+  "url": "https://www.smartechvacuum.com/blog/96",
+  "lighthouse": "13.4.1",
+  "scores": {
+   "performance": 70,
+   "accessibility": 96,
+   "best-practices": 100,
+   "seo": 92
+  },
+  "LCP_s": 9.18,
+  "TBT_ms": 146,
+  "CLS": 0.1108,
+  "bytes": 1534694
+ },
+ "lh2-blog-mobile": {
+  "fetchTime": "2026-09-24T21:04:17.988Z",
+  "url": "https://www.smartechvacuum.com/blog/96",
+  "lighthouse": "13.4.1",
+  "scores": {
+   "performance": 62,
+   "accessibility": 96,
+   "best-practices": 100,
+   "seo": 92
+  },
+  "LCP_s": 4.29,
+  "TBT_ms": 692,
+  "CLS": 0.1134,
+  "bytes": 1535606
+ }
+}
