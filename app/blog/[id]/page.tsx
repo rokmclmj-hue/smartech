@@ -5,6 +5,7 @@ import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import type { Metadata } from "next";
 import { formatBlogInline, prepareBlogBody, getBlogDescription, getBlogImage } from "@/lib/blog-inline";
+import { getRemoteImageSize, type ImageSize } from "@/lib/remote-image-size";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -61,7 +62,11 @@ function formatDate(d: Date) {
 }
 
 // 마크다운 → React 엘리먼트 (AI 생성 콘텐츠 패턴에 맞춘 간단 파서)
-function renderMarkdown(text: string) {
+// 본문 사진 크기(가로·세로) — 미리 알아내 자리를 잡아 두면 사진이 늦게 떠도 글이 밀리지 않는다.
+// firstSrc(첫 사진)는 첫 화면 대표 이미지라 먼저 받고, 나머지는 화면에 가까워질 때 받는다.
+type ImageHints = { sizes: Map<string, ImageSize>; firstSrc: string | null };
+
+function renderMarkdown(text: string, hints: ImageHints) {
   const lines = text.split("\n");
   const elements: React.ReactNode[] = [];
   let i = 0;
@@ -170,7 +175,12 @@ function renderMarkdown(text: string) {
       if (imgMatch) {
         elements.push(
           <img key={`img-${i}`} src={imgMatch[2]} alt={imgMatch[1]}
-               className="w-full my-6 rounded-sm" />
+               width={hints.sizes.get(imgMatch[2])?.width}
+               height={hints.sizes.get(imgMatch[2])?.height}
+               loading={imgMatch[2] === hints.firstSrc ? "eager" : "lazy"}
+               fetchPriority={imgMatch[2] === hints.firstSrc ? "high" : "auto"}
+               decoding="async"
+               className="w-full h-auto my-6 rounded-sm" />
         );
         i++;
         continue;
@@ -251,6 +261,21 @@ export default async function BlogPostPage({ params }: Props) {
   const tags = post.tags ? post.tags.split(/[,\s]+/).filter(Boolean) : [];
   const content = prepareBlogBody(post.content, post.title);
   const description = getBlogDescription(post.content, post.title, post.metaDesc);
+
+  // 본문 사진 크기 미리 조회 (renderMarkdown의 이미지 규칙과 같은 패턴)
+  const imageUrls = Array.from(new Set(
+    content.split("\n")
+      .map((l) => l.match(/^!\[[^\]]*\]\((https?:\/\/[^)]+)\)/)?.[1])
+      .filter((u): u is string => !!u)
+  ));
+  const imageSizeList = await Promise.all(imageUrls.map((u) => getRemoteImageSize(u)));
+  const imageHints: ImageHints = {
+    sizes: new Map(imageUrls.flatMap((u, idx) => {
+      const size = imageSizeList[idx];
+      return size ? [[u, size] as [string, ImageSize]] : [];
+    })),
+    firstSrc: imageUrls[0] ?? null,
+  };
 
   // 본문·태그에서 제품 모델 키워드 추출 → 제품 페이지 링크용
   const PRODUCT_MODELS = ["RV", "E2M", "E2S", "nES", "nXDS", "XDS", "EH", "GXS", "EXS", "iXH", "nXRi", "iXL", "nEXT", "STP", "ELD500", "APG", "AIM", "WRG"];
@@ -369,7 +394,7 @@ export default async function BlogPostPage({ params }: Props) {
               if (h2 === 2) return lines.slice(0, i).join('\n');
             }
             return lines.slice(0, Math.floor(lines.length / 2)).join('\n');
-          })())}
+          })(), imageHints)}
 
           {/* 중간 사진 (두 번째 소제목 앞) */}
           {postPhotos[1] && (
@@ -397,7 +422,7 @@ export default async function BlogPostPage({ params }: Props) {
               }
             }
             return '';
-          })())}
+          })(), imageHints)}
 
           {/* 하단 사진 (마지막 소제목 앞) */}
           {postPhotos[2] && (
@@ -419,7 +444,7 @@ export default async function BlogPostPage({ params }: Props) {
               if (rest[j].startsWith('## ')) return rest.slice(j).join('\n');
             }
             return '';
-          })())}
+          })(), imageHints)}
         </article>
 
         {/* 태그 */}
