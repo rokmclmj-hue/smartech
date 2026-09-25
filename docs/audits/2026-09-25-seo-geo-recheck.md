@@ -29,6 +29,11 @@
 - 9/10 이후 홈 첫 화면 코드(app/page.tsx·globals.css·layout.tsx)는 바뀌지 않았다. 홈 모바일 차이는 측정 환경 편차 가능성이 크며, 악화라고 단정하지 않는다. 다만 목표 LCP 2.5초에는 여전히 못 미친다. LCP 요소는 9/9와 같은 홈 도입 문단이다.
 - Lighthouse가 블로그 96에 "meta description 없음"을 표시했으나, 원본 HTML에는 있고 일반 브라우저·Googlebot·Yeti(네이버)·bingbot·GPTBot 사용자 에이전트 모두 `<head>` 안에서 받는 것을 확인했다. 검색봇 기준 문제 아님.
 
+## 추가 확인 — Google PageSpeed Insights (대표님 브라우저, 9/25 12:40)
+
+- 홈 모바일(구글 서버, Lighthouse 13.5.0): **성능 90**, LCP 2.8초, TBT 110ms, CLS 0.001, SEO 100, 접근성 97, 권장사항 100, 에이전트형 브라우징 3/3. 실제 사용자(CrUX) 데이터는 "데이터 없음"(방문량 부족).
+- 결론 정정: 로컬 4회(52~71점, LCP 8초대)는 측정 PC 부하로 낮게 나온 것. 홈 모바일 속도는 9/9(55점) 대비 개선됐고 긴급 과제 아님. "합성되지 않는 애니메이션 25개" 진단은 로컬 분석(빨간 띠 바늘 left/width 애니메이션, 배경 blur 애니메이션)과 일치 — globals.css(보호 파일) 수정이 필요해 보류.
+
 ## 새로 확인한 것
 
 1. **Organization 구조화 데이터에 `sameAs`가 비어 있다.** 유튜브·X·네이버 블로그·구글 비즈니스 프로필 등 공식 채널을 회사 정보와 연결하지 않았다. 이름이 비슷한 인도 Edwards 대리점 Smart Tech Vacuum Solutions(smarttechvacuum.com, t 두 개)가 있어, AI·검색엔진이 두 회사를 구분할 근거로도 필요하다.
