@@ -30,16 +30,39 @@ function parseWebp(b: Uint8Array): ImageSize | null {
   return null;
 }
 
+// EXIF(APP1) 안의 회전 값(Orientation, 태그 0x0112). 휴대폰 세로 사진은 가로 픽셀 + "90° 회전" 값(5~8)으로 저장된다.
+function readExifOrientation(b: Uint8Array, start: number, len: number): number | null {
+  const t = start + 10; // "Exif\0\0" 다음 TIFF 헤더 시작
+  if (len < 16 || String.fromCharCode(...b.slice(start + 4, start + 8)) !== "Exif" || t + 8 > b.length) return null;
+  const le = b[t] === 0x49; // "II"=little-endian, "MM"=big-endian
+  const u16 = (o: number) => (le ? b[o] | (b[o + 1] << 8) : (b[o] << 8) | b[o + 1]);
+  const u32 = (o: number) => (le ? (b[o] | (b[o + 1] << 8) | (b[o + 2] << 16)) + b[o + 3] * 0x1000000 : b[o] * 0x1000000 + ((b[o + 1] << 16) | (b[o + 2] << 8) | b[o + 3]));
+  const ifd = t + u32(t + 4);
+  if (ifd + 2 > b.length) return null;
+  const count = u16(ifd);
+  for (let k = 0; k < count; k++) {
+    const e = ifd + 2 + k * 12;
+    if (e + 12 > b.length) return null;
+    if (u16(e) === 0x0112) return u16(e + 8);
+  }
+  return null;
+}
+
 function parseJpeg(b: Uint8Array): ImageSize | null {
   if (b.length < 4 || b[0] !== 0xff || b[1] !== 0xd8) return null;
   let i = 2;
+  let orientation: number | null = null;
   while (i + 9 < b.length) {
     if (b[i] !== 0xff) { i++; continue; }
     const marker = b[i + 1];
     const len = (b[i + 2] << 8) | b[i + 3];
+    if (marker === 0xe1 && orientation === null) orientation = readExifOrientation(b, i, len);
     // SOF0~SOF15 (DHT·JPG·DAC 제외)
     if (marker >= 0xc0 && marker <= 0xcf && marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc) {
-      return { height: (b[i + 5] << 8) | b[i + 6], width: (b[i + 7] << 8) | b[i + 8] };
+      const height = (b[i + 5] << 8) | b[i + 6];
+      const width = (b[i + 7] << 8) | b[i + 8];
+      // 회전 값 5~8이면 브라우저가 90° 돌려 보여주므로 가로·세로를 바꿔야 자리 크기가 맞는다
+      return orientation !== null && orientation >= 5 && orientation <= 8 ? { width: height, height: width } : { width, height };
     }
     i += 2 + len;
   }
