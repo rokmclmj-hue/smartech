@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAdminSession } from "@/lib/admin-auth";
+import { makePurchaseOrderNo } from "@/lib/purchase-order-no";
 
 // GET — 발주 필요 품목 조회 (currentStock < minStock)
 export async function GET() {
@@ -81,8 +82,7 @@ export async function POST(req: NextRequest) {
         },
       },
     });
-    const year = new Date().getFullYear();
-    const orderNo = `SMT-${year}-P-${String(po.id).padStart(6, "0")}`;
+    const orderNo = makePurchaseOrderNo(po.orderDate, po.id);
     return tx.manualPurchaseOrder.update({
       where: { id: po.id },
       data: { orderNo },

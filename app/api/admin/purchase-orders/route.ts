@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAdminSession } from "@/lib/admin-auth";
+import { makePurchaseOrderNo } from "@/lib/purchase-order-no";
 
 // GET — 발주서 목록
 export async function GET(_req: NextRequest) {
@@ -36,8 +37,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "모든 품목에 단가를 입력해주세요." }, { status: 400 });
   }
 
-  const year = new Date().getFullYear();
-
   // 트랜잭션으로 TEMP 생성 → 실제 번호 업데이트를 원자적으로 처리
   const updated = await prisma.$transaction(async (tx) => {
     const order = await tx.manualPurchaseOrder.create({
@@ -64,7 +63,7 @@ export async function POST(req: NextRequest) {
         },
       },
     });
-    const finalOrderNo = `SMT-${year}-P-${String(order.id).padStart(6, "0")}`;
+    const finalOrderNo = makePurchaseOrderNo(order.orderDate, order.id);
     return tx.manualPurchaseOrder.update({
       where: { id: order.id },
       data: { orderNo: finalOrderNo },

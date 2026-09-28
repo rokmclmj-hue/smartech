@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAdminSession } from "@/lib/admin-auth";
 import * as XLSX from "xlsx";
+import { PURCHASE_ORDER_NO_PATTERN } from "@/lib/purchase-order-no";
 
 // documentNo/itemLine/mad는 diff의 기준 키라 정확일치만 허용 (엉뚱한 컬럼에 잘못 매칭되면
 // @@unique([documentNo, itemLine]) 키가 오염돼 그 주 전체 비교가 틀어짐 — 부분일치 금지)
@@ -125,7 +126,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "유효한 품목이 없습니다" }, { status: 400 });
 
   // SMT-*-P-* 형식 PO는 기존 발주서 시스템(ManualPurchaseOrder)과 자동 연결
-  const smtPoNumbers = [...new Set(parsedRows.map((r) => r.poNumber).filter((p) => /^SMT-\d{4}-P-\d+$/.test(p)))];
+  const smtPoNumbers = [...new Set(parsedRows.map((r) => r.poNumber).filter((p) => PURCHASE_ORDER_NO_PATTERN.test(p)))];
   const linkedOrders = smtPoNumbers.length
     ? await prisma.manualPurchaseOrder.findMany({
         where: { orderNo: { in: smtPoNumbers } },
