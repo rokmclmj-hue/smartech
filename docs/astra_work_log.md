@@ -342,3 +342,10 @@
 - 대표님 "블로그 글 업로드하자" 요청으로 수동 실행: 발행 전 output 전체 사진 MD5 대조(중복 0), `check_quality.py` 전체 통과 → `python 블로그/auto_upload.py --slot day1`.
 - 결과: https://www.smartechvacuum.com/blog/102 HTTP 200·제목 일치 확인. X 대기글 1건 PENDING 자동 생성(127/280자). upload-queue day1 uploaded=true.
 - 다음: 10/1(목) day2 `1001-이차전지-드라이펌프` — 9시에 PC가 켜져 있지 않으면 같은 방식으로 수동 발행 필요. 10/5 주부터는 큐 갱신 필요.
+
+### 9/28 자동 발행 누락 원인 확인·수정
+
+- 원인(시스템 이벤트 기록): 노트북이 9/26 01:38부터 9/28 09:13까지 절전(Modern Standby). 09:00 예약을 놓쳤고, `StartWhenAvailable=True`였지만 `DisallowStartIfOnBatteries=True` + 깨어날 때 배터리 사용 중이라 늦은 실행도 막힘.
+- 수정: `블로그/setup_scheduler.ps1`에 `-AllowStartIfOnBatteries -DontStopIfGoingOnBatteries` 추가, `test_setup_scheduler.ps1` 검사 보강(PASS). 변경 전 작업 XML 백업 `블로그/scheduler-backups/20260928-battery-before/`.
+- 대표님이 관리자 PowerShell에서 스크립트 재실행(백업 20260928-095334-202). 재조회: Day1_Monday·Day2_Thursday 모두 Ready, 배터리 금지 False, StartWhenAvailable True, Hidden True, 다음 실행 10/1·10/5 09:00.
+- 한계: 노트북이 계속 절전 중이면 깨어날 때까지 발행이 늦어진다(깨우기 설정은 켜지 않음).

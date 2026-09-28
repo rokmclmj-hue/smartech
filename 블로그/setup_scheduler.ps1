@@ -21,8 +21,11 @@ foreach ($required in @($pythonWindowless, $script)) {
 
 # Hidden marks the scheduler entry; pythonw and CREATE_NO_WINDOW in Python
 # prevent the console itself from opening (QuickEdit click/pause protection).
+# Battery switches: a laptop woken on battery after a missed 09:00 run must still publish (2026-09-28).
 $settings = New-ScheduledTaskSettingsSet `
     -StartWhenAvailable `
+    -AllowStartIfOnBatteries `
+    -DontStopIfGoingOnBatteries `
     -Hidden `
     -RunOnlyIfNetworkAvailable:$false `
     -ExecutionTimeLimit (New-TimeSpan -Minutes 30) `

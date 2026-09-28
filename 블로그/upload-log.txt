@@ -1408,3 +1408,7 @@ icn1::qh9md-1785732841640-5d63fec558c8
 
 완료: 1건 PENDING으로 생성됨
 [2026-09-28 09:35:30] ✅ [월요일] 업로드 완료: 진공 포장기는 어떻게 공기를 빼고, 왜 음식이 오래갈까
+[2026-09-28T09:53:37] Registered SmartechBlog_Day1_Monday, start=2026-09-14T09:00:00, backup=C:\Users\rokmc\smartech\블로그\scheduler-backups\20260928-095334-202
+[2026-09-28T09:53:37] Registered SmartechBlog_Day2_Thursday, start=2026-09-17T09:00:00, backup=C:\Users\rokmc\smartech\블로그\scheduler-backups\20260928-095334-202
+[2026-09-28T09:53:37] Disabled SmartechBlog_Day2_Wednesday, backup=C:\Users\rokmc\smartech\블로그\scheduler-backups\20260928-095334-202
+[2026-09-28T09:53:37] Disabled SmartechBlog_Day3_Friday, backup=C:\Users\rokmc\smartech\블로그\scheduler-backups\20260928-095334-202

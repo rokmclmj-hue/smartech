@@ -13,8 +13,10 @@ function Get-ScheduledTask {
 }
 function New-ScheduledTaskSettingsSet {
     param([switch]$StartWhenAvailable, [switch]$Hidden, [switch]$RunOnlyIfNetworkAvailable,
+        [switch]$AllowStartIfOnBatteries, [switch]$DontStopIfGoingOnBatteries,
         $ExecutionTimeLimit, $MultipleInstances)
-    [pscustomobject]@{ Hidden = $Hidden.IsPresent; MultipleInstances = $MultipleInstances }
+    [pscustomobject]@{ Hidden = $Hidden.IsPresent; MultipleInstances = $MultipleInstances
+        Battery = $AllowStartIfOnBatteries.IsPresent -and $DontStopIfGoingOnBatteries.IsPresent }
 }
 function New-ScheduledTaskAction {
     param($Execute, $Argument, $WorkingDirectory)
@@ -62,7 +64,7 @@ $expected = @('2026-09-14T09:00:00', '2026-09-17T09:00:00')
 for ($index = 0; $index -lt 2; $index++) {
     $job = $registered[$index]
     if ($job.Trigger.StartBoundary -ne $expected[$index] -or
-        $job.Trigger.At -ne '09:00' -or -not $job.Settings.Hidden -or
+        $job.Trigger.At -ne '09:00' -or -not $job.Settings.Hidden -or -not $job.Settings.Battery -or
         $job.Action.Execute -notlike '*\pythonw.exe' -or
         $job.Action.Argument -notlike "*--slot day$($index + 1)") {
         throw 'Wrong schedule, slot, or console protection.'
