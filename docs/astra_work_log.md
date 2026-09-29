@@ -1,5 +1,13 @@
 # Astra 작업 기록
 
+## 2026-09-29 — (클로드) 오픈오더 사라진 품목 자동 입고완료 + MAD 빈칸 저장 (커밋 2020f55)
+
+- 대표님 설명: 새 오픈오더에 안 보이는 품목 = 납품 완료. 기존엔 입고완료 후보(PENDING_CONFIRM)로만 표시하고 품목마다 수동 확정 버튼 → 8/31분 40개가 진행중 탭에 계속 섞여 보였음.
+- 수정: 업로드 시 사라진 품목(OPEN·옛 PENDING_CONFIRM)은 바로 DELIVERED+deliveredAt. 확정 버튼 제거, 탭명 "진행중". DELIVERED 품목이 시트에 다시 나오면 자동 OPEN 복귀(되돌리기 버튼은 유지).
+- 인식실패 1건 원인: 9/28 파일 69행 SMT-2026-P-000083 PV16EKA Solenoid Valve 240V x3, Current MAD 빈칸(본사 미정). 빈칸 행은 이제 건너뛰지 않고 currentMad=null("MAD 미정", 목록 맨 뒤)로 저장 — 건너뛰면 기존 품목이 사라짐으로 오판돼 입고완료될 위험도 함께 해소.
+- schema: `EdwardsOpenOrder.currentMad` nullable(대표님 승인). `npx prisma db push`와 `next build`는 자동모드가 막아 대표님이 직접 실행(성공), is_nullable=YES 확인. tsc 통과, push·원격 일치·Vercel success 확인.
+- 남은 확인: 대표님이 9/28 엑셀 재업로드 → 후보 40개 입고완료 이력으로 이동, PV16EKA "MAD 미정" 표시 확인. 관리자 메뉴 PENDING_CONFIRM 배지는 이후 항상 0(코드 그대로 둠). page.tsx의 기존 eslint 오류 2건(setState in effect)은 이번 변경 전부터 있던 것.
+
 ## 2026-09-28 — (클로드) 발주서 번호 연도→발주일 변경 (커밋 3968cb3)
 
 - 대표님 요청: `SMT-2026-P-000031` → `SMT-260610-P-000031`처럼 발주일(YYMMDD, 한국 날짜)로. **앞으로 저장되는 발주서부터**만 적용, 기존 번호(31~84 등)는 에드워드에 이미 발송·오픈오더에 연결돼 있어 그대로 둠(대표님 결정).
