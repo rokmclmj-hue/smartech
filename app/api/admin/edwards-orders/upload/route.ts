@@ -97,18 +97,20 @@ export async function POST(req: NextRequest) {
     materialCode: string;
     description: string;
     quantity: number;
-    mad: Date;
+    mad: Date | null; // 본사가 아직 MAD를 안 정한 품목은 빈칸 → null로 저장
     supplier: string;
   };
 
   const parsedRows: Parsed[] = [];
-  let skipped = 0;
+  let skipped = 0, madMissing = 0;
 
   for (const row of rows2d.slice(1)) {
     const documentNo = String(row[idx.documentNo] ?? "").trim();
     const itemLine = String(row[idx.itemLine] ?? "").trim();
+    // MAD 빈칸은 건너뛰지 않음 — 건너뛰면 "시트에서 사라짐"으로 잘못 판단돼 입고완료 처리되기 때문
+    if (!documentNo || !itemLine) { skipped++; continue; }
     const mad = excelSerialToDate(row[idx.mad]);
-    if (!documentNo || !itemLine || !mad) { skipped++; continue; }
+    if (!mad) madMissing++;
 
     parsedRows.push({
       poNumber: String(row[idx.poNumber] ?? "").trim(),
@@ -174,12 +176,6 @@ export async function POST(req: NextRequest) {
         continue;
       }
 
-      if (found.status === "DELIVERED") {
-        // 이미 입고완료 확정된 건이 다시 나타남 — 자동으로 되돌리지 않고 건너뜀(사람이 필요시 수동 확인)
-        skippedDelivered++;
-        continue;
-      }
-
       const madHasChanged = !sameDate(found.currentMad, row.mad);
       const data: Record<string, unknown> = {
         poNumber: row.poNumber,
@@ -197,11 +193,13 @@ export async function POST(req: NextRequest) {
       if (!found.supplier && row.supplier) {
         data.supplier = row.supplier;
       }
-      if (found.status === "PENDING_CONFIRM") {
+      // 입고완료(또는 옛 입고완료 후보) 처리됐던 품목이 시트에 다시 나타나면 아직 진행중인 것 → 자동 복귀
+      if (found.status !== "OPEN") {
         data.status = "OPEN";
+        data.deliveredAt = null;
         reappeared++;
       }
-      if (!madHasChanged && found.status !== "PENDING_CONFIRM" && (found.supplier || !row.supplier)) {
+      if (!madHasChanged && found.status === "OPEN" && (found.supplier || !row.supplier)) {
         unchanged++;
       }
 
@@ -218,14 +216,15 @@ export async function POST(req: NextRequest) {
       existingMap.set(key, { ...found, ...data } as typeof found);
     }
 
-    // 이번 시트에 없어진 OPEN 품목 → 입고완료 후보(PENDING_CONFIRM)로 표시 (자동 확정 아님, 사람 확인 필요)
+    // 이번 시트에 없어진 품목 = 납품 완료 → 바로 입고완료(DELIVERED) 처리 (잘못된 경우 화면의 "되돌리기"로 복구)
+    // 옛 방식의 입고완료 후보(PENDING_CONFIRM)도 여기서 함께 정리
     const disappearedRows = existing.filter(
-      (e) => e.status === "OPEN" && !seenKeys.has(`${e.documentNo}|${e.itemLine}`)
+      (e) => (e.status === "OPEN" || e.status === "PENDING_CONFIRM") && !seenKeys.has(`${e.documentNo}|${e.itemLine}`)
     );
     disappearedCount = disappearedRows.length;
     for (const e of disappearedRows) {
-      // 같은 이유로 status: "OPEN" 조건을 걸어 그 사이 상태가 바뀐 건은 건드리지 않음
-      await tx.edwardsOpenOrder.updateMany({ where: { id: e.id, status: "OPEN" }, data: { status: "PENDING_CONFIRM" } });
+      // 같은 이유로 읽었던 status 조건을 걸어 그 사이 상태가 바뀐 건은 건드리지 않음
+      await tx.edwardsOpenOrder.updateMany({ where: { id: e.id, status: e.status }, data: { status: "DELIVERED", deliveredAt: now } });
     }
   }, { timeout: 30000, maxWait: 10000 });
 
@@ -238,6 +237,7 @@ export async function POST(req: NextRequest) {
     unchanged,
     disappeared: disappearedCount,
     skippedRows: skipped,
+    madMissing,
     skippedDelivered,
   });
 }

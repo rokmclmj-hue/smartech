@@ -11,7 +11,7 @@ type EdwardsOpenOrder = {
   materialCode: string;
   description: string;
   quantity: number;
-  currentMad: string;
+  currentMad: string | null; // 본사가 아직 MAD를 안 정한 품목은 null
   previousMad: string | null;
   supplier: string | null;
   status: "OPEN" | "PENDING_CONFIRM" | "DELIVERED";
@@ -24,19 +24,26 @@ type EdwardsOpenOrder = {
 
 type PoGroupSetting = { poNumber: string; requireFullShipment: boolean };
 
-function fmtDate(s: string) {
+// MAD 미정(null)은 정렬 시 맨 뒤로
+function madKey(s: string | null) {
+  return s ?? "9999";
+}
+
+function fmtDate(s: string | null) {
+  if (!s) return "MAD 미정";
   return new Date(s).toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" });
 }
 
 // 오늘부터 currentMad까지 남은 일수 (자정 기준, UTC로 저장된 MAD와 맞춰 비교)
-function daysUntil(dateStr: string) {
+function daysUntil(dateStr: string | null) {
+  if (!dateStr) return Infinity;
   const today = new Date();
   const todayUtc = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
   const mad = new Date(dateStr).getTime();
   return Math.round((mad - todayUtc) / 86400000);
 }
 
-function gcalUrl(item: EdwardsOpenOrder) {
+function gcalUrl(item: EdwardsOpenOrder & { currentMad: string }) {
   const d = new Date(item.currentMad);
   const end = new Date(d.getTime() + 86400000);
   const fmt = (x: Date) => x.toISOString().slice(0, 10).replace(/-/g, "");
@@ -49,7 +56,7 @@ function gcalUrl(item: EdwardsOpenOrder) {
 
 // MAD가 직전 스냅샷보다 당겨졌는지(🟢)/밀렸는지(🔴) 배지
 function MadBadge({ item }: { item: EdwardsOpenOrder }) {
-  if (!item.previousMad) return null;
+  if (!item.previousMad || !item.currentMad) return null;
   const diffDays = Math.round(
     (new Date(item.currentMad).getTime() - new Date(item.previousMad).getTime()) / 86400000
   );
@@ -65,7 +72,6 @@ function MadBadge({ item }: { item: EdwardsOpenOrder }) {
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { label: string; cls: string }> = {
     OPEN: { label: "진행중", cls: "bg-smblue/10 text-smblue" },
-    PENDING_CONFIRM: { label: "입고완료 후보", cls: "bg-edred/10 text-edred" },
     DELIVERED: { label: "입고완료", cls: "bg-ink/10 text-dim" },
   };
   const s = map[status] ?? { label: status, cls: "bg-ink/10 text-dim" };
@@ -123,7 +129,7 @@ function SupplierCell({
 }
 
 export default function EdwardsOrdersPage() {
-  const { success, error: toastError, info } = useToast();
+  const { success, error: toastError } = useToast();
   const [items, setItems] = useState<EdwardsOpenOrder[]>([]);
   const [poSettings, setPoSettings] = useState<Record<string, boolean>>({});
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
@@ -169,8 +175,9 @@ export default function EdwardsOrdersPage() {
       const data = await res.json();
       if (!res.ok) { toastError(data.error ?? "업로드 실패"); return; }
       const skippedNote = data.skippedRows > 0 ? `, 인식 실패 ${data.skippedRows}건(확인 필요)` : "";
+      const madMissingNote = data.madMissing > 0 ? `, MAD 미정 ${data.madMissing}건` : "";
       success(
-        `업로드 완료 — 신규 ${data.created}건, MAD변경 ${data.madChanged}건, 입고완료 후보 ${data.disappeared}건${skippedNote}`
+        `업로드 완료 — 신규 ${data.created}건, MAD변경 ${data.madChanged}건, 입고완료 처리 ${data.disappeared}건${madMissingNote}${skippedNote}`
       );
       load(tab);
       loadSupplierSuggestions();
@@ -226,17 +233,6 @@ export default function EdwardsOrdersPage() {
     });
   }
 
-  async function confirmDelivered(id: number) {
-    const res = await fetch(`/api/admin/edwards-orders/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "confirmDelivered" }),
-    });
-    if (!res.ok) { toastError("확정 실패"); return; }
-    info("입고완료로 확정했습니다");
-    setItems((prev) => prev.filter((it) => it.id !== id));
-  }
-
   async function reopen(id: number) {
     const res = await fetch(`/api/admin/edwards-orders/${id}`, {
       method: "PATCH",
@@ -256,12 +252,12 @@ export default function EdwardsOrdersPage() {
       map.set(it.poNumber, arr);
     }
     const list = [...map.entries()].map(([poNumber, group]) => {
-      const sorted = [...group].sort((a, b) => a.currentMad.localeCompare(b.currentMad));
-      const earliestMad = sorted[0]?.currentMad ?? "";
+      const sorted = [...group].sort((a, b) => madKey(a.currentMad).localeCompare(madKey(b.currentMad)));
+      const earliestMad = sorted[0]?.currentMad ?? null;
       const receivedCount = group.filter((g) => g.hqReceived).length;
       return { poNumber, items: sorted, earliestMad, receivedCount, total: group.length };
     });
-    list.sort((a, b) => a.earliestMad.localeCompare(b.earliestMad));
+    list.sort((a, b) => madKey(a.earliestMad).localeCompare(madKey(b.earliestMad)));
     return list;
   }, [items]);
 
@@ -269,7 +265,8 @@ export default function EdwardsOrdersPage() {
   const upcoming = useMemo(() => {
     if (tab !== "active") return [];
     return items
-      .filter((it) => it.status !== "DELIVERED" && daysUntil(it.currentMad) <= 7)
+      .filter((it): it is EdwardsOpenOrder & { currentMad: string } =>
+        it.status !== "DELIVERED" && it.currentMad !== null && daysUntil(it.currentMad) <= 7)
       .sort((a, b) => a.currentMad.localeCompare(b.currentMad));
   }, [items, tab]);
 
@@ -336,7 +333,7 @@ export default function EdwardsOrdersPage() {
             tab === "active" ? "border-edred text-ink" : "border-transparent dim hover:text-ink"
           }`}
         >
-          진행중 / 입고완료 후보
+          진행중
         </button>
         <button
           onClick={() => setTab("delivered")}
@@ -436,14 +433,6 @@ export default function EdwardsOrdersPage() {
                             </td>
                             <td className="px-3 py-2.5"><StatusBadge status={it.status} /></td>
                             <td className="px-3 py-2.5 text-right">
-                              {it.status === "PENDING_CONFIRM" && (
-                                <button
-                                  onClick={() => confirmDelivered(it.id)}
-                                  className="mono text-[10px] tracking-[0.06em] uppercase bg-ink text-paper px-3 py-1.5 rounded hover:bg-ink/80 transition-colors"
-                                >
-                                  입고완료 확정
-                                </button>
-                              )}
                               {it.status === "DELIVERED" && (
                                 <button
                                   onClick={() => reopen(it.id)}

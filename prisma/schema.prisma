@@ -596,10 +596,10 @@ model EdwardsOpenOrder {
   materialCode  String                        // 자재코드 (A73501983)
   description   String                        // 품명
   quantity      Int
-  currentMad    DateTime                      // 최신 납기 예정일 (Material Availability Date)
+  currentMad    DateTime?                     // 최신 납기 예정일 (Material Availability Date), 본사가 아직 안 정했으면 null
   previousMad   DateTime?                     // 직전 스냅샷 MAD (당겨짐/밀림 비교용)
   supplier      String?                       // 발주업체 (자유입력, 본사는 모르는 정보라 스마텍이 직접 태깅)
-  status        String    @default("OPEN")    // OPEN | PENDING_CONFIRM | DELIVERED
+  status        String    @default("OPEN")    // OPEN | DELIVERED (PENDING_CONFIRM은 2026-09-29 이전 방식, 다음 업로드 때 DELIVERED로 정리)
   manualPurchaseOrderId Int?                  // SMT-* 형식이면 기존 발주서(ManualPurchaseOrder)와 연결
   firstSeenAt   DateTime  @default(now())     // 최초로 업로드 시트에서 발견된 시각
   lastSeenAt    DateTime  @default(now())     // 마지막으로 시트에 존재했던 시각
