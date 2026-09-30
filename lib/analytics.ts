@@ -9,6 +9,8 @@ export type InquiryEvent = "phone_click" | "quote_request" | "repair_submit" | "
 
 export function trackEvent(name: InquiryEvent) {
   if (typeof window === "undefined" || typeof window.gtag !== "function") return;
+  // 관리자 화면(직원 전화·챗봇 시험)은 손님 문의가 아니므로 제외
+  if (window.location.pathname.startsWith("/admin")) return;
   try {
     window.gtag("event", name, { page_path: window.location.pathname });
   } catch {
