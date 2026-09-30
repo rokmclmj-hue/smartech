@@ -1,5 +1,14 @@
 # Astra 작업 기록
 
+## 2026-09-30 — (클로드) GA4 문의 이벤트 4종 추가 (커밋 9a0df59)
+
+- 계기: 9월 GA4 969세션 중 주요 이벤트 1건인데 대표님 실제 문의는 10건 이상 → 코드에 문의 이벤트 전송이 전혀 없었음(layout.tsx 기본 gtag config만).
+- 추가: `lib/analytics.ts` trackEvent(이벤트명+page_path만, 개인정보 없음), `components/PhoneClickTracker.tsx`(tel: 링크 전역 감지, /admin 제외, layout에 장착), 견적 요청 성공(`quote_request`)·수리 접수 성공(`repair_submit`), FloatingChat 대화 첫 질문(`chat_start`, 보호 파일 — 대표님 승인, import+1줄).
+- 홈페이지에 카카오톡 상담 링크는 없음(pf.kakao.com 0건) → 카톡 문의는 외부 채널 경유. 카톡 버튼 추가는 별도 제안 사항.
+- 검증: tsc 통과, next build 통과. eslint FloatingChat의 `acc` 수정 오류(react-hooks/immutability)는 이번 변경 전부터 있던 코드. push·원격 일치, Vercel Production Ready 후 라이브 청크에서 /·/quote·/repair 각 이벤트명 확인.
+- 남은 일: 대표님이 GA4에서 phone_click·quote_request·repair_submit·chat_start를 주요 이벤트로 등록, 실시간 보고서로 전화 버튼 테스트. 10/23 전후 월간 점검 때 첫 문의 통계 확인.
+- 참고: GitHub 커밋 상태 "Vercel success"는 Preview 배포였고 Production은 몇 분 늦게 Ready. 라이브 확인은 `npx vercel ls --prod` 또는 라이브 파일로 할 것.
+
 ## 2026-09-30 — (클로드) 방문자 유입경로 확인 + GA4 로그인 복귀 제외 설정 (코드 변경 없음)
 
 - 대표님이 GA4(보고서→획득→트래픽 획득, 세션 소스/매체) 직접 조회. 9/2~9/29 969세션: google 581 / direct 172 / 네이버 150(naver organic 85 + m.search.naver.com referral 63 + ad.search 2) / chatgpt 32 / bing 17.
