@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { sendChatEmail } from "@/lib/chatEmailAction";
+import { trackEvent } from "@/lib/analytics";
 
 type Message = { role: "user" | "assistant"; content: string };
 
@@ -80,6 +81,7 @@ export default function FloatingChat() {
   async function send(q?: string) {
     const text = (q ?? input).trim();
     if (!text || loading) return;
+    if (!messages.some((m) => m.role === "user")) trackEvent("chat_start");
     const userMsg: Message = { role: "user", content: text };
     const nextMessages = [...messages, userMsg];
     setMessages(nextMessages);

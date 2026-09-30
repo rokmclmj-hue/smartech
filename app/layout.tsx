@@ -5,6 +5,7 @@ import "./quote/[id]/quote-styles.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import QuoteBar from "@/components/QuoteBar";
+import PhoneClickTracker from "@/components/PhoneClickTracker";
 import { SessionProvider } from "./providers";
 
 export const metadata: Metadata = {
@@ -153,6 +154,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <main>{children}</main>
           <Footer />
           <QuoteBar />
+          <PhoneClickTracker />
         </SessionProvider>
       </body>
     </html>

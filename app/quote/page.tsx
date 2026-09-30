@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { trackEvent } from "@/lib/analytics";
 
 type CartItem = {
   productId: number;
@@ -107,6 +108,7 @@ export default function QuotePage() {
       if (res.ok) {
         const data = await res.json();
         setDone(data.quoteId);
+        trackEvent("quote_request");
         localStorage.removeItem("quoteCart");
         window.dispatchEvent(new Event("quoteCartUpdated"));
         setCart([]);

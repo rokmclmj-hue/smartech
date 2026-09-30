@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { SMARTECH_COMPANY } from "@/lib/company";
 import { REPAIR_CASES } from "@/lib/repair-cases";
+import { trackEvent } from "@/lib/analytics";
 import "@/app/quote/[id]/quote-styles.css";
 
 // ── 타입 ──────────────────────────────────────────────────
@@ -262,6 +263,7 @@ export default function RepairPageClient() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setRepairNo(data.repairNo);
+      trackEvent("repair_submit");
       setSubmitted(true);
       setStep(3);
     } catch (e) {
