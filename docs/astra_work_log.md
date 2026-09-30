@@ -384,3 +384,11 @@
 - 수정: `블로그/setup_scheduler.ps1`에 `-AllowStartIfOnBatteries -DontStopIfGoingOnBatteries` 추가, `test_setup_scheduler.ps1` 검사 보강(PASS). 변경 전 작업 XML 백업 `블로그/scheduler-backups/20260928-battery-before/`.
 - 대표님이 관리자 PowerShell에서 스크립트 재실행(백업 20260928-095334-202). 재조회: Day1_Monday·Day2_Thursday 모두 Ready, 배터리 금지 False, StartWhenAvailable True, Hidden True, 다음 실행 10/1·10/5 09:00.
 - 한계: 노트북이 계속 절전 중이면 깨어날 때까지 발행이 늦어진다(깨우기 설정은 켜지 않음).
+
+### 10/1(목) 블로그 발행 — 1001-이차전지-드라이펌프 (id=103)
+
+- 06:42 대표님 "홈페이지 블로그 글 업로드하자" 요청. 큐 day2 approved=true·uploaded=false, 라이브 미발행 확인(9시 예약 전).
+- 발행 전 `check_quality.py` 전체 통과, 기술블로그 전체 PNG MD5 대조로 이 글 사진 중복 0 확인.
+- `python 블로그/approve_post.py "기술블로그/2026-10/1001-이차전지-드라이펌프"` → https://www.smartechvacuum.com/blog/103 HTTP 200·제목 일치. X 대기글 1건 PENDING(154/280자). day2 uploaded=true.
+- 9시 `SmartechBlog_Day2_Thursday`는 `auto_upload.py --slot day2 --dry-run`에서 "이미 업로드 완료"로 건너뜀 확인(중복 발행 없음).
+- 다음: 10/5(월)·10/8(목) 글을 위해 upload-queue.json을 W41로 갱신해야 함(원고 1005-진공흡착-원리·1008-펌프다운-지연원인 폴더 존재, 사진·예약 승인 필요).
