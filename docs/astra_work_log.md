@@ -401,3 +401,13 @@
 - 규칙: `블로그/agents/writer.md`에 "naver.md [출처] 목록 금지" 1줄 추가(ae60349, 별도 커밋).
 - 대표님 할 일: 네이버에 0928·1001을 이미 올렸다면 네이버 글 맨 아래 출처 부분 직접 삭제.
 - 참고: 12:32 Day2 예약 작업이 실행돼 "이미 업로드 완료"로 건너뜀(중복 발행 없음).
+
+## 2026-10-02 — 온라인수리 → 수리접수 등록 버튼 (커밋 0d14ee1)
+
+- 요청: 온라인수리로 들어온 고객 정보를 수리접수에 다시 입력하는 번거로움 제거. 논의 후 승인 3건(스키마 칸 추가, 금액 이관, 수리사유 "고장").
+- 변경: `prisma/schema.prisma`(`OfflineRepairJob.sourceRepairId` unique + 관계), `app/api/admin/repairs/[id]/to-offline/route.ts`(신규 POST), `lib/offline-repair-defaults.ts`(검사항목 기본값·증상 한글을 옮겨 공유), `app/api/admin/repairs/route.ts`(목록에 offlineJob 포함), `app/api/admin/offline-repairs/route.ts`(기본값 import로 교체), `app/admin/repairs/page.tsx`(버튼·배지).
+- DB: `prisma db push --accept-data-loss`는 도구 권한에서 차단돼 대표님이 직접 실행(경고는 새 unique 칸 1건뿐, "in sync" 확인). 코드 push는 DB 적용 뒤에 진행.
+- 검증: `tsc --noEmit` 통과, `next build` 통과, 실제 접수(id=12, SM-261001-01)로 생성→중복 시도 P2002→롤백 시험(건수 27→27 유지). eslint 오류 2건은 기존 줄(useEffect setState)로 이번 변경과 무관.
+- 배포: 원격 해시 일치, Vercel Production 반영 후 `POST /api/admin/repairs/12/to-offline` 비로그인 403, `/api/admin/offline-repairs` 403, `/admin/repairs` 200 확인. (미리보기 배포 success 직후에는 404였고 Production 완료 뒤 403으로 바뀜 — success 표시만 보고 판단하지 말 것.)
+- 미확인: 관리자 로그인 상태의 실제 버튼 클릭은 대표님 확인 대기. reviewed 포인터는 이동하지 않음(이전 미검토 4개 + 이번 커밋).
+- 남긴 것: `SYMPTOM_KO` 사본이 `app/admin/repairs/page.tsx`·`blog-draft/route.ts`에 그대로 있음(범위 밖, 통합은 별도).
