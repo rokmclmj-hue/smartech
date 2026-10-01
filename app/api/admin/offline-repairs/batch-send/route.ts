@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { getAdminSession } from "@/lib/admin-auth";
 import { generateRepairQuotePdf, generateRepairInspectionPdf } from "@/lib/pdf";
 import { sendRepairQuoteBatch } from "@/lib/mailer";
+import { syncOnlineRepairStatus } from "@/lib/repair-status-sync";
 
 export async function POST(req: NextRequest) {
   if (!(await getAdminSession()))
@@ -74,6 +75,7 @@ export async function POST(req: NextRequest) {
     where: { id: { in: ids } },
     data: { status: "QUOTE_SENT" },
   });
+  await syncOnlineRepairStatus(ids);
 
   return NextResponse.json({ ok: true, count: jobs.length });
 }

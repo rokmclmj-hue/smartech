@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { put } from "@vercel/blob";
+import { syncOnlineRepairStatus } from "@/lib/repair-status-sync";
 
 // POST — 협력사 파일 업로드 + 검사항목 제출
 export async function POST(req: NextRequest) {
@@ -61,6 +62,7 @@ export async function POST(req: NextRequest) {
     where: { id: job.id },
     data: { status: "UPLOADED", uploadedAt: new Date() },
   });
+  await syncOnlineRepairStatus(job.id);
 
   // 관리자 SMS 알림
   const adminPhone = process.env.ADMIN_PHONE;

@@ -4,6 +4,7 @@ import { getAdminSession } from "@/lib/admin-auth";
 import { randomUUID } from "crypto";
 import { sendSubUploadLink } from "@/lib/mailer";
 import { resolveCompanyId } from "@/lib/known-company";
+import { syncOnlineRepairStatus } from "@/lib/repair-status-sync";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -51,6 +52,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     } catch {
       return NextResponse.json({ error: "업데이트 실패 (동시 삭제됐을 수 있음)" }, { status: 409 });
     }
+    await syncOnlineRepairStatus(nId);
 
     // 협력사 이메일 자동 발송 (subEmail 우선, 없으면 환경변수)
     const subEmail = job.subEmail || process.env.REPAIR_SUB_EMAIL;
@@ -149,6 +151,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       }),
     },
   });
+  if (body.status) await syncOnlineRepairStatus(nId);
   return NextResponse.json(updated);
 }
 

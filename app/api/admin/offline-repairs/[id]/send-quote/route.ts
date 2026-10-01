@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { getAdminSession } from "@/lib/admin-auth";
 import { generateRepairQuotePdf, generateRepairInspectionPdf } from "@/lib/pdf";
 import { sendRepairQuote } from "@/lib/mailer";
+import { syncOnlineRepairStatus } from "@/lib/repair-status-sync";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -82,6 +83,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     where: { id: Number(id) },
     data: { status: "QUOTE_SENT" },
   });
+  await syncOnlineRepairStatus(Number(id));
 
   return NextResponse.json({ ok: true });
 }
