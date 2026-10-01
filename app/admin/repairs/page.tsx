@@ -40,6 +40,7 @@ type Repair = {
   symptomNote: string | null;
   createdAt: string;
   files: RepairFile[];
+  offlineJob?: { id: number; jobNo: string } | null;
 };
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
@@ -93,6 +94,7 @@ function RepairRow({ repair, onRefresh }: { repair: Repair; onRefresh: () => voi
   const [editModel, setEditModel] = useState(repair.pumpModel ?? "");
   const [savingModel, setSavingModel] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [registering, setRegistering] = useState(false);
 
   const [fullFiles, setFullFiles] = useState<FullRepairFile[]>([]);
   const [filesLoading, setFilesLoading] = useState(false);
@@ -151,6 +153,20 @@ function RepairRow({ repair, onRefresh }: { repair: Repair; onRefresh: () => voi
       setCurRepair(p => ({ ...p, pumpModel: editModel.trim() }));
       onRefresh();
     } finally { setSavingModel(false); }
+  }
+
+  async function registerOffline() {
+    if (!confirm(`${curRepair.repairNo} 건을 수리접수로 등록하시겠습니까?\n거래처·담당자·장비·증상·금액이 그대로 넘어갑니다.`)) return;
+    setRegistering(true);
+    try {
+      const res = await fetch(`/api/admin/repairs/${repair.id}/to-offline`, { method: "POST" });
+      const data = await res.json().catch(() => ({}));
+      if (data.offlineJob) setCurRepair(p => ({ ...p, offlineJob: data.offlineJob }));
+      if (!res.ok) throw new Error(data.error ?? "등록 실패");
+      onRefresh();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "등록 실패");
+    } finally { setRegistering(false); }
   }
 
   async function updateStatus(newStatus: string) {
@@ -270,6 +286,9 @@ function RepairRow({ repair, onRefresh }: { repair: Repair; onRefresh: () => voi
             {curRepair.aiConfidence === "low" && (
               <span className="text-[9px] bg-amber-100 text-amber-700 px-1.5 py-0.5 font-semibold">모델확인필요</span>
             )}
+            {curRepair.offlineJob && (
+              <span className="text-[9px] bg-green-50 text-green-700 px-1.5 py-0.5 font-semibold">수리접수 {curRepair.offlineJob.jobNo}</span>
+            )}
             {photoCount > 0 && <span className="text-[10px] bg-blue-50 text-blue-600 px-1.5 py-0.5">사진 {photoCount}</span>}
             {certCount > 0 && <span className="text-[10px] bg-green-50 text-green-600 px-1.5 py-0.5">성적서 {certCount}</span>}
           </div>
@@ -370,6 +389,29 @@ function RepairRow({ repair, onRefresh }: { repair: Repair; onRefresh: () => voi
                     <Row label="이메일" value={
                       <a href={`mailto:${curRepair.contactEmail}`} className="text-edred hover:underline">{curRepair.contactEmail}</a>
                     } />
+                  )}
+                </Section>
+                <Section title="수리접수 등록">
+                  {curRepair.offlineJob ? (
+                    <div className="flex items-center justify-between gap-3 flex-wrap">
+                      <div className="text-[13px]">
+                        수리접수 등록됨 <span className="mono font-bold text-smblue ml-1">{curRepair.offlineJob.jobNo}</span>
+                      </div>
+                      <a href="/admin/offline-repairs"
+                        className="text-[12px] border border-line px-3 py-1.5 hover:border-ink transition text-dim hover:text-ink">
+                        수리접수에서 보기 →
+                      </a>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="text-[12px] text-dim mb-3">
+                        위 장비·증상·연락처와 금액을 수리접수로 그대로 넘깁니다. 다시 입력할 필요가 없습니다.
+                      </p>
+                      <button onClick={registerOffline} disabled={registering || !curRepair.pumpModel?.trim()}
+                        className="w-full py-2.5 bg-ink text-paper text-[12px] font-semibold hover:bg-edred transition disabled:opacity-40">
+                        {registering ? "등록 중..." : "수리접수로 등록"}
+                      </button>
+                    </>
                   )}
                 </Section>
               </>

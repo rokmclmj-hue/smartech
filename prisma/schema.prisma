@@ -251,6 +251,7 @@ model RepairRequest {
   files         RepairFile[]
   statusLogs    RepairStatusLog[]
   uploadTokens  UploadToken[]
+  offlineJob    OfflineRepairJob? // "수리접수로 등록"으로 만들어진 수리접수 건
 
   @@index([status])
   @@index([repairNo])
@@ -658,6 +659,10 @@ model OfflineRepairJob {
   requestedDate   DateTime?
 
   memo            String?
+
+  // 온라인 수리접수(RepairRequest)에서 넘어온 건이면 원본 id — 한 접수당 한 번만 등록되도록 unique
+  sourceRepairId  Int?      @unique
+  sourceRepair    RepairRequest? @relation(fields: [sourceRepairId], references: [id], onDelete: SetNull)
 
   // 수리 견적 (Phase 2)
   repairCost      Int?      // 총 견적금액 (quoteItems 합계, 필요 시 직접 수정 가능)

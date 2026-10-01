@@ -33,6 +33,7 @@ export async function GET(req: NextRequest) {
         files: { select: { fileType: true } },
         statusLogs: { orderBy: { createdAt: "desc" }, take: 1 },
         uploadTokens: { select: { id: true, expiresAt: true, usedAt: true } },
+        offlineJob: { select: { id: true, jobNo: true } },
       },
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * limit,
