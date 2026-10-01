@@ -59,9 +59,6 @@
 
 흡착 방식 장비를 다루신다면 예비 대책이 있는지, 흡착력이 계산상 최대치가 아니라 실제 표면 상태에서 얼마나 나오는지 먼저 확인해 보시길 권합니다.
 
-[출처]
-- NIST CODATA, standard atmosphere: https://physics.nist.gov/cgi-bin/cuu/Value?stdatm=
-
 추가로 궁금한 점은 아래로 문의해 주세요.
 
 ---

@@ -51,10 +51,6 @@ Leybold의 한 건조 공정 예시에서는, 챔버 내 수분 압력이 27 mba
 
 진공 오븐을 운전 중이시라면 지금 어느 압력대에서 반응이 느려지는지, 그 지점에서 게이지 방식이 수증기를 정확히 읽고 있는지부터 확인해 보시는 것이 첫 단계입니다.
 
-[출처]
-- Leybold, How does the drying process work with a vacuum pump system: https://www.leybold.com/en-us/knowledge/vacuum-fundamentals/vacuum-generation/how-does-the-drying-process-work
-- Leybold, How to select a vacuum pump for drying applications: https://www.leybold.com/en-in/knowledge/vacuum-fundamentals/vacuum-generation/pump-selection-for-drying-process
-
 건조 공정 압력 구간별 게이지·펌프 구성 상담은 아래로 문의해 주세요.
 
 ---

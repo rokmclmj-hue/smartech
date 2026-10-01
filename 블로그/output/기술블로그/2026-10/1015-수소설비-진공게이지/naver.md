@@ -55,10 +55,6 @@ Pfeiffer는 압력을 면적에 가해지는 힘으로 직접 측정하는 방�
 
 귀사 설비가 수소를 처리하는 진공 라인이시라면 현재 쓰시는 게이지의 방식(피라니·이온화·정전용량)과 교정 기준 가스가 무엇인지 먼저 확인해 보시는 것이 첫 단계입니다.
 
-[출처]
-- Edwards, Seven factors affecting the sensitivity of vacuum gauges: https://www.edwardsvacuum.com/en-us/vacuum-pumps/knowledge/applications/seven-factors-affecting-the-sensitivity-of-vacuum-gauges
-- Pfeiffer Vacuum, Total Pressure Measurement Fundamentals: https://www.pfeiffervacuum.com/us/en/knowledge/vacuum-technology/knowledge-book/5-vacuum-measuring-equipment/5_1_fundamentals_of_total_pressure_measurement/
-
 제품 문의·견적은 아래 채널로 받고 있습니다.
 
 ---

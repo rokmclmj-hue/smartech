@@ -53,10 +53,6 @@ VIP는 창문이 아니라 벽체·냉동고·냉장 설비의 단열재로 주�
 
 창문이나 벽체를 새로 시공하거나 교체할 계획이 있으시다면, 제품이 진공식인지 기체 충전식인지, 그리고 시공 후에는 표면을 뚫거나 강한 충격을 주는 작업을 피해야 하는지 시공업체에 미리 확인해 두시는 것이 좋습니다.
 
-[출처]
-- NIST CODATA, standard atmosphere: https://physics.nist.gov/cgi-bin/cuu/Value?stdatm=
-- 미국 에너지부(DOE), Inexpensive and Durable Aerogel-Based VIP Cores: https://www.energy.gov/eere/buildings/articles/inexpensive-and-durable-aerogel-based-vip-cores-0
-
 추가로 궁금한 점은 아래로 문의해 주세요.
 
 ---

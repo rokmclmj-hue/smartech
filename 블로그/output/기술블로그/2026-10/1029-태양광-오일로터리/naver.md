@@ -45,10 +45,6 @@ Leybold는 태양광 제조에서 순도와 오일 프리 솔루션이 필수적
 
 귀사 공정이 어느 단계(코팅, 결정 성장, 박막, 로드락)에 해당하시는지와 처리 가스 조건, 산소 관여 여부를 알려주시면 적합한 펌프 구성과 오일 사양을 확인해 드립니다.
 
-[출처]
-- Leybold, Solar Technology: https://www.leybold.com/en/applications-and-industries/solar-technology
-- Leybold, Solar Coating: https://www.leybold.com/en-us/applications-and-industries/solar-technology/solar-coating
-
 제품 문의·견적은 아래 채널로 받고 있습니다.
 
 ---

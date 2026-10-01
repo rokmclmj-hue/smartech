@@ -59,13 +59,6 @@
 
 식품 포장 공정의 펌프를 검토 중이시라면 처리하는 식품의 수분량, 한 사이클의 배기 시간, 요구하는 최종 압력 세 가지를 먼저 정리해 보시길 권합니다.
 
-[출처]
-- Atlas Copco, vacuum packaged food: https://www.atlascopco.com/en-us/vacuum-solutions/blog/vacuum-packaged-food
-- Leybold, Food Packaging: https://www.leybold.com/en/applications-and-industries/food-processing-and-packaging/food-packaging
-- Leybold, gas ballast: https://www.leybold.com/en-us/knowledge/vacuum-fundamentals/vacuum-generation/how-does-a-gas-ballast-work
-- NIST CODATA, standard atmosphere: https://physics.nist.gov/cgi-bin/cuu/Value?stdatm=
-- FDA, Fish and Fishery Products Hazards and Controls Guidance Chapter 13: https://www.fda.gov/files/food/published/Fish-and-Fishery-Products-Hazards-and-Controls-Guidance-Chapter-13-Download.pdf
-
 관련 상담은 아래 연락처로 편하게 남겨주세요.
 
 ---

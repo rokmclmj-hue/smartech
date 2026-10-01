@@ -54,10 +54,6 @@ GXS는 단독형과 부스터(2600·4200 등)를 더한 조합형이 있습니�
 
 귀사 공정이 파우치형인지 각형인지, 챔버 용적과 목표 탈기 시간이 어느 정도인지 알려주시면 적합한 GXS 구성을 확인해 드립니다.
 
-[출처]
-- Edwards, Lithium-Ion Battery Production: https://www.edwardsvacuum.com/en-us/vacuum-pumps/our-markets/energy-solutions/lithium-ion-battery-production
-- Edwards, Why are dry pumps better for Li-ion battery electrolyte degassing?: https://www.edwardsvacuum.com/en-us/knowledge/applications/why-are-dry-pumps-better-for-li-ion-battery-electrolyte-degassing
-
 제품 문의·견적은 아래 채널로 받고 있습니다.
 
 ---

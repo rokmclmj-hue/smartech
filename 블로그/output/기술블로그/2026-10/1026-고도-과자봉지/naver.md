@@ -49,11 +49,6 @@ ISA 공식은 직선이 아니라 지수함수 형태입니다. 그래서 저고
 
 등산이나 여행 중 간식을 챙기실 때 이런 팽창을 아예 걱정하고 싶지 않으시다면, 처음부터 압력 변화에 덜 민감한 단단한 용기에 옮겨 담는 것도 한 방법입니다. 다만 대부분의 경우는 봉지가 부푸는 정도로 그치고 안전에 문제가 되지는 않습니다.
 
-[출처]
-- NIST CODATA, standard atmosphere: https://physics.nist.gov/cgi-bin/cuu/Value?stdatm=
-- The International Standard Atmosphere (ISA): http://fisicaatmo.at.fcen.uba.ar/practicas/ISAweb.pdf
-- 14 CFR 25.841, Pressurized cabins (eCFR): https://www.ecfr.gov/current/title-14/chapter-I/subchapter-C/part-25/subpart-D/subject-group-ECFRc61d71ee0787390/section-25.841
-
 추가로 궁금한 점은 아래로 문의해 주세요.
 
 ---

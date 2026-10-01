@@ -57,11 +57,6 @@
 
 원인을 찾는 동안 챔버를 자주 열고 닫으시면 그 자체로 새로운 대기 노출과 표면 오염이 더해져 진단이 오히려 어려워질 수 있습니다. 가능하면 챔버를 닫아둔 상태에서 관찰 가능한 항목(도달압력, 압력 회복 속도)부터 확인하시고, 육안 점검이 필요한 항목은 마지막에 한 번에 처리하시는 순서가 효율적입니다.
 
-[출처]
-- Edwards, Why Your Vacuum Pump Keeps Failing: https://www.edwardsvacuum.com/en-us/vacuum-pumps/knowledge/applications/whyyourvacuumpumpkeepsfailing-6commonmaintenancemistakes
-- Edwards, Four ways to reduce outgassing in vacuum systems: https://www.edwardsvacuum.com/en-us/vacuum-pumps/knowledge/applications/four-ways-to-reduce-outgassing-in-vacuum-systems
-- Leybold, Basics of Vacuum Leak Detection: https://www.leybold.com/en-us/knowledge/vacuum-fundamentals/leak-detection/basics-of-leak-detection
-
 관련 상담은 아래 연락처로 편하게 남겨주세요.
 
 ---
