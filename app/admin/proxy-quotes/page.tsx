@@ -77,6 +77,7 @@ type HistoryItem = {
   phone: string | null;
   tier: string;
   isGuest: boolean;
+  contacts?: KnownContact[];
   subtotal: number;
   itemCount: number;
   previewItems: { partNo: string; description: string; quantity: number; unitPrice: number; leadTime?: string }[];
@@ -310,16 +311,17 @@ function AdminProxyQuotesInner() {
     setGuest((g) => ({
       ...g,
       name: ct.name,
-      title: ct.title ?? g.title,
-      phone: ct.mobile ?? ct.tel ?? g.phone,
-      email: ct.email ?? g.email,
+      // 이전 담당자의 직급·연락처가 새 담당자에게 남지 않도록 빈 값이면 비운다.
+      title: ct.title ?? "",
+      phone: ct.mobile ?? ct.tel ?? "",
+      email: ct.email ?? "",
     }));
     if (selectedCustomer) {
       setSelectedCustomer({
         ...selectedCustomer,
         name: ct.name,
-        phone: ct.mobile ?? ct.tel ?? selectedCustomer.phone,
-        email: ct.email ?? selectedCustomer.email,
+        phone: ct.mobile ?? ct.tel ?? "",
+        email: ct.email ?? "",
       });
     }
   }
@@ -340,6 +342,7 @@ function AdminProxyQuotesInner() {
     setGuest({ company: h.company, name: h.contactName, title: h.contactTitle ?? "", email: h.email ?? "", phone: h.phone ?? "", tier: h.tier });
     setSelectedCustomer({ source: "known", id: 0, company: h.company, name: h.contactName, phone: h.phone ?? "", email: h.email ?? "", tier: h.tier, paymentTerm: null, contacts: [] });
     setSelectedCompanyName(h.company);
+    setSelectedContacts(h.contacts ?? []);
     // 품목 복원
     const restoredLines: LineItem[] = h.previewItems.map((item, idx) => ({
       key: `hist_${h.id}_${idx}`,
@@ -915,7 +918,8 @@ function AdminProxyQuotesInner() {
             </div>
 
             {/* 담당자 여러 명 선택 */}
-            {selectedContacts.length > 1 && (
+            {(selectedContacts.length > 1 ||
+              (selectedContacts.length === 1 && selectedContacts[0].name !== selectedCustomer.name)) && (
               <div>
                 <div className="mono text-[9px] tracking-[0.12em] dim uppercase mb-1.5">담당자 선택</div>
                 <div className="flex flex-wrap gap-2">

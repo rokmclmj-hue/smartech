@@ -30,6 +30,19 @@ export async function GET(req: NextRequest) {
     take: 30,
   });
 
+  // 거래처에 등록된 담당자 목록 — 이력을 불러온 뒤 담당자만 바꿔 다시 견적낼 수 있게 함께 보낸다.
+  const companyNames = [...new Set(quotes.map((q) => q.user?.company ?? q.guestCompany ?? "").filter(Boolean))];
+  const knownCompanies = companyNames.length
+    ? await prisma.knownCompany.findMany({
+        where: { companyName: { in: companyNames } },
+        select: {
+          companyName: true,
+          contacts: { select: { id: true, name: true, title: true, tel: true, mobile: true, email: true }, orderBy: { id: "asc" } },
+        },
+      })
+    : [];
+  const contactsByCompany = new Map(knownCompanies.map((c) => [c.companyName, c.contacts]));
+
   const items = quotes.map((q) => {
     const company = q.user?.company ?? q.guestCompany ?? "";
     const contactName = q.user?.name ?? q.guestName ?? "";
@@ -46,6 +59,7 @@ export async function GET(req: NextRequest) {
       contactTitle: q.guestTitle ?? null,
       tier: q.guestTier ?? "ENDUSER",
       isGuest: q.userId === null,
+      contacts: contactsByCompany.get(company) ?? [],
       subtotal,
       itemCount: q.items.length,
       previewItems: q.items.map((i) => ({
