@@ -156,6 +156,9 @@ export default function AdminQuoteDetailPage() {
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<"send" | "duplicate" | "confirm" | null>(null);
+  const [editingDate, setEditingDate] = useState(false);
+  const [dateValue, setDateValue] = useState("");
+  const [savingDate, setSavingDate] = useState(false);
 
   const loadQuote = useCallback(() => {
     setLoading(true);
@@ -218,6 +221,28 @@ export default function AdminQuoteDetailPage() {
       toastError(e instanceof Error ? e.message : "오류가 발생했습니다");
     } finally {
       setActionLoading(null);
+    }
+  }
+
+  // ── 작성일 수정 ───────────────────────────────────────────
+  async function handleSaveDate() {
+    if (!dateValue) return;
+    setSavingDate(true);
+    try {
+      const res = await fetch(`/api/admin/quotes/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ createdDate: dateValue }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
+      if (!res.ok) throw new Error(data.error ?? "저장 실패");
+      success("작성일을 수정했습니다. 견적서를 다시 저장·발송하면 새 날짜로 나갑니다.");
+      setEditingDate(false);
+      loadQuote();
+    } catch (e) {
+      toastError(e instanceof Error ? e.message : "오류가 발생했습니다");
+    } finally {
+      setSavingDate(false);
     }
   }
 
@@ -350,7 +375,30 @@ export default function AdminQuoteDetailPage() {
           — 01 · 기본 정보
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-y border-line/30">
-          <MetaCell label="작성일" value={fmtDate(quote.createdAt)} />
+          <div className="px-5 py-4">
+            <div className="mono text-[10px] dim tracking-[0.12em] uppercase mb-1">작성일</div>
+            {editingDate ? (
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <input type="date" value={dateValue} onChange={(e) => setDateValue(e.target.value)}
+                  className="border border-line px-2 py-1 text-[13px] bg-paper focus:outline-none focus:border-ink" />
+                <button onClick={handleSaveDate} disabled={savingDate || !dateValue}
+                  className="text-[11px] px-2 py-1 bg-ink text-paper hover:bg-edred transition disabled:opacity-40">
+                  {savingDate ? "..." : "저장"}
+                </button>
+                <button onClick={() => setEditingDate(false)} disabled={savingDate}
+                  className="text-[11px] px-2 py-1 border border-line text-dim hover:border-ink hover:text-ink transition">
+                  취소
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => { setDateValue(fmtDate(quote.createdAt).replace(/\./g, "-")); setEditingDate(true); }}
+                title="작성일 수정"
+                className="text-[14px] font-medium text-ink hover:text-edred transition">
+                {fmtDate(quote.createdAt)} <span className="text-[12px] dim">✎</span>
+              </button>
+            )}
+          </div>
           <MetaCell
             label="유효기간"
             value={expiresAt ? fmtDate(expiresAt) : "—"}
