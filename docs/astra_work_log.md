@@ -419,3 +419,10 @@
 - 검증: `tsc --noEmit`·`next build` 통과. 실제 연결 건(job 44)으로 함수 실행 → 양쪽 모두 접수 상태라 변경 없음 확인. 실제 상태 전환은 고객 데이터라 시험하지 않음 — 대표님이 실제 진행 시 확인.
 - 배포: 원격 해시 일치, Vercel Production Ready, 라이브 `/api/admin/offline-repairs` 403·홈 200.
 - 앞서 등록 버튼(0d14ee1)은 대표님이 라이브에서 정상 동작 확인("잘 되네").
+
+### 10/2 견적 상세 작성일 수정 (커밋 71db691) + 로컬 코드리뷰
+
+- 변경: `app/api/admin/quotes/[id]/route.ts`에 PATCH 추가(`createdDate` YYYY-MM-DD → 한국시간 정오 `createdAt`, `expiresAt`=+14일, 감사 로그 quote.update), `app/admin/quotes/[id]/page.tsx` 작성일 칸에 ✎ 편집.
+- 검증: `tsc --noEmit`·`next build` 통과. 최신 견적 1건으로 날짜 변경→롤백 시험(UTC·한국시간 모두 같은 날짜, 원본 유지 확인). eslint 오류 1건은 기존 줄. 관리자 로그인 상태의 실제 저장·PDF 재발행은 대표님 확인 대기.
+- 로컬 코드리뷰(대표님 요청): `origin/reviewed..origin/master` 9개 커밋의 코드·문서·원고 diff 전체를 읽고 검토. 확인 항목 — 권한 검사(신규 API 2개 모두 관리자 전용), 중복 등록 방지, 연동 실패가 본 작업을 막지 않는지, 날짜 시간대, 공개 응답에 내부정보 추가 여부(없음). 수정 필요 버그 없음.
+- 관찰(미수정): 마이페이지 수리 진행 현황 5단계 vs 관리자 3단계 불일치(기존 동작).
