@@ -41,7 +41,11 @@ export async function GET(req: NextRequest) {
         },
       })
     : [];
-  const contactsByCompany = new Map(knownCompanies.map((c) => [c.companyName, c.contacts]));
+  // 같은 이름의 거래처가 두 번 등록돼 있어도 담당자가 빠지지 않게 합친다 (companyName은 unique가 아님).
+  const contactsByCompany = new Map<string, (typeof knownCompanies)[number]["contacts"]>();
+  for (const c of knownCompanies) {
+    contactsByCompany.set(c.companyName, [...(contactsByCompany.get(c.companyName) ?? []), ...c.contacts]);
+  }
 
   const items = quotes.map((q) => {
     const company = q.user?.company ?? q.guestCompany ?? "";
