@@ -411,3 +411,11 @@
 - 배포: 원격 해시 일치, Vercel Production 반영 후 `POST /api/admin/repairs/12/to-offline` 비로그인 403, `/api/admin/offline-repairs` 403, `/admin/repairs` 200 확인. (미리보기 배포 success 직후에는 404였고 Production 완료 뒤 403으로 바뀜 — success 표시만 보고 판단하지 말 것.)
 - 미확인: 관리자 로그인 상태의 실제 버튼 클릭은 대표님 확인 대기. reviewed 포인터는 이동하지 않음(이전 미검토 4개 + 이번 커밋).
 - 남긴 것: `SYMPTOM_KO` 사본이 `app/admin/repairs/page.tsx`·`blog-draft/route.ts`에 그대로 있음(범위 밖, 통합은 별도).
+
+### 10/2 수리접수 → 온라인수리 상태 자동 연동 (커밋 9b5f0d5)
+
+- 계기: 대표님이 "납품완료 누르면 저장 + 고객이 로그인해 수리 이력 보기"를 제안. 확인 결과 둘 다 이미 있음(온라인수리 진행 상태 버튼, 마이페이지 수리 이력 탭). 실제 빈 곳은 ①수리접수에서 상태를 바꿔도 온라인 쪽이 안 바뀜 ②비로그인 접수 8/10건은 회원과 연결 안 됨. 대표님 승인으로 ①만 진행.
+- 변경: `lib/repair-status-sync.ts`(신규 `syncOnlineRepairStatus`), 호출 5곳 — `offline-repairs/[id]/route.ts`(수동 상태 변경·외주발송 토큰), `[id]/send-quote`, `batch-send`, `api/repair/offline-upload`(협력사 제출). 스키마 변경 없음. 연동 시 RepairStatusLog에 changedBy=system 기록.
+- 검증: `tsc --noEmit`·`next build` 통과. 실제 연결 건(job 44)으로 함수 실행 → 양쪽 모두 접수 상태라 변경 없음 확인. 실제 상태 전환은 고객 데이터라 시험하지 않음 — 대표님이 실제 진행 시 확인.
+- 배포: 원격 해시 일치, Vercel Production Ready, 라이브 `/api/admin/offline-repairs` 403·홈 200.
+- 앞서 등록 버튼(0d14ee1)은 대표님이 라이브에서 정상 동작 확인("잘 되네").
