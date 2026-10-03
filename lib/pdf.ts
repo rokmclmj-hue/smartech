@@ -1264,6 +1264,7 @@ export interface RepairInspectionForPdf {
   contactName: string | null;
   inspectorName: string | null;
   remarks?: string | null;
+  issuedDate?: Date;  // 발행일·확인일 (없으면 PDF를 만든 날) — 공개 수리사례 PDF를 실제 검사일로 맞출 때 사용
   inspectionItems: RepairInspectionItem[];
   selectedPhotos: RepairPhotoFile[];
 }
@@ -1310,6 +1311,7 @@ const IR = StyleSheet.create({
 function InspectionReportDocument({ data }: { data: RepairInspectionForPdf }) {
   const el = React.createElement;
   const photosOnly = data.selectedPhotos.filter(f => /\.(jpe?g|png|gif|webp)$/i.test(f.fileName));
+  const issued = data.issuedDate ?? new Date();
 
   function passLabel(pass: boolean | null, isNA: boolean) {
     if (isNA) return "-";
@@ -1335,7 +1337,7 @@ function InspectionReportDocument({ data }: { data: RepairInspectionForPdf }) {
         ),
         el(View, { style: { textAlign: "right" } },
           el(Text, { style: IR.jobNo }, data.jobNo),
-          el(Text, { style: IR.jobMeta }, `발행일: ${fmtDate(new Date())}`)
+          el(Text, { style: IR.jobMeta }, `발행일: ${fmtDate(issued)}`)
         )
       ),
 
@@ -1394,7 +1396,7 @@ function InspectionReportDocument({ data }: { data: RepairInspectionForPdf }) {
         ),
         el(View, { style: IR.sigBox },
           el(Text, { style: IR.sigLabel }, "확인일  ·  DATE"),
-          el(Text, { style: IR.sigName }, fmtDate(new Date())),
+          el(Text, { style: IR.sigName }, fmtDate(issued)),
           el(View, { style: { borderBottom: "1 solid #999999", marginTop: 16 } })
         )
       ),
