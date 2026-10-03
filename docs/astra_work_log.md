@@ -475,3 +475,11 @@
 - 사진: 사례당 1장(대표 E2M28 외관), 원본 600×450. 기존 output 전체 MD5 대조 중복 0. blur-config radius 0 방식.
 - 검사: 1차 글자수 미달 → "검사성적서에서 확인하는 항목" 섹션(실제 기록) 추가 → check_quality 전체 통과(2158/1516자).
 - 발행: 대표님 OK 후 `upload_post.py "수리사례/2026-09/202609-이달의수리사례"` → id=105, 라이브 200·사진 5장·/repair 링크·실명/이니셜 미노출 확인. X 대기글 PENDING(149/280자).
+
+## 2026-10-03 — 로컬 코드리뷰 실행 및 반영 (커밋 c272eab)
+
+- 대표님 요청으로 `/code-review high fce14d2..HEAD`(22커밋·약 20개 파일) 실행 → 지적 10건. 제가 하나씩 재확인 후 우선순위 정리, 대표님 승인으로 8건 수정 + 9번(확정 견적 날짜 수정 차단) 결정 반영, 10번(담당자 목록 반복 응답)은 영향 없어 보류.
+- 수정: `lib/repair-status-sync.ts`(단계 순서 STAGE로 전진만), `lib/pdf.ts` fmtDate 한국시간, `to-offline`(추가 파트비 단독 이관·번호 공용 함수), `quotes/[id]` PATCH(왕복 검증·2020~2100·CONFIRMED 409)+상세 화면 ✎ 숨김, `proxy-quotes/history`(trim+insensitive), SYMPTOM_KO·formatRepairJobNo를 `lib/offline-repair-defaults.ts`로 통합(관리자 화면·블로그 초안·수리접수 POST).
+- 공개 PDF 재생성: duo25-b(접수일 엑셀 입고일 8/31, 발행 9/17), w2v20(값 없는 항목 isNA 처리로 빈 줄 0). 글자 추출로 날짜·빈 줄·실명 없음 확인.
+- 검증: node로 날짜 검사(2/31·0001년 거부)·전진 규칙·한국시간 표시 샘플 확인, tsc·next build·eslint(변경 서버 파일) 통과, push 후 원격 일치, 라이브 PDF 2개 로컬과 MD5 일치, 견적 PATCH 비로그인 403, /repair 200.
+- reviewed: 리뷰 범위 + 이번 수정 커밋까지 이동.
