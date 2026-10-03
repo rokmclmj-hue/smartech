@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAdminSession } from "@/lib/admin-auth";
 import { resolveCompanyId } from "@/lib/known-company";
-import { DEFAULT_ITEMS } from "@/lib/offline-repair-defaults";
+import { DEFAULT_ITEMS, formatRepairJobNo } from "@/lib/offline-repair-defaults";
 
 // GET — 목록
 export async function GET() {
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
             inspectionItems: { create: DEFAULT_ITEMS },
           },
         });
-        const jobNo = `SMT-${year}-R-${String(created.id).padStart(6, "0")}`;
+        const jobNo = formatRepairJobNo(created.id, year);
         await tx.offlineRepairJob.update({ where: { id: created.id }, data: { jobNo } });
         createdIds.push(created.id);
       }

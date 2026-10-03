@@ -371,8 +371,9 @@ function fmt(n: number): string {
   return "₩" + n.toLocaleString("en-US");
 }
 
+// 서버(Vercel)는 UTC라 getFullYear/getDate를 쓰면 한국시간 0~9시에 만든 PDF가 하루 전 날짜로 찍힌다 → 한국시간 기준으로 표시
 function fmtDate(d: Date): string {
-  return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
+  return d.toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" }).replace(/-/g, ".");
 }
 
 function QuoteDocument({ quote }: { quote: QuoteForPdf }) {

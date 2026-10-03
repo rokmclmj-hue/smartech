@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import { upload } from "@vercel/blob/client";
+import { SYMPTOM_KO } from "@/lib/offline-repair-defaults";
 
 
 type RepairFile = { fileType: string };
@@ -53,12 +54,6 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
 };
 
 const STATUS_FLOW = ["RECEIVED", "IN_PROGRESS", "DELIVERED"];
-
-const SYMPTOM_KO: Record<string, string> = {
-  vibration: "진동/소음", vacuum: "진공 불량", overload: "과부하",
-  temperature: "온도 이상", oil_leak: "오일 누유", contamination: "공정 오염",
-  electrical: "전기/제어 오류", other: "기타",
-};
 
 const FILE_TYPE_KO: Record<string, string> = {
   disassembly_photo: "분해 사진",

@@ -22,7 +22,12 @@ export const DEFAULT_ITEMS = [
   { sortOrder: 19, itemLabel: "Oil",                   unit: "N/A",         spec: null, isNA: true },
 ];
 
-// 온라인 수리접수 증상 코드 → 한글 (수리접수 메모로 옮길 때 사용)
+// 수리접수 번호 SMT-YYYY-R-NNNNNN (수리접수 직접 등록·온라인수리에서 넘기기 공용)
+export function formatRepairJobNo(id: number, year = new Date().getFullYear()): string {
+  return `SMT-${year}-R-${String(id).padStart(6, "0")}`;
+}
+
+// 온라인 수리접수 증상 코드 → 한글 (관리자 화면·블로그 초안·수리접수 메모 공용)
 export const SYMPTOM_KO: Record<string, string> = {
   vibration: "진동/소음", vacuum: "진공 불량", overload: "과부하",
   temperature: "온도 이상", oil_leak: "오일 누유", contamination: "공정 오염",

@@ -31,10 +31,12 @@ export async function GET(req: NextRequest) {
   });
 
   // 거래처에 등록된 담당자 목록 — 이력을 불러온 뒤 담당자만 바꿔 다시 견적낼 수 있게 함께 보낸다.
-  const companyNames = [...new Set(quotes.map((q) => q.user?.company ?? q.guestCompany ?? "").filter(Boolean))];
+  // 대소문자·앞뒤 빈칸이 달라도 같은 거래처로 본다 (resolveCompanyId와 같은 기준)
+  const nameKey = (name: string) => name.trim().toLowerCase();
+  const companyNames = [...new Set(quotes.map((q) => (q.user?.company ?? q.guestCompany ?? "").trim()).filter(Boolean))];
   const knownCompanies = companyNames.length
     ? await prisma.knownCompany.findMany({
-        where: { companyName: { in: companyNames } },
+        where: { OR: companyNames.map((name) => ({ companyName: { equals: name, mode: "insensitive" as const } })) },
         select: {
           companyName: true,
           contacts: { select: { id: true, name: true, title: true, tel: true, mobile: true, email: true }, orderBy: { id: "asc" } },
@@ -44,7 +46,8 @@ export async function GET(req: NextRequest) {
   // 같은 이름의 거래처가 두 번 등록돼 있어도 담당자가 빠지지 않게 합친다 (companyName은 unique가 아님).
   const contactsByCompany = new Map<string, (typeof knownCompanies)[number]["contacts"]>();
   for (const c of knownCompanies) {
-    contactsByCompany.set(c.companyName, [...(contactsByCompany.get(c.companyName) ?? []), ...c.contacts]);
+    const key = nameKey(c.companyName);
+    contactsByCompany.set(key, [...(contactsByCompany.get(key) ?? []), ...c.contacts]);
   }
 
   const items = quotes.map((q) => {
@@ -63,7 +66,7 @@ export async function GET(req: NextRequest) {
       contactTitle: q.guestTitle ?? null,
       tier: q.guestTier ?? "ENDUSER",
       isGuest: q.userId === null,
-      contacts: contactsByCompany.get(company) ?? [],
+      contacts: contactsByCompany.get(nameKey(company)) ?? [],
       subtotal,
       itemCount: q.items.length,
       previewItems: q.items.map((i) => ({

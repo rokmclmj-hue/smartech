@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { getAdminSession } from "@/lib/admin-auth";
 import { resolveCompanyId } from "@/lib/known-company";
-import { DEFAULT_ITEMS, SYMPTOM_KO } from "@/lib/offline-repair-defaults";
+import { DEFAULT_ITEMS, SYMPTOM_KO, formatRepairJobNo } from "@/lib/offline-repair-defaults";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -36,15 +36,16 @@ export async function POST(_req: NextRequest, { params }: Params) {
   ].filter(Boolean).join("\n");
 
   // 온라인 수리견적서(send-quote)와 같은 품목 구성: 기본수리 1줄 + 추가파트 1줄
-  // 기본 수리비가 0(상담필요)이면 비워 둔다 — 수리접수 화면의 기본수리 자동 채우기가 동작한다.
-  const quoteItems = repair.baseAmount > 0
-    ? [
-        { name: `기본수리 — ${pumpModel}`, quantity: 1, unitPrice: repair.baseAmount, sortOrder: 0 },
-        ...(repair.extraAmount > 0
-          ? [{ name: repair.extraPartsName || "추가 파트 교체", quantity: 1, unitPrice: repair.extraAmount, sortOrder: 1 }]
-          : []),
-      ]
-    : [];
+  // 기본 수리비가 0(상담필요)이면 기본수리 줄은 빼고 추가파트만 넘긴다(기본수리는 수리접수 화면 "기본수리 불러오기"로 채움).
+  // 둘 다 0이면 비워 둔다 — 수리접수 화면의 기본수리 자동 채우기가 동작한다.
+  const quoteItems = [
+    ...(repair.baseAmount > 0
+      ? [{ name: `기본수리 — ${pumpModel}`, quantity: 1, unitPrice: repair.baseAmount }]
+      : []),
+    ...(repair.extraAmount > 0
+      ? [{ name: repair.extraPartsName || "추가 파트 교체", quantity: 1, unitPrice: repair.extraAmount }]
+      : []),
+  ].map((it, i) => ({ ...it, sortOrder: i }));
   const repairCost = quoteItems.length
     ? quoteItems.reduce((sum, it) => sum + it.unitPrice * it.quantity, 0)
     : null;
@@ -73,7 +74,7 @@ export async function POST(_req: NextRequest, { params }: Params) {
           quoteItems: { create: quoteItems },
         },
       });
-      const jobNo = `SMT-${new Date().getFullYear()}-R-${String(created.id).padStart(6, "0")}`;
+      const jobNo = formatRepairJobNo(created.id);
       return tx.offlineRepairJob.update({
         where: { id: created.id },
         data: { jobNo },

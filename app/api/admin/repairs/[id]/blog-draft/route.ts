@@ -3,23 +3,13 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import Anthropic from "@anthropic-ai/sdk";
 import type { Session } from "next-auth";
+import { SYMPTOM_KO } from "@/lib/offline-repair-defaults";
 
 function isAdmin(session: Session | null) {
   return (session?.user as { tier?: string })?.tier === "ADMIN";
 }
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-
-const SYMPTOM_KO: Record<string, string> = {
-  vibration: "진동/소음",
-  vacuum: "진공 불량",
-  overload: "과부하",
-  temperature: "온도 이상",
-  oil_leak: "오일 누유",
-  contamination: "공정 오염",
-  electrical: "전기/제어 오류",
-  other: "기타",
-};
 
 // GET: Claude가 수리 데이터로 블로그 초안 생성
 export async function GET(

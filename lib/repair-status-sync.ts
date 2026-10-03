@@ -12,8 +12,9 @@ const ONLINE_STATUS: Record<string, string> = {
   DELIVERED: "DELIVERED",
 };
 
-// 온라인수리에서 "수리중"으로 함께 취급하는 상태값 (app/api/admin/repairs/route.ts 참고)
-const IN_PROGRESS_GROUP = ["IN_PROGRESS", "INSPECTION", "COMPLETED"];
+// 온라인수리 진행 단계 순서 — 연동은 앞으로만 진행한다(납품완료 후 협력사 재제출·견적 재발송으로 되돌아가지 않게).
+// IN_PROGRESS·INSPECTION·COMPLETED는 온라인수리에서 같은 "수리중"으로 취급한다 (app/api/admin/repairs/route.ts 참고)
+const STAGE: Record<string, number> = { RECEIVED: 0, IN_PROGRESS: 1, INSPECTION: 1, COMPLETED: 1, DELIVERED: 2 };
 
 // "수리접수로 등록"으로 넘어온 건이면, 수리접수 상태를 온라인수리(고객 마이페이지에 보이는 상태)에 맞춘다.
 // 수리접수 상태를 바꾼 직후에 호출한다. 실패해도 호출한 쪽 작업은 그대로 성공해야 하므로 오류를 던지지 않는다.
@@ -29,8 +30,7 @@ export async function syncOnlineRepairStatus(jobIds: number | number[]): Promise
       const online = job.sourceRepair;
       const target = ONLINE_STATUS[job.status];
       if (!online || !target || online.status === "CANCELLED") continue;
-      if (online.status === target) continue;
-      if (target === "IN_PROGRESS" && IN_PROGRESS_GROUP.includes(online.status)) continue;
+      if ((STAGE[target] ?? 0) <= (STAGE[online.status] ?? 0)) continue;
 
       await prisma.repairRequest.update({
         where: { id: online.id },

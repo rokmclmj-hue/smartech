@@ -377,7 +377,11 @@ export default function AdminQuoteDetailPage() {
         <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-y border-line/30">
           <div className="px-5 py-4">
             <div className="mono text-[10px] dim tracking-[0.12em] uppercase mb-1">작성일</div>
-            {editingDate ? (
+            {quote.status === "CONFIRMED" ? (
+              <div className="text-[14px] font-medium text-ink" title="발주 확정된 견적은 작성일을 수정할 수 없습니다">
+                {fmtDate(quote.createdAt)}
+              </div>
+            ) : editingDate ? (
               <div className="flex items-center gap-1.5 flex-wrap">
                 <input type="date" value={dateValue} onChange={(e) => setDateValue(e.target.value)}
                   className="border border-line px-2 py-1 text-[13px] bg-paper focus:outline-none focus:border-ink" />
