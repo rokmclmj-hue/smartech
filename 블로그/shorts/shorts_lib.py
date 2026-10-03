@@ -17,6 +17,9 @@ INK = (11, 11, 12)       # ink
 WHITE = (255, 255, 255)
 
 MUSIC_PATH = r"C:\Users\rokmc\smartech\블로그\assets\music\close-up.mp3"
+# 완성 영상 저장 폴더 — 폴더를 옮기면 여기 한 곳만 고친다.
+VIDEO_DIR = r"C:\Users\rokmc\Desktop\진공펌프_소개_자동화\스마텍_유튜브숏츠"
+CAPTION_FONT_SIZE = 62
 
 
 def make_background(img: Image.Image) -> Image.Image:
@@ -45,7 +48,7 @@ def caption_block_height(lines):
 
 def draw_caption_attached(canvas, lines, box_left, box_right, box_top, highlight_words=None):
     draw = ImageDraw.Draw(canvas, "RGBA")
-    font = ImageFont.truetype(FONT_BOLD, 62)
+    font = ImageFont.truetype(FONT_BOLD, CAPTION_FONT_SIZE)
     highlight_words = highlight_words or []
     line_h = 92
     box_h = caption_block_height(lines)
@@ -172,21 +175,22 @@ def build_video(scenes, out_path, music_path=MUSIC_PATH, tmp_dir=None):
     tmp_dir = tmp_dir or os.path.dirname(out_path)
     os.makedirs(tmp_dir, exist_ok=True)
 
-    all_frames = []
-    for sc in scenes:
-        all_frames += render_scene(
-            sc["image"], sc.get("caption"), sc["duration"],
-            highlight_words=sc.get("highlight"),
-            zoom_from=sc.get("zoom_from", 1.0), zoom_to=sc.get("zoom_to", 1.07),
-            is_full_bleed=sc.get("is_full_bleed", False),
-        )
-    all_frames += render_closing()
-
+    # 장면마다 바로 파일에 써서, 전체 프레임을 한꺼번에 메모리에 쌓지 않는다(25초 영상 기준 약 4.6GB → 장면 1개분).
     silent_path = os.path.join(tmp_dir, "_silent_temp.mp4")
     writer = cv2.VideoWriter(silent_path, cv2.VideoWriter_fourcc(*"mp4v"), FPS, (W, H))
-    for f in all_frames:
-        writer.write(f)
-    writer.release()
+    try:
+        for sc in scenes:
+            for f in render_scene(
+                sc["image"], sc.get("caption"), sc["duration"],
+                highlight_words=sc.get("highlight"),
+                zoom_from=sc.get("zoom_from", 1.0), zoom_to=sc.get("zoom_to", 1.07),
+                is_full_bleed=sc.get("is_full_bleed", False),
+            ):
+                writer.write(f)
+        for f in render_closing():
+            writer.write(f)
+    finally:
+        writer.release()
 
     from moviepy import VideoFileClip, AudioFileClip, afx
 

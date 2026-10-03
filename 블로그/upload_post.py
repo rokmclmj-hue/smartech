@@ -311,7 +311,7 @@ def create_short(blog_id):
         r = subprocess.run(
             [sys.executable, script, topic, "--blog-id", str(blog_id)],
             capture_output=True, text=True, encoding="utf-8", errors="replace",
-            timeout=900, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+            timeout=300, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
         )
         if r.stdout:
             print(r.stdout.strip())

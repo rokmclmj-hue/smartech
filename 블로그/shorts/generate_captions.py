@@ -9,7 +9,7 @@ from shorts_lib import scenes_to_srt
 from build_short import scenes as scenes_1
 from batch_render import ITEMS, START_NUM
 
-OUT_DIR = r"C:\Users\rokmc\Desktop\진공펌프_소개_자동화\스마텍_유튜브숏츠"
+from shorts_lib import VIDEO_DIR as OUT_DIR
 os.makedirs(OUT_DIR, exist_ok=True)
 
 

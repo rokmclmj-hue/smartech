@@ -34,7 +34,6 @@ BLOG_DIR = os.path.dirname(HERE)
 OUTPUT_DIR = os.path.join(BLOG_DIR, "output")
 YT_DIR = os.path.join(BLOG_DIR, "youtube")
 TOKEN_PATH = os.path.join(YT_DIR, "token.json")
-VIDEO_DIR = r"C:\Users\rokmc\Desktop\진공펌프_소개_자동화\스마텍_유튜브숏츠"
 SCOPES = ["https://www.googleapis.com/auth/youtube"]
 SITE = "https://www.smartechvacuum.com"
 RESULT_NAME = "shorts-result.json"
@@ -47,10 +46,10 @@ MIN_LEAD_MINUTES = 30      # 12시까지 30분도 안 남았으면 다음 평일
 MAX_TOTAL_SECONDS = 58.0   # 숏츠 길이 제한(60초) 안쪽
 OPENER_SECONDS = 3.5
 CLOSING_SECONDS = 4.0
-CAPTION_FONT_SIZE = 62     # shorts_lib.draw_caption_attached와 같은 값
 CAPTION_SIDE_MARGIN = 40
 
 sys.path.insert(0, HERE)
+from shorts_lib import CAPTION_FONT_SIZE, VIDEO_DIR  # noqa: E402
 
 
 def find_folder(topic):
@@ -201,6 +200,14 @@ def record_for_site(blog_id, video_id, publish_at_kst):
         print(f"  [WARN] lib/blog-shorts.json 기록 실패(유튜브 예약은 정상): {e}")
 
 
+def site_has(blog_id, video_id):
+    try:
+        with open(SITE_MAP_PATH, encoding="utf-8") as f:
+            return json.load(f).get(str(blog_id), {}).get("videoId") == video_id
+    except Exception:
+        return False
+
+
 def get_service():
     from google.auth.transport.requests import Request
     from google.oauth2.credentials import Credentials
@@ -214,7 +221,8 @@ def get_service():
     return build("youtube", "v3", credentials=creds)
 
 
-def upload(video_path, srt_path, title, description, tags, publish_at_kst):
+def upload(video_path, srt_path, title, description, tags, publish_at_kst, on_uploaded):
+    """on_uploaded(video_id)는 영상 업로드가 끝난 즉시 호출된다(자막 단계보다 먼저)."""
     from googleapiclient.http import MediaFileUpload
 
     youtube = get_service()
@@ -232,6 +240,7 @@ def upload(video_path, srt_path, title, description, tags, publish_at_kst):
     while response is None:
         _, response = request.next_chunk()
     video_id = response["id"]
+    on_uploaded(video_id)
 
     # 자막 실패는 영상 업로드를 되돌리지 않는다.
     try:
@@ -250,7 +259,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("topic")
     ap.add_argument("--blog-id", type=int)
-    ap.add_argument("--blog-url", help="이미 발행된 글의 주소(주소가 /blog/영문-이름 형태일 때). --blog-id 대신 사용")
+    ap.add_argument("--blog-url", help="설명란에 넣을 글 주소(/blog/영문-이름 형태일 때). 홈페이지용 목록 기록에는 --blog-id도 함께 필요")
     ap.add_argument("--publish-at", help='공개 시각 직접 지정 "YYYY-MM-DD HH:MM" (한국시간). 없으면 당일 낮 12시 규칙')
     ap.add_argument("--check", action="store_true", help="shorts.json 검사만")
     ap.add_argument("--render-only", action="store_true", help="영상만 만들고 업로드하지 않음")
@@ -286,6 +295,11 @@ def main():
         with open(result_path, encoding="utf-8") as f:
             prev = json.load(f)
         print(f"[SKIP] 이미 올린 숏츠입니다: https://youtube.com/shorts/{prev.get('videoId')} (공개 {prev.get('publishAt')})")
+        # 유튜브에는 올라갔는데 홈페이지용 목록 기록만 빠진 경우를 다시 올리지 않고 채운다.
+        prev_blog_id = prev.get("blogId") or args.blog_id
+        if prev_blog_id and prev.get("videoId") and not site_has(prev_blog_id, prev["videoId"]):
+            prev_at = datetime.strptime(prev["publishAt"].replace(" KST", ""), "%Y-%m-%d %H:%M").replace(tzinfo=KST)
+            record_for_site(prev_blog_id, prev["videoId"], prev_at)
         return 0
     if not args.render_only and not (args.blog_id or args.blog_url):
         print("[ERROR] 업로드에는 --blog-id 또는 --blog-url이 필요합니다(설명란에 글 주소를 넣기 위해).")
@@ -297,6 +311,9 @@ def main():
             return 1
     else:
         publish_at = None
+
+    if args.force and not args.render_only and os.path.exists(result_path):
+        os.remove(result_path)
 
     from shorts_lib import build_video, scenes_to_srt
 
@@ -320,11 +337,38 @@ def main():
         f"{' '.join(spec['hashtags'])}"
     )
     publish_at = publish_at or publish_time(datetime.now(KST))
-    target = f"--blog-url {args.blog_url}" if args.blog_url else f"--blog-id {args.blog_id}"
+    target = " ".join(x for x in (f"--blog-id {args.blog_id}" if args.blog_id else "",
+                                  f"--blog-url {args.blog_url}" if args.blog_url else "") if x)
     retry = f'python 블로그/shorts/publish_short.py "{args.topic}" {target}'
+    blog_id = args.blog_id
+    if not blog_id:
+        m = re.search(r"/blog/(\d+)/?$", blog_url.split("?")[0])
+        blog_id = int(m.group(1)) if m else None
+
+    def on_uploaded(video_id):
+        record = {
+            "videoId": video_id,
+            "url": f"https://youtube.com/shorts/{video_id}",
+            "publishAt": publish_at.strftime("%Y-%m-%d %H:%M KST"),
+            "blogId": blog_id,
+            "blogUrl": blog_url,
+            "title": title,
+        }
+        with open(result_path, "w", encoding="utf-8") as f:
+            json.dump(record, f, ensure_ascii=False, indent=2)
+        print(f"[SUCCESS] 유튜브 예약 완료: {record['url']} (공개 {record['publishAt']})", flush=True)
+        if blog_id:
+            record_for_site(blog_id, video_id, publish_at)
+        else:
+            print("  [WARN] 글 번호를 알 수 없어 홈페이지용 목록에 기록하지 못했습니다. "
+                  "--blog-id를 함께 주고 다시 실행하면 재업로드 없이 기록됩니다.")
+
     try:
-        video_id = upload(video_path, srt_path, title, description, spec["tags"], publish_at)
+        upload(video_path, srt_path, title, description, spec["tags"], publish_at, on_uploaded)
     except Exception as e:
+        if os.path.exists(result_path) and not args.force:
+            print(f"[WARN] 영상 업로드 뒤 단계에서 오류: {e} — 영상 예약은 완료된 상태입니다.")
+            return 0
         if "invalid_grant" in str(e):
             print("[WARN] 유튜브 로그인 열쇠가 만료됐습니다. 영상은 만들어져 있습니다.")
             print("  1) python 블로그/youtube/authorize.py  (rokmclmj@gmail.com으로 로그인)")
@@ -336,24 +380,6 @@ def main():
             print(f"[WARN] 유튜브 업로드 실패: {e}")
             print(f"  다시 실행: {retry}")
         return 2
-
-    record = {
-        "videoId": video_id,
-        "url": f"https://youtube.com/shorts/{video_id}",
-        "publishAt": publish_at.strftime("%Y-%m-%d %H:%M KST"),
-        "blogId": args.blog_id,
-        "blogUrl": blog_url,
-        "title": title,
-    }
-    with open(result_path, "w", encoding="utf-8") as f:
-        json.dump(record, f, ensure_ascii=False, indent=2)
-    print(f"[SUCCESS] 유튜브 예약 완료: {record['url']} (공개 {record['publishAt']})")
-    blog_id = args.blog_id
-    if not blog_id:
-        m = re.search(r"/blog/(\d+)$", blog_url)
-        blog_id = int(m.group(1)) if m else None
-    if blog_id:
-        record_for_site(blog_id, video_id, publish_at)
     return 0
 
 

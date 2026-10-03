@@ -5,7 +5,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from shorts_lib import build_video
 
 folder = r"C:\Users\rokmc\smartech\블로그\output\기술블로그\2026-08\0803-베어링소음진단\images"
-out_dir = r"C:\Users\rokmc\Desktop\진공펌프_소개_자동화\스마텍_유튜브숏츠"
+from shorts_lib import VIDEO_DIR as out_dir
 os.makedirs(out_dir, exist_ok=True)
 
 scenes = [
