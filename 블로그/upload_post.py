@@ -297,3 +297,29 @@ def create_x_draft(blog_id):
               f"node --env-file=.env scripts/generate-x-posts-from-blog.mjs --id {blog_id}")
 
 create_x_draft(result["id"])
+
+
+# ── 유튜브 숏츠 자동 제작·예약 ─────────────────────────
+# 원고 폴더에 shorts.json이 있을 때만 영상을 만들어 유튜브에 비공개+예약(당일 낮 12시)으로 올린다(2026-10-04 대표님 승인).
+# X 대기글과 같은 이유로 여기서 한 번만 호출하고, 실패해도 종료코드를 바꾸지 않는다.
+def create_short(blog_id):
+    import subprocess
+    script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "shorts", "publish_short.py")
+    retry = f'python 블로그/shorts/publish_short.py "{topic}" --blog-id {blog_id}'
+    print(f"\n=== 유튜브 숏츠 자동 제작·예약 (블로그 id={blog_id}) ===", flush=True)
+    try:
+        r = subprocess.run(
+            [sys.executable, script, topic, "--blog-id", str(blog_id)],
+            capture_output=True, text=True, encoding="utf-8", errors="replace",
+            timeout=900, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+        )
+        if r.stdout:
+            print(r.stdout.strip())
+        if r.returncode != 0:
+            print(f"[WARN] 숏츠 예약 안 됨(exit {r.returncode}) — 블로그 발행은 정상. 수동 실행: {retry}")
+            if r.stderr:
+                print(r.stderr.strip()[-500:])
+    except Exception as e:
+        print(f"[WARN] 숏츠 실행 오류: {e} — 블로그 발행은 정상. 수동 실행: {retry}")
+
+create_short(result["id"])
