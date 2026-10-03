@@ -7,7 +7,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from shorts_lib import build_video
 
 BASE = r"C:\Users\rokmc\smartech\블로그\output"
-OUT_DIR = r"C:\Users\rokmc\Desktop\스마텍_유튜브숏츠"
+OUT_DIR = r"C:\Users\rokmc\Desktop\진공펌프_소개_자동화\스마텍_유튜브숏츠"
 os.makedirs(OUT_DIR, exist_ok=True)
 
 

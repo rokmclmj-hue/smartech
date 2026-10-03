@@ -34,10 +34,12 @@ BLOG_DIR = os.path.dirname(HERE)
 OUTPUT_DIR = os.path.join(BLOG_DIR, "output")
 YT_DIR = os.path.join(BLOG_DIR, "youtube")
 TOKEN_PATH = os.path.join(YT_DIR, "token.json")
-VIDEO_DIR = r"C:\Users\rokmc\Desktop\스마텍_유튜브숏츠"
+VIDEO_DIR = r"C:\Users\rokmc\Desktop\진공펌프_소개_자동화\스마텍_유튜브숏츠"
 SCOPES = ["https://www.googleapis.com/auth/youtube"]
 SITE = "https://www.smartechvacuum.com"
 RESULT_NAME = "shorts-result.json"
+# 홈페이지 블로그 글이 이 목록을 읽어 해당 숏츠를 본문 아래에 넣는다(lib/blog-shorts.ts). 바뀌면 커밋·push해야 라이브에 반영된다.
+SITE_MAP_PATH = os.path.join(os.path.dirname(BLOG_DIR), "lib", "blog-shorts.json")
 
 KST = timezone(timedelta(hours=9))
 PUBLISH_HOUR = 12          # 블로그 발행 당일 낮 12시 공개
@@ -106,8 +108,8 @@ def validate(folder, spec, title, final_text):
         errors.append(f"제목 {len(title)}자 — 유튜브 제한 100자 초과")
 
     scenes = spec.get("scenes", [])
-    if not (3 <= len(scenes) <= 6):
-        errors.append(f"scenes {len(scenes)}개 (3~6개)")
+    if not (2 <= len(scenes) <= 6):
+        errors.append(f"scenes {len(scenes)}개 (2~6개)")
 
     final_numbers = _numbers(final_text)
     font = ImageFont.truetype(FONT_BOLD, CAPTION_FONT_SIZE)
@@ -179,6 +181,26 @@ def publish_time(now_kst):
     return target
 
 
+def record_for_site(blog_id, video_id, publish_at_kst):
+    """lib/blog-shorts.json에 글 id → 숏츠를 기록한다. 실패해도 업로드 결과에는 영향이 없다."""
+    try:
+        with open(SITE_MAP_PATH, encoding="utf-8") as f:
+            data = json.load(f)
+        data[str(blog_id)] = {
+            "videoId": video_id,
+            "publishAt": publish_at_kst.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        }
+        data = dict(sorted(data.items(), key=lambda kv: int(kv[0])))
+        tmp = SITE_MAP_PATH + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+            f.write(chr(10))
+        os.replace(tmp, SITE_MAP_PATH)
+        print("  홈페이지용 목록(lib/blog-shorts.json)에 기록 — 커밋·push 후 글에 영상이 나타납니다")
+    except Exception as e:
+        print(f"  [WARN] lib/blog-shorts.json 기록 실패(유튜브 예약은 정상): {e}")
+
+
 def get_service():
     from google.auth.transport.requests import Request
     from google.oauth2.credentials import Credentials
@@ -228,6 +250,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("topic")
     ap.add_argument("--blog-id", type=int)
+    ap.add_argument("--blog-url", help="이미 발행된 글의 주소(주소가 /blog/영문-이름 형태일 때). --blog-id 대신 사용")
+    ap.add_argument("--publish-at", help='공개 시각 직접 지정 "YYYY-MM-DD HH:MM" (한국시간). 없으면 당일 낮 12시 규칙')
     ap.add_argument("--check", action="store_true", help="shorts.json 검사만")
     ap.add_argument("--render-only", action="store_true", help="영상만 만들고 업로드하지 않음")
     ap.add_argument("--force", action="store_true", help="이미 올린 기록이 있어도 다시 올림")
@@ -263,9 +287,16 @@ def main():
             prev = json.load(f)
         print(f"[SKIP] 이미 올린 숏츠입니다: https://youtube.com/shorts/{prev.get('videoId')} (공개 {prev.get('publishAt')})")
         return 0
-    if not args.render_only and not args.blog_id:
-        print("[ERROR] 업로드에는 --blog-id가 필요합니다(설명란에 글 주소를 넣기 위해).")
+    if not args.render_only and not (args.blog_id or args.blog_url):
+        print("[ERROR] 업로드에는 --blog-id 또는 --blog-url이 필요합니다(설명란에 글 주소를 넣기 위해).")
         return 1
+    if args.publish_at:
+        publish_at = datetime.strptime(args.publish_at, "%Y-%m-%d %H:%M").replace(tzinfo=KST)
+        if publish_at - datetime.now(KST) < timedelta(minutes=MIN_LEAD_MINUTES):
+            print(f"[ERROR] --publish-at이 지금보다 {MIN_LEAD_MINUTES}분 이상 뒤여야 합니다: {args.publish_at}")
+            return 1
+    else:
+        publish_at = None
 
     from shorts_lib import build_video, scenes_to_srt
 
@@ -281,15 +312,16 @@ def main():
     if args.render_only:
         return 0
 
-    blog_url = f"{SITE}/blog/{args.blog_id}"
+    blog_url = args.blog_url or f"{SITE}/blog/{args.blog_id}"
     description = (
         f"{spec['description']}\n\n"
         f"글 전문: {blog_url}\n"
         f"스마텍 진공펌프 수리·부품 문의: {SITE}\n"
         f"{' '.join(spec['hashtags'])}"
     )
-    publish_at = publish_time(datetime.now(KST))
-    retry = f'python 블로그/shorts/publish_short.py "{args.topic}" --blog-id {args.blog_id}'
+    publish_at = publish_at or publish_time(datetime.now(KST))
+    target = f"--blog-url {args.blog_url}" if args.blog_url else f"--blog-id {args.blog_id}"
+    retry = f'python 블로그/shorts/publish_short.py "{args.topic}" {target}'
     try:
         video_id = upload(video_path, srt_path, title, description, spec["tags"], publish_at)
     except Exception as e:
@@ -297,6 +329,9 @@ def main():
             print("[WARN] 유튜브 로그인 열쇠가 만료됐습니다. 영상은 만들어져 있습니다.")
             print("  1) python 블로그/youtube/authorize.py  (rokmclmj@gmail.com으로 로그인)")
             print(f"  2) {retry}")
+        elif "uploadLimitExceeded" in str(e):
+            print("[WARN] 유튜브 하루 업로드 한도를 넘었습니다(2026-10-04 실측: 하루 10편까지 성공). 영상은 만들어져 있습니다.")
+            print(f"  24시간 뒤 다시 실행: {retry}")
         else:
             print(f"[WARN] 유튜브 업로드 실패: {e}")
             print(f"  다시 실행: {retry}")
@@ -307,11 +342,18 @@ def main():
         "url": f"https://youtube.com/shorts/{video_id}",
         "publishAt": publish_at.strftime("%Y-%m-%d %H:%M KST"),
         "blogId": args.blog_id,
+        "blogUrl": blog_url,
         "title": title,
     }
     with open(result_path, "w", encoding="utf-8") as f:
         json.dump(record, f, ensure_ascii=False, indent=2)
     print(f"[SUCCESS] 유튜브 예약 완료: {record['url']} (공개 {record['publishAt']})")
+    blog_id = args.blog_id
+    if not blog_id:
+        m = re.search(r"/blog/(\d+)$", blog_url)
+        blog_id = int(m.group(1)) if m else None
+    if blog_id:
+        record_for_site(blog_id, video_id, publish_at)
     return 0
 
 

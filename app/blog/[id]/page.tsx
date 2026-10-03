@@ -6,6 +6,7 @@ import { notFound, permanentRedirect } from "next/navigation";
 import type { Metadata } from "next";
 import { formatBlogInline, prepareBlogBody, getBlogDescription, getBlogImage } from "@/lib/blog-inline";
 import { getRemoteImageSize, type ImageSize } from "@/lib/remote-image-size";
+import { getPublishedBlogShort } from "@/lib/blog-shorts";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -306,6 +307,20 @@ export default async function BlogPostPage({ params }: Props) {
     ],
   });
 
+  // 이 글로 만든 유튜브 숏츠 — 공개 시각이 지난 것만 본문 아래에 넣는다
+  const short = getPublishedBlogShort(post.id);
+  const videoSchema = short ? JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "VideoObject",
+    "name": post.title,
+    "description": description,
+    "thumbnailUrl": [`https://i.ytimg.com/vi/${short.videoId}/hqdefault.jpg`],
+    "uploadDate": short.publishAt,
+    "embedUrl": `https://www.youtube.com/embed/${short.videoId}`,
+    "url": `https://www.youtube.com/shorts/${short.videoId}`,
+    "publisher": { "@type": "Organization", "name": "스마텍", "url": "https://www.smartechvacuum.com" },
+  }) : null;
+
   // 절차형 글에만 적용 — 현재는 id=22(수리 시 주의사항 7가지) 1편만 해당
   const howtoSchema = post.id === 22 ? JSON.stringify({
     "@context": "https://schema.org",
@@ -336,6 +351,12 @@ export default async function BlogPostPage({ params }: Props) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: howtoSchema.replace(/</g, "\\u003c") }}
+      />
+    )}
+    {videoSchema && (
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: videoSchema.replace(/</g, "\\u003c") }}
       />
     )}
     <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-10 md:py-16">
@@ -455,6 +476,23 @@ export default async function BlogPostPage({ params }: Props) {
                 {tag}
               </span>
             ))}
+          </div>
+        )}
+
+        {/* 이 글의 요약 영상(유튜브 숏츠) — 화면 근처에 올 때만 불러온다 */}
+        {short && (
+          <div className="mt-10 pt-6 border-t hair">
+            <div className="mono text-[9px] tracking-[0.18em] dim uppercase mb-3">영상으로 보기</div>
+            <div className="mx-auto w-full max-w-[315px] aspect-[9/16] bg-ink">
+              <iframe
+                src={`https://www.youtube.com/embed/${short.videoId}`}
+                title={`${post.title} — 요약 영상`}
+                loading="lazy"
+                allow="accelerometer; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="w-full h-full"
+              />
+            </div>
           </div>
         )}
 
