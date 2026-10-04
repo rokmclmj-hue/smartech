@@ -525,3 +525,4 @@
 - 수정: ①영상 업로드 직후 결과 파일을 먼저 기록(자막 단계·시간 초과로 끊겨도 재실행이 중복 업로드하지 않음) ②숏츠 단계 제한 시간 15분→5분(예약 작업 30분 제한 여유) ③`--blog-url`만 줘서 글 번호를 모르면 경고 출력, `--blog-id`와 함께 쓸 수 있게 함 ④이미 올린 글을 다시 실행하면 재업로드 없이 홈페이지용 목록만 채움 ⑤`sync_site_map.py` 신설 — 유튜브 실제 공개/예약 시각·삭제 여부와 lib/blog-shorts.json 대조(실행 결과 51건 차이 0) ⑥`shorts_lib.build_video`가 프레임을 장면 단위로 바로 기록(25초 영상 약 4.6GB → 장면 1개분) ⑦글자 크기·영상 폴더 상수를 shorts_lib 한 곳으로.
 - 미수정(의도): 자동 예약 업로드가 lib/blog-shorts.json을 커밋·push하지 않는 점(무인 push는 하지 않기로 함 — 다음 세션에서 커밋), ISR 1시간 캐시로 공개 뒤 영상 표시가 늦을 수 있는 점(방문이 적은 글은 더 늦음), 폴더 찾기 함수가 upload_post.py와 중복인 점.
 - 검증: py_compile 8개, 규칙 시험 9개, 1005 재제작(750프레임·25초 동일), 89번 재실행 시 [SKIP], 예전 묶음 도구 import 정상.
+- 배포·라이브 확인(ad418b1): 원격 해시 일치, Vercel success. 라이브 `/blog/sputtering-dry-vacuum-pump-features`에 iframe(loading=lazy)·VideoObject 1개, 예약 상태인 id=87과 영상 없는 id=105는 삽입 0, 유튜브 embed 주소 200. `check-public-leaks.mjs` 라이브 통과. reviewed를 ad418b1로 이동(미검토 0).
