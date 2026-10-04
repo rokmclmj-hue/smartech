@@ -34,7 +34,11 @@ BLOG_DIR = os.path.dirname(HERE)
 OUTPUT_DIR = os.path.join(BLOG_DIR, "output")
 YT_DIR = os.path.join(BLOG_DIR, "youtube")
 TOKEN_PATH = os.path.join(YT_DIR, "token.json")
-SCOPES = ["https://www.googleapis.com/auth/youtube"]
+# force-ssl은 자막(CC) 업로드에 필요하다. 다시 로그인할 때는 블로그/youtube/authorize_captions.py를 쓴다.
+SCOPES = [
+    "https://www.googleapis.com/auth/youtube",
+    "https://www.googleapis.com/auth/youtube.force-ssl",
+]
 SITE = "https://www.smartechvacuum.com"
 RESULT_NAME = "shorts-result.json"
 # 홈페이지 블로그 글이 이 목록을 읽어 해당 숏츠를 본문 아래에 넣는다(lib/blog-shorts.ts). 바뀌면 커밋·push해야 라이브에 반영된다.
@@ -371,7 +375,7 @@ def main():
             return 0
         if "invalid_grant" in str(e):
             print("[WARN] 유튜브 로그인 열쇠가 만료됐습니다. 영상은 만들어져 있습니다.")
-            print("  1) python 블로그/youtube/authorize.py  (rokmclmj@gmail.com으로 로그인)")
+            print("  1) python 블로그/youtube/authorize_captions.py  (rokmclmj@gmail.com으로 로그인, 끝나면 token_new.json을 token.json으로 교체)")
             print(f"  2) {retry}")
         elif "uploadLimitExceeded" in str(e):
             print("[WARN] 유튜브 하루 업로드 한도를 넘었습니다(2026-10-04 실측: 하루 10편까지 성공). 영상은 만들어져 있습니다.")
