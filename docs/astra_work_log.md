@@ -533,3 +533,11 @@
 - 대표님이 `블로그/youtube/authorize_captions.py`(신규, gitignore 폴더)로 재로그인 — 권한 `youtube` + `youtube.force-ssl`. 새 열쇠를 따로 받은 뒤 교체, 이전 열쇠는 `token_before_captions.json`으로 백업.
 - `publish_short.py` SCOPES에 force-ssl 추가, `backfill_captions.py` 신설. 예약된 10편(id 89~98) 자막 업로드 성공 10/10, 재실행 시 10편 모두 건너뜀 확인. `check_status.py`·`sync_site_map.py`도 새 열쇠로 정상.
 - 앞으로 재로그인은 `authorize.py`가 아니라 `authorize_captions.py`를 쓸 것(authorize.py는 자막 권한이 빠진 열쇠를 만든다).
+
+### 10/4 오후 — 기존 42편 자막(CC) 채우기 시작, API 하루 사용량 소진
+
+- 확인: 8월 묶음 42편에도 CC 자막이 0건이었음(당시에도 권한 부족으로 실패한 것으로 추정). 대표님 승인으로 채우기 시작 — `backfill_captions.py --legacy`(영상 폴더의 N.srt 사용, 이미 있으면 건너뜀, 사용량 초과 시 중단).
+- 결과: 1~6번 성공 후 **YouTube Data API 하루 사용량(10,000) 소진**으로 중단(16:48 KST). 자막 넣기 1건 400, 자막 조회 1건 50 단위. 사용량은 매일 16:00 KST 전후(태평양 시간 자정)에 초기화.
+- 남은 일: 7~42번 36편 — 하루 20편 이하로 나눠 `python 블로그/shorts/backfill_captions.py --legacy` 재실행(이어서 진행됨). 블로그 발행일에는 발행·숏츠 예약이 끝난 뒤 16시 이후에 돌릴 것.
+- 10/5 영향: 영상 업로드는 별도 한도라 가능할 것으로 보지만(미검증), 사용량이 16시까지 비어 있어 그 글의 **CC 자막은 실패할 수 있음** → 16시 이후 `backfill_captions.py`(옵션 없이)로 채움.
+- 10/5 발행 방식: 예약 큐가 W40 그대로라 자동 발행은 건너뜀(`auto_upload.py --slot day1 --dry-run` 확인). 대표님이 "블로그 업로드해줘" 하면 수동 발행.

@@ -14,8 +14,49 @@ from publish_short import OUTPUT_DIR, RESULT_NAME, build_scenes, get_service  # 
 from shorts_lib import scenes_to_srt  # noqa: E402
 
 
+def legacy():
+    """8월 묶음 42편: 영상 폴더의 N.srt를 올린다. 하루 사용량이 다 차면 멈추고, 다음 날 다시 돌리면 이어서 한다."""
+    from googleapiclient.http import MediaFileUpload
+    from shorts_lib import VIDEO_DIR
+
+    sys.path.insert(0, os.path.join(os.path.dirname(OUTPUT_DIR), "youtube"))
+    from video_ids import VIDEO_IDS
+
+    youtube = get_service()
+    done = skipped = failed = 0
+    for num, video_id in sorted(VIDEO_IDS.items()):
+        srt_path = os.path.join(VIDEO_DIR, f"{num}.srt")
+        try:
+            existing = youtube.captions().list(part="snippet", videoId=video_id).execute().get("items", [])
+            if any(c["snippet"]["language"] == "ko" and c["snippet"].get("trackKind") != "asr" for c in existing):
+                skipped += 1
+                continue
+            if not os.path.exists(srt_path):
+                print(f"[실패] {num}번 — 자막 파일 없음: {srt_path}")
+                failed += 1
+                continue
+            youtube.captions().insert(
+                part="snippet",
+                body={"snippet": {"videoId": video_id, "language": "ko", "name": "한국어", "isDraft": False}},
+                media_body=MediaFileUpload(srt_path, mimetype="application/octet-stream"),
+            ).execute()
+            print(f"[성공] {num}번 ({video_id})", flush=True)
+            done += 1
+        except Exception as e:
+            if "quotaExceeded" in str(e):
+                print(f"[중단] {num}번에서 하루 사용량 초과 — 내일 다시 실행하면 이어서 합니다.")
+                break
+            print(f"[실패] {num}번 ({video_id}): {e}")
+            failed += 1
+    print(f"성공 {done} / 이미 있음 {skipped} / 실패 {failed} / 전체 {len(VIDEO_IDS)}")
+    return 1 if failed else 0
+
+
 def main():
     from googleapiclient.http import MediaInMemoryUpload
+
+    if "--legacy" in sys.argv:
+        return legacy()
 
     youtube = get_service()
     done = skipped = failed = 0
