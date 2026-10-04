@@ -390,7 +390,7 @@ approve_post.py는 upload-queue.json에 approved=true를 기록하고 upload_pos
 🎬 유튜브 숏츠: [shorts-result.json의 주소·공개 시각 / 예약 안 됨(사유)]
 ```
 
-숏츠가 "로그인 열쇠 만료"로 예약되지 않았으면 영상 파일은 바탕화면 `진공펌프_소개_자동화\스마텍_유튜브숏츠`에 만들어져 있다. `python 블로그/youtube/authorize.py`로
+숏츠가 "로그인 열쇠 만료"로 예약되지 않았으면 영상 파일은 바탕화면 `진공펌프_소개_자동화\스마텍_유튜브숏츠`에 만들어져 있다. `python 블로그/youtube/authorize_captions.py`로
 다시 로그인(rokmclmj@gmail.com)한 뒤 `python 블로그/shorts/publish_short.py "[폴더]" --blog-id [id]`를 실행한다. 블로그를 다시 업로드하지 않는다.
 
 업로드가 막혔으면 원인과 실제 발행 여부를 먼저 확인한다. 성공 여부가 불명확한 상태로 재실행을 안내하지 않는다. 중복 여부를 확인했고 즉시발행 승인이 유효한 경우에만 아래 실행 안내를 제공한다:

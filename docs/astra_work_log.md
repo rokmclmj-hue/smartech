@@ -526,3 +526,10 @@
 - 미수정(의도): 자동 예약 업로드가 lib/blog-shorts.json을 커밋·push하지 않는 점(무인 push는 하지 않기로 함 — 다음 세션에서 커밋), ISR 1시간 캐시로 공개 뒤 영상 표시가 늦을 수 있는 점(방문이 적은 글은 더 늦음), 폴더 찾기 함수가 upload_post.py와 중복인 점.
 - 검증: py_compile 8개, 규칙 시험 9개, 1005 재제작(750프레임·25초 동일), 89번 재실행 시 [SKIP], 예전 묶음 도구 import 정상.
 - 배포·라이브 확인(ad418b1): 원격 해시 일치, Vercel success. 라이브 `/blog/sputtering-dry-vacuum-pump-features`에 iframe(loading=lazy)·VideoObject 1개, 예약 상태인 id=87과 영상 없는 id=105는 삽입 0, 유튜브 embed 주소 200. `check-public-leaks.mjs` 라이브 통과. reviewed를 ad418b1로 이동(미검토 0).
+
+### 10/4 유튜브 자막(CC) 권한 추가·채우기
+
+- 대표님 설명: "하루 10편 공개"로 오해 → 10편은 비공개 예약이고 11/16부터 월수금 1편씩 공개됨을 설명, 내릴 필요 없음.
+- 대표님이 `블로그/youtube/authorize_captions.py`(신규, gitignore 폴더)로 재로그인 — 권한 `youtube` + `youtube.force-ssl`. 새 열쇠를 따로 받은 뒤 교체, 이전 열쇠는 `token_before_captions.json`으로 백업.
+- `publish_short.py` SCOPES에 force-ssl 추가, `backfill_captions.py` 신설. 예약된 10편(id 89~98) 자막 업로드 성공 10/10, 재실행 시 10편 모두 건너뜀 확인. `check_status.py`·`sync_site_map.py`도 새 열쇠로 정상.
+- 앞으로 재로그인은 `authorize.py`가 아니라 `authorize_captions.py`를 쓸 것(authorize.py는 자막 권한이 빠진 열쇠를 만든다).
