@@ -553,3 +553,4 @@
 - 큐에 없는 폴더라 `upload_post.py "기술블로그/2026-10/1005-진공흡착-원리"` 직접 업로드(14시경). id=106, 라이브 200·제목 일치·사진 5장. X 대기글 PENDING(108/280자).
 - **숏츠 자동 연결 첫 실전 성공**: 발행 직후 영상 제작 → 유튜브 비공개 예약 `isvp-QMQ8sQ`, 공개 10/6(화) 12:00(11:30 이후 발행이라 다음 평일). API로 private·publishAt·26초 확인. lib/blog-shorts.json 자동 기록.
 - 자막(CC)은 예상대로 API 사용량 초과로 실패 → 16시 이후 `backfill_captions.py`로 채울 것(미완료).
+- (10/5 20:25) 자막 채우기: `backfill_captions.py`로 1005 쇼츠(isvp-QMQ8sQ) CC 성공, `--legacy --max 19`로 기존 묶음 7~25번 성공(실패 0). `--max N` 옵션 추가. **남음: 26~42번 17편** — 다음 16시 이후 `python 블로그/shorts/backfill_captions.py --legacy` (목요일 오전 발행 전날인 수요일 저녁에 돌릴 때는 사용량을 남기도록 `--max 15`).

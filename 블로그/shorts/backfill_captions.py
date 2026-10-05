@@ -24,7 +24,12 @@ def legacy():
 
     youtube = get_service()
     done = skipped = failed = 0
+    # --max N: 이번 실행에서 넣을 최대 편수(다음 날 오전 발행분의 사용량을 남겨야 할 때)
+    limit = int(sys.argv[sys.argv.index("--max") + 1]) if "--max" in sys.argv else len(VIDEO_IDS)
     for num, video_id in sorted(VIDEO_IDS.items()):
+        if done >= limit:
+            print(f"[멈춤] 이번 실행 한도 {limit}편 도달")
+            break
         srt_path = os.path.join(VIDEO_DIR, f"{num}.srt")
         try:
             existing = youtube.captions().list(part="snippet", videoId=video_id).execute().get("items", [])
