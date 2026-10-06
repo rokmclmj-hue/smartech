@@ -32,6 +32,10 @@ const nextConfig: NextConfig = {
       // 2026-09-03 서치콘솔 404 재점검 — 출처불명 잘못된 링크(백링크·크롤러 오류로 추정), 안전하게 홈으로 리다이렉트
       { source: "/smartechvacuum",   destination: "/",          permanent: true },
       { source: "/&",                destination: "/",          permanent: true },
+      // 2026-10-06 펌프 부착 QR 스티커 전용 주소. 인쇄된 QR은 못 바꾸므로 도착지는 여기서만 바꾼다.
+      // 🔴 permanent: false 유지 — true(308)면 휴대폰이 옛 도착지를 영구 기억해 나중에 바꿔도 안 먹는다.
+      // 🔴 이 줄을 지우거나 source를 바꾸면 이미 붙인 스티커가 전부 404가 된다.
+      { source: "/qr", destination: "/?utm_source=qr_sticker&utm_medium=sticker&utm_campaign=pump_sticker", permanent: false },
     ];
   },
   serverExternalPackages: ["bcryptjs", "@prisma/client", "prisma", "xlsx", "sharp"],
