@@ -13,6 +13,17 @@ export type RepairCase = {
 export const REPAIR_CASES: RepairCase[] = [
   {
     model: "Edwards iH1800MK5",
+    client: "S사",
+    date: "2026.10.06",
+    symptom: "공정 부산물 고착 · 파워 PCA 불량",
+    work: ["오링 교체", "베어링 교체", "씰 교체", "슬리브 교체", "오일 교체", "PCA 교체", "기타"],
+    photo: "/images/repair/ih1800mk5-c-exterior.jpg",
+    partPhoto: "/images/repair/ih1800mk5-c-deposit.jpg",
+    extraPhoto: "/images/repair/ih1800mk5-c-pca.jpg",
+    reportPdf: "/documents/repair-reports/ih1800mk5-c-inspection.pdf",
+  },
+  {
+    model: "Edwards iH1800MK5",
     client: "M사",
     date: "2026.09.22",
     symptom: "공정 부산물 오염 · 정기 오버홀",
