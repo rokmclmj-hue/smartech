@@ -8,8 +8,38 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import AddToQuoteButton from "./AddToQuoteButton";
 import ModelDetail from "./ModelDetail";
-import { findModelBySlug } from "@/lib/product-specs";
+import { findModelBySlug, getModelSpecRows } from "@/lib/product-specs";
 import { getProductPhotoUrl } from "@/lib/product-icons";
+
+// 검색 결과 제목·설명용 — 카테고리 키("오일펌프(소형 RV)")의 괄호 앞부분을 읽기 쉬운 제품 종류명으로 바꾼다.
+const MODEL_TYPE_LABEL: Record<string, string> = {
+  "오일펌프": "오일 진공펌프",
+  "스크롤펌프": "스크롤 진공펌프",
+  "산업용드라이펌프": "산업용 드라이 진공펌프",
+  "반도체드라이펌프": "반도체 드라이 진공펌프",
+  "터보펌프": "터보분자펌프",
+  "부스터펌프": "부스터 진공펌프",
+};
+
+// 모델 페이지 설명문에 넣을 핵심 사양(카탈로그 스펙 표에 있는 값만, 빈 값은 건너뜀)
+function modelSeoText(category: string, index: number) {
+  const typeKey = category.split("(")[0];
+  const typeLabel = MODEL_TYPE_LABEL[typeKey] ?? typeKey;
+  const rows = getModelSpecRows(category, index);
+  const pick = (prefix: string, name: string) => {
+    const row = rows.find((r) => r.label.startsWith(prefix));
+    const value = row?.value?.trim();
+    if (!row || !value || value === "-" || value === "—") return null;
+    return `${name} ${value}${row.unit ? ` ${row.unit}` : ""}`;
+  };
+  const specs = [
+    pick("배기속도", "배기속도"),
+    pick("도달압력", "도달압력"),
+    pick("인렛 플랜지", "인렛"),
+    pick("무게", "무게"),
+  ].filter(Boolean);
+  return { typeLabel, specs: specs.join(", ") };
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ partNo: string }> }): Promise<Metadata> {
   const { partNo: raw } = await params;
@@ -25,9 +55,10 @@ export async function generateMetadata({ params }: { params: Promise<{ partNo: s
 
   const modelInfo = findModelBySlug(partNo);
   if (modelInfo) {
+    const { typeLabel, specs } = modelSeoText(modelInfo.category, modelInfo.index);
     return {
-      title: `Edwards ${modelInfo.model} 사양·가격 — 스마텍 | Edwards Vacuum`,
-      description: `Edwards ${modelInfo.model} 배기속도·도달압력·플랜지 등 공식 카탈로그 사양. 스마텍에서 정품 공급·견적 문의.`,
+      title: `Edwards ${modelInfo.model} ${typeLabel} 사양·가격 — 스마텍`,
+      description: `Edwards ${modelInfo.model} ${typeLabel}${specs ? ` — ${specs}` : " 공식 카탈로그 사양"}. Edwards 한국 공식 대리점 스마텍에서 정품 견적·수리 상담.`,
       alternates: { canonical: `https://www.smartechvacuum.com/products/${encodeURIComponent(partNo)}` },
     };
   }
