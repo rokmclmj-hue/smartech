@@ -26,14 +26,16 @@ function modelSeoText(category: string, index: number) {
   const typeKey = category.split("(")[0];
   const typeLabel = MODEL_TYPE_LABEL[typeKey] ?? typeKey;
   const rows = getModelSpecRows(category, index);
-  const pick = (prefix: string, name: string) => {
-    const row = rows.find((r) => r.label.startsWith(prefix));
+  const pick = (prefix: string | string[], name: string) => {
+    const prefixes = Array.isArray(prefix) ? prefix : [prefix];
+    const row = rows.find((r) => prefixes.some((p) => r.label.startsWith(p)));
     const value = row?.value?.trim();
     if (!row || !value || value === "-" || value === "—") return null;
-    return `${name} ${value}${row.unit ? ` ${row.unit}` : ""}`;
+    const shown = row.label.startsWith("최대") ? `최대 ${name}` : name;
+    return `${shown} ${value}${row.unit ? ` ${row.unit}` : ""}`;
   };
   const specs = [
-    pick("배기속도", "배기속도"),
+    pick(["배기속도", "최대 배기속도"], "배기속도"), // iXH는 행 이름이 "최대 배기속도"
     pick("도달압력", "도달압력"),
     pick("인렛 플랜지", "인렛"),
     pick("무게", "무게"),
