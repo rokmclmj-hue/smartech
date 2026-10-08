@@ -8,7 +8,7 @@
 ## 2026-10-09 10/8 글 출처 표현 수정 (id=113) + 출처 규칙 재검토 중
 
 - 대표님 지적: 10/8 `1008-펌프다운-지연원인`에 제조사 언급이 과함. 확인 결과 6곳(규칙은 1~3곳)·제조사가 주어인 문장 3곳·도입부 "Edwards·Leybold 공식 자료를 기준으로" — 9/25 절충안 위반인데 발행 전 점검에서 못 걸렀음(check_quality는 형식만 봄).
-- 수정: 도입부 문구 삭제, 제조사 주어 문장을 일반 설명으로, Leybold(경쟁 제조사) 언급 전부 삭제. 출처 문장은 2곳(원인 1·5, 스마텍 주어)만 유지. final.md·naver.md·google.md와 DB id=113(content·naverContent) 모두 반영, check_quality 통과. 재업로드는 하지 않음(쇼츠·X 중복 방지).
+- 수정: 도입부 문구 삭제, 제조사 주어 문장을 일반 설명으로, Leybold(경쟁 제조사) 언급 전부 삭제. 출처 문장은 2곳(원인 1·5, 스마텍 주어)만 유지. 검색 설명문(meta.txt·metaDesc)의 "Edwards·Leybold 공식 자료로 정리"와 FAQ 답변 5개의 "Edwards는…/Leybold에 따르면"도 수정(FAQ 출처 문장은 수치 답변 1곳만). final.md·naver.md·google.md·faq.json·meta.txt와 DB id=113(content·naverContent·metaDesc·faqSchema) 모두 반영, check_quality 통과. 재업로드는 하지 않음(쇼츠·X 중복 방지).
 - **앞으로**: 발행 전 제조사 언급 횟수·문장 형태를 세어 대표님께 보고. 경쟁 제조사 이름은 근거로 쓰지 않음.
 - **결정 대기**: 출처 문장을 아예 없앨지. 제안 — 출처 문장은 0~1곳(놀라운 수치·안전 기준만), Edwards는 "취급 제품" 맥락으로만 언급, 근거는 스마텍 수리 사례로. 9/25 규칙 변경이라 대표님 확정 후 writer.md 수정.
 
