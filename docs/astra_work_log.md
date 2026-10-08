@@ -603,3 +603,11 @@
 - 950327b: 스키마 2칸 추가(db push 선행), 대행견적 문의 경로, 거래명세표 원본 견적 저장, 대시보드 월별 표. 로그인 필요한 화면은 자동 검증 못 함.
 - 모바일 점검: Playwright로 라이브 공개 12쪽을 6개 화면 폭에서 측정. 처음 스크립트는 화면 밖에 숨겨 둔 메뉴 서랍을 "삐져나옴"으로 잘못 잡아 출력이 과도했음(오탐) → 넘침은 scrollWidth 기준으로만 판단. 실제 문제는 `/blog/113` 본문 긴 주소 1건, `break-words`로 수정.
 - 임시 점검 스크립트는 삭제, 캡처는 세션 임시 폴더에만 둠.
+
+### 10/8 밤 — (클로드) Vercel Deployment Storage 100% 메일 재수신 → reviewed 가지 배포 끔
+
+- 대표님 Usage 화면: 10.11 GB / 10 GB(실제 초과). 그래프는 10GB 근처까지 찼다가 1~2GB로 떨어지는 톱니 모양 반복. 9/21 "0 B"는 정리 직후 시점이었던 것으로 보임 → 9/21 기록의 "메일은 무시" 결론은 낡음.
+- 근거: Vercel 9/16 공지 — Hobby는 프로젝트당 최근 production 3개 + 최근 3개만 보호, 10GB 초과 시 그 밖의 배포는 즉시 삭제, 초과 상태에서는 새 배포가 막힐 수 있음. https://vercel.com/changelog/hobby-projects-now-retain-fewer-deployments-to-free-up-storage
+- 확인: `vercel ls` 12개(master 8·reviewed 4), 전부 당일 생성. 배포 1개 약 0.8GB로 추정(10GB÷12, 직접 측정 아님). 라이브 200, 초과 상태에서도 당일 배포는 Ready.
+- 조치(대표님 승인 "어 추가해줘"): 보호 파일 `vercel.json`에 `git.deploymentEnabled.reviewed=false` 추가. master 배포는 그대로.
+- 미검증: reviewed 가지가 이 설정이 들어간 커밋까지 전진한 뒤부터 적용됨. 다음에 reviewed를 옮길 때 `vercel ls -m githubCommitRef=reviewed`에 새 배포가 생기지 않는지 확인할 것. 메일은 덜 자주 올 뿐 없어지지는 않음.
