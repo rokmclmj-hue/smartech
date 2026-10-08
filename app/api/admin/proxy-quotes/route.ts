@@ -172,6 +172,24 @@ export async function POST(req: NextRequest) {
           };
         }
         await prisma.knownCompany.create({ data: companyData });
+      } else if (g.name.trim()) {
+        // 이미 있는 거래처 — 담당자만 새 사람이면 담당자 목록에 추가(띄어쓰기·대소문자 무시하고 같은 이름이면 건너뜀)
+        const nameKey = (s: string) => s.replace(/\s/g, "").toLowerCase();
+        const contacts = await prisma.knownContact.findMany({
+          where: { companyId: existing.id },
+          select: { name: true },
+        });
+        if (!contacts.some((c) => nameKey(c.name) === nameKey(g.name))) {
+          await prisma.knownContact.create({
+            data: {
+              companyId: existing.id,
+              name: g.name.trim(),
+              title: g.title?.trim() || null,
+              mobile: g.phone?.trim() || null,
+              email: g.email?.trim() || null,
+            },
+          });
+        }
       }
     }
 

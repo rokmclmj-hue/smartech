@@ -78,7 +78,7 @@ model Quote {
   guestTitle          String?
   guestTier           String?
   paymentTerm         String?
-  inquirySource       String?     // 문의 경로(내부 기록): EMAIL | PHONE | WEB | EXISTING | OTHER — lib/inquiry-source.ts
+  inquirySource       String?     // 문의 경로(내부 기록): EMAIL_INFO | EMAIL_DIRECT | PHONE | WEB | EXISTING | OTHER — lib/inquiry-source.ts
   user                User?       @relation(fields: [userId], references: [id])
   createdByAdmin      User?       @relation("QuoteCreatedBy", fields: [createdByAdminId], references: [id])
   items               QuoteItem[]
