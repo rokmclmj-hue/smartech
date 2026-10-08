@@ -22,7 +22,7 @@ category: 기술문의
 
 ![응축부터 도달진공 저하·부식으로 이어지는 흐름](./images/사진2.png)
 
-수증기가 기체 상태 그대로 배출되지 않고 펌프 내부에서 액체로 응축되면, 다시 증발시켜야만 배기할 수 있어 도달진공 회복 시간이 훨씬 길어진다. 스마텍이 Edwards와 Pfeiffer Vacuum의 기술자료(How to pump condensable vapours?, https://www.edwardsvacuum.com/en-us/vacuum-pumps/knowledge/applications/how-to-pump-condensable-vapours / Know-How 4.7 Roots Vacuum Pumps, https://www.pfeiffervacuum.com/us/en/knowledge/vacuum-technology/knowledge-book/4-vacuum-generation/4_7_roots_vacuum_pumps/)를 각각 확인한 결과, 두 제조사 모두 같은 인과관계를 설명한다. 응축이 도달압력 상승과 부식, 최악의 경우 펌프 고장으로까지 이어진다는 것이다.
+수증기가 기체 상태 그대로 배출되지 않고 펌프 내부에서 액체로 응축되면, 다시 증발시켜야만 배기할 수 있어 도달진공 회복 시간이 훨씬 길어진다. 스마텍이 Edwards 기술자료(How to pump condensable vapours?, https://www.edwardsvacuum.com/en-us/vacuum-pumps/knowledge/applications/how-to-pump-condensable-vapours)를 확인한 결과, 응축은 도달압력 상승과 부식, 최악의 경우 펌프 고장으로까지 이어지는 것으로 확인된다.
 
 ## 정비 전 퍼지와 보관 중 벤트는 목적이 다릅니다
 
