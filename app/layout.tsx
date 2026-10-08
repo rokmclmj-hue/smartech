@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import "./globals.css";
+import "./mobile-inputs.css";
 import "./quote/[id]/quote-styles.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
