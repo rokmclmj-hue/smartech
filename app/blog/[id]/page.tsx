@@ -396,7 +396,7 @@ export default async function BlogPostPage({ params }: Props) {
         </header>
 
         {/* 본문 — 사진을 실제 위치에 삽입 */}
-        <article className="border-t hair pt-8">
+        <article className="border-t hair pt-8 break-words">
           {/* 상단 사진 (글 시작 바로 아래) */}
           {postPhotos[0] && (
             <div className="mb-8">
