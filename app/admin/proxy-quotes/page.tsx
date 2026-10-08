@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/lib/toast";
+import { INQUIRY_SOURCES } from "@/lib/inquiry-source";
 
 // ── 타입 ────────────────────────────────────────────────────────────────────
 
@@ -200,6 +201,9 @@ function AdminProxyQuotesInner() {
   const [customPaymentText, setCustomPaymentText] = useState("");
   const effectivePaymentTerm =
     paymentTerm === "c" ? (customPaymentText.trim() || null) : paymentTerm;
+
+  // 문의 경로 (내부 기록 — 견적서에는 표시되지 않음)
+  const [inquirySource, setInquirySource] = useState<string | null>(null);
 
   // 비고
   const [note, setNote] = useState("납기는 구매 시점에 따라서 변동 될 수 있습니다. 감사합니다.");
@@ -500,8 +504,8 @@ function AdminProxyQuotesInner() {
       // 홈페이지 등록 회원이면 customerId, 거래처/직접입력이면 guest
       const body =
         selectedCustomer?.source === "user"
-          ? { customerId: selectedCustomer.id, items: itemsPayload, paymentTerm: effectivePaymentTerm ?? undefined, note: note || undefined }
-          : { guest, items: itemsPayload, paymentTerm: effectivePaymentTerm ?? undefined, note: note || undefined, saveToCompany: showDirect ? saveToCompany : false };
+          ? { customerId: selectedCustomer.id, items: itemsPayload, paymentTerm: effectivePaymentTerm ?? undefined, note: note || undefined, inquirySource: inquirySource ?? undefined }
+          : { guest, items: itemsPayload, paymentTerm: effectivePaymentTerm ?? undefined, note: note || undefined, inquirySource: inquirySource ?? undefined, saveToCompany: showDirect ? saveToCompany : false };
 
       const res = await fetch("/api/admin/proxy-quotes", {
         method: "POST",
@@ -1323,6 +1327,29 @@ function AdminProxyQuotesInner() {
             className="mt-2 w-full max-w-md border hair rounded-md px-3 py-2 text-[13px] focus:outline-none focus:border-smblue"
           />
         )}
+      </div>
+
+      {/* 문의 경로 — 견적→납품 집계용 내부 기록 */}
+      <div className="mb-8">
+        <label className="mono text-[10px] tracking-[0.18em] uppercase dim mb-3 block">
+          문의 경로 <span className="normal-case text-[10px]">(선택) — 내부 기록용, 견적서에는 표시되지 않습니다</span>
+        </label>
+        <div className="flex flex-wrap gap-2">
+          {INQUIRY_SOURCES.map((o) => (
+            <button
+              key={o.value}
+              type="button"
+              onClick={() => setInquirySource(inquirySource === o.value ? null : o.value)}
+              className={`mono text-[11px] tracking-[0.06em] border px-3 py-2 rounded-md transition-colors ${
+                inquirySource === o.value
+                  ? "bg-smblue text-white border-smblue"
+                  : "hair dim hover:text-ink"
+              }`}
+            >
+              {o.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* 05 / 비고 */}

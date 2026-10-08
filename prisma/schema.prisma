@@ -78,6 +78,7 @@ model Quote {
   guestTitle          String?
   guestTier           String?
   paymentTerm         String?
+  inquirySource       String?     // 문의 경로(내부 기록): EMAIL | PHONE | WEB | EXISTING | OTHER — lib/inquiry-source.ts
   user                User?       @relation(fields: [userId], references: [id])
   createdByAdmin      User?       @relation("QuoteCreatedBy", fields: [createdByAdminId], references: [id])
   items               QuoteItem[]
@@ -484,9 +485,15 @@ model ManualDeliveryNote {
   sentAt          DateTime?
   sentTo          String?
 
+  // 대행견적 이력에서 불러와 만든 경우 원본 Quote.id (견적→납품 집계용).
+  // 관계를 걸지 않는다 — 견적이 삭제돼도 명세표는 그대로 남아야 한다.
+  sourceQuoteId   Int?
+
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   items           ManualDeliveryNoteItem[]
+
+  @@index([sourceQuoteId])
 
   @@index([status])
   @@index([createdAt])

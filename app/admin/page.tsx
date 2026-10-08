@@ -126,6 +126,86 @@ function RepairStatusSection({ stats }: { stats: DashboardStats }) {
   );
 }
 
+// ─── 견적 → 납품 집계 섹션 ───────────────────────────────────
+type FunnelCell = { quotes: number; delivered: number };
+type FunnelData = {
+  sources: { value: string; label: string }[];
+  months: { month: string; total: FunnelCell; bySource: Record<string, FunnelCell> }[];
+};
+
+function QuoteFunnelSection() {
+  const [open, setOpen] = useState(false);
+  const [data, setData] = useState<FunnelData | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    if (!open || data) return;
+    fetch("/api/admin/dashboard/quote-funnel")
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then(setData)
+      .catch(() => setFailed(true));
+  }, [open, data]);
+
+  const cell = (c: FunnelCell) => (c.quotes === 0 ? "—" : `${c.quotes} → ${c.delivered}`);
+  const rate = (c: FunnelCell) => (c.quotes === 0 ? "—" : `${Math.round((c.delivered / c.quotes) * 100)}%`);
+
+  return (
+    <div className="border hair bg-paper">
+      <div className="flex items-center justify-between px-5 pt-4 pb-3">
+        <div className="mono text-[10px] tracking-[0.15em] uppercase dim">견적 → 납품 · 월별</div>
+        <button
+          onClick={() => setOpen((v) => !v)}
+          className="mono text-[10px] tracking-[0.1em] dim hover:text-edred transition-colors"
+        >
+          {open ? "닫기 ▲" : "열기 ▼"}
+        </button>
+      </div>
+      {open && (
+        <div className="border-t hair px-5 py-4">
+          {failed ? (
+            <div className="text-[12px] dim">집계를 불러오지 못했습니다.</div>
+          ) : !data ? (
+            <div className="mono text-[11px] dim">— 불러오는 중</div>
+          ) : (
+            <>
+              <div className="overflow-x-auto">
+                <table className="w-full text-[12px] tabular whitespace-nowrap">
+                  <thead>
+                    <tr className="border-b hair text-left dim">
+                      <th className="py-2 pr-4 font-normal">월</th>
+                      <th className="py-2 pr-4 font-normal">보낸 견적 → 납품</th>
+                      <th className="py-2 pr-4 font-normal">비율</th>
+                      {data.sources.map((s) => (
+                        <th key={s.value} className="py-2 pr-4 font-normal">{s.label}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.months.map((m) => (
+                      <tr key={m.month} className="border-b hair last:border-0">
+                        <td className="py-2 pr-4 mono">{m.month}</td>
+                        <td className="py-2 pr-4 font-medium">{cell(m.total)}</td>
+                        <td className="py-2 pr-4">{rate(m.total)}</td>
+                        {data.sources.map((s) => (
+                          <td key={s.value} className="py-2 pr-4 dim">{cell(m.bySource[s.value])}</td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className="text-[11px] dim mt-3 leading-relaxed">
+                각 칸은 &quot;보낸 견적 수 → 그중 거래명세표로 이어진 수&quot;입니다. 거래명세표를 &quot;대행견적 이력불러오기&quot;로 만들 때만 연결되며,
+                2026-10-08 이전에 만든 거래명세표는 연결 기록이 없어 0으로 나옵니다. 문의 경로는 대행견적서 작성 화면에서 고른 값입니다.
+              </p>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── GA 방문자 분석 섹션 ─────────────────────────────────────
 function GaSection() {
   const [open, setOpen] = useState(false);
@@ -531,6 +611,9 @@ export default function AdminDashboard() {
         {/* 오늘 / 이번 주 방문 업체 */}
         <VisitorSection stats={stats} />
 
+        {/* 견적 → 납품 집계 */}
+        <QuoteFunnelSection />
+
         {/* GA 방문자 분석 */}
         <GaSection />
       </div>
@@ -663,6 +746,9 @@ export default function AdminDashboard() {
           </Link>
         </div>
       )}
+
+      {/* 견적 → 납품 집계 */}
+      <QuoteFunnelSection />
 
       {/* GA 방문자 분석 */}
       <GaSection />

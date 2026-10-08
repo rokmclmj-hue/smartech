@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAdminSession } from "@/lib/admin-auth";
+import { parseInquirySource } from "@/lib/inquiry-source";
 
 type LineInput = {
   productId: number | null;
@@ -35,6 +36,7 @@ export async function POST(req: NextRequest) {
   const note = typeof body.note === "string" ? body.note : null;
   const taxInvoiceRequested = Boolean(body.taxInvoiceRequested);
   const paymentTerm = typeof body.paymentTerm === "string" ? body.paymentTerm : null;
+  const inquirySource = parseInquirySource(body.inquirySource);
 
   if (!items || items.length === 0) {
     return NextResponse.json({ error: "품목이 없습니다." }, { status: 400 });
@@ -110,6 +112,7 @@ export async function POST(req: NextRequest) {
         note,
         taxInvoiceRequested,
         paymentTerm,
+        inquirySource,
         totalAmount,
         expiresAt,
         items: { create: itemData },
@@ -132,6 +135,7 @@ export async function POST(req: NextRequest) {
         note,
         taxInvoiceRequested,
         paymentTerm,
+        inquirySource,
         totalAmount,
         expiresAt,
         guestName: g.name.trim(),

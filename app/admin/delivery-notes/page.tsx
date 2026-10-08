@@ -167,6 +167,8 @@ function NoteForm({ onSaved }: { onSaved: () => void }) {
   const [quoteHistoryQ, setQuoteHistoryQ] = useState("");
   const [quoteHistoryItems, setQuoteHistoryItems] = useState<QuoteHistoryItem[]>([]);
   const [quoteHistoryLoading, setQuoteHistoryLoading] = useState(false);
+  // 대행견적 이력에서 불러온 경우의 원본 견적 (견적→납품 집계용으로 함께 저장)
+  const [sourceQuote, setSourceQuote] = useState<{ id: number; quoteNo: string } | null>(null);
 
   // 상태
   const [saving, setSaving] = useState(false);
@@ -242,9 +244,11 @@ function NoteForm({ onSaved }: { onSaved: () => void }) {
     setShowDirect(true);
     setSearchQ("");
     setSearchResults([]);
+    setSourceQuote(null);
   }
 
   function loadFromHistory(h: HistoryItem) {
+    setSourceQuote(null);
     setToCompany(h.toCompany);
     setToName(h.toName ?? "");
     setToTitle(h.toTitle ?? "");
@@ -285,6 +289,7 @@ function NoteForm({ onSaved }: { onSaved: () => void }) {
     setShowDirect(true);
     setShowQuoteHistory(false);
     setQuoteHistoryQ("");
+    setSourceQuote({ id: h.id, quoteNo: h.quoteNo });
   }
 
   function addItem() {
@@ -329,6 +334,7 @@ function NoteForm({ onSaved }: { onSaved: () => void }) {
           issuedDate,
           toCompany, toName, toTitle, toEmail, toPhone, toBizNo,
           memo, remarks, includeBankInfo,
+          sourceQuoteId: sourceQuote?.id ?? undefined,
           items: items.map((it, idx) => ({ ...it, quantity: Number(it.quantity), unitPrice: Number(it.unitPrice), sortOrder: idx })),
         }),
       });
@@ -456,6 +462,22 @@ function NoteForm({ onSaved }: { onSaved: () => void }) {
           <span className="ml-2 text-[11px] dim">PDF에 표시되는 발행일입니다. 기본값은 오늘 날짜예요.</span>
         </div>
       </div>
+
+      {/* 원본 견적 연결 안내 — 대행견적 이력에서 불러온 경우 */}
+      {sourceQuote && (
+        <div className="border hair bg-paper px-5 py-2.5 flex items-center justify-between gap-3">
+          <span className="text-[12px]">
+            견적 <span className="mono text-edred">{sourceQuote.quoteNo}</span>에서 불러왔습니다. 저장하면 이 견적의 납품으로 기록됩니다.
+          </span>
+          <button
+            type="button"
+            onClick={() => setSourceQuote(null)}
+            className="mono text-[10px] dim hover:text-edred transition-colors shrink-0"
+          >
+            연결 해제
+          </button>
+        </div>
+      )}
 
       {/* 01 수신자 */}
       <div className="border hair bg-paper">

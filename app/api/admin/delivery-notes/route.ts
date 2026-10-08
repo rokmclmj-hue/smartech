@@ -33,6 +33,14 @@ export async function POST(req: NextRequest) {
   const totalVat = Math.round(totalSupply * 0.1);
   const totalAmount = totalSupply + totalVat;
 
+  // 대행견적 이력에서 불러온 경우에만 원본 견적 번호를 남긴다(없는 견적 번호는 버림)
+  const rawQuoteId = Number(body.sourceQuoteId);
+  const sourceQuoteId =
+    Number.isInteger(rawQuoteId) && rawQuoteId > 0 &&
+    (await prisma.quote.findUnique({ where: { id: rawQuoteId }, select: { id: true } }))
+      ? rawQuoteId
+      : null;
+
   const year = new Date().getFullYear();
   const parsedIssuedDate = body.issuedDate ? new Date(body.issuedDate) : new Date();
   const issuedDate = isNaN(parsedIssuedDate.getTime()) ? new Date() : parsedIssuedDate;
@@ -52,6 +60,7 @@ export async function POST(req: NextRequest) {
         memo: body.memo?.trim() || null,
         remarks: body.remarks?.trim() || null,
         includeBankInfo: body.includeBankInfo !== false,
+        sourceQuoteId,
         totalSupply,
         totalVat,
         totalAmount,
