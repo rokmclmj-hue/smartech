@@ -35,3 +35,23 @@
 - ✅ [Leybold — How to select a vacuum pump for drying applications](https://www.leybold.com/en-in/knowledge/vacuum-fundamentals/vacuum-generation/pump-selection-for-drying-process)
 - ✅ 스마텍 내부 `data/Product_master_table/product_master_table.csv` (APG200 사양)
 - 관련 공개 글(참고용, 원리 반복 안 함): [진공에서는 물이 왜 낮은 온도에서 끓을까](https://www.smartechvacuum.com/blog/98)
+
+
+## 2026-10-09 재작성 근거 (출처 규칙 강화 — Edwards 자료만 공개 인용)
+
+기존 원고는 Leybold 건조 공정 자료(27 mbar·6.5e-2 mbar·60 mbar·0.65 mbar, 콘덴서 4단계)를 뼈대로 했다. 대표님 지시(글당 1~2곳·Edwards만·타사 인용 금지)로 그 수치와 단계 설명을 공개 글에서 모두 뺐다.
+
+✅ [Edwards — Why gas ballast is important on oil sealed rotary vane pumps?](https://www.edwardsvacuum.com/en/knowledge/applications/why-gas-ballast-is-important-on-oil-sealed-rotary-vane-pumps) (10/9 원문 확인)
+- "Water has a saturated vapour pressure of ~24 mbar (18 Torr) at 20 oC (70 oF), this is the lowest pressure the pump can attain until all the water is pumped away."
+- "If vapour is being pumped, the vacuum pump's ultimate pressure will be limited, not by ultimate pressure performance of the pump itself, but by the vapour pressure of the material being processed."
+- "Allowing water vapour to condense inside a pump will make the time to recover ultimate pressure much longer than if it remains in vapour phase." / "Condensed water vapour can also degrade an oil sealed rotary vane pump oil quite quickly."
+- "An oil sealed vacuum pump running gas ballast for long periods of time should be fitted with a device designed to return oil back into the oil box..."
+
+✅ [Edwards — How to pump condensable vapours?](https://www.edwardsvacuum.com/en-us/vacuum-pumps/knowledge/applications/how-to-pump-condensable-vapours) (10/9 원문 확인)
+- "it is important for the pump to warm-up to its normal operating temperature before exposing it to condensable vapour, this will typically take up to 60 minutes" / "'Blanking' the inlet of the pump, by closing a valve..."
+- "the ballast should generally be run all the time that vapour is being passed through the pump"
+- "It is recommended the pump is run for a minimum of 20 to 30 minutes after finishing the vacuum process"
+- "This applies to both oil sealed pumps and dry pumps"
+
+원문에 없는 내용(스마텍 설명으로 쓴 일반 원리): 재료 온도가 오르면 물의 증기압이 높아진다(수치 미기재), 압력 정체 구간을 벗어나는 흐름으로 건조 진행을 본다(위 두 문장에서 끌어낸 판단 기준), 게이지 위치·기록 비교.
+정전용량식 게이지(Edwards Barocel) 취급은 대표님 확인(10/9), 카탈로그 DB에 Barocel 7025 등록 확인.

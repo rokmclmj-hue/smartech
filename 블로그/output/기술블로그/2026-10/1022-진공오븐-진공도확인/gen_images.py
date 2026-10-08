@@ -29,24 +29,23 @@ def html(body, extra=""):
     return f'<!doctype html><html lang="ko"><head><meta charset="utf-8"><style>{CSS}{extra}</style></head><body>{body}</body></html>'
 
 STAGES = html("""
-<div id="card"><div class="eyebrow">DRYING STAGES · 건조 4단계</div>
-<h2>배기부터 응축기 우회까지</h2>
-<div class="grid4">
-<div class="box"><div class="n">A</div><h3>배기</h3><p>가스 발라스트+루츠펌프로<br>용기 배기</p></div>
-<div class="box"><div class="n">B</div><h3>콘덴서 연결</h3><p>수증기압 상승 시<br>콘덴서 2개 연결</p></div>
-<div class="box"><div class="n">C</div><h3>메인 우회</h3><p>메인 콘덴서<br>우회</p></div>
-<div class="box"><div class="n">D</div><h3>중간 우회</h3><p>중간 콘덴서<br>우회</p></div>
-</div><div class="note">Leybold 배치식 건조 공정 설명 기준.</div></div>
+<div id="card"><div class="eyebrow">WATER VAPOUR · 수증기압</div>
+<h2>수분이 남아 있는 동안 압력은 여기서 머뭅니다</h2>
+<div class="grid">
+<div class="box"><h3>약 24 mbar (18 Torr)</h3><p>20℃에서 물의 포화 증기압<br>물이 다 빠질 때까지의 한계</p></div>
+<div class="box"><h3>수분이 빠진 뒤</h3><p>압력이 다시 내려가<br>빈 챔버의 평소 도달압력에 접근</p></div>
+</div><div class="note">재료 온도가 높으면 압력이 머무는 구간도 더 높아집니다.</div></div>
 """)
 
 PRESSURE = html("""
-<div id="card"><div class="eyebrow">PRESSURE THRESHOLD · 압력 전환점</div>
-<h2>특정 압력 아래로 떨어지면 구성이 바뀝니다</h2>
-<div class="grid">
-<div class="box"><h3>27 mbar 이하</h3><p>루츠펌프 추가 가동<br>(Leybold 예시)</p></div>
-<div class="box"><h3>약 6.5×10⁻² mbar</h3><p>최종 건조 단계 목표<br>(Leybold 예시)</p></div>
-</div><div class="note">특정 건조 공정 예시 수치이며 모든 설비의 절대 기준은 아닙니다. 로터리베인 펌프 수증기 허용치는 예시 자료 기준 60 mbar.</div></div>
-""")
+<div id="card"><div class="eyebrow">PUMP OPERATION · 펌프 운전</div>
+<h2>수증기를 배기할 때 지킬 세 가지</h2>
+<div class="grid3">
+<div class="box"><div class="n">1</div><h3>미리 데우기</h3><p>흡입구를 닫고 운전<br>보통 최대 60분</p></div>
+<div class="box"><div class="n">2</div><h3>발라스트 열기</h3><p>증기가 지나는 동안<br>계속 열어 둠</p></div>
+<div class="box"><div class="n">3</div><h3>마무리 운전</h3><p>공정 후 흡입구를 막고<br>최소 20~30분</p></div>
+</div><div class="note">오일씰 펌프와 드라이 펌프 모두에 해당합니다.</div></div>
+""", ".grid3 { display:grid; gap:18px; grid-template-columns:repeat(3,1fr); }")
 
 GAUGE = html("""
 <div id="card"><div class="eyebrow">GAUGE LIMIT · 게이지의 한계</div>
@@ -54,7 +53,7 @@ GAUGE = html("""
 <div class="grid">
 <div class="box"><h3>APG200(피라니)</h3><p>측정범위 대기압~5×10⁻⁴ mbar<br>질소 기준 교정</p></div>
 <div class="box"><h3>건조 공정 중</h3><p>수증기 비중이 높아<br>표시값이 실제와 다를 수 있음</p></div>
-</div><div class="note">수증기 전용 보정계수 수치는 확인하지 못했습니다.</div></div>
+</div><div class="note">절댓값이 중요하면 가스 종류와 무관한 정전용량식 게이지를 씁니다.</div></div>
 """)
 
 with sync_playwright() as p:
