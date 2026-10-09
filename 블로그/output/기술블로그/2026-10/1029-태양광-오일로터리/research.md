@@ -36,3 +36,26 @@
 - ✅ [Leybold — Solar Technology](https://www.leybold.com/en/applications-and-industries/solar-technology)
 - ✅ [Leybold — Solar Coating](https://www.leybold.com/en-us/applications-and-industries/solar-technology/solar-coating)
 - ✅ 스마텍 내부 `data/Product_master_table/2.오일펌프_중대형E2M.txt`, `1.오일펌프_소형RV.txt`, `7.산업용드라이펌프_GXS Dry.txt`
+
+
+## 2026-10-09 재작성 근거 (출처 규칙 강화 — Edwards 자료만 공개 인용, 대표님 승인 방향)
+
+기존 원고의 뼈대였던 Leybold 자료(SOGEVAC·TRIVAC 표준, RUVAC 250~7000 m³/h, POWERBOOST)는 공개 글에서 모두 뺐다. 제목·방향을 "드라이펌프가 기본이 된 이유 + 오일로터리의 오일 선택"으로 조정(대표님 "제안하는 방향으로 하자", 10/9).
+
+✅ [Edwards — Solar](https://www.edwardsvacuum.com/en/vacuum-pumps/our-markets/energy-solutions/renewable-energy/solar) (10/9 확인, 요약 도구 경유)
+- "Manufacturers use various processes such as crystalline silicon, CdTe, CIGS or Silicon Thin Film Technology to produce photovoltaic cells..."
+- "the complete range of dry vacuum pumps, turbomolecular pumps (TMPs) and exhaust management systems for all processes"
+- 제품: STP Maglev TMP, Semiconductor Dry Pumps iXM·iXH·iXL, GXS Dry Screw, EDS Dry Screw. 오일씰 펌프는 목록에 없음. 이유(분말·부식 등)는 이 페이지에 없음.
+
+✅ Edwards GXS Dry Screw Vacuum Pumps 제품 자료 — 스마텍 내부 `data/Product_master_table/7.산업용드라이펌프_GXS Dry.txt` (10/9 원문 대조)
+- Applications: "Solar • Silicon crystal-pulling • PV lamination", "Coating ... • Glass coating", "Vacuum chamber evacuation ... • Load lock chambers"
+- "Easy on environment: no contaminated or dirty disposable oil"
+- "Combined with a six litre per minute seal purge the gearbox is protected from contamination and the vacuum space is kept free of oil"
+- "Superior liquid and powder handling. Tests demonstrate a five litre water slug and one kilogram fine powder slug handling capability"
+- "ultimate vacuum of 5 X 10-4 mbar"
+- "dry vacuum pumps aren't designed to continuously pump solid material so on certain applications an inlet filter would dramatically extend the time between services"
+
+✅ Edwards E2M 제품 자료 — `2.오일펌프_중대형E2M.txt`: "HC Standard pumps with hydrocarbon oil / FX PFPE prepared pumps for pumping oxygen mixtures with oxygen concentration >21%", "Combine the E2M with an EH booster to obtain additional pumping speed and improved ultimate pressure", Applications에 Coating.
+✅ Edwards RV 제품 자료 — `1.오일펌프_소형RV.txt`: "PFPE prepared" 주문 사양.
+
+근거 없이 쓰지 않은 것: "태양광에서 오일로터리가 표준인 공정"(타사 자료에만 있음). 오일로터리가 남아 있는 자리는 "기존 설비 유지·부담이 적은 보조 배기"라는 일반 서술로만 썼고, 스마텍의 태양광 납품·수리 기록은 확인하지 못해 넣지 않았다.
