@@ -1,0 +1,34 @@
+{
+  "method": "사진1·3·4: Original HTML/CSS via Playwright. 사진2: field photo (data/현장사진/06_비교도식/nXDS10i_분석장비 SEM.jpg) blurred with blur_photo.py. Thumbnail: Edwards RV and nXDS product photos (public/images/products/rv.jpeg, xds.jpeg) on a title card.",
+  "images": {
+    "thumbnail.png": {
+      "width": 1080,
+      "height": 1080,
+      "bytes": 385769
+    },
+    "사진1.png": {
+      "width": 1200,
+      "height": 571,
+      "bytes": 135884
+    },
+    "사진2.png": {
+      "width": 1000,
+      "height": 1333,
+      "bytes": 835122
+    },
+    "사진3.png": {
+      "width": 1200,
+      "height": 710,
+      "bytes": 174132
+    },
+    "사진4.png": {
+      "width": 1200,
+      "height": 572,
+      "bytes": 130930
+    }
+  },
+  "thumbnail_margins": {
+    "top_percent": 8.52,
+    "bottom_percent": 7.87
+  }
+}
