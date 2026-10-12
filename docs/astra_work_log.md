@@ -642,3 +642,9 @@
 - 조사(읽기 전용): "연세"·"한솔" 견적 6건 모두 직접 입력 견적, 한솔 4건은 발주 확정 전. 대상은 id 262(9/28).
 - 변경 2파일: `app/admin/quotes/[id]/page.tsx`, `app/api/admin/quotes/[id]/route.ts`. tsc·build 통과, 기존 eslint 1건(179행 effect)은 HEAD 사본으로 대조해 기존 것임을 확인.
 - push 후 Vercel success, 라이브 비로그인 PATCH 403. 로그인 화면 동작은 미검증.
+
+### 10/12 — (클로드) 로컬 코드리뷰 /code-review medium 665e6b9..90fd2b0 → 수정 31695b2
+
+- 지적 10건. 직접 확인: `classifyCompany`가 KnownCompany의 phone·email로, 간편가입이 businessNo로 등급을 바로 부여함(사실), 간편가입 임시 상호 `사업자_번호`(사실), unified-search가 회원·거래처를 따로 나열(사실).
+- 반영 6건(등급 명단 분리, 미승인·임시 상호 제외, 대소문자 무시 매칭, 직접 입력 쪽 try/catch, 100자 제한·중복 저장 방지, 오류 사유 표시). 미반영 4건은 current-state에 결정 대기로 기록.
+- 절차 실수: 리뷰 전에 reviewed를 먼저 옮겼음 — 앞으로 코드 커밋은 리뷰 뒤에 옮길 것.
