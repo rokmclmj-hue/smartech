@@ -636,3 +636,9 @@
 - 변경 3파일: `app/admin/delivery-notes/page.tsx`, `app/api/admin/delivery-notes/[id]/route.ts`, `app/api/admin/proxy-quotes/route.ts`. 한글 입력 중 Enter로 저장되지 않게 isComposing 확인.
 - 검증: tsc, eslint(같은 패턴의 effect를 하나 더 넣었다가 오류 +1 → 제거해 기존 6건 유지), next build, push 후 Vercel success, 라이브 비로그인 PATCH 403.
 - 실수: 처음에 메뉴 이름을 "회원 관리"라고 안내 — 실제 메뉴 이름은 "고객".
+
+### 10/12 — (클로드) 견적 상세 수신 업체명 수정 (90fd2b0)
+
+- 조사(읽기 전용): "연세"·"한솔" 견적 6건 모두 직접 입력 견적, 한솔 4건은 발주 확정 전. 대상은 id 262(9/28).
+- 변경 2파일: `app/admin/quotes/[id]/page.tsx`, `app/api/admin/quotes/[id]/route.ts`. tsc·build 통과, 기존 eslint 1건(179행 effect)은 HEAD 사본으로 대조해 기존 것임을 확인.
+- push 후 Vercel success, 라이브 비로그인 PATCH 403. 로그인 화면 동작은 미검증.
