@@ -698,7 +698,7 @@ function NoteRow({ note, onDelete }: { note: DeliveryNote; onDelete: () => void 
   useEffect(() => { setDateValue(dateInputStr(note.issuedDate)); }, [note.issuedDate]);
 
   async function handleSaveCompany() {
-    if (!companyValue.trim()) return;
+    if (!companyValue.trim() || savingCompany) return;
     setSavingCompany(true);
     try {
       const res = await fetch(`/api/admin/delivery-notes/${note.id}`, {
@@ -707,7 +707,12 @@ function NoteRow({ note, onDelete }: { note: DeliveryNote; onDelete: () => void 
         body: JSON.stringify({ toCompany: companyValue }),
       });
       if (res.ok) { setEditingCompany(false); setToast("업체명 수정 완료"); onDelete(); }
-      else setToast("업체명 수정 실패");
+      else {
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        setToast(data.error ?? "업체명 수정 실패");
+      }
+    } catch {
+      setToast("업체명 수정 실패 — 인터넷 연결을 확인해 주세요");
     } finally {
       setSavingCompany(false);
       setTimeout(() => setToast(null), 3000);
@@ -784,7 +789,7 @@ function NoteRow({ note, onDelete }: { note: DeliveryNote; onDelete: () => void 
           </div>
           {editingCompany ? (
             <div className="flex items-center gap-1.5 flex-wrap">
-              <input type="text" value={companyValue} onChange={(e) => setCompanyValue(e.target.value)}
+              <input type="text" value={companyValue} maxLength={100} onChange={(e) => setCompanyValue(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter" && !e.nativeEvent.isComposing) handleSaveCompany(); }}
                 className="border hair px-2 py-1 text-[14px] font-semibold focus:outline-none focus:border-ink min-w-0 w-64 max-w-full" />
               <button onClick={handleSaveCompany} disabled={savingCompany || !companyValue.trim()}

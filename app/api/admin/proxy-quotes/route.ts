@@ -24,6 +24,9 @@ type GuestInput = {
 const KNOWN_COMPANY_TIERS = ["DEALER", "OEM", "ENDUSER", "KEY_DEALER", "VIP_DEALER"];
 
 // 견적을 낸 업체가 거래처 목록에 없으면 등록하고, 있으면 새 담당자만 추가한다.
+// 주의: 거래처의 전화·이메일·사업자번호는 가입 시 등급을 바로 주는 명단으로도 쓰인다
+// (lib/classify-company.ts, lib/auth.ts). 회원에서 넘어온 정보(fromMember)는 그 명단에 들어가지 않도록
+// 거래처 칸에는 전화·이메일을 넣지 않고 담당자 칸에만 넣는다.
 async function ensureKnownCompany(c: {
   company: string;
   name: string;
@@ -31,16 +34,33 @@ async function ensureKnownCompany(c: {
   phone?: string | null;
   email?: string | null;
   tier?: string | null;
+  businessNo?: string | null;
+  fromMember?: boolean;
 }) {
   const companyName = c.company.trim();
-  const name = c.name.trim();
   if (!companyName) return;
-  const existing = await prisma.knownCompany.findFirst({ where: { companyName } });
+  if (c.fromMember) {
+    // 승인 전·거절 회원은 등록하지 않는다. 사업자번호 간편가입의 임시 상호(사업자_번호)도 건너뛴다.
+    if (!c.tier || !KNOWN_COMPANY_TIERS.includes(c.tier)) return;
+    if (companyName.startsWith("사업자_")) return;
+  }
+  // 담당자 이름이 상호와 같으면(간편가입 기본값) 담당자로 넣지 않는다.
+  const name = c.name.trim() === companyName ? "" : c.name.trim();
+  // 같은 거래처 찾기: 상호(대소문자 무시) 또는, 회원이면 사업자번호
+  const bizNo = c.fromMember ? (c.businessNo ?? "").replace(/\D/g, "") : "";
+  const existing = await prisma.knownCompany.findFirst({
+    where: {
+      OR: [
+        { companyName: { equals: companyName, mode: "insensitive" } },
+        ...(bizNo.length === 10 ? [{ businessNo: bizNo }] : []),
+      ],
+    },
+  });
   if (!existing) {
     const companyData: Parameters<typeof prisma.knownCompany.create>[0]["data"] = {
       companyName,
-      phone: c.phone?.trim() || null,
-      email: c.email?.trim() || null,
+      phone: c.fromMember ? null : c.phone?.trim() || null,
+      email: c.fromMember ? null : c.email?.trim() || null,
       tier: c.tier && KNOWN_COMPANY_TIERS.includes(c.tier) ? c.tier : "ENDUSER",
       source: "manual",
     };
@@ -185,6 +205,8 @@ export async function POST(req: NextRequest) {
           phone: customer.phone,
           email: customer.email,
           tier: customer.tier,
+          businessNo: customer.businessNo,
+          fromMember: true,
         });
       } catch (e) {
         console.error("[proxy-quotes] 거래처 자동 등록 실패", e);
@@ -221,15 +243,20 @@ export async function POST(req: NextRequest) {
     });
 
     // 거래처 자동 등록
+    // 견적은 이미 만들어졌으므로 등록이 실패해도 견적 응답은 그대로 보낸다(다시 눌러 견적이 두 장 생기는 것 방지).
     if (body.saveToCompany) {
-      await ensureKnownCompany({
-        company: g.company,
-        name: g.name,
-        title: g.title,
-        phone: g.phone,
-        email: g.email,
-        tier: g.tier,
-      });
+      try {
+        await ensureKnownCompany({
+          company: g.company,
+          name: g.name,
+          title: g.title,
+          phone: g.phone,
+          email: g.email,
+          tier: g.tier,
+        });
+      } catch (e) {
+        console.error("[proxy-quotes] 거래처 자동 등록 실패", e);
+      }
     }
 
     return NextResponse.json({ quoteId: quote.id });

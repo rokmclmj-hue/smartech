@@ -49,8 +49,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   // 수신 업체명 수정 — 빈 값으로는 바꿀 수 없음
   let toCompany: string | undefined;
   if (body.toCompany !== undefined) {
-    if (typeof body.toCompany !== "string" || !body.toCompany.trim())
-      return NextResponse.json({ error: "업체명을 입력해주세요." }, { status: 400 });
+    if (typeof body.toCompany !== "string" || !body.toCompany.trim() || body.toCompany.trim().length > 100)
+      return NextResponse.json({ error: "업체명을 입력해주세요(100자 이내)." }, { status: 400 });
     toCompany = body.toCompany.trim();
   }
 

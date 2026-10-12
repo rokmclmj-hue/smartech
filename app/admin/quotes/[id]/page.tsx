@@ -251,7 +251,7 @@ export default function AdminQuoteDetailPage() {
 
   // ── 수신 업체명 수정 (직접 입력·거래처 검색 견적만) ────────
   async function handleSaveCompany() {
-    if (!companyValue.trim()) return;
+    if (!companyValue.trim() || savingCompany) return;
     setSavingCompany(true);
     try {
       const res = await fetch(`/api/admin/quotes/${id}`, {
