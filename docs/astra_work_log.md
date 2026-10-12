@@ -629,3 +629,10 @@
 - 발행: `approve_post.py` 08:24, id=114, X 대기글 PENDING, 숏츠 `p16erJYncCI` 12:00 예약·CC 성공. 라이브 200·제목·이미지 확인.
 - 삭제: `1012-브레이크부스터-진공` 폴더(대표님 지시), tracker 항목 교체. 큐 W42 등록(day2 1015 승인 대기).
 - 실수: blur_preview.py에 `--out` 없이 출력 경로를 줘서 미리보기가 현장사진 폴더에 생김 → 임시 폴더로 옮김. 첫 블러 결과는 배경이 화면 대부분이라 원본을 잘라 다시 처리.
+
+### 10/12 오전 — (클로드) 거래명세표 수신 업체명 수정, 회원 견적 거래처 자동 등록 (5e453f5)
+
+- 조사(읽기 전용 DB 조회): 거래처에 "고려" 0건, 견적 274·273은 회원 상호 "고려대", 거래명세표 123은 `toCompany` "고려대"(sourceQuoteId 274).
+- 변경 3파일: `app/admin/delivery-notes/page.tsx`, `app/api/admin/delivery-notes/[id]/route.ts`, `app/api/admin/proxy-quotes/route.ts`. 한글 입력 중 Enter로 저장되지 않게 isComposing 확인.
+- 검증: tsc, eslint(같은 패턴의 effect를 하나 더 넣었다가 오류 +1 → 제거해 기존 6건 유지), next build, push 후 Vercel success, 라이브 비로그인 PATCH 403.
+- 실수: 처음에 메뉴 이름을 "회원 관리"라고 안내 — 실제 메뉴 이름은 "고객".
