@@ -648,3 +648,8 @@
 - 지적 10건. 직접 확인: `classifyCompany`가 KnownCompany의 phone·email로, 간편가입이 businessNo로 등급을 바로 부여함(사실), 간편가입 임시 상호 `사업자_번호`(사실), unified-search가 회원·거래처를 따로 나열(사실).
 - 반영 6건(등급 명단 분리, 미승인·임시 상호 제외, 대소문자 무시 매칭, 직접 입력 쪽 try/catch, 100자 제한·중복 저장 방지, 오류 사유 표시). 미반영 4건은 current-state에 결정 대기로 기록.
 - 절차 실수: 리뷰 전에 reviewed를 먼저 옮겼음 — 앞으로 코드 커밋은 리뷰 뒤에 옮길 것.
+
+### 10/12 — (클로드) 회원 견적 거래처 자동 등록 되돌림
+
+- `app/api/admin/proxy-quotes/route.ts`에서 회원 쪽 호출과 fromMember·사업자번호 분기를 제거. tsc·eslint·next build 통과.
+- 그 밖에: 바탕화면 `E2M80_메이저키트_구성품` 폴더에 구성품 표 1장 + 분해 그림 4장(PNG) 저장 — 원본 워드·PDF는 변경 없음(워드는 읽기 전용으로 열어 임시 PDF로 변환).
