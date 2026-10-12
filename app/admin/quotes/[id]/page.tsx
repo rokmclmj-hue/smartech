@@ -159,6 +159,9 @@ export default function AdminQuoteDetailPage() {
   const [editingDate, setEditingDate] = useState(false);
   const [dateValue, setDateValue] = useState("");
   const [savingDate, setSavingDate] = useState(false);
+  const [editingCompany, setEditingCompany] = useState(false);
+  const [companyValue, setCompanyValue] = useState("");
+  const [savingCompany, setSavingCompany] = useState(false);
 
   const loadQuote = useCallback(() => {
     setLoading(true);
@@ -243,6 +246,28 @@ export default function AdminQuoteDetailPage() {
       toastError(e instanceof Error ? e.message : "오류가 발생했습니다");
     } finally {
       setSavingDate(false);
+    }
+  }
+
+  // ── 수신 업체명 수정 (직접 입력·거래처 검색 견적만) ────────
+  async function handleSaveCompany() {
+    if (!companyValue.trim()) return;
+    setSavingCompany(true);
+    try {
+      const res = await fetch(`/api/admin/quotes/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ guestCompany: companyValue }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
+      if (!res.ok) throw new Error(data.error ?? "저장 실패");
+      success("업체명을 수정했습니다. 견적서를 다시 저장·발송하면 새 업체명으로 나갑니다.");
+      setEditingCompany(false);
+      loadQuote();
+    } catch (e) {
+      toastError(e instanceof Error ? e.message : "오류가 발생했습니다");
+    } finally {
+      setSavingCompany(false);
     }
   }
 
@@ -432,9 +457,35 @@ export default function AdminQuoteDetailPage() {
             <div className="mono text-[10px] dim tracking-[0.12em] uppercase mb-3">
               TO · 수신
             </div>
-            <div className="text-[18px] font-medium text-ink">
-              {recipient.company} 귀중
-            </div>
+            {quote.user || quote.status === "CONFIRMED" ? (
+              <div
+                className="text-[18px] font-medium text-ink"
+                title={quote.user ? "회원 견적의 업체명은 고객 메뉴에서 회원 상호를 수정합니다" : "발주 확정된 견적은 업체명을 수정할 수 없습니다"}
+              >
+                {recipient.company} 귀중
+              </div>
+            ) : editingCompany ? (
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <input type="text" value={companyValue} maxLength={100} onChange={(e) => setCompanyValue(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter" && !e.nativeEvent.isComposing) handleSaveCompany(); }}
+                  className="border border-line px-2 py-1 text-[15px] bg-paper focus:outline-none focus:border-ink w-64 max-w-full" />
+                <button onClick={handleSaveCompany} disabled={savingCompany || !companyValue.trim()}
+                  className="text-[11px] px-2 py-1 bg-ink text-paper hover:bg-edred transition disabled:opacity-40">
+                  {savingCompany ? "..." : "저장"}
+                </button>
+                <button onClick={() => setEditingCompany(false)} disabled={savingCompany}
+                  className="text-[11px] px-2 py-1 border border-line text-dim hover:border-ink hover:text-ink transition">
+                  취소
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => { setCompanyValue(recipient.company); setEditingCompany(true); }}
+                title="수신 업체명 수정"
+                className="text-[18px] font-medium text-ink text-left hover:text-edred transition">
+                {recipient.company} 귀중 <span className="text-[12px] dim">✎</span>
+              </button>
+            )}
             <div className="flex items-center gap-2 mt-1">
               <span
                 className={`mono text-[9px] tracking-[0.1em] uppercase border px-1.5 py-0.5 ${

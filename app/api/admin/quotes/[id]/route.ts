@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { QUOTE_VALID_DAYS } from "@/lib/constants";
 
 // PATCH — 작성일 수정 (유효기간도 새 작성일 + QUOTE_VALID_DAYS로 함께 이동)
+//         또는 수신 업체명 수정 (직접 입력·거래처 검색으로 만든 견적만)
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -21,6 +22,38 @@ export async function PATCH(
   }
 
   const body = await req.json().catch(() => null);
+
+  // ── 수신 업체명 수정 ──
+  if (body?.guestCompany !== undefined) {
+    const guestCompany = typeof body.guestCompany === "string" ? body.guestCompany.trim() : "";
+    if (!guestCompany || guestCompany.length > 100) {
+      return NextResponse.json({ error: "업체명을 입력해주세요" }, { status: 400 });
+    }
+    const target = await prisma.quote.findUnique({
+      where: { id: quoteId },
+      select: { id: true, userId: true, status: true, guestCompany: true },
+    });
+    if (!target) {
+      return NextResponse.json({ error: "견적을 찾을 수 없습니다" }, { status: 404 });
+    }
+    // 회원 견적의 업체명은 회원 정보의 상호를 따라가므로 여기서 바꿀 수 없다 (고객 메뉴에서 수정)
+    if (target.userId !== null) {
+      return NextResponse.json({ error: "회원 견적의 업체명은 고객 메뉴에서 회원 상호를 수정해주세요" }, { status: 409 });
+    }
+    if (target.status === "CONFIRMED") {
+      return NextResponse.json({ error: "발주 확정된 견적은 업체명을 수정할 수 없습니다" }, { status: 409 });
+    }
+    await prisma.quote.update({ where: { id: quoteId }, data: { guestCompany } });
+    await logAudit({
+      userId: admin.userId,
+      action: "quote.update",
+      target: "Quote",
+      targetId: quoteId,
+      payload: { field: "guestCompany", from: target.guestCompany, to: guestCompany },
+    });
+    return NextResponse.json({ ok: true });
+  }
+
   const dateStr = typeof body?.createdDate === "string" ? body.createdDate : "";
   // 한국시간 정오로 저장 — 서버(UTC)에서 PDF를 만들 때도, 한국 브라우저에서 볼 때도 같은 날짜로 나온다.
   const createdAt = /^\d{4}-\d{2}-\d{2}$/.test(dateStr) ? new Date(`${dateStr}T12:00:00+09:00`) : null;
