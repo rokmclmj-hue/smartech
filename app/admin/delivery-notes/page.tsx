@@ -690,9 +690,29 @@ function NoteRow({ note, onDelete }: { note: DeliveryNote; onDelete: () => void 
   const [editingDate, setEditingDate] = useState(false);
   const [dateValue, setDateValue] = useState(dateInputStr(note.issuedDate));
   const [savingDate, setSavingDate] = useState(false);
+  const [editingCompany, setEditingCompany] = useState(false);
+  const [companyValue, setCompanyValue] = useState(note.toCompany);
+  const [savingCompany, setSavingCompany] = useState(false);
 
   useEffect(() => { setSendEmail(note.toEmail ?? ""); }, [note.toEmail]);
   useEffect(() => { setDateValue(dateInputStr(note.issuedDate)); }, [note.issuedDate]);
+
+  async function handleSaveCompany() {
+    if (!companyValue.trim()) return;
+    setSavingCompany(true);
+    try {
+      const res = await fetch(`/api/admin/delivery-notes/${note.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ toCompany: companyValue }),
+      });
+      if (res.ok) { setEditingCompany(false); setToast("업체명 수정 완료"); onDelete(); }
+      else setToast("업체명 수정 실패");
+    } finally {
+      setSavingCompany(false);
+      setTimeout(() => setToast(null), 3000);
+    }
+  }
 
   async function handleSaveDate() {
     setSavingDate(true);
@@ -762,7 +782,24 @@ function NoteRow({ note, onDelete }: { note: DeliveryNote; onDelete: () => void 
               </button>
             )}
           </div>
-          <div className="text-[14px] font-semibold">{note.toCompany}</div>
+          {editingCompany ? (
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <input type="text" value={companyValue} onChange={(e) => setCompanyValue(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter" && !e.nativeEvent.isComposing) handleSaveCompany(); }}
+                className="border hair px-2 py-1 text-[14px] font-semibold focus:outline-none focus:border-ink min-w-0 w-64 max-w-full" />
+              <button onClick={handleSaveCompany} disabled={savingCompany || !companyValue.trim()}
+                className="mono text-[10px] bg-ink text-paper px-2 py-0.5 hover:bg-ink/90 disabled:opacity-50">
+                {savingCompany ? "저장중" : "저장"}
+              </button>
+              <button onClick={() => { setEditingCompany(false); setCompanyValue(note.toCompany); }}
+                className="mono text-[10px] dim hover:text-ink">취소</button>
+            </div>
+          ) : (
+            <button onClick={() => { setCompanyValue(note.toCompany); setEditingCompany(true); }} title="수신 업체명 수정"
+              className="text-[14px] font-semibold text-left hover:underline">
+              {note.toCompany} <span className="text-[12px] dim font-normal">✎</span>
+            </button>
+          )}
           <div className="text-[12px] dim">
             {note.toName && <span className="mr-2">{note.toName}</span>}
             {note.toEmail && <span className="mono mr-2">{note.toEmail}</span>}

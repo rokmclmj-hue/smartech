@@ -21,6 +21,61 @@ type GuestInput = {
   tier: string;
 };
 
+const KNOWN_COMPANY_TIERS = ["DEALER", "OEM", "ENDUSER", "KEY_DEALER", "VIP_DEALER"];
+
+// 견적을 낸 업체가 거래처 목록에 없으면 등록하고, 있으면 새 담당자만 추가한다.
+async function ensureKnownCompany(c: {
+  company: string;
+  name: string;
+  title?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  tier?: string | null;
+}) {
+  const companyName = c.company.trim();
+  const name = c.name.trim();
+  if (!companyName) return;
+  const existing = await prisma.knownCompany.findFirst({ where: { companyName } });
+  if (!existing) {
+    const companyData: Parameters<typeof prisma.knownCompany.create>[0]["data"] = {
+      companyName,
+      phone: c.phone?.trim() || null,
+      email: c.email?.trim() || null,
+      tier: c.tier && KNOWN_COMPANY_TIERS.includes(c.tier) ? c.tier : "ENDUSER",
+      source: "manual",
+    };
+    if (name) {
+      companyData.contacts = {
+        create: {
+          name,
+          title: c.title?.trim() || null,
+          mobile: c.phone?.trim() || null,
+          email: c.email?.trim() || null,
+        },
+      };
+    }
+    await prisma.knownCompany.create({ data: companyData });
+  } else if (name) {
+    // 이미 있는 거래처 — 담당자만 새 사람이면 담당자 목록에 추가(띄어쓰기·대소문자 무시하고 같은 이름이면 건너뜀)
+    const nameKey = (s: string) => s.replace(/\s/g, "").toLowerCase();
+    const contacts = await prisma.knownContact.findMany({
+      where: { companyId: existing.id },
+      select: { name: true },
+    });
+    if (!contacts.some((k) => nameKey(k.name) === nameKey(name))) {
+      await prisma.knownContact.create({
+        data: {
+          companyId: existing.id,
+          name,
+          title: c.title?.trim() || null,
+          mobile: c.phone?.trim() || null,
+          email: c.email?.trim() || null,
+        },
+      });
+    }
+  }
+}
+
 export async function POST(req: NextRequest) {
   const admin = await getAdminSession();
   if (!admin) {
@@ -118,6 +173,23 @@ export async function POST(req: NextRequest) {
         items: { create: itemData },
       },
     });
+
+    // 회원을 골라 낸 견적도 거래처 목록에서 찾을 수 있게 등록한다(관리자 계정 제외).
+    // 견적은 이미 만들어졌으므로 등록이 실패해도 견적 응답은 그대로 보낸다.
+    if (customer.tier !== "ADMIN") {
+      try {
+        await ensureKnownCompany({
+          company: customer.company,
+          name: customer.name,
+          title: customer.title,
+          phone: customer.phone,
+          email: customer.email,
+          tier: customer.tier,
+        });
+      } catch (e) {
+        console.error("[proxy-quotes] 거래처 자동 등록 실패", e);
+      }
+    }
     return NextResponse.json({ quoteId: quote.id });
   }
 
@@ -150,47 +222,14 @@ export async function POST(req: NextRequest) {
 
     // 거래처 자동 등록
     if (body.saveToCompany) {
-      const existing = await prisma.knownCompany.findFirst({
-        where: { companyName: g.company.trim() },
+      await ensureKnownCompany({
+        company: g.company,
+        name: g.name,
+        title: g.title,
+        phone: g.phone,
+        email: g.email,
+        tier: g.tier,
       });
-      if (!existing) {
-        const companyData: Parameters<typeof prisma.knownCompany.create>[0]["data"] = {
-          companyName: g.company.trim(),
-          phone: g.phone?.trim() || null,
-          email: g.email?.trim() || null,
-          tier: g.tier || "ENDUSER",
-          source: "manual",
-        };
-        if (g.name.trim()) {
-          companyData.contacts = {
-            create: {
-              name: g.name.trim(),
-              title: g.title?.trim() || null,
-              mobile: g.phone?.trim() || null,
-              email: g.email?.trim() || null,
-            },
-          };
-        }
-        await prisma.knownCompany.create({ data: companyData });
-      } else if (g.name.trim()) {
-        // 이미 있는 거래처 — 담당자만 새 사람이면 담당자 목록에 추가(띄어쓰기·대소문자 무시하고 같은 이름이면 건너뜀)
-        const nameKey = (s: string) => s.replace(/\s/g, "").toLowerCase();
-        const contacts = await prisma.knownContact.findMany({
-          where: { companyId: existing.id },
-          select: { name: true },
-        });
-        if (!contacts.some((c) => nameKey(c.name) === nameKey(g.name))) {
-          await prisma.knownContact.create({
-            data: {
-              companyId: existing.id,
-              name: g.name.trim(),
-              title: g.title?.trim() || null,
-              mobile: g.phone?.trim() || null,
-              email: g.email?.trim() || null,
-            },
-          });
-        }
-      }
     }
 
     return NextResponse.json({ quoteId: quote.id });

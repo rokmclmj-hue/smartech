@@ -46,6 +46,14 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     issuedDate = parsed;
   }
 
+  // 수신 업체명 수정 — 빈 값으로는 바꿀 수 없음
+  let toCompany: string | undefined;
+  if (body.toCompany !== undefined) {
+    if (typeof body.toCompany !== "string" || !body.toCompany.trim())
+      return NextResponse.json({ error: "업체명을 입력해주세요." }, { status: 400 });
+    toCompany = body.toCompany.trim();
+  }
+
   const updated = await prisma.manualDeliveryNote.update({
     where: { id: nId },
     data: {
@@ -54,6 +62,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       ...(body.sentTo !== undefined && { sentTo: body.sentTo }),
       ...(body.remarks !== undefined && { remarks: body.remarks?.trim() || null }),
       ...(issuedDate !== undefined && { issuedDate }),
+      ...(toCompany !== undefined && { toCompany }),
     },
   });
   return NextResponse.json({ ok: true, note: updated });
