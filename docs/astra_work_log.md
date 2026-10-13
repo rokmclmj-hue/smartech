@@ -660,3 +660,10 @@
 - 보관 처리 전 DB 조회(읽기)에서 id 108이 PUBLISHED(publishedAt 10/11 00:47 UTC)임을 발견. 라이브 `/blog/108` 200, `/blog` 목록·sitemap 노출 확인.
 - 실패: id 108을 ARCHIVED로 바꾸는 DB 수정은 자동 권한 검사에 막혀 실행하지 못함. 우회하지 않고 대표님께 관리자 화면 "보관" 버튼을 안내.
 - 다음 행동: 대표님 보관 후 404·목록·sitemap 재확인, X 대기글에 108 관련 글이 생겼는지 확인.
+
+### 10/14 — (클로드) `1015-수소설비-진공게이지` 그림 문구 수정, writer.md 9항
+
+- 원인: 10/9 수정(5a18cf4)이 final·naver·faq·meta만 고치고 `gen_images.py`(사진2·3)와 marketing.txt를 놓침.
+- 변경: gen_images.py 4곳, marketing.txt 1곳 → 그림 다시 생성(사진1·썸네일은 내용 동일). check_quality 전체 통과, `publish_short.py --check` 통과, output 전체 MD5 중복 0.
+- 다른 글 그림 조사(10월 폴더 gen_images.py grep): 1008 "(Leybold)"(발행됨), 1005·1019·1015 사진1 "확인하지 못했습니다" — 수정하지 않고 대표님께 보고.
+- 규칙 파일 변경은 별도 커밋(writer.md 9항).

@@ -56,16 +56,16 @@ GASDEP = html("""
 <div class="grid">
 <div class="box"><h3>피라니(열식)</h3><p>가스별 열전도도가 달라<br>표시값이 달라짐</p></div>
 <div class="box"><h3>이온화 게이지</h3><p>가스별 이온화 확률이 달라<br>표시값이 달라짐<br>(예: 헬륨은 낮게 표시)</p></div>
-</div><div class="note">Pfeiffer 설명 기준.</div></div>
+</div></div>
 """)
 
 CAPACITANCE = html("""
 <div id="card"><div class="eyebrow">GAS-INDEPENDENT · 예외 방식</div>
 <h2>정전용량식은 가스와 무관합니다</h2>
 <div class="grid">
-<div class="box"><h3>정전용량식(다이어프램)</h3><p>막을 미는 힘 자체를 측정<br>가스 종류와 무관 (Pfeiffer)</p></div>
-<div class="box"><h3>스마텍 취급 게이지</h3><p>APG200·AIM200·WRG200<br>모두 가스 의존적 방식</p></div>
-</div><div class="note">스마텍이 정전용량식 제품을 취급한다는 근거는 확인되지 않았습니다.</div></div>
+<div class="box"><h3>정전용량식(다이어프램)</h3><p>막을 미는 힘 자체를 측정<br>가스 종류와 무관</p></div>
+<div class="box"><h3>APG200·AIM200·WRG200</h3><p>피라니·역자장 방식<br>가스 의존적 방식</p></div>
+</div><div class="note">가스와 무관한 측정이 필요한 지점에는 정전용량식 게이지(Edwards Barocel)를 쓸 수 있습니다.</div></div>
 """)
 
 with sync_playwright() as p:
