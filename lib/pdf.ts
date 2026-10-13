@@ -427,10 +427,13 @@ function QuoteDocument({ quote }: { quote: QuoteForPdf }) {
             el(Text, { style: QS.partyKey }, "COMPANY"),
             el(Text, { style: S.partyVal }, quote.user.company)
           ),
-          el(View, { style: S.partyRow },
-            el(Text, { style: QS.partyKey }, "ATTN"),
-            el(Text, { style: S.partyVal }, quote.user.title ? `${quote.user.name} ${quote.user.title}님` : `${quote.user.name}님`)
-          ),
+          // 담당자 이름이 없는 견적은 "님"만 남지 않도록 줄을 뺀다
+          quote.user.name.trim()
+            ? el(View, { style: S.partyRow },
+                el(Text, { style: QS.partyKey }, "ATTN"),
+                el(Text, { style: S.partyVal }, quote.user.title ? `${quote.user.name} ${quote.user.title}님` : `${quote.user.name}님`)
+              )
+            : null,
           quote.user.phone
             ? el(View, { style: S.partyRow },
                 el(Text, { style: QS.partyKey }, "TEL"),
