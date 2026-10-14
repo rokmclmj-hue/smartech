@@ -47,7 +47,7 @@ CALIBRATION = html("""
 <div class="grid">
 <div class="box"><h3>질소를 측정하면</h3><p>보정계수 = 1<br>표시값 = 실제 압력</p></div>
 <div class="box"><h3>수소를 측정하면</h3><p>보정계수가 1이 아님<br>표시값 ≠ 실제 압력<br>(Edwards)</p></div>
-</div><div class="note">수소 전용 보정계수 수치는 이번 조사에서 확인하지 못했습니다.</div></div>
+</div><div class="note">수소 보정계수는 사용하는 게이지의 매뉴얼에서 확인합니다.</div></div>
 """)
 
 GASDEP = html("""
