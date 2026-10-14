@@ -676,3 +676,4 @@
 - `approve_post.py` 08:05: id=115, X 대기글 1건 PENDING, 숏츠 YK0SlwZu1Zg 12:00 예약·CC 성공.
 - 라이브 확인: HTTP 200, 제목 일치, Blob 사진 4장, 타사 이름·"확인하지 못" 0건. 사진 폴더 열기 실행.
 - 미해결: /blog/108 여전히 200(대표님 보관 대기).
+- 이어서: 대표님 네이버·X·108 보관 완료 → /blog/108 404, sitemap 0건 확인. GitHub Desktop 화면 문의: Documents/GitHub/smartech 옛 복사본(eb99abf, 5/2, 977커밋 뒤, .claude/settings.json·app/docs·app/quotes 미추적, app/quote/page.tsx 삭제 표시)으로 확인. 손대지 않음.
