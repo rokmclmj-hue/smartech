@@ -687,3 +687,4 @@
 - 이어서: 재고 관리 화면(InventoryItem)과 Product.stock이 별개임을 확인(api/admin/inventory는 product 미참조). 대표님 승인으로 InventoryItem 12품목 currentStock 갱신(트랜잭션, 전후 값 출력 확인).
 - 이어서: InventoryItem 오늘 미수정 품목 중 0이 아닌 17개 → 0, D1G2011100=4(트랜잭션, 전후 값 출력). Product.stock은 손대지 않음(APG200 XLC는 제품 쪽 0).
 - 이어서(대표님 승인): Product.stock 6품목 입력, 라이브 /products/{partNo} 6개 InStock 확인(U20 1L은 OutOfStock 그대로). 음수 재고 7개 발견(미수정).
+- 이어서(대표님 승인): Product.stock 음수 7개 → 0.
