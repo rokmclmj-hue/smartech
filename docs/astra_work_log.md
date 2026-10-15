@@ -677,3 +677,8 @@
 - 라이브 확인: HTTP 200, 제목 일치, Blob 사진 4장, 타사 이름·"확인하지 못" 0건. 사진 폴더 열기 실행.
 - 미해결: /blog/108 여전히 200(대표님 보관 대기).
 - 이어서: 대표님 네이버·X·108 보관 완료 → /blog/108 404, sitemap 0건 확인. GitHub Desktop 화면 문의: Documents/GitHub/smartech 옛 복사본(eb99abf, 5/2, 977커밋 뒤, .claude/settings.json·app/docs·app/quotes 미추적, app/quote/page.tsx 삭제 표시)으로 확인. 손대지 않음.
+
+### 10/15 — (클로드) 스마트스토어 오일 재고·원가표
+
+- DB 읽기 조회만: 오일 원가, PriceRule, 거래명세표 오일 판매 수량·단가(6/17~). 쓰기 없음.
+- openpyxl로 바탕화면 xlsx 생성(Arial, 보유수량 노란 칸, 일반가 수식 =D*$F$3). recalc.py는 Windows에서 LibreOffice 준비 실패(AF_UNIX)로 실행 못 함 — 수식은 곱셈 1개라 Excel이 열 때 계산. 파일을 다시 읽어 값·수식 확인, 화면에 열어 둠.
