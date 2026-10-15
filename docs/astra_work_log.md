@@ -686,3 +686,4 @@
 - 이어서(대표님 승인): DB 트랜잭션으로 Order 8 CANCELLED(조건: CONFIRMED·미출고·명세표 0) + AuditLog + 펌프 4종 stock 입력. 첫 시도는 관리자 조회 칸 이름 오류(role→tier)로 전체 롤백, 재실행 성공. 라이브 /products/{partNo} 4개 InStock 확인.
 - 이어서: 재고 관리 화면(InventoryItem)과 Product.stock이 별개임을 확인(api/admin/inventory는 product 미참조). 대표님 승인으로 InventoryItem 12품목 currentStock 갱신(트랜잭션, 전후 값 출력 확인).
 - 이어서: InventoryItem 오늘 미수정 품목 중 0이 아닌 17개 → 0, D1G2011100=4(트랜잭션, 전후 값 출력). Product.stock은 손대지 않음(APG200 XLC는 제품 쪽 0).
+- 이어서(대표님 승인): Product.stock 6품목 입력, 라이브 /products/{partNo} 6개 InStock 확인(U20 1L은 OutOfStock 그대로). 음수 재고 7개 발견(미수정).
