@@ -688,3 +688,10 @@
 - 이어서: InventoryItem 오늘 미수정 품목 중 0이 아닌 17개 → 0, D1G2011100=4(트랜잭션, 전후 값 출력). Product.stock은 손대지 않음(APG200 XLC는 제품 쪽 0).
 - 이어서(대표님 승인): Product.stock 6품목 입력, 라이브 /products/{partNo} 6개 InStock 확인(U20 1L은 OutOfStock 그대로). 음수 재고 7개 발견(미수정).
 - 이어서(대표님 승인): Product.stock 음수 7개 → 0.
+
+### 10/15 — (클로드) 수리사례 000046·000047 카드 + 네이버 초안
+
+- 사진: ZIP을 BLOB 토큰으로 임시 폴더에 받아 모음 이미지로 30·27장 확인 → 카드 W2V40 02/07/18, RV12 02/09/17. 고객 표시 없음 육안 확인. 원본은 저장소에 올리지 않음.
+- PDF: tsx + createRequire로 generateRepairInspectionPdf(companyName 이니셜, contactName·inspectorName null, issuedDate 10/14). 임시 스크립트 삭제.
+- tsc·next build 통과, push 84aab69, Vercel success 후 2분가량 새 파일 404 → 재확인 200.
+- 네이버 초안 2편 DB DRAFT(id 116·117), naver-repair-queue.md 추가.
