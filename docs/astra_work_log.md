@@ -684,3 +684,4 @@
 - openpyxl로 바탕화면 xlsx 생성(Arial, 보유수량 노란 칸, 일반가 수식 =D*$F$3). recalc.py는 Windows에서 LibreOffice 준비 실패(AF_UNIX)로 실행 못 함 — 수식은 곱셈 1개라 Excel이 열 때 계산. 파일을 다시 읽어 값·수식 확인, 화면에 열어 둠.
 - 이어서: 대표님 기입 파일 백업 후 G열 "통상 납기" 추가(기존 값·수식 유지 확인). 거래명세표 238줄·66품목 집계(읽기만), 제품 stock 전부 0 확인, EMF3 이상 단가 2건 발견.
 - 이어서(대표님 승인): DB 트랜잭션으로 Order 8 CANCELLED(조건: CONFIRMED·미출고·명세표 0) + AuditLog + 펌프 4종 stock 입력. 첫 시도는 관리자 조회 칸 이름 오류(role→tier)로 전체 롤백, 재실행 성공. 라이브 /products/{partNo} 4개 InStock 확인.
+- 이어서: 재고 관리 화면(InventoryItem)과 Product.stock이 별개임을 확인(api/admin/inventory는 product 미참조). 대표님 승인으로 InventoryItem 12품목 currentStock 갱신(트랜잭션, 전후 값 출력 확인).
