@@ -12,6 +12,28 @@ export type RepairCase = {
 
 export const REPAIR_CASES: RepairCase[] = [
   {
+    model: "우성진공 W2V40",
+    client: "S대",
+    date: "2026.10.14",
+    symptom: "오일 경화 · 내부 오염",
+    work: ["개스킷 교체", "오일씰 교체", "립씰 교체", "오링 교체", "베어링 교체", "배기밸브 교체", "필터 교체", "기타"],
+    photo: "/images/repair/w2v40-b-exterior.jpg",
+    partPhoto: "/images/repair/w2v40-b-sludge.jpg",
+    extraPhoto: "/images/repair/w2v40-b-cylinder.jpg",
+    reportPdf: "/documents/repair-reports/w2v40-b-inspection.pdf",
+  },
+  {
+    model: "Edwards RV12",
+    client: "Y대",
+    date: "2026.10.14",
+    symptom: "오일 오염 · 정기 오버홀",
+    work: ["개스킷 교체", "오일씰 교체", "립씰 교체", "오링 교체", "슬리브 교체", "베어링 교체", "배기밸브 교체", "기타"],
+    photo: "/images/repair/rv12-exterior.jpg",
+    partPhoto: "/images/repair/rv12-module.jpg",
+    extraPhoto: "/images/repair/rv12-rotor.jpg",
+    reportPdf: "/documents/repair-reports/rv12-inspection.pdf",
+  },
+  {
     model: "Edwards iH1800MK5",
     client: "S사",
     date: "2026.10.06",
