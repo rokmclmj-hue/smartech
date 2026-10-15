@@ -62,7 +62,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/products`, changeFrequency: "weekly", priority: 0.8 },
     // 수리 접수
     { url: `${BASE_URL}/repair`, changeFrequency: "monthly", priority: 0.8 },
-    // 산업 분야 20개
+    // 산업 분야 (lib/industries.ts)
     ...industryEntries,
     // 개별 제품 페이지
     ...productEntries,

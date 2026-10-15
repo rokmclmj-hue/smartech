@@ -165,10 +165,10 @@ export default async function IndustryDetailPage({
         <div className="max-w-[1400px] mx-auto px-4 md:px-6 pt-8 md:pt-12 pb-10 md:pb-16">
           <div className="flex justify-between items-center gap-3 text-[11px] mono dim mb-6 md:mb-10">
             <Link href="/#industries" className="hover:text-edred whitespace-nowrap">
-              ← 20 INDUSTRIES
+              ← {INDUSTRIES.length} INDUSTRIES
             </Link>
             <span className="text-right">
-              {String(industry.n).padStart(2, "0")} / 20 ·{" "}
+              {String(industry.n).padStart(2, "0")} / {INDUSTRIES.length} ·{" "}
               <span className="hidden sm:inline">{industry.tag.join(" · ")}</span>
               <span className="sm:hidden">{industry.tag[0]}</span>
             </span>

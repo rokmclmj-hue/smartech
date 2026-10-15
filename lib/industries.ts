@@ -20,6 +20,71 @@ export type Industry = {
 export const INDUSTRIES: Industry[] = [
   {
     n: 1,
+    slug: "semiconductor",
+    tag: ["반도체"],
+    title: "반도체",
+    line: "반도체 장비 배기와 반도체용 드라이펌프 수리·오버홀",
+    image: "/images/repair/ih1800mk5-c-exterior.jpg",
+    tagline: "반도체 장비 챔버 배기 펌프 선정부터 iH·iQDP 반도체용 드라이펌프 수리·오버홀까지.",
+    description:
+      "반도체 제조 장비의 로드락·프로세스 챔버, 장비 부품 코팅 공정, 세정 후 성분 분석 장비에는 공정 부산물에 강한 드라이펌프와 고진공 터보펌프 조합이 쓰입니다. 스마텍은 Edwards 공식 대리점으로 반도체 장비용 펌프 선정 상담과 iH·iQDP 등 반도체용 드라이펌프 수리·오버홀을 함께 제공합니다.",
+    processes: [
+      "로드락·트랜스퍼 챔버 배기",
+      "소형 프로세스 챔버 배기",
+      "반도체 장비 부품 보호 코팅 챔버",
+      "세정 후 성분 분석 챔버(드라이 + 터보 조합)",
+      "반도체용 드라이펌프 수리·오버홀(iH·iQDP)",
+    ],
+    recommendedPumps: ["iXH", "iXL", "nXDS", "nEXT", "STP"],
+    models: ["iXH", "iXL", "nEXT"],
+    edwardsUrl: "https://www.edwardsvacuum.com/ko-kr/semiconductor",
+    engineeringNotes: [
+      {
+        title: "로드락은 대형 클래스 드라이펌프가 목표 압력에 더 빨리 도달합니다",
+        body: "수천 리터급 로드락 챔버(목표 10⁻² torr대)에서 산업용 드라이펌프 2대 구성을 비교했을 때, 중형 클래스는 약 90초, 대형 클래스는 약 1분 내외로 도달했습니다. 사이클 시간이 중요한 로드락은 펌프 클래스 선택이 택트타임에 직접 반영됩니다.",
+      },
+      {
+        title: "대형 버퍼 챔버는 펌프 세트를 늘릴수록 도달 시간이 비례 이상으로 줄어듭니다",
+        body: "로드락보다 약 15배 큰 수만 리터급 버퍼 챔버에서 1세트는 20분대, 2세트는 10분대, 3세트는 10분 미만으로 도달했습니다. 세트 수에 단순 반비례하지 않는 구간이 있어 증설 여부를 검토할 때 함께 따져야 합니다.",
+      },
+      {
+        title: "부품 코팅용 대형 챔버는 오일펌프+부스터 조합이 드라이 단독보다 빠를 수 있습니다",
+        body: "반도체 장비 부품의 보호 코팅용 수천 리터급 챔버(0.1 torr 이하 목표)에서 드라이펌프 단독은 4~7분대, 오일펌프+루츠 부스터 조합은 2분대로 도달했습니다. 같은 배기속도 등급이라도 펌프 방식에 따라 도달 시간 차이가 크게 납니다.",
+      },
+      {
+        title: "시료가 드나드는 분석 챔버는 시뮬레이션 수치를 그대로 기대하면 안 됩니다",
+        body: "세정 후 성분 분석용 31 L 챔버(드라이 + 터보 조합, 10⁻⁶ torr대 목표)는 outgassing rate 가정치에 따라 도달 시점이 크게 달라집니다. 시료가 반입·반출되는 O-ring 실링 챔버에서는 낮은 가정치를 실제로 구현하기 어렵고, 목표압력도 자릿수가 아니라 정확한 값으로 정해야 합니다.",
+      },
+    ],
+    faq: [
+      {
+        q: "반도체용 드라이펌프(iH·iQDP)도 수리하나요?",
+        a: "네. 스마텍은 Edwards iH1800·iH1800HTX·iQDP40 등 반도체용 드라이펌프를 수리·오버홀하고 있으며, 수리 사례와 검사성적서를 수리·오버홀 안내 페이지(https://www.smartechvacuum.com/repair)에 공개합니다.",
+      },
+      {
+        q: "공정 부산물이 고착된 드라이펌프도 수리되나요?",
+        a: "가능합니다. 공정 부산물 고착과 파워 PCA 불량으로 입고된 iH1800은 분해 세정 후 오링·베어링·씰·슬리브·오일과 파워 PCA를 교체했고, 도달 진공도 5.5×10⁻³ Torr(기준 9.0×10⁻³ 이하), 운전 전류 8.7A, 16시간 시운전 등 전 항목 합격 후 출고했습니다.",
+      },
+      {
+        q: "수리 후 어떤 시험을 하나요?",
+        a: "도달 진공도, 운전 전류, 본체 온도, 누설 검사, 오일 누유·냉각수 누수·이상 소음 여부, 기능 시험, 시운전(4시간 이상), 오일 종류·주입 확인을 모두 거친 뒤 검사성적서를 발행합니다.",
+      },
+      {
+        q: "반도체용 드라이펌프 수리 보증 기간은 얼마인가요?",
+        a: "드라이펌프는 수리 후 6개월 보증입니다. 오일 로터리 펌프는 3개월이며, 그 밖의 펌프는 모델과 작업 내용에 따라 접수 시 안내합니다.",
+      },
+      {
+        q: "반도체 진공 배관에 전해연마가 꼭 필요한가요?",
+        a: "공정 조건과 표면처리 범위에 따라 다릅니다. 필요한 조건과 용접·세정·포장·검수 문서에서 발주 전에 확인할 기준은 블로그 글(https://www.smartechvacuum.com/blog/97)에 정리했습니다.",
+      },
+      {
+        q: "반도체 장비용 펌프 선정 상담이 가능한가요?",
+        a: "가능합니다. 챔버 체적, 목표압력(정확한 값), 공정 가스 유무, 배관 구경·길이를 알려주시면 031-204-7170에서 Edwards 시뮬레이션 기반으로 펌프 구성을 검토해 드립니다.",
+      },
+    ],
+  },
+  {
+    n: 2,
     slug: "research-analysis",
     tag: ["R&D", "분석"],
     title: "연구 및 분석",
@@ -81,7 +146,7 @@ export const INDUSTRIES: Industry[] = [
     ],
   },
   {
-    n: 2,
+    n: 3,
     slug: "gas-cylinder",
     tag: ["에너지", "안전"],
     title: "가스 실린더",
@@ -143,7 +208,7 @@ export const INDUSTRIES: Industry[] = [
     ],
   },
   {
-    n: 3,
+    n: 4,
     slug: "cryogenic-piping",
     tag: ["기반", "극저온"],
     title: "진공 이중배관",
@@ -197,7 +262,7 @@ export const INDUSTRIES: Industry[] = [
     ],
   },
   {
-    n: 4,
+    n: 5,
     slug: "lithium-battery",
     tag: ["배터리"],
     title: "이차전지",
@@ -255,7 +320,7 @@ export const INDUSTRIES: Industry[] = [
     ],
   },
   {
-    n: 5,
+    n: 6,
     slug: "vacuum-furnace",
     tag: ["금속", "열처리"],
     title: "진공로",
@@ -313,7 +378,7 @@ export const INDUSTRIES: Industry[] = [
     ],
   },
   {
-    n: 6,
+    n: 7,
     slug: "vacuum-drying",
     tag: ["건조", "제약"],
     title: "진공 오븐/건조",
@@ -367,7 +432,7 @@ export const INDUSTRIES: Industry[] = [
     ],
   },
   {
-    n: 7,
+    n: 8,
     slug: "oled-display",
     tag: ["디스플레이", "반도체"],
     title: "OLED / 디스플레이",
@@ -429,7 +494,7 @@ export const INDUSTRIES: Industry[] = [
     ],
   },
   {
-    n: 8,
+    n: 9,
     slug: "freeze-drying",
     tag: ["식품", "제약"],
     title: "식품·제약 동결건조",
@@ -487,7 +552,7 @@ export const INDUSTRIES: Industry[] = [
     ],
   },
   {
-    n: 9,
+    n: 10,
     slug: "coating",
     tag: ["코팅", "모바일"],
     title: "코팅 / 스마트폰",
@@ -545,7 +610,7 @@ export const INDUSTRIES: Industry[] = [
     ],
   },
   {
-    n: 10,
+    n: 11,
     slug: "hydrogen-energy",
     tag: ["에너지", "수소"],
     title: "수소 에너지",
@@ -593,7 +658,7 @@ export const INDUSTRIES: Industry[] = [
     ],
   },
   {
-    n: 11,
+    n: 12,
     slug: "aerospace",
     tag: ["항공우주"],
     title: "항공우주",
@@ -641,7 +706,7 @@ export const INDUSTRIES: Industry[] = [
     ],
   },
   {
-    n: 12,
+    n: 13,
     slug: "solar",
     tag: ["에너지"],
     title: "태양광 에너지",
@@ -689,7 +754,7 @@ export const INDUSTRIES: Industry[] = [
     ],
   },
   {
-    n: 13,
+    n: 14,
     slug: "fusion-accelerator",
     tag: ["대규모", "과학"],
     title: "핵융합 / 가속기",
@@ -743,7 +808,7 @@ export const INDUSTRIES: Industry[] = [
     ],
   },
   {
-    n: 14,
+    n: 15,
     slug: "precision-machining",
     tag: ["정밀", "반도체"],
     title: "초미세 가공",
@@ -791,7 +856,7 @@ export const INDUSTRIES: Industry[] = [
     ],
   },
   {
-    n: 15,
+    n: 16,
     slug: "recycling",
     tag: ["환경"],
     title: "리사이클링",
@@ -839,7 +904,7 @@ export const INDUSTRIES: Industry[] = [
     ],
   },
   {
-    n: 16,
+    n: 17,
     slug: "medical-bio",
     tag: ["의료", "바이오"],
     title: "의료 / 생명공학",
@@ -887,7 +952,7 @@ export const INDUSTRIES: Industry[] = [
     ],
   },
   {
-    n: 17,
+    n: 18,
     slug: "mobility",
     tag: ["모빌리티"],
     title: "차세대 모빌리티",
@@ -935,7 +1000,7 @@ export const INDUSTRIES: Industry[] = [
     ],
   },
   {
-    n: 18,
+    n: 19,
     slug: "specialty-welding",
     tag: ["금속", "용접"],
     title: "특수 용접 / 금속",
@@ -983,7 +1048,7 @@ export const INDUSTRIES: Industry[] = [
     ],
   },
   {
-    n: 19,
+    n: 20,
     slug: "lithium-primary",
     tag: ["배터리"],
     title: "리튬 1차전지",
@@ -1031,7 +1096,7 @@ export const INDUSTRIES: Industry[] = [
     ],
   },
   {
-    n: 20,
+    n: 21,
     slug: "ess",
     tag: ["ESS", "에너지"],
     title: "ESS 에너지 저장",

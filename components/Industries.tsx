@@ -17,13 +17,13 @@ export default function Industries() {
       <div className="max-w-[1400px] mx-auto px-6">
         <div className="grid grid-cols-12 gap-6 mb-14">
           <div className="col-span-12 lg:col-span-7">
-            <div className="mono text-[11px] dim mb-4">— 02 · 20 INDUSTRIES OF VACUUM</div>
+            <div className="mono text-[11px] dim mb-4">— 02 · {INDUSTRIES.length} INDUSTRIES OF VACUUM</div>
             <h2 className="section-title display">
               진공은 산업의<br />
               <span className="italic">보이지 않는 기반</span>입니다.
             </h2>
             <p className="mt-6 text-[15px] max-w-[55ch] leading-[1.75] text-[#2a2823]">
-              반도체부터 핵융합까지, 진공펌프는 20개 산업에서 쓰입니다.
+              반도체부터 핵융합까지, 진공펌프는 {INDUSTRIES.length}개 산업에서 쓰입니다.
             </p>
           </div>
 
@@ -60,7 +60,7 @@ export default function Industries() {
             >
               <div className="flex items-start justify-between">
                 <div className="ind-num mono text-[11px] text-[#6A6660] group-hover:text-paper/70">
-                  {String(it.n).padStart(2, "0")} / 20
+                  {String(it.n).padStart(2, "0")} / {INDUSTRIES.length}
                 </div>
                 <div className="mono text-[10px] opacity-50">{it.tag[0]}</div>
               </div>
