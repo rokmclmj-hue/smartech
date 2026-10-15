@@ -695,3 +695,11 @@
 - PDF: tsx + createRequire로 generateRepairInspectionPdf(companyName 이니셜, contactName·inspectorName null, issuedDate 10/14). 임시 스크립트 삭제.
 - tsc·next build 통과, push 84aab69, Vercel success 후 2분가량 새 파일 404 → 재확인 200.
 - 네이버 초안 2편 DB DRAFT(id 116·117), naver-repair-queue.md 추가.
+
+### 10/15 — (클로드) AI 답변 기준점 측정 1일차
+
+- 다른 AI가 대표 프로필을 아는 상태에서 쓴 "일반인 검색 결과"는 짐작이라 측정값으로 쓰지 않기로 함. 대신 엣지 InPrivate(로그인 안 함)에서 고정 질문 5개로 직접 측정.
+- 결과: ChatGPT 5개 중 2개 1위(Q4 수원·Q5 반도체), 퍼플렉시티 2개 모두 1위(Q3~Q5는 로그인 제한으로 10/16 이어서), 제미나이 Q1 2위·Q3 대리점 중 1위·Q4 1위·Q2 한 줄 언급·Q5 미노출.
+- 인용 근거 확인: /about FAQ(타사 수리 상담·현장 방문), 주소·전화, 홈 "24/7" 문구가 그대로 쓰임(grep으로 대조).
+- 기록: docs/audits/2026-10-15-ai-answer-baseline.md (개선 검토 목록 7개 포함). 코드 수정 없음.
+- 다음: 10/16 퍼플렉시티 Q3~Q5 → 원인 분석 → 개선안 승인 → 작업 → 11월 재측정.
