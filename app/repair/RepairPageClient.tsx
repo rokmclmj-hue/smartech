@@ -24,7 +24,7 @@ type RepairKit = {
 
 type SelectedExtra = { id: number; category: string; name: string; customerPrice: number };
 
-type PhotoFile = { file: File; preview: string; label: string };
+type PhotoFile = { file: File; preview: string };
 
 type AiResult = {
   modelName: string | null;
@@ -64,11 +64,10 @@ const SYMPTOMS = [
 
 const STEPS = ["접수 정보", "증상 입력", "수리 견적", "접수 완료"];
 
-const PHOTO_SLOTS = [
-  { key: "nameplate", label: "명판 사진",       required: true,  hint: "모델명 확인용" },
-  { key: "exterior",  label: "전체 외관 사진",  required: false, hint: "있으면 더 정확해요" },
-  { key: "damage",    label: "고장 부위 사진",  required: false, hint: "있으면 더 정확해요" },
-];
+// 첫 화면 최근 수리 사례: 최신순에서 모델이 겹치지 않게 4건
+const RECENT_CASES = REPAIR_CASES.filter(
+  (c, i, all) => all.findIndex((x) => x.model === c.model) === i
+).slice(0, 4);
 
 // ── 유틸 ──────────────────────────────────────────────────
 function formatPrice(n: number) {
@@ -97,15 +96,12 @@ export default function RepairPageClient({ children }: { children?: ReactNode })
   const [showPartsDetail, setShowPartsDetail] = useState(false);
   const [modelSearchFocus, setModelSearchFocus] = useState(false);
 
-  // 사진 상태
-  const [photos, setPhotos] = useState<Record<string, PhotoFile | null>>({
-    nameplate: null, exterior: null, damage: null,
-  });
+  // 명판 사진 (AI 모델 인식 전용 — 접수 내용과 함께 저장되지 않음)
+  const [nameplate, setNameplate] = useState<PhotoFile | null>(null);
   const [aiResult, setAiResult] = useState<AiResult | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiDone, setAiDone] = useState(false);
-  const [dragOver, setDragOver] = useState<string | null>(null);
-  const fileRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const nameplateRef = useRef<HTMLInputElement | null>(null);
 
   const [form, setForm] = useState<FormData>({
     pumpFamily: "",
@@ -168,36 +164,23 @@ export default function RepairPageClient({ children }: { children?: ReactNode })
   );
   const totalCustomerPrice = baseCustomerPrice + extraCustomerTotal;
 
-  // 사진 선택
-  function handlePhotoSelect(key: string, file: File) {
-    setPhotos((p) => {
-      if (p[key]?.preview.startsWith("blob:")) URL.revokeObjectURL(p[key]!.preview);
-      return { ...p, [key]: { file, preview: URL.createObjectURL(file), label: key } };
+  // 명판 사진 선택 → 바로 AI 모델 인식
+  function handleNameplateSelect(file: File) {
+    setNameplate((prev) => {
+      if (prev?.preview.startsWith("blob:")) URL.revokeObjectURL(prev.preview);
+      return { file, preview: URL.createObjectURL(file) };
     });
-    setAiDone(false);
-    setAiResult(null);
-  }
-
-  // 사진 삭제
-  function handlePhotoRemove(key: string) {
-    setPhotos((p) => {
-      if (p[key]?.preview.startsWith("blob:")) URL.revokeObjectURL(p[key]!.preview);
-      return { ...p, [key]: null };
-    });
-    setAiDone(false);
-    setAiResult(null);
-    if (fileRefs.current[key]) fileRefs.current[key]!.value = "";
+    runAiIdentify(file);
   }
 
   // AI 모델 인식
-  async function runAiIdentify() {
-    const photoFiles = Object.values(photos).filter(Boolean) as PhotoFile[];
-    if (photoFiles.length === 0) return;
-
+  async function runAiIdentify(file: File) {
     setAiLoading(true);
+    setAiDone(false);
+    setAiResult(null);
     try {
       const fd = new FormData();
-      photoFiles.forEach((p) => fd.append("photos", p.file));
+      fd.append("photos", file);
 
       const res = await fetch("/api/repair/identify", { method: "POST", body: fd });
       const data: AiResult = await res.json();
@@ -226,14 +209,10 @@ export default function RepairPageClient({ children }: { children?: ReactNode })
       setAiDone(true);
     } finally {
       setAiLoading(false);
+      if (nameplateRef.current) nameplateRef.current.value = "";
     }
   }
 
-  const requiredPhotos = ["nameplate"];
-  const hasRequired = requiredPhotos.every((k) => photos[k] !== null);
-  const photoCount = Object.values(photos).filter(Boolean).length;
-
-  // 접수 제출
   async function submit() {
     setLoading(true);
     try {
@@ -292,6 +271,36 @@ export default function RepairPageClient({ children }: { children?: ReactNode })
             오버홀 절차 · 출고 시험 항목 · 보증 보기 ↓
           </a>
         </div>
+
+        {/* 최근 수리 사례 — 접수 전 신뢰 확인용 (모델 중복 없이 4건) */}
+        {step === 0 && !submitted && RECENT_CASES.length > 0 && (
+          <div className="-mt-6 mb-12">
+            <div className="flex items-end justify-between gap-3 mb-3">
+              <div className="text-[13px] font-semibold">
+                최근 수리 사례 <span className="text-dim font-normal">· 총 {REPAIR_CASES.length}건 공개 · 검사성적서 발행</span>
+              </div>
+              <a href="#repair-cases" className="shrink-0 text-[12px] mono text-dim hover:text-edred transition-colors">전체 보기 ↓</a>
+            </div>
+            <div className="flex sm:grid sm:grid-cols-4 gap-3 overflow-x-auto snap-x snap-mandatory scroll-pl-6 sm:scroll-pl-0 -mx-6 px-6 sm:mx-0 sm:px-0 pb-1">
+              {RECENT_CASES.map((c) => (
+                <a
+                  key={`${c.model}-${c.date}`}
+                  href="#repair-cases"
+                  className="snap-start shrink-0 w-[44%] sm:w-auto border hair bg-white overflow-hidden group"
+                >
+                  <div className="aspect-[4/3] bg-[#111] overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={c.photo} alt={`${c.model} 수리 — ${c.symptom}`} width={400} height={300} className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform" />
+                  </div>
+                  <div className="p-2.5">
+                    <div className="text-[12px] font-semibold leading-tight truncate">{c.model}</div>
+                    <div className="text-[11px] text-dim leading-snug mt-0.5 line-clamp-2">{c.symptom}</div>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* 스텝 바 */}
         {!submitted && (
@@ -369,9 +378,10 @@ export default function RepairPageClient({ children }: { children?: ReactNode })
             {/* 모델명 검색 */}
             <h3 className="text-[16px] font-bold tracking-tight mb-2">어떤 장비인가요?</h3>
             <p className="text-[13px] text-dim mb-3">
-              모델명을 알고 계시면 검색해 주세요. 모르셔도 아래 사진으로 확인해 드립니다.
+              모델명을 검색해 주세요. 모르시면 📷 버튼으로 명판 사진을 올리면 모델명을 자동으로 찾아드려요.
             </p>
-            <div className="mb-10 relative">
+            <div className="mb-6 relative">
+              <div className="flex gap-2">
               <input
                 type="text"
                 value={form.pumpModel}
@@ -389,8 +399,27 @@ export default function RepairPageClient({ children }: { children?: ReactNode })
                 onFocus={() => setModelSearchFocus(true)}
                 onBlur={() => setTimeout(() => setModelSearchFocus(false), 150)}
                 placeholder="예: nXDS10i, RV8, E2M18, EH500..."
-                className="w-full border border-line px-4 py-3 text-[14px] focus:outline-none focus:border-ink bg-paper"
+                className="flex-1 min-w-0 border border-line px-4 py-3 text-[14px] focus:outline-none focus:border-ink bg-paper"
               />
+              <button
+                type="button"
+                onClick={() => nameplateRef.current?.click()}
+                disabled={aiLoading}
+                className="shrink-0 border border-ink px-3 sm:px-4 text-[13px] font-semibold hover:bg-ink hover:text-paper transition-colors disabled:opacity-50 whitespace-nowrap"
+              >
+                📷 <span className="hidden sm:inline">명판 </span>사진으로 찾기
+              </button>
+              <input
+                ref={nameplateRef}
+                type="file"
+                accept="image/*,application/pdf"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleNameplateSelect(file);
+                }}
+              />
+              </div>
               {/* 검색 결과 드롭다운 */}
               {modelSearchFocus && form.pumpModel.length >= 2 && (() => {
                 const matched = kits.filter(k =>
@@ -420,114 +449,15 @@ export default function RepairPageClient({ children }: { children?: ReactNode })
               })()}
             </div>
 
-            {/* 사진 업로드 (선택) */}
-            <h3 className="text-[16px] font-bold tracking-tight mb-2">사진을 올려주시면 더 빠르게 도와드려요</h3>
-            <p className="text-[13px] text-dim mb-6">
-              모델명을 자동으로 인식해드려요. 사진이 없어도 괜찮아요 — 모델명만 입력하셔도 접수됩니다.
-            </p>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
-              {PHOTO_SLOTS.map((slot) => {
-                const photo = photos[slot.key];
-                return (
-                  <div key={slot.key} className="flex flex-col gap-1.5">
-                    <div
-                      onClick={() => fileRefs.current[slot.key]?.click()}
-                      onDragOver={(e) => { e.preventDefault(); setDragOver(slot.key); }}
-                      onDragEnter={(e) => { e.preventDefault(); setDragOver(slot.key); }}
-                      onDragLeave={() => setDragOver(null)}
-                      onDrop={(e) => {
-                        e.preventDefault();
-                        setDragOver(null);
-                        const file = e.dataTransfer.files[0];
-                        if (file && (file.type.startsWith("image/") || file.type === "application/pdf")) handlePhotoSelect(slot.key, file);
-                      }}
-                      className={`relative aspect-square border-2 cursor-pointer flex flex-col items-center justify-center transition-all overflow-hidden group ${
-                        dragOver === slot.key
-                          ? "border-edred bg-edred/5 scale-[1.03]"
-                          : photo
-                          ? "border-ink"
-                          : "border-dashed border-line hover:border-ink"
-                      }`}
-                    >
-                      {photo ? (
-                        <>
-                          {photo.file.type === "application/pdf" ? (
-                            <iframe
-                              src={photo.preview}
-                              className="absolute inset-0 w-full h-full border-0"
-                              title="PDF 미리보기"
-                            />
-                          ) : (
-                            /* eslint-disable-next-line @next/next/no-img-element */
-                            <img
-                              src={photo.preview}
-                              alt={slot.label}
-                              className="absolute inset-0 w-full h-full object-cover"
-                            />
-                          )}
-                          <div className="absolute inset-0 bg-ink/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <span className="text-paper text-[12px] font-medium">변경</span>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={(e) => { e.stopPropagation(); handlePhotoRemove(slot.key); }}
-                            className="absolute top-1.5 left-1.5 w-6 h-6 bg-red-600 text-white text-[12px] font-bold rounded-full flex items-center justify-center hover:bg-red-700 transition-colors z-10"
-                          >
-                            ✕
-                          </button>
-                          <div className="absolute top-1.5 right-1.5 bg-ink text-paper text-[10px] px-1.5 py-0.5 rounded">
-                            ✓
-                          </div>
-                        </>
-                      ) : (
-                        <div className="text-center p-3 pointer-events-none">
-                          <div className={`text-[24px] mb-1 ${dragOver === slot.key ? "text-edred" : "text-dim/40"}`}>
-                            {dragOver === slot.key ? "↓" : "+"}
-                          </div>
-                          <div className={`text-[11px] font-medium ${dragOver === slot.key ? "text-edred" : "text-dim"}`}>
-                            {dragOver === slot.key ? "놓으면 업로드" : "선택"}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    <div className="text-[11px] font-medium text-ink">{slot.label}</div>
-                    <div className="text-[10px] text-dim leading-tight">{slot.hint}</div>
-                    <input
-                      ref={(el) => { fileRefs.current[slot.key] = el; }}
-                      type="file"
-                      accept="image/*,application/pdf"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handlePhotoSelect(slot.key, file);
-                      }}
-                    />
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* AI 인식 버튼 / 결과 */}
-            {hasRequired && !aiDone && (
-              <div className="mb-8">
-                <button
-                  onClick={runAiIdentify}
-                  disabled={aiLoading}
-                  className="w-full py-4 bg-ink text-paper text-[14px] font-semibold hover:bg-edred transition-all disabled:opacity-50 flex items-center justify-center gap-3"
-                >
-                  {aiLoading ? (
-                    <>
-                      <span className="animate-spin inline-block w-4 h-4 border-2 border-paper/30 border-t-paper rounded-full" />
-                      모델명 인식 중...
-                    </>
-                  ) : (
-                    <>사진 {photoCount}장으로 모델 자동 인식</>
-                  )}
-                </button>
-                <p className="text-[11px] text-dim text-center mt-2">
-                  명판이 선명하게 찍힐수록 정확합니다
-                </p>
+            {/* 명판 사진 인식 중 */}
+            {aiLoading && (
+              <div className="flex items-center gap-4 border hair p-4 mb-8">
+                {nameplate && !nameplate.file.type.startsWith("application/pdf") && (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img src={nameplate.preview} alt="명판 사진" className="w-14 h-14 object-cover border hair shrink-0" />
+                )}
+                <span className="animate-spin inline-block w-4 h-4 border-2 border-ink/20 border-t-ink rounded-full shrink-0" />
+                <span className="text-[13px]">명판 사진에서 모델명을 찾는 중...</span>
               </div>
             )}
 
@@ -572,8 +502,8 @@ export default function RepairPageClient({ children }: { children?: ReactNode })
                         </div>
                         <div className="text-[12px] text-dim leading-relaxed mb-3">{aiResult.notes}</div>
                         <p className="text-[12px] leading-relaxed">
-                          접수 후 담당자가 사진을 확인하고 직접 연락드립니다.
-                          위 모델명 검색창에 직접 입력하시거나, 그대로 접수하셔도 됩니다.
+                          명판이 잘 보이게 다시 찍어 올리시거나, 위 검색창에 직접 입력해 주세요.
+                          모델명 없이 그대로 접수하셔도 담당자가 확인 후 연락드립니다.
                         </p>
                       </>
                     )}
@@ -1146,7 +1076,7 @@ export default function RepairPageClient({ children }: { children?: ReactNode })
       {children}
 
       {/* ── 수리 사례 ── */}
-      <section className="mt-24 border-t hair pt-14 pb-20 bg-paper">
+      <section id="repair-cases" className="mt-24 border-t hair pt-14 pb-20 bg-paper">
         <div className="max-w-5xl mx-auto px-6">
           {/* 헤더 */}
           <div className="mono text-[11px] text-dim mb-3 tracking-widest">REPAIR CASES</div>
