@@ -138,7 +138,7 @@ export default function Navbar() {
               </>
             ) : (
               <div className="hidden lg:flex items-center gap-2">
-                <Link href="/repair" className="chip !border-ink hover:bg-ink hover:text-paper transition">
+                <Link href="/#b2b" className="chip !border-ink hover:bg-ink hover:text-paper transition">
                   견적 문의 →
                 </Link>
                 <Link href="/auth/login" className="chip !border-edred bg-edred text-paper text-[11px] hover:bg-edred/90 transition">

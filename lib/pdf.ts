@@ -15,6 +15,7 @@ import { NextResponse } from "next/server";
 import { VAT_RATE } from "./constants";
 import { SMARTECH_COMPANY } from "./company";
 import { computeRepairQuoteAmounts } from "./repairQuoteAmounts";
+import { repairWarrantyText } from "./repair-warranty";
 
 Font.register({
   family: "Pretendard",
@@ -1463,6 +1464,7 @@ export interface RepairQuoteForPdf {
   jobNo: string;
   pumpMaker: string;
   pumpModel: string;
+  pumpFamily?: string | null;    // 온라인 수리만 있음. 없으면 모델명으로 보증 기간 판별
   serialNo: string | null;
   voltage: string | null;
   repairReason: string | null;
@@ -1648,7 +1650,7 @@ function RepairQuoteDocument({ data }: { data: RepairQuoteForPdf }) {
         ),
         el(View, { style: S.termRow },
           el(Text, { style: S.termLabel }, "WARRANTY"),
-          el(Text, { style: S.termValue }, "수리 후 3개월 보증")
+          el(Text, { style: S.termValue }, repairWarrantyText(data.pumpFamily, data.pumpModel))
         ),
         el(View, { style: { ...S.termRow, marginBottom: 0 } },
           el(Text, { style: S.termLabel }, "A / S"),

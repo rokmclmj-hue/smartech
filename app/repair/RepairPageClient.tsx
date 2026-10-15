@@ -6,6 +6,7 @@ import Link from "next/link";
 import { SMARTECH_COMPANY } from "@/lib/company";
 import { REPAIR_CASES } from "@/lib/repair-cases";
 import { trackEvent } from "@/lib/analytics";
+import { repairWarrantyText } from "@/lib/repair-warranty";
 import "@/app/quote/[id]/quote-styles.css";
 
 // ── 타입 ──────────────────────────────────────────────────
@@ -1129,7 +1130,7 @@ export default function RepairPageClient({ children }: { children?: ReactNode })
           {/* 거래 조건 */}
           <div className="p-terms">
             <div className="row"><span className="k">Payment</span><span className="v">수리 완료 후 세금계산서 발행 · 협의</span></div>
-            <div className="row"><span className="k">Warranty</span><span className="v">수리 후 3개월 보증</span></div>
+            <div className="row"><span className="k">Warranty</span><span className="v">{repairWarrantyText(form.pumpFamily, form.pumpModel)}</span></div>
             <div className="row"><span className="k">A / S</span><span className="v">031-204-7170 · 스마텍 서비스센터 직접 응대</span></div>
             <div className="row"><span className="k">Note</span><span className="v">본 견적은 참고용이며 분해 검사 후 정확한 금액이 확정됩니다.</span></div>
           </div>
