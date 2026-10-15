@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { SMARTECH_COMPANY } from "@/lib/company";
@@ -82,7 +82,7 @@ function phoneAutoFormat(v: string) {
 }
 
 // ── 컴포넌트 ──────────────────────────────────────────────
-export default function RepairPageClient() {
+export default function RepairPageClient({ children }: { children?: ReactNode }) {
   const { data: session } = useSession();
   const user = session?.user as { name?: string; email?: string; phone?: string; company?: string; tier?: string } | undefined;
   const isLoggedIn = !!user;
@@ -281,12 +281,15 @@ export default function RepairPageClient() {
         <div className="mb-12">
           <p className="mono text-[11px] tracking-widest text-dim mb-3">REPAIR · A/S · OVERHAUL</p>
           <h1 className="display text-[clamp(32px,5vw,64px)] leading-none tracking-tight mb-4">
-            수리 접수
+            수리·오버홀
           </h1>
           <p className="text-[15px] text-dim max-w-xl leading-relaxed">
             Edwards 및 타브랜드 진공 펌프 수리를 접수해 드립니다.<br />
             진공펌프 수리 경력 30년의 전담 엔지니어가 직접 분해·점검·조립합니다.
           </p>
+          <a href="#overhaul-guide" className="mt-4 inline-block text-[13px] mono text-dim hover:text-edred transition-colors">
+            오버홀 절차 · 출고 시험 항목 · 보증 보기 ↓
+          </a>
         </div>
 
         {/* 스텝 바 */}
@@ -1138,6 +1141,8 @@ export default function RepairPageClient() {
           </div>
         </div>
       </div>
+
+      {children}
 
       {/* ── 수리 사례 ── */}
       <section className="mt-24 border-t hair pt-14 pb-20 bg-paper">

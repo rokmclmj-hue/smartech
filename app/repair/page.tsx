@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import RepairPageClient from "./RepairPageClient";
+import RepairGuide from "./RepairGuide";
 import { REPAIR_CASES } from "@/lib/repair-cases";
 
 export const metadata: Metadata = {
-  title: "수리 접수 — 스마텍 | Edwards 진공펌프 수리·오버홀",
-  description: "Edwards 진공펌프(RV·E2M·GXS·nXDS·iXH·nEXT·STP) 수리 접수. AI 모델 자동 판별·수리비 즉시 견적·사진 업로드. 수원 본사 및 천안 수리센터 운영.",
+  title: "수리·오버홀 안내 — 스마텍 | Edwards 진공펌프 수리·오버홀",
+  description: "Edwards 공식 대리점 스마텍의 진공펌프 수리·오버홀 안내와 접수. 오일 로터리·드라이·스크롤·반도체용 드라이펌프(iH) 수리, 출고 전 시험 후 검사성적서 발행. 수원 본사·천안 수리센터.",
   alternates: { canonical: "https://www.smartechvacuum.com/repair" },
   openGraph: {
-    title: "수리 접수 — 스마텍 | Edwards 진공펌프 수리",
+    title: "수리·오버홀 안내 — 스마텍 | Edwards 진공펌프 수리",
     description: "Edwards 진공펌프 수리 접수. AI 모델 자동 판별·즉시 견적.",
     url: "https://www.smartechvacuum.com/repair",
     type: "website",
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "수리 접수 — 스마텍",
+    title: "수리·오버홀 안내 — 스마텍",
     description: "Edwards 진공펌프 수리 접수. AI 모델 자동 판별·즉시 견적.",
     images: ["https://www.smartechvacuum.com/og-default.png"],
   },
@@ -27,8 +28,8 @@ const repairServiceSchema = JSON.stringify({
   "@context": "https://schema.org",
   "@type": "Service",
   "serviceType": "Edwards 진공펌프 수리·오버홀",
-  "name": "수리 접수 — 스마텍",
-  "description": "Edwards 진공펌프(RV·E2M·GXS·nXDS·iXH·nEXT·STP) 수리 접수. AI 모델 자동 판별·수리비 즉시 견적·사진 업로드.",
+  "name": "수리·오버홀 안내 — 스마텍",
+  "description": "Edwards 및 타사 진공펌프 수리·오버홀. 분해 검사, 부품 교체, 출고 전 시험(도달 진공도·운전 전류·본체 온도·누설·시운전) 후 검사성적서 발행. 보증: 드라이펌프 6개월, 오일 로터리 펌프 3개월.",
   "url": "https://www.smartechvacuum.com/repair",
   "provider": {
     "@type": "Organization",
@@ -63,7 +64,9 @@ export default function RepairPage() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: repairServiceSchema }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: repairCasesSchema }} />
-      <RepairPageClient />
+      <RepairPageClient>
+        <RepairGuide />
+      </RepairPageClient>
     </>
   );
 }
