@@ -8,6 +8,8 @@ export type RepairCase = {
   partPhoto?: string;
   extraPhoto?: string;
   reportPdf?: string; // 검사성적서 PDF (고객사·담당자 익명화 완료본)
+  /** 검사성적서 출고 시험 값 (PDF에서 옮겨 적음). 성적서가 있는 사례만 */
+  result?: { vacuum: string; vacuumStd: string; current: string; temp: string; runHours: number };
 };
 
 export const REPAIR_CASES: RepairCase[] = [
@@ -21,6 +23,7 @@ export const REPAIR_CASES: RepairCase[] = [
     partPhoto: "/images/repair/w2v40-b-sludge.jpg",
     extraPhoto: "/images/repair/w2v40-b-cylinder.jpg",
     reportPdf: "/documents/repair-reports/w2v40-b-inspection.pdf",
+    result: { vacuum: "2.5×10⁻³ Torr", vacuumStd: "9.0×10⁻³ Torr 이하", current: "1.8A", temp: "43℃", runHours: 12 },
   },
   {
     model: "Edwards RV12",
@@ -32,6 +35,7 @@ export const REPAIR_CASES: RepairCase[] = [
     partPhoto: "/images/repair/rv12-module.jpg",
     extraPhoto: "/images/repair/rv12-rotor.jpg",
     reportPdf: "/documents/repair-reports/rv12-inspection.pdf",
+    result: { vacuum: "3.0×10⁻³ Torr", vacuumStd: "9.0×10⁻³ Torr 이하", current: "1.3A", temp: "56℃", runHours: 12 },
   },
   {
     model: "Edwards iH1800MK5",
@@ -43,6 +47,7 @@ export const REPAIR_CASES: RepairCase[] = [
     partPhoto: "/images/repair/ih1800mk5-c-deposit.jpg",
     extraPhoto: "/images/repair/ih1800mk5-c-pca.jpg",
     reportPdf: "/documents/repair-reports/ih1800mk5-c-inspection.pdf",
+    result: { vacuum: "5.5×10⁻³ Torr", vacuumStd: "9.0×10⁻³ Torr 이하", current: "8.7A", temp: "134℃", runHours: 16 },
   },
   {
     model: "Edwards iH1800MK5",
@@ -54,6 +59,7 @@ export const REPAIR_CASES: RepairCase[] = [
     partPhoto: "/images/repair/ih1800mk5-b-stator.jpg",
     extraPhoto: "/images/repair/ih1800mk5-b-parts.jpg",
     reportPdf: "/documents/repair-reports/ih1800mk5-b-inspection.pdf",
+    result: { vacuum: "7.2×10⁻³ Torr", vacuumStd: "9.0×10⁻³ Torr 이하", current: "8.2A", temp: "126℃", runHours: 16 },
   },
   {
     model: "Pfeiffer Vacuum DUO2.5",
@@ -65,6 +71,7 @@ export const REPAIR_CASES: RepairCase[] = [
     partPhoto: "/images/repair/duo25-b-blade.jpg",
     extraPhoto: "/images/repair/duo25-b-sleeve.jpg",
     reportPdf: "/documents/repair-reports/duo25-b-inspection.pdf",
+    result: { vacuum: "5.9×10⁻³ Torr", vacuumStd: "9.0×10⁻³ Torr 이하", current: "1.3A", temp: "54℃", runHours: 12 },
   },
   {
     model: "Edwards E2M28",
@@ -76,6 +83,7 @@ export const REPAIR_CASES: RepairCase[] = [
     partPhoto: "/images/repair/e2m28-b-coil.jpg",
     extraPhoto: "/images/repair/e2m28-b-rotor.jpg",
     reportPdf: "/documents/repair-reports/e2m28-b-inspection.pdf",
+    result: { vacuum: "2.8×10⁻³ Torr", vacuumStd: "9.0×10⁻³ Torr 이하", current: "1.3A", temp: "52℃", runHours: 12 },
   },
   {
     model: "우성진공 W2V20",
@@ -87,6 +95,7 @@ export const REPAIR_CASES: RepairCase[] = [
     partPhoto: "/images/repair/w2v20-internal.jpg",
     extraPhoto: "/images/repair/w2v20-rotor.jpg",
     reportPdf: "/documents/repair-reports/w2v20-inspection.pdf",
+    result: { vacuum: "3.2×10⁻³ Torr", vacuumStd: "9.0×10⁻³ Torr 이하", current: "1.1A", temp: "43℃", runHours: 12 },
   },
   {
     model: "Edwards RV5",
@@ -98,6 +107,7 @@ export const REPAIR_CASES: RepairCase[] = [
     partPhoto: "/images/repair/rv5-b-sleeve.jpg",
     extraPhoto: "/images/repair/rv5-b-parts.jpg",
     reportPdf: "/documents/repair-reports/rv5-b-inspection.pdf",
+    result: { vacuum: "3.2×10⁻³ Torr", vacuumStd: "9.0×10⁻³ Torr 이하", current: "1.5A", temp: "50℃", runHours: 12 },
   },
   {
     model: "Edwards GV80",
@@ -109,6 +119,7 @@ export const REPAIR_CASES: RepairCase[] = [
     partPhoto: "/images/repair/gv80-c-bearing.jpg",
     extraPhoto: "/images/repair/gv80-c-internal.jpg",
     reportPdf: "/documents/repair-reports/gv80-c-inspection.pdf",
+    result: { vacuum: "1.2×10⁻² Torr", vacuumStd: "5.0×10⁻² Torr 이하", current: "4.8A", temp: "38℃", runHours: 12 },
   },
   {
     model: "Edwards nXDS20i",
@@ -120,6 +131,7 @@ export const REPAIR_CASES: RepairCase[] = [
     partPhoto: "/images/repair/nxds20i-b-bearing.jpg",
     extraPhoto: "/images/repair/nxds20i-b-tipseal.jpg",
     reportPdf: "/documents/repair-reports/nxds20i-b-inspection.pdf",
+    result: { vacuum: "2.0×10⁻² Torr", vacuumStd: "5.0×10⁻² Torr 이하", current: "1.3A", temp: "38℃", runHours: 16 },
   },
   {
     model: "Edwards GV80",
@@ -141,6 +153,7 @@ export const REPAIR_CASES: RepairCase[] = [
     partPhoto: "/images/repair/e2m07-c-part1.jpg",
     extraPhoto: "/images/repair/e2m07-c-part2.jpg",
     reportPdf: "/documents/repair-reports/e2m07-c-inspection.pdf",
+    result: { vacuum: "5.0×10⁻³ Torr", vacuumStd: "9.0×10⁻³ Torr 이하", current: "0.8A", temp: "48℃", runHours: 12 },
   },
   {
     model: "Edwards nXDS20i",
@@ -162,6 +175,7 @@ export const REPAIR_CASES: RepairCase[] = [
     partPhoto: "/images/repair/duo3-motor.jpg",
     extraPhoto: "/images/repair/duo3-rotor.jpg",
     reportPdf: "/documents/repair-reports/duo3-h-inspection.pdf",
+    result: { vacuum: "6.1×10⁻³ Torr", vacuumStd: "9.0×10⁻³ Torr 이하", current: "2A", temp: "65℃", runHours: 12 },
   },
   {
     model: "Edwards E2M0.7",
@@ -183,6 +197,7 @@ export const REPAIR_CASES: RepairCase[] = [
     partPhoto: "/images/repair/iqdp40-cooling-coil.jpg",
     extraPhoto: "/images/repair/iqdp40-internal.jpg",
     reportPdf: "/documents/repair-reports/iqdp40-d-inspection.pdf",
+    result: { vacuum: "6.5×10⁻² Torr", vacuumStd: "8.5×10⁻² Torr 이하", current: "3A", temp: "65℃", runHours: 16 },
   },
   {
     model: "Edwards XDS35i",
@@ -254,6 +269,7 @@ export const REPAIR_CASES: RepairCase[] = [
     partPhoto: "/images/repair/nxds10i-scroll.jpg",
     extraPhoto: "/images/repair/nxds10i-tipseal.jpg",
     reportPdf: "/documents/repair-reports/nxds10i-k-inspection.pdf",
+    result: { vacuum: "3.2×10⁻² Torr", vacuumStd: "5.0×10⁻² Torr 이하", current: "1.5A", temp: "40℃", runHours: 16 },
   },
   {
     model: "Edwards E2M80",

@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { prisma } from "@/lib/db";
 import { INDUSTRIES } from "@/lib/industries";
+import { REPAIR_CASES } from "@/lib/repair-cases";
 import { PRODUCT_ITEMS } from "@/lib/product-categories";
 
 // components/ProductCategories.tsx와 같은 lib/product-categories.ts를 참조 —
@@ -9,6 +10,12 @@ import { PRODUCT_ITEMS } from "@/lib/product-categories";
 const PRODUCT_CATEGORIES = PRODUCT_ITEMS.map(({ code, title }) => ({ code, title }));
 
 export async function GET() {
+  const repairLines = REPAIR_CASES.map((c) => {
+    const result = c.result
+      ? ` / 출고 시험: 도달 진공도 ${c.result.vacuum}(기준 ${c.result.vacuumStd}), 운전 전류 ${c.result.current}, 본체 온도 ${c.result.temp}, ${c.result.runHours}시간 시운전, 전 항목 합격`
+      : "";
+    return `- ${c.date} ${c.model} — 증상: ${c.symptom} / 작업: ${c.work.join(", ")}${result}`;
+  }).join("\n");
   const posts = await prisma.blogPost.findMany({
     where: { status: "PUBLISHED" },
     orderBy: { publishedAt: "desc" },
@@ -59,6 +66,12 @@ ${productLines}
 ## 산업별 진공 솔루션 (${INDUSTRIES.length}개 산업)
 
 ${industryLines}
+
+## 수리·오버홀 사례 (${REPAIR_CASES.length}건, 최신순)
+
+실제 수리 기록입니다. 출고 시험 값은 각 사례의 검사성적서에서 옮겼습니다. 안내: https://www.smartechvacuum.com/repair
+
+${repairLines}
 
 ## 블로그 전체 글 (${posts.length}편, 최신순)
 

@@ -53,7 +53,7 @@ const repairCasesSchema = JSON.stringify({
       "name": `${c.model} 수리 사례`,
       "serviceType": "진공펌프 수리·오버홀",
       "provider": { "@type": "Organization", "name": "스마텍" },
-      "description": `증상: ${c.symptom} / 작업 내역: ${c.work.join(", ")}`,
+      "description": `증상: ${c.symptom} / 작업 내역: ${c.work.join(", ")}${c.result ? ` / 출고 시험: 도달 진공도 ${c.result.vacuum}(기준 ${c.result.vacuumStd}), 운전 전류 ${c.result.current}, 본체 온도 ${c.result.temp}, ${c.result.runHours}시간 시운전, 전 항목 합격` : ""}`,
       "dateCreated": c.date.replaceAll(".", "-"),
     },
   })),

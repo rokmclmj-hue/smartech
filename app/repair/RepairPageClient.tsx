@@ -1122,6 +1122,21 @@ export default function RepairPageClient({ children }: { children?: ReactNode })
                       ))}
                     </div>
                   </div>
+                  {c.result && (
+                    <div>
+                      <div className="mono text-[9px] text-dim tracking-widest mb-1.5">출고 시험 · 전 항목 합격</div>
+                      <dl className="grid grid-cols-2 gap-x-3 gap-y-1 text-[11.5px] leading-snug">
+                        <dt className="text-dim">도달 진공도</dt>
+                        <dd className="font-semibold">{c.result.vacuum}</dd>
+                        <dt className="text-dim">기준</dt>
+                        <dd>{c.result.vacuumStd}</dd>
+                        <dt className="text-dim">운전 전류 · 온도</dt>
+                        <dd>{c.result.current} · {c.result.temp}</dd>
+                        <dt className="text-dim">시운전</dt>
+                        <dd>{c.result.runHours}시간</dd>
+                      </dl>
+                    </div>
+                  )}
                   {c.partPhoto && (
                     <div className="mt-auto pt-3 border-t hair">
                       <div className="mono text-[9px] text-dim tracking-widest mb-1.5">PARTS</div>
