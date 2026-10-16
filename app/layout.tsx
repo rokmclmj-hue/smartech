@@ -56,6 +56,29 @@ const jsonLd = {
         "https://www.google.com/maps?cid=2249450778476640442",
       ],
       "description": "Edwards 코리아 공식 대리점(Industrial Vacuum·Scientific Vacuum 모두 담당). 진공펌프 판매·수리·기술상담. 2011년 창업, 대표 진공산업 경력 2006년부터, 진공펌프 수리 경력 30년의 전담 엔지니어 보유.",
+      "areaServed": { "@type": "Country", "name": "대한민국" },
+      // 전문 분야·제공 서비스 — AI가 "판매·수리 전문 업체"로 분류하도록 (2026-10-16, 실제 취급·수리 실적 기준)
+      "knowsAbout": [
+        "진공펌프",
+        "오일 로터리 베인 펌프",
+        "드라이 스크롤 펌프",
+        "드라이펌프",
+        "반도체용 드라이펌프",
+        "루츠 부스터 펌프",
+        "터보분자 펌프",
+        "진공펌프 수리·오버홀",
+        "진공 시스템 배기 시뮬레이션",
+      ],
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "스마텍 서비스",
+        "itemListElement": [
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Edwards 진공펌프 판매", "url": "https://www.smartechvacuum.com/products" } },
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "진공펌프 수리·오버홀", "url": "https://www.smartechvacuum.com/repair" } },
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "반도체용 드라이펌프(iH·iQDP) 수리", "url": "https://www.smartechvacuum.com/industries/semiconductor" } },
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Edwards 시뮬레이션 기반 진공펌프 선정 상담", "url": "https://www.smartechvacuum.com/#b2b" } },
+        ],
+      },
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "신원로55, 테크트리지식산업센터 907호",
@@ -91,6 +114,7 @@ const jsonLd = {
       "@id": "https://www.smartechvacuum.com/#local-cheonan",
       "name": "스마텍 천안수리센터",
       "parentOrganization": { "@id": "https://www.smartechvacuum.com/#organization" },
+      "url": "https://www.smartechvacuum.com/repair",
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "두정공원 2길 49",
@@ -105,7 +129,7 @@ const jsonLd = {
       "name": "Edwards 진공펌프 수리·오버홀 서비스",
       "provider": { "@id": "https://www.smartechvacuum.com/#organization" },
       "serviceType": "진공펌프 수리 및 오버홀",
-      "description": "Edwards 진공펌프(RV·E2M·nES·GXS·EXS·nXDS·XDS·iXH·nEXT·STP) 전 라인업 수리·오버홀·부품 교체. 수원 본사 및 천안 수리센터 운영.",
+      "description": "Edwards 진공펌프(RV·E2M·nES·GXS·EXS·nXDS·XDS·iH·iQDP·iXH·nEXT·STP)와 Pfeiffer·우성진공 등 타사 펌프 수리·오버홀·부품 교체. 출고 전 도달 진공도·운전 전류·온도·누설 검사와 시운전 후 검사성적서 발행. 보증: 드라이펌프 6개월, 오일 로터리 펌프 3개월. 수원 본사 및 천안 수리센터 운영.",
       "areaServed": { "@type": "Country", "name": "대한민국" },
       "url": "https://www.smartechvacuum.com/repair",
     },

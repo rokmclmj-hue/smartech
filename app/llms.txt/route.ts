@@ -24,7 +24,7 @@ export async function GET() {
 - [제품 목록](https://www.smartechvacuum.com/products): Edwards 진공펌프 전 라인업 (RV·E2M·GXS·nXDS·iXH·STP·nEXT·nXRi 시리즈)
 - [수리 서비스](https://www.smartechvacuum.com/repair): 진공펌프 오버홀·분해수리·예방정비(PM) 서비스. 천안수리센터 직접 수리.
 - [블로그](https://www.smartechvacuum.com/blog): 진공 기술 가이드, 산업별 펌프 선택 기준, 수리 사례, 소모품 관리
-- [산업 응용](https://www.smartechvacuum.com/industries): 반도체·이차전지·제약·연구소 등 산업별 진공 솔루션
+- [산업 응용](https://www.smartechvacuum.com/#industries): 반도체·이차전지·제약·연구소 등 산업별 진공 솔루션
 - [회사 소개](https://www.smartechvacuum.com/about): 스마텍 소개, 수원 본사·천안수리센터, Edwards 공인 대리점 인증
 
 ## 블로그 — 기술 가이드 및 수리 사례 (최신순)
