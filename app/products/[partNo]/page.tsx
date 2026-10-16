@@ -60,7 +60,7 @@ export async function generateMetadata({ params }: { params: Promise<{ partNo: s
     const { typeLabel, specs } = modelSeoText(modelInfo.category, modelInfo.index);
     return {
       title: `Edwards ${modelInfo.model} ${typeLabel} 사양·가격 — 스마텍`,
-      description: `Edwards ${modelInfo.model} ${typeLabel}${specs ? ` — ${specs}` : " 공식 카탈로그 사양"}. Edwards 한국 공식 대리점 스마텍에서 정품 견적·수리 상담.`,
+      description: `Edwards ${modelInfo.model} ${typeLabel}${specs ? ` — ${specs}` : " 공식 카탈로그 사양"}. Edwards 코리아 공식 대리점 스마텍에서 정품 견적·수리 상담.`,
       alternates: { canonical: `https://www.smartechvacuum.com/products/${encodeURIComponent(partNo)}` },
     };
   }
@@ -103,7 +103,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     "@context": "https://schema.org",
     "@type": "Product",
     "name": product.description,
-    "description": `Edwards ${product.description} — 파트번호 ${product.partNo}. 스마텍(Edwards Vacuum 한국 공식 대리점)에서 정품 공급·견적·수리 상담.`,
+    "description": `Edwards ${product.description} — 파트번호 ${product.partNo}. 스마텍(Edwards 코리아 공식 대리점)에서 정품 공급·견적·수리 상담.`,
     "image": photoAbsoluteUrl,
     "brand": { "@type": "Brand", "name": "Edwards Vacuum" },
     "manufacturer": { "@type": "Organization", "name": "Edwards Vacuum" },

@@ -37,14 +37,14 @@ ${ind.description}
     .map((p) => `- ${p.code}: ${p.title}`)
     .join("\n");
 
-  const body = `# 스마텍 (Smartech) — Edwards Vacuum 한국 공식 대리점 (전체 콘텐츠)
+  const body = `# 스마텍 (Smartech) — Edwards 코리아 공식 대리점 (전체 콘텐츠)
 
 > 이 파일은 llms.txt의 상세 버전입니다. AI 답변 엔진이 스마텍의 산업별 솔루션, 제품 라인업, 블로그 콘텐츠 전체를 파악할 수 있도록 제공합니다.
 
 ## 회사 정보
 
 - 회사명: (주)스마텍 (Smartech Co., Ltd.)
-- Edwards Vacuum 한국 공식 대리점. 2006년 Edwards 코리아 합류, 2011년 창업.
+- Edwards 코리아 공식 대리점(산업용 Industrial Vacuum·과학용 Scientific Vacuum 모두 담당, 대리점 목록: https://www.edwardsvacuum.com/ko-kr/talk-to-us/contacts-asia/korea). 2006년 Edwards 코리아 합류, 2011년 창업.
 - 본사: 경기도 수원시 영통구 신원로55, 테크트리지식산업센터 907호
 - 수리센터: 충남 천안시
 - 전화: 031-204-7170 / 이메일: info@smartechvacuum.com

@@ -4,7 +4,7 @@ import Link from "next/link";
 import AboutBento from "./AboutBento";
 
 export const metadata: Metadata = {
-  title: "회사 소개 — 스마텍 | Edwards Vacuum 공식 대리점",
+  title: "회사 소개 — 스마텍 | Edwards 코리아 공식 대리점",
   description:
     "2006년 Edwards 코리아 합류, 2011년 창업. 2018 Edwards Korea Gold Award 수상. 진공펌프 공급·수리·기술지원 일체를 직접 운영하는 공식 대리점.",
   alternates: { canonical: "https://www.smartechvacuum.com/about" },
@@ -46,7 +46,7 @@ const orgLd = {
   foundingDate: "2011",
   award: "Edwards Vacuum Korea Distributor Gold Award 2018",
   description:
-    "Edwards Vacuum 한국 공식 대리점. 2006년 Edwards 코리아 합류, 2011년 창업. 진공펌프 전 라인업 공급·수리·기술지원.",
+    "Edwards 코리아 공식 대리점(산업용·과학용 진공 모두 담당). 2006년 Edwards 코리아 합류, 2011년 창업. 진공펌프 전 라인업 공급·수리·기술지원.",
   telephone: "031-204-7170",
   email: "info@smartechvacuum.com",
   address: {
@@ -75,7 +75,7 @@ const TIMELINE = [
   {
     year: "2011",
     title: "스마텍 창업",
-    desc: "Edwards Vacuum 공식 대리점으로 출발. 제품 공급·수리·기술지원을 직접 운영하는 구조로 설립.",
+    desc: "Edwards 코리아 공식 대리점으로 출발. 제품 공급·수리·기술지원을 직접 운영하는 구조로 설립.",
   },
   {
     year: "2018",
@@ -127,8 +127,8 @@ const GALLERY = [
 
 const FAQ_ITEMS = [
   {
-    q: "스마텍은 Edwards Vacuum 공식 대리점인가요?",
-    a: "네. 2006년 Edwards 코리아 합류, 2011년 창업 이후 공식 대리점 지위를 유지하고 있습니다. 2018년 Edwards Korea Distributor Gold Award를 수상했으며, 정품 부품과 공식 기술 지원을 직접 받습니다.",
+    q: "스마텍은 Edwards 코리아 공식 대리점인가요?",
+    a: "네. Edwards 코리아 홈페이지 대리점 목록(https://www.edwardsvacuum.com/ko-kr/talk-to-us/contacts-asia/korea)에 산업용(Industrial Vacuum)·과학용(Scientific Vacuum) 진공을 모두 담당하는 공식 대리점으로 올라 있습니다. 2006년 Edwards 코리아 합류, 2011년 창업 이후 공식 대리점 지위를 유지하고 있습니다. 2018년 Edwards Korea Distributor Gold Award를 수상했으며, 정품 부품과 공식 기술 지원을 직접 받습니다.",
   },
   {
     q: "서울·수도권 외 지역도 서비스가 가능한가요?",
@@ -212,6 +212,17 @@ export default function AboutPage() {
                 판매 실적만이 아니라 고객 서비스 품질과 기술 지원 역량을 함께 평가해 부여되는 인증이에요.
                 이 자격은 Edwards 본사가 발행하는 공식 뉴스레터에 기록됩니다.
               </p>
+              <p className="mt-4 text-[15px] leading-[1.8] text-[#2a2823]">
+                Edwards 코리아 홈페이지의 대리점 목록에는 스마텍이 <strong>산업용(Industrial Vacuum)·과학용(Scientific Vacuum) 진공을 모두 담당하는 공식 대리점</strong>으로 올라 있습니다.
+              </p>
+              <a
+                href="https://www.edwardsvacuum.com/ko-kr/talk-to-us/contacts-asia/korea"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 inline-flex items-center gap-2 border hair px-4 py-2 mono text-[11px] tracking-wider hover:bg-ink hover:text-paper transition-colors"
+              >
+                Edwards 코리아 대리점 목록에서 확인 →
+              </a>
             </div>
           </div>
 

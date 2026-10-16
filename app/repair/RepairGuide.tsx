@@ -39,7 +39,7 @@ export default function RepairGuide() {
         <div className="mono text-[11px] text-dim mb-3 tracking-widest">OVERHAUL GUIDE</div>
         <h2 className="display text-[32px] leading-tight">수리·오버홀 안내</h2>
         <p className="mt-3 text-[15px] text-dim leading-relaxed max-w-3xl break-keep">
-          스마텍은 Edwards Vacuum 한국 공식 대리점입니다. 수원 본사와 천안 수리센터를 운영하며,
+          스마텍은 산업용·과학용 진공을 모두 담당하는 Edwards 코리아 공식 대리점입니다. 수원 본사와 천안 수리센터를 운영하며,
           필요 시 현장 방문 서비스도 제공합니다. 진공펌프 수리 경력 30년의 전담 엔지니어가
           직접 분해·점검·조립하고, 출고 전 시험 결과를 검사성적서로 발행합니다.
         </p>

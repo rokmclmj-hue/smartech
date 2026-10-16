@@ -25,7 +25,7 @@ const personLd = {
   jobTitle: "대표",
   worksFor: { "@type": "Organization", "@id": "https://www.smartechvacuum.com/#organization", name: "스마텍" },
   url: "https://www.smartechvacuum.com/about/robin",
-  description: "Edwards Vacuum 한국 공식 대리점 스마텍 대표. 2006년 Edwards 코리아 합류(기술영업), 2011년 스마텍 창업.",
+  description: "Edwards 코리아 공식 대리점 스마텍 대표. 2006년 Edwards 코리아 합류(기술영업), 2011년 스마텍 창업.",
 };
 
 const breadcrumbLd = {
@@ -40,7 +40,7 @@ const breadcrumbLd = {
 
 const CAREER = [
   { year: "2006", desc: "Edwards 코리아 합류 — 기술영업으로 시작, 반도체·디스플레이·연구기관 현장에서 진공 공정을 직접 익힘" },
-  { year: "2011", desc: "스마텍 창업 — Edwards Vacuum 공식 대리점으로 출발" },
+  { year: "2011", desc: "스마텍 창업 — Edwards 코리아 공식 대리점으로 출발" },
   { year: "2018", desc: "Edwards Korea Distributor Gold Award 수상 (대표 재임 중)" },
   { year: "현재", desc: "스마텍 대표 · 기술 상담·견적 검토 · 진공펌프 기술 블로그 작성" },
 ];

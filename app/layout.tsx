@@ -10,8 +10,8 @@ import PhoneClickTracker from "@/components/PhoneClickTracker";
 import { SessionProvider } from "./providers";
 
 export const metadata: Metadata = {
-  title: "스마텍 — Edwards Vacuum 한국 공식 대리점 | 진공 토탈 솔루션",
-  description: "Edwards Vacuum 한국 공식 대리점 스마텍. 2006년 Edwards 코리아 합류, 2011년 창업. RV·E2M·GXS·nXDS·STP·nEXT 전 라인업 · 딜러/OEM/소비자 등급별 가격 · 온라인 견적 시스템.",
+  title: "스마텍 — Edwards 코리아 공식 대리점 | 진공펌프 판매·수리",
+  description: "Edwards 코리아 공식 대리점 스마텍(산업용·과학용 진공 모두 담당). 2006년 Edwards 코리아 합류, 2011년 창업. RV·E2M·GXS·nXDS·STP·nEXT 전 라인업 · 딜러/OEM/소비자 등급별 가격 · 온라인 견적 시스템.",
   metadataBase: new URL("https://www.smartechvacuum.com"),
   verification: {
     other: { "naver-site-verification": "42d90b9cf0599e0f8b74c3bf5abc5089c7706274" },
@@ -20,14 +20,14 @@ export const metadata: Metadata = {
     type: "website",
     locale: "ko_KR",
     siteName: "스마텍",
-    title: "스마텍 — Edwards Vacuum 한국 공식 대리점",
-    description: "Edwards Vacuum 한국 공식 대리점. 진공펌프 판매·수리·기술상담 토탈 솔루션.",
-    images: [{ url: "https://www.smartechvacuum.com/og-default.png", width: 1200, height: 630, alt: "스마텍 — Edwards Vacuum 한국 공식 대리점" }],
+    title: "스마텍 — Edwards 코리아 공식 대리점",
+    description: "Edwards 코리아 공식 대리점(산업용·과학용 진공 모두 담당). 진공펌프 판매·수리·기술상담.",
+    images: [{ url: "https://www.smartechvacuum.com/og-default.png", width: 1200, height: 630, alt: "스마텍 — Edwards 코리아 공식 대리점" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "스마텍 — Edwards Vacuum 한국 공식 대리점",
-    description: "Edwards Vacuum 한국 공식 대리점. 진공펌프 판매·수리·기술상담 토탈 솔루션.",
+    title: "스마텍 — Edwards 코리아 공식 대리점",
+    description: "Edwards 코리아 공식 대리점(산업용·과학용 진공 모두 담당). 진공펌프 판매·수리·기술상담.",
     images: ["https://www.smartechvacuum.com/og-default.png"],
   },
 };
@@ -55,7 +55,7 @@ const jsonLd = {
         "https://x.com/smartechvacuum",
         "https://www.google.com/maps?cid=2249450778476640442",
       ],
-      "description": "Edwards Vacuum 한국 공식 대리점. 진공펌프 판매·수리·기술상담 토탈 솔루션. 2011년 창업, 대표 진공산업 경력 2006년부터, 진공펌프 수리 경력 30년의 전담 엔지니어 보유.",
+      "description": "Edwards 코리아 공식 대리점(Industrial Vacuum·Scientific Vacuum 모두 담당). 진공펌프 판매·수리·기술상담. 2011년 창업, 대표 진공산업 경력 2006년부터, 진공펌프 수리 경력 30년의 전담 엔지니어 보유.",
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "신원로55, 테크트리지식산업센터 907호",
