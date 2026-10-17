@@ -38,6 +38,13 @@ const nextConfig: NextConfig = {
       { source: "/qr", destination: "/?utm_source=qr_sticker&utm_medium=sticker&utm_campaign=pump_sticker", permanent: false },
     ];
   },
+  // 2026-10-17 대표님 승인 — 블로그 목록 사진을 화면 크기에 맞게 줄여 보내기(next/image).
+  // 🔴 스마텍 Blob 저장소의 /blog/ 폴더만 허용. 바꾸면 app/blog/page.tsx의 BLOG_IMAGE_PREFIX도 같이 바꿀 것.
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "k1bzaxgjue0tdirt.public.blob.vercel-storage.com", pathname: "/blog/**", search: "" },
+    ],
+  },
   serverExternalPackages: ["bcryptjs", "@prisma/client", "prisma", "xlsx", "sharp"],
   outputFileTracingIncludes: {
     "/api/chat": ["./data/simulation-cases/**"],

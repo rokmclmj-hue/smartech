@@ -3,7 +3,11 @@ export const revalidate = 3600;
 import { prisma } from "@/lib/db";
 import Link from "next/link";
 import type { Metadata } from "next";
+import Image from "next/image";
 import { getBlogImage } from "@/lib/blog-inline";
+
+// next.config.ts images.remotePatterns와 같은 주소. 이 주소의 사진만 줄여서 보내고, 그 밖은 원본 그대로.
+const BLOG_IMAGE_PREFIX = "https://k1bzaxgjue0tdirt.public.blob.vercel-storage.com/blog/";
 
 const PAGE_SIZE = 9;
 const BASE_URL = "https://www.smartechvacuum.com";
@@ -147,7 +151,15 @@ export default async function BlogListPage({ searchParams }: { searchParams: Sea
                 >
                   {/* 대표 사진은 정사각형이라 칸도 정사각형(글자 잘림 방지). 휴대폰은 왼쪽 작은 사진 */}
                   <div className="w-28 shrink-0 self-start md:w-auto md:self-auto aspect-square relative overflow-hidden border-r md:border-r-0 md:border-b hair bg-ink/[0.04]">
-                    {thumb ? (
+                    {thumb?.startsWith(BLOG_IMAGE_PREFIX) && !thumb.includes("?") ? (
+                      <Image
+                        src={thumb}
+                        alt={post.title}
+                        fill
+                        sizes="(max-width: 767px) 112px, (max-width: 1023px) 50vw, 33vw"
+                        className="object-cover group-hover:scale-[1.03] transition-transform duration-500"
+                      />
+                    ) : thumb ? (
                       <img
                         src={thumb}
                         alt={post.title}
