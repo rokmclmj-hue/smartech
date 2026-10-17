@@ -75,6 +75,10 @@ const CATEGORY_GROUPS: { label: string; items: string[] }[] = [
   },
 ];
 
+// 목록도 좌측 메뉴와 같은 순서(펌프 먼저)로 보여준다. 메뉴에 없는 분류는 맨 뒤.
+const CATEGORY_ORDER = new Map(CATEGORY_GROUPS.flatMap((g) => g.items).map((cat, i) => [cat, i]));
+const categoryRank = (cat: string) => CATEGORY_ORDER.get(cat) ?? CATEGORY_ORDER.size;
+
 function formatKRW(v: number) {
   return new Intl.NumberFormat("ko-KR", {
     style: "currency",
@@ -385,7 +389,9 @@ function ProductsContent() {
       if (!map.has(p.category)) map.set(p.category, []);
       map.get(p.category)!.push(p);
     }
-    return Array.from(map.entries()).sort((a, b) => b[1].length - a[1].length);
+    return Array.from(map.entries()).sort(
+      (a, b) => categoryRank(a[0]) - categoryRank(b[0]) || b[1].length - a[1].length,
+    );
   }, [filtered]);
 
   return (
