@@ -47,7 +47,7 @@ export default function ProductCategories() {
                 />
               </div>
 
-              <div className="display text-[18px] leading-[1.2] line-clamp-2">{item.title}</div>
+              <div className="display text-[18px] leading-[1.2]">{item.title}</div>
               <div className="mono text-[11px] opacity-60 mt-1">{(item as any).label ?? item.category}</div>
             </div>
 

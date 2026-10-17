@@ -1,5 +1,12 @@
 # Astra 작업 기록
 
+## 2026-10-17 — (클로드) 홈페이지 UX·UI 점검 + 오류 3건 수정
+
+- 라이브 11쪽 × 휴대폰·PC 점검 결과: `docs/audits/2026-10-17-ux-ui-check.md`.
+- 대표님 "ok"로 수정: ① 홈 "21 / 20 INDUSTRIES" → 산업 개수 자동 ② 휴대폰 제품 상세 하단 로그인·견적 담기 버튼이 채팅 버튼에 가려짐 → 하단 줄 오른쪽 여백(pr-24), FloatingChat.tsx 무수정 ③ 한글 단어 중간 끊김 → `app/korean-text.css`(body keep-all + break-word, .admin-scope·.quote-page 제외, globals.css 무수정), "30년 경력 수리 전문" 띄어쓰기. keep-all로 홈 주요 제품 제목이 3줄이 되며 "(E2M…"로 잘려 `ProductCategories.tsx` 제목 line-clamp 제거.
+- 검증: tsc·next build 통과, 로컬 12쪽 × 344·360·393·1440px 가로 넘침 0, 카운터 "21 / 21", 344px 제품 상세 버튼·채팅 버튼 분리, 제품 카드 제목 전체 표시 사진 확인. 관리자·견적서 화면은 예전 줄바꿈 유지(화면 확인은 안 함).
+- 남은 개선 여지 4~8번(휴대폰 홈 길이·카탈로그 순서·제품 상세 내용·작은 글자·블로그 목록 사진)은 대표님 결정 대기.
+
 ## 2026-09-30 — (클로드) 로컬 코드리뷰 606387e..56a9352 (5커밋)
 
 - 코드 커밋 9a0df59(GA4 문의 이벤트) 검토. 발견 1건: FloatingChat이 `app/providers.tsx`에서 전역 렌더링돼 관리자 화면에도 떠 있음 → 직원 챗봇 시험이 chat_start로 잡힘. 관리자 제외를 `trackEvent` 한 곳으로 옮겨 4개 이벤트 모두 적용(56a9352, 보호 파일 무수정). tsc·next build 통과, push·원격 일치·Vercel Production Ready 확인.

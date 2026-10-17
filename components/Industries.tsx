@@ -98,7 +98,7 @@ export default function Industries() {
 
         <div className="mt-10 text-[12.5px] dim mono flex justify-between">
           <span></span>
-          <span>{visible.length} / 20 INDUSTRIES</span>
+          <span>{visible.length} / {INDUSTRIES.length} INDUSTRIES</span>
         </div>
       </div>
     </section>
