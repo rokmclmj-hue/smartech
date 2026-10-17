@@ -19,6 +19,7 @@ import PumpSelector from "@/components/PumpSelector";
 import HeroVideoIntro from "@/components/HeroVideoIntro";
 import HeroClock from "@/components/HeroClock";
 import RecentBlogPosts from "@/components/RecentBlogPosts";
+import { INDUSTRIES } from "@/lib/industries";
 
 function hiEd(text: string, white = false) {
   return text.split(/(\bEdwards\b|\bSmartech\b)/).map((p, i) => {
@@ -51,7 +52,7 @@ export default function Home() {
               <RotatingHero />
               <p className="mt-0 md:mt-8 max-w-xl text-[15px] leading-[1.7] text-[#2a2823]">
                 스마텍은 <span className="text-edred font-semibold">Edwards</span> 코리아 공식 대리점으로서 산업용·과학용 진공을 모두 담당하며,
-                21대 핵심 진공 산업 전반에 걸쳐 고객사별 맞춤형 하이엔드 진공 솔루션을 제공합니다.
+                {INDUSTRIES.length}대 핵심 진공 산업 전반에 걸쳐 고객사별 맞춤형 하이엔드 진공 솔루션을 제공합니다.
               </p>
               <HeroCtaCards />
               <div className="mt-10 hidden md:flex flex-wrap items-center gap-x-6 gap-y-2 text-[12px] mono text-black hero-rise" style={{ ["--rd" as never]: ".9s" }}>
