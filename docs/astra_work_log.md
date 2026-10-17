@@ -791,3 +791,11 @@
 - 산업 페이지 설명문 = 한 줄 소개 + 적용 공정 3 + 추천 펌프 3 + 공식 대리점(OG·트위터 포함), 부품 페이지 설명문에 정품·공식 대리점·수원/천안 수리 상담 문장 추가. 라이브 확인, 산업 21페이지 IndexNow 200.
 - 남은 것: 블로그 dry-pump-dp-temp-high-alarm 설명문 40자(DB 데이터, 미수정), 외부 링크 부족(제3자 언급 확대 과제).
 - 이어서(대표님 승인): 블로그 id 2(dry-pump-dp-temp-high-alarm) metaDesc를 DB에서 직접 수정 — 본문 첫 문장 잘림(40자) → 원인 2가지·5분 점검·수리/교체 기준 요약(106자). 라이브 반영·IndexNow 200 확인. 코드 변경 없음.
+
+### 10/17 — (클로드) 로컬 코드리뷰 45커밋 (684a743..47f2a8d), reviewed=master
+
+- 범위: origin/reviewed..origin/master 45커밋(코드 변경 22파일 + docs). 수리 접수 화면(명판 사진 버튼·최근 사례·출고 시험 카드), 보증 분류·견적 PDF, 수리·오버홀 안내, 반도체 산업 페이지·번호 재배치, 회사 표기·구조화 데이터·llms, 설명문, 수리사례 2건 데이터·사진·PDF(익명 확인).
+- 확인: tsc·next build 통과, test:repair-quote 전부 통과, AI 인식 pumpFamily 값(scroll/rotary_vane/booster/dry/other)과 보증 분류 일치, eslint 오류·경고는 모두 이번 변경과 무관한 기존 줄.
+- 수정(47f2a8d): 홈 "21대" 하드코딩 → INDUSTRIES.length, EXS를 드라이 6개월로 분류. 라이브 확인.
+- 심각한 버그 없음. 참고만: AI 인식 결과가 사용자가 직접 입력한 모델명을 덮어쓰는 것은 예전부터의 동작.
+- reviewed 브랜치를 master(47f2a8d)로 전진.
