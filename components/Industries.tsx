@@ -4,9 +4,12 @@ import Link from "next/link";
 import { INDUSTRIES } from "@/lib/industries";
 
 const ALL_TAGS = Array.from(new Set(INDUSTRIES.flatMap((i) => i.tag)));
+// 휴대폰에서는 처음에 이만큼만 보이고 "더 보기"로 펼친다(PC는 항상 전체)
+const MOBILE_INITIAL = 6;
 
 export default function Industries() {
   const [activeTag, setActiveTag] = useState<string | null>(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const visible = activeTag
     ? INDUSTRIES.filter((i) => i.tag.includes(activeTag))
@@ -52,11 +55,11 @@ export default function Industries() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 border-t border-l hair">
-          {visible.map((it) => (
+          {visible.map((it, idx) => (
             <Link
               key={it.n}
               href={`/industries/${it.slug}`}
-              className="ind-card relative p-5 border-r border-b hair bg-paper hover:bg-ink hover:text-paper transition-colors group"
+              className={`ind-card relative p-5 border-r border-b hair bg-paper hover:bg-ink hover:text-paper transition-colors group ${!mobileOpen && idx >= MOBILE_INITIAL ? "max-md:hidden" : ""}`}
             >
               <div className="flex items-start justify-between">
                 <div className="ind-num mono text-[11px] text-[#6A6660] group-hover:text-paper/70">
@@ -95,6 +98,20 @@ export default function Industries() {
             </Link>
           ))}
         </div>
+
+        {visible.length > MOBILE_INITIAL && (
+          <div className="md:hidden mt-8">
+            <button
+              onClick={() => {
+                if (mobileOpen) document.getElementById("industries")?.scrollIntoView();
+                setMobileOpen(!mobileOpen);
+              }}
+              className="w-full border hair px-6 py-3 text-sm hover:bg-ink hover:text-paper transition-colors"
+            >
+              {mobileOpen ? "접기 ↑" : `산업 ${visible.length - MOBILE_INITIAL}개 더 보기 ↓`}
+            </button>
+          </div>
+        )}
 
         <div className="mt-10 text-[12.5px] dim mono flex justify-between">
           <span></span>

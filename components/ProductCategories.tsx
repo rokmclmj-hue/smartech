@@ -6,9 +6,12 @@ import { CATALOG_MAP } from "@/lib/catalogs";
 import { PRODUCT_ITEMS as ITEMS } from "@/lib/product-categories";
 
 const INITIAL = 16;
+// 휴대폰에서는 처음에 이만큼만 보이고 "더 보기"로 펼친다(PC는 기존 접기·펼치기 그대로)
+const MOBILE_INITIAL = 6;
 
 export default function ProductCategories() {
   const [expanded, setExpanded] = useState(true);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [panelItem, setPanelItem] = useState<PanelItem | null>(null);
   const visible = expanded ? ITEMS : ITEMS.slice(0, INITIAL);
 
@@ -25,7 +28,7 @@ export default function ProductCategories() {
         {visible.map((item, i) => (
           <div
             key={item.category}
-            className="group border hair bg-white hover:bg-ink hover:text-paper transition-colors overflow-hidden flex flex-col"
+            className={`group border hair bg-white hover:bg-ink hover:text-paper transition-colors overflow-hidden flex flex-col ${!mobileOpen && i >= MOBILE_INITIAL ? "max-md:hidden" : ""}`}
           >
             {/* 상단 — 클릭 시 패널 오픈 */}
             <div
@@ -64,8 +67,20 @@ export default function ProductCategories() {
         ))}
       </div>
 
+      <div className="md:hidden mt-8">
+        <button
+          onClick={() => {
+            if (mobileOpen) document.getElementById("products")?.scrollIntoView();
+            setMobileOpen(!mobileOpen);
+          }}
+          className="w-full border hair px-6 py-3 text-sm hover:bg-ink hover:text-paper transition-colors"
+        >
+          {mobileOpen ? "접기 ↑" : `제품 ${ITEMS.length - MOBILE_INITIAL}개 더 보기 ↓`}
+        </button>
+      </div>
+
       {!expanded && (
-        <div className="mt-8 flex items-center gap-4">
+        <div className="max-md:hidden mt-8 flex items-center gap-4">
           <button
             onClick={() => setExpanded(true)}
             className="inline-flex items-center gap-2 border hair px-6 py-3 text-sm hover:bg-ink hover:text-paper transition-colors"
@@ -76,7 +91,7 @@ export default function ProductCategories() {
       )}
 
       {expanded && (
-        <div className="mt-8 flex items-center gap-4">
+        <div className="max-md:hidden mt-8 flex items-center gap-4">
           <button
             onClick={() => setExpanded(false)}
             className="inline-flex items-center gap-2 border hair px-6 py-3 text-sm hover:bg-ink hover:text-paper transition-colors"
