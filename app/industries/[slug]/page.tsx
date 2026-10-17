@@ -20,13 +20,15 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const industry = getIndustry(slug);
   if (!industry) return { title: "스마텍" };
+  // 짧은 한 줄 소개만으론 검색엔진이 "설명 부족"으로 판단 → 적용 공정·추천 펌프를 붙임 (빙 웹마스터 권장, 2026-10-17)
+  const description = `${industry.tagline} 적용 공정: ${industry.processes.slice(0, 3).join(" · ")}. 추천 Edwards 펌프 ${industry.recommendedPumps.slice(0, 3).join(" · ")} — Edwards 코리아 공식 대리점 스마텍.`;
   return {
     title: `${industry.title} 진공 솔루션 — 스마텍 | Edwards Vacuum`,
-    description: industry.tagline,
+    description,
     alternates: { canonical: `https://www.smartechvacuum.com/industries/${slug}` },
     openGraph: {
       title: `${industry.title} 진공 솔루션 — 스마텍`,
-      description: industry.tagline,
+      description,
       url: `https://www.smartechvacuum.com/industries/${slug}`,
       type: "website",
       siteName: "스마텍",
@@ -36,7 +38,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     twitter: {
       card: "summary_large_image",
       title: `${industry.title} 진공 솔루션 — 스마텍`,
-      description: industry.tagline,
+      description,
       images: [industry.image],
     },
   };

@@ -50,7 +50,7 @@ export async function generateMetadata({ params }: { params: Promise<{ partNo: s
   if (product) {
     return {
       title: `${product.description} (${partNo}) — 스마텍 | Edwards Vacuum`,
-      description: `Edwards ${product.description} 파트번호 ${partNo}. 스마텍에서 정품 공급·견적·문의.`,
+      description: `Edwards ${product.description} 정품 부품(파트번호 ${partNo}). Edwards 코리아 공식 대리점 스마텍에서 정품 공급·견적, 수원 본사·천안 수리센터에서 수리 상담.`,
       alternates: { canonical: `https://www.smartechvacuum.com/products/${encodeURIComponent(partNo)}` },
     };
   }
