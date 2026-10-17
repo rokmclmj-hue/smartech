@@ -175,7 +175,8 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
       </div>
 
       {/* 모바일 하단 고정 바 — 가격 + 견적 담기 버튼 */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-paper border-t border-gray-200 shadow-lg px-4 py-3">
+      {/* 오른쪽 여백(pr-24): 오른쪽 아래 채팅 버튼에 견적 담기·로그인 버튼이 가려지지 않게 */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-paper border-t border-gray-200 shadow-lg pl-4 pr-24 py-3">
         <div className="flex items-center justify-between gap-3">
           {/* 가격 표시 — 항상 가격 노출, 등급명 없음 */}
           <div className="flex-1 min-w-0">

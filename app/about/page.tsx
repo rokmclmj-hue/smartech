@@ -45,6 +45,10 @@ const orgLd = {
   url: "https://www.smartechvacuum.com",
   foundingDate: "2011",
   award: "Edwards Vacuum Korea Distributor Gold Award 2018",
+  hasCredential: [
+    { "@type": "EducationalOccupationalCredential", name: "ISO 9001:2015 품질경영시스템", credentialCategory: "certification", identifier: "JK-19604", validUntil: "2028-09-18", recognizedBy: { "@type": "Organization", name: "아이아이씨인증원(IIC)" } },
+    { "@type": "EducationalOccupationalCredential", name: "ISO 14001:2015 환경경영시스템", credentialCategory: "certification", identifier: "JEK-23613", validUntil: "2028-09-18", recognizedBy: { "@type": "Organization", name: "아이아이씨인증원(IIC)" } },
+  ],
   description:
     "Edwards 코리아 공식 대리점(산업용·과학용 진공 모두 담당). 2006년 Edwards 코리아 합류, 2011년 창업. 진공펌프 전 라인업 공급·수리·기술지원.",
   telephone: "031-204-7170",
@@ -91,6 +95,31 @@ const TIMELINE = [
     year: "2026",
     title: "디지털 플랫폼 오픈",
     desc: "온라인 견적·수리접수·AI 상담 시스템 론칭. 고객이 24시간 스스로 접수하고 진행 현황을 확인하는 플랫폼.",
+  },
+];
+
+// 인증·특허 — 원본 대조(2026-10-17). ISO 범위는 "개발·제조"라 수리 인증으로 쓰지 않는다.
+// 특허증 이미지는 개인정보(주민번호 앞자리·주소)가 있어 글자로만 표기.
+const CREDENTIALS = [
+  {
+    kind: "ISO 9001:2015",
+    title: "품질경영시스템 인증",
+    detail: "인증번호 JK-19604 · 아이아이씨인증원(IIC) · 유효기간 2028년 9월 18일",
+  },
+  {
+    kind: "ISO 14001:2015",
+    title: "환경경영시스템 인증",
+    detail: "인증번호 JEK-23613 · 아이아이씨인증원(IIC) · 유효기간 2028년 9월 18일",
+  },
+  {
+    kind: "특허 제10-1998403호",
+    title: "소음저감 및 액드레인 기능을 구비한 진공챔버용 사일런스 장치",
+    detail: "2019년 7월 등록 · 특허청",
+  },
+  {
+    kind: "특허 제10-2312460호",
+    title: "반도체 진공펌프용 소음장치",
+    detail: "2021년 10월 등록 · 특허청 · 특허권자 (주)스마텍",
   },
 ];
 
@@ -141,6 +170,10 @@ const FAQ_ITEMS = [
   {
     q: "수리 후 품질 보증은 어떻게 됩니까?",
     a: "Edwards 정품 부품으로만 작업하며, 오버홀 완료 후 검사성적서를 발행합니다. 보증 기간은 드라이펌프 6개월, 오일 로터리 펌프 3개월이며, 그 밖의 펌프는 모델과 작업 내용에 따라 접수 시 안내드립니다.",
+  },
+  {
+    q: "스마텍은 ISO 인증이나 특허를 보유하고 있나요?",
+    a: "ISO 9001(품질경영)·ISO 14001(환경경영) 인증을 보유하고 있으며, 인증 범위는 반도체용 펌프 및 펌프 액세서리의 개발·제조입니다(아이아이씨인증원, 유효기간 2028년 9월). 특허는 진공챔버용 사일런스 장치(제10-1998403호)와 반도체 진공펌프용 소음장치(제10-2312460호) 2건이 등록되어 있습니다.",
   },
   {
     q: "온라인으로 수리 접수 및 견적이 가능한가요?",
@@ -380,10 +413,34 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ══════════════ IN THE NEWS ══════════════ */}
-      <section className="border-b hair py-16 md:py-24">
+      {/* ══════════════ CERTIFICATIONS ══════════════ */}
+      <section id="certifications" className="border-b hair py-16 md:py-24">
         <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-          <div className="mono text-[11px] dim tracking-widest mb-3">— 04 · IN THE NEWS</div>
+          <div className="mono text-[11px] dim tracking-widest mb-3">— 04 · CERTIFICATIONS</div>
+          <h2 className="display text-[clamp(28px,3.5vw,48px)] leading-[1.1] mb-10">
+            인증 · <span className="italic text-edred">특허</span>
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-0 border-t border-l hair">
+            {CREDENTIALS.map((c) => (
+              <div key={c.kind} className="p-6 md:p-8 border-r border-b hair flex flex-col gap-2">
+                <div className="mono text-[11px] text-edred tracking-wider">{c.kind}</div>
+                <div className="text-[15px] font-semibold leading-snug break-keep">{c.title}</div>
+                <div className="text-[13px] text-dim leading-relaxed">{c.detail}</div>
+              </div>
+            ))}
+          </div>
+
+          <p className="mt-6 text-[12px] text-dim">
+            ISO 인증 범위: 반도체용 펌프 및 펌프 액세서리의 개발 및 제조. 특허 등록 사항은 특허청 특허정보검색서비스(KIPRIS)에서 번호로 확인할 수 있습니다.
+          </p>
+        </div>
+      </section>
+
+      {/* ══════════════ IN THE NEWS ══════════════ */}
+      <section className="border-b hair py-16 md:py-24 bg-paper">
+        <div className="max-w-[1400px] mx-auto px-4 md:px-6">
+          <div className="mono text-[11px] dim tracking-widest mb-3">— 05 · IN THE NEWS</div>
           <h2 className="display text-[clamp(28px,3.5vw,48px)] leading-[1.1] mb-10">
             언론 · 업계 <span className="italic">보도</span>
           </h2>
@@ -442,9 +499,9 @@ export default function AboutPage() {
       </section>
 
       {/* ══════════════ FAQ ══════════════ */}
-      <section className="border-b hair py-16 md:py-24 bg-paper">
+      <section className="border-b hair py-16 md:py-24">
         <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-          <div className="mono text-[11px] dim tracking-widest mb-3">— 05 · FAQ</div>
+          <div className="mono text-[11px] dim tracking-widest mb-3">— 06 · FAQ</div>
           <h2 className="display text-[clamp(28px,3.5vw,48px)] leading-[1.1] mb-10">
             자주 묻는 <span className="italic text-edred">질문</span>
           </h2>

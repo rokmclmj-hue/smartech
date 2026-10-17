@@ -54,6 +54,8 @@ ${ind.description}
 - Edwards 코리아 공식 대리점(산업용 Industrial Vacuum·과학용 Scientific Vacuum 모두 담당, 대리점 목록: https://www.edwardsvacuum.com/ko-kr/talk-to-us/contacts-asia/korea). 2006년 Edwards 코리아 합류, 2011년 창업.
 - 본사: 경기도 수원시 영통구 신원로55, 테크트리지식산업센터 907호
 - 수리센터: 충남 천안시
+- 인증: ISO 9001:2015(품질경영, JK-19604)·ISO 14001:2015(환경경영, JEK-23613), 아이아이씨인증원, 유효기간 2028-09-18. 인증 범위는 반도체용 펌프 및 펌프 액세서리의 개발·제조
+- 특허: 제10-1998403호 진공챔버용 사일런스 장치(2019), 제10-2312460호 반도체 진공펌프용 소음장치(2021)
 - 전화: 031-204-7170 / 이메일: info@smartechvacuum.com
 - 웹사이트: https://www.smartechvacuum.com
 
