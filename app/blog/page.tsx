@@ -3,6 +3,7 @@ export const revalidate = 3600;
 import { prisma } from "@/lib/db";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { getBlogImage } from "@/lib/blog-inline";
 
 const PAGE_SIZE = 9;
 const BASE_URL = "https://www.smartechvacuum.com";
@@ -70,6 +71,7 @@ export default async function BlogListPage({ searchParams }: { searchParams: Sea
         metaDesc: true,
         category: true,
         tags: true,
+        content: true, // 목록 사진(본문 첫 사진) 추출용 — 화면에는 내보내지 않음
         publishedAt: true,
         createdAt: true,
       },
@@ -136,23 +138,41 @@ export default async function BlogListPage({ searchParams }: { searchParams: Sea
             {posts.map((post) => {
               const colorClass = CATEGORY_COLORS[post.category] ?? CATEGORY_COLORS["일반"];
               const date = post.publishedAt ?? post.createdAt;
+              const thumb = getBlogImage(post.content);
               return (
                 <Link
                   key={post.id}
                   href={`/blog/${post.slug ?? post.id}`}
-                  className="group flex flex-col border hair bg-paper hover:border-ink/30 transition-colors"
+                  className="group flex flex-row md:flex-col border hair bg-paper hover:border-ink/30 transition-colors"
                 >
-                  <div className={`px-5 py-2.5 border-b ${colorClass}`}>
+                  {/* 대표 사진은 정사각형이라 칸도 정사각형(글자 잘림 방지). 휴대폰은 왼쪽 작은 사진 */}
+                  <div className="w-28 shrink-0 self-start md:w-auto md:self-auto aspect-square relative overflow-hidden border-r md:border-r-0 md:border-b hair bg-ink/[0.04]">
+                    {thumb ? (
+                      <img
+                        src={thumb}
+                        alt={post.title}
+                        loading="lazy"
+                        decoding="async"
+                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+                      />
+                    ) : (
+                      <span className="absolute inset-0 flex items-center justify-center mono text-[11px] tracking-[0.2em] dim">
+                        SMARTECH
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0 flex flex-col">
+                  <div className={`px-3 py-1.5 md:px-5 md:py-2.5 border-b ${colorClass}`}>
                     <span className="mono text-[9px] tracking-[0.1em] font-medium uppercase">
                       {post.category}
                     </span>
                   </div>
-                  <div className="flex-1 px-5 py-5 flex flex-col gap-3">
-                    <h2 className="text-[15px] font-semibold leading-snug tracking-tight group-hover:text-edred transition-colors line-clamp-3">
+                  <div className="flex-1 px-3 py-3 md:px-5 md:py-5 flex flex-col gap-2 md:gap-3">
+                    <h2 className="text-[14px] md:text-[15px] font-semibold leading-snug tracking-tight group-hover:text-edred transition-colors line-clamp-3">
                       {post.title}
                     </h2>
                     {post.metaDesc && (
-                      <p className="text-[13px] dim leading-relaxed line-clamp-3">
+                      <p className="hidden md:block text-[13px] dim leading-relaxed line-clamp-3">
                         {post.metaDesc}
                       </p>
                     )}
@@ -162,6 +182,7 @@ export default async function BlogListPage({ searchParams }: { searchParams: Sea
                         읽기 →
                       </span>
                     </div>
+                  </div>
                   </div>
                 </Link>
               );
