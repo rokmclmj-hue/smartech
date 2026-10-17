@@ -56,7 +56,12 @@ const jsonLd = {
         "https://x.com/smartechvacuum",
         "https://www.google.com/maps?cid=2249450778476640442",
       ],
-      "description": "Edwards 코리아 공식 대리점(Industrial Vacuum·Scientific Vacuum 모두 담당). 진공펌프 판매·수리·기술상담. 2011년 창업, 대표 진공산업 경력 2006년부터, 진공펌프 수리 경력 30년의 전담 엔지니어 보유.",
+      "description": "Edwards 코리아 공식 대리점(Industrial Vacuum·Scientific Vacuum 모두 담당). 진공펌프 판매·수리·기술상담. 2011년 창업, 대표 진공산업 경력 2006년부터, 진공펌프 수리 경력 30년의 전담 엔지니어 보유. ISO 9001·ISO 14001 인증(반도체용 펌프 및 액세서리 개발·제조), 진공펌프용 소음장치 특허 2건(제10-1998403호·제10-2312460호) 보유.",
+      // ISO 인증 — 원본 대조(2026-10-17), 범위는 개발·제조(수리 아님)
+      "hasCredential": [
+        { "@type": "EducationalOccupationalCredential", "name": "ISO 9001:2015 품질경영시스템", "credentialCategory": "certification", "identifier": "JK-19604", "validUntil": "2028-09-18", "recognizedBy": { "@type": "Organization", "name": "아이아이씨인증원(IIC)" } },
+        { "@type": "EducationalOccupationalCredential", "name": "ISO 14001:2015 환경경영시스템", "credentialCategory": "certification", "identifier": "JEK-23613", "validUntil": "2028-09-18", "recognizedBy": { "@type": "Organization", "name": "아이아이씨인증원(IIC)" } },
+      ],
       "areaServed": { "@type": "Country", "name": "대한민국" },
       // 전문 분야·제공 서비스 — AI가 "판매·수리 전문 업체"로 분류하도록 (2026-10-16, 실제 취급·수리 실적 기준)
       "knowsAbout": [
