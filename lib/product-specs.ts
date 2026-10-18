@@ -239,7 +239,7 @@ export function findModelForProduct(category: string, description: string): Mode
   // 🔴 부품("Spares Kit Blade RV12", "Rotor E2M18")·스테이션("nEXPT2/nEXT240D-ISO/RV12")에
   // 펌프 사양이 붙지 않도록 품명이 모델명으로 "시작"하는 것만, 그리고 Kit/Spare 품명은 제외 (2026-10-18 수정)
   if (/\b(kit|spares?)\b/i.test(description)) return null;
-  // "iXL250Q 2600"처럼 부스터 크기(1750·2600·4200)가 따로 붙은 품명은 조합일 수 있어 제외(대표님 확인 전)
+  // "iXL250Q 2600"처럼 부스터 크기(1750·2600·4200)가 따로 붙은 품명은 부스터 조합이라 제외(대표님 확인 10/18: 사양 다름)
   if (/\s(1750|2600|4200)\b/.test(description)) return null;
   let best: ModelLookup | null = null;
   data.models.forEach((model, index) => {

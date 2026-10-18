@@ -17,85 +17,87 @@ export default async function ModelDetail({ category, model, index }: ModelLooku
   // 파트번호 화면의 사양표 연결과 같은 기준(findModelForProduct)으로 골라 두 화면이 같은 짝을 가리키게 한다
   const relatedSkus = candidates.filter((p) => findModelForProduct(category, p.description)?.model === model);
 
+
   return (
     <div className="max-w-4xl mx-auto px-4 md:px-6 py-8 md:py-12">
-      <Link href="/products" className="text-sm text-gray-500 hover:text-blue-600 mb-6 inline-block">
-        ← 제품 목록
+      <Link href="/products" className="mono text-[12px] text-dim hover:text-edred mb-6 inline-block">
+        ← 제품 카탈로그
       </Link>
 
-      <div className="bg-white border border-gray-200 rounded-2xl p-5 md:p-8 shadow-sm">
-        <p className="text-blue-600 font-mono text-sm mb-1">{category}</p>
-        <h1 className="text-xl md:text-2xl font-bold text-slate-800 mb-6 leading-snug">
-          Edwards {model}
-        </h1>
+      {/* 다른 화면과 같은 모양 — 각진 칸·가는 선·빨강/검정 */}
+      <div className="mono text-[11px] text-dim tracking-wider">EDWARDS · {category}</div>
+      <h1 className="display text-[28px] md:text-[36px] leading-[1.15] mt-3">Edwards {model}</h1>
 
-        <div className="border-t pt-6">
-          <h2 className="text-lg font-semibold mb-4">사양 (Edwards 공식 카탈로그 기준)</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm border-collapse">
-              <tbody>
-                {specRows.map((row) => (
-                  <tr key={row.label} className="border-b border-gray-100">
-                    <td className="py-2 pr-4 text-gray-500 whitespace-nowrap">{row.label}</td>
-                    <td className="py-2 font-medium text-slate-800">
-                      {row.value}{row.unit ? ` ${row.unit}` : ""}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {relatedSkus.length > 0 && (
-          <div className="mt-8 border-t pt-6">
-            <h2 className="text-lg font-semibold mb-3">판매 옵션 (전압·주파수·지역별)</h2>
-            <ul className="space-y-2">
-              {relatedSkus.map((p) => (
-                <li key={p.partNo}>
-                  <Link
-                    href={`/products/${encodeURIComponent(p.partNo)}`}
-                    className="block text-sm px-4 py-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
-                  >
-                    <span className="text-blue-600 font-mono mr-2">{p.partNo}</span>
-                    {p.description}
-                  </Link>
-                </li>
+      <section className="mt-10">
+        <div className="mono text-[11px] text-dim tracking-widest mb-2">SPECIFICATION</div>
+        <h2 className="text-[20px] font-bold tracking-tight">사양 <span className="text-[14px] font-normal text-dim">(Edwards 공식 카탈로그 기준)</span></h2>
+        <div className="mt-4 border hair bg-white overflow-x-auto">
+          <table className="w-full text-[14px] border-collapse">
+            <tbody>
+              {specRows.map((row) => (
+                <tr key={row.label} className="border-b hair last:border-b-0">
+                  <td className="px-5 py-3 text-dim whitespace-nowrap w-[45%]">{row.label}</td>
+                  <td className="px-5 py-3 font-medium">
+                    {row.value}{row.unit ? ` ${row.unit}` : ""}
+                  </td>
+                </tr>
               ))}
-            </ul>
-          </div>
-        )}
+            </tbody>
+          </table>
+        </div>
+      </section>
 
-        {siblings.length > 0 && (
-          <div className="mt-8 border-t pt-6">
-            <h2 className="text-lg font-semibold mb-3">같은 라인업의 다른 모델</h2>
-            <div className="flex flex-wrap gap-2">
-              {siblings.map((s) => (
+      {relatedSkus.length > 0 && (
+        <section className="mt-10">
+          <div className="mono text-[11px] text-dim tracking-widest mb-2">PART NUMBERS</div>
+          <h2 className="text-[20px] font-bold tracking-tight">판매 옵션 <span className="text-[14px] font-normal text-dim">(전압·주파수·지역별)</span></h2>
+          <ul className="mt-4 border hair bg-white divide-y divide-line">
+            {relatedSkus.map((p) => (
+              <li key={p.partNo}>
                 <Link
-                  key={s.slug}
-                  href={`/products/${s.slug}`}
-                  className="text-sm px-4 py-2 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
+                  href={`/products/${encodeURIComponent(p.partNo)}`}
+                  className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-5 px-5 py-3 text-[14px] hover:bg-ink hover:text-paper transition-colors group"
                 >
-                  {s.model}
+                  <span className="mono text-[13px] sm:w-36 shrink-0 text-edred group-hover:text-paper">{p.partNo}</span>
+                  <span>{p.description}</span>
                 </Link>
-              ))}
-            </div>
-          </div>
-        )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
-        <div className="mt-8 border-t pt-6">
-          <h2 className="text-lg font-semibold mb-3">가격·재고 문의</h2>
-          <p className="text-sm text-gray-500 mb-4">
-            정확한 견적은 사용 전압·주파수·지역 사양에 따라 달라집니다. 전화 또는 견적 문의로 확인해 주세요.
-          </p>
-          <a
-            href="tel:031-204-7170"
-            className="inline-flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold"
-          >
-            📞 031-204-7170
-          </a>
-        </div>
-      </div>
+      {siblings.length > 0 && (
+        <section className="mt-10">
+          <div className="mono text-[11px] text-dim tracking-widest mb-2">LINEUP</div>
+          <h2 className="text-[20px] font-bold tracking-tight">같은 라인업의 다른 모델</h2>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {siblings.map((s) => (
+              <Link
+                key={s.slug}
+                href={`/products/${s.slug}`}
+                className="border hair bg-white px-4 py-2 text-[14px] hover:bg-ink hover:text-paper transition-colors"
+              >
+                {s.model}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <section className="mt-10 border hair bg-white p-5 md:p-8">
+        <div className="mono text-[11px] text-dim tracking-widest mb-2">CONTACT</div>
+        <h2 className="text-[20px] font-bold tracking-tight">가격·재고 문의</h2>
+        <p className="mt-2 text-[14px] text-dim break-keep">
+          정확한 견적은 사용 전압·주파수·지역 사양에 따라 달라집니다. 전화 또는 견적 문의로 확인해 주세요.
+        </p>
+        <a
+          href="tel:031-204-7170"
+          className="mt-5 inline-flex items-center gap-2 bg-edred text-paper px-5 py-3 text-[14px] font-semibold hover:bg-edred3 transition-colors"
+        >
+          031-204-7170 전화하기
+        </a>
+      </section>
     </div>
   );
 }

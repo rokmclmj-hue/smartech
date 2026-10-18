@@ -38,10 +38,10 @@ export default function AddToQuoteButton({ product, compact = false }: Props) {
     return (
       <button
         onClick={addToCart}
-        className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors min-h-[44px] whitespace-nowrap ${
+        className={`px-5 py-2.5 text-sm font-semibold transition-colors min-h-[44px] whitespace-nowrap ${
           added
-            ? "bg-green-600 text-white"
-            : "bg-blue-600 hover:bg-blue-500 text-white"
+            ? "bg-ink text-paper"
+            : "bg-edred hover:bg-edred3 text-paper"
         }`}
       >
         {added ? "✓ 담김" : "견적 담기"}
@@ -56,12 +56,12 @@ export default function AddToQuoteButton({ product, compact = false }: Props) {
         min={1}
         value={qty}
         onChange={(e) => setQty(Math.max(1, parseInt(e.target.value) || 1))}
-        className="w-20 border border-gray-300 rounded-lg px-3 py-2 text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]"
+        className="w-20 border hair bg-white px-3 py-2 text-sm text-center focus:outline-none focus:border-ink min-h-[44px]"
         aria-label="수량"
       />
       <button
         onClick={addToCart}
-        className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg text-sm font-semibold transition-colors min-h-[44px]"
+        className="bg-edred hover:bg-edred3 text-paper px-6 py-2 text-sm font-semibold transition-colors min-h-[44px]"
       >
         {added ? "✓ 견적 카트에 추가됨" : "견적 카트에 추가"}
       </button>
