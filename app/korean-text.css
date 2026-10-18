@@ -1,10 +1,11 @@
 /* 한글 단어가 줄 끝에서 중간에 잘리지 않게 한다("시뮬레/이션" 대신 단어째 다음 줄로).
    - keep-all: 한글도 띄어쓰기 단위로 줄을 바꾼다.
-   - break-word: 한 줄보다 긴 단어(긴 주소 등)는 넘치지 않게 그때만 자른다.
+   - anywhere: 한 줄보다 긴 단어(긴 주소·띄어쓰기 없는 긴 한글)는 그때만 자른다. break-word와 달리
+     좁은 표·flex 칸의 최소 폭도 줄여 주어 칸이 화면 밖으로 넓어지지 않는다(2026-10-18 코드리뷰).
    - 관리자 화면(.admin-scope)·견적서 문서(.quote-page)는 좁은 표가 많아 예전 방식대로 둔다. */
 body {
   word-break: keep-all;
-  overflow-wrap: break-word;
+  overflow-wrap: anywhere;
 }
 
 .admin-scope,

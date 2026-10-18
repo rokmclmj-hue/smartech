@@ -127,7 +127,7 @@ export default function HeroChat() {
         <button
           onClick={() => send()}
           disabled={loading || !input.trim()}
-          className="bg-ink text-paper px-5 text-[13px] disabled:opacity-40 hover:bg-edred transition-colors"
+          className="shrink-0 whitespace-nowrap bg-ink text-paper px-5 text-[13px] disabled:opacity-40 hover:bg-edred transition-colors"
         >
           전송 →
         </button>

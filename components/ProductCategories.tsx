@@ -13,7 +13,7 @@ export default function ProductCategories() {
   const [expanded, setExpanded] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [panelItem, setPanelItem] = useState<PanelItem | null>(null);
-  const visible = expanded ? ITEMS : ITEMS.slice(0, INITIAL);
+  // 카드는 항상 전부 그리고, 접힘은 화면 폭별로 CSS로만 숨긴다(PC 접기·휴대폰 더 보기가 서로 영향 없게)
 
   return (
     <>
@@ -25,10 +25,10 @@ export default function ProductCategories() {
 
       <div>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-        {visible.map((item, i) => (
+        {ITEMS.map((item, i) => (
           <div
             key={item.category}
-            className={`group border hair bg-white hover:bg-ink hover:text-paper transition-colors overflow-hidden flex flex-col ${!mobileOpen && i >= MOBILE_INITIAL ? "max-md:hidden" : ""}`}
+            className={`group border hair bg-white hover:bg-ink hover:text-paper transition-colors overflow-hidden flex flex-col ${!mobileOpen && i >= MOBILE_INITIAL ? "max-md:hidden" : ""} ${!expanded && i >= INITIAL ? "md:hidden" : ""}`}
           >
             {/* 상단 — 클릭 시 패널 오픈 */}
             <div
