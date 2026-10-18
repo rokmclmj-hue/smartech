@@ -5,6 +5,8 @@
 - 대표님 "다음작업진행하자"(UX 점검 6번). 파트번호 화면에는 사양이 없고 모델 화면(ModelDetail, /products/edwards-xxx)과 연결도 없었음 → `lib/product-specs.ts` findModelForProduct(ModelDetail 판매 옵션과 같은 단어 경계 기준, 여러 개면 가장 긴 모델명) 추가, 파트번호 화면에 사양표+"모델 대표값" 안내+모델 화면 링크.
 - DB 읽기 전용 집계: 전체 1,035, 사양표 분류 466 중 198 연결, 268 미연결(GXS160F 등 접미 변형·EDS 등 사양표 밖 모델 — 틀린 사양 위험으로 일부러 제외). 사양표 모델 중 SKU 없는 것: nES200·iXH1820·nEXT730D.
 - 검증: tsc·eslint·next build 통과, 로컬 RV12(A65522905) 393·1440px 사양 10행·링크 200, 피팅(A13305000)은 사양표 없음, 가로 넘침 0.
+- 이어서 대표님 확인("사양이 같아"): GXS…F는 기본 모델과 사양 같음 → SAME_SPEC_SUFFIXES(GXS 분류 F)로 13개 추가 연결(211/466). ModelDetail 판매 옵션도 findModelForProduct로 통일(GXS160 모델 화면에 F 3개 표시). 미확인 변형(질문 대기): RV·E2M …FX 11, nXDS…iC/iR 8, XDS35iC/IE·XDS46iC 3, nEXT85H 4.
+- 원가 질문(대표님 화면 ₩2,000,000): 관리자 등급(ADMIN) 배율이 DB PriceRule 1.0이라 관리자에게만 원가와 같은 금액이 "귀사 적용가"로 보임. 비로그인 라이브 ₩3,100,000(1.55) 확인. 관리자 계정 2개뿐, 고객 등급 최저 1.10.
 
 ## 2026-10-17 — (클로드) ISO 인증·특허 홈페이지 반영
 

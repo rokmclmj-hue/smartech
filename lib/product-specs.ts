@@ -224,13 +224,20 @@ export function findModelBySlug(param: string): ModelLookup | null {
  * ModelDetail의 "판매 옵션" 목록과 같은 기준(품명 안에 모델명이 단어로 들어 있음)이라
  * 모델 화면 ↔ 파트번호 화면이 서로 같은 짝을 가리킨다. 여러 개가 맞으면 가장 긴 모델명.
  */
+// 기본 모델과 사양이 같은 변형 표기(대표님 확인한 것만 추가). 예: GXS160F → GXS160 (2026-10-18 확인)
+const SAME_SPEC_SUFFIXES: Record<string, string[]> = {
+  "산업용드라이펌프(GXS)": ["F"],
+};
+
 export function findModelForProduct(category: string, description: string): ModelLookup | null {
   const data = SPEC_DATA[category];
   if (!data) return null;
+  const suffixes = SAME_SPEC_SUFFIXES[category] ?? [];
+  const suffixPart = suffixes.length ? `(?:${suffixes.join("|")})?` : "";
   let best: ModelLookup | null = null;
   data.models.forEach((model, index) => {
     const escaped = model.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const boundary = new RegExp(`(^|[^A-Za-z0-9])${escaped}([^A-Za-z0-9]|$)`, "i");
+    const boundary = new RegExp(`(^|[^A-Za-z0-9])${escaped}${suffixPart}([^A-Za-z0-9]|$)`, "i");
     if (boundary.test(description) && (!best || model.length > best.model.length)) {
       best = { category, model, index };
     }

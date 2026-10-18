@@ -1,10 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
-import { getModelSpecRows, getSiblingModels, type ModelLookup } from "@/lib/product-specs";
-
-function escapeRegex(s: string) {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
+import { findModelForProduct, getModelSpecRows, getSiblingModels, type ModelLookup } from "@/lib/product-specs";
 
 export default async function ModelDetail({ category, model, index }: ModelLookup) {
   const specRows = getModelSpecRows(category, index);
@@ -18,8 +14,8 @@ export default async function ModelDetail({ category, model, index }: ModelLooku
     where: { category, description: { contains: model, mode: "insensitive" } },
     select: { partNo: true, description: true },
   });
-  const boundary = new RegExp(`(^|[^A-Za-z0-9])${escapeRegex(model)}([^A-Za-z0-9]|$)`, "i");
-  const relatedSkus = candidates.filter((p) => boundary.test(p.description));
+  // 파트번호 화면의 사양표 연결과 같은 기준(findModelForProduct)으로 골라 두 화면이 같은 짝을 가리키게 한다
+  const relatedSkus = candidates.filter((p) => findModelForProduct(category, p.description)?.model === model);
 
   return (
     <div className="max-w-4xl mx-auto px-4 md:px-6 py-8 md:py-12">
