@@ -9,8 +9,9 @@ export default function HeroCtaCards() {
       <div className="grid grid-cols-2 gap-2.5">
         <div
           onClick={() => document.getElementById("b2b")?.scrollIntoView({ behavior: "smooth" })}
-          className="group border border-edred bg-edred text-paper p-5 flex flex-col justify-center items-center sm:justify-between sm:items-start min-h-[132px] hover:bg-dim hover:border-dim transition-all cursor-pointer"
+          className="group border border-edred bg-edred text-paper p-5 flex flex-col justify-center items-center sm:justify-between sm:items-start min-h-[132px] hover:bg-edred3 hover:border-edred3 hover:-translate-y-[3px] hover:shadow-[0_12px_24px_rgb(11_11_12/0.22)] transition-all cursor-pointer"
         >
+          {/* 마우스 올림: 자기 색 유지 — 견적 문의는 진한 빨강, 수리·오버홀은 검정+빨강 테두리·글자 (2026-10-18 대표님 A안) */}
           <div className="hidden sm:block text-[11px] mono tracking-widest opacity-50">DIRECT QUOTE</div>
           <div className="text-center sm:text-left">
             <div className="text-[22px] sm:text-[26px] display leading-tight tracking-tight break-keep">견적 문의</div>
@@ -20,12 +21,12 @@ export default function HeroCtaCards() {
 
         <div
           onClick={() => router.push("/repair")}
-          className="group border border-ink bg-ink text-paper p-5 flex flex-col justify-center items-center sm:justify-between sm:items-start min-h-[132px] hover:bg-dim hover:border-dim transition-all cursor-pointer"
+          className="group border border-ink bg-ink text-paper p-5 flex flex-col justify-center items-center sm:justify-between sm:items-start min-h-[132px] hover:border-edred hover:-translate-y-[3px] hover:shadow-[inset_0_0_0_1px_var(--color-edred),0_12px_24px_rgb(11_11_12/0.22)] transition-all cursor-pointer"
         >
           <div className="hidden sm:block text-[11px] mono tracking-widest opacity-50">REPAIR</div>
           <div className="text-center sm:text-left">
             <div className="text-[22px] sm:text-[26px] display leading-tight tracking-tight break-keep">수리·오버홀</div>
-            <div className="hidden sm:block mt-1.5 text-[11px] opacity-60 group-hover:opacity-80">접수 · 절차 · 사례 →</div>
+            <div className="hidden sm:block mt-1.5 text-[11px] opacity-60 group-hover:opacity-100 group-hover:text-edred2">접수 · 절차 · 사례 →</div>
           </div>
         </div>
       </div>

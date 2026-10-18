@@ -1,5 +1,10 @@
 # Astra 작업 기록
 
+## 2026-10-18 — (클로드) 히어로 카드 마우스 올림 색 A안
+
+- 대표님: 회색(dim) 별로. 빨강↔검정 교차는 두 카드가 같은 색이 돼 헷갈림(대표님 지적) → 바탕화면 `카드_마우스색_비교`(라이브 화면에 CSS만 입혀 A·B 비교) 후 "A로하자".
+- `HeroCtaCards.tsx`: 견적 문의 hover 진한 빨강(edred3)·수리·오버홀 hover 검정 유지+빨강 테두리(edred)·작은 글자 edred2, 둘 다 3px 떠오름+그림자. tsc·eslint·build 통과, 로컬 hover 사진이 A안과 동일.
+
 ## 2026-10-18 — (클로드) 로컬 코드리뷰 c9636bc..ea0c234 (17커밋, medium)
 
 - 지적 9건 직접 확인. **반영 2건**: ① `app/korean-text.css` overflow-wrap break-word → anywhere(keep-all에서 띄어쓰기 없는 긴 한글이 좁은 flex·표 칸을 화면 밖으로 넓힐 수 있음 — 마이페이지 등 로그인 화면 미확인 대비). 그 영향으로 344px에서 홈 AI 상담 "전송" 버튼이 "전/송"으로 나뉘어 `HeroChat.tsx` 버튼 shrink-0·whitespace-nowrap. ② `ProductCategories.tsx` PC "접기" 후 휴대폰 폭으로 줄이면 "20개 더 보기"인데 16개까지만 나오던 문제 → 카드는 항상 전부 그리고 PC 접힘(md:hidden)·휴대폰 더 보기(max-md:hidden)를 CSS로만.
