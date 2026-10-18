@@ -225,6 +225,8 @@ export function findModelBySlug(param: string): ModelLookup | null {
  * 모델 화면 ↔ 파트번호 화면이 서로 같은 짝을 가리킨다. 여러 개가 맞으면 가장 긴 모델명.
  */
 // 기본 모델과 사양이 같은 변형 표기(대표님 확인한 것만 추가). 예: GXS160F → GXS160 (2026-10-18 확인)
+// 🔴 추가 금지(2026-10-18 대표님 확인 — 기본 모델과 다름): RV·E2M …FX(사용 오일), nXDS…iC/iR(내부 밸브),
+//    XDS35iC/IE·XDS46iC(내부 밸브·성능), nEXT85H(처리량)
 const SAME_SPEC_SUFFIXES: Record<string, string[]> = {
   "산업용드라이펌프(GXS)": ["F"],
 };
