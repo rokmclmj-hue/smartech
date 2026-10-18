@@ -221,7 +221,7 @@ export function findModelBySlug(param: string): ModelLookup | null {
 
 /**
  * 파트번호 제품(카테고리·품명)이 어느 사양표 모델에 속하는지 찾는다. 못 찾으면 null.
- * ModelDetail의 "판매 옵션" 목록과 같은 기준(품명 안에 모델명이 단어로 들어 있음)이라
+ * ModelDetail의 "판매 옵션" 목록과 같은 기준(품명이 모델명으로 시작, 부품 제외)이라
  * 모델 화면 ↔ 파트번호 화면이 서로 같은 짝을 가리킨다. 여러 개가 맞으면 가장 긴 모델명.
  */
 // 기본 모델과 사양이 같은 변형 표기(대표님 확인한 것만 추가). 예: GXS160F → GXS160 (2026-10-18 확인)
@@ -236,10 +236,17 @@ export function findModelForProduct(category: string, description: string): Mode
   if (!data) return null;
   const suffixes = SAME_SPEC_SUFFIXES[category] ?? [];
   const suffixPart = suffixes.length ? `(?:${suffixes.join("|")})?` : "";
+  // 🔴 부품("Spares Kit Blade RV12", "Rotor E2M18")·스테이션("nEXPT2/nEXT240D-ISO/RV12")에
+  // 펌프 사양이 붙지 않도록 품명이 모델명으로 "시작"하는 것만, 그리고 Kit/Spare 품명은 제외 (2026-10-18 수정)
+  if (/\b(kit|spares?)\b/i.test(description)) return null;
+  // "iXL250Q 2600"처럼 부스터 크기(1750·2600·4200)가 따로 붙은 품명은 조합일 수 있어 제외(대표님 확인 전)
+  if (/\s(1750|2600|4200)\b/.test(description)) return null;
   let best: ModelLookup | null = null;
   data.models.forEach((model, index) => {
     const escaped = model.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const boundary = new RegExp(`(^|[^A-Za-z0-9])${escaped}${suffixPart}([^A-Za-z0-9]|$)`, "i");
+    // 모델명 바로 뒤는 띄어쓰기·끝만 허용 — "GXS160/1750F"(부스터 조합), "NEXT300D/NXDS6I/…"(보조 펌프 조합) 제외.
+    // 띄어 쓴 "E2M28 FX …"도 FX(사용 오일 다름) 변형이라 제외
+    const boundary = new RegExp(`^\\s*${escaped}${suffixPart}(?!\\s+FX\\b)(\\s|$)`, "i");
     if (boundary.test(description) && (!best || model.length > best.model.length)) {
       best = { category, model, index };
     }
