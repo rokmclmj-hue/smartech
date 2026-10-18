@@ -8,7 +8,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import AddToQuoteButton from "./AddToQuoteButton";
 import ModelDetail from "./ModelDetail";
-import { findModelBySlug, getModelSpecRows } from "@/lib/product-specs";
+import { findModelBySlug, findModelForProduct, getModelSpecRows, modelSlug } from "@/lib/product-specs";
 import { getProductPhotoUrl } from "@/lib/product-icons";
 
 // 검색 결과 제목·설명용 — 카테고리 키("오일펌프(소형 RV)")의 괄호 앞부분을 읽기 쉬운 제품 종류명으로 바꾼다.
@@ -92,6 +92,9 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const isLoggedIn = !!session;
   const isPending = tier === "PENDING";
   const photoUrl = getProductPhotoUrl(product.partNo, product.description, product.category);
+  // 펌프 파트번호는 모델 사양표(카탈로그 기준)를 함께 보여준다 — 부품·액세서리는 해당 없음
+  const model = product.category ? findModelForProduct(product.category, product.description) : null;
+  const specRows = model ? getModelSpecRows(model.category, model.index) : [];
   const photoAbsoluteUrl = `https://www.smartechvacuum.com${photoUrl}`;
   const availability = product.isDiscontinued
     ? "https://schema.org/Discontinued"
@@ -155,6 +158,33 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
           {isLoggedIn && !isPending && (
             <div className="hidden md:block">
               <AddToQuoteButton product={{ id: product.id, partNo: product.partNo, description: product.description }} />
+            </div>
+          )}
+
+          {model && (
+            <div className="mt-8 border-t pt-6">
+              <h2 className="text-lg font-semibold mb-1">Edwards {model.model} 사양 (Edwards 공식 카탈로그 기준)</h2>
+              <p className="text-xs text-gray-500 mb-4">모델 대표값입니다. 전압·상(단상/3상) 사양에 따라 일부 값이 다를 수 있어 정확한 값은 견적 시 확인해 드립니다.</p>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm border-collapse">
+                  <tbody>
+                    {specRows.map((row) => (
+                      <tr key={row.label} className="border-b border-gray-100">
+                        <td className="py-2 pr-4 text-gray-500 whitespace-nowrap">{row.label}</td>
+                        <td className="py-2 font-medium text-slate-800">
+                          {row.value}{row.unit ? ` ${row.unit}` : ""}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <Link
+                href={`/products/${modelSlug(model.model)}`}
+                className="mt-4 inline-block text-sm text-blue-600 hover:underline"
+              >
+                {model.model} 다른 전압·사양과 같은 라인업 모델 보기 →
+              </Link>
             </div>
           )}
 

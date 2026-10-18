@@ -219,6 +219,25 @@ export function findModelBySlug(param: string): ModelLookup | null {
   return null;
 }
 
+/**
+ * 파트번호 제품(카테고리·품명)이 어느 사양표 모델에 속하는지 찾는다. 못 찾으면 null.
+ * ModelDetail의 "판매 옵션" 목록과 같은 기준(품명 안에 모델명이 단어로 들어 있음)이라
+ * 모델 화면 ↔ 파트번호 화면이 서로 같은 짝을 가리킨다. 여러 개가 맞으면 가장 긴 모델명.
+ */
+export function findModelForProduct(category: string, description: string): ModelLookup | null {
+  const data = SPEC_DATA[category];
+  if (!data) return null;
+  let best: ModelLookup | null = null;
+  data.models.forEach((model, index) => {
+    const escaped = model.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const boundary = new RegExp(`(^|[^A-Za-z0-9])${escaped}([^A-Za-z0-9]|$)`, "i");
+    if (boundary.test(description) && (!best || model.length > best.model.length)) {
+      best = { category, model, index };
+    }
+  });
+  return best;
+}
+
 /** sitemap.ts에서 사용 — 모든 모델 슬러그 목록 */
 export function allModelSlugs(): string[] {
   const out: string[] = [];
