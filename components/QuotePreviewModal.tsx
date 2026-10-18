@@ -86,6 +86,14 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
         body.printing-quote .quote-page .util,
         body.printing-quote .quote-page .btn-export { display: none !important; }
       }
+      /* 미리보기 창의 화면용 견적서만 글자·칸을 1.2배로(2026-10-18 대표님 요청). 인쇄용(.pdf-only)·/quote/[id] 화면은 그대로 */
+      /* 오른쪽 견적 카트(480px)를 뺀 공간에 맞춰 단계적으로(1440·1600·1920px에서 맨 위 줄 한 줄 확인) */
+      @media screen and (min-width: 1280px) {
+        .print-modal-wrapper .quote-page .full-version { zoom: 1.1; }
+      }
+      @media screen and (min-width: 1600px) {
+        .print-modal-wrapper .quote-page .full-version { zoom: 1.2; }
+      }
     `}</style>
     {/* 왼쪽 패널 — fullscreen 시 전체, 일반 시 데스크톱만 QuotePanel(480px) 제외 */}
     <div className={`fixed top-0 bottom-0 left-0 z-50 overflow-y-auto print-modal-wrapper ${fullscreen ? "right-0" : "right-0 md:right-[480px]"}`}>
@@ -102,17 +110,14 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
             {/* 유틸 바 */}
             <div className="util">
               <div className="left">
-                <span>FILE — quote-preview.tsx</span>
-                <span>·</span>
+                {/* 코드 파일 이름("FILE — quote-preview.tsx")은 손님에게 의미가 없어 뺌(2026-10-18) */}
                 <span>PREVIEW MODE</span>
                 <span>·</span>
                 <span>{items.length} LINES · {totalQty} EA</span>
               </div>
               <div className="right">
-                <span>
-                  <span className="pulse-dot" />
-                  {isLoggedIn ? "우대적용 · 확정가" : "PUBLIC · 공개가"}
-                </span>
+                {/* 가격 기준 표시("PUBLIC · 공개가"/"우대적용 · 확정가")는 아래 PRICE BASIS·안내 문구와 겹치고
+                    승인 대기 회원에게 "확정가"로 잘못 보여 뺌(2026-10-18 대표님 확인) */}
                 <button
                   type="button"
                   className="btn-export"
@@ -153,7 +158,7 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
                     }
                   }}
                 >
-                  [ EXPORT → PDF ]
+                  견적서 저장 (PDF)
                 </button>
                 <button
                   type="button"
@@ -165,7 +170,7 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
                     cursor: "pointer", textTransform: "uppercase",
                   }}
                 >
-                  [ CLOSE ✕ ]
+                  닫기 ✕
                 </button>
               </div>
             </div>

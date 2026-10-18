@@ -259,7 +259,7 @@ export default function ProductPanel({ item, onClose, catalogUrl }: Props) {
 
       {/* ── 스펙 비교 패널 ── */}
       {showSpec && specData && (
-        <div className="fixed inset-0 md:inset-auto md:top-0 md:bottom-0 md:right-[480px] md:left-0 z-[60] bg-paper border-r hair flex flex-col shadow-2xl">
+        <div className="fixed inset-0 md:inset-auto md:top-0 md:bottom-0 md:right-[480px] xl:right-[720px] md:left-0 z-[60] bg-paper border-r hair flex flex-col shadow-2xl">
           {/* 헤더 */}
           <div className="flex items-center justify-between px-5 py-4 border-b hair shrink-0">
             <div className="display text-[17px]">스펙 비교</div>
@@ -319,18 +319,18 @@ export default function ProductPanel({ item, onClose, catalogUrl }: Props) {
       )}
 
       {/* ── 메인 패널 ── */}
-      <div className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-[480px] bg-paper border-l hair flex flex-col shadow-2xl">
+      <div className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-[480px] xl:max-w-[720px] bg-paper border-l hair flex flex-col shadow-2xl">
 
         {/* 헤더 */}
         <div className="flex items-start justify-between px-6 pt-6 pb-4 border-b hair shrink-0">
           <div>
-            <div className="mono text-[10px] tracking-[0.16em] uppercase text-dim">{item.code}</div>
-            <h2 className="display text-[22px] leading-tight mt-1">{item.title}</h2>
-            <div className="mono text-[11px] text-dim mt-1">{item.category}</div>
+            <div className="mono text-[12px] tracking-[0.16em] uppercase text-dim">{item.code}</div>
+            <h2 className="display text-[24px] xl:text-[30px] leading-tight mt-1">{item.title}</h2>
+            <div className="mono text-[13px] text-dim mt-1">{item.category}</div>
           </div>
           <button
             onClick={onClose}
-            className="shrink-0 ml-4 w-8 h-8 flex items-center justify-center border hair hover:bg-ink hover:text-paper transition-colors text-[18px] leading-none"
+            className="shrink-0 ml-4 w-11 h-11 flex items-center justify-center border hair hover:bg-ink hover:text-paper transition-colors text-[18px] leading-none"
             aria-label="닫기"
           >
             ×
@@ -339,13 +339,13 @@ export default function ProductPanel({ item, onClose, catalogUrl }: Props) {
 
         {/* 이미지 + 버튼 */}
         <div className="px-6 py-5 border-b hair bg-white shrink-0">
-          <div className="aspect-[3/2] relative">
+          <div className="aspect-[3/2] xl:aspect-auto xl:h-[300px] relative">
             <Image
               src={item.image}
               alt={item.title}
               fill
               className="object-contain"
-              sizes="480px"
+              sizes="(min-width: 1280px) 720px, 480px"
               priority={false}
             />
           </div>
@@ -354,7 +354,7 @@ export default function ProductPanel({ item, onClose, catalogUrl }: Props) {
               {specData && (
                 <button
                   onClick={() => setShowSpec(!showSpec)}
-                  className="text-[11px] mono text-ink hover:text-edred transition-colors"
+                  className="text-[14px] mono text-ink hover:text-edred transition-colors"
                 >
                   ← 스펙 비교
                 </button>
@@ -364,7 +364,7 @@ export default function ProductPanel({ item, onClose, catalogUrl }: Props) {
                   href={catalogUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-[11px] mono text-edred hover:underline font-medium tracking-[0.06em]"
+                  className="inline-flex items-center gap-1 text-[14px] mono text-edred hover:underline font-medium tracking-[0.06em]"
                 >
                   카탈로그 PDF →
                 </a>
@@ -373,7 +373,7 @@ export default function ProductPanel({ item, onClose, catalogUrl }: Props) {
             {products.some(p => p.priceStatus === "login") && (
               <button
                 onClick={() => setBizModalOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-edred text-paper text-[11px] font-semibold rounded-full hover:bg-edred3 transition-colors whitespace-nowrap"
+                className="flex items-center gap-1.5 px-4 py-2 bg-edred text-paper text-[14px] font-semibold rounded-full hover:bg-edred3 transition-colors whitespace-nowrap"
               >
                 <span className="inline-block w-1.5 h-1.5 rounded-full bg-paper shrink-0" />
                 우대가 확인
@@ -402,7 +402,7 @@ export default function ProductPanel({ item, onClose, catalogUrl }: Props) {
                 return (
                   <div
                     key={product.id}
-                    className={`px-4 py-3 transition-colors ${
+                    className={`px-6 py-4 transition-colors ${
                       isAdded ? "bg-ink/[0.03]" : "hover:bg-edred/[0.03]"
                     }`}
                   >
@@ -412,19 +412,19 @@ export default function ProductPanel({ item, onClose, catalogUrl }: Props) {
                         {product.isImportant && (
                           <span className="inline-block w-1.5 h-1.5 rounded-full bg-edred mr-1.5 mb-0.5 align-middle" />
                         )}
-                        <span className="mono text-[11px] text-dim">{product.partNo}</span>
-                        <div className="text-[13px] leading-snug mt-0.5">{product.description}</div>
+                        <span className="mono text-[14px] text-dim">{product.partNo}</span>
+                        <div className="text-[17px] leading-snug mt-1">{product.description}</div>
                         <div className="mt-1">
                           {product.priceStatus === "visible" && product.displayPrice ? (
-                            <span className="mono text-[12px] font-semibold">
+                            <span className="mono text-[17px] font-bold">
                               {formatKRW(product.displayPrice)}
                             </span>
                           ) : product.priceStatus === "pending" ? (
-                            <span className="mono text-[11px] text-dim">승인 대기</span>
+                            <span className="mono text-[14px] text-dim">승인 대기</span>
                           ) : (
                             <button
                               onClick={() => setBizModalOpen(true)}
-                              className="flex items-center gap-1 text-[11px] text-edred font-medium hover:opacity-75 transition-opacity"
+                              className="flex items-center gap-1 text-[14px] text-edred font-medium hover:opacity-75 transition-opacity"
                             >
                               <span className="inline-block w-1.5 h-1.5 rounded-full bg-edred shrink-0" />
                               우대가 확인
@@ -438,7 +438,7 @@ export default function ProductPanel({ item, onClose, catalogUrl }: Props) {
                       {product.priceStatus === "login" && (
                         <button
                           onClick={() => setBizModalOpen(true)}
-                          className="flex items-center gap-1 text-[10px] text-edred font-semibold hover:opacity-75 transition-opacity whitespace-nowrap"
+                          className="flex items-center gap-1 text-[13px] text-edred font-semibold hover:opacity-75 transition-opacity whitespace-nowrap"
                         >
                           <span className="inline-block w-1.5 h-1.5 rounded-full bg-edred shrink-0" />
                           우대가 확인
@@ -455,12 +455,12 @@ export default function ProductPanel({ item, onClose, catalogUrl }: Props) {
                               [product.id]: Math.max(1, parseInt(e.target.value) || 1),
                             }))
                           }
-                          className="w-12 border hair px-1 py-1.5 text-[12px] text-center focus:outline-none focus:border-ink bg-transparent"
+                          className="w-16 min-h-[44px] border hair px-1 py-2 text-[15px] text-center focus:outline-none focus:border-ink bg-transparent"
                           aria-label="수량"
                         />
                         <button
                           onClick={() => addToQuote(product, qty)}
-                          className={`px-2.5 py-1.5 text-[11px] mono tracking-wider border transition-colors whitespace-nowrap ${
+                          className={`min-h-[44px] px-4 py-2 text-[15px] mono tracking-wider border transition-colors whitespace-nowrap ${
                             isAdded
                               ? "bg-ink text-paper border-ink"
                               : "border-ink/40 hover:bg-ink hover:text-paper hover:border-ink"
@@ -479,8 +479,8 @@ export default function ProductPanel({ item, onClose, catalogUrl }: Props) {
         </div>
 
         {/* 푸터 */}
-        <div className="px-6 py-3 border-t hair shrink-0">
-          <div className="mono text-[10px] text-dim">
+        <div className="pl-6 pr-24 py-3 border-t hair shrink-0">
+          <div className="mono text-[14px] text-ink/80">
             ※ 로그인 시 우대 가격 적용 · 가격은 VAT 별도
           </div>
         </div>

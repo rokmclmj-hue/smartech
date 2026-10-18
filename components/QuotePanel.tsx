@@ -133,13 +133,13 @@ export default function QuotePanel({ open, onClose }: Props) {
         {/* 헤더 */}
         <div className="flex items-start justify-between px-6 pt-6 pb-4 border-b hair shrink-0">
           <div>
-            <div className="mono text-[10px] tracking-[0.16em] uppercase text-dim">QUOTE CART</div>
-            <h2 className="display text-[22px] leading-tight mt-1">견적서</h2>
-            <div className="mono text-[11px] text-dim mt-1">{items.length}종 선택됨</div>
+            <div className="mono text-[12px] tracking-[0.16em] uppercase text-dim">QUOTE CART</div>
+            <h2 className="display text-[26px] leading-tight mt-1">견적서</h2>
+            <div className="mono text-[14px] text-dim mt-1">{items.length}종 선택됨</div>
           </div>
           <button
             onClick={onClose}
-            className="shrink-0 ml-4 w-8 h-8 flex items-center justify-center border hair hover:bg-ink hover:text-paper transition-colors text-[18px] leading-none"
+            className="shrink-0 ml-4 w-11 h-11 flex items-center justify-center border hair hover:bg-ink hover:text-paper transition-colors text-[18px] leading-none"
             aria-label="닫기"
           >
             ×
@@ -156,15 +156,15 @@ export default function QuotePanel({ open, onClose }: Props) {
                 const unitPrice = priceMap.get(item.productId) ?? null;
                 const lineSubtotal = unitPrice != null ? unitPrice * item.quantity : null;
                 return (
-                  <div key={item.productId} className="px-4 py-3 hover:bg-edred/[0.03] transition-colors">
+                  <div key={item.productId} className="px-6 py-4 hover:bg-edred/[0.03] transition-colors">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
-                        <div className="mono text-[11px] text-dim">{item.partNo}</div>
-                        <div className="text-[13px] leading-snug mt-0.5">{item.description}</div>
+                        <div className="mono text-[14px] text-dim">{item.partNo}</div>
+                        <div className="text-[17px] leading-snug mt-1">{item.description}</div>
                         {lineSubtotal != null && (
-                          <div className="mono text-[11px] text-dim mt-1">
+                          <div className="mono text-[14px] text-dim mt-1.5">
                             {unitPrice!.toLocaleString("ko-KR")}원 × {item.quantity} ={" "}
-                            <span className="text-ink font-semibold">{lineSubtotal.toLocaleString("ko-KR")}원</span>
+                            <span className="text-ink font-bold text-[16px]">{lineSubtotal.toLocaleString("ko-KR")}원</span>
                           </div>
                         )}
                       </div>
@@ -176,12 +176,12 @@ export default function QuotePanel({ open, onClose }: Props) {
                           onChange={(e) =>
                             updateQty(item.productId, parseInt(e.target.value) || 1)
                           }
-                          className="w-12 border hair px-1 py-1.5 text-[12px] text-center focus:outline-none focus:border-ink bg-transparent"
+                          className="w-16 min-h-[44px] border hair px-1 py-2 text-[15px] text-center focus:outline-none focus:border-ink bg-transparent"
                           aria-label="수량"
                         />
                         <button
                           onClick={() => removeItem(item.productId)}
-                          className="px-2.5 py-1.5 text-[14px] border hair border-ink/20 hover:bg-edred hover:text-paper hover:border-edred transition-colors leading-none"
+                          className="min-h-[44px] min-w-[44px] px-3 py-2 text-[18px] border hair border-ink/20 hover:bg-edred hover:text-paper hover:border-edred transition-colors leading-none"
                           aria-label="삭제"
                         >
                           ×
@@ -197,7 +197,7 @@ export default function QuotePanel({ open, onClose }: Props) {
 
         {/* 푸터 */}
         {items.length > 0 && (
-          <div className="px-6 py-4 border-t hair shrink-0 space-y-2">
+          <div className="pl-6 pr-24 py-4 border-t hair shrink-0 space-y-2">
             {/* 소계 합계 */}
             {(() => {
               const total = items.reduce((sum, item) => {
@@ -208,24 +208,24 @@ export default function QuotePanel({ open, onClose }: Props) {
               if (!hasPrices) return null;
               return (
                 <div className="flex justify-between items-center py-2 border-b hair mb-1">
-                  <span className="text-[12px] text-dim">소계 (VAT 별도)</span>
-                  <span className="mono text-[14px] font-semibold">{total.toLocaleString("ko-KR")}원</span>
+                  <span className="text-[15px] text-dim">소계 (VAT 별도)</span>
+                  <span className="mono text-[19px] font-bold">{total.toLocaleString("ko-KR")}원</span>
                 </div>
               );
             })()}
             <button
               onClick={handleSavePdf}
-              className="w-full py-3 bg-edred text-paper text-[13px] mono tracking-wider hover:bg-ink transition-colors"
+              className="w-full py-4 bg-edred text-paper text-[16px] mono tracking-wider hover:bg-ink transition-colors"
             >
               견적서 저장 (PDF) →
             </button>
             <button
               onClick={clearAll}
-              className="w-full py-2 border hair text-[12px] text-dim hover:text-ink hover:border-ink transition-colors"
+              className="w-full py-3 border hair text-[14px] text-dim hover:text-ink hover:border-ink transition-colors"
             >
               전체 비우기
             </button>
-            <div className="mono text-[10px] text-dim pt-1">
+            <div className="mono text-[14px] text-ink/80 pt-1">
               ※ 로그인 시 우대 가격 적용 · 가격은 VAT 별도
             </div>
           </div>
