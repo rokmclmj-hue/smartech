@@ -291,12 +291,12 @@ export default async function IndustryDetailPage({
                     />
                   </div>
                   <div className="p-4">
-                    <div className="mono text-[10.5px] opacity-60">
+                    <div className="mono text-[11px] opacity-60">
                       {String(i + 1).padStart(2, "0")} · <span className="text-edred font-semibold">Edwards</span>
                     </div>
                     <div className="display text-[24px] leading-none mt-2">{pump}</div>
                     {pdf && (
-                      <div className="mt-2 text-[10px] mono text-edred opacity-70 group-hover:opacity-100">
+                      <div className="mt-2 text-[11px] mono text-edred opacity-70 group-hover:opacity-100">
                         카탈로그 PDF →
                       </div>
                     )}

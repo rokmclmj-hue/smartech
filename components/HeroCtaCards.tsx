@@ -11,7 +11,7 @@ export default function HeroCtaCards() {
           onClick={() => document.getElementById("b2b")?.scrollIntoView({ behavior: "smooth" })}
           className="group border border-edred bg-edred text-paper p-5 flex flex-col justify-center items-center sm:justify-between sm:items-start min-h-[132px] hover:bg-dim hover:border-dim transition-all cursor-pointer"
         >
-          <div className="hidden sm:block text-[9px] mono tracking-widest opacity-50">DIRECT QUOTE</div>
+          <div className="hidden sm:block text-[11px] mono tracking-widest opacity-50">DIRECT QUOTE</div>
           <div className="text-center sm:text-left">
             <div className="text-[22px] sm:text-[26px] display leading-tight tracking-tight break-keep">견적 문의</div>
             <div className="hidden sm:block mt-1.5 text-[11px] opacity-60 group-hover:opacity-80">제품 검색 · 펌프 선정 →</div>
@@ -22,7 +22,7 @@ export default function HeroCtaCards() {
           onClick={() => router.push("/repair")}
           className="group border border-ink bg-ink text-paper p-5 flex flex-col justify-center items-center sm:justify-between sm:items-start min-h-[132px] hover:bg-dim hover:border-dim transition-all cursor-pointer"
         >
-          <div className="hidden sm:block text-[9px] mono tracking-widest opacity-50">REPAIR</div>
+          <div className="hidden sm:block text-[11px] mono tracking-widest opacity-50">REPAIR</div>
           <div className="text-center sm:text-left">
             <div className="text-[22px] sm:text-[26px] display leading-tight tracking-tight break-keep">수리·오버홀</div>
             <div className="hidden sm:block mt-1.5 text-[11px] opacity-60 group-hover:opacity-80">접수 · 절차 · 사례 →</div>

@@ -97,7 +97,7 @@ export default async function BlogListPage({ searchParams }: { searchParams: Sea
     <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-10 md:py-16">
       {/* 헤더 */}
       <div className="mb-10 md:mb-14">
-        <div className="mono text-[10px] tracking-[0.22em] dim uppercase mb-3">
+        <div className="mono text-[11px] tracking-[0.22em] dim uppercase mb-3">
           Smartech · Blog
         </div>
         <h1 className="display text-[32px] md:text-[48px] leading-none tracking-[-0.03em]">
@@ -112,7 +112,7 @@ export default async function BlogListPage({ searchParams }: { searchParams: Sea
       <div className="flex flex-wrap gap-2 mb-8">
         <Link
           href="/blog"
-          className={`mono text-[10px] tracking-[0.08em] px-3 py-1.5 border transition-colors ${
+          className={`mono text-[11px] tracking-[0.08em] px-3 py-1.5 border transition-colors ${
             !category ? "bg-ink text-paper border-ink" : "border-ink/20 text-dim hover:border-ink hover:text-ink"
           }`}
         >
@@ -122,7 +122,7 @@ export default async function BlogListPage({ searchParams }: { searchParams: Sea
           <Link
             key={cat}
             href={`/blog?category=${cat}`}
-            className={`mono text-[10px] tracking-[0.08em] px-3 py-1.5 border transition-colors ${
+            className={`mono text-[11px] tracking-[0.08em] px-3 py-1.5 border transition-colors ${
               category === cat ? "bg-ink text-paper border-ink" : "border-ink/20 text-dim hover:border-ink hover:text-ink"
             }`}
           >
@@ -175,7 +175,7 @@ export default async function BlogListPage({ searchParams }: { searchParams: Sea
                   </div>
                   <div className="flex-1 min-w-0 flex flex-col">
                   <div className={`px-3 py-1.5 md:px-5 md:py-2.5 border-b ${colorClass}`}>
-                    <span className="mono text-[9px] tracking-[0.1em] font-medium uppercase">
+                    <span className="mono text-[11px] tracking-[0.1em] font-medium uppercase">
                       {post.category}
                     </span>
                   </div>
@@ -189,8 +189,8 @@ export default async function BlogListPage({ searchParams }: { searchParams: Sea
                       </p>
                     )}
                     <div className="mt-auto pt-2 flex items-center justify-between">
-                      <span className="mono text-[10px] dim">{formatDate(date)}</span>
-                      <span className="mono text-[10px] text-edred opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span className="mono text-[11px] dim">{formatDate(date)}</span>
+                      <span className="mono text-[11px] text-edred opacity-0 group-hover:opacity-100 transition-opacity">
                         읽기 →
                       </span>
                     </div>
@@ -262,7 +262,7 @@ export default async function BlogListPage({ searchParams }: { searchParams: Sea
           )}
 
           {/* 총 글 수 */}
-          <p className="mt-4 text-center mono text-[10px] text-dim">
+          <p className="mt-4 text-center mono text-[11px] text-dim">
             {total}편 중 {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, total)}편
           </p>
         </>
@@ -271,7 +271,7 @@ export default async function BlogListPage({ searchParams }: { searchParams: Sea
       {/* 문의 유도 */}
       <div className="mt-16 border border-black px-6 md:px-10 py-8 md:py-10 bg-ink/[0.02] flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div>
-          <div className="mono text-[9px] tracking-[0.18em] dim uppercase mb-2">문의</div>
+          <div className="mono text-[11px] tracking-[0.18em] dim uppercase mb-2">문의</div>
           <p className="text-[15px] leading-relaxed">
             진공펌프 관련 문의 사항이 있으시면 언제든지 스마텍으로 연락 부탁드립니다.
           </p>

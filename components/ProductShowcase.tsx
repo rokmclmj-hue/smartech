@@ -49,15 +49,15 @@ export default function ProductShowcase() {
                 loading="lazy"
               />
 
-              <div className="absolute top-2 left-2.5 text-[8.5px] mono dim tracking-[0.12em] opacity-45">
+              <div className="absolute top-2 left-2.5 text-[11px] mono dim tracking-[0.12em] opacity-45">
                 EDWARDS
               </div>
 
               <div className="absolute inset-x-0 bottom-0 px-3 pt-6 pb-2.5 bg-gradient-to-t from-ink via-ink/85 to-ink/0 text-paper translate-y-full group-hover:translate-y-0 transition-transform duration-[450ms] ease-out">
-                <div className="text-[9.5px] mono opacity-80 tracking-[0.14em] uppercase">{p.code}</div>
+                <div className="text-[11px] mono opacity-80 tracking-[0.14em] uppercase">{p.code}</div>
                 <div className="text-[13px] font-medium leading-tight mt-0.5">{p.title}</div>
                 {catalog && (
-                  <div className="mt-1.5 text-[10px] text-edred font-medium tracking-[0.06em]">카탈로그 PDF →</div>
+                  <div className="mt-1.5 text-[11px] text-edred font-medium tracking-[0.06em]">카탈로그 PDF →</div>
                 )}
               </div>
 

@@ -667,7 +667,7 @@ export default function PumpSelector() {
           }`}
         >
           <span className="text-[15px] font-semibold tracking-tight">AI 모델 인식</span>
-          <span className="mono text-[10px] tracking-[0.06em] mt-0.5 text-paper">
+          <span className="mono text-[11px] tracking-[0.06em] mt-0.5 text-paper">
             명판 사진으로 즉시 견적
           </span>
         </button>
@@ -681,7 +681,7 @@ export default function PumpSelector() {
           className="group flex flex-col items-center justify-center py-4 px-3 border bg-paper text-ink border-ink hover:bg-ink hover:text-paper transition-colors"
         >
           <span className="text-[15px] font-semibold tracking-tight">펌프선정 및 시뮬레이션</span>
-          <span className="mono text-[10px] tracking-[0.06em] mt-0.5 text-ink/60 group-hover:text-paper/70">
+          <span className="mono text-[11px] tracking-[0.06em] mt-0.5 text-ink/60 group-hover:text-paper/70">
             {!session ? "🔒 로그인 필요" : "공정 조건 기반 자동 선정"}
           </span>
         </button>
@@ -691,7 +691,7 @@ export default function PumpSelector() {
       {showLoginGate && (
         <div className="relative mt-6">
           <div className="absolute inset-0 z-10 bg-paper/95 backdrop-blur-sm flex flex-col items-center justify-center p-8 border hair min-h-[320px]">
-            <div className="mono text-[10px] tracking-[0.16em] uppercase text-dim mb-4">로그인 필요</div>
+            <div className="mono text-[11px] tracking-[0.16em] uppercase text-dim mb-4">로그인 필요</div>
             <h3 className="display text-[22px] leading-tight text-center mb-2">
               펌프선정 및 시뮬레이션은<br />로그인 후 이용 가능합니다
             </h3>
@@ -738,7 +738,7 @@ export default function PumpSelector() {
                 <div className="text-center">
                   <p className="text-[14px] font-medium text-ink">사진 업로드 또는 촬영</p>
                   <p className="mono text-[11px] text-dim mt-1">클릭하거나 사진을 드래그해서 놓으세요</p>
-                  <p className="mono text-[10px] text-dim/60 mt-1">JPG · PNG · WEBP 지원</p>
+                  <p className="mono text-[11px] text-dim/60 mt-1">JPG · PNG · WEBP 지원</p>
                 </div>
               </div>
             ) : (
@@ -778,19 +778,19 @@ export default function PumpSelector() {
                     "border-red-200 bg-red-50"
                   }`}>
                     <div className="flex items-center justify-between">
-                      <span className={`mono text-[10px] font-bold tracking-[0.12em] uppercase px-2 py-0.5 rounded ${
+                      <span className={`mono text-[11px] font-bold tracking-[0.12em] uppercase px-2 py-0.5 rounded ${
                         scanResult.confidence === "high" ? "bg-green-200 text-green-800" :
                         scanResult.confidence === "medium" ? "bg-yellow-200 text-yellow-800" :
                         "bg-red-200 text-red-800"
                       }`}>
                         {scanResult.confidence === "high" ? "인식 완료" : scanResult.confidence === "medium" ? "부분 인식" : "인식 불가"}
                       </span>
-                      <button onClick={() => { setScanFile(null); setScanPreview((prev) => { if (prev.startsWith("blob:")) URL.revokeObjectURL(prev); return ""; }); setScanResult(null); }} className="mono text-[10px] text-dim hover:text-ink">다시 촬영</button>
+                      <button onClick={() => { setScanFile(null); setScanPreview((prev) => { if (prev.startsWith("blob:")) URL.revokeObjectURL(prev); return ""; }); setScanResult(null); }} className="mono text-[11px] text-dim hover:text-ink">다시 촬영</button>
                     </div>
 
                     {scanResult.modelName && (
                       <div>
-                        <div className="mono text-[10px] text-dim uppercase tracking-[0.1em] mb-1">인식된 모델</div>
+                        <div className="mono text-[11px] text-dim uppercase tracking-[0.1em] mb-1">인식된 모델</div>
                         <div className="text-[20px] font-bold tracking-tight">{scanResult.modelName}</div>
                         {scanResult.maker && <div className="mono text-[11px] text-dim mt-0.5">{scanResult.maker}</div>}
 
@@ -798,7 +798,7 @@ export default function PumpSelector() {
                         {scanProduct && (
                           <div className="mt-3 grid grid-cols-2 gap-2">
                             <div className="border hair px-3 py-2 bg-paper">
-                              <div className="mono text-[9px] tracking-[0.12em] uppercase text-dim mb-1">공급 가격</div>
+                              <div className="mono text-[11px] tracking-[0.12em] uppercase text-dim mb-1">공급 가격</div>
                               <div className="text-[15px] font-bold tracking-tight">
                                 {scanProduct.unitPrice
                                   ? `₩ ${scanProduct.unitPrice.toLocaleString("ko-KR")}`
@@ -807,7 +807,7 @@ export default function PumpSelector() {
                               </div>
                             </div>
                             <div className="border hair px-3 py-2 bg-paper">
-                              <div className="mono text-[9px] tracking-[0.12em] uppercase text-dim mb-1">납기</div>
+                              <div className="mono text-[11px] tracking-[0.12em] uppercase text-dim mb-1">납기</div>
                               <div className="text-[13px] font-semibold tracking-tight">
                                 {scanProduct.stock > 0
                                   ? <span className="text-green-700">국내 재고 보유</span>
@@ -857,7 +857,7 @@ export default function PumpSelector() {
             {/* 촬영 팁 */}
             {!scanPreview && (
               <div className="mt-5 border hair p-4 bg-ink/[0.015]">
-                <div className="mono text-[9px] tracking-[0.16em] uppercase text-dim mb-2">명판 촬영 팁</div>
+                <div className="mono text-[11px] tracking-[0.16em] uppercase text-dim mb-2">명판 촬영 팁</div>
                 <ul className="space-y-1">
                   {["명판 전체가 화면에 들어오도록 가까이 촬영하세요", "글자가 흐리지 않게 초점을 맞춰주세요", "그림자가 생기지 않도록 밝은 곳에서 촬영하세요"].map((tip, i) => (
                     <li key={i} className="text-[12px] text-dim flex gap-2">
@@ -892,7 +892,7 @@ export default function PumpSelector() {
                         <div key={i} className="flex items-center justify-between px-3 py-2.5 hover:bg-[#f0ede8] transition-colors">
                           <div>
                             <div className="text-[12px] font-medium leading-snug">{item.desc}</div>
-                            <div className="text-[10px] text-[#6A6660] mono mt-0.5">{item.partNo}</div>
+                            <div className="text-[11px] text-[#6A6660] mono mt-0.5">{item.partNo}</div>
                           </div>
                           <div className="shrink-0 ml-4 flex items-center gap-2">
                             <div className="text-[12px] font-semibold text-[#c00020]">
@@ -909,7 +909,7 @@ export default function PumpSelector() {
                         </div>
                       ))}
                     </div>
-                    <div className="mt-1.5 text-[10px] text-[#6A6660]">총 {newGlobalResults.length}개 · 가격은 부가세 미포함 기준입니다.</div>
+                    <div className="mt-1.5 text-[11px] text-[#6A6660]">총 {newGlobalResults.length}개 · 가격은 부가세 미포함 기준입니다.</div>
                   </>
                 ) : search.trim().length >= 1 ? (
                   <div className="border border-[#E3DFD6] p-4 text-[12px] text-[#6A6660]">일치하는 항목이 없습니다.</div>
@@ -968,7 +968,7 @@ export default function PumpSelector() {
                           <div key={i} className="flex items-center justify-between px-3 py-2.5 hover:bg-[#f0ede8] transition-colors">
                             <div>
                               <div className="text-[12px] font-medium leading-snug">{item.desc}</div>
-                              <div className="text-[10px] text-[#6A6660] mono mt-0.5">{item.partNo}</div>
+                              <div className="text-[11px] text-[#6A6660] mono mt-0.5">{item.partNo}</div>
                             </div>
                             <div className="shrink-0 ml-4 flex items-center gap-2">
                               <div className="text-[12px] font-semibold text-[#c00020]">
@@ -990,7 +990,7 @@ export default function PumpSelector() {
                         ))
                       )}
                     </div>
-                    <div className="mt-1.5 text-[10px] text-[#6A6660]">가격은 부가세 미포함 기준입니다.</div>
+                    <div className="mt-1.5 text-[11px] text-[#6A6660]">가격은 부가세 미포함 기준입니다.</div>
                   </>
                 ) : (
                   <div className="border border-[#E3DFD6] p-4 text-[12px] text-[#6A6660] bg-[#F6F4EF]">
@@ -1019,7 +1019,7 @@ export default function PumpSelector() {
 
               {/* 사용공정 */}
               <div>
-                <label className="text-[10px] mono text-ink font-medium uppercase tracking-wider">사용공정</label>
+                <label className="text-[11px] mono text-ink font-medium uppercase tracking-wider">사용공정</label>
                 <select
                   value={form.process}
                   onChange={(e) => setForm({ ...form, process: e.target.value })}
@@ -1032,7 +1032,7 @@ export default function PumpSelector() {
 
               {/* 펌프종류 계층 */}
               <div className="border border-[#E3DFD6] p-3 space-y-3">
-                <div className="text-[10px] mono text-[#6A6660] uppercase tracking-wider">펌프종류 (선택)</div>
+                <div className="text-[11px] mono text-[#6A6660] uppercase tracking-wider">펌프종류 (선택)</div>
                 {pumpL1 && (
                   <div className="flex items-center gap-1 text-[11px] text-[#6A6660] flex-wrap">
                     <span className="font-medium text-ink">{pumpL1}</span>
@@ -1040,12 +1040,12 @@ export default function PumpSelector() {
                     {pumpL3 && <><span>›</span><span className="font-medium text-ink">{pumpL3}</span></>}
                     <button
                       onClick={() => { setPumpL1(""); setPumpL2(""); setPumpL3(""); setTurboSeries(""); setTurboTMP(""); setTurboResult(null); }}
-                      className="ml-1 text-[10px] text-[#6A6660] hover:text-[#c00020] underline"
+                      className="ml-1 text-[11px] text-[#6A6660] hover:text-[#c00020] underline"
                     >초기화</button>
                   </div>
                 )}
                 <div>
-                  <div className="text-[10px] text-[#6A6660] mb-1.5">펌프 분류</div>
+                  <div className="text-[11px] text-[#6A6660] mb-1.5">펌프 분류</div>
                   <div className="flex flex-wrap gap-1.5">
                     {PUMP_L1.map((opt) => (
                       <button key={opt}
@@ -1057,7 +1057,7 @@ export default function PumpSelector() {
                 </div>
                 {pumpL1 && PUMP_L2_MAP[pumpL1] && (
                   <div>
-                    <div className="text-[10px] text-[#6A6660] mb-1.5">
+                    <div className="text-[11px] text-[#6A6660] mb-1.5">
                       {pumpL1 === "오일펌프" ? "펌프 단수" : "세부 분류"}
                     </div>
                     <div className="flex flex-wrap gap-1.5">
@@ -1072,7 +1072,7 @@ export default function PumpSelector() {
                 )}
                 {pumpL2 && PUMP_L3_MAP[pumpL2] && (
                   <div>
-                    <div className="text-[10px] text-[#6A6660] mb-1.5">펌프 구성</div>
+                    <div className="text-[11px] text-[#6A6660] mb-1.5">펌프 구성</div>
                     <div className="flex flex-wrap gap-1.5">
                       {PUMP_L3_MAP[pumpL2].map((opt) => (
                         <button key={opt}
@@ -1087,7 +1087,7 @@ export default function PumpSelector() {
                 {pumpL1 === "터보펌프" && (
                   <>
                     <div>
-                      <div className="text-[10px] text-[#6A6660] mb-1.5">TMP 시리즈</div>
+                      <div className="text-[11px] text-[#6A6660] mb-1.5">TMP 시리즈</div>
                       <div className="flex flex-wrap gap-1.5">
                         {TMP_SERIES_ORDER.map(s => (
                           <button key={s}
@@ -1099,7 +1099,7 @@ export default function PumpSelector() {
                     </div>
                     {turboSeries && (
                       <div>
-                        <div className="text-[10px] text-[#6A6660] mb-1.5">TMP 모델</div>
+                        <div className="text-[11px] text-[#6A6660] mb-1.5">TMP 모델</div>
                         <div className="grid grid-cols-2 gap-2">
                           {TURBO_PUMPS.filter(t => t.series === turboSeries).map(t => (
                             <button key={t.model}
@@ -1111,10 +1111,10 @@ export default function PumpSelector() {
                               }`}
                             >
                               <div className="text-[12px] font-semibold leading-snug">{t.model}</div>
-                              <div className={`text-[10px] mt-0.5 ${turboTMP === t.model ? "text-paper/80" : "text-[#6A6660]"}`}>
+                              <div className={`text-[11px] mt-0.5 ${turboTMP === t.model ? "text-paper/80" : "text-[#6A6660]"}`}>
                                 N₂: {t.speedN2_Ls} L/s · {t.inletFlange}
                               </div>
-                              <div className={`text-[10px] ${turboTMP === t.model ? "text-paper/70" : "text-[#6A6660]"}`}>
+                              <div className={`text-[11px] ${turboTMP === t.model ? "text-paper/70" : "text-[#6A6660]"}`}>
                                 {t.integrated ? `일체형 · ${t.backingPump}` : `최대 FV: ${t.maxFVPressure_mbar} mbar`}
                               </div>
                             </button>
@@ -1141,7 +1141,7 @@ export default function PumpSelector() {
               {/* 챔버볼륨 + 목표압력 (같은 행) */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[10px] mono text-ink font-medium uppercase tracking-wider">
+                  <label className="text-[11px] mono text-ink font-medium uppercase tracking-wider">
                     챔버볼륨 (L) <span className="text-[#c00020]">*</span>
                   </label>
                   <select
@@ -1165,14 +1165,14 @@ export default function PumpSelector() {
                 </div>
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="text-[10px] mono text-ink font-medium uppercase tracking-wider">
+                    <label className="text-[11px] mono text-ink font-medium uppercase tracking-wider">
                       목표 도달압력 <span className="text-[#c00020]">*</span>
                     </label>
                     <div className="flex gap-1">
                       {(["mbar","Torr","Pa"] as PressureUnit[]).map((u) => (
                         <button key={u}
                           onClick={() => setPressureUnit(u)}
-                          className={`px-1.5 py-0.5 text-[10px] border transition-colors ${pressureUnit === u ? "bg-ink text-paper border-ink" : "border-[#E3DFD6] text-[#6A6660] hover:border-ink"}`}
+                          className={`px-1.5 py-0.5 text-[11px] border transition-colors ${pressureUnit === u ? "bg-ink text-paper border-ink" : "border-[#E3DFD6] text-[#6A6660] hover:border-ink"}`}
                         >{u}</button>
                       ))}
                     </div>
@@ -1200,7 +1200,7 @@ export default function PumpSelector() {
               {pumpL1 !== "터보펌프" ? (
                 <div className="grid grid-cols-3 gap-3">
                   <div>
-                    <label className="text-[10px] mono text-ink font-medium uppercase tracking-wider">
+                    <label className="text-[11px] mono text-ink font-medium uppercase tracking-wider">
                       배관규격 <span className="text-[#c00020]">*</span>
                     </label>
                     <select
@@ -1220,7 +1220,7 @@ export default function PumpSelector() {
                     )}
                   </div>
                   <div>
-                    <label className="text-[10px] mono text-ink font-medium uppercase tracking-wider">
+                    <label className="text-[11px] mono text-ink font-medium uppercase tracking-wider">
                       배관길이 (m) <span className="text-[#c00020]">*</span>
                     </label>
                     <select
@@ -1242,7 +1242,7 @@ export default function PumpSelector() {
                     )}
                   </div>
                   <div>
-                    <label className="text-[10px] mono text-ink font-medium uppercase tracking-wider">꺾임 (회)</label>
+                    <label className="text-[11px] mono text-ink font-medium uppercase tracking-wider">꺾임 (회)</label>
                     <select
                       value={form.bends}
                       onChange={(e) => { setForm({ ...form, bends: e.target.value }); if (e.target.value !== "기타") setBendsCustom(""); }}
@@ -1265,25 +1265,25 @@ export default function PumpSelector() {
               ) : selectedTMPObj && (
                 <div className="space-y-3">
                   <div>
-                    <div className="text-[10px] mono text-[#6A6660] uppercase tracking-wider mb-2">
+                    <div className="text-[11px] mono text-[#6A6660] uppercase tracking-wider mb-2">
                       HV 배관 (챔버 ↔ TMP 인렛)
                     </div>
                     <div className="grid grid-cols-3 gap-3">
                       <div>
-                        <label className="text-[10px] text-[#6A6660]">배관 규격 (자동)</label>
+                        <label className="text-[11px] text-[#6A6660]">배관 규격 (자동)</label>
                         <div className="mt-1 border border-[#E3DFD6] px-3 py-2 text-[13px] bg-[#F6F4EF] text-[#6A6660]">
                           {selectedTMPObj.inletFlange}
                         </div>
                       </div>
                       <div>
-                        <label className="text-[10px] text-[#6A6660]">배관 길이 (m)</label>
+                        <label className="text-[11px] text-[#6A6660]">배관 길이 (m)</label>
                         <select value={turboHvLen} onChange={e => { setTurboHvLen(e.target.value); setTurboResult(null); }}
                           className="mt-1 w-full border border-[#E3DFD6] px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-transparent">
                           {["0.3","0.5","1","1.5","2","3"].map(v => <option key={v} value={v}>{v}m</option>)}
                         </select>
                       </div>
                       <div>
-                        <label className="text-[10px] text-[#6A6660]">꺾임 (회)</label>
+                        <label className="text-[11px] text-[#6A6660]">꺾임 (회)</label>
                         <select value={turboHvBends} onChange={e => { setTurboHvBends(e.target.value); setTurboResult(null); }}
                           className="mt-1 w-full border border-[#E3DFD6] px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-transparent">
                           {["0","1","2","3"].map(v => <option key={v} value={v}>{v}회</option>)}
@@ -1293,25 +1293,25 @@ export default function PumpSelector() {
                   </div>
                   {!selectedTMPObj.integrated && (
                     <div>
-                      <div className="text-[10px] mono text-[#6A6660] uppercase tracking-wider mb-2">
+                      <div className="text-[11px] mono text-[#6A6660] uppercase tracking-wider mb-2">
                         러핑 배관 (백킹펌프 ↔ 챔버, Stage 1)
                       </div>
                       <div className="grid grid-cols-3 gap-3">
                         <div>
-                          <label className="text-[10px] text-[#6A6660]">규격 (주배관 기준)</label>
+                          <label className="text-[11px] text-[#6A6660]">규격 (주배관 기준)</label>
                           <div className="mt-1 border border-[#E3DFD6] px-3 py-2 text-[13px] bg-[#F6F4EF] text-[#6A6660]">
                             {form.pipeSpec === "기타" ? (pipeSpecCustom || "—") : (form.pipeSpec || "—")}
                           </div>
                         </div>
                         <div>
-                          <label className="text-[10px] text-[#6A6660]">길이 (m)</label>
+                          <label className="text-[11px] text-[#6A6660]">길이 (m)</label>
                           <select value={turboRoughLen} onChange={e => { setTurboRoughLen(e.target.value); setTurboResult(null); }}
                             className="mt-1 w-full border border-[#E3DFD6] px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-transparent">
                             {["0.5","1","1.5","2","3"].map(v => <option key={v} value={v}>{v}m</option>)}
                           </select>
                         </div>
                         <div className="flex items-end pb-0.5">
-                          <span className="text-[10px] text-[#6A6660]">꺾임 없음 (기본)</span>
+                          <span className="text-[11px] text-[#6A6660]">꺾임 없음 (기본)</span>
                         </div>
                       </div>
                     </div>
@@ -1344,13 +1344,13 @@ export default function PumpSelector() {
                   <div className="px-4 py-2.5 bg-[#F6F4EF] border-b border-[#E3DFD6]">
                     <div className="flex items-baseline justify-between">
                       <span className="text-[11px] font-semibold mono uppercase tracking-wider">계산 결과</span>
-                      <span className="text-[10px] text-[#6A6660]">{turboResult.turboModel}</span>
+                      <span className="text-[11px] text-[#6A6660]">{turboResult.turboModel}</span>
                     </div>
                     {selectedTMPObj && !selectedTMPObj.integrated && (
                       <div className="mt-1.5 flex items-center gap-1.5">
-                        <span className="text-[9px] bg-ink text-paper px-1.5 py-0.5 font-medium tracking-wide">자동 선정</span>
+                        <span className="text-[11px] bg-ink text-paper px-1.5 py-0.5 font-medium tracking-wide">자동 선정</span>
                         <span className="text-[12px] font-semibold text-ink">{turboResult.backingModel}</span>
-                        <span className="text-[10px] text-[#6A6660]">백킹펌프 (GXS 시리즈 중 최적)</span>
+                        <span className="text-[11px] text-[#6A6660]">백킹펌프 (GXS 시리즈 중 최적)</span>
                       </div>
                     )}
                   </div>
@@ -1363,10 +1363,10 @@ export default function PumpSelector() {
                   ) : (
                     <div>
                       <div className="flex items-center px-4 py-3 border-b border-[#E3DFD6] gap-3">
-                        <div className="shrink-0 w-5 h-5 flex items-center justify-center text-[9px] font-bold border border-[#E3DFD6] text-[#6A6660]">1</div>
+                        <div className="shrink-0 w-5 h-5 flex items-center justify-center text-[11px] font-bold border border-[#E3DFD6] text-[#6A6660]">1</div>
                         <div className="flex-1">
                           <div className="text-[12px] font-medium">Stage 1 — 러핑</div>
-                          <div className="text-[10px] text-[#6A6660] mono mt-0.5">
+                          <div className="text-[11px] text-[#6A6660] mono mt-0.5">
                             대기압 → 0.05 Torr ({TMP_TURNON_MBAR.toFixed(4)} mbar) · {turboResult.backingModel}
                           </div>
                         </div>
@@ -1375,20 +1375,20 @@ export default function PumpSelector() {
                         </div>
                       </div>
                       <div className="flex items-center px-4 py-3 border-b border-[#E3DFD6] gap-3">
-                        <div className="shrink-0 w-5 h-5 flex items-center justify-center text-[9px] font-bold border border-[#E3DFD6] text-[#6A6660]">2</div>
+                        <div className="shrink-0 w-5 h-5 flex items-center justify-center text-[11px] font-bold border border-[#E3DFD6] text-[#6A6660]">2</div>
                         <div className="flex-1">
                           <div className="text-[12px] font-medium">Stage 2 — TMP 고진공</div>
-                          <div className="text-[10px] text-[#6A6660] mono mt-0.5">
+                          <div className="text-[11px] text-[#6A6660] mono mt-0.5">
                             유효속도 {turboResult.tmpEffSpeed_Ls} L/s · 한계 {fmtPressure(turboResult.ultimateSystem_mbar, pressureUnit)}
                           </div>
                         </div>
                         <div className="shrink-0 text-right">
                           <div className="text-[13px] font-semibold mono">{fmtTime(turboResult.stage2_s, timeUnit)}</div>
-                          <div className="text-[10px] text-[#6A6660]">{turboResult.turboModel}</div>
+                          <div className="text-[11px] text-[#6A6660]">{turboResult.turboModel}</div>
                         </div>
                       </div>
                       <div className="flex items-center px-4 py-3 bg-[#F6F4EF] gap-3">
-                        <div className="shrink-0 w-5 h-5 flex items-center justify-center text-[9px] font-bold bg-ink text-paper">∑</div>
+                        <div className="shrink-0 w-5 h-5 flex items-center justify-center text-[11px] font-bold bg-ink text-paper">∑</div>
                         <div className="flex-1">
                           <div className="text-[12px] font-semibold">총 펌프다운 시간</div>
                         </div>
@@ -1415,7 +1415,7 @@ export default function PumpSelector() {
                     </div>
                   )}
                   <div className="px-4 py-2.5 border-t border-[#E3DFD6] bg-[#F6F4EF]">
-                    <p className="text-[10px] text-[#6A6660] leading-relaxed">
+                    <p className="text-[11px] text-[#6A6660] leading-relaxed">
                       ※ TMP 스핀업 시간(1~3분)은 포함되지 않습니다. SUS, 아웃게싱 시간 의존형 모델(1.9×10⁻⁷ mbar·L/s·cm² @ 1h 기준) 적용.
                       백킹펌프는 TMP 모델별 실운용 조합 중 최적 자동 선정. 최종 선정은 스마텍 전문가 검토를 권장합니다.
                     </p>
@@ -1430,7 +1430,7 @@ export default function PumpSelector() {
                   <div className="px-4 py-2.5 bg-[#F6F4EF] border-b border-[#E3DFD6] flex items-center justify-between gap-2">
                     <div>
                       <span className="text-[11px] font-semibold mono uppercase tracking-wider">계산 결과</span>
-                      <span className="ml-3 text-[10px] text-[#6A6660]">
+                      <span className="ml-3 text-[11px] text-[#6A6660]">
                         목표 {fmtPressure(parseFloat(targetP === "기타" ? String(unitToMbar(parseFloat(targetPCustom), pressureUnit)) : targetP), pressureUnit)}
                         {" · "}{Number(form.chamberVol === "기타" ? chamberVolCustom : form.chamberVol).toLocaleString()}L
                         {" · "}{form.pipeSpec === "기타" ? pipeSpecCustom : form.pipeSpec}
@@ -1440,8 +1440,8 @@ export default function PumpSelector() {
                     <div className="flex items-center gap-3 shrink-0">
                       {/* 처리량 컬럼 레이블 */}
                       <div className="text-right">
-                        <div className="text-[10px] font-semibold text-[#6A6660] uppercase tracking-wider">처리량</div>
-                        <div className="text-[10px] text-[#6A6660]">
+                        <div className="text-[11px] font-semibold text-[#6A6660] uppercase tracking-wider">처리량</div>
+                        <div className="text-[11px] text-[#6A6660]">
                           @ {calcTargetMbar != null ? fmtPressure(calcTargetMbar, pressureUnit) : ""}
                         </div>
                       </div>
@@ -1452,7 +1452,7 @@ export default function PumpSelector() {
                         {(["s","min"] as TimeUnit[]).map((u) => (
                           <button key={u}
                             onClick={() => setTimeUnit(u)}
-                            className={`px-1.5 py-0.5 text-[10px] border transition-colors ${timeUnit === u ? "bg-ink text-paper border-ink" : "border-[#E3DFD6] text-[#6A6660] hover:border-ink"}`}
+                            className={`px-1.5 py-0.5 text-[11px] border transition-colors ${timeUnit === u ? "bg-ink text-paper border-ink" : "border-[#E3DFD6] text-[#6A6660] hover:border-ink"}`}
                           >{u === "s" ? "초" : "분"}</button>
                         ))}
                       </div>
@@ -1475,7 +1475,7 @@ export default function PumpSelector() {
                             className={`flex items-center px-4 py-3 gap-3 ${i === 0 ? "bg-[#F6F4EF]" : "hover:bg-[#faf9f6]"} transition-colors`}
                           >
                             {/* 순위 */}
-                            <span className={`shrink-0 w-5 h-5 flex items-center justify-center text-[10px] font-bold ${
+                            <span className={`shrink-0 w-5 h-5 flex items-center justify-center text-[11px] font-bold ${
                               i === 0 ? "bg-ink text-paper" : "border border-[#E3DFD6] text-[#6A6660]"
                             }`}>
                               {i + 1}
@@ -1485,9 +1485,9 @@ export default function PumpSelector() {
                             <div className="flex-1 min-w-0">
                               <div className="flex items-baseline gap-2">
                                 <span className="text-[13px] font-semibold">{r.model}</span>
-                                <span className="text-[10px] text-[#6A6660]">{r.series}</span>
+                                <span className="text-[11px] text-[#6A6660]">{r.series}</span>
                               </div>
-                              <div className="text-[10px] text-[#6A6660] mono mt-0.5">
+                              <div className="text-[11px] text-[#6A6660] mono mt-0.5">
                                 정격 {r.pumpSpeed_m3h} m³/h · 유효 {r.effectiveSpeed_m3h} m³/h
                               </div>
                             </div>
@@ -1505,13 +1505,13 @@ export default function PumpSelector() {
                                 {fmtTime(r.pumpDownTime_s, timeUnit)}
                               </div>
                               {r.kvOutOfRange && (
-                                <div className="mt-0.5 text-[9px] text-amber-600 font-medium">
+                                <div className="mt-0.5 text-[11px] text-amber-600 font-medium">
                                   ⚠ 참고값
                                 </div>
                               )}
                               <button
                                 onClick={() => setPanelItem(SERIES_PANEL_MAP[r.series] ?? null)}
-                                className="mt-1 block text-[10px] text-[#6A6660] hover:text-ink underline w-full text-right"
+                                className="mt-1 block text-[11px] text-[#6A6660] hover:text-ink underline w-full text-right"
                               >
                                 카탈로그 →
                               </button>
@@ -1524,12 +1524,12 @@ export default function PumpSelector() {
 
                   {/* 주석 */}
                   <div className="px-4 py-2.5 border-t border-[#E3DFD6] bg-[#F6F4EF] space-y-1">
-                    <p className="text-[10px] text-[#6A6660] leading-relaxed">
+                    <p className="text-[11px] text-[#6A6660] leading-relaxed">
                       ※ 상기 결과는 수치 시뮬레이션 참고값입니다 (SUS+Viton, outgassing 1.9×10⁻⁷ mbar·L/s·cm², 60Hz 기준).
                       최종 모델 선정은 스마텍 전문가 검토를 권장합니다.
                     </p>
                     {results?.some((r) => r.kvOutOfRange) && (
-                      <p className="text-[10px] text-amber-700 leading-relaxed">
+                      <p className="text-[11px] text-amber-700 leading-relaxed">
                         ⚠ &apos;참고값&apos; 표시 모델은 입력하신 챔버 용적이 검증 범위를 초과해 오차가 커질 수 있습니다. 정확한 선정은 스마텍에 문의해 주세요.
                       </p>
                     )}

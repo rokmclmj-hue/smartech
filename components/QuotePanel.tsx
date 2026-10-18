@@ -234,7 +234,7 @@ export default function QuotePanel({ open, onClose }: Props) {
         {/* 로그인 게이트 오버레이 */}
         {showLoginGate && (
           <div className="absolute inset-0 z-10 bg-paper/95 backdrop-blur-sm flex flex-col items-center justify-center p-8">
-            <div className="mono text-[10px] tracking-[0.16em] uppercase text-dim mb-4">로그인 필요</div>
+            <div className="mono text-[11px] tracking-[0.16em] uppercase text-dim mb-4">로그인 필요</div>
             <h3 className="display text-[24px] leading-tight text-center mb-2">
               견적서 저장을<br />위해 로그인하세요
             </h3>

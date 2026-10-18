@@ -81,7 +81,7 @@ export default function Navbar() {
               Smartech<span style={{ color: "#c00020" }}>.</span>
             </div>
             <span className="hidden lg:block w-px h-6 bg-ink/60" aria-hidden />
-            <div className="hidden lg:block text-[10px] mono tracking-[0.22em] dim uppercase">
+            <div className="hidden lg:block text-[11px] mono tracking-[0.22em] dim uppercase">
               Vacuum · Since 2011
             </div>
           </Link>

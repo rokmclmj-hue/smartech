@@ -38,7 +38,7 @@ export default function ProductsPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: collectionSchema }} />
       <header className="border-b hair">
         <div className="max-w-7xl mx-auto px-6 pt-14 pb-10">
-          <div className="mono text-[10.5px] tracking-[0.18em] uppercase text-dim mb-4">
+          <div className="mono text-[11px] tracking-[0.18em] uppercase text-dim mb-4">
             CATALOG · <span className="text-edred">EDWARDS</span> KOREA
           </div>
           <h1 className="display text-[44px] md:text-[64px] leading-[0.98] tracking-[-0.04em]">

@@ -85,7 +85,7 @@ export default function RotatingHero() {
             }`}
           />
         ))}
-        <span className="ml-3 text-[10px] mono dim tabular">
+        <span className="ml-3 text-[11px] mono dim tabular">
           {String(idx + 1).padStart(2, "0")} / {String(SLIDES.length).padStart(2, "0")}
         </span>
       </div>

@@ -59,10 +59,10 @@ export default async function RecentBlogPosts() {
               >
                 {/* 카테고리 + 날짜 */}
                 <div className="flex items-center justify-between">
-                  <span className={`mono text-[10px] tracking-[0.1em] uppercase font-medium group-hover:text-paper/70 transition-colors ${colorClass}`}>
+                  <span className={`mono text-[11px] tracking-[0.1em] uppercase font-medium group-hover:text-paper/70 transition-colors ${colorClass}`}>
                     {post.category}
                   </span>
-                  <span className="mono text-[10px] dim group-hover:text-paper/50 transition-colors">
+                  <span className="mono text-[11px] dim group-hover:text-paper/50 transition-colors">
                     {formatDate(date)}
                   </span>
                 </div>

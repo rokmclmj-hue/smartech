@@ -481,7 +481,7 @@ export default function RepairPageClient({ children }: { children?: ReactNode })
                   <div className="flex-1">
                     {aiResult.modelName ? (
                       <>
-                        <div className="mono text-[10px] tracking-widest text-dim mb-1">인식된 모델</div>
+                        <div className="mono text-[11px] tracking-widest text-dim mb-1">인식된 모델</div>
                         <div className="text-[22px] font-bold tracking-tight mb-1">
                           {aiResult.maker} {aiResult.modelName}
                         </div>
@@ -548,7 +548,7 @@ export default function RepairPageClient({ children }: { children?: ReactNode })
                 {form.pumpMaker} {form.pumpModel || "모델 미확인"}
               </span>
               {!form.pumpModel && (
-                <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5">
+                <span className="text-[11px] bg-amber-100 text-amber-700 px-2 py-0.5">
                   담당자 확인 예정
                 </span>
               )}
@@ -640,7 +640,7 @@ export default function RepairPageClient({ children }: { children?: ReactNode })
               <div className="flex items-center justify-between px-5 py-4">
                 <div>
                   <div className="flex items-center gap-2 mb-0.5">
-                    <span className="text-[10px] bg-ink text-paper px-1.5 py-0.5 font-medium tracking-wide">필수</span>
+                    <span className="text-[11px] bg-ink text-paper px-1.5 py-0.5 font-medium tracking-wide">필수</span>
                     <span className="text-[15px] font-bold">기본수리</span>
                   </div>
                   <div className="text-[11px] text-dim">소모품 교체 · 기본 분해점검 포함</div>
@@ -649,7 +649,7 @@ export default function RepairPageClient({ children }: { children?: ReactNode })
                   {selectedKit ? (
                     <>
                       <div className="text-[22px] font-bold tabular">{formatPrice(baseCustomerPrice)}</div>
-                      <div className="text-[10px] text-dim">VAT 별도</div>
+                      <div className="text-[11px] text-dim">VAT 별도</div>
                     </>
                   ) : (
                     <div className="text-[16px] font-bold text-edred">상담 후 확정</div>
@@ -673,7 +673,7 @@ export default function RepairPageClient({ children }: { children?: ReactNode })
                     <div className="bg-ink text-paper">
                       <div className="px-5 py-3 border-b border-paper/10 flex items-center justify-between">
                         <div>
-                          <div className="mono text-[9px] tracking-widest text-paper/40 mb-0.5">REPLACEMENT PARTS</div>
+                          <div className="mono text-[11px] tracking-widest text-paper/40 mb-0.5">REPLACEMENT PARTS</div>
                           <div className="text-[14px] font-bold">
                             {form.pumpMaker} {form.pumpModel || "—"} · 기본수리
                           </div>
@@ -688,7 +688,7 @@ export default function RepairPageClient({ children }: { children?: ReactNode })
                       <div className="px-5 py-4 space-y-2">
                         {selectedKit.parts.map((p, i) => (
                           <div key={p.id} className="flex items-center gap-3 py-1 border-b border-paper/5">
-                            <span className="text-[10px] text-paper/30 w-5 text-right shrink-0">{i + 1}</span>
+                            <span className="text-[11px] text-paper/30 w-5 text-right shrink-0">{i + 1}</span>
                             <span className="text-[13px] flex-1">{p.name}</span>
                             {p.quantity && (
                               <span className="text-[11px] text-paper/50 shrink-0">{p.quantity}</span>
@@ -697,10 +697,10 @@ export default function RepairPageClient({ children }: { children?: ReactNode })
                         ))}
                         {selectedExtras.length > 0 && (
                           <>
-                            <div className="pt-3 pb-1 text-[10px] text-paper/40 tracking-widest">추가 선택 항목</div>
+                            <div className="pt-3 pb-1 text-[11px] text-paper/40 tracking-widest">추가 선택 항목</div>
                             {selectedExtras.map((e) => (
                               <div key={e.id} className="flex items-center gap-3 py-1 border-b border-paper/5">
-                                <span className="text-[10px] text-paper/30 w-5 shrink-0">+</span>
+                                <span className="text-[11px] text-paper/30 w-5 shrink-0">+</span>
                                 <span className="text-[13px] flex-1">{e.name}</span>
                                 <span className="text-[11px] text-paper/50 shrink-0">{e.category}</span>
                               </div>
@@ -749,7 +749,7 @@ export default function RepairPageClient({ children }: { children?: ReactNode })
                           {customerPrice > 0 ? (
                             <>
                               <div className="text-[15px] font-bold tabular">{formatPrice(customerPrice)}</div>
-                              <div className="text-[10px] text-dim">VAT 별도</div>
+                              <div className="text-[11px] text-dim">VAT 별도</div>
                             </>
                           ) : (
                             <div className="text-[13px] text-dim">상담 후 확정</div>
@@ -809,7 +809,7 @@ export default function RepairPageClient({ children }: { children?: ReactNode })
                   </button>
                 </div>
               </div>
-              <p className="text-[10px] text-dim leading-relaxed">
+              <p className="text-[11px] text-dim leading-relaxed">
                 ※ 분해 검사 후 정확한 금액이 확정됩니다. 본 견적은 참고용이며 실제 금액과 다를 수 있습니다.
               </p>
             </div>
@@ -847,7 +847,7 @@ export default function RepairPageClient({ children }: { children?: ReactNode })
               </div>
             )}
             <div className="border border-line p-6 mb-8">
-              <div className="mono text-[10px] tracking-widest text-dim mb-5">연락처 정보</div>
+              <div className="mono text-[11px] tracking-widest text-dim mb-5">연락처 정보</div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-[14px]">
                 <div>
                   <div className="text-[12px] text-dim mb-1">담당자 이름</div>
@@ -898,7 +898,7 @@ export default function RepairPageClient({ children }: { children?: ReactNode })
           <div className="max-w-2xl">
             <div className="border border-ink mb-10">
               <div className="bg-ink text-paper px-8 py-8">
-                <div className="mono text-[10px] tracking-widest text-paper/40 mb-4">
+                <div className="mono text-[11px] tracking-widest text-paper/40 mb-4">
                   REPAIR REQUEST CONFIRMED
                 </div>
                 <div className="text-[42px] font-bold tracking-tight leading-none mb-2 tabular">
@@ -1102,20 +1102,20 @@ export default function RepairPageClient({ children }: { children?: ReactNode })
                   <img src={c.photo} alt={c.symptom} className="w-full h-full object-cover" />
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent px-4 py-3">
                     <div className="text-paper text-[13px] font-semibold leading-tight">{c.model}</div>
-                    <div className="text-paper/50 text-[10px] mono">{c.client}</div>
+                    <div className="text-paper/50 text-[11px] mono">{c.client}</div>
                   </div>
                 </div>
                 {/* 내용 */}
                 <div className="p-4 flex-1 flex flex-col gap-3">
                   <div>
                     <div className="flex items-center justify-between mb-1">
-                      <div className="mono text-[9px] text-edred tracking-widest">SYMPTOM</div>
-                      <div className="mono text-[9px] text-dim tracking-widest">{c.date}</div>
+                      <div className="mono text-[11px] text-edred tracking-widest">SYMPTOM</div>
+                      <div className="mono text-[11px] text-dim tracking-widest">{c.date}</div>
                     </div>
                     <div className="text-[13px] font-semibold leading-snug">{c.symptom}</div>
                   </div>
                   <div>
-                    <div className="mono text-[9px] text-dim tracking-widest mb-1.5">WORK DONE</div>
+                    <div className="mono text-[11px] text-dim tracking-widest mb-1.5">WORK DONE</div>
                     <div className="flex flex-wrap gap-1">
                       {c.work.map((w, j) => (
                         <span key={j} className="text-[11px] border hair px-2 py-0.5 text-dim">{w}</span>
@@ -1124,7 +1124,7 @@ export default function RepairPageClient({ children }: { children?: ReactNode })
                   </div>
                   {c.result && (
                     <div>
-                      <div className="mono text-[9px] text-dim tracking-widest mb-1.5">출고 시험 · 전 항목 합격</div>
+                      <div className="mono text-[11px] text-dim tracking-widest mb-1.5">출고 시험 · 전 항목 합격</div>
                       <dl className="grid grid-cols-2 gap-x-3 gap-y-1 text-[11.5px] leading-snug">
                         <dt className="text-dim">도달 진공도</dt>
                         <dd className="font-semibold">{c.result.vacuum}</dd>
@@ -1139,7 +1139,7 @@ export default function RepairPageClient({ children }: { children?: ReactNode })
                   )}
                   {c.partPhoto && (
                     <div className="mt-auto pt-3 border-t hair">
-                      <div className="mono text-[9px] text-dim tracking-widest mb-1.5">PARTS</div>
+                      <div className="mono text-[11px] text-dim tracking-widest mb-1.5">PARTS</div>
                       {c.extraPhoto ? (
                         <div className="flex gap-1">
                           {[c.partPhoto, c.extraPhoto].map((p, j) => (
@@ -1175,7 +1175,7 @@ export default function RepairPageClient({ children }: { children?: ReactNode })
               [0, 1, 2].map((i) => (
                 <div key={i} className="border hair bg-white flex flex-col overflow-hidden opacity-40">
                   <div className="aspect-[4/3] bg-[#ECEAE5] flex items-center justify-center">
-                    <span className="mono text-[10px] text-dim">DAMAGE PHOTO</span>
+                    <span className="mono text-[11px] text-dim">DAMAGE PHOTO</span>
                   </div>
                   <div className="p-4 flex flex-col gap-2">
                     <div className="h-2 bg-[#E3DFD6] rounded w-20" />

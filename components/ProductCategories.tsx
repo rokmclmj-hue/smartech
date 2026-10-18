@@ -35,7 +35,7 @@ export default function ProductCategories() {
               onClick={() => setPanelItem({ category: item.category, code: item.code, title: item.title, image: item.image })}
               className="cursor-pointer p-5 pb-3 flex-1"
             >
-              <div className="flex justify-between text-[10.5px] mono opacity-60">
+              <div className="flex justify-between text-[11px] mono opacity-60">
                 <span>{String(i + 1).padStart(2, "0")} / {ITEMS.length}</span>
                 <span>{item.code}</span>
               </div>

@@ -2,7 +2,7 @@
 export default function RedTape() {
   return (
     <div className="red-tape relative overflow-hidden" style={{ height: 36 }}>
-      <div className="max-w-[1400px] mx-auto px-4 md:px-6 h-full flex items-center gap-2 md:gap-3 text-[10px] mono tracking-[0.18em] uppercase">
+      <div className="max-w-[1400px] mx-auto px-4 md:px-6 h-full flex items-center gap-2 md:gap-3 text-[11px] mono tracking-[0.18em] uppercase">
         <span className="shrink-0 text-paper/85 whitespace-nowrap">
           <span className="text-paper/55">ATM</span> · 10³ mbar
         </span>

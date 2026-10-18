@@ -65,7 +65,7 @@ export default function Industries() {
                 <div className="ind-num mono text-[11px] text-[#6A6660] group-hover:text-paper/70">
                   {String(it.n).padStart(2, "0")} / {INDUSTRIES.length}
                 </div>
-                <div className="mono text-[10px] opacity-50">{it.tag[0]}</div>
+                <div className="mono text-[11px] opacity-50">{it.tag[0]}</div>
               </div>
 
               <div className="mt-4 aspect-[4/3] relative overflow-hidden border hair bg-[#F6F4EF]">
@@ -81,13 +81,13 @@ export default function Industries() {
               <div className="mt-2 text-[12.5px] leading-[1.55] opacity-80 max-w-[26ch]">{it.line}</div>
 
               <div className="mt-5 pt-4 border-t border-dashed border-current/20">
-                <div className="mono text-[10px] opacity-60 mb-2">RECOMMENDED</div>
+                <div className="mono text-[11px] opacity-60 mb-2">RECOMMENDED</div>
                 <div className="flex flex-wrap gap-1">
                   {it.models.slice(0, 3).map((m) => (
-                    <span key={m} className="px-2 py-1 border border-current text-[10.5px]">{m}</span>
+                    <span key={m} className="px-2 py-1 border border-current text-[11px]">{m}</span>
                   ))}
                   {it.models.length > 3 && (
-                    <span className="px-2 py-1 text-[10.5px] opacity-60">+{it.models.length - 3}</span>
+                    <span className="px-2 py-1 text-[11px] opacity-60">+{it.models.length - 3}</span>
                   )}
                 </div>
               </div>

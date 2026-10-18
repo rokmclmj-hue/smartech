@@ -66,7 +66,7 @@ export default function Home() {
             <div className="col-span-12 lg:col-span-5 hero-rise" style={{ ["--rd" as never]: ".4s" }}>
               <HeroVideoIntro>
               {/* eyebrow — desktop only */}
-              <div className="hidden md:flex items-center gap-2.5 text-[10px] mono dim mb-3">
+              <div className="hidden md:flex items-center gap-2.5 text-[11px] mono dim mb-3">
                 <span className="kpi-status" />
                 <span className="uppercase tracking-[0.18em]">Trust Profile</span>
                 <span className="opacity-30">·</span>
@@ -77,7 +77,7 @@ export default function Home() {
                 {/* Hero cell — Editorial typography (col-span-2, row-span-2) */}
                 <div className="bento-hero col-span-2 row-span-2 relative bg-white border hair p-5 md:p-6 flex flex-col justify-between overflow-hidden">
                   {/* Top kicker — 대표 개인 경력(2006) ≠ 스마텍 설립(2011), 혼동 방지를 위해 명확히 라벨링 */}
-                  <div className="flex items-baseline justify-between text-[10.5px] mono dim tracking-[0.18em] uppercase">
+                  <div className="flex items-baseline justify-between text-[11px] mono dim tracking-[0.18em] uppercase">
                     <span>대표 진공산업 경력</span>
                     <span>Since 2006</span>
                   </div>
@@ -95,7 +95,7 @@ export default function Home() {
                   {/* Range bar — 2006 ────── {CURRENT_YEAR}. Current year emphasized as editorial anchor. */}
                   <div className="mt-6 md:mt-8">
                     <div className="flex items-end gap-3">
-                      <span className="text-[10.5px] mono tabular dim tracking-wider pb-1">2006</span>
+                      <span className="text-[11px] mono tabular dim tracking-wider pb-1">2006</span>
                       <div className="flex-1 relative h-px bg-ink/20 mb-1.5 overflow-visible">
                         <div className="editorial-range-fill absolute left-0 top-0 h-full bg-edred">
                           <span className="editorial-range-dot absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-2 h-2 rounded-full bg-edred" />
@@ -122,7 +122,7 @@ export default function Home() {
                       <Counter to={40} duration={2200} />
                       <span className="text-[20px] opacity-60">만+</span>
                     </div>
-                    <div className="text-[10px] mt-1.5 dim leading-snug">
+                    <div className="text-[11px] mt-1.5 dim leading-snug">
                       <span className="text-edred font-semibold">Edwards</span> 글로벌 누적
                     </div>
                   </div>
@@ -136,7 +136,7 @@ export default function Home() {
                       <Counter to={1014} duration={3600} />
                       <span className="text-[20px] opacity-60">+</span>
                     </div>
-                    <div className="text-[10px] mt-1.5 dim leading-snug">취급 품목</div>
+                    <div className="text-[11px] mt-1.5 dim leading-snug">취급 품목</div>
                   </div>
                 </div>
 
@@ -153,14 +153,14 @@ export default function Home() {
                     <span className="absolute -inset-1 border border-white/40 animate-ping opacity-50" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-[10px] mono opacity-70 tracking-[0.16em] uppercase">Authorization · Official</div>
+                    <div className="text-[11px] mono opacity-70 tracking-[0.16em] uppercase">Authorization · Official</div>
                     <div className="text-[13px] md:text-[15px] font-medium mt-0.5">
                       <span className="font-bold">Edwards</span>{" "}
                       <span className="opacity-95">Authorized Distributor</span>
                     </div>
-                    <div className="text-[10.5px] opacity-75 mt-0.5">한국 공식 대리점 · Korea</div>
+                    <div className="text-[11px] opacity-75 mt-0.5">한국 공식 대리점 · Korea</div>
                   </div>
-                  <div className="hidden sm:block shrink-0 text-[9px] mono opacity-35 tracking-[0.14em] self-start">04 / 04</div>
+                  <div className="hidden sm:block shrink-0 text-[11px] mono opacity-35 tracking-[0.14em] self-start">04 / 04</div>
                 </div>
               </div>
               </HeroVideoIntro>
@@ -169,7 +169,7 @@ export default function Home() {
 
           {/* In-hero compact product strip — 첫 화면에 노출 */}
           <div className="hero-rise" style={{ ["--rd" as never]: "1.05s" }}>
-            <div className="mt-6 mb-2 flex items-center justify-between text-[10px] mono dim">
+            <div className="mt-6 mb-2 flex items-center justify-between text-[11px] mono dim">
               <span className="flex items-center gap-2">
                 <span className="kpi-status" />
                 <span className="uppercase tracking-[0.14em] text-ink/70">Featured Lineup</span>

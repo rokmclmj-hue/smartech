@@ -146,7 +146,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
               <span>·</span>
               <span className="break-keep">{product.category}</span>
               {product.isImportant && (
-                <span className="ml-auto border border-edred text-edred px-2 py-0.5 text-[10px]">주요 제품</span>
+                <span className="ml-auto border border-edred text-edred px-2 py-0.5 text-[11px]">주요 제품</span>
               )}
             </div>
             <h1 className="display text-[24px] md:text-[30px] leading-[1.2] mt-3">
@@ -225,7 +225,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
               {formatKRW(displayPrice)}
             </p>
             {isPending && (
-              <p className="text-[10px] text-amber-500 mt-0.5">확인 중 — 확정가는 담당자 문의</p>
+              <p className="text-[11px] text-amber-500 mt-0.5">확인 중 — 확정가는 담당자 문의</p>
             )}
           </div>
 

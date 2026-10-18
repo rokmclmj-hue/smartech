@@ -222,7 +222,7 @@ export default function AboutPage() {
               </div>
             ))}
           </div>
-          <p className="mono text-[10.5px] text-dim px-8 py-4 border-t hair">
+          <p className="mono text-[11px] text-dim px-8 py-4 border-t hair">
             2011년 설립 이후 누적 · 내부 ERP·세금계산서 기준 · 취소·반품 건 제외, 동일 고객의 복수 납품은 개별 건으로 계산
           </p>
         </div>
@@ -276,9 +276,9 @@ export default function AboutPage() {
               <div className="px-5 py-4 border-t hair flex items-center justify-between mt-auto">
                 <div>
                   <div className="text-[13px] font-semibold">{GALLERY[0].label}</div>
-                  <div className="mono text-[10px] text-dim mt-0.5">{GALLERY[0].sub}</div>
+                  <div className="mono text-[11px] text-dim mt-0.5">{GALLERY[0].sub}</div>
                 </div>
-                <div className="shrink-0 border border-edred text-edred mono text-[10px] px-3 py-1.5 tracking-wider">
+                <div className="shrink-0 border border-edred text-edred mono text-[11px] px-3 py-1.5 tracking-wider">
                   GOLD CLASS
                 </div>
               </div>
@@ -298,7 +298,7 @@ export default function AboutPage() {
                 </div>
                 <div className="px-5 py-4 border-t hair mt-auto">
                   <div className="text-[13px] font-semibold">{img.label}</div>
-                  <div className="mono text-[10px] text-dim mt-0.5">{img.sub}</div>
+                  <div className="mono text-[11px] text-dim mt-0.5">{img.sub}</div>
                 </div>
               </div>
             ))}
@@ -334,7 +334,7 @@ export default function AboutPage() {
                       {item.year}
                     </div>
                     {item.title === "Edwards Korea Gold Award 수상" && (
-                      <div className="md:mt-1 border border-edred text-edred mono text-[9px] px-2 py-0.5 tracking-widest whitespace-nowrap">
+                      <div className="md:mt-1 border border-edred text-edred mono text-[11px] px-2 py-0.5 tracking-widest whitespace-nowrap">
                         GOLD AWARD
                       </div>
                     )}
@@ -388,13 +388,13 @@ export default function AboutPage() {
                 <div className="p-6 flex-1 flex flex-col gap-4">
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <div className="mono text-[9px] text-edred tracking-widest mb-1">INDUSTRY</div>
+                      <div className="mono text-[11px] text-edred tracking-widest mb-1">INDUSTRY</div>
                       <div className="text-[14px] font-semibold">{c.industry}</div>
                     </div>
-                    <div className="border hair px-2.5 py-1 mono text-[10px] text-dim shrink-0">{c.model}</div>
+                    <div className="border hair px-2.5 py-1 mono text-[11px] text-dim shrink-0">{c.model}</div>
                   </div>
                   <div className="border-t hair pt-4">
-                    <div className="mono text-[9px] text-dim tracking-widest mb-2">OUTCOME</div>
+                    <div className="mono text-[11px] text-dim tracking-widest mb-2">OUTCOME</div>
                     <div className="text-[13px] text-dim leading-[1.6]">{c.hint}</div>
                   </div>
                 </div>
@@ -469,8 +469,8 @@ export default function AboutPage() {
             ].map((item) => (
               <div key={item.title} className="grid grid-cols-12 gap-4 py-6 border-b hair last:border-b-0 items-start">
                 <div className="col-span-12 md:col-span-2">
-                  <div className="mono text-[10px] text-edred tracking-wider">{item.source}</div>
-                  <div className="mono text-[10px] text-dim mt-1">{item.date}</div>
+                  <div className="mono text-[11px] text-edred tracking-wider">{item.source}</div>
+                  <div className="mono text-[11px] text-dim mt-1">{item.date}</div>
                 </div>
                 <div className="col-span-12 md:col-span-9">
                   <div className="text-[15px] font-semibold mb-1 leading-snug">{item.title}</div>
@@ -478,11 +478,11 @@ export default function AboutPage() {
                 </div>
                 <div className="col-span-12 md:col-span-1 flex md:justify-end">
                   {item.href ? (
-                    <Link href={item.href} className="mono text-[9px] text-edred border border-edred/30 px-2 py-1 self-start hover:bg-edred hover:text-paper transition-colors">
+                    <Link href={item.href} className="mono text-[11px] text-edred border border-edred/30 px-2 py-1 self-start hover:bg-edred hover:text-paper transition-colors">
                       자세히 →
                     </Link>
                   ) : (
-                    <span className="mono text-[9px] text-dim/60 border hair px-2 py-1 self-start">
+                    <span className="mono text-[11px] text-dim/60 border hair px-2 py-1 self-start">
                       CLOSED
                     </span>
                   )}
@@ -540,7 +540,7 @@ export default function AboutPage() {
                   className="flex items-center justify-between w-full border border-paper/20 px-6 py-5 hover:border-paper hover:bg-paper/5 transition-all group"
                 >
                   <div>
-                    <div className="mono text-[10px] text-paper/40 tracking-wider mb-1">PHONE</div>
+                    <div className="mono text-[11px] text-paper/40 tracking-wider mb-1">PHONE</div>
                     <div className="display text-[22px] tabular">031-204-7170</div>
                   </div>
                   <span className="text-paper/30 group-hover:text-paper transition-colors text-[20px]">→</span>
@@ -551,7 +551,7 @@ export default function AboutPage() {
                   className="flex items-center justify-between w-full border border-paper/20 px-6 py-5 hover:border-paper hover:bg-paper/5 transition-all group"
                 >
                   <div>
-                    <div className="mono text-[10px] text-paper/40 tracking-wider mb-1">EMAIL</div>
+                    <div className="mono text-[11px] text-paper/40 tracking-wider mb-1">EMAIL</div>
                     <div className="text-[15px]">info@smartechvacuum.com</div>
                   </div>
                   <span className="text-paper/30 group-hover:text-paper transition-colors text-[20px]">→</span>
@@ -562,7 +562,7 @@ export default function AboutPage() {
                   className="flex items-center justify-between w-full bg-edred px-6 py-5 hover:bg-[#a0001a] transition-all group"
                 >
                   <div>
-                    <div className="mono text-[10px] text-paper/70 tracking-wider mb-1">ONLINE</div>
+                    <div className="mono text-[11px] text-paper/70 tracking-wider mb-1">ONLINE</div>
                     <div className="text-[15px] font-semibold">수리 접수 바로 하기</div>
                   </div>
                   <span className="text-paper/70 group-hover:text-paper transition-colors text-[20px]">→</span>

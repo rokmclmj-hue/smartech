@@ -58,7 +58,7 @@ export default function RobinPage() {
           <span>Robin</span>
         </nav>
 
-        <div className="mono text-[10px] dim uppercase tracking-[0.16em] mb-3">Author</div>
+        <div className="mono text-[11px] dim uppercase tracking-[0.16em] mb-3">Author</div>
         <h1 className="display text-[32px] md:text-[44px] leading-tight tracking-[-0.02em] mb-2">
           Robin <span className="text-edred">·</span> 스마텍 대표
         </h1>

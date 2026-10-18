@@ -298,11 +298,11 @@ export default function ProductPanel({ item, onClose, catalogUrl }: Props) {
                 </tbody>
               </table>
             </div>
-            <p className="mt-4 text-[10px] dim mono">※ 60 Hz 기준 (국내 전원). 카탈로그 원본 기준.</p>
+            <p className="mt-4 text-[11px] dim mono">※ 60 Hz 기준 (국내 전원). 카탈로그 원본 기준.</p>
 
             {/* 연락처 */}
             <div className="mt-6 border-t hair pt-5">
-              <div className="mono text-[10px] tracking-widest text-dim mb-3">수량 · 납기 · 커스텀 사양 문의</div>
+              <div className="mono text-[11px] tracking-widest text-dim mb-3">수량 · 납기 · 커스텀 사양 문의</div>
               <div className="flex flex-col gap-2">
                 <a href="tel:031-204-7170" className="flex items-center gap-2 group">
                   <span className="bg-edred text-paper mono text-[11px] px-2.5 py-1 tracking-wider">CALL</span>

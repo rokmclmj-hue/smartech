@@ -406,7 +406,7 @@ function ProductsContent() {
         {/* ── Controls ─────────────────────────── */}
         <div className="flex flex-col md:flex-row md:items-end gap-4 mb-6">
           <div className="flex-1">
-            <label className="block mono text-[10px] tracking-[0.14em] uppercase text-dim mb-2">
+            <label className="block mono text-[11px] tracking-[0.14em] uppercase text-dim mb-2">
               검색 — 파트번호 / 모델명 / 설명
             </label>
             <input
@@ -428,10 +428,10 @@ function ProductsContent() {
               </svg>
               필터
               {category && (
-                <span className="bg-edred text-paper text-[9px] px-1 rounded-full">1</span>
+                <span className="bg-edred text-paper text-[11px] px-1 rounded-full">1</span>
               )}
             </button>
-            <span className="mono text-[10px] tracking-[0.14em] uppercase text-dim mr-1 hidden sm:inline">VIEW</span>
+            <span className="mono text-[11px] tracking-[0.14em] uppercase text-dim mr-1 hidden sm:inline">VIEW</span>
             <button
               onClick={() => setView("table")}
               className={`px-3 py-1.5 text-[11px] mono uppercase tracking-wider border hair transition min-h-[44px] ${
@@ -490,7 +490,7 @@ function ProductsContent() {
                 <div className="mt-4 space-y-5">
                   {CATEGORY_GROUPS.map((group) => (
                     <div key={group.label}>
-                      <div className="mono text-[9.5px] tracking-[0.16em] uppercase text-edred/80 mb-2 pl-3">
+                      <div className="mono text-[11px] tracking-[0.16em] uppercase text-edred/80 mb-2 pl-3">
                         {group.label}
                       </div>
                       {group.items.map((cat) => {
@@ -524,7 +524,7 @@ function ProductsContent() {
           {/* ── Sidebar — category tree ───────── */}
           <aside className="hidden lg:block w-64 flex-shrink-0">
             <div className="sticky top-6">
-              <div className="mono text-[10px] tracking-[0.14em] uppercase text-dim mb-3">
+              <div className="mono text-[11px] tracking-[0.14em] uppercase text-dim mb-3">
                 CATEGORIES
               </div>
               <button
@@ -542,7 +542,7 @@ function ProductsContent() {
               <div className="mt-4 space-y-5">
                 {CATEGORY_GROUPS.map((group) => (
                   <div key={group.label}>
-                    <div className="mono text-[9.5px] tracking-[0.16em] uppercase text-edred/80 mb-2 pl-3">
+                    <div className="mono text-[11px] tracking-[0.16em] uppercase text-edred/80 mb-2 pl-3">
                       {group.label}
                     </div>
                     {group.items.map((cat) => {
@@ -560,7 +560,7 @@ function ProductsContent() {
                           }`}
                         >
                           <span className="truncate pr-2">{cat}</span>
-                          <span className="mono text-[10px] text-dim tabular">{count}</span>
+                          <span className="mono text-[11px] text-dim tabular">{count}</span>
                         </button>
                       );
                     })}
@@ -627,7 +627,7 @@ function CatalogTable({ groups, onBizLogin }: { groups: [string, Product[]][]; o
             <h2 className="display text-xl tracking-tight">
               {cat}
             </h2>
-            <span className="mono text-[10px] tracking-[0.14em] uppercase text-dim">
+            <span className="mono text-[11px] tracking-[0.14em] uppercase text-dim">
               {items.length} SKU
             </span>
           </div>
@@ -635,7 +635,7 @@ function CatalogTable({ groups, onBizLogin }: { groups: [string, Product[]][]; o
           <div className="overflow-x-auto -mx-2 px-2">
             <table className="w-full text-[12px] md:text-[12.5px] min-w-[480px]">
               <thead>
-                <tr className="text-left mono text-[9.5px] tracking-[0.14em] uppercase text-dim">
+                <tr className="text-left mono text-[11px] tracking-[0.14em] uppercase text-dim">
                   <th className="py-2 pr-2 w-6 hidden sm:table-cell"></th>
                   <th className="py-2 pr-2 w-[120px] md:w-[140px]">PART NO</th>
                   <th className="py-2 pr-2">DESCRIPTION</th>
@@ -673,11 +673,11 @@ function CatalogTable({ groups, onBizLogin }: { groups: [string, Product[]][]; o
                       {p.priceStatus === "visible" && p.displayPrice ? (
                         <span className="font-semibold text-ink text-[11px] md:text-[12px]">{formatKRW(p.displayPrice)}</span>
                       ) : p.priceStatus === "pending" ? (
-                        <span className="text-[10px] text-dim">승인 대기</span>
+                        <span className="text-[11px] text-dim">승인 대기</span>
                       ) : (
                         <button
                           onClick={() => onBizLogin()}
-                          className="text-[10px] text-smblue hover:text-smblue/70 font-medium pb-0.5 border-b border-smblue/30"
+                          className="text-[11px] text-smblue hover:text-smblue/70 font-medium pb-0.5 border-b border-smblue/30"
                         >
                           우대가 확인
                         </button>
@@ -686,7 +686,7 @@ function CatalogTable({ groups, onBizLogin }: { groups: [string, Product[]][]; o
                     <td className="py-2 align-middle text-right">
                       <Link
                         href={`/products/${encodeURIComponent(p.partNo)}`}
-                        className="mono text-[10px] tracking-wider text-dim group-hover:text-edred"
+                        className="mono text-[11px] tracking-wider text-dim group-hover:text-edred"
                         aria-label="상세"
                       >
                         →
@@ -711,7 +711,7 @@ function CatalogGrid({ groups, onBizLogin }: { groups: [string, Product[]][]; on
         <section key={cat}>
           <div className="flex items-baseline justify-between border-b-2 border-ink pb-2 mb-3">
             <h2 className="display text-xl tracking-tight">{cat}</h2>
-            <span className="mono text-[10px] tracking-[0.14em] uppercase text-dim">
+            <span className="mono text-[11px] tracking-[0.14em] uppercase text-dim">
               {items.length} SKU
             </span>
           </div>
@@ -723,7 +723,7 @@ function CatalogGrid({ groups, onBizLogin }: { groups: [string, Product[]][]; on
                 className="bg-paper hover:bg-edred hover:text-paper transition p-3 flex flex-col justify-between min-h-[112px] group"
               >
                 <div>
-                  <div className="flex items-center justify-between mono text-[9.5px] tracking-[0.1em] uppercase">
+                  <div className="flex items-center justify-between mono text-[11px] tracking-[0.1em] uppercase">
                     <span className={p.isImportant ? "text-edred group-hover:text-paper" : "text-dim group-hover:text-paper/70"}>
                       {p.isImportant ? "★ KEY" : "SKU"}
                     </span>

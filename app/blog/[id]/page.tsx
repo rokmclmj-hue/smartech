@@ -362,7 +362,7 @@ export default async function BlogPostPage({ params }: Props) {
     <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-10 md:py-16">
       <div className="max-w-3xl mx-auto">
         {/* 브레드크럼 */}
-        <nav className="flex items-center gap-2 mono text-[10px] dim tracking-[0.08em] mb-8">
+        <nav className="flex items-center gap-2 mono text-[11px] dim tracking-[0.08em] mb-8">
           <Link href="/" className="hover:text-ink transition-colors">홈</Link>
           <span>/</span>
           <Link href="/blog" className="hover:text-ink transition-colors">블로그</Link>
@@ -373,13 +373,13 @@ export default async function BlogPostPage({ params }: Props) {
         {/* 헤더 */}
         <header className="mb-10">
           <div className="flex items-center gap-3 mb-4">
-            <span className="mono text-[9px] tracking-[0.1em] bg-edred/10 text-edred px-2.5 py-1 border border-edred/20">
+            <span className="mono text-[11px] tracking-[0.1em] bg-edred/10 text-edred px-2.5 py-1 border border-edred/20">
               {post.category}
             </span>
-            <span className="mono text-[10px] dim">
+            <span className="mono text-[11px] dim">
               {formatDate(post.publishedAt ?? post.createdAt)}
             </span>
-            <Link href="/about/robin" className="mono text-[10px] dim hover:text-edred transition-colors">
+            <Link href="/about/robin" className="mono text-[11px] dim hover:text-edred transition-colors">
               Robin · 스마텍
             </Link>
           </div>
@@ -472,7 +472,7 @@ export default async function BlogPostPage({ params }: Props) {
         {tags.length > 0 && (
           <div className="mt-10 pt-6 border-t hair flex flex-wrap gap-2">
             {tags.map((tag) => (
-              <span key={tag} className="mono text-[10px] tracking-[0.06em] border hair px-2.5 py-1 text-dim">
+              <span key={tag} className="mono text-[11px] tracking-[0.06em] border hair px-2.5 py-1 text-dim">
                 {tag}
               </span>
             ))}
@@ -482,7 +482,7 @@ export default async function BlogPostPage({ params }: Props) {
         {/* 이 글의 요약 영상(유튜브 숏츠) — 화면 근처에 올 때만 불러온다 */}
         {short && (
           <div className="mt-10 pt-6 border-t hair">
-            <div className="mono text-[9px] tracking-[0.18em] dim uppercase mb-3">영상으로 보기</div>
+            <div className="mono text-[11px] tracking-[0.18em] dim uppercase mb-3">영상으로 보기</div>
             <div className="mx-auto w-full max-w-[315px] aspect-[9/16] bg-ink">
               <iframe
                 src={`https://www.youtube.com/embed/${short.videoId}`}
@@ -498,7 +498,7 @@ export default async function BlogPostPage({ params }: Props) {
 
         {/* CTA */}
         <div className="mt-12 border border-black px-6 py-8 bg-ink/[0.02]">
-          <div className="mono text-[9px] tracking-[0.18em] dim uppercase mb-3">문의</div>
+          <div className="mono text-[11px] tracking-[0.18em] dim uppercase mb-3">문의</div>
           <p className="text-[15px] leading-relaxed mb-5">
             진공펌프 관련 문의 사항이 있으시면 언제든지 스마텍으로 연락 부탁드립니다.
           </p>
@@ -533,7 +533,7 @@ export default async function BlogPostPage({ params }: Props) {
           {/* 관련 제품 페이지 바로가기 */}
           {productKeyword && (
             <div className="mt-5 pt-5 border-t border-black/10">
-              <span className="mono text-[9px] tracking-[0.18em] dim uppercase">관련 제품</span>
+              <span className="mono text-[11px] tracking-[0.18em] dim uppercase">관련 제품</span>
               <div className="mt-2">
                 <Link
                   href={`/products?q=${encodeURIComponent(productKeyword)}`}
@@ -549,7 +549,7 @@ export default async function BlogPostPage({ params }: Props) {
         {/* 관련 글 */}
         {relatedPosts.length > 0 && (
           <div className="mt-12 pt-8 border-t hair">
-            <div className="mono text-[9px] tracking-[0.18em] dim uppercase mb-5">관련 글</div>
+            <div className="mono text-[11px] tracking-[0.18em] dim uppercase mb-5">관련 글</div>
             <div className="flex flex-col gap-3">
               {relatedPosts.map((r) => (
                 <Link
@@ -563,7 +563,7 @@ export default async function BlogPostPage({ params }: Props) {
                   {r.metaDesc && (
                     <span className="text-[12px] dim leading-relaxed line-clamp-2">{r.metaDesc}</span>
                   )}
-                  <span className="mono text-[10px] dim">{formatDate(r.publishedAt ?? r.createdAt)}</span>
+                  <span className="mono text-[11px] dim">{formatDate(r.publishedAt ?? r.createdAt)}</span>
                 </Link>
               ))}
             </div>

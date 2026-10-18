@@ -52,7 +52,7 @@ export default async function FeaturedProducts() {
           href={`/products/${encodeURIComponent(p.partNo)}`}
           className="group border hair bg-paper p-5 hover:bg-edred hover:text-paper transition"
         >
-          <div className="flex justify-between text-[10.5px] mono opacity-70">
+          <div className="flex justify-between text-[11px] mono opacity-70">
             <span>{String(i + 1).padStart(2, "0")} / {products.length}</span>
             <span>{p.partNo}</span>
           </div>
