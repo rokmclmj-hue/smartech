@@ -1,5 +1,10 @@
 # Astra 작업 기록
 
+## 2026-10-19 — (클로드) 많이 찾는 모델·바로 출고 가능 조정 (5867008)
+
+- 대표님: 많이 찾는 모델에 RV8·RV12 추가, "펌프 오일 19"→"Ultragrade 19", 바로 출고 가능 2줄→3줄(PC 9개, 휴대폰 3개 그대로). 라이브 확인: 버튼 8개, PC 카드 9개(재고 10개 중 가격 높은 순), 가로 넘침 0, HEAD=origin.
+- nXDS 팁씰(A73501801 nXDS Tip Seal Service Kit 등)은 두 장부 모두 재고 0이라 목록에 안 나옴 → 대표님께 보유 수량 확인 요청.
+
 ## 2026-10-19 — (클로드) 견적 문의 검색창 강화 + 견적서 PDF 로그인 해제 (69d9e64)
 
 - 대표님 "나안"(추천안 1~4 + PDF 로그인 풀기). `PumpSelector.tsx`: 제목·큰 검색 form(Enter·가격 보기 → 결과로 스크롤·휴대폰 자판 내림), 예시 타이핑(입력 시작하면 멈춤), POPULAR_SEARCHES 6개, 재고 카드(inStock fetch 1회, 담기), 분류 26개 접기. `app/api/products/route.ts` inStock=true → where.stock>0만 추가(응답 항목 그대로). `QuotePanel.tsx`·`QuotePreviewModal.tsx` 로그인 게이트 삭제, 비로그인은 기존 "공개가(PUBLIC) 기준" PDF, 카트 하단 로그인 링크 안내. `lib/analytics.ts` quote_pdf_save.
