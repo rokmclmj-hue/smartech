@@ -1,5 +1,13 @@
 # Astra 작업 기록
 
+## 2026-10-19 — (클로드) 견적 문의 제품 검색 개편 + 펌프선정 로그인 해제 (edbf3ae)
+
+- 조사(DB 읽기): 회원 35명(90일 내 로그인 24), 회원 직접 견적 12건(보냄 7) vs 대행견적 197건. 시뮬레이션은 브라우저 안 계산이라 사용 기록 없음. 과거 견적 납기 기록 있는 제품 86/1,035(표기 제각각) → 제품 종류별 통상 납기를 대표님께 받기로.
+- `components/PumpSelector.tsx`: 검색·분류 목록 공용 ProductResultRow(품명 16·가격 16 굵게·파트번호 13·담기 h-10·"재고 N"), 칸 제목, 정렬 sortSearchResults(파트번호 앞부분 일치 → 숫자 든 첫 단어가 검색어로 시작하는 본체 → 기타 → Kit/Spare/Parts, 같은 순위는 모델명→재고→품명), limit 50→200, 검색칸 16px. 로그인 게이트 삭제(useSession 제거). GXS+GXB 행 "예상치" 배지+결과 밑 빨간 안내. `lib/analytics.ts` simulation_run 추가(일반·터보 계산 시).
+- DB: RV8 A65401903 Product.stock·InventoryItem.currentStock 2→4(오늘 2대 입고, 대표님 지시).
+- 검증: tsc·next build 통과, eslint 지적 변경 전과 같음(기존 2). 로컬·라이브 1440·393px: rv3 → RV3·RV3FX·키트3, rv8 → RV8 1PH(재고 4) 맨 위, rv 63개 RV3부터, 가로 넘침 0. GXS+GXB 3,000L·1mbar 계산 배지 6·안내 보임(로컬). 라이브 홈에 "로그인 필요" 0건. leak-check 사전·라이브 통과, HEAD=origin.
+- 다음: 대표님 통상 납기 숫자 → 재고 없는 제품 "통상 ○주" 표시. 탭 선택 표시 의견 결정 대기. 11월 중순 GA4 simulation_run 확인.
+
 ## 2026-10-19 — (클로드) 블로그 발행 — 1019-진공유리-단열 (id=118)
 
 - 09:11 자동 실행은 큐가 W42(10/12)라 "발행일 불일치"로 건너뜀 → W43 큐 작성(day1 1019, day2 `1022-진공오븐-진공도확인` approved=false), W42 큐는 `블로그/scheduler-backups/upload-queue-2026-W42.json`.
