@@ -1,7 +1,6 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
 import productData from "@/lib/productCatalog.json";
 import { addToCartByPartNo } from "@/lib/cartUtils";
 import { recommendPumps, TURBO_PUMPS, ALL_PUMPS, calcTurboPumpDown, TMP_TURNON_MBAR } from "@/lib/pumpSpeedData";
@@ -9,6 +8,7 @@ import type { PumpDownResult, TurboPumpDownResult, PumpModel } from "@/lib/pumpS
 import ProductPanel from "@/components/ProductPanel";
 import type { PanelItem } from "@/components/ProductPanel";
 import { CATALOG_MAP } from "@/lib/catalogs";
+import { trackEvent } from "@/lib/analytics";
 
 type SeriesKey = keyof typeof productData;
 type Tab = "search" | "scan" | "selection";
@@ -272,10 +272,72 @@ function resolveSeriesFilter(l1: string, l2: string, l3: string): string[] | und
   return undefined;
 }
 
+// ── 제품 검색 결과 정렬 ─────────────────────────────────────
+// 파트번호 순서 그대로면 "RV3 → RV3 부품키트 → RV3FX → 모터키트"처럼 섞여 보인다.
+// 모델명으로 시작하는 본체를 위로, 키트·부품을 아래로 보낸다 (2026-10-19 대표님 요청).
+const KIT_WORDS = /\b(kit|spares?|parts?)\b/i;
+const normalizeQuery = (s: string) => s.replace(/[\s\-/]/g, "").toLowerCase();
+
+function searchRank(item: { partNo: string; desc: string }, q: string): number {
+  if (q && item.partNo.toLowerCase().startsWith(q)) return 0;             // 파트번호로 찾은 경우
+  if (KIT_WORDS.test(item.desc)) return 3;                                // 부품·키트
+  const firstWord = item.desc.trim().split(/\s+/)[0] ?? "";
+  if (q && /\d/.test(firstWord) && !firstWord.includes("/") && normalizeQuery(firstWord).startsWith(q)) return 1; // 모델 본체(RV3·E2M28처럼 숫자 포함)
+  return 2;
+}
+
+// 같은 순위 안에서는 모델명(첫 단어) 순 → 같은 모델이면 재고 있는 것 먼저 → 품명 순
+function sortSearchResults<T extends { partNo: string; desc: string; stock: number }>(items: T[], query: string): T[] {
+  const q = normalizeQuery(query);
+  const cmp = (x: string, y: string) => x.localeCompare(y, "en", { numeric: true, sensitivity: "base" });
+  const model = (d: string) => d.trim().split(/\s+/)[0] ?? "";
+  return [...items].sort((a, b) =>
+    searchRank(a, q) - searchRank(b, q) ||
+    cmp(model(a.desc), model(b.desc)) ||
+    b.stock - a.stock ||
+    cmp(a.desc, b.desc)
+  );
+}
+
+// 제품 검색·분류별 목록이 함께 쓰는 한 줄 (품명·파트번호·재고 | 가격·담기)
+function ProductResultRow({ desc, partNo, stock, priceLabel, added, loading, onAdd }: {
+  desc: string;
+  partNo: string;
+  stock: number;
+  priceLabel: string;
+  added: boolean;
+  loading: boolean;
+  onAdd: () => void;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-4 px-4 py-3.5 hover:bg-[#f0ede8] transition-colors">
+      <div className="min-w-0">
+        <div className="text-[16px] font-medium leading-snug text-ink">{desc}</div>
+        <div className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1">
+          <span className="mono text-[13px] text-dim">{partNo}</span>
+          {stock > 0 && (
+            <span className="inline-flex items-center gap-1.5 border border-ink px-1.5 py-px text-[12px] font-semibold leading-tight text-ink">
+              <span className="h-1.5 w-1.5 bg-edred" aria-hidden />
+              재고 {stock}
+            </span>
+          )}
+        </div>
+      </div>
+      <div className="shrink-0 flex items-center gap-3">
+        <div className="text-[16px] font-bold text-edred whitespace-nowrap">{priceLabel}</div>
+        <button
+          onClick={onAdd}
+          disabled={loading}
+          className={`h-10 min-w-[60px] px-3.5 text-[14px] font-medium border transition-colors whitespace-nowrap ${added ? "bg-ink text-paper border-ink" : "border-ink text-ink hover:bg-ink hover:text-paper"} disabled:opacity-50`}
+        >
+          {added ? "✓" : loading ? "…" : "담기"}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export default function PumpSelector() {
-  const { data: session } = useSession();
-  const [showLoginGate, setShowLoginGate] = useState(false);
   const [tab, setTab] = useState<Tab>("search");
 
   // AI 모델 인식 탭 상태
@@ -323,13 +385,14 @@ export default function PumpSelector() {
   const [cartLoading, setCartLoading] = useState<string | null>(null);
   const [cartAdded, setCartAdded] = useState<Set<string>>(new Set());
 
-  type FlatItem = { partNo: string; desc: string; price: number | null; series: string };
+  type FlatItem = { partNo: string; desc: string; price: number | null; stock: number; series: string };
   const [dbSearchResults, setDbSearchResults] = useState<FlatItem[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
 
   // 카테고리 세부검색은 JSON을 품목 구조(파트번호·이름)로만 쓰고,
   // 가격은 항상 DB에서 실시간으로 가져온다 (JSON 고정가는 원가 변경이 반영되지 않는 문제가 있었음 — 2026-09-14).
   const [categoryPrices, setCategoryPrices] = useState<Record<string, number | null>>({});
+  const [categoryStock, setCategoryStock] = useState<Record<string, number>>({});
   const [categoryPriceLoading, setCategoryPriceLoading] = useState(false);
 
   useEffect(() => {
@@ -344,12 +407,17 @@ export default function PumpSelector() {
       try {
         const res = await fetch(`/api/products?partNos=${encodeURIComponent(partNos.join(","))}&limit=${partNos.length}`, { signal: controller.signal });
         const data = await res.json();
-        const products: { partNo: string; displayPrice: number | null }[] = data.products ?? [];
+        const products: { partNo: string; displayPrice: number | null; stock?: number }[] = data.products ?? [];
         const map: Record<string, number | null> = {};
-        for (const p of products) map[p.partNo] = p.displayPrice;
+        const stockMap: Record<string, number> = {};
+        for (const p of products) {
+          map[p.partNo] = p.displayPrice;
+          stockMap[p.partNo] = p.stock ?? 0;
+        }
         setCategoryPrices(map);
+        setCategoryStock(stockMap);
       } catch (e) {
-        if ((e as Error).name !== "AbortError") setCategoryPrices({});
+        if ((e as Error).name !== "AbortError") { setCategoryPrices({}); setCategoryStock({}); }
       } finally {
         setCategoryPriceLoading(false);
       }
@@ -366,16 +434,21 @@ export default function PumpSelector() {
     setSearchLoading(true);
     const timer = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/products?q=${encodeURIComponent(search)}&limit=50`, { signal: controller.signal });
+        // 서버는 파트번호 순으로 자르므로 넉넉히 받아 와서 모델 본체가 잘리지 않게 한다 ("rv"·"e2m"은 60개 이상)
+        const res = await fetch(`/api/products?q=${encodeURIComponent(search)}&limit=200`, { signal: controller.signal });
         const data = await res.json();
-        const products: { partNo: string; description: string; displayPrice: number | null }[] = data.products ?? [];
+        const products: { partNo: string; description: string; displayPrice: number | null; stock?: number }[] = data.products ?? [];
         setDbSearchResults(
-          products.map((p) => ({
-            partNo: p.partNo,
-            desc: p.description,
-            price: p.displayPrice,
-            series: "",
-          }))
+          sortSearchResults(
+            products.map((p) => ({
+              partNo: p.partNo,
+              desc: p.description,
+              price: p.displayPrice,
+              stock: p.stock ?? 0,
+              series: "",
+            })),
+            search
+          )
         );
       } catch (e) {
         if ((e as Error).name !== "AbortError") setDbSearchResults([]);
@@ -434,6 +507,7 @@ export default function PumpSelector() {
         );
         setResults(res);
         setCalcTargetMbar(target);
+        trackEvent("simulation_run");
       } catch {
         setCalcError("계산 중 오류가 발생했습니다.");
       } finally {
@@ -479,6 +553,7 @@ export default function PumpSelector() {
 
     setTurboError("");
     setTurboIsCalc(true);
+    trackEvent("simulation_run");
     setTimeout(() => {
       try {
         if (tmp.integrated) {
@@ -674,46 +749,16 @@ export default function PumpSelector() {
 
         {/* 펌프선정 및 시뮬레이션 */}
         <button
-          onClick={() => {
-            if (!session) { setShowLoginGate(true); return; }
-            setTab("selection"); setSelectedCategory(null);
-          }}
+          // 2026-10-19 로그인 없이 공개 (계산은 브라우저 안에서만 돌아 비용이 없고, 사용 횟수는 GA4로 센다)
+          onClick={() => { setTab("selection"); setSelectedCategory(null); }}
           className="group flex flex-col items-center justify-center py-4 px-3 border bg-paper text-ink border-ink hover:bg-ink hover:text-paper transition-colors"
         >
           <span className="text-[15px] font-semibold tracking-tight">펌프선정 및 시뮬레이션</span>
           <span className="mono text-[11px] tracking-[0.06em] mt-0.5 text-ink/60 group-hover:text-paper/70">
-            {!session ? "🔒 로그인 필요" : "공정 조건 기반 자동 선정"}
+            공정 조건 기반 자동 선정
           </span>
         </button>
       </div>
-
-      {/* 로그인 게이트 오버레이 */}
-      {showLoginGate && (
-        <div className="relative mt-6">
-          <div className="absolute inset-0 z-10 bg-paper/95 backdrop-blur-sm flex flex-col items-center justify-center p-8 border hair min-h-[320px]">
-            <div className="mono text-[11px] tracking-[0.16em] uppercase text-dim mb-4">로그인 필요</div>
-            <h3 className="display text-[22px] leading-tight text-center mb-2">
-              펌프선정 및 시뮬레이션은<br />로그인 후 이용 가능합니다
-            </h3>
-            <p className="text-[12px] text-dim text-center mb-6">
-              로그인하시면 공정 조건에 맞는 최적 펌프를<br />자동으로 시뮬레이션해 드립니다.
-            </p>
-            <Link
-              href="/auth/login"
-              className="inline-block px-6 py-3 bg-ink text-paper text-[13px] mono tracking-wider hover:bg-edred transition-colors mb-3"
-            >
-              로그인하기 →
-            </Link>
-            <button
-              onClick={() => setShowLoginGate(false)}
-              className="text-[12px] text-dim hover:text-ink transition-colors"
-            >
-              계속 둘러보기
-            </button>
-          </div>
-          <div className="min-h-[320px]" />
-        </div>
-      )}
 
       <div className="mt-6">
         {/* AI 모델 인식 */}
@@ -881,38 +926,36 @@ export default function PumpSelector() {
                   placeholder="파트번호 또는 모델명 검색 (예: A65301903, EH250)"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full border-2 border-ink px-3 py-2.5 text-[14px] focus:outline-none focus:border-edred bg-transparent mb-3 placeholder:text-[#2a2823] transition-colors"
+                  className="w-full border-2 border-ink px-4 py-3 text-[16px] focus:outline-none focus:border-edred bg-transparent mb-3 placeholder:text-[#2a2823] transition-colors"
                 />
                 {searchLoading ? (
-                  <div className="border border-[#E3DFD6] p-4 text-[12px] text-[#6A6660]">검색 중...</div>
+                  <div className="border border-[#E3DFD6] p-4 text-[14px] text-dim">검색 중...</div>
                 ) : newGlobalResults.length > 0 ? (
                   <>
-                    <div className="border border-[#E3DFD6] divide-y divide-[#E3DFD6] max-h-[360px] overflow-y-auto">
-                      {newGlobalResults.map((item, i) => (
-                        <div key={i} className="flex items-center justify-between px-3 py-2.5 hover:bg-[#f0ede8] transition-colors">
-                          <div>
-                            <div className="text-[12px] font-medium leading-snug">{item.desc}</div>
-                            <div className="text-[11px] text-[#6A6660] mono mt-0.5">{item.partNo}</div>
-                          </div>
-                          <div className="shrink-0 ml-4 flex items-center gap-2">
-                            <div className="text-[12px] font-semibold text-[#c00020]">
-                              {item.price ? item.price.toLocaleString() + "원" : "문의"}
-                            </div>
-                            <button
-                              onClick={() => handleAddToCart(item.partNo, item.desc)}
-                              disabled={cartLoading === item.partNo}
-                              className={`px-2.5 py-1 text-[11px] border transition-colors whitespace-nowrap ${cartAdded.has(item.partNo) ? "bg-ink text-paper border-ink" : "border-[#E3DFD6] hover:border-ink hover:bg-ink hover:text-paper"} disabled:opacity-50`}
-                            >
-                              {cartAdded.has(item.partNo) ? "✓" : cartLoading === item.partNo ? "…" : "담기"}
-                            </button>
-                          </div>
-                        </div>
-                      ))}
+                    <div className="border border-[#E3DFD6]">
+                      <div className="flex items-center justify-between px-4 py-2 border-b border-[#E3DFD6] bg-[#efece5] mono text-[12px] tracking-[0.08em] text-dim">
+                        <span>품명 · 파트번호 · 재고</span>
+                        <span>판매가 (VAT 별도)</span>
+                      </div>
+                      <div className="divide-y divide-[#E3DFD6] max-h-[520px] overflow-y-auto">
+                        {newGlobalResults.map((item) => (
+                          <ProductResultRow
+                            key={item.partNo}
+                            desc={item.desc}
+                            partNo={item.partNo}
+                            stock={item.stock}
+                            priceLabel={item.price ? item.price.toLocaleString() + "원" : "문의"}
+                            added={cartAdded.has(item.partNo)}
+                            loading={cartLoading === item.partNo}
+                            onAdd={() => handleAddToCart(item.partNo, item.desc)}
+                          />
+                        ))}
+                      </div>
                     </div>
-                    <div className="mt-1.5 text-[11px] text-[#6A6660]">총 {newGlobalResults.length}개 · 가격은 부가세 미포함 기준입니다.</div>
+                    <div className="mt-2 text-[13px] text-dim">총 {newGlobalResults.length}개 · 펌프 본체가 먼저, 부품·키트는 아래에 표시됩니다.</div>
                   </>
                 ) : search.trim().length >= 1 ? (
-                  <div className="border border-[#E3DFD6] p-4 text-[12px] text-[#6A6660]">일치하는 항목이 없습니다.</div>
+                  <div className="border border-[#E3DFD6] p-4 text-[14px] text-dim">일치하는 항목이 없습니다. 모델명 일부(예: RV12)나 파트번호로 다시 검색해 보세요.</div>
                 ) : (
                   <div className="grid grid-cols-3 gap-2">
                     {CATALOG_ITEMS.map((item) => (
@@ -954,7 +997,7 @@ export default function PumpSelector() {
                         placeholder="모델명 또는 파트번호 검색..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="flex-1 border border-[#E3DFD6] px-3 py-2 text-[13px] focus:outline-none focus:border-ink bg-transparent"
+                        className="flex-1 border border-[#E3DFD6] px-3 py-2.5 text-[15px] focus:outline-none focus:border-ink bg-transparent"
                       />
                       <span className="shrink-0 text-[11px] text-[#6A6660] mono whitespace-nowrap">
                         총 {productItems.length}개
@@ -965,32 +1008,24 @@ export default function PumpSelector() {
                         <div className="p-4 text-[12px] text-[#6A6660]">검색 결과가 없습니다.</div>
                       ) : (
                         productItems.map((item, i) => (
-                          <div key={i} className="flex items-center justify-between px-3 py-2.5 hover:bg-[#f0ede8] transition-colors">
-                            <div>
-                              <div className="text-[12px] font-medium leading-snug">{item.desc}</div>
-                              <div className="text-[11px] text-[#6A6660] mono mt-0.5">{item.partNo}</div>
-                            </div>
-                            <div className="shrink-0 ml-4 flex items-center gap-2">
-                              <div className="text-[12px] font-semibold text-[#c00020]">
-                                {categoryPriceLoading
-                                  ? "확인 중..."
-                                  : categoryPrices[item.partNo] != null
-                                  ? categoryPrices[item.partNo]!.toLocaleString() + "원"
-                                  : "문의"}
-                              </div>
-                              <button
-                                onClick={() => handleAddToCart(item.partNo, item.desc)}
-                                disabled={cartLoading === item.partNo}
-                                className={`px-2.5 py-1 text-[11px] border transition-colors whitespace-nowrap ${cartAdded.has(item.partNo) ? "bg-ink text-paper border-ink" : "border-[#E3DFD6] hover:border-ink hover:bg-ink hover:text-paper"} disabled:opacity-50`}
-                              >
-                                {cartAdded.has(item.partNo) ? "✓" : cartLoading === item.partNo ? "…" : "담기"}
-                              </button>
-                            </div>
-                          </div>
+                          <ProductResultRow
+                            key={i}
+                            desc={item.desc}
+                            partNo={item.partNo}
+                            stock={categoryStock[item.partNo] ?? 0}
+                            priceLabel={categoryPriceLoading
+                              ? "확인 중..."
+                              : categoryPrices[item.partNo] != null
+                              ? categoryPrices[item.partNo]!.toLocaleString() + "원"
+                              : "문의"}
+                            added={cartAdded.has(item.partNo)}
+                            loading={cartLoading === item.partNo}
+                            onAdd={() => handleAddToCart(item.partNo, item.desc)}
+                          />
                         ))
                       )}
                     </div>
-                    <div className="mt-1.5 text-[11px] text-[#6A6660]">가격은 부가세 미포함 기준입니다.</div>
+                    <div className="mt-2 text-[13px] text-dim">가격은 부가세 미포함 기준입니다.</div>
                   </>
                 ) : (
                   <div className="border border-[#E3DFD6] p-4 text-[12px] text-[#6A6660] bg-[#F6F4EF]">
@@ -1504,7 +1539,11 @@ export default function PumpSelector() {
                               <div className={`text-[13px] font-semibold mono ${i === 0 ? "text-ink" : ""}`}>
                                 {fmtTime(r.pumpDownTime_s, timeUnit)}
                               </div>
-                              {r.kvOutOfRange && (
+                              {r.series === "GXS+GXB" ? (
+                                <div className="mt-1 inline-block bg-edred px-1.5 py-px text-[11px] font-semibold text-paper">
+                                  예상치
+                                </div>
+                              ) : r.kvOutOfRange && (
                                 <div className="mt-0.5 text-[11px] text-amber-600 font-medium">
                                   ⚠ 참고값
                                 </div>
@@ -1519,6 +1558,17 @@ export default function PumpSelector() {
                           </div>
                         );
                       })}
+                    </div>
+                  )}
+
+                  {/* GXS+GXB 조합 — 부스터 속도 자동 제어를 단순화한 계산이라 오차가 큼 (대표님 요청 2026-10-19) */}
+                  {results.some((r) => r.series === "GXS+GXB") && (
+                    <div className="border-t-2 border-edred bg-paper px-4 py-3">
+                      <div className="text-[14px] font-bold text-edred">GXS+GXB 조합 결과는 예상치입니다</div>
+                      <p className="mt-1 text-[13px] leading-relaxed text-ink">
+                        부스터 속도 자동 제어를 단순화해 계산한 값으로, 현장 안전율을 고려하지 않았습니다.
+                        참고용으로만 사용하시고 실제 선정은 스마텍 전문가와 확인해 주세요.
+                      </p>
                     </div>
                   )}
 

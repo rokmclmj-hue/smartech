@@ -5,7 +5,8 @@ declare global {
   }
 }
 
-export type InquiryEvent = "phone_click" | "quote_request" | "repair_submit" | "chat_start";
+// simulation_run: 펌프선정 시뮬레이션 계산 실행 (2026-10-19 로그인 없이 공개하면서 실제 사용 여부 확인용)
+export type InquiryEvent = "phone_click" | "quote_request" | "repair_submit" | "chat_start" | "simulation_run";
 
 export function trackEvent(name: InquiryEvent) {
   if (typeof window === "undefined" || typeof window.gtag !== "function") return;
