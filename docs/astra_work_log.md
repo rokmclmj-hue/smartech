@@ -1,5 +1,12 @@
 # Astra 작업 기록
 
+## 2026-10-19 — (클로드) 재고 3종 입력 + 로컬 코드리뷰 11커밋 (반영 9debb29, reviewed=75bd500)
+
+- 재고(대표님): nXDS Tip Seal Service Kit A73501801=3, Silencer for nXDS and XDS5/10 A50597000=4, Edwards 45 Fluid 1L H11022015=3 — Product.stock·InventoryItem 둘 다(사일런서는 InventoryItem 새 줄, 분류 Part/AK, unitPrice=원가). 라이브 바로 출고 가능 9칸에 3종 모두 표시.
+- 로컬 코드리뷰(medium) ffc7ff3..75bd500 11커밋(코드 파일만 줄 단위, 블로그·메모 파일 제외) 지적 10건 확인 → 모두 반영: 재고 목록 limit 50→500(서버 파트번호 순 자름), 취소된 검색이 "검색 중" 끄던 문제, 검색 정렬도 lead-time isPumpPart로 통일(GXS160/1750F 본체 위로), 예시 타이핑 TypingSearchInput 분리(큰 화면 0.12초마다 재렌더 방지), AddToCartButton 공용, 분류 목록 빈 납기 → "납기 문의", GXS+GXB 예상치+참고값 함께, PDF 빈 블록 정리.
+- 검증: tsc·build 통과, eslint 지적 수 그대로. 로컬·라이브: 예시 타이핑 변화, 재고 카드 9, rv3·rv·gxs160·nxds 정렬, RV1→RV12 빠른 입력 정상, 비로그인 PDF 저장 2회 인쇄 호출. HEAD=origin. reviewed는 실제 검토한 75bd500까지(반영 커밋 9debb29는 다음 검토 범위).
+- 의견 전달: 실제 재고는 모두 올리는 게 구글(재고 있음 표시)·AI 검색·구매 결정에 유리, 단 대행견적·거래명세표 판매는 재고 자동 차감 안 됨 → 판매 시 대표님이 알려 주기로 안내.
+
 ## 2026-10-19 — (클로드) 많이 찾는 모델·바로 출고 가능 조정 (5867008)
 
 - 대표님: 많이 찾는 모델에 RV8·RV12 추가, "펌프 오일 19"→"Ultragrade 19", 바로 출고 가능 2줄→3줄(PC 9개, 휴대폰 3개 그대로). 라이브 확인: 버튼 8개, PC 카드 9개(재고 10개 중 가격 높은 순), 가로 넘침 0, HEAD=origin.
