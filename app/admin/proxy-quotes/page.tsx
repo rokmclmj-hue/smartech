@@ -96,6 +96,15 @@ const TIER_LABEL: Record<string, string> = {
 
 const TIER_OPTIONS = ["ENDUSER", "OEM", "DEALER", "KEY_DEALER", "VIP_DEALER"];
 
+// 수신처 입력칸 — "직접 입력"과 "✎ 수정"(이력·거래처 선택 후)이 같이 쓴다
+const GUEST_FIELDS: { label: string; key: Exclude<keyof GuestForm, "tier">; type: string; placeholder: string }[] = [
+  { label: "상호 *", key: "company", type: "text", placeholder: "회사명" },
+  { label: "담당자", key: "name", type: "text", placeholder: "담당자 이름" },
+  { label: "직급", key: "title", type: "text", placeholder: "부장, 대표 등" },
+  { label: "연락처", key: "phone", type: "tel", placeholder: "010-0000-0000" },
+  { label: "이메일", key: "email", type: "email", placeholder: "example@company.com" },
+];
+
 const PAY_OPTIONS = [
   { value: "a", label: "납품 전 현금" },
   { value: "b", label: "계약30%/납품전70%" },
@@ -145,6 +154,12 @@ function AdminProxyQuotesInner() {
 
   // 직접 입력 (수동)
   const [showDirect, setShowDirect] = useState(false);
+  // 이력·거래처를 고른 뒤 수신처·담당자를 그 자리에서 고치는 중인지(회원 고객은 제외)
+  const [editingCustomer, setEditingCustomer] = useState(false);
+  // 한 번이라도 ✎ 수정을 열었으면 보낼 때 "거래처에 저장" 체크를 따른다(입력칸을 닫아도 유지)
+  const [customerEdited, setCustomerEdited] = useState(false);
+  // 불러온 이력이 회원 견적이었는지 — ✎ 수정 칸에 "거래처 저장은 꺼 둠" 안내
+  const [fromMemberHistory, setFromMemberHistory] = useState(false);
   const [guest, setGuest] = useState<GuestForm>({
     name: "", title: "", company: "", email: "", phone: "", tier: "ENDUSER",
   });
@@ -292,6 +307,10 @@ function AdminProxyQuotesInner() {
     setCustomerQ("");
     setCustomerOpen(false);
     setShowDirect(false);
+    setEditingCustomer(false);
+    setCustomerEdited(false);
+    setFromMemberHistory(false);
+    setSaveToCompany(true);
     setSelectedContacts(c.contacts as KnownContact[]);
     setSelectedCompanyName(c.source === "known" ? c.company : null);
     const matchingContact = c.contacts.find((ct) => ct.name === c.name);
@@ -306,6 +325,10 @@ function AdminProxyQuotesInner() {
     setSelectedContacts([]);
     setSelectedCompanyName(null);
     setShowDirect(false);
+    setEditingCustomer(false);
+    setCustomerEdited(false);
+    setFromMemberHistory(false);
+    setSaveToCompany(true);
     setGuest({ name: "", title: "", company: "", email: "", phone: "", tier: "ENDUSER" });
     setPaymentTerm(null);
     setAttachFiles([]);
@@ -340,9 +363,22 @@ function AdminProxyQuotesInner() {
     setShowHistory(true);
   }
 
+  // ✎ 수정 중 입력 — 견적에 쓰이는 guest와 고객 칸에 보이는 selectedCustomer를 같이 바꾼다
+  function updateGuestField(key: Exclude<keyof GuestForm, "tier">, value: string) {
+    setGuest((g) => ({ ...g, [key]: value }));
+    if (editingCustomer && key !== "title") {
+      setSelectedCustomer((c) => (c ? { ...c, [key]: value } : c));
+    }
+  }
+
   function loadFromHistory(h: HistoryItem) {
     // 고객 정보 복원
     setShowDirect(false);
+    setEditingCustomer(false);
+    setCustomerEdited(false);
+    // 회원 견적에서 불러온 이력은 회원 연락처가 거래처(가입 등급 명단)에 들어가지 않게 저장을 꺼 두고 시작
+    setSaveToCompany(h.isGuest);
+    setFromMemberHistory(!h.isGuest);
     setGuest({ company: h.company, name: h.contactName, title: h.contactTitle ?? "", email: h.email ?? "", phone: h.phone ?? "", tier: h.tier });
     setSelectedCustomer({ source: "known", id: 0, company: h.company, name: h.contactName, phone: h.phone ?? "", email: h.email ?? "", tier: h.tier, paymentTerm: null, contacts: [] });
     setSelectedCompanyName(h.company);
@@ -505,7 +541,7 @@ function AdminProxyQuotesInner() {
       const body =
         selectedCustomer?.source === "user"
           ? { customerId: selectedCustomer.id, items: itemsPayload, paymentTerm: effectivePaymentTerm ?? undefined, note: note || undefined, inquirySource: inquirySource ?? undefined }
-          : { guest, items: itemsPayload, paymentTerm: effectivePaymentTerm ?? undefined, note: note || undefined, inquirySource: inquirySource ?? undefined, saveToCompany: showDirect ? saveToCompany : false };
+          : { guest, items: itemsPayload, paymentTerm: effectivePaymentTerm ?? undefined, note: note || undefined, inquirySource: inquirySource ?? undefined, saveToCompany: showDirect || customerEdited ? saveToCompany : false };
 
       const res = await fetch("/api/admin/proxy-quotes", {
         method: "POST",
@@ -914,12 +950,58 @@ function AdminProxyQuotesInner() {
                 </div>
                 <div className="text-[13px] dim">
                   {selectedCustomer.name}
+                  {guest.title && selectedCustomer.source !== "user" && ` (${guest.title})`}
                   {selectedCustomer.phone && ` · ${selectedCustomer.phone}`}
                   {selectedCustomer.email && ` · ${selectedCustomer.email}`}
                 </div>
               </div>
-              <button onClick={clearCustomer} className="text-[12px] dim hover:text-edred shrink-0">변경</button>
+              <div className="flex items-center gap-3 shrink-0">
+                {/* 회원 고객은 "고객 → 전체 회원"에서 고친다(2026-10-12 결정) — 이력·거래처만 여기서 수정 */}
+                {selectedCustomer.source !== "user" && (
+                  <button
+                    type="button"
+                    onClick={() => { setEditingCustomer((v) => !v); setCustomerEdited(true); }}
+                    className="text-[12px] dim hover:text-edred"
+                  >
+                    {editingCustomer ? "입력 닫기" : "✎ 수정"}
+                  </button>
+                )}
+                <button onClick={clearCustomer} className="text-[12px] dim hover:text-edred">변경</button>
+              </div>
             </div>
+
+            {/* ✎ 수정 — 불러온 품목은 그대로 두고 수신처·담당자만 고친다 */}
+            {editingCustomer && selectedCustomer.source !== "user" && (
+              <div className="border hair rounded-md p-4 bg-paper space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {GUEST_FIELDS.map(({ label, key, type, placeholder }) => (
+                    <div key={key}>
+                      <label className="mono text-[10px] tracking-[0.15em] uppercase dim mb-1 block">{label}</label>
+                      <input type={type} value={guest[key]}
+                        onChange={(e) => updateGuestField(key, e.target.value)}
+                        placeholder={placeholder}
+                        className="w-full border hair rounded-md px-3 py-2.5 text-[14px] focus:outline-none focus:border-edred" />
+                    </div>
+                  ))}
+                </div>
+                <label className="flex items-center gap-2.5 cursor-pointer select-none group">
+                  <input
+                    type="checkbox"
+                    checked={saveToCompany}
+                    onChange={(e) => setSaveToCompany(e.target.checked)}
+                    className="w-4 h-4 accent-edred cursor-pointer"
+                  />
+                  <span className="text-[13px] text-ink group-hover:text-edred transition-colors">
+                    거래처에 저장 <span className="dim text-[11px]">— 새 담당자는 거래처 담당자 목록에 추가(이미 있는 이름은 그대로)</span>
+                  </span>
+                </label>
+                {fromMemberHistory && (
+                  <p className="text-[12px] text-amber-700 leading-relaxed">
+                    회원 견적에서 불러온 이력이라 거래처 저장을 꺼 두었어요. 다른 회사·담당자로 바꿨을 때만 켜 주세요.
+                  </p>
+                )}
+              </div>
+            )}
 
             {/* 담당자 여러 명 선택 */}
             {(selectedContacts.length > 1 ||
@@ -998,17 +1080,11 @@ function AdminProxyQuotesInner() {
             {showDirect && (
               <div className="border hair rounded-md p-4 space-y-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {[
-                    { label: "상호 *", key: "company", type: "text", placeholder: "회사명" },
-                    { label: "담당자", key: "name", type: "text", placeholder: "담당자 이름" },
-                    { label: "직급", key: "title", type: "text", placeholder: "부장, 대표 등" },
-                    { label: "연락처", key: "phone", type: "tel", placeholder: "010-0000-0000" },
-                    { label: "이메일", key: "email", type: "email", placeholder: "example@company.com" },
-                  ].map(({ label, key, type, placeholder }) => (
+                  {GUEST_FIELDS.map(({ label, key, type, placeholder }) => (
                     <div key={key}>
                       <label className="mono text-[10px] tracking-[0.15em] uppercase dim mb-1 block">{label}</label>
-                      <input type={type} value={guest[key as keyof GuestForm]}
-                        onChange={(e) => setGuest((g) => ({ ...g, [key]: e.target.value }))}
+                      <input type={type} value={guest[key]}
+                        onChange={(e) => updateGuestField(key, e.target.value)}
                         placeholder={placeholder}
                         className="w-full border hair rounded-md px-3 py-2.5 text-[14px] focus:outline-none focus:border-edred" />
                     </div>
