@@ -274,14 +274,16 @@ function resolveSeriesFilter(l1: string, l2: string, l3: string): string[] | und
 }
 
 // ── 견적 문의 검색 첫 화면 ─────────────────────────────────
-// 많이 찾는 모델: 최근 6개월 견적에 가장 많이 나간 품목 (2026-10-19 DB 집계 — 오일19·EMF10·nXDS10i·EMF20·nXDS6i·RV5)
+// 많이 찾는 모델: 최근 6개월 견적에 가장 많이 나간 품목 (2026-10-19 DB 집계 — 오일19·EMF10·nXDS10i·EMF20·nXDS6i·RV5) + RV12·RV8(대표님 추가)
 const POPULAR_SEARCHES: { label: string; query: string }[] = [
-  { label: "펌프 오일 19", query: "Performance 19" },
+  { label: "Ultragrade 19", query: "Performance 19" },
   { label: "EMF10", query: "EMF10" },
   { label: "nXDS10i", query: "nXDS10i" },
   { label: "EMF20", query: "EMF20" },
   { label: "nXDS6i", query: "nXDS6i" },
   { label: "RV5", query: "RV5" },
+  { label: "RV8", query: "RV8" },
+  { label: "RV12", query: "RV12" },
 ];
 // 검색칸에 저절로 써졌다 지워지는 예시
 const TYPING_EXAMPLES = ["RV12", "nXDS10i", "EMF20", "E2M28", "A65401903"];
@@ -1060,7 +1062,7 @@ export default function PumpSelector() {
                           <span className="text-[13px] font-normal text-dim">· 스마텍 재고 보유</span>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                          {stockItems.slice(0, 6).map((item, i) => (
+                          {stockItems.slice(0, 9).map((item, i) => (
                             <div key={item.partNo} className={`flex items-center justify-between gap-3 border border-ink/25 bg-paper px-4 py-3 ${i >= 3 ? "max-sm:hidden" : ""}`}>
                               <div className="min-w-0">
                                 <div className="truncate text-[15px] font-semibold text-ink" title={item.desc}>{item.desc}</div>
