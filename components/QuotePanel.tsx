@@ -104,18 +104,16 @@ export default function QuotePanel({ open, onClose }: Props) {
   // 2026-10-19 로그인 없이도 공개가 기준으로 저장 (가격은 이미 공개, 로그인하면 우대가)
   function handleSavePdf() {
     trackEvent("quote_pdf_save");
-    {
-      const header = document.querySelector("header") as HTMLElement | null;
-      const main = document.querySelector("main") as HTMLElement | null;
-      const hidden: HTMLElement[] = [];
-      [header, main].forEach((el) => {
-        if (el) { el.style.display = "none"; hidden.push(el); }
-      });
-      document.body.classList.add("printing-quote");
-      window.print();
-      hidden.forEach((el) => (el.style.display = ""));
-      document.body.classList.remove("printing-quote");
-    }
+    const header = document.querySelector("header") as HTMLElement | null;
+    const main = document.querySelector("main") as HTMLElement | null;
+    const hidden: HTMLElement[] = [];
+    [header, main].forEach((el) => {
+      if (el) { el.style.display = "none"; hidden.push(el); }
+    });
+    document.body.classList.add("printing-quote");
+    window.print();
+    hidden.forEach((el) => (el.style.display = ""));
+    document.body.classList.remove("printing-quote");
   }
 
   if (!open) return null;

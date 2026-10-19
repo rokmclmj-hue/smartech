@@ -9,7 +9,7 @@ import ProductPanel from "@/components/ProductPanel";
 import type { PanelItem } from "@/components/ProductPanel";
 import { CATALOG_MAP } from "@/lib/catalogs";
 import { trackEvent } from "@/lib/analytics";
-import { leadTimeLabel } from "@/lib/lead-time";
+import { leadTimeLabel, isPumpPart } from "@/lib/lead-time";
 
 type SeriesKey = keyof typeof productData;
 type Tab = "search" | "scan" | "selection";
@@ -291,14 +291,14 @@ const TYPING_EXAMPLES = ["RV12", "nXDS10i", "EMF20", "E2M28", "A65401903"];
 // ── 제품 검색 결과 정렬 ─────────────────────────────────────
 // 파트번호 순서 그대로면 "RV3 → RV3 부품키트 → RV3FX → 모터키트"처럼 섞여 보인다.
 // 모델명으로 시작하는 본체를 위로, 키트·부품을 아래로 보낸다 (2026-10-19 대표님 요청).
-const KIT_WORDS = /\b(kit|spares?|parts?)\b/i;
+// 본체/부품 구분은 통상 납기와 같은 기준(lib/lead-time.ts isPumpPart)을 쓴다.
 const normalizeQuery = (s: string) => s.replace(/[\s\-/]/g, "").toLowerCase();
 
 function searchRank(item: { partNo: string; desc: string }, q: string): number {
   if (q && item.partNo.toLowerCase().startsWith(q)) return 0;             // 파트번호로 찾은 경우
-  if (KIT_WORDS.test(item.desc)) return 3;                                // 부품·키트
+  if (isPumpPart(item.desc)) return 3;                                    // 부품·키트
   const firstWord = item.desc.trim().split(/\s+/)[0] ?? "";
-  if (q && /\d/.test(firstWord) && !firstWord.includes("/") && normalizeQuery(firstWord).startsWith(q)) return 1; // 모델 본체(RV3·E2M28처럼 숫자 포함)
+  if (q && /\d/.test(firstWord) && normalizeQuery(firstWord).startsWith(q)) return 1; // 모델 본체(RV3·GXS160/1750F처럼 숫자 포함)
   return 2;
 }
 
@@ -312,6 +312,55 @@ function sortSearchResults<T extends { partNo: string; desc: string; stock: numb
     cmp(model(a.desc), model(b.desc)) ||
     b.stock - a.stock ||
     cmp(a.desc, b.desc)
+  );
+}
+
+// 검색 결과 줄·바로 출고 카드가 함께 쓰는 담기 버튼
+function AddToCartButton({ added, loading, onAdd }: { added: boolean; loading: boolean; onAdd: () => void }) {
+  return (
+    <button
+      onClick={onAdd}
+      disabled={loading}
+      className={`h-10 shrink-0 min-w-[60px] px-3.5 text-[14px] font-medium border transition-colors whitespace-nowrap ${added ? "bg-ink text-paper border-ink" : "border-ink text-ink hover:bg-ink hover:text-paper"} disabled:opacity-50`}
+    >
+      {added ? "✓" : loading ? "…" : "담기"}
+    </button>
+  );
+}
+
+// 검색칸: 비어 있으면 예시 모델명을 한 글자씩 써 보여준다 (손님이 입력을 시작하면 멈춤)
+function TypingSearchInput({ value, onChange, inputRef }: {
+  value: string;
+  onChange: (v: string) => void;
+  inputRef: React.RefObject<HTMLInputElement | null>;
+}) {
+  const [typed, setTyped] = useState("");
+  useEffect(() => {
+    if (value) return;
+    let word = 0, len = 0, deleting = false;
+    const timer = setInterval(() => {
+      const target = TYPING_EXAMPLES[word];
+      if (!deleting) {
+        len++;
+        if (len > target.length + 8) deleting = true; // 다 쓴 뒤 잠깐 멈춤
+      } else {
+        len = Math.min(len, target.length) - 1;
+        if (len <= 0) { deleting = false; len = 0; word = (word + 1) % TYPING_EXAMPLES.length; }
+      }
+      setTyped(TYPING_EXAMPLES[word].slice(0, Math.max(0, len)));
+    }, 120);
+    return () => clearInterval(timer);
+  }, [value]);
+  return (
+    <input
+      ref={inputRef}
+      type="search"
+      aria-label="파트번호 또는 모델명 검색"
+      placeholder={`예: ${typed}`}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="min-w-0 flex-1 bg-transparent px-4 sm:px-3 py-4 md:py-5 text-[19px] md:text-[22px] font-medium focus:outline-none placeholder:text-ink/40"
+    />
   );
 }
 
@@ -344,13 +393,7 @@ function ProductResultRow({ desc, partNo, stock, leadLabel, priceLabel, added, l
       </div>
       <div className="shrink-0 flex items-center gap-3">
         <div className="text-[16px] font-bold text-edred whitespace-nowrap">{priceLabel}</div>
-        <button
-          onClick={onAdd}
-          disabled={loading}
-          className={`h-10 min-w-[60px] px-3.5 text-[14px] font-medium border transition-colors whitespace-nowrap ${added ? "bg-ink text-paper border-ink" : "border-ink text-ink hover:bg-ink hover:text-paper"} disabled:opacity-50`}
-        >
-          {added ? "✓" : loading ? "…" : "담기"}
-        </button>
+        <AddToCartButton added={added} loading={loading} onAdd={onAdd} />
       </div>
     </div>
   );
@@ -408,7 +451,6 @@ export default function PumpSelector() {
   const [dbSearchResults, setDbSearchResults] = useState<FlatItem[]>([]);
   const [stockItems, setStockItems] = useState<FlatItem[]>([]);
   const [showAllCategories, setShowAllCategories] = useState(false);
-  const [typedExample, setTypedExample] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchResultsRef = useRef<HTMLDivElement>(null);
   const [searchLoading, setSearchLoading] = useState(false);
@@ -478,7 +520,7 @@ export default function PumpSelector() {
       } catch (e) {
         if ((e as Error).name !== "AbortError") setDbSearchResults([]);
       } finally {
-        setSearchLoading(false);
+        if (!controller.signal.aborted) setSearchLoading(false);
       }
     }, 300);
     return () => { clearTimeout(timer); controller.abort(); };
@@ -487,7 +529,7 @@ export default function PumpSelector() {
   // 지금 바로 출고 가능: 재고 있는 품목 (관리자 화면 재고 숫자와 바로 연동, 비싼 것=펌프 먼저)
   useEffect(() => {
     const controller = new AbortController();
-    fetch("/api/products?inStock=true&limit=50", { signal: controller.signal })
+    fetch("/api/products?inStock=true&limit=500", { signal: controller.signal })
       .then((r) => r.json())
       .then((data) => {
         const products: { partNo: string; description: string; displayPrice: number | null; stock?: number; category?: string | null }[] = data.products ?? [];
@@ -500,24 +542,6 @@ export default function PumpSelector() {
       .catch(() => {});
     return () => controller.abort();
   }, []);
-
-  // 검색칸 예시 글자를 한 글자씩 써 보여준다 (손님이 입력을 시작하면 멈춤)
-  useEffect(() => {
-    if (search) return;
-    let word = 0, len = 0, deleting = false;
-    const timer = setInterval(() => {
-      const target = TYPING_EXAMPLES[word];
-      if (!deleting) {
-        len++;
-        if (len > target.length + 8) deleting = true; // 다 쓴 뒤 잠깐 멈춤
-      } else {
-        len = Math.min(len, target.length) - 1;
-        if (len <= 0) { deleting = false; len = 0; word = (word + 1) % TYPING_EXAMPLES.length; }
-      }
-      setTypedExample(TYPING_EXAMPLES[word].slice(0, Math.max(0, len)));
-    }, 120);
-    return () => clearInterval(timer);
-  }, [search]);
 
   function runSearch(q: string) {
     setSearch(q);
@@ -996,15 +1020,7 @@ export default function PumpSelector() {
                   <svg className="hidden sm:block shrink-0 self-center ml-5 h-6 w-6 text-ink" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden>
                     <circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" />
                   </svg>
-                  <input
-                    ref={searchInputRef}
-                    type="search"
-                    aria-label="파트번호 또는 모델명 검색"
-                    placeholder={`예: ${typedExample}`}
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="min-w-0 flex-1 bg-transparent px-4 sm:px-3 py-4 md:py-5 text-[19px] md:text-[22px] font-medium focus:outline-none placeholder:text-ink/40"
-                  />
+                  <TypingSearchInput value={search} onChange={setSearch} inputRef={searchInputRef} />
                   <button type="submit" className="shrink-0 bg-edred px-5 md:px-9 text-[15px] md:text-[17px] font-bold text-paper hover:bg-edred3 transition-colors">
                     가격 보기
                   </button>
@@ -1071,13 +1087,11 @@ export default function PumpSelector() {
                                   {item.price ? <> · <span className="font-semibold text-edred">{item.price.toLocaleString()}원</span></> : null}
                                 </div>
                               </div>
-                              <button
-                                onClick={() => handleAddToCart(item.partNo, item.desc)}
-                                disabled={cartLoading === item.partNo}
-                                className={`h-10 shrink-0 min-w-[60px] px-3.5 text-[14px] font-medium border transition-colors ${cartAdded.has(item.partNo) ? "bg-ink text-paper border-ink" : "border-ink text-ink hover:bg-ink hover:text-paper"} disabled:opacity-50`}
-                              >
-                                {cartAdded.has(item.partNo) ? "✓" : cartLoading === item.partNo ? "…" : "담기"}
-                              </button>
+                              <AddToCartButton
+                                added={cartAdded.has(item.partNo)}
+                                loading={cartLoading === item.partNo}
+                                onAdd={() => handleAddToCart(item.partNo, item.desc)}
+                              />
                             </div>
                           ))}
                         </div>
@@ -1150,7 +1164,7 @@ export default function PumpSelector() {
                             desc={item.desc}
                             partNo={item.partNo}
                             stock={categoryMeta[item.partNo]?.stock ?? 0}
-                            leadLabel={categoryMeta[item.partNo] ? leadTimeLabel(categoryMeta[item.partNo].category, item.desc) : ""}
+                            leadLabel={categoryMeta[item.partNo] ? leadTimeLabel(categoryMeta[item.partNo].category, item.desc) : categoryPriceLoading ? "" : "납기 문의"}
                             priceLabel={categoryPriceLoading
                               ? "확인 중..."
                               : categoryPrices[item.partNo] != null
@@ -1677,11 +1691,12 @@ export default function PumpSelector() {
                               <div className={`text-[13px] font-semibold mono ${i === 0 ? "text-ink" : ""}`}>
                                 {fmtTime(r.pumpDownTime_s, timeUnit)}
                               </div>
-                              {r.series === "GXS+GXB" ? (
+                              {r.series === "GXS+GXB" && (
                                 <div className="mt-1 inline-block bg-edred px-1.5 py-px text-[11px] font-semibold text-paper">
                                   예상치
                                 </div>
-                              ) : r.kvOutOfRange && (
+                              )}
+                              {r.kvOutOfRange && (
                                 <div className="mt-0.5 text-[11px] text-amber-600 font-medium">
                                   ⚠ 참고값
                                 </div>

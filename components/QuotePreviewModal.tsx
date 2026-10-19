@@ -123,38 +123,36 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
                   onClick={() => {
                     // 2026-10-19 로그인 없이도 공개가 기준으로 저장 (가격은 이미 공개, 로그인하면 우대가)
                     trackEvent("quote_pdf_save");
-                    {
-                      const header = document.querySelector("header") as HTMLElement | null;
-                      const main = document.querySelector("main") as HTMLElement | null;
-                      const hidden: HTMLElement[] = [];
-                      [header, main].forEach((el) => {
-                        if (el) { el.style.display = "none"; hidden.push(el); }
-                      });
-                      document.body.classList.add("printing-quote");
-                      // 모바일에서 window.print()는 비동기(즉시 반환)이므로
-                      // 복원 코드를 afterprint 안으로 이동 — 인쇄 전 복원 방지
-                      let fallbackTimer: ReturnType<typeof setTimeout> | null = null;
-                      const restore = () => {
-                        if (fallbackTimer) clearTimeout(fallbackTimer);
-                        hidden.forEach((el) => (el.style.display = ""));
-                        document.body.classList.remove("printing-quote");
-                        localStorage.removeItem("quoteCart");
-                        window.dispatchEvent(new Event("quoteCartUpdated"));
-                        onClose();
-                        window.removeEventListener("afterprint", restore);
-                      };
-                      window.addEventListener("afterprint", restore);
-                      // 모바일에서는 header/main을 숨긴 스타일이 화면에 반영(페인트)되기 전에
-                      // 인쇄 스냅샷이 찍혀 원래 페이지 내용이 함께 인쇄되는 경우가 있어
-                      // 다음 프레임까지 한 번 기다린 후 인쇄를 호출한다.
+                    const header = document.querySelector("header") as HTMLElement | null;
+                    const main = document.querySelector("main") as HTMLElement | null;
+                    const hidden: HTMLElement[] = [];
+                    [header, main].forEach((el) => {
+                      if (el) { el.style.display = "none"; hidden.push(el); }
+                    });
+                    document.body.classList.add("printing-quote");
+                    // 모바일에서 window.print()는 비동기(즉시 반환)이므로
+                    // 복원 코드를 afterprint 안으로 이동 — 인쇄 전 복원 방지
+                    let fallbackTimer: ReturnType<typeof setTimeout> | null = null;
+                    const restore = () => {
+                      if (fallbackTimer) clearTimeout(fallbackTimer);
+                      hidden.forEach((el) => (el.style.display = ""));
+                      document.body.classList.remove("printing-quote");
+                      localStorage.removeItem("quoteCart");
+                      window.dispatchEvent(new Event("quoteCartUpdated"));
+                      onClose();
+                      window.removeEventListener("afterprint", restore);
+                    };
+                    window.addEventListener("afterprint", restore);
+                    // 모바일에서는 header/main을 숨긴 스타일이 화면에 반영(페인트)되기 전에
+                    // 인쇄 스냅샷이 찍혀 원래 페이지 내용이 함께 인쇄되는 경우가 있어
+                    // 다음 프레임까지 한 번 기다린 후 인쇄를 호출한다.
+                    requestAnimationFrame(() => {
                       requestAnimationFrame(() => {
-                        requestAnimationFrame(() => {
-                          window.print();
-                          // iOS/Android: afterprint 미발생 대비 — 2초 후 강제 복원
-                          fallbackTimer = setTimeout(restore, 2000);
-                        });
+                        window.print();
+                        // iOS/Android: afterprint 미발생 대비 — 2초 후 강제 복원
+                        fallbackTimer = setTimeout(restore, 2000);
                       });
-                    }
+                    });
                   }}
                 >
                   견적서 저장 (PDF)
