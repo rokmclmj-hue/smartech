@@ -12,7 +12,7 @@
 - RV8(A65401903) 10/19 2대 입고 → Product.stock·InventoryItem 둘 다 2→4.
 - 이어서(5efa781, 라이브 확인): 통상 납기 표시 — `lib/lead-time.ts`가 유일한 기준표(대표님 10/19: RV 4·E2M 8·E2S 10·nES 12·EH 10·스크롤 8·산업용 드라이 12·nXRi 8·nEXT/T-Station 12·게이지 6·TIC 12·ADC 8·EMF 1·오일 2·피팅 4·부품/키트 4주, iXH·iXL "현재 1년 이상"→"납기 문의", ELD "납기 문의"). 펌프 분류 안 부품(Rotor·Gasket·Kit 등)은 4주. 납기가 바뀌면 이 파일만 고친다. 탭: 보는 칸만 검정+빨간 밑줄, AI는 작은 "AI" 표시(대표님 "추천안").
 - 분류 없던 4개 대표님 승인으로 DB 지정(10/19): RV5 3ph Universal(A65301905)→오일펌프(소형 RV), nEXT930D ISO-k200(B8K200D00)→터보펌프, P4|P5 보호 케이스·충전 키트(D03000500-A/-C)→디스플레이게이지(P4/P5). category 빈 제품 0개.
-- 의견 전달(결정 대기): 검색창 강화 아이디어. 발견 — 견적서 PDF 저장은 로그인 필요(QuotePanel handleSavePdf), 직접 견적이 적은 큰 원인일 수 있음. 최근 6개월 견적 많은 품목: 오일(Ultragrade) 20·EMF10 13·nXDS10i 10·EMF20 9·nXDS6i 8·RV5 6.
+- 검색창 강화 + 견적서 PDF 로그인 해제(69d9e64, 대표님 "나안", 라이브 확인): "모델명만 치세요" 제목·큰 검색창(22px)+가격 보기·예시 모델 타이핑, 많이 찾는 모델 6개(최근 6개월 견적 많은 품목: 오일19 20·EMF10 13·nXDS10i 10·EMF20 9·nXDS6i 8·RV5 6 — 바꾸려면 PumpSelector POPULAR_SEARCHES), "지금 바로 출고 가능"(Product.stock>0, 가격 높은 순 6개·휴대폰 3개, /api/products inStock=true), 26개 분류는 접기. 견적 카트·미리보기 PDF 저장은 비로그인도 공개가로 가능, 로그인 시 우대가 안내. GA4 quote_pdf_save 추가 → 11월 중순 simulation_run과 함께 횟수 확인.
 
 ## 2026-10-17 ISO 인증·특허 홈페이지 반영
 

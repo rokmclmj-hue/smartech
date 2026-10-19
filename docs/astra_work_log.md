@@ -1,5 +1,11 @@
 # Astra 작업 기록
 
+## 2026-10-19 — (클로드) 견적 문의 검색창 강화 + 견적서 PDF 로그인 해제 (69d9e64)
+
+- 대표님 "나안"(추천안 1~4 + PDF 로그인 풀기). `PumpSelector.tsx`: 제목·큰 검색 form(Enter·가격 보기 → 결과로 스크롤·휴대폰 자판 내림), 예시 타이핑(입력 시작하면 멈춤), POPULAR_SEARCHES 6개, 재고 카드(inStock fetch 1회, 담기), 분류 26개 접기. `app/api/products/route.ts` inStock=true → where.stock>0만 추가(응답 항목 그대로). `QuotePanel.tsx`·`QuotePreviewModal.tsx` 로그인 게이트 삭제, 비로그인은 기존 "공개가(PUBLIC) 기준" PDF, 카트 하단 로그인 링크 안내. `lib/analytics.ts` quote_pdf_save.
+- 검증: tsc·next build 통과, eslint 파일별 지적 수 변경 전과 같음. leak-check 정적 검사가 route.ts 변경으로 멈춤 → 로컬 --approve(16개 파일 통과) 후 public-api-reviewed.json 함께 커밋. 로컬·라이브 1440·393px: 예시 타이핑, 재고 카드, EMF10 버튼 → EMF10 통상 1주 294,500원, 분류 펼침, 재고 카드 담기 → 견적서 미리보기 → PDF 저장 시 인쇄 호출 1회·로그인 창 0, 가로 넘침 0. 라이브 inStock 응답 costPrice 0, 라이브 leak-check 통과, HEAD=origin.
+- 참고: 푸시 후 라이브 반영 확인 루프가 10분 넘게 걸림(Vercel Ready는 정상) — 다음엔 vercel ls로 먼저 상태 확인.
+
 ## 2026-10-19 — (클로드) 분류 없는 제품 4개 분류 지정 (DB만)
 
 - 대표님 "넣어주고": A65301905 RV5 3ph Universal→오일펌프(소형 RV)(통상 4주), B8K200D00 nEXT930D ISO-k200→터보펌프(12주), D03000500-A·-C P4|P5 보호 케이스·충전 키트→디스플레이게이지(P4/P5)(6주). category null 0개 확인. 코드 변경 없음.
