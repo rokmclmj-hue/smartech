@@ -65,7 +65,7 @@ VIG = html("""
 <div class="grid">
 <div class="box"><h3>저압 공간</h3><p>유리 두 장 사이를 배기<br>유리 프릿으로 테두리 밀봉</p></div>
 <div class="box"><h3>필러(스페이서)</h3><p>대기압 힘을 분산해서 지지<br>유리판이 붙거나 휘는 것을 방지</p></div>
-</div><div class="note">구체적 내부 압력·필러 간격 수치는 확인하지 못했습니다.</div></div>
+</div><div class="note">내부 압력·필러 간격은 제품마다 달라 제품 사양서로 확인합니다.</div></div>
 """)
 
 with sync_playwright() as p:
