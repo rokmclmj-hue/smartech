@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { trackEvent } from "@/lib/analytics";
 
 type CartItem = {
   productId: number;
@@ -19,7 +20,6 @@ export default function QuotePanel({ open, onClose }: Props) {
   const { data: session } = useSession();
   const [items, setItems] = useState<CartItem[]>([]);
   const [priceMap, setPriceMap] = useState<Map<number, number | null>>(new Map());
-  const [showLoginGate, setShowLoginGate] = useState(false);
 
   function loadItems() {
     try {
@@ -45,10 +45,7 @@ export default function QuotePanel({ open, onClose }: Props) {
   }
 
   useEffect(() => {
-    if (open) {
-      loadItems();
-      setShowLoginGate(false);
-    }
+    if (open) loadItems();
   }, [open]);
 
   useEffect(() => {
@@ -64,14 +61,11 @@ export default function QuotePanel({ open, onClose }: Props) {
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        if (showLoginGate) setShowLoginGate(false);
-        else onClose();
-      }
+      if (e.key === "Escape") onClose();
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [onClose, showLoginGate]);
+  }, [onClose]);
 
   useEffect(() => {
     if (open) {
@@ -107,10 +101,10 @@ export default function QuotePanel({ open, onClose }: Props) {
     onClose();
   }
 
+  // 2026-10-19 로그인 없이도 공개가 기준으로 저장 (가격은 이미 공개, 로그인하면 우대가)
   function handleSavePdf() {
-    if (!session) {
-      setShowLoginGate(true);
-    } else {
+    trackEvent("quote_pdf_save");
+    {
       const header = document.querySelector("header") as HTMLElement | null;
       const main = document.querySelector("main") as HTMLElement | null;
       const hidden: HTMLElement[] = [];
@@ -225,37 +219,21 @@ export default function QuotePanel({ open, onClose }: Props) {
             >
               전체 비우기
             </button>
-            <div className="mono text-[14px] text-ink/80 pt-1">
-              ※ 로그인 시 우대 가격 적용 · 가격은 VAT 별도
+            <div className="text-[14px] text-ink/80 pt-1">
+              ※ 가격은 VAT 별도 · 로그인 없이 공개가로 저장됩니다.
+              {!session && (
+                <>
+                  {" "}회원은{" "}
+                  <Link href="/auth/login" onClick={onClose} className="underline underline-offset-2 text-ink hover:text-edred">
+                    로그인
+                  </Link>
+                  하면 우대 가격이 적용됩니다.
+                </>
+              )}
             </div>
           </div>
         )}
 
-        {/* 로그인 게이트 오버레이 */}
-        {showLoginGate && (
-          <div className="absolute inset-0 z-10 bg-paper/95 backdrop-blur-sm flex flex-col items-center justify-center p-8">
-            <div className="mono text-[11px] tracking-[0.16em] uppercase text-dim mb-4">로그인 필요</div>
-            <h3 className="display text-[24px] leading-tight text-center mb-2">
-              견적서 저장을<br />위해 로그인하세요
-            </h3>
-            <p className="text-[12px] text-dim text-center mb-6">
-              로그인 후 우대가격이 적용되며<br />PDF로 저장할 수 있습니다.
-            </p>
-            <Link
-              href="/auth/login"
-              onClick={onClose}
-              className="inline-block px-6 py-3 bg-ink text-paper text-[13px] mono tracking-wider hover:bg-edred transition-colors mb-3"
-            >
-              로그인하기 →
-            </Link>
-            <button
-              onClick={() => setShowLoginGate(false)}
-              className="text-[12px] text-dim hover:text-ink transition-colors"
-            >
-              계속 둘러보기
-            </button>
-          </div>
-        )}
       </div>
     </>
   );

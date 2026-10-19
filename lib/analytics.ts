@@ -5,8 +5,9 @@ declare global {
   }
 }
 
-// simulation_run: 펌프선정 시뮬레이션 계산 실행 (2026-10-19 로그인 없이 공개하면서 실제 사용 여부 확인용)
-export type InquiryEvent = "phone_click" | "quote_request" | "repair_submit" | "chat_start" | "simulation_run";
+// simulation_run: 펌프선정 시뮬레이션 계산 실행, quote_pdf_save: 견적서 PDF 저장 버튼
+// (2026-10-19 둘 다 로그인 없이 공개하면서 실제 사용 여부 확인용)
+export type InquiryEvent = "phone_click" | "quote_request" | "repair_submit" | "chat_start" | "simulation_run" | "quote_pdf_save";
 
 export function trackEvent(name: InquiryEvent) {
   if (typeof window === "undefined" || typeof window.gtag !== "function") return;

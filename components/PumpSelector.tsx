@@ -273,6 +273,19 @@ function resolveSeriesFilter(l1: string, l2: string, l3: string): string[] | und
   return undefined;
 }
 
+// ── 견적 문의 검색 첫 화면 ─────────────────────────────────
+// 많이 찾는 모델: 최근 6개월 견적에 가장 많이 나간 품목 (2026-10-19 DB 집계 — 오일19·EMF10·nXDS10i·EMF20·nXDS6i·RV5)
+const POPULAR_SEARCHES: { label: string; query: string }[] = [
+  { label: "펌프 오일 19", query: "Performance 19" },
+  { label: "EMF10", query: "EMF10" },
+  { label: "nXDS10i", query: "nXDS10i" },
+  { label: "EMF20", query: "EMF20" },
+  { label: "nXDS6i", query: "nXDS6i" },
+  { label: "RV5", query: "RV5" },
+];
+// 검색칸에 저절로 써졌다 지워지는 예시
+const TYPING_EXAMPLES = ["RV12", "nXDS10i", "EMF20", "E2M28", "A65401903"];
+
 // ── 제품 검색 결과 정렬 ─────────────────────────────────────
 // 파트번호 순서 그대로면 "RV3 → RV3 부품키트 → RV3FX → 모터키트"처럼 섞여 보인다.
 // 모델명으로 시작하는 본체를 위로, 키트·부품을 아래로 보낸다 (2026-10-19 대표님 요청).
@@ -391,6 +404,11 @@ export default function PumpSelector() {
 
   type FlatItem = { partNo: string; desc: string; price: number | null; stock: number; category: string | null; series: string };
   const [dbSearchResults, setDbSearchResults] = useState<FlatItem[]>([]);
+  const [stockItems, setStockItems] = useState<FlatItem[]>([]);
+  const [showAllCategories, setShowAllCategories] = useState(false);
+  const [typedExample, setTypedExample] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchResultsRef = useRef<HTMLDivElement>(null);
   const [searchLoading, setSearchLoading] = useState(false);
 
   // 카테고리 세부검색은 JSON을 품목 구조(파트번호·이름)로만 쓰고,
@@ -463,6 +481,47 @@ export default function PumpSelector() {
     }, 300);
     return () => { clearTimeout(timer); controller.abort(); };
   }, [search, selectedCategory, tab]);
+
+  // 지금 바로 출고 가능: 재고 있는 품목 (관리자 화면 재고 숫자와 바로 연동, 비싼 것=펌프 먼저)
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch("/api/products?inStock=true&limit=50", { signal: controller.signal })
+      .then((r) => r.json())
+      .then((data) => {
+        const products: { partNo: string; description: string; displayPrice: number | null; stock?: number; category?: string | null }[] = data.products ?? [];
+        setStockItems(
+          products
+            .map((p) => ({ partNo: p.partNo, desc: p.description, price: p.displayPrice, stock: p.stock ?? 0, category: p.category ?? null, series: "" }))
+            .sort((a, b) => (b.price ?? 0) - (a.price ?? 0))
+        );
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  }, []);
+
+  // 검색칸 예시 글자를 한 글자씩 써 보여준다 (손님이 입력을 시작하면 멈춤)
+  useEffect(() => {
+    if (search) return;
+    let word = 0, len = 0, deleting = false;
+    const timer = setInterval(() => {
+      const target = TYPING_EXAMPLES[word];
+      if (!deleting) {
+        len++;
+        if (len > target.length + 8) deleting = true; // 다 쓴 뒤 잠깐 멈춤
+      } else {
+        len = Math.min(len, target.length) - 1;
+        if (len <= 0) { deleting = false; len = 0; word = (word + 1) % TYPING_EXAMPLES.length; }
+      }
+      setTypedExample(TYPING_EXAMPLES[word].slice(0, Math.max(0, len)));
+    }, 120);
+    return () => clearInterval(timer);
+  }, [search]);
+
+  function runSearch(q: string) {
+    setSearch(q);
+    searchInputRef.current?.blur(); // 휴대폰 자판을 내려 결과가 보이게
+    setTimeout(() => searchResultsRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" }), 50);
+  }
 
   // 선택된 TMP 객체
   const selectedTMPObj = TURBO_PUMPS.find(t => t.model === turboTMP) ?? null;
@@ -924,14 +983,44 @@ export default function PumpSelector() {
           <div>
             {!selectedCategory ? (
               <>
-                <p className="text-[14px] text-[#6A6660] mb-3">신규 도입할 제품을 선택하거나 파트번호·모델명으로 검색하세요.</p>
-                <input
-                  type="text"
-                  placeholder="파트번호 또는 모델명 검색 (예: A65301903, EH250)"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="w-full border-2 border-ink px-4 py-3 text-[16px] focus:outline-none focus:border-edred bg-transparent mb-3 placeholder:text-[#2a2823] transition-colors"
-                />
+                <h3 className="display text-[22px] md:text-[28px] leading-tight tracking-tight mb-4">
+                  모델명만 치세요. <span className="text-edred">가격과 납기</span>가 바로 나옵니다.
+                </h3>
+                <form
+                  role="search"
+                  onSubmit={(e) => { e.preventDefault(); runSearch(search); }}
+                  className="flex items-stretch border-2 border-ink focus-within:border-edred bg-paper transition-colors"
+                >
+                  <svg className="hidden sm:block shrink-0 self-center ml-5 h-6 w-6 text-ink" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden>
+                    <circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" />
+                  </svg>
+                  <input
+                    ref={searchInputRef}
+                    type="search"
+                    aria-label="파트번호 또는 모델명 검색"
+                    placeholder={`예: ${typedExample}`}
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="min-w-0 flex-1 bg-transparent px-4 sm:px-3 py-4 md:py-5 text-[19px] md:text-[22px] font-medium focus:outline-none placeholder:text-ink/40"
+                  />
+                  <button type="submit" className="shrink-0 bg-edred px-5 md:px-9 text-[15px] md:text-[17px] font-bold text-paper hover:bg-edred3 transition-colors">
+                    가격 보기
+                  </button>
+                </form>
+                <div className="mt-3 mb-5 flex flex-wrap items-center gap-2">
+                  <span className="mr-1 text-[13px] text-dim">많이 찾는 모델</span>
+                  {POPULAR_SEARCHES.map((p) => (
+                    <button
+                      key={p.query}
+                      type="button"
+                      onClick={() => runSearch(p.query)}
+                      className={`border px-3 py-1.5 text-[14px] font-medium transition-colors ${search === p.query ? "bg-ink text-paper border-ink" : "border-ink/30 text-ink hover:border-ink hover:bg-ink hover:text-paper"}`}
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+                <div ref={searchResultsRef} className="scroll-mt-24" />
                 {searchLoading ? (
                   <div className="border border-[#E3DFD6] p-4 text-[14px] text-dim">검색 중...</div>
                 ) : newGlobalResults.length > 0 ? (
@@ -962,7 +1051,46 @@ export default function PumpSelector() {
                 ) : search.trim().length >= 1 ? (
                   <div className="border border-[#E3DFD6] p-4 text-[14px] text-dim">일치하는 항목이 없습니다. 모델명 일부(예: RV12)나 파트번호로 다시 검색해 보세요.</div>
                 ) : (
-                  <div className="grid grid-cols-3 gap-2">
+                  <>
+                    {stockItems.length > 0 && (
+                      <div className="mb-6">
+                        <div className="mb-2 flex items-center gap-2 text-[15px] font-bold text-ink">
+                          <span className="h-2 w-2 bg-edred" aria-hidden />
+                          지금 바로 출고 가능
+                          <span className="text-[13px] font-normal text-dim">· 스마텍 재고 보유</span>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                          {stockItems.slice(0, 6).map((item, i) => (
+                            <div key={item.partNo} className={`flex items-center justify-between gap-3 border border-ink/25 bg-paper px-4 py-3 ${i >= 3 ? "max-sm:hidden" : ""}`}>
+                              <div className="min-w-0">
+                                <div className="truncate text-[15px] font-semibold text-ink" title={item.desc}>{item.desc}</div>
+                                <div className="mt-0.5 text-[13px] text-dim">
+                                  재고 <span className="font-semibold text-ink">{item.stock}</span>
+                                  {item.price ? <> · <span className="font-semibold text-edred">{item.price.toLocaleString()}원</span></> : null}
+                                </div>
+                              </div>
+                              <button
+                                onClick={() => handleAddToCart(item.partNo, item.desc)}
+                                disabled={cartLoading === item.partNo}
+                                className={`h-10 shrink-0 min-w-[60px] px-3.5 text-[14px] font-medium border transition-colors ${cartAdded.has(item.partNo) ? "bg-ink text-paper border-ink" : "border-ink text-ink hover:bg-ink hover:text-paper"} disabled:opacity-50`}
+                              >
+                                {cartAdded.has(item.partNo) ? "✓" : cartLoading === item.partNo ? "…" : "담기"}
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setShowAllCategories((v) => !v)}
+                      aria-expanded={showAllCategories}
+                      className="w-full border border-ink/30 px-4 py-3 text-left text-[15px] font-medium text-ink hover:border-ink transition-colors"
+                    >
+                      전체 제품 분류 보기 ({CATALOG_ITEMS.length}) {showAllCategories ? "▴" : "▾"}
+                    </button>
+                    {showAllCategories && (
+                  <div className="mt-2 grid grid-cols-2 md:grid-cols-3 gap-2">
                     {CATALOG_ITEMS.map((item) => (
                       <button
                         key={item.category}
@@ -976,6 +1104,8 @@ export default function PumpSelector() {
                       </button>
                     ))}
                   </div>
+                    )}
+                  </>
                 )}
               </>
             ) : (

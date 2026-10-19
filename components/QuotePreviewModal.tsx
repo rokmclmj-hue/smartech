@@ -1,9 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import Link from "next/link";
 import { SMARTECH_COMPANY } from "@/lib/company";
 import { getProductIconUrl } from "@/lib/product-icons";
+import { trackEvent } from "@/lib/analytics";
 
 const SM = SMARTECH_COMPANY;
 
@@ -26,7 +26,6 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
   const { data: session } = useSession();
   const [items, setItems] = useState<PricedItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const [showLoginGate, setShowLoginGate] = useState(false);
 
   async function fetchPrices() {
     const cart: CartItem[] = JSON.parse(localStorage.getItem("quoteCart") ?? "[]");
@@ -42,7 +41,7 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
     } finally { setLoading(false); }
   }
 
-  useEffect(() => { if (open) { setShowLoginGate(false); fetchPrices(); } }, [open]);
+  useEffect(() => { if (open) { fetchPrices(); } }, [open]);
   useEffect(() => {
     window.addEventListener("quoteCartUpdated", fetchPrices);
     return () => window.removeEventListener("quoteCartUpdated", fetchPrices);
@@ -122,9 +121,9 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
                   type="button"
                   className="btn-export"
                   onClick={() => {
-                    if (!isLoggedIn) {
-                      setShowLoginGate(true);
-                    } else {
+                    // 2026-10-19 로그인 없이도 공개가 기준으로 저장 (가격은 이미 공개, 로그인하면 우대가)
+                    trackEvent("quote_pdf_save");
+                    {
                       const header = document.querySelector("header") as HTMLElement | null;
                       const main = document.querySelector("main") as HTMLElement | null;
                       const hidden: HTMLElement[] = [];
@@ -471,37 +470,6 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
           </div>
         </div>
 
-        {/* ── 로그인 게이트 ── */}
-        {showLoginGate && (
-          <div style={{
-            position:"fixed", inset:0, zIndex:60,
-            background:"rgba(10,14,20,0.92)", backdropFilter:"blur(4px)",
-            display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:32,
-          }}>
-            <div style={{ fontFamily:"var(--q-mono)", fontSize:10, color:"var(--q-muted)", letterSpacing:"0.16em", textTransform:"uppercase", marginBottom:16 }}>
-              LOGIN REQUIRED
-            </div>
-            <h3 style={{ fontSize:24, fontWeight:700, textAlign:"center", marginBottom:8, color:"var(--q-text)" }}>
-              견적서 저장을<br />위해 로그인하세요
-            </h3>
-            <p style={{ fontSize:12, color:"var(--q-muted)", textAlign:"center", marginBottom:24, lineHeight:1.8 }}>
-              로그인 후 우대가격이 적용되며<br />PDF로 저장할 수 있습니다.
-            </p>
-            <Link href="/auth/login" onClick={onClose} style={{
-              display:"inline-block", padding:"12px 28px",
-              background:"var(--q-accent)", color:"var(--q-bg)",
-              fontSize:13, fontFamily:"var(--q-mono)", letterSpacing:"0.1em",
-              textDecoration:"none", marginBottom:12,
-            }}>
-              [ 로그인하기 → ]
-            </Link>
-            <button onClick={() => setShowLoginGate(false)} style={{
-              fontSize:12, color:"var(--q-muted)", background:"none", border:"none", cursor:"pointer", fontFamily:"var(--q-mono)",
-            }}>
-              계속 둘러보기
-            </button>
-          </div>
-        )}
       </div>
     </div>
     </>

@@ -40,6 +40,8 @@ export async function GET(req: NextRequest) {
   }
   if (category) where.category = category;
   if (importantOnly) where.isImportant = true;
+  // 홈 견적 문의 "지금 바로 출고 가능" 줄 (2026-10-19)
+  if (searchParams.get("inStock") === "true") where.stock = { gt: 0 };
 
   let products: any[];
   let total: number;
