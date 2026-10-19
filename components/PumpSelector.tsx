@@ -9,6 +9,7 @@ import ProductPanel from "@/components/ProductPanel";
 import type { PanelItem } from "@/components/ProductPanel";
 import { CATALOG_MAP } from "@/lib/catalogs";
 import { trackEvent } from "@/lib/analytics";
+import { leadTimeLabel } from "@/lib/lead-time";
 
 type SeriesKey = keyof typeof productData;
 type Tab = "search" | "scan" | "selection";
@@ -299,11 +300,12 @@ function sortSearchResults<T extends { partNo: string; desc: string; stock: numb
   );
 }
 
-// 제품 검색·분류별 목록이 함께 쓰는 한 줄 (품명·파트번호·재고 | 가격·담기)
-function ProductResultRow({ desc, partNo, stock, priceLabel, added, loading, onAdd }: {
+// 제품 검색·분류별 목록이 함께 쓰는 한 줄 (품명·파트번호·재고 또는 통상 납기 | 가격·담기)
+function ProductResultRow({ desc, partNo, stock, leadLabel, priceLabel, added, loading, onAdd }: {
   desc: string;
   partNo: string;
   stock: number;
+  leadLabel: string;
   priceLabel: string;
   added: boolean;
   loading: boolean;
@@ -315,11 +317,13 @@ function ProductResultRow({ desc, partNo, stock, priceLabel, added, loading, onA
         <div className="text-[16px] font-medium leading-snug text-ink">{desc}</div>
         <div className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1">
           <span className="mono text-[13px] text-dim">{partNo}</span>
-          {stock > 0 && (
+          {stock > 0 ? (
             <span className="inline-flex items-center gap-1.5 border border-ink px-1.5 py-px text-[12px] font-semibold leading-tight text-ink">
               <span className="h-1.5 w-1.5 bg-edred" aria-hidden />
               재고 {stock}
             </span>
+          ) : (
+            <span className="text-[13px] text-ink/75">{leadLabel}</span>
           )}
         </div>
       </div>
@@ -385,14 +389,14 @@ export default function PumpSelector() {
   const [cartLoading, setCartLoading] = useState<string | null>(null);
   const [cartAdded, setCartAdded] = useState<Set<string>>(new Set());
 
-  type FlatItem = { partNo: string; desc: string; price: number | null; stock: number; series: string };
+  type FlatItem = { partNo: string; desc: string; price: number | null; stock: number; category: string | null; series: string };
   const [dbSearchResults, setDbSearchResults] = useState<FlatItem[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
 
   // 카테고리 세부검색은 JSON을 품목 구조(파트번호·이름)로만 쓰고,
   // 가격은 항상 DB에서 실시간으로 가져온다 (JSON 고정가는 원가 변경이 반영되지 않는 문제가 있었음 — 2026-09-14).
   const [categoryPrices, setCategoryPrices] = useState<Record<string, number | null>>({});
-  const [categoryStock, setCategoryStock] = useState<Record<string, number>>({});
+  const [categoryMeta, setCategoryMeta] = useState<Record<string, { stock: number; category: string | null }>>({});
   const [categoryPriceLoading, setCategoryPriceLoading] = useState(false);
 
   useEffect(() => {
@@ -407,17 +411,17 @@ export default function PumpSelector() {
       try {
         const res = await fetch(`/api/products?partNos=${encodeURIComponent(partNos.join(","))}&limit=${partNos.length}`, { signal: controller.signal });
         const data = await res.json();
-        const products: { partNo: string; displayPrice: number | null; stock?: number }[] = data.products ?? [];
+        const products: { partNo: string; displayPrice: number | null; stock?: number; category?: string | null }[] = data.products ?? [];
         const map: Record<string, number | null> = {};
-        const stockMap: Record<string, number> = {};
+        const metaMap: Record<string, { stock: number; category: string | null }> = {};
         for (const p of products) {
           map[p.partNo] = p.displayPrice;
-          stockMap[p.partNo] = p.stock ?? 0;
+          metaMap[p.partNo] = { stock: p.stock ?? 0, category: p.category ?? null };
         }
         setCategoryPrices(map);
-        setCategoryStock(stockMap);
+        setCategoryMeta(metaMap);
       } catch (e) {
-        if ((e as Error).name !== "AbortError") { setCategoryPrices({}); setCategoryStock({}); }
+        if ((e as Error).name !== "AbortError") { setCategoryPrices({}); setCategoryMeta({}); }
       } finally {
         setCategoryPriceLoading(false);
       }
@@ -437,7 +441,7 @@ export default function PumpSelector() {
         // 서버는 파트번호 순으로 자르므로 넉넉히 받아 와서 모델 본체가 잘리지 않게 한다 ("rv"·"e2m"은 60개 이상)
         const res = await fetch(`/api/products?q=${encodeURIComponent(search)}&limit=200`, { signal: controller.signal });
         const data = await res.json();
-        const products: { partNo: string; description: string; displayPrice: number | null; stock?: number }[] = data.products ?? [];
+        const products: { partNo: string; description: string; displayPrice: number | null; stock?: number; category?: string | null }[] = data.products ?? [];
         setDbSearchResults(
           sortSearchResults(
             products.map((p) => ({
@@ -445,6 +449,7 @@ export default function PumpSelector() {
               desc: p.description,
               price: p.displayPrice,
               stock: p.stock ?? 0,
+              category: p.category ?? null,
               series: "",
             })),
             search
@@ -722,42 +727,41 @@ export default function PumpSelector() {
         catalogUrl={panelItem ? (CATALOG_MAP[panelItem.category] ?? undefined) : undefined}
       />
 
-      {/* Tabs */}
-      <div className="grid grid-cols-3 gap-2">
-        {/* 제품 검색 */}
-        <button
-          onClick={() => { setTab("search"); setSelectedCategory(null); setSearch(""); }}
-          className="flex flex-col items-center justify-center py-4 px-3 border bg-paper text-ink border-ink hover:bg-ink hover:text-paper transition-colors"
-        >
-          <span className="text-[15px] font-semibold tracking-tight">제품 검색</span>
-        </button>
-
-        {/* AI 모델 인식 */}
-        <button
-          onClick={() => { setTab("scan"); setScanResult(null); }}
-          className={`flex flex-col items-center justify-center py-4 px-3 border transition-colors ${
-            tab === "scan"
-              ? "bg-edred text-paper border-edred"
-              : "bg-edred text-paper border-edred hover:bg-ink hover:border-ink"
-          }`}
-        >
-          <span className="text-[15px] font-semibold tracking-tight">AI 모델 인식</span>
-          <span className="mono text-[11px] tracking-[0.06em] mt-0.5 text-paper">
-            명판 사진으로 즉시 견적
-          </span>
-        </button>
-
-        {/* 펌프선정 및 시뮬레이션 */}
-        <button
+      {/* Tabs — 지금 보고 있는 칸만 검게 + 아래 빨간 줄. AI는 칸 색 대신 작은 빨간 표시로 강조 (2026-10-19) */}
+      <div className="grid grid-cols-3 gap-2" role="tablist">
+        {([
+          { key: "search", label: "제품 검색", sub: "모델명으로 가격·납기", ai: false,
+            onClick: () => { setTab("search"); setSelectedCategory(null); setSearch(""); } },
+          { key: "scan", label: "모델 인식", sub: "명판 사진으로 즉시 견적", ai: true,
+            onClick: () => { setTab("scan"); setScanResult(null); } },
           // 2026-10-19 로그인 없이 공개 (계산은 브라우저 안에서만 돌아 비용이 없고, 사용 횟수는 GA4로 센다)
-          onClick={() => { setTab("selection"); setSelectedCategory(null); }}
-          className="group flex flex-col items-center justify-center py-4 px-3 border bg-paper text-ink border-ink hover:bg-ink hover:text-paper transition-colors"
-        >
-          <span className="text-[15px] font-semibold tracking-tight">펌프선정 및 시뮬레이션</span>
-          <span className="mono text-[11px] tracking-[0.06em] mt-0.5 text-ink/60 group-hover:text-paper/70">
-            공정 조건 기반 자동 선정
-          </span>
-        </button>
+          { key: "selection", label: "펌프선정 및 시뮬레이션", sub: "공정 조건 기반 자동 선정", ai: false,
+            onClick: () => { setTab("selection"); setSelectedCategory(null); } },
+        ] as const).map((t) => {
+          const active = tab === t.key;
+          return (
+            <button
+              key={t.key}
+              role="tab"
+              aria-selected={active}
+              onClick={t.onClick}
+              className={`relative flex flex-col items-center justify-center py-4 px-3 border transition-colors ${
+                active
+                  ? "bg-ink text-paper border-ink"
+                  : "bg-paper text-ink border-ink/40 hover:border-ink hover:bg-[#efece5]"
+              }`}
+            >
+              <span className="flex items-center gap-1.5 text-[15px] font-semibold tracking-tight">
+                {t.ai && <span className="bg-edred px-1.5 py-px mono text-[11px] font-bold leading-tight text-paper">AI</span>}
+                {t.label}
+              </span>
+              <span className={`mono text-[11px] tracking-[0.06em] mt-0.5 ${active ? "text-paper/75" : "text-ink/60"}`}>
+                {t.sub}
+              </span>
+              {active && <span className="absolute inset-x-0 -bottom-px h-1 bg-edred" aria-hidden />}
+            </button>
+          );
+        })}
       </div>
 
       <div className="mt-6">
@@ -934,7 +938,7 @@ export default function PumpSelector() {
                   <>
                     <div className="border border-[#E3DFD6]">
                       <div className="flex items-center justify-between px-4 py-2 border-b border-[#E3DFD6] bg-[#efece5] mono text-[12px] tracking-[0.08em] text-dim">
-                        <span>품명 · 파트번호 · 재고</span>
+                        <span>품명 · 파트번호 · 재고/납기</span>
                         <span>판매가 (VAT 별도)</span>
                       </div>
                       <div className="divide-y divide-[#E3DFD6] max-h-[520px] overflow-y-auto">
@@ -944,6 +948,7 @@ export default function PumpSelector() {
                             desc={item.desc}
                             partNo={item.partNo}
                             stock={item.stock}
+                            leadLabel={leadTimeLabel(item.category, item.desc)}
                             priceLabel={item.price ? item.price.toLocaleString() + "원" : "문의"}
                             added={cartAdded.has(item.partNo)}
                             loading={cartLoading === item.partNo}
@@ -952,7 +957,7 @@ export default function PumpSelector() {
                         ))}
                       </div>
                     </div>
-                    <div className="mt-2 text-[13px] text-dim">총 {newGlobalResults.length}개 · 펌프 본체가 먼저, 부품·키트는 아래에 표시됩니다.</div>
+                    <div className="mt-2 text-[13px] text-dim">총 {newGlobalResults.length}개 · 펌프 본체가 먼저, 부품·키트는 아래에 표시됩니다. 통상 납기는 발주 후 기준이며 본사 사정에 따라 달라질 수 있습니다.</div>
                   </>
                 ) : search.trim().length >= 1 ? (
                   <div className="border border-[#E3DFD6] p-4 text-[14px] text-dim">일치하는 항목이 없습니다. 모델명 일부(예: RV12)나 파트번호로 다시 검색해 보세요.</div>
@@ -1012,7 +1017,8 @@ export default function PumpSelector() {
                             key={i}
                             desc={item.desc}
                             partNo={item.partNo}
-                            stock={categoryStock[item.partNo] ?? 0}
+                            stock={categoryMeta[item.partNo]?.stock ?? 0}
+                            leadLabel={categoryMeta[item.partNo] ? leadTimeLabel(categoryMeta[item.partNo].category, item.desc) : ""}
                             priceLabel={categoryPriceLoading
                               ? "확인 중..."
                               : categoryPrices[item.partNo] != null
@@ -1025,7 +1031,7 @@ export default function PumpSelector() {
                         ))
                       )}
                     </div>
-                    <div className="mt-2 text-[13px] text-dim">가격은 부가세 미포함 기준입니다.</div>
+                    <div className="mt-2 text-[13px] text-dim">가격은 부가세 미포함 기준입니다. 통상 납기는 발주 후 기준이며 본사 사정에 따라 달라질 수 있습니다.</div>
                   </>
                 ) : (
                   <div className="border border-[#E3DFD6] p-4 text-[12px] text-[#6A6660] bg-[#F6F4EF]">
