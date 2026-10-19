@@ -160,6 +160,8 @@ function AdminProxyQuotesInner() {
   const [customerEdited, setCustomerEdited] = useState(false);
   // 불러온 이력이 회원 견적이었는지 — ✎ 수정 칸에 "거래처 저장은 꺼 둠" 안내
   const [fromMemberHistory, setFromMemberHistory] = useState(false);
+  // 불러오거나 고른 순간의 고객 유형 — ✎ 수정에서 바꾸면 "단가 확인" 안내
+  const [loadedTier, setLoadedTier] = useState("ENDUSER");
   const [guest, setGuest] = useState<GuestForm>({
     name: "", title: "", company: "", email: "", phone: "", tier: "ENDUSER",
   });
@@ -232,6 +234,12 @@ function AdminProxyQuotesInner() {
   // 현재 활성 tier / 고객 확정 여부
   const activeTier = selectedCustomer?.tier ?? guest.tier ?? "ENDUSER";
   const hasCustomer = !!selectedCustomer || (showDirect && !!guest.company.trim());
+  // ✎ 수정에서 상호를 다른 회사로 바꿨는지 — 바꿨으면 예전 회사의 담당자 버튼·이전 견적 보기를 숨긴다
+  const companyRenamed =
+    !!selectedCustomer && selectedCustomer.source !== "user" && !!selectedCompanyName &&
+    guest.company.trim().toLowerCase() !== selectedCompanyName.trim().toLowerCase();
+  // 회원 견적 이력은 같은 회사 그대로면 거래처 저장 금지(2026-10-12 결정 — 회원 정보를 거래처·가입 등급 명단에 넣지 않음)
+  const memberSaveBlocked = fromMemberHistory && !companyRenamed;
 
   // ── 저장된 회사 서류 로드 ────────────────────────────────
   useEffect(() => {
@@ -311,6 +319,7 @@ function AdminProxyQuotesInner() {
     setCustomerEdited(false);
     setFromMemberHistory(false);
     setSaveToCompany(true);
+    setLoadedTier(c.tier);
     setSelectedContacts(c.contacts as KnownContact[]);
     setSelectedCompanyName(c.source === "known" ? c.company : null);
     const matchingContact = c.contacts.find((ct) => ct.name === c.name);
@@ -329,6 +338,7 @@ function AdminProxyQuotesInner() {
     setCustomerEdited(false);
     setFromMemberHistory(false);
     setSaveToCompany(true);
+    setLoadedTier("ENDUSER");
     setGuest({ name: "", title: "", company: "", email: "", phone: "", tier: "ENDUSER" });
     setPaymentTerm(null);
     setAttachFiles([]);
@@ -364,11 +374,20 @@ function AdminProxyQuotesInner() {
   }
 
   // ✎ 수정 중 입력 — 견적에 쓰이는 guest와 고객 칸에 보이는 selectedCustomer를 같이 바꾼다
+  // 직접 입력 폼은 selectedCustomer가 없을 때만 보이므로, 고른 고객(회원 제외)이 있으면 ✎ 수정에서 온 입력이다.
+  // 실제로 칸을 고쳤을 때만 customerEdited를 켠다(열었다 닫기만 하면 거래처에 저장하지 않음).
   function updateGuestField(key: Exclude<keyof GuestForm, "tier">, value: string) {
     setGuest((g) => ({ ...g, [key]: value }));
-    if (editingCustomer && key !== "title") {
-      setSelectedCustomer((c) => (c ? { ...c, [key]: value } : c));
+    if (selectedCustomer && selectedCustomer.source !== "user") {
+      if (key !== "title") setSelectedCustomer((c) => (c ? { ...c, [key]: value } : c));
+      setCustomerEdited(true);
     }
+  }
+
+  function updateGuestTier(tier: string) {
+    setGuest((g) => ({ ...g, tier }));
+    setSelectedCustomer((c) => (c ? { ...c, tier } : c));
+    setCustomerEdited(true);
   }
 
   function loadFromHistory(h: HistoryItem) {
@@ -379,6 +398,7 @@ function AdminProxyQuotesInner() {
     // 회원 견적에서 불러온 이력은 회원 연락처가 거래처(가입 등급 명단)에 들어가지 않게 저장을 꺼 두고 시작
     setSaveToCompany(h.isGuest);
     setFromMemberHistory(!h.isGuest);
+    setLoadedTier(h.tier);
     setGuest({ company: h.company, name: h.contactName, title: h.contactTitle ?? "", email: h.email ?? "", phone: h.phone ?? "", tier: h.tier });
     setSelectedCustomer({ source: "known", id: 0, company: h.company, name: h.contactName, phone: h.phone ?? "", email: h.email ?? "", tier: h.tier, paymentTerm: null, contacts: [] });
     setSelectedCompanyName(h.company);
@@ -526,6 +546,8 @@ function AdminProxyQuotesInner() {
     if (lines.length === 0) { toast.error("상품을 1개 이상 추가해주세요."); return; }
     if (!hasCustomer) { toast.error("고객을 먼저 선택해주세요."); return; }
     if (!guest.company.trim()) { toast.error("상호를 입력해주세요."); return; }
+    // 회원이 아닌 견적은 서버가 담당자 이름을 꼭 받는다 — 보내기 전에 미리 알림
+    if (selectedCustomer?.source !== "user" && !guest.name.trim()) { toast.error("담당자 이름을 입력해주세요."); return; }
 
     setSubmitting(true);
     try {
@@ -541,7 +563,7 @@ function AdminProxyQuotesInner() {
       const body =
         selectedCustomer?.source === "user"
           ? { customerId: selectedCustomer.id, items: itemsPayload, paymentTerm: effectivePaymentTerm ?? undefined, note: note || undefined, inquirySource: inquirySource ?? undefined }
-          : { guest, items: itemsPayload, paymentTerm: effectivePaymentTerm ?? undefined, note: note || undefined, inquirySource: inquirySource ?? undefined, saveToCompany: showDirect || customerEdited ? saveToCompany : false };
+          : { guest, items: itemsPayload, paymentTerm: effectivePaymentTerm ?? undefined, note: note || undefined, inquirySource: inquirySource ?? undefined, saveToCompany: showDirect || customerEdited ? saveToCompany && !memberSaveBlocked : false };
 
       const res = await fetch("/api/admin/proxy-quotes", {
         method: "POST",
@@ -960,7 +982,7 @@ function AdminProxyQuotesInner() {
                 {selectedCustomer.source !== "user" && (
                   <button
                     type="button"
-                    onClick={() => { setEditingCustomer((v) => !v); setCustomerEdited(true); }}
+                    onClick={() => setEditingCustomer((v) => !v)}
                     className="text-[12px] dim hover:text-edred"
                   >
                     {editingCustomer ? "입력 닫기" : "✎ 수정"}
@@ -984,12 +1006,32 @@ function AdminProxyQuotesInner() {
                     </div>
                   ))}
                 </div>
-                <label className="flex items-center gap-2.5 cursor-pointer select-none group">
+                {/* 고객 유형 — 다른 회사로 바꿀 때 예전 회사 등급(예: 딜러)이 견적·거래처에 남지 않게 */}
+                <div>
+                  <label className="mono text-[10px] tracking-[0.15em] uppercase dim mb-1.5 block">고객 유형</label>
+                  <div className="flex flex-wrap gap-2">
+                    {TIER_OPTIONS.map((t) => (
+                      <button key={t} type="button" onClick={() => updateGuestTier(t)}
+                        className={`mono text-[10px] tracking-[0.12em] px-3 py-1.5 rounded border transition-colors ${
+                          guest.tier === t ? "bg-edred text-white border-edred" : "hair dim hover:text-ink"
+                        }`}>
+                        {TIER_LABEL[t]}
+                      </button>
+                    ))}
+                  </div>
+                  {customerEdited && guest.tier !== loadedTier && (
+                    <p className="mt-1.5 text-[12px] text-amber-700 leading-relaxed">
+                      고객 유형이 바뀌었어요. 이미 넣은 품목 단가는 불러온 견적 그대로이니 단가를 확인해 주세요.
+                    </p>
+                  )}
+                </div>
+                <label className={`flex items-center gap-2.5 select-none group ${memberSaveBlocked ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}>
                   <input
                     type="checkbox"
-                    checked={saveToCompany}
+                    checked={saveToCompany && !memberSaveBlocked}
+                    disabled={memberSaveBlocked}
                     onChange={(e) => setSaveToCompany(e.target.checked)}
-                    className="w-4 h-4 accent-edred cursor-pointer"
+                    className="w-4 h-4 accent-edred cursor-pointer disabled:cursor-not-allowed"
                   />
                   <span className="text-[13px] text-ink group-hover:text-edred transition-colors">
                     거래처에 저장 <span className="dim text-[11px]">— 새 담당자는 거래처 담당자 목록에 추가(이미 있는 이름은 그대로)</span>
@@ -997,14 +1039,17 @@ function AdminProxyQuotesInner() {
                 </label>
                 {fromMemberHistory && (
                   <p className="text-[12px] text-amber-700 leading-relaxed">
-                    회원 견적에서 불러온 이력이라 거래처 저장을 꺼 두었어요. 다른 회사·담당자로 바꿨을 때만 켜 주세요.
+                    {memberSaveBlocked
+                      ? "회원 견적에서 불러온 이력이라 같은 회사로는 거래처에 저장하지 않아요(회원 정보는 \"고객 → 전체 회원\"에서 관리)."
+                      : "다른 회사로 바꿨어요. 새 회사를 거래처에 저장하려면 체크해 주세요."}
                   </p>
                 )}
               </div>
             )}
 
             {/* 담당자 여러 명 선택 */}
-            {(selectedContacts.length > 1 ||
+            {/* 상호를 다른 회사로 바꿨으면 예전 회사 담당자 버튼은 숨김(잘못 눌러 섞이는 것 방지) */}
+            {!companyRenamed && (selectedContacts.length > 1 ||
               (selectedContacts.length === 1 && selectedContacts[0].name !== selectedCustomer.name)) && (
               <div>
                 <div className="mono text-[9px] tracking-[0.12em] dim uppercase mb-1.5">담당자 선택</div>
@@ -1022,7 +1067,7 @@ function AdminProxyQuotesInner() {
             )}
 
             {/* 이전 견적 보기 */}
-            {selectedCompanyName && (
+            {selectedCompanyName && !companyRenamed && (
               <div className="flex justify-end">
                 <button type="button" onClick={() => openHistoryForCompany(selectedCompanyName)}
                   className="mono text-[10px] tracking-[0.1em] border hair rounded px-3 py-1.5 hover:text-edred hover:border-edred transition-colors">
