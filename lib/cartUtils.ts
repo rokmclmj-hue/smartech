@@ -5,6 +5,14 @@ type CartItem = {
   quantity: number;
 };
 
+// "/#cart" 링크의 onClick — 이미 홈이면 이동 없이 QuoteBar에 신호를 보내 카트를 연다.
+// 다른 페이지면 그대로 "/#cart"로 이동하고 QuoteBar가 주소를 보고 연다(2026-10-20)
+export function onCartLinkClick(e: { preventDefault(): void }) {
+  if (window.location.pathname !== "/") return;
+  e.preventDefault();
+  window.dispatchEvent(new Event("openQuoteCart"));
+}
+
 export async function addToCartByPartNo(
   partNo: string,
   description: string,

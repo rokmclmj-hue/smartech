@@ -4,6 +4,7 @@ import { useSession, signOut } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import RedTape from "./RedTape";
+import { onCartLinkClick } from "@/lib/cartUtils";
 
 const TIER_LABELS: Record<string, string> = {
   PENDING: "승인대기",
@@ -117,7 +118,8 @@ export default function Navbar() {
                     마이페이지
                   </Link>
                   <Link
-                    href="/quote"
+                    href="/#cart"
+                    onClick={onCartLinkClick}
                     className="relative chip !border-ink/60 hover:bg-ink hover:text-paper transition text-[11px]"
                     aria-label={`견적 카트 ${cartCount}개`}
                   >
@@ -150,7 +152,8 @@ export default function Navbar() {
             {/* 모바일: 견적 카트 아이콘 (항상 표시) */}
             {session && (
               <Link
-                href="/quote"
+                href="/#cart"
+                onClick={onCartLinkClick}
                 className="lg:hidden print:hidden relative p-2 text-ink/70 hover:text-edred transition min-h-[44px] min-w-[44px] flex items-center justify-center"
                 aria-label={`견적 카트 ${cartCount}개`}
               >
@@ -267,8 +270,8 @@ export default function Navbar() {
 
               {/* 견적 카트 — 뱃지 포함 */}
               <Link
-                href="/quote"
-                onClick={() => setMenuOpen(false)}
+                href="/#cart"
+                onClick={(e) => { setMenuOpen(false); onCartLinkClick(e); }}
                 className="py-3 border-b hair text-ink hover:text-edred transition-colors min-h-[44px] flex items-center justify-between"
               >
                 <span>견적 카트</span>

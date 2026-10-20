@@ -40,6 +40,32 @@ export default function QuoteBar() {
     };
   }, []);
 
+  // 카트 하나로(2026-10-20): 메뉴 "견적 카트"·옛 /quote 주소는 "/#cart"로 와서 이 카트를 연다
+  useEffect(() => {
+    function openFromHash() {
+      if (window.location.pathname !== "/" || window.location.hash !== "#cart") return;
+      try {
+        const stored = JSON.parse(localStorage.getItem("quoteCart") ?? "[]");
+        setCount(Array.isArray(stored) ? stored.length : 0);
+      } catch { setCount(0); }
+      setFullscreenMode(false);
+      setOpen(true);
+      window.history.replaceState(null, "", "/");
+    }
+    // 이미 홈에 있을 때 누른 "/#cart" 링크(lib/cartUtils onCartLinkClick)
+    function openFromSignal() {
+      window.history.replaceState(null, "", "/#cart");
+      openFromHash();
+    }
+    openFromHash();
+    window.addEventListener("hashchange", openFromHash);
+    window.addEventListener("openQuoteCart", openFromSignal);
+    return () => {
+      window.removeEventListener("hashchange", openFromHash);
+      window.removeEventListener("openQuoteCart", openFromSignal);
+    };
+  }, [pathname]);
+
   // 허용 페이지에서만 열림 상태 유지 (비허용 페이지에서는 파생값으로 자동 닫힘)
   const isAllowed = QUOTE_ALLOWED_PATHS.some((p) =>
     p === "/" ? pathname === "/" : pathname.startsWith(p)

@@ -8,6 +8,7 @@
   "app/api/quote/[id]/detail/route.ts": "ca29121e0c88185b",
   "app/api/quote/[id]/pdf/route.ts": "f3660ed5c9752885",
   "app/api/quote/[id]/route.ts": "f212d6961bbc0749",
+  "app/api/quote/guest-request/route.ts": "b5ec1bec70b3eec5",
   "app/api/quote/pdf-preview/route.ts": "e76a22a9ad03542a",
   "app/api/quote/request/route.ts": "f2a9dce580abb0fb",
   "app/api/quote/route.ts": "f0ebb31f5f56d0d0",

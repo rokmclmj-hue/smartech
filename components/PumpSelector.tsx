@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import productData from "@/lib/productCatalog.json";
-import { addToCartByPartNo } from "@/lib/cartUtils";
+import { addToCartByPartNo, onCartLinkClick } from "@/lib/cartUtils";
 import { recommendPumps, TURBO_PUMPS, ALL_PUMPS, calcTurboPumpDown, TMP_TURNON_MBAR } from "@/lib/pumpSpeedData";
 import type { PumpDownResult, TurboPumpDownResult, PumpModel } from "@/lib/pumpSpeedData";
 import ProductPanel from "@/components/ProductPanel";
@@ -1199,7 +1199,8 @@ export default function PumpSelector() {
                 )}
 
                 <Link
-                  href="/quote"
+                  href="/#cart"
+                  onClick={onCartLinkClick}
                   className="mt-4 w-full bg-ink text-paper py-3 text-[13px] hover:bg-[#c00020] transition-colors block text-center"
                 >
                   견적 카트 보기 →

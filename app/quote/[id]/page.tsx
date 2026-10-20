@@ -367,7 +367,7 @@ export default function QuoteDetailPage() {
     return (
       <div className="quote-page" style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 16 }}>
         <p style={{ color: "#7A8B9D" }}>견적을 찾을 수 없습니다.</p>
-        <Link href="/quote" className="qmono" style={{ fontSize: 11, letterSpacing: "0.1em", color: "#3A8DD0", textTransform: "uppercase" }}>
+        <Link href="/#cart" className="qmono" style={{ fontSize: 11, letterSpacing: "0.1em", color: "#3A8DD0", textTransform: "uppercase" }}>
           [ ← 견적 카트로 돌아가기 ]
         </Link>
       </div>

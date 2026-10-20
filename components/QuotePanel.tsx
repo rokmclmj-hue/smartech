@@ -24,6 +24,71 @@ export default function QuotePanel({ open, onClose }: Props) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [infoMap, setInfoMap] = useState<Map<number, ProductInfo>>(new Map());
 
+  // 주문 요청(2026-10-20): cart → form → done
+  const [step, setStep] = useState<"cart" | "form" | "done">("cart");
+  const [form, setForm] = useState({ company: "", name: "", phone: "", email: "", note: "", website: "" });
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState("");
+  const [doneNo, setDoneNo] = useState("");
+  const sessionUser = session?.user as { name?: string; company?: string; phone?: string; email?: string; tier?: string } | undefined;
+  // 승인된 회원은 기존 회원 발주 요청(/api/quote/request → 주문 관리 등록), 그 외(비회원·승인 대기)는 비회원 요청
+  const isApprovedMember = !!sessionUser && sessionUser.tier !== "PENDING" && sessionUser.tier !== "REJECTED";
+
+  function openForm() {
+    setForm((f) => ({
+      ...f,
+      company: f.company || sessionUser?.company || "",
+      name: f.name || sessionUser?.name || "",
+      phone: f.phone || sessionUser?.phone || "",
+      email: f.email || sessionUser?.email || "",
+    }));
+    setFormError("");
+    setStep("form");
+  }
+
+  async function submitOrder() {
+    setFormError("");
+    if (!isApprovedMember) {
+      if (!form.company.trim() || !form.name.trim()) { setFormError("회사명과 담당자를 입력해 주세요."); return; }
+      const digits = form.phone.replace(/\D/g, "");
+      if (digits.length < 9 || digits.length > 11) { setFormError("연락처를 정확히 입력해 주세요."); return; }
+    }
+    setSubmitting(true);
+    try {
+      const payloadItems = items.map((i) => ({ productId: i.productId, quantity: i.quantity }));
+      const res = isApprovedMember
+        ? await fetch("/api/quote/request", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ items: payloadItems, note: form.note.trim() || null }),
+          })
+        : await fetch("/api/quote/guest-request", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...form, items: payloadItems }),
+          });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { setFormError(data.error ?? "접수하지 못했습니다. 잠시 후 다시 시도해 주세요."); return; }
+      trackEvent("quote_request");
+      setDoneNo(
+        data.quoteNo ??
+        (data.quoteId ? `SMT-${new Date().getFullYear()}-Q-${String(data.quoteId).padStart(6, "0")}` : "")
+      );
+      localStorage.removeItem("quoteCart");
+      window.dispatchEvent(new Event("quoteCartUpdated"));
+      setStep("done");
+    } catch {
+      setFormError("네트워크 오류로 접수하지 못했습니다. 다시 시도해 주세요.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  function closePanel() {
+    if (step === "done") setStep("cart");
+    onClose();
+  }
+
   function loadItems() {
     try {
       const stored = JSON.parse(localStorage.getItem("quoteCart") ?? "[]");
@@ -64,7 +129,10 @@ export default function QuotePanel({ open, onClose }: Props) {
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        setStep((s) => (s === "done" ? "cart" : s));
+        onClose();
+      }
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
@@ -129,11 +197,18 @@ export default function QuotePanel({ open, onClose }: Props) {
         <div className="flex items-start justify-between px-6 pt-6 pb-4 border-b hair shrink-0">
           <div>
             {/* 영어 머리글·코드 글꼴 삭제(2026-10-20, 견적서 미리보기와 같은 방향) */}
-            <h2 className="display text-[26px] leading-tight">견적서</h2>
-            <div className="text-[15px] text-dim mt-1">{items.length}종 담김</div>
+            <h2 className="display text-[26px] leading-tight">
+              {step === "form" ? "주문 요청" : step === "done" ? "접수 완료" : "견적서"}
+            </h2>
+            {step === "cart" && <div className="text-[15px] text-dim mt-1">{items.length}종 담김</div>}
+            {step === "form" && (
+              <button type="button" onClick={() => setStep("cart")} className="text-[15px] text-dim hover:text-ink mt-1">
+                ← 견적서로 돌아가기
+              </button>
+            )}
           </div>
           <button
-            onClick={onClose}
+            onClick={closePanel}
             className="shrink-0 ml-4 w-11 h-11 flex items-center justify-center border hair hover:bg-ink hover:text-paper transition-colors text-[18px] leading-none"
             aria-label="닫기"
           >
@@ -141,7 +216,83 @@ export default function QuotePanel({ open, onClose }: Props) {
           </button>
         </div>
 
+        {/* 접수 완료 */}
+        {step === "done" && (
+          <div className="flex-1 overflow-y-auto px-6 py-8">
+            <div className="text-[40px] leading-none text-edred">✓</div>
+            <p className="mt-4 text-[20px] font-bold">주문 요청이 접수되었습니다.</p>
+            {doneNo && <p className="mt-2 text-[16px] tabular-nums">접수번호 <b>{doneNo}</b></p>}
+            <p className="mt-3 text-[15px] text-dim leading-relaxed">
+              담당자가 재고·납기를 확인한 뒤 연락드립니다.<br />
+              급하시면 <a href="tel:031-204-7170" className="text-ink underline underline-offset-2">031-204-7170</a>으로 전화 주세요.
+            </p>
+            {isApprovedMember && (
+              <Link href="/mypage" onClick={closePanel} className="inline-block mt-5 text-[15px] text-edred font-semibold underline underline-offset-2">
+                마이페이지에서 진행 상황 보기 →
+              </Link>
+            )}
+          </div>
+        )}
+
+        {/* 주문 요청 입력 */}
+        {step === "form" && (
+          <div className="flex-1 overflow-y-auto px-6 py-5 space-y-3">
+            {isApprovedMember ? (
+              <p className="text-[15px] leading-relaxed">
+                <b>{sessionUser?.company || sessionUser?.name}</b> 회원 정보로 접수됩니다. 우대 가격으로 견적서가 메일로 함께 발송됩니다.
+              </p>
+            ) : (
+              <>
+                {([
+                  ["company", "회사명", true, "organization"],
+                  ["name", "담당자", true, "name"],
+                  ["phone", "연락처", true, "tel"],
+                  ["email", "이메일 (선택)", false, "email"],
+                ] as const).map(([key, label, required, auto]) => (
+                  <label key={key} className="block">
+                    <span className="text-[14px] font-semibold">
+                      {label}{required && <span className="text-edred"> *</span>}
+                    </span>
+                    <input
+                      type={key === "phone" ? "tel" : key === "email" ? "email" : "text"}
+                      autoComplete={auto}
+                      value={form[key]}
+                      onChange={(e) => { setForm((f) => ({ ...f, [key]: e.target.value })); setFormError(""); }}
+                      className="mt-1 w-full min-h-[48px] border border-ink/30 bg-white px-3 text-[16px] focus:outline-none focus:border-ink"
+                    />
+                  </label>
+                ))}
+                {/* 사람에게 보이지 않는 칸(자동 입력 스팸 거르기) */}
+                <input
+                  type="text" tabIndex={-1} autoComplete="off" aria-hidden="true"
+                  value={form.website}
+                  onChange={(e) => setForm((f) => ({ ...f, website: e.target.value }))}
+                  className="hidden"
+                />
+              </>
+            )}
+            <label className="block">
+              <span className="text-[14px] font-semibold">요청사항 (선택)</span>
+              <textarea
+                rows={3}
+                value={form.note}
+                onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))}
+                placeholder="희망 납기, 세금계산서, 배송지 등"
+                className="mt-1 w-full border border-ink/30 bg-white px-3 py-2 text-[16px] focus:outline-none focus:border-ink"
+              />
+            </label>
+            {!isApprovedMember && (
+              <p className="text-[13px] text-dim leading-relaxed">
+                입력하신 정보는 주문 확인·연락 목적으로만 사용합니다.{" "}
+                <Link href="/privacy" target="_blank" className="underline underline-offset-2">개인정보처리방침</Link>
+              </p>
+            )}
+            {formError && <p className="text-[15px] text-edred font-semibold" role="alert">{formError}</p>}
+          </div>
+        )}
+
         {/* 제품 목록 */}
+        {step === "cart" && (
         <div className="flex-1 overflow-y-auto">
           {items.length === 0 ? (
             <div className="p-6 text-center text-dim text-sm">담긴 제품이 없습니다.</div>
@@ -198,9 +349,32 @@ export default function QuotePanel({ open, onClose }: Props) {
             </div>
           )}
         </div>
+        )}
 
-        {/* 푸터 */}
-        {items.length > 0 && (
+        {/* 푸터 — 주문 요청 입력 중 */}
+        {step === "form" && (
+          <div className="pl-6 pr-24 py-4 border-t hair shrink-0 space-y-2">
+            <button
+              onClick={submitOrder}
+              disabled={submitting || items.length === 0}
+              className="w-full py-4 bg-edred text-paper text-[17px] font-semibold hover:bg-ink disabled:opacity-50 transition-colors"
+            >
+              {submitting ? "접수 중…" : "주문 요청 보내기"}
+            </button>
+          </div>
+        )}
+
+        {/* 푸터 — 접수 완료 */}
+        {step === "done" && (
+          <div className="pl-6 pr-24 py-4 border-t hair shrink-0">
+            <button onClick={closePanel} className="w-full py-4 bg-ink text-paper text-[17px] font-semibold hover:bg-edred transition-colors">
+              닫기
+            </button>
+          </div>
+        )}
+
+        {/* 푸터 — 견적서 */}
+        {step === "cart" && items.length > 0 && (
           <div className="pl-6 pr-24 py-4 border-t hair shrink-0 space-y-2">
             {/* 소계 합계 */}
             {(() => {
@@ -226,19 +400,25 @@ export default function QuotePanel({ open, onClose }: Props) {
               );
             })()}
             <button
-              onClick={handleSavePdf}
+              onClick={openForm}
               className="w-full py-4 bg-edred text-paper text-[17px] font-semibold hover:bg-ink transition-colors"
             >
-              견적서 PDF 저장 →
+              주문 요청하기 →
+            </button>
+            <button
+              onClick={handleSavePdf}
+              className="w-full py-3.5 border border-ink/40 bg-white text-[16px] font-semibold hover:bg-ink hover:text-paper transition-colors"
+            >
+              견적서 PDF 저장
             </button>
             <button
               onClick={clearAll}
-              className="w-full py-3 border hair text-[14px] text-dim hover:text-ink hover:border-ink transition-colors"
+              className="w-full py-1.5 text-[14px] text-dim underline underline-offset-2 hover:text-ink transition-colors"
             >
               전체 비우기
             </button>
             <div className="text-[14px] text-ink/80 pt-1">
-              ※ 로그인 없이 공개가로 저장됩니다.
+              ※ 로그인 없이 공개가로 요청·저장됩니다.
               {!session && (
                 <>
                   {" "}회원은{" "}
