@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAdminSession } from "@/lib/admin-auth";
 import { logAudit } from "@/lib/audit";
 import { prisma } from "@/lib/db";
+import { syncInventoryStock } from "@/lib/stock";
 
 // ─── GET: 검색 + 페이지네이션 ────────────────────────────────────────────────
 export async function GET(req: NextRequest) {
@@ -92,14 +93,19 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const product = await prisma.product.create({
-    data: {
-      partNo: partNo.trim(),
-      description: description.trim(),
-      costPrice,
-      stock: stockNum,
-      ...(categoryStr !== null ? { category: categoryStr } : {}),
-    },
+  const product = await prisma.$transaction(async (tx) => {
+    const p = await tx.product.create({
+      data: {
+        partNo: partNo.trim(),
+        description: description.trim(),
+        costPrice,
+        stock: stockNum,
+        ...(categoryStr !== null ? { category: categoryStr } : {}),
+      },
+    });
+    // 재고를 넣어 새 제품을 만들면 재고 관리 화면의 같은 파트번호도 (lib/stock.ts)
+    if (stockNum > 0) await syncInventoryStock(tx, p.partNo, p.stock);
+    return p;
   });
 
   await logAudit({
@@ -199,9 +205,11 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: "존재하지 않는 제품입니다" }, { status: 404 });
   }
 
-  const updated = await prisma.product.update({
-    where: { id: productId },
-    data,
+  // 재고를 고치면 재고 관리 화면(InventoryItem)의 같은 파트번호도 같은 숫자로 (lib/stock.ts)
+  const updated = await prisma.$transaction(async (tx) => {
+    const p = await tx.product.update({ where: { id: productId }, data });
+    if (data.stock !== undefined) await syncInventoryStock(tx, p.partNo, p.stock);
+    return p;
   });
 
   // audit: 변경 전/후 스냅샷 (변경된 필드만)

@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { sendBusinessDocRequest } from "@/lib/mailer";
 import { notifyOrderConfirmed } from "@/lib/solapi";
+import { decrementProductStock } from "@/lib/stock";
 
 type SessionUser = { id: string; tier: string };
 
@@ -121,10 +122,7 @@ export async function POST(req: NextRequest) {
       // 재고 차감 (등록 제품만)
       for (const item of quote.items) {
         if (!item.productId) continue;
-        await tx.product.update({
-          where: { id: item.productId },
-          data: { stock: { decrement: item.quantity } },
-        });
+        await decrementProductStock(tx, item.productId, item.quantity);
       }
     }
 

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAdminSession } from "@/lib/admin-auth";
 import { logAudit } from "@/lib/audit";
 import { prisma } from "@/lib/db";
+import { decrementProductStock } from "@/lib/stock";
 
 // ──────────────────────────────────────────────
 // GET /api/admin/orders
@@ -164,10 +165,7 @@ export async function PATCH(req: NextRequest) {
         // 4. 재고 차감 (등록 제품만)
         for (const item of order.quote.items) {
           if (!item.product) continue;
-          await tx.product.update({
-            where: { id: item.product.id },
-            data: { stock: { decrement: item.quantity } },
-          });
+          await decrementProductStock(tx, item.product.id, item.quantity);
         }
 
         // 5. 주문 상태 변경 (race condition 방지: updateMany + status 조건)

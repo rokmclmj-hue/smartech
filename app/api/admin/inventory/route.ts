@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAdminSession } from "@/lib/admin-auth";
+import { syncProductStock } from "@/lib/stock";
 
 // GET — 목록 조회 (isActive 필터)
 export async function GET(req: NextRequest) {
@@ -31,20 +32,30 @@ export async function POST(req: NextRequest) {
   if (!body?.partNo || !body?.name || !body?.department)
     return NextResponse.json({ error: "partNo, name, department 필수" }, { status: 400 });
 
-  const item = await prisma.inventoryItem.create({
-    data: {
-      category:     body.category     ?? "기타",
-      department:   body.department,
-      partNo:       body.partNo,
-      name:         body.name,
-      currentStock: body.currentStock ?? 0,
-      minStock:     body.minStock     ?? 0,
-      orderQty:     body.orderQty     ?? 1,
-      unitPrice:    body.unitPrice    ?? 0,
-      leadTime:     body.leadTime     ?? null,
-      supplier:     body.supplier     ?? null,
-      memo:         body.memo         ?? null,
-    },
+  // 같은 파트번호 제품이 있으면 재고를 맞춘다 (lib/stock.ts): 0으로 추가하면 제품 재고를 가져오고,
+  // 숫자를 넣어 추가하면 제품(홈페이지) 재고도 그 숫자로
+  const entered = Number(body.currentStock ?? 0);
+  const product = await prisma.product.findUnique({ where: { partNo: body.partNo }, select: { stock: true } });
+  const startStock = product && entered === 0 ? product.stock : entered;
+
+  const item = await prisma.$transaction(async (tx) => {
+    const created = await tx.inventoryItem.create({
+      data: {
+        category:     body.category     ?? "기타",
+        department:   body.department,
+        partNo:       body.partNo,
+        name:         body.name,
+        currentStock: startStock,
+        minStock:     body.minStock     ?? 0,
+        orderQty:     body.orderQty     ?? 1,
+        unitPrice:    body.unitPrice    ?? 0,
+        leadTime:     body.leadTime     ?? null,
+        supplier:     body.supplier     ?? null,
+        memo:         body.memo         ?? null,
+      },
+    });
+    if (product && entered !== 0) await syncProductStock(tx, created.partNo, created.currentStock);
+    return created;
   });
 
   return NextResponse.json(item, { status: 201 });

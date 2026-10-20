@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAdminSession } from "@/lib/admin-auth";
 import { prisma } from "@/lib/db";
 import { notifyOrderConfirmed } from "@/lib/solapi";
+import { decrementProductStock } from "@/lib/stock";
 
 export async function POST(
   _req: NextRequest,
@@ -60,10 +61,7 @@ export async function POST(
 
     for (const item of quote.items) {
       if (!item.productId) continue;
-      await tx.product.update({
-        where: { id: item.productId },
-        data: { stock: { decrement: item.quantity } },
-      });
+      await decrementProductStock(tx, item.productId, item.quantity);
     }
 
     return newOrder;

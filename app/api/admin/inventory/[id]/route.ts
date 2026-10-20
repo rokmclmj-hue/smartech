@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAdminSession } from "@/lib/admin-auth";
+import { syncProductStock } from "@/lib/stock";
 
 // PATCH — 수정 (재고 수량, 숨기기/복원, 모든 필드)
 export async function PATCH(
@@ -14,22 +15,27 @@ export async function PATCH(
   const body = await req.json().catch(() => null);
   if (!body) return NextResponse.json({ error: "body 필요" }, { status: 400 });
 
-  const item = await prisma.inventoryItem.update({
-    where: { id: Number(id) },
-    data: {
-      ...(body.category     !== undefined && { category:     body.category }),
-      ...(body.department   !== undefined && { department:   body.department }),
-      ...(body.partNo       !== undefined && { partNo:       body.partNo }),
-      ...(body.name         !== undefined && { name:         body.name }),
-      ...(body.currentStock !== undefined && { currentStock: body.currentStock }),
-      ...(body.minStock     !== undefined && { minStock:     body.minStock }),
-      ...(body.orderQty     !== undefined && { orderQty:     body.orderQty }),
-      ...(body.unitPrice    !== undefined && { unitPrice:    body.unitPrice }),
-      ...(body.leadTime     !== undefined && { leadTime:     body.leadTime }),
-      ...(body.supplier     !== undefined && { supplier:     body.supplier }),
-      ...(body.memo         !== undefined && { memo:         body.memo }),
-      ...(body.isActive     !== undefined && { isActive:     body.isActive }),
-    },
+  // 재고를 고치면 제품(홈페이지 재고 표시)의 같은 파트번호도 같은 숫자로 (lib/stock.ts)
+  const item = await prisma.$transaction(async (tx) => {
+    const updated = await tx.inventoryItem.update({
+      where: { id: Number(id) },
+      data: {
+        ...(body.category     !== undefined && { category:     body.category }),
+        ...(body.department   !== undefined && { department:   body.department }),
+        ...(body.partNo       !== undefined && { partNo:       body.partNo }),
+        ...(body.name         !== undefined && { name:         body.name }),
+        ...(body.currentStock !== undefined && { currentStock: body.currentStock }),
+        ...(body.minStock     !== undefined && { minStock:     body.minStock }),
+        ...(body.orderQty     !== undefined && { orderQty:     body.orderQty }),
+        ...(body.unitPrice    !== undefined && { unitPrice:    body.unitPrice }),
+        ...(body.leadTime     !== undefined && { leadTime:     body.leadTime }),
+        ...(body.supplier     !== undefined && { supplier:     body.supplier }),
+        ...(body.memo         !== undefined && { memo:         body.memo }),
+        ...(body.isActive     !== undefined && { isActive:     body.isActive }),
+      },
+    });
+    if (body.currentStock !== undefined) await syncProductStock(tx, updated.partNo, updated.currentStock);
+    return updated;
   });
 
   return NextResponse.json(item);
