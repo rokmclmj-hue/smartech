@@ -35,6 +35,8 @@ export async function POST(req: NextRequest) {
   // 같은 파트번호 제품이 있으면 재고를 맞춘다 (lib/stock.ts): 0으로 추가하면 제품 재고를 가져오고,
   // 숫자를 넣어 추가하면 제품(홈페이지) 재고도 그 숫자로
   const entered = Number(body.currentStock ?? 0);
+  if (!(Number.isInteger(entered) && entered >= 0))
+    return NextResponse.json({ error: "재고 수량은 0 이상의 정수여야 합니다" }, { status: 400 });
   const product = await prisma.product.findUnique({ where: { partNo: body.partNo }, select: { stock: true } });
   const startStock = product && entered === 0 ? product.stock : entered;
 

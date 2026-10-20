@@ -9,7 +9,7 @@ import { leadTimeLabel } from "@/lib/lead-time";
 const SM = SMARTECH_COMPANY;
 
 type CartItem = { productId: number; partNo: string; description: string; quantity: number };
-type PricedItem = CartItem & { unitPrice: number | null; stock: number; category: string | null };
+type PricedItem = CartItem & { unitPrice: number | null; listPrice: number | null; stock: number; category: string | null };
 type Props = { open: boolean; onClose: () => void; fullscreen?: boolean };
 
 function fmt(n: number) { return n.toLocaleString("ko-KR"); }
@@ -33,12 +33,12 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
     setLoading(true);
     try {
       const data = await fetch(`/api/products?ids=${ids}&limit=200`).then((r) => r.json());
-      const productMap = new Map<number, { displayPrice: number | null; stock: number | null; category: string | null }>(
+      const productMap = new Map<number, { displayPrice: number | null; listPrice?: number; stock: number | null; category: string | null }>(
         (data.products ?? []).map((p: any) => [p.id, p])
       );
       setItems(cart.map((item) => {
         const p = productMap.get(item.productId);
-        return { ...item, unitPrice: p?.displayPrice ?? null, stock: p?.stock ?? 0, category: p?.category ?? null };
+        return { ...item, unitPrice: p?.displayPrice ?? null, listPrice: p?.listPrice ?? null, stock: p?.stock ?? 0, category: p?.category ?? null };
       }));
     } finally { setLoading(false); }
   }
@@ -66,10 +66,11 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
   const userPhone = (session?.user as any)?.phone ?? null;
   const showSavings = isLoggedIn && tierLabel !== "ENDUSER" && tierLabel !== "PENDING" && tierLabel !== "ADMIN";
 
-  const DEALER_TIER_MULT: Record<string, number> = { DEALER: 1.20, KEY_DEALER: 1.15, VIP_DEALER: 1.10 };
-  const showSavingsBlock = ["DEALER", "KEY_DEALER", "VIP_DEALER"].includes(tierLabel);
-  const userTierMult = DEALER_TIER_MULT[tierLabel] ?? 1.40;
-  const listSubtotal = showSavingsBlock ? Math.round(subtotal * (1.40 / userTierMult)) : 0;
+  // 일반 공급가는 서버가 DB 배율로 계산한 listPrice(딜러에게만 옴)로 — 옛 고정 배율 1.40 삭제(코드 리뷰 10/20)
+  const listSubtotal = items.every((i) => i.listPrice != null)
+    ? items.reduce((s, i) => s + (i.listPrice ?? 0) * i.quantity, 0)
+    : 0;
+  const showSavingsBlock = ["DEALER", "KEY_DEALER", "VIP_DEALER"].includes(tierLabel) && listSubtotal > subtotal;
   const savingsAmount = showSavingsBlock ? listSubtotal - subtotal : 0;
   const savingsPct = listSubtotal > 0 ? Math.round((savingsAmount / listSubtotal) * 100) : 0;
   const userName = (session?.user as any)?.name ?? "";
@@ -126,8 +127,7 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
                       if (fallbackTimer) clearTimeout(fallbackTimer);
                       hidden.forEach((el) => (el.style.display = ""));
                       document.body.classList.remove("printing-quote");
-                      localStorage.removeItem("quoteCart");
-                      window.dispatchEvent(new Event("quoteCartUpdated"));
+                      // PDF 저장 뒤에도 카트는 그대로 — 저장한 다음 "주문 요청하기"를 누를 수 있게(코드 리뷰 10/20, 카트 패널 PDF와 같게)
                       onClose();
                       window.removeEventListener("afterprint", restore);
                     };

@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
   }
 
   // PENDING/거절된 등급은 견적 요청 불가
-  if (tier === "PENDING" || tier === "REJECTED") {
+  if (!tier || tier === "PENDING" || tier === "REJECTED") {
     return NextResponse.json(
       { error: "관리자 승인 후 견적 요청이 가능합니다." },
       { status: 403 }

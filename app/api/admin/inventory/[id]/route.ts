@@ -14,6 +14,9 @@ export async function PATCH(
   const { id } = await params;
   const body = await req.json().catch(() => null);
   if (!body) return NextResponse.json({ error: "body 필요" }, { status: 400 });
+  // 제품 화면과 같은 기준 — 홈페이지 재고로 그대로 넘어가므로 0 이상 정수만(코드 리뷰 10/20)
+  if (body.currentStock !== undefined && !(Number.isInteger(body.currentStock) && body.currentStock >= 0))
+    return NextResponse.json({ error: "재고 수량은 0 이상의 정수여야 합니다" }, { status: 400 });
 
   // 재고를 고치면 제품(홈페이지 재고 표시)의 같은 파트번호도 같은 숫자로 (lib/stock.ts)
   const item = await prisma.$transaction(async (tx) => {

@@ -81,13 +81,18 @@ export async function GET(req: NextRequest) {
   // 원가·공급처 등 내부 정보는 관리자에게만 보낸다 (발주서 이력불러오기가 costPrice 사용).
   // 공개 응답에 ...p를 그대로 내보내 비로그인 방문자에게도 원가가 노출되던 문제 수정 — 2026-09-24.
   const isAdmin = tier === "ADMIN";
+  // 딜러 회원 견적서의 "일반 공급가 → 우대 가격" 비교용: 일반(ENDUSER) 판매가를 DB 배율로 계산해 함께 보낸다.
+  // 견적서 화면에 옛 고정 배율(1.40)이 박혀 할인액이 틀리던 문제(코드 리뷰 10/20). 딜러에게만, 원가는 보내지 않는다.
+  const isDealer = ["DEALER", "KEY_DEALER", "VIP_DEALER"].includes(tier);
+  const listMultiplier = isDealer ? await getMultiplier("ENDUSER") : null;
   const result = products.map((p) => {
     const { costPrice, supplierName, department, minStock, orderQty, ...publicFields } = p;
     const displayPrice = showPrice && multiplier ? Math.round(costPrice * multiplier) : null;
     const priceStatus = !showPrice ? "pending" : "visible";
+    const listPrice = listMultiplier ? Math.round(costPrice * listMultiplier) : undefined;
     return isAdmin
       ? { ...publicFields, costPrice, supplierName, department, minStock, orderQty, displayPrice, priceStatus }
-      : { ...publicFields, displayPrice, priceStatus };
+      : { ...publicFields, displayPrice, priceStatus, ...(listPrice !== undefined && { listPrice }) };
   });
 
   return NextResponse.json({ products: result, total, page, limit });

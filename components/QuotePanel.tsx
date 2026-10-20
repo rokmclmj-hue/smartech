@@ -32,7 +32,8 @@ export default function QuotePanel({ open, onClose }: Props) {
   const [doneNo, setDoneNo] = useState("");
   const sessionUser = session?.user as { name?: string; company?: string; phone?: string; email?: string; tier?: string } | undefined;
   // 승인된 회원은 기존 회원 발주 요청(/api/quote/request → 주문 관리 등록), 그 외(비회원·승인 대기)는 비회원 요청
-  const isApprovedMember = !!sessionUser && sessionUser.tier !== "PENDING" && sessionUser.tier !== "REJECTED";
+  // 등급이 비어 있는 로그인 정보는 회원으로 보지 않는다(코드 리뷰 10/20)
+  const isApprovedMember = !!sessionUser?.tier && sessionUser.tier !== "PENDING" && sessionUser.tier !== "REJECTED";
 
   function openForm() {
     setForm((f) => ({
