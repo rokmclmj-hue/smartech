@@ -545,7 +545,7 @@ function QuoteDocument({ quote }: { quote: QuoteForPdf }) {
         ),
         el(View, { style: S.termRow },
           el(Text, { style: S.termLabel }, "DELIVERY"),
-          el(Text, { style: S.termValue }, "국내 재고분 D+1 / 해외발주분(협의)")
+          el(Text, { style: S.termValue }, "재고품 출고일 별도 안내 · 그 외 통상 납기(해외 발주)")
         ),
         el(View, { style: S.termRow },
           el(Text, { style: S.termLabel }, "WARRANTY"),

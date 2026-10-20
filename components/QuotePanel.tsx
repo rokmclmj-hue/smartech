@@ -3,6 +3,9 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { trackEvent } from "@/lib/analytics";
+import { leadTimeLabel } from "@/lib/lead-time";
+
+type ProductInfo = { price: number | null; stock: number; category: string | null };
 
 type CartItem = {
   productId: number;
@@ -19,7 +22,7 @@ type Props = {
 export default function QuotePanel({ open, onClose }: Props) {
   const { data: session } = useSession();
   const [items, setItems] = useState<CartItem[]>([]);
-  const [priceMap, setPriceMap] = useState<Map<number, number | null>>(new Map());
+  const [infoMap, setInfoMap] = useState<Map<number, ProductInfo>>(new Map());
 
   function loadItems() {
     try {
@@ -35,12 +38,12 @@ export default function QuotePanel({ open, onClose }: Props) {
     const ids = cartItems.map((i) => i.productId).join(",");
     try {
       const data = await fetch(`/api/products?ids=${ids}&limit=200`).then((r) => r.json());
-      const map = new Map<number, number | null>(
-        (data.products ?? []).map((p: any) => [p.id, p.displayPrice ?? null])
+      const map = new Map<number, ProductInfo>(
+        (data.products ?? []).map((p: any) => [p.id, { price: p.displayPrice ?? null, stock: p.stock ?? 0, category: p.category ?? null }])
       );
-      setPriceMap(map);
+      setInfoMap(map);
     } catch {
-      setPriceMap(new Map());
+      setInfoMap(new Map());
     }
   }
 
@@ -125,9 +128,9 @@ export default function QuotePanel({ open, onClose }: Props) {
         {/* 헤더 */}
         <div className="flex items-start justify-between px-6 pt-6 pb-4 border-b hair shrink-0">
           <div>
-            <div className="mono text-[12px] tracking-[0.16em] uppercase text-dim">QUOTE CART</div>
-            <h2 className="display text-[26px] leading-tight mt-1">견적서</h2>
-            <div className="mono text-[14px] text-dim mt-1">{items.length}종 선택됨</div>
+            {/* 영어 머리글·코드 글꼴 삭제(2026-10-20, 견적서 미리보기와 같은 방향) */}
+            <h2 className="display text-[26px] leading-tight">견적서</h2>
+            <div className="text-[15px] text-dim mt-1">{items.length}종 담김</div>
           </div>
           <button
             onClick={onClose}
@@ -145,16 +148,25 @@ export default function QuotePanel({ open, onClose }: Props) {
           ) : (
             <div className="divide-y hair">
               {items.map((item) => {
-                const unitPrice = priceMap.get(item.productId) ?? null;
+                const info = infoMap.get(item.productId);
+                const unitPrice = info?.price ?? null;
                 const lineSubtotal = unitPrice != null ? unitPrice * item.quantity : null;
+                const inStock = (info?.stock ?? 0) > 0;
                 return (
                   <div key={item.productId} className="px-6 py-4 hover:bg-edred/[0.03] transition-colors">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
-                        <div className="mono text-[14px] text-dim">{item.partNo}</div>
-                        <div className="text-[17px] leading-snug mt-1">{item.description}</div>
+                        <div className="text-[17px] font-semibold leading-snug">{item.description}</div>
+                        <div className="text-[14px] text-dim mt-0.5 tabular-nums">
+                          {item.partNo}
+                          {info && (
+                            <span className={inStock ? "text-edred font-semibold" : ""}>
+                              {" · "}{inStock ? `재고 ${info.stock}` : leadTimeLabel(info.category, item.description)}
+                            </span>
+                          )}
+                        </div>
                         {lineSubtotal != null && (
-                          <div className="mono text-[14px] text-dim mt-1.5">
+                          <div className="text-[14px] text-dim mt-1.5 tabular-nums">
                             {unitPrice!.toLocaleString("ko-KR")}원 × {item.quantity} ={" "}
                             <span className="text-ink font-bold text-[16px]">{lineSubtotal.toLocaleString("ko-KR")}원</span>
                           </div>
@@ -193,23 +205,31 @@ export default function QuotePanel({ open, onClose }: Props) {
             {/* 소계 합계 */}
             {(() => {
               const total = items.reduce((sum, item) => {
-                const up = priceMap.get(item.productId) ?? null;
+                const up = infoMap.get(item.productId)?.price ?? null;
                 return up != null ? sum + up * item.quantity : sum;
               }, 0);
-              const hasPrices = items.some((item) => priceMap.get(item.productId) != null);
+              const hasPrices = items.some((item) => infoMap.get(item.productId)?.price != null);
               if (!hasPrices) return null;
+              // 미리보기 화면과 같은 계산(부가세 10% 반올림)
+              const vat = Math.round(total * 0.1);
               return (
-                <div className="flex justify-between items-center py-2 border-b hair mb-1">
-                  <span className="text-[15px] text-dim">소계 (VAT 별도)</span>
-                  <span className="mono text-[19px] font-bold">{total.toLocaleString("ko-KR")}원</span>
+                <div className="py-2 border-b hair mb-1 tabular-nums">
+                  <div className="flex justify-between items-baseline">
+                    <span className="text-[15px] font-semibold">합계 (부가세 포함)</span>
+                    <span className="text-[22px] font-bold">{(total + vat).toLocaleString("ko-KR")}원</span>
+                  </div>
+                  <div className="flex justify-between text-[14px] text-dim mt-0.5">
+                    <span>공급가 {total.toLocaleString("ko-KR")}원</span>
+                    <span>부가세 {vat.toLocaleString("ko-KR")}원</span>
+                  </div>
                 </div>
               );
             })()}
             <button
               onClick={handleSavePdf}
-              className="w-full py-4 bg-edred text-paper text-[16px] mono tracking-wider hover:bg-ink transition-colors"
+              className="w-full py-4 bg-edred text-paper text-[17px] font-semibold hover:bg-ink transition-colors"
             >
-              견적서 저장 (PDF) →
+              견적서 PDF 저장 →
             </button>
             <button
               onClick={clearAll}
@@ -218,7 +238,7 @@ export default function QuotePanel({ open, onClose }: Props) {
               전체 비우기
             </button>
             <div className="text-[14px] text-ink/80 pt-1">
-              ※ 가격은 VAT 별도 · 로그인 없이 공개가로 저장됩니다.
+              ※ 로그인 없이 공개가로 저장됩니다.
               {!session && (
                 <>
                   {" "}회원은{" "}

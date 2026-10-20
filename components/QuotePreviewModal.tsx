@@ -4,19 +4,18 @@ import { useSession } from "next-auth/react";
 import { SMARTECH_COMPANY } from "@/lib/company";
 import { getProductIconUrl } from "@/lib/product-icons";
 import { trackEvent } from "@/lib/analytics";
+import { leadTimeLabel } from "@/lib/lead-time";
 
 const SM = SMARTECH_COMPANY;
 
 type CartItem = { productId: number; partNo: string; description: string; quantity: number };
-type PricedItem = CartItem & { unitPrice: number | null };
+type PricedItem = CartItem & { unitPrice: number | null; stock: number; category: string | null };
 type Props = { open: boolean; onClose: () => void; fullscreen?: boolean };
 
 function fmt(n: number) { return n.toLocaleString("ko-KR"); }
-function getDelivery(desc: string): string {
-  if (["RV", "nXDS", "E2M0.7", "E2M1.5", "EMF10", "EMF20"].some(k => desc.includes(k))) return "1 week";
-  if (["E2M40", "E2M80", "E2M175", "E2M275", "EH250", "EH500", "EH1200", "EH2600", "EH4200"].some(k => desc.includes(k))) return "8 ~ 10 weeks";
-  if (["GXS", "EXS", "EDS"].some(k => desc.includes(k))) return "12 ~ 14 weeks";
-  return "TBC";
+// 검색 결과와 같은 기준(재고 있으면 재고 수, 없으면 lib/lead-time 통상 납기) — 2026-10-20
+function stockOrLead(item: PricedItem): string {
+  return item.stock > 0 ? `재고 ${item.stock}` : leadTimeLabel(item.category, item.description);
 }
 function ymd(d: Date) {
   return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,"0")}.${String(d.getDate()).padStart(2,"0")}`;
@@ -34,10 +33,13 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
     setLoading(true);
     try {
       const data = await fetch(`/api/products?ids=${ids}&limit=200`).then((r) => r.json());
-      const priceMap = new Map<number, number | null>(
-        (data.products ?? []).map((p: any) => [p.id, p.displayPrice])
+      const productMap = new Map<number, { displayPrice: number | null; stock: number | null; category: string | null }>(
+        (data.products ?? []).map((p: any) => [p.id, p])
       );
-      setItems(cart.map((item) => ({ ...item, unitPrice: priceMap.get(item.productId) ?? null })));
+      setItems(cart.map((item) => {
+        const p = productMap.get(item.productId);
+        return { ...item, unitPrice: p?.displayPrice ?? null, stock: p?.stock ?? 0, category: p?.category ?? null };
+      }));
     } finally { setLoading(false); }
   }
 
@@ -85,41 +87,28 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
         body.printing-quote .quote-page .util,
         body.printing-quote .quote-page .btn-export { display: none !important; }
       }
-      /* 미리보기 창의 화면용 견적서만 글자·칸을 1.2배로(2026-10-18 대표님 요청). 인쇄용(.pdf-only)·/quote/[id] 화면은 그대로 */
-      /* 오른쪽 견적 카트(480px)를 뺀 공간에 맞춰 단계적으로(1440·1600·1920px에서 맨 위 줄 한 줄 확인) */
-      @media screen and (min-width: 1280px) {
-        .print-modal-wrapper .quote-page .full-version { zoom: 1.1; }
-      }
-      @media screen and (min-width: 1600px) {
-        .print-modal-wrapper .quote-page .full-version { zoom: 1.2; }
-      }
     `}</style>
     {/* 왼쪽 패널 — fullscreen 시 전체, 일반 시 데스크톱만 QuotePanel(480px) 제외 */}
     <div className={`fixed top-0 bottom-0 left-0 z-50 overflow-y-auto print-modal-wrapper ${fullscreen ? "right-0" : "right-0 md:right-[480px]"}`}>
 
-      {/* ── quote-page 다크 테마 래퍼 ── */}
-      <div className="quote-page" style={{ minHeight: "100%" }}>
+      {/* quote-page: 인쇄 규칙용 이름. 화면은 밝은 종이색(2026-10-20 대표님 승인 — 남색·영어 화면이 보기 어렵다는 의견) */}
+      <div className="quote-page" style={{ minHeight: "100%", background: "#F6F4EF", color: "#0B0B0C" }}>
 
         {/* ══════════════════════════════════
-            FULL VERSION — 화면용 다크 터미널
+            FULL VERSION — 화면용 (밝은 배경·한글·합계 먼저)
             ══════════════════════════════════ */}
         <div className="full-version">
-          <div className="stage">
-
-            {/* 유틸 바 */}
-            <div className="util">
-              <div className="left">
-                {/* 코드 파일 이름("FILE — quote-preview.tsx")은 손님에게 의미가 없어 뺌(2026-10-18) */}
-                <span>PREVIEW MODE</span>
-                <span>·</span>
-                <span>{items.length} LINES · {totalQty} EA</span>
+          {/* 맨 위 고정 줄 — 제목 · 저장 · 닫기 */}
+          <div className="sticky top-0 z-10 bg-paper/95 backdrop-blur border-b border-line">
+            <div className="max-w-[980px] mx-auto px-5 md:px-8 py-3 flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <div className="text-[18px] md:text-[20px] font-bold tracking-tight">견적서 미리보기</div>
+                <div className="text-[13px] text-dim">{items.length}종 · {totalQty}개 · {ymd(today)}</div>
               </div>
-              <div className="right">
-                {/* 가격 기준 표시("PUBLIC · 공개가"/"우대적용 · 확정가")는 아래 PRICE BASIS·안내 문구와 겹치고
-                    승인 대기 회원에게 "확정가"로 잘못 보여 뺌(2026-10-18 대표님 확인) */}
+              <div className="flex items-center gap-2 shrink-0">
                 <button
                   type="button"
-                  className="btn-export"
+                  className="bg-edred hover:bg-edred3 text-paper text-[15px] font-semibold px-5 py-3 transition-colors"
                   onClick={() => {
                     // 2026-10-19 로그인 없이도 공개가 기준으로 저장 (가격은 이미 공개, 로그인하면 우대가)
                     trackEvent("quote_pdf_save");
@@ -155,229 +144,136 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
                     });
                   }}
                 >
-                  견적서 저장 (PDF)
+                  PDF 저장
                 </button>
                 <button
                   type="button"
                   onClick={onClose}
-                  style={{
-                    fontFamily: "var(--q-mono)", fontSize: 11, letterSpacing: "0.1em",
-                    color: "var(--q-muted)", background: "transparent",
-                    border: "1px solid var(--q-line)", padding: "9px 14px",
-                    cursor: "pointer", textTransform: "uppercase",
-                  }}
+                  className="border border-ink/40 hover:bg-ink hover:text-paper text-[15px] px-4 py-3 transition-colors"
                 >
                   닫기 ✕
                 </button>
               </div>
             </div>
+          </div>
 
-            {/* 헤더 */}
-            <div className="header">
-              <div>
-                <div className="wordmark">Smartech<span className="dot">.</span></div>
-                <div className="wordmark-sub">
-                  Edwards Vacuum Korea<span className="sep">·</span>
-                  Authorized Distributor<span className="sep">·</span>
-                  SINCE 2011<span className="sep">·</span>
-                  PREVIEW MODE
+          <div className="max-w-[980px] mx-auto px-5 md:px-8 pt-6 pb-16">
+            {/* 1. 합계 — 가장 먼저 */}
+            <section className="bg-white border border-line">
+              <div className="flex flex-wrap items-end justify-between gap-4 p-5 md:p-7">
+                <div>
+                  <div className="text-[14px] text-dim font-medium">합계 금액 (부가세 포함)</div>
+                  <div className="mt-1 text-[34px] md:text-[44px] font-bold tracking-tight tabular-nums leading-none">
+                    {fmt(grandTotal)}<span className="text-[22px] md:text-[26px] ml-1">원</span>
+                  </div>
+                </div>
+                <div className="text-[15px] tabular-nums space-y-1 min-w-[220px]">
+                  <div className="flex justify-between gap-6"><span className="text-dim">공급가액</span><span>{fmt(subtotal)}원</span></div>
+                  <div className="flex justify-between gap-6"><span className="text-dim">부가세 (10%)</span><span>{fmt(vat)}원</span></div>
                 </div>
               </div>
-              <div className="meta-grid">
-                <div className="cell"><div className="k">Q-REF</div><div className="v">PREVIEW</div></div>
-                <div className="cell"><div className="k">DATE</div><div className="v">{ymd(today)}</div></div>
-                <div className="cell"><div className="k">ITEMS</div><div className="v">{items.length} LINES</div></div>
-                <div className="cell"><div className="k">CURRENCY</div><div className="v">KRW (₩)</div></div>
-                <div className="cell"><div className="k">STATUS</div><div className="v">PREVIEW</div></div>
+              {showSavingsBlock && (
+                <div className="border-t border-line px-5 md:px-7 py-3 text-[14px] tabular-nums flex flex-wrap gap-x-6 gap-y-1">
+                  <span className="text-dim">일반 공급가 <span className="line-through">{fmt(listSubtotal)}원</span></span>
+                  <span className="text-edred font-semibold">우대 가격 적용 −{fmt(savingsAmount)}원 ({savingsPct}%)</span>
+                </div>
+              )}
+              <div className="border-t border-line bg-paper/60 px-5 md:px-7 py-3 text-[14px]">
+                {isLoggedIn
+                  ? <span>우대 가격이 적용된 미리보기입니다. <b>PDF 저장</b>으로 견적서를 받으세요.</span>
+                  : <span>공개가 기준입니다. <a href="/auth/login" className="text-edred font-semibold underline underline-offset-2">로그인</a>하면 우대 가격이 적용됩니다.</span>}
               </div>
-            </div>
+            </section>
 
-            {/* SECTION 01 · PARTIES */}
-            <div className="section-label">— SECTION 01 · PARTIES</div>
-            <div className="parties">
-              <div className="party">
-                <h4><span>TO · 수신처</span><span className="tag">[ CLIENT ]</span></h4>
-                {isLoggedIn ? (
-                  <>
-                    <div className="party-row"><div className="lbl">Company</div><div className="val">{userCompany || "—"}</div></div>
-                    <div className="party-row"><div className="lbl">Attn</div><div className="val">{userName ? `${userName}님` : "—"}</div></div>
-                    {userPhone && (
-                      <div className="party-row"><div className="lbl">Tel</div><div className="val qmono">{userPhone}</div></div>
-                    )}
-                    <div className="party-row"><div className="lbl">Email</div><div className="val qmono">{userEmail}</div></div>
-                  </>
-                ) : (
-                  <div className="party-row">
-                    <div className="lbl">Notice</div>
-                    <div className="val" style={{ color: "var(--q-gold)" }}>로그인 후 우대 가격 적용</div>
-                  </div>
-                )}
-              </div>
-              <div className="party">
-                <h4><span>FROM · 발신처</span><span className="tag">[ ISSUER ]</span></h4>
-                <div className="party-row"><div className="lbl">Company</div><div className="val">{SM.name} · {SM.english}</div></div>
-                <div className="party-row"><div className="lbl">Role</div><div className="val">{SM.role}</div></div>
-                <div className="party-row"><div className="lbl">CEO</div><div className="val">{SM.ceo}</div></div>
-                <div className="party-row"><div className="lbl">Tel</div><div className="val qmono">{SM.officeTel} · M {SM.mobileTel}</div></div>
-                <div className="party-row"><div className="lbl">Email</div><div className="val qmono">{SM.email}</div></div>
-                <div className="party-row"><div className="lbl">Office</div><div className="val">{SM.headOfficeKo}</div></div>
-              </div>
-            </div>
-
-            {/* SECTION 02 · ITEMS */}
-            <div className="section-label">
-              — SECTION 02 · ITEMS · {String(items.length).padStart(2,"0")} LINES
-            </div>
-
+            {/* 2. 품목 */}
+            <h2 className="mt-8 mb-3 text-[17px] font-bold">품목 {items.length}종</h2>
             {loading ? (
-              <div className="items">
-                {[1,2,3].map((i) => (
-                  <div key={i} style={{ height: 240, background: "var(--q-surface)", border: "1px solid var(--q-line)", animation: "pulse 1.5s infinite" }} />
-                ))}
+              <div className="space-y-2">
+                {[1, 2].map((i) => <div key={i} className="h-20 bg-white border border-line animate-pulse" />)}
               </div>
             ) : items.length === 0 ? (
-              <div style={{ padding: "40px 0", textAlign:"center", color:"var(--q-muted)", fontFamily:"var(--q-mono)", fontSize:12 }}>
-                담긴 제품이 없습니다.
-              </div>
+              <div className="py-10 text-center text-dim text-[15px] bg-white border border-line">담긴 제품이 없습니다.</div>
             ) : (
-              <div className="items">
-                {items.map((item, idx) => {
+              <div className="bg-white border border-line divide-y divide-line">
+                {/* PC 머리줄 */}
+                <div className="hidden md:grid grid-cols-[1fr_110px_70px_130px_140px] gap-3 px-5 py-2.5 text-[13px] text-dim font-medium bg-paper/60">
+                  <span>제품</span><span>재고 · 납기</span><span className="text-right">수량</span><span className="text-right">단가</span><span className="text-right">금액</span>
+                </div>
+                {items.map((item) => {
                   const iconUrl = getProductIconUrl(item.partNo, item.description);
-                  const lineSubtotal = (item.unitPrice ?? 0) * item.quantity;
+                  const line = (item.unitPrice ?? 0) * item.quantity;
+                  const inStock = item.stock > 0;
                   return (
-                    <article key={item.productId} className="card">
-                      <div className="ill">
-                        <div className="ill-label">
-                          {String(idx+1).padStart(2,"0")} / {String(items.length).padStart(2,"0")} · {item.partNo}
-                        </div>
+                    <div key={item.productId} className="grid grid-cols-[1fr_auto] md:grid-cols-[1fr_110px_70px_130px_140px] gap-x-3 gap-y-1 px-5 py-4 items-center">
+                      <div className="flex items-center gap-3 min-w-0">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={iconUrl} alt="" className="icon-img" />
-                        <div className="stamp">
-                          <div className="l1">GENUINE</div>
-                          <div className="l2">EDWARDS</div>
-                          <div className="l2">PREVIEW</div>
+                        <img src={iconUrl} alt="" className="hidden sm:block w-11 h-11 object-contain shrink-0" />
+                        <div className="min-w-0">
+                          <div className="text-[16px] font-semibold leading-snug break-words">{item.description}</div>
+                          <div className="text-[13px] text-dim tabular-nums">{item.partNo}</div>
                         </div>
                       </div>
-                      <div className="card-data">
-                        <div className="card-head">
-                          <div>
-                            <div className="partno">PART NO · {item.partNo}</div>
-                            <div className="model">{item.description}</div>
-                          </div>
-                          <span className="badge-genuine">● Edwards Genuine</span>
-                        </div>
-                        <div className="meta-line">
-                          <div><div className="k">Quantity</div><div className="v">{item.quantity} EA</div></div>
-                          <div><div className="k">DELIVERY</div><div className="v">{getDelivery(item.description)}</div></div>
-                          <div><div className="k">Warranty</div><div className="v">12 Months</div></div>
-                        </div>
-                        <div className="price-block">
-                          <div className="pcell">
-                            <div className="k">Unit Price</div>
-                            <div className="v">{item.unitPrice ? `₩ ${fmt(item.unitPrice)}` : "—"}</div>
-                          </div>
-                          <div className="pcell">
-                            <div className="k">Quantity</div>
-                            <div className="v">{item.quantity} EA</div>
-                          </div>
-                          <div className="pcell">
-                            <div className="k">Subtotal</div>
-                            <div className="v">{item.unitPrice ? `₩ ${fmt(lineSubtotal)}` : "—"}</div>
-                          </div>
-                        </div>
-                        <div className="status-line">
-                          <span className="ok">● Edwards 정품</span>
-                          <span>출고 · 협의</span>
-                        </div>
+                      {/* 휴대폰: 금액을 오른쪽, 재고·수량·단가를 아래 줄에 */}
+                      <div className="md:hidden text-right text-[16px] font-bold tabular-nums">
+                        {item.unitPrice ? `${fmt(line)}원` : "가격 문의"}
                       </div>
-                    </article>
+                      <div className="md:hidden col-span-2 text-[13px] text-dim tabular-nums">
+                        <span className={inStock ? "text-edred font-semibold" : ""}>{stockOrLead(item)}</span>
+                        {" · "}{item.quantity}개 × {item.unitPrice ? `${fmt(item.unitPrice)}원` : "—"}
+                      </div>
+                      <span className={`hidden md:block text-[14px] ${inStock ? "text-edred font-semibold" : "text-dim"}`}>{stockOrLead(item)}</span>
+                      <span className="hidden md:block text-right text-[15px] tabular-nums">{item.quantity}개</span>
+                      <span className="hidden md:block text-right text-[15px] tabular-nums">{item.unitPrice ? `${fmt(item.unitPrice)}원` : "—"}</span>
+                      <span className="hidden md:block text-right text-[16px] font-bold tabular-nums">{item.unitPrice ? `${fmt(line)}원` : "가격 문의"}</span>
+                    </div>
                   );
                 })}
               </div>
             )}
 
-            {/* SECTION 03 · TOTAL */}
-            <div className="section-label">— SECTION 03 · TOTAL</div>
-            <div className="hero">
-              <div className="hero-total">
-                <div className="hero-eyebrow">
-                  <span>SUPPLY · 공급가액</span>
-                  <span className="ref">PREVIEW</span>
+            {/* 3. 거래 조건 — PDF(아래 pdf-only)와 같은 내용 */}
+            <h2 className="mt-8 mb-3 text-[17px] font-bold">거래 조건</h2>
+            <dl className="bg-white border border-line divide-y divide-line text-[15px]">
+              {[
+                ["결제", "납품 전 현금결제"],
+                ["납기", "재고품 출고일 별도 안내 · 그 외 통상 납기(해외 발주)"],
+                ["보증", "12개월 · Edwards 정품 보증(소모품 제외)"],
+                ["A/S", "현장 서비스 · 기술 지원"],
+              ].map(([k, v]) => (
+                <div key={k} className="grid grid-cols-[72px_1fr] gap-3 px-5 py-3">
+                  <dt className="text-dim">{k}</dt><dd>{v}</dd>
                 </div>
-                <div className="hero-bignum"><span className="won">₩</span>{fmt(subtotal)}</div>
-                <div className="hero-breakdown">
-                  <div className="b"><div className="k">SUPPLY (공급가액)</div><div className="v">₩ {fmt(subtotal)}</div></div>
-                  <div className="b"><div className="k">VAT (10%)</div><div className="v">₩ {fmt(vat)}</div></div>
-                  <div className="b total"><div className="k">GRAND TOTAL</div><div className="v">₩ {fmt(grandTotal)}</div></div>
-                </div>
-                {showSavingsBlock && (
-                  <div className="savings-block">
-                    <div className="s-label">— PREFERRED PRICING · 우대 가격 적용</div>
-                    <div className="s-row">
-                      <span className="s-k">일반 공급가 (ENDUSER 기준)</span>
-                      <span className="s-v">₩ {fmt(listSubtotal)}</span>
-                    </div>
-                    <div className="s-row s-discount">
-                      <span className="s-k">우대 가격 적용</span>
-                      <span className="s-v">- ₩ {fmt(savingsAmount)}</span>
-                    </div>
-                    <div className="s-row s-final">
-                      <span className="s-k">귀사 적용가</span>
-                      <span className="s-v">₩ {fmt(subtotal)}</span>
-                    </div>
-                    <div className="savings-badge">
-                      절감 {savingsPct}% &nbsp;·&nbsp; ₩ {fmt(savingsAmount)} 우대 적용
-                    </div>
-                  </div>
+              ))}
+            </dl>
+
+            {/* 4. 받는 곳 · 보내는 곳 */}
+            <div className="mt-8 grid md:grid-cols-2 gap-3">
+              <section className="bg-white border border-line p-5">
+                <h2 className="text-[17px] font-bold mb-3">받는 곳</h2>
+                {isLoggedIn ? (
+                  <dl className="text-[15px] space-y-1.5">
+                    <div className="grid grid-cols-[72px_1fr] gap-3"><dt className="text-dim">회사</dt><dd>{userCompany || "—"}</dd></div>
+                    <div className="grid grid-cols-[72px_1fr] gap-3"><dt className="text-dim">담당자</dt><dd>{userName ? `${userName}님` : "—"}</dd></div>
+                    {userPhone && <div className="grid grid-cols-[72px_1fr] gap-3"><dt className="text-dim">전화</dt><dd className="tabular-nums">{userPhone}</dd></div>}
+                    <div className="grid grid-cols-[72px_1fr] gap-3"><dt className="text-dim">이메일</dt><dd className="break-all">{userEmail}</dd></div>
+                  </dl>
+                ) : (
+                  <p className="text-[15px] text-dim">로그인하면 회사명과 담당자가 들어갑니다.</p>
                 )}
-              </div>
-              <div className="hero-side">
-                <div className="eyebrow">PREVIEW · QUOTE</div>
-                <p style={{ fontSize: 14, color: "var(--q-text)", lineHeight: 1.6, whiteSpace: "pre-line" }}>
-                  {isLoggedIn
-                    ? "우대 가격이 적용된 미리보기입니다.\nPDF 저장으로 공식 견적서를 발행하세요."
-                    : "현재 공개가 기준입니다.\n로그인 시 우대 가격이 적용됩니다."}
-                </p>
-                <div className="meta-row" style={{ display:"flex", justifyContent:"space-between", paddingTop:8, borderTop:"1px dashed var(--q-line-soft)", fontFamily:"var(--q-mono)", fontSize:11, color:"var(--q-muted)" }}>
-                  <span>DATE</span><span>{ymd(today)}</span>
-                </div>
-              </div>
+              </section>
+              <section className="bg-white border border-line p-5">
+                <h2 className="text-[17px] font-bold mb-3">보내는 곳</h2>
+                <dl className="text-[15px] space-y-1.5">
+                  <div className="grid grid-cols-[72px_1fr] gap-3"><dt className="text-dim">회사</dt><dd>{SM.name} · Edwards 코리아 공식 대리점</dd></div>
+                  <div className="grid grid-cols-[72px_1fr] gap-3"><dt className="text-dim">대표</dt><dd>{SM.ceo}</dd></div>
+                  <div className="grid grid-cols-[72px_1fr] gap-3"><dt className="text-dim">전화</dt><dd className="tabular-nums">{SM.officeTel} · {SM.mobileTel}</dd></div>
+                  <div className="grid grid-cols-[72px_1fr] gap-3"><dt className="text-dim">이메일</dt><dd className="break-all">{SM.email}</dd></div>
+                  <div className="grid grid-cols-[72px_1fr] gap-3"><dt className="text-dim">주소</dt><dd>{SM.headOfficeKo}</dd></div>
+                </dl>
+              </section>
             </div>
 
-            {/* SECTION 04 · SUMMARY */}
-            <div className="section-label">— SECTION 04 · SUMMARY</div>
-            <div className="summary">
-              <div className="summary-left">
-                <div className="row"><span>ITEMS</span><span className="v">{items.length} LINES · {totalQty} EA</span></div>
-                <div className="row"><span>CURRENCY</span><span className="v">KRW (₩)</span></div>
-                <div className="row"><span>PRICE BASIS</span><span className="v">{isLoggedIn ? "우대적용" : "PUBLIC"}</span></div>
-                <div className="row"><span>STATUS</span><span className="v" style={{ color: "var(--q-gold)" }}>PREVIEW</span></div>
-              </div>
-              <div className="summary-right">
-                {showSavingsBlock && (
-                  <>
-                    <div className="row">
-                      <span className="k">일반 공급가 (LIST)</span>
-                      <span className="v" style={{ color: "var(--q-muted)", textDecoration: "line-through" }}>₩ {fmt(listSubtotal)}</span>
-                    </div>
-                    <div className="row">
-                      <span className="k" style={{ color: "var(--q-success)" }}>우대 가격 적용</span>
-                      <span className="v" style={{ color: "var(--q-success)" }}>- ₩ {fmt(savingsAmount)} ({savingsPct}%)</span>
-                    </div>
-                  </>
-                )}
-                <div className="row"><span className="k">SUB-TOTAL</span><span className="v">₩ {fmt(subtotal)}</span></div>
-                <div className="row"><span className="k">VAT (10%)</span><span className="v">₩ {fmt(vat)}</span></div>
-                <div className="row grand"><span className="k">GRAND TOTAL · INCL. VAT</span><span className="v">₩ {fmt(grandTotal)}</span></div>
-              </div>
-            </div>
-
-            {/* 푸터 */}
-            <div className="qfooter">
-              <span>© {today.getFullYear()} SMARTECH CO., LTD. · ALL RIGHTS RESERVED</span>
-              <span>PREVIEW MODE · NOT AN OFFICIAL QUOTATION</span>
-              <span>Edwards Vacuum Korea Official Distributor · Since 2011</span>
-            </div>
+            <p className="mt-6 text-[13px] text-dim">미리보기 화면입니다. 정식 견적서는 PDF 저장으로 받으실 수 있습니다.</p>
           </div>
         </div>
 
@@ -458,7 +354,7 @@ export default function QuotePreviewModal({ open, onClose, fullscreen = false }:
           </div>
           <div className="p-terms">
             <div className="row"><span className="k">Payment</span><span className="v">납품 전 현금결제</span></div>
-            <div className="row"><span className="k">Delivery</span><span className="v">국내 재고분 D+1 / 해외발주분(협의)</span></div>
+            <div className="row"><span className="k">Delivery</span><span className="v">재고품 출고일 별도 안내 · 그 외 통상 납기(해외 발주)</span></div>
             <div className="row"><span className="k">Warranty</span><span className="v">12개월 · Edwards 정품 보증(소모품제외)</span></div>
             <div className="row"><span className="k">A / S</span><span className="v">현장 서비스 · 기술지원</span></div>
           </div>

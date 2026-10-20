@@ -64,14 +64,15 @@ export default function QuoteBar() {
 
       {/* 하단 플로팅 버튼: 허용 페이지에서만 표시 */}
       {count > 0 && !effectiveOpen && isAllowed && (
-        <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-60 pointer-events-none">
+        // 휴대폰: 한 줄짜리 작은 버튼을 왼쪽 아래에 — 두 줄로 커져 검색 결과를 가리던 문제(2026-10-20)
+        <div className="fixed bottom-4 left-4 md:bottom-5 md:left-1/2 md:-translate-x-1/2 z-60 pointer-events-none">
           <button
             onClick={() => setOpen(true)}
-            className="pointer-events-auto flex items-center gap-3 bg-edred text-paper px-8 py-4 shadow-2xl hover:bg-ink transition-colors border border-white/10"
+            className="pointer-events-auto flex items-center gap-2 md:gap-3 whitespace-nowrap bg-edred text-paper px-4 py-2.5 md:px-8 md:py-4 shadow-2xl hover:bg-ink transition-colors border border-white/10"
           >
-            <span className="text-[16px] font-semibold tracking-tight">견적서 미리보기</span>
+            <span className="text-[15px] md:text-[16px] font-semibold tracking-tight">견적서<span className="hidden md:inline"> 미리보기</span></span>
             <span className="w-px h-4 bg-white/30" aria-hidden="true" />
-            <span className="mono text-[16px] font-semibold">{count}종</span>
+            <span className="mono text-[15px] md:text-[16px] font-semibold">{count}종</span>
             <span className="text-[14px] opacity-70 ml-1">→</span>
           </button>
         </div>
