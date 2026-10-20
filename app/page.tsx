@@ -186,11 +186,33 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ═══════════════ 제품 검색 / 펌프선정 — 첫 화면 바로 아래(2026-10-20 대표님 승인) ═══════════════ */}
+      <section id="b2b" className="border-b hair">
+        <div className="max-w-[1400px] mx-auto px-6 py-16 md:py-20">
+          <div className="grid grid-cols-12 gap-6 mb-10">
+            <div className="col-span-12 lg:col-span-6">
+              <div className="mono text-[13px] dim mb-4">— 01 · 제품 검색 · 펌프선정 및 시뮬레이션</div>
+              <h3 className="display leading-[1.05]" style={{ fontSize: "clamp(32px, 4.2vw, 62px)" }}>
+                사양에서 선정까지,<br />
+                <span className="text-edred">한곳에서.</span>
+              </h3>
+            </div>
+            <div className="col-span-12 lg:col-span-4 lg:col-start-9 flex items-end pb-1">
+              <p className="text-[14px] leading-[1.8] text-[#6A6660]">
+                오일 로터리 베인부터 터보분자, 반도체 드라이까지.<br />
+                공정 조건에 맞게 조합해 제안합니다.
+              </p>
+            </div>
+          </div>
+          <PumpSelector />
+        </div>
+      </section>
+
       {/* ═══════════════ TOTAL SOLUTION ═══════════════ */}
       <section id="solution" className="pt-14 pb-28 border-b hair">
         <div className="max-w-[1400px] mx-auto px-6">
           <div className="mb-16 text-center">
-            <div className="mono text-[11px] dim mb-4">— 01 · TOTAL SOLUTION</div>
+            <div className="mono text-[11px] dim mb-4">— 02 · TOTAL SOLUTION</div>
             <h2 className="section-title display" style={{ fontSize: "clamp(28px, 4.8vw, 72px)" }}>
               판매로 시작해, <span className="italic text-edred">운전 수명 내내</span> 함께합니다.
             </h2>
@@ -228,7 +250,7 @@ export default function Home() {
         <div className="max-w-[1400px] mx-auto px-6">
           <div className="grid grid-cols-12 gap-6 mb-14">
             <div className="col-span-12 lg:col-span-6">
-              <div className="mono text-[11px] dim mb-4">— 03 · PRODUCT LINEUP</div>
+              <div className="mono text-[11px] dim mb-4">— 04 · PRODUCT LINEUP</div>
               <h2 className="section-title display">
                 주요 제품<span className="text-edred">.</span>
               </h2>
@@ -242,28 +264,6 @@ export default function Home() {
           </div>
 
           <ProductCategories />
-        </div>
-      </section>
-
-      {/* ═══════════════ 제품 검색 / 펌프선정 ═══════════════ */}
-      <section id="b2b" className="border-b hair">
-        <div className="max-w-[1400px] mx-auto px-6 py-16 md:py-20">
-          <div className="grid grid-cols-12 gap-6 mb-10">
-            <div className="col-span-12 lg:col-span-6">
-              <div className="mono text-[13px] dim mb-4">— 04 · 제품 검색 · 펌프선정 및 시뮬레이션</div>
-              <h3 className="display leading-[1.05]" style={{ fontSize: "clamp(32px, 4.2vw, 62px)" }}>
-                사양에서 선정까지,<br />
-                <span className="text-edred">한곳에서.</span>
-              </h3>
-            </div>
-            <div className="col-span-12 lg:col-span-4 lg:col-start-9 flex items-end pb-1">
-              <p className="text-[14px] leading-[1.8] text-[#6A6660]">
-                오일 로터리 베인부터 터보분자, 반도체 드라이까지.<br />
-                공정 조건에 맞게 조합해 제안합니다.
-              </p>
-            </div>
-          </div>
-          <PumpSelector />
         </div>
       </section>
 

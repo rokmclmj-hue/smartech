@@ -20,7 +20,7 @@ export default function Industries() {
       <div className="max-w-[1400px] mx-auto px-6">
         <div className="grid grid-cols-12 gap-6 mb-14">
           <div className="col-span-12 lg:col-span-7">
-            <div className="mono text-[11px] dim mb-4">— 02 · {INDUSTRIES.length} INDUSTRIES OF VACUUM</div>
+            <div className="mono text-[11px] dim mb-4">— 03 · {INDUSTRIES.length} INDUSTRIES OF VACUUM</div>
             <h2 className="section-title display">
               진공은 산업의<br />
               <span className="italic">보이지 않는 기반</span>입니다.
