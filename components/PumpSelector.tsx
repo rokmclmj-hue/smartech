@@ -412,6 +412,19 @@ export default function PumpSelector() {
   const [selectedCategory, setSelectedCategory] = useState<CatalogItem | null>(null);
   const [search, setSearch] = useState("");
 
+  // 홈 첫 화면 버튼(HeroCtaCards)이 보내는 신호로 해당 탭을 연다
+  useEffect(() => {
+    function onOpenTab(e: Event) {
+      const next = (e as CustomEvent<Tab>).detail;
+      if (next === "search" || next === "selection") {
+        setTab(next);
+        setSelectedCategory(null);
+      }
+    }
+    window.addEventListener("pumpSelectorTab", onOpenTab);
+    return () => window.removeEventListener("pumpSelectorTab", onOpenTab);
+  }, []);
+
   const [form, setForm] = useState({
     process: "", chamberVol: "", pipeSpec: "", pipeLen: "", bends: "",
   });
