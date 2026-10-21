@@ -65,6 +65,25 @@ function splitTags(tags: string | null) {
   return tags ? tags.split(/[,\s]+/).filter(t => t.length > 1) : [];
 }
 
+// 블로그 FAQ 데이터 — 두 가지 저장 형식(FAQPage 객체 / [{question, answer}] 배열)을 같은 모양으로 읽는다.
+// 배열 형식 4편(52·53·97·98)은 예전엔 그대로 내보내 구글이 FAQ로 읽지 못했다(2026-10-21)
+type FaqItem = { q: string; a: string };
+function parseFaq(raw: string | null): FaqItem[] {
+  if (!raw) return [];
+  try {
+    const data = JSON.parse(raw);
+    const list: unknown[] = Array.isArray(data) ? data : Array.isArray(data?.mainEntity) ? data.mainEntity : [];
+    return list
+      .map((item) => {
+        const it = item as { question?: string; answer?: string; name?: string; acceptedAnswer?: { text?: string } };
+        return { q: (it.question ?? it.name ?? "").trim(), a: (it.answer ?? it.acceptedAnswer?.text ?? "").trim() };
+      })
+      .filter((f) => f.q && f.a);
+  } catch {
+    return [];
+  }
+}
+
 // 검색엔진용 본문(articleBody) — 화면 본문과 같은 내용을 글자만 남겨 전부 넣는다.
 // 예전엔 2,000자에서 잘라 문장·적용 조건이 중간에 끊기고 사진 주소가 섞였다(2026-10-21 외부 진단)
 function toArticleBody(markdown: string) {
@@ -288,6 +307,17 @@ export default async function BlogPostPage({ params }: Props) {
 
   const tags = post.tags ? post.tags.split(/[,\s]+/).filter(Boolean) : [];
   const content = prepareBlogBody(post.content, post.title);
+  const faqItems = parseFaq(post.faqSchema);
+  const bodyHasFaq = /^##\s*자주 (묻는|확인하는|나오는) 질문/m.test(content);
+  const faqSchema = faqItems.length > 0 ? JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqItems.map((f) => ({
+      "@type": "Question",
+      "name": f.q,
+      "acceptedAnswer": { "@type": "Answer", "text": f.a },
+    })),
+  }) : null;
   const description = getBlogDescription(post.content, post.title, post.metaDesc);
 
   // 본문 사진 크기 미리 조회 (renderMarkdown의 이미지 규칙과 같은 패턴)
@@ -368,10 +398,10 @@ export default async function BlogPostPage({ params }: Props) {
     <>
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: articleSchema.replace(/</g, "\\u003c") }} />
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: breadcrumbSchema.replace(/</g, "\\u003c") }} />
-    {post.faqSchema && (
+    {faqSchema && (
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: post.faqSchema.replace(/</g, "\\u003c") }}
+        dangerouslySetInnerHTML={{ __html: faqSchema.replace(/</g, "\\u003c") }}
       />
     )}
     {howtoSchema && (
@@ -494,6 +524,24 @@ export default async function BlogPostPage({ params }: Props) {
             return '';
           })(), imageHints)}
         </article>
+
+        {/* 자주 묻는 질문 — 검색엔진용 FAQ와 같은 데이터를 화면에도 보여 준다(2026-10-21 외부 진단: 숨은 FAQ).
+            본문에 이미 FAQ 소제목이 있는 9편은 질문이 서로 달라(10/21 확인, 겹침 0) 제목만 바꿔 함께 보여 준다 */}
+        {faqItems.length > 0 && (
+          <section className="mt-12">
+            <h2 className="text-[19px] font-bold leading-snug tracking-tight mb-2 border-b hair pb-2">
+              {bodyHasFaq ? "함께 자주 묻는 질문" : "자주 묻는 질문"}
+            </h2>
+            <div className="divide-y divide-ink/10">
+              {faqItems.map((f, i) => (
+                <div key={i} className="py-5">
+                  <h3 className="text-[16px] font-semibold leading-snug">Q. {f.q}</h3>
+                  <p className="mt-2 text-[15px] leading-relaxed text-ink/85">{f.a}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* 태그 */}
         {tags.length > 0 && (
