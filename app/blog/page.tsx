@@ -17,11 +17,23 @@ const CATEGORY_COLORS: Record<string, string> = {
   "기술문의": "bg-purple-50 text-purple-700 border-purple-100",
   "단종문의": "bg-yellow-50 text-yellow-700 border-yellow-100",
   "수리문의": "bg-orange-50 text-orange-700 border-orange-100",
+  "현장사례": "bg-orange-50 text-orange-700 border-orange-100",
   "보도자료": "bg-edred/10 text-edred border-edred/20",
   "일반":     "bg-ink/5 text-dim border-ink/10",
 };
 
-const CATEGORIES = ["기술문의", "수리문의", "견적문의", "납기문의", "단종문의", "보도자료"];
+// 목록 탭 — DB 분류는 그대로 두고 화면에서만 묶는다(2026-10-21 외부 진단: 현장사례 탭 없음·글 1편짜리 탭).
+// key는 기존 주소(?category=…)를 그대로 써서 이미 알려진 주소가 바뀌지 않게 한다.
+const TABS: { key: string; label: string; categories: string[] }[] = [
+  { key: "기술문의", label: "기술 정보", categories: ["기술문의"] },
+  { key: "수리문의", label: "수리·현장사례", categories: ["수리문의", "현장사례"] },
+  { key: "보도자료", label: "보도자료", categories: ["보도자료"] },
+];
+// 탭에 묶인 분류로 들어오면 그 탭 주소로 통일(예: ?category=현장사례 → 수리문의 탭)
+function resolveTab(category?: string) {
+  if (!category) return null;
+  return TABS.find((t) => t.categories.includes(category)) ?? null;
+}
 
 function formatDate(d: Date) {
   return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
@@ -38,12 +50,14 @@ function buildCanonical(category?: string, page?: number) {
 type SearchParams = Promise<{ category?: string; page?: string }>;
 
 export async function generateMetadata({ searchParams }: { searchParams: SearchParams }): Promise<Metadata> {
-  const { category, page: pageStr } = await searchParams;
+  const { category: rawCategory, page: pageStr } = await searchParams;
   const page = Math.max(1, Number(pageStr) || 1);
+  const tab = resolveTab(rawCategory);
+  const category = tab?.key ?? rawCategory;
   const canonical = buildCanonical(category, page);
 
   const title = category
-    ? `${category} — 스마텍 블로그 | 진공펌프 기술 정보`
+    ? `${tab?.label ?? category} — 스마텍 블로그 | 진공펌프 기술 정보`
     : "블로그 — 스마텍 | 진공펌프 기술 정보";
 
   return {
@@ -54,12 +68,15 @@ export async function generateMetadata({ searchParams }: { searchParams: SearchP
 }
 
 export default async function BlogListPage({ searchParams }: { searchParams: SearchParams }) {
-  const { category, page: pageStr } = await searchParams;
+  const { category: rawCategory, page: pageStr } = await searchParams;
   const page = Math.max(1, Number(pageStr) || 1);
+  const tab = resolveTab(rawCategory);
+  const category = tab?.key ?? rawCategory;
 
+  // 탭이면 묶인 분류 전부, 탭 밖 분류(견적·납기·단종문의 등 옛 주소)는 그 분류만
   const where = {
     status: "PUBLISHED",
-    ...(category ? { category } : {}),
+    ...(tab ? { category: { in: tab.categories } } : category ? { category } : {}),
   };
 
   const [posts, total] = await Promise.all([
@@ -118,15 +135,15 @@ export default async function BlogListPage({ searchParams }: { searchParams: Sea
         >
           전체
         </Link>
-        {CATEGORIES.map((cat) => (
+        {TABS.map((t) => (
           <Link
-            key={cat}
-            href={`/blog?category=${cat}`}
+            key={t.key}
+            href={`/blog?category=${encodeURIComponent(t.key)}`}
             className={`mono text-[11px] tracking-[0.08em] px-3 py-1.5 border transition-colors ${
-              category === cat ? "bg-ink text-paper border-ink" : "border-ink/20 text-dim hover:border-ink hover:text-ink"
+              category === t.key ? "bg-ink text-paper border-ink" : "border-ink/20 text-dim hover:border-ink hover:text-ink"
             }`}
           >
-            {cat}
+            {t.label}
           </Link>
         ))}
       </div>

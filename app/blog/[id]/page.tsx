@@ -58,6 +58,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+// 관련 글 고를 때 무시하는 태그 — 대부분의 글에 붙어 있어 비슷한 글을 가려내지 못함(10/21 집계: #스마텍 47/68편)
+const COMMON_TAGS = new Set(["#스마텍", "#에드워드진공펌프", "#Edwards진공펌프", "#진공펌프", "#진공기술", "#Edwards", "#에드워드"]);
+
+function splitTags(tags: string | null) {
+  return tags ? tags.split(/[,\s]+/).filter(t => t.length > 1) : [];
+}
+
 // 검색엔진용 본문(articleBody) — 화면 본문과 같은 내용을 글자만 남겨 전부 넣는다.
 // 예전엔 2,000자에서 잘라 문장·적용 조건이 중간에 끊기고 사진 주소가 섞였다(2026-10-21 외부 진단)
 function toArticleBody(markdown: string) {
@@ -249,18 +256,25 @@ export default async function BlogPostPage({ params }: Props) {
   if (!post) return notFound();
 
   // 태그 공유 기반 관련 글 (카테고리 경계를 넘어 연결)
-  const tagList = post.tags ? post.tags.split(/[,\s]+/).filter(t => t.length > 1) : [];
-  let relatedPosts = tagList.length > 0
-    ? await prisma.blogPost.findMany({
+  // 거의 모든 글에 붙는 태그는 빼고, 같은 태그가 많이 겹치는 글부터 고른다.
+  // 예전엔 #스마텍 하나만 겹쳐도 관련 글이라 늘 최신 글 3개가 나왔다(2026-10-21 외부 진단)
+  const tagList = splitTags(post.tags).filter(t => !COMMON_TAGS.has(t));
+  type RelatedPost = { id: number; slug: string | null; title: string; metaDesc: string; publishedAt: Date | null; createdAt: Date };
+  let relatedPosts: RelatedPost[] = tagList.length > 0
+    ? (await prisma.blogPost.findMany({
         where: {
           status: "PUBLISHED",
           id: { not: post.id },
           OR: tagList.map(tag => ({ tags: { contains: tag } })),
         },
         orderBy: { publishedAt: "desc" },
-        take: 3,
-        select: { id: true, slug: true, title: true, metaDesc: true, publishedAt: true, createdAt: true },
-      })
+        take: 50,
+        select: { id: true, slug: true, title: true, metaDesc: true, tags: true, publishedAt: true, createdAt: true },
+      }))
+        .map(r => ({ ...r, shared: splitTags(r.tags).filter(t => tagList.includes(t)).length }))
+        .filter(r => r.shared > 0) // contains는 글자 일부만 같아도 걸리므로 태그 단위로 다시 센다
+        .sort((x, y) => y.shared - x.shared) // 같은 수면 위의 최신순 유지
+        .slice(0, 3)
     : [];
   // 태그 매칭 부족 시 카테고리로 보충
   if (relatedPosts.length < 2) {
