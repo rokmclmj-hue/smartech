@@ -419,7 +419,14 @@ export default function QuotePanel({ open, onClose }: Props) {
               전체 비우기
             </button>
             <div className="text-[14px] text-ink/80 pt-1">
-              ※ 로그인 없이 공개가로 요청·저장됩니다.
+              {/* 로그인 상태별 안내 — 관리자는 배율 1.00이라 원가가 보이므로 고객 화면과 헷갈리지 않게(10/21) */}
+              {!session
+                ? "※ 로그인 없이 공개가로 요청·저장됩니다."
+                : sessionUser?.tier === "ADMIN"
+                  ? "※ 관리자 계정이라 원가로 표시됩니다. 고객에게는 공개가로 보입니다."
+                  : isApprovedMember
+                    ? "※ 귀사 적용가로 계산됩니다."
+                    : "※ 공개가 기준으로 요청·저장됩니다."}
               {!session && (
                 <>
                   {" "}회원은{" "}
