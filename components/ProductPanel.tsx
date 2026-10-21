@@ -2,7 +2,8 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { signIn } from "next-auth/react";
-import { SPEC_DATA } from "@/lib/product-specs";
+import Link from "next/link";
+import { SPEC_DATA, modelSlug } from "@/lib/product-specs";
 
 type Product = {
   id: number;
@@ -380,6 +381,22 @@ export default function ProductPanel({ item, onClose, catalogUrl }: Props) {
               </button>
             )}
           </div>
+          {/* 모델별 사양 화면으로 — 산업 페이지 추천 카드와 같은 연결(2026-10-21 외부 진단 대응) */}
+          {specData && (
+            <div className="mt-3 flex flex-wrap items-center gap-1.5">
+              <span className="text-[12px] text-dim mr-1">모델별 사양</span>
+              {specData.models.map((m) => (
+                <Link
+                  key={m}
+                  href={`/products/${modelSlug(m)}`}
+                  onClick={onClose}
+                  className="mono text-[12px] border hair px-2 py-1.5 leading-none hover:bg-ink hover:text-paper transition-colors"
+                >
+                  {m}
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* 제품 목록 — 스크롤 가능 */}
