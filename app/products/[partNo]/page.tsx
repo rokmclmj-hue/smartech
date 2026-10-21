@@ -108,8 +108,9 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     : product.stock > 0
       ? `재고 ${product.stock} · 바로 출고 가능`
       : `${leadTimeLabel(product.category, product.description)} (재고 없음)`;
-  // 견적 담기는 비회원도 가능 — 홈 견적 카트와 같은 카트(2026-10-20 비회원 주문 요청). 단종 품목만 제외
-  const canAddToQuote = !product.isDiscontinued;
+  // 견적 담기는 비회원도 가능 — 홈 견적 카트와 같은 카트(2026-10-20 비회원 주문 요청).
+  // 단종·가격 미정(원가 0) 품목은 주문 요청에서 거절되므로 버튼도 숨긴다(코드 리뷰 10/21)
+  const canAddToQuote = !product.isDiscontinued && product.costPrice > 0;
 
   const productSchema = JSON.stringify({
     "@context": "https://schema.org",

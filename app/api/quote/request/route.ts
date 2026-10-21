@@ -62,6 +62,13 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+    // 단종·가격 미정(원가 0) 품목은 0원 주문이 되지 않게 — 비회원 주문 요청과 같은 기준(코드 리뷰 10/21)
+    if (product.isDiscontinued || !(product.costPrice > 0)) {
+      return NextResponse.json(
+        { error: `${product.partNo}은(는) 단종되었거나 가격 문의가 필요한 품목입니다. 해당 품목을 빼거나 031-204-7170으로 문의해 주세요.` },
+        { status: 400 }
+      );
+    }
     const unitPrice = Math.round(product.costPrice * multiplier);
     quoteItemData.push({ productId: item.productId, quantity: item.quantity, unitPrice });
   }

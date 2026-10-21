@@ -54,7 +54,8 @@ export async function generateMetadata({ searchParams }: { searchParams: SearchP
   const page = Math.max(1, Number(pageStr) || 1);
   const tab = resolveTab(rawCategory);
   const category = tab?.key ?? rawCategory;
-  const canonical = buildCanonical(category, page);
+  // 탭에 없는 분류(견적·납기·단종문의 등 옛 주소)는 글이 1편뿐이라 따로 색인되지 않게 블로그 첫 화면을 정식 주소로(코드 리뷰 10/21)
+  const canonical = rawCategory && !tab ? buildCanonical() : buildCanonical(category, page);
 
   const title = category
     ? `${tab?.label ?? category} — 스마텍 블로그 | 진공펌프 기술 정보`

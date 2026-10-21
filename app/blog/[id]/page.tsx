@@ -91,7 +91,7 @@ function toArticleBody(markdown: string) {
     .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")       // 사진
     .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")     // 링크는 글자만
     .replace(/https?:\/\/\S+/g, " ")             // 남은 주소
-    .replace(/^[#>\-\s]+/gm, "")                  // 제목·인용·목록 기호
+    .replace(/^\s*(?:#{1,6}\s+|>\s?|[-*+]\s+)/gm, "") // 제목·인용·목록 기호 — "-10°C" 같은 마이너스 숫자는 남긴다
     .replace(/[*`|]/g, "")
     .replace(/\s+/g, " ")
     .trim();
@@ -287,7 +287,7 @@ export default async function BlogPostPage({ params }: Props) {
           OR: tagList.map(tag => ({ tags: { contains: tag } })),
         },
         orderBy: { publishedAt: "desc" },
-        take: 50,
+        // 후보 수를 자르지 않는다 — 최신 N편만 보면 겹치는 태그가 더 많은 옛 글이 빠진다(코드 리뷰 10/21)
         select: { id: true, slug: true, title: true, metaDesc: true, tags: true, publishedAt: true, createdAt: true },
       }))
         .map(r => ({ ...r, shared: splitTags(r.tags).filter(t => tagList.includes(t)).length }))
@@ -295,14 +295,15 @@ export default async function BlogPostPage({ params }: Props) {
         .sort((x, y) => y.shared - x.shared) // 같은 수면 위의 최신순 유지
         .slice(0, 3)
     : [];
-  // 태그 매칭 부족 시 카테고리로 보충
-  if (relatedPosts.length < 2) {
-    relatedPosts = await prisma.blogPost.findMany({
-      where: { category: post.category, id: { not: post.id }, status: "PUBLISHED" },
+  // 태그 매칭이 3개 미만이면 같은 분류 최신 글로 채운다 — 찾은 글은 버리지 않는다(코드 리뷰 10/21)
+  if (relatedPosts.length < 3) {
+    const filler = await prisma.blogPost.findMany({
+      where: { category: post.category, id: { notIn: [post.id, ...relatedPosts.map(r => r.id)] }, status: "PUBLISHED" },
       orderBy: { publishedAt: "desc" },
-      take: 3,
+      take: 3 - relatedPosts.length,
       select: { id: true, slug: true, title: true, metaDesc: true, publishedAt: true, createdAt: true },
     });
+    relatedPosts = [...relatedPosts, ...filler];
   }
 
   const tags = post.tags ? post.tags.split(/[,\s]+/).filter(Boolean) : [];

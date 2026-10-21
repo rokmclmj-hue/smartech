@@ -20,7 +20,7 @@ type Props = {
 };
 
 export default function QuotePanel({ open, onClose }: Props) {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [items, setItems] = useState<CartItem[]>([]);
   const [infoMap, setInfoMap] = useState<Map<number, ProductInfo>>(new Map());
 
@@ -420,14 +420,17 @@ export default function QuotePanel({ open, onClose }: Props) {
             </button>
             <div className="text-[14px] text-ink/80 pt-1">
               {/* 로그인 상태별 안내 — 관리자는 배율 1.00이라 원가가 보이므로 고객 화면과 헷갈리지 않게(10/21) */}
-              {!session
+              {/* 로그인 확인 중엔 비워 둔다 — 회원에게 비회원 문구가 잠깐 보이지 않게(코드 리뷰 10/21) */}
+              {status === "loading"
+                ? null
+                : !session
                 ? "※ 로그인 없이 공개가로 요청·저장됩니다."
                 : sessionUser?.tier === "ADMIN"
                   ? "※ 관리자 계정이라 원가로 표시됩니다. 고객에게는 공개가로 보입니다."
                   : isApprovedMember
                     ? "※ 귀사 적용가로 계산됩니다."
                     : "※ 공개가 기준으로 요청·저장됩니다."}
-              {!session && (
+              {status === "unauthenticated" && (
                 <>
                   {" "}회원은{" "}
                   <Link href="/auth/login" onClick={onClose} className="underline underline-offset-2 text-ink hover:text-edred">

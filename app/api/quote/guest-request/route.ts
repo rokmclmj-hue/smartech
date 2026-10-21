@@ -67,7 +67,8 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // 장난 접수 막기(코드 리뷰 10/20) — 같은 연락처 10분 안 재접수, 홈페이지 주문 요청 1시간 20건 초과 시 접수 중단(문자 요금·목록 보호)
+  // 장난 접수 막기(코드 리뷰 10/20) — 같은 연락처 10분 안 재접수는 거절.
+  // 1시간 20건 초과 시엔 접수는 받고 문자만 멈춘다 — 장난 20건에 진짜 주문까지 막히지 않게(코드 리뷰 10/21)
   const recent = await prisma.quote.findMany({
     where: { note: { startsWith: WEB_ORDER_NOTE }, createdAt: { gte: new Date(Date.now() - 60 * 60 * 1000) } },
     select: { guestPhone: true, createdAt: true },
@@ -76,9 +77,7 @@ export async function POST(req: NextRequest) {
   if (recent.some((q) => q.createdAt.getTime() >= tenMinAgo && (q.guestPhone ?? "").replace(/\D/g, "") === digits)) {
     return NextResponse.json({ error: "방금 같은 연락처로 접수되었습니다. 추가 요청은 031-204-7170으로 전화 주세요." }, { status: 429 });
   }
-  if (recent.length >= 20) {
-    return NextResponse.json({ error: "지금은 접수가 많습니다. 031-204-7170으로 전화 주세요." }, { status: 429 });
-  }
+  const skipSms = recent.length >= 20;
   const multiplier = await getMultiplier("PUBLIC");
   const costById = new Map(products.map((p) => [p.id, p.costPrice]));
   const itemData = items.map((i) => ({
@@ -108,10 +107,14 @@ export async function POST(req: NextRequest) {
     select: { id: true, createdAt: true },
   });
 
-  try {
-    await notifyNewQuote(quote.id, `${company} ${name} (홈페이지·비회원)`, totalAmount, true);
-  } catch (err) {
-    console.error("[Guest order SMS] 알림 오류:", err);
+  if (skipSms) {
+    console.warn("[Guest order SMS] 1시간 20건 초과 — 문자 생략, 견적 목록에서 확인:", quote.id);
+  } else {
+    try {
+      await notifyNewQuote(quote.id, `${company} ${name} (홈페이지·비회원)`, totalAmount, true);
+    } catch (err) {
+      console.error("[Guest order SMS] 알림 오류:", err);
+    }
   }
 
   const quoteNo = `SMT-${quote.createdAt.getFullYear()}-Q-${String(quote.id).padStart(6, "0")}`;
