@@ -3,6 +3,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { INDUSTRIES, getIndustry } from "@/lib/industries";
+import { SPEC_DATA, modelSlug } from "@/lib/product-specs";
 
 function hiEd(text: string) {
   return text.split(/(\bEdwards\b)/).map((p, i) =>
@@ -106,6 +107,29 @@ function pumpImage(name: string): string {
 
 function pumpPdf(name: string): string | null {
   return PUMP_PDF[name] ?? null;
+}
+
+// 추천 계열 → 사양표(lib/product-specs.ts) 분류. 카드 아래 모델 버튼이 모델 사양·가격 화면으로 이어진다
+// (2026-10-21 외부 진단: 추천이 PDF로만 연결). E2M은 위 PDF와 같은 중대형 계열. 사양표 없는 STP·게이지·ELD500은 PDF만
+const PUMP_SPEC_KEY: Record<string, string> = {
+  RV: "오일펌프(소형 RV)",
+  E2M: "오일펌프(중대형 E2M)",
+  E2S: "오일펌프(중대형 E2S)",
+  nES: "오일펌프(nES)",
+  nXDS: "스크롤펌프(소형 nXDS)",
+  XDS: "스크롤펌프(중형 XDS)",
+  GXS: "산업용드라이펌프(GXS)",
+  EXS: "산업용드라이펌프(EXS)",
+  iXH: "반도체드라이펌프(iXH)",
+  iXL: "반도체드라이펌프(iXL)",
+  nXRi: "반도체드라이펌프(nXRi)",
+  nEXT: "터보펌프(nEXT)",
+  EH: "부스터펌프(EH)",
+};
+
+function pumpModels(name: string): string[] {
+  const key = PUMP_SPEC_KEY[name];
+  return key ? SPEC_DATA[key]?.models ?? [] : [];
 }
 
 export default async function IndustryDetailPage({
@@ -271,15 +295,16 @@ export default async function IndustryDetailPage({
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {industry.recommendedPumps.map((pump, i) => {
               const pdf = pumpPdf(pump);
+              const models = pumpModels(pump);
               const Wrapper = pdf ? "a" : "div";
               const wrapperProps = pdf
                 ? { href: pdf, target: "_blank", rel: "noopener noreferrer" }
                 : {};
               return (
+                <div key={pump} className="border hair bg-paper flex flex-col overflow-hidden">
                 <Wrapper
-                  key={pump}
                   {...(wrapperProps as any)}
-                  className={`border hair bg-paper flex flex-col overflow-hidden group${pdf ? " cursor-pointer" : ""}`}
+                  className={`flex flex-col group${pdf ? " cursor-pointer" : ""}`}
                 >
                   <div className="aspect-[4/3] relative bg-[#F6F4EF] border-b hair overflow-hidden">
                     <Image
@@ -302,6 +327,23 @@ export default async function IndustryDetailPage({
                     )}
                   </div>
                 </Wrapper>
+                {models.length > 0 && (
+                  <div className="px-4 pb-4 mt-auto">
+                    <div className="text-[11px] text-dim mb-1.5">모델별 사양·가격</div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {models.map((m) => (
+                        <Link
+                          key={m}
+                          href={`/products/${modelSlug(m)}`}
+                          className="mono text-[12px] border hair px-2 py-1.5 leading-none hover:bg-ink hover:text-paper transition-colors"
+                        >
+                          {m}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                </div>
               );
             })}
           </div>
