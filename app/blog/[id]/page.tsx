@@ -58,6 +58,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+// 검색엔진용 본문(articleBody) — 화면 본문과 같은 내용을 글자만 남겨 전부 넣는다.
+// 예전엔 2,000자에서 잘라 문장·적용 조건이 중간에 끊기고 사진 주소가 섞였다(2026-10-21 외부 진단)
+function toArticleBody(markdown: string) {
+  return markdown
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")       // 사진
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")     // 링크는 글자만
+    .replace(/https?:\/\/\S+/g, " ")             // 남은 주소
+    .replace(/^[#>\-\s]+/gm, "")                  // 제목·인용·목록 기호
+    .replace(/[*`|]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function formatDate(d: Date) {
   return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
 }
@@ -289,7 +302,7 @@ export default async function BlogPostPage({ params }: Props) {
     "headline": post.title,
     "description": description,
     "image": getBlogImage(content),
-    "articleBody": content.replace(/[#*`!\[\]()]/g, "").slice(0, 2000),
+    "articleBody": toArticleBody(content),
     "datePublished": (post.publishedAt ?? post.createdAt).toISOString(),
     "dateModified": post.updatedAt.toISOString(),
     "url": `https://www.smartechvacuum.com/blog/${post.slug ?? post.id}`,

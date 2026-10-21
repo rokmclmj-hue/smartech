@@ -81,7 +81,8 @@ export const SPEC_DATA: Record<string, SpecData> = {
   "스크롤펌프(소형 nXDS)": {
     models: ["nXDS6i", "nXDS10i", "nXDS15i", "nXDS20i"],
     rows: [
-      { label: "배기속도 (Peak)", unit: "m³/h", values: ["6.2", "12.7", "17.1", "22.0"] },
+      // 카탈로그 8쪽 "Peak pumping speed" 행. 바로 위 "Displacement"(6.8·12.7·17.1·28.0)와 헷갈리지 말 것 (2026-10-21 정정)
+      { label: "배기속도 (Peak)", unit: "m³/h", values: ["6.2", "11.4", "15.1", "22.0"] },
       { label: "도달압력", unit: "mbar", values: ["2.0×10⁻²", "7.0×10⁻³", "7.0×10⁻³", "3.0×10⁻²"] },
       { label: "모터 출력", unit: "W", values: ["260", "280", "300", "260"] },
       { label: "회전수", unit: "rpm", values: ["1,800", "1,800", "1,800", "1,800"] },
@@ -89,7 +90,7 @@ export const SPEC_DATA: Record<string, SpecData> = {
       { label: "무게", unit: "kg", values: ["26.2", "25.8", "25.2", "25.6"] },
       { label: "인렛 플랜지", unit: "", values: ["NW25", "NW25", "NW25", "NW25"] },
       { label: "배기 플랜지", unit: "", values: ["NW25", "NW25", "NW25", "NW25"] },
-      { label: "작동 온도", unit: "°C", values: ["10~40", "10~40", "10~40", "10~40"] },
+      { label: "작동 온도", unit: "°C", values: ["5~40", "5~40", "5~40", "5~40"] },
       { label: "외형 치수 (L×W×H)", unit: "mm", values: ["432×282×302", "432×282×302", "432×282×302", "432×282×302"] },
     ],
   },

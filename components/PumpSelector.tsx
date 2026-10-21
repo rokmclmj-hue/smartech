@@ -833,7 +833,7 @@ export default function PumpSelector() {
           { key: "scan", label: "모델 인식", sub: "명판 사진으로 즉시 견적", ai: true,
             onClick: () => { setTab("scan"); setScanResult(null); } },
           // 2026-10-19 로그인 없이 공개 (계산은 브라우저 안에서만 돌아 비용이 없고, 사용 횟수는 GA4로 센다)
-          { key: "selection", label: "펌프선정 및 시뮬레이션", sub: "공정 조건 기반 자동 선정", ai: false,
+          { key: "selection", label: "펌프선정 및 시뮬레이션", sub: "배기 계산으로 후보 선정", ai: false,
             onClick: () => { setTab("selection"); setSelectedCategory(null); } },
         ] as const).map((t) => {
           const active = tab === t.key;
@@ -1214,7 +1214,8 @@ export default function PumpSelector() {
         {tab === "selection" && (
           <div>
             <p className="text-[12px] text-[#6A6660] mb-4">
-              공정 조건을 입력하면 적합한 펌프를 자동 계산합니다.
+              챔버 부피·목표 압력·배관 조건으로 배기 시간을 계산해 후보 펌프를 보여 드립니다.
+              가스 종류·수분·운전 주기 같은 공정 적합성은 전문가 검토에서 함께 확인합니다.
             </p>
             <div className="space-y-4">
 

@@ -10,6 +10,7 @@ import AddToQuoteButton from "./AddToQuoteButton";
 import ModelDetail from "./ModelDetail";
 import { findModelBySlug, findModelForProduct, getModelSpecRows, modelSlug } from "@/lib/product-specs";
 import { getProductPhotoUrl } from "@/lib/product-icons";
+import { leadTimeLabel } from "@/lib/lead-time";
 
 // 검색 결과 제목·설명용 — 카테고리 키("오일펌프(소형 RV)")의 괄호 앞부분을 읽기 쉬운 제품 종류명으로 바꾼다.
 const MODEL_TYPE_LABEL: Record<string, string> = {
@@ -50,7 +51,7 @@ export async function generateMetadata({ params }: { params: Promise<{ partNo: s
   if (product) {
     return {
       title: `${product.description} (${partNo}) — 스마텍 | Edwards Vacuum`,
-      description: `Edwards ${product.description} 정품 부품(파트번호 ${partNo}). Edwards 코리아 공식 대리점 스마텍에서 정품 공급·견적, 수원 본사·천안 수리센터에서 수리 상담.`,
+      description: `Edwards ${product.description} 정품(파트번호 ${partNo}). Edwards 코리아 공식 대리점 스마텍에서 정품 공급·견적, 수원 본사·천안 수리센터에서 수리 상담.`,
       alternates: { canonical: `https://www.smartechvacuum.com/products/${encodeURIComponent(partNo)}` },
     };
   }
@@ -101,6 +102,14 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     : product.stock <= 0
       ? "https://schema.org/OutOfStock"
       : "https://schema.org/InStock";
+  // 화면 재고 표시 — 구글용 availability와 같은 기준(재고 숫자)으로 보여 준다
+  const stockLabel = product.isDiscontinued
+    ? "단종 — 대체 모델 문의"
+    : product.stock > 0
+      ? `재고 ${product.stock} · 바로 출고 가능`
+      : `${leadTimeLabel(product.category, product.description)} (재고 없음)`;
+  // 견적 담기는 비회원도 가능 — 홈 견적 카트와 같은 카트(2026-10-20 비회원 주문 요청). 단종 품목만 제외
+  const canAddToQuote = !product.isDiscontinued;
 
   const productSchema = JSON.stringify({
     "@context": "https://schema.org",
@@ -159,9 +168,9 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
             {/* 가격 정보 — 데스크탑에서는 여기에 표시, 모바일에서는 하단 바에서 표시 */}
             <div className="hidden md:block mt-auto pt-8">
-              <PriceBlock displayPrice={displayPrice} isLoggedIn={isLoggedIn} isPending={isPending} />
+              <PriceBlock displayPrice={displayPrice} isLoggedIn={isLoggedIn} isPending={isPending} stockLabel={stockLabel} inStock={product.stock > 0 && !product.isDiscontinued} />
               {/* 견적 담기 버튼 — 데스크탑 */}
-              {isLoggedIn && !isPending && (
+              {canAddToQuote && (
                 <AddToQuoteButton product={{ id: product.id, partNo: product.partNo, description: product.description }} />
               )}
             </div>
@@ -227,24 +236,18 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             {isPending && (
               <p className="text-[11px] text-amber-500 mt-0.5">확인 중 — 확정가는 담당자 문의</p>
             )}
+            <p className="text-[12px] text-ink/75 mt-0.5 truncate">{stockLabel}</p>
           </div>
 
           {/* 견적 담기 버튼 */}
-          {isLoggedIn && !isPending ? (
+          {canAddToQuote && (
             <div className="flex-shrink-0">
               <AddToQuoteButton
                 product={{ id: product.id, partNo: product.partNo, description: product.description }}
                 compact
               />
             </div>
-          ) : !isLoggedIn ? (
-            <Link
-              href="/auth/login"
-              className="flex-shrink-0 bg-edred text-paper px-5 py-2.5 text-sm font-semibold min-h-[44px] flex items-center"
-            >
-              로그인
-            </Link>
-          ) : null}
+          )}
         </div>
       </div>
     </>
@@ -255,10 +258,14 @@ function PriceBlock({
   displayPrice,
   isLoggedIn,
   isPending,
+  stockLabel,
+  inStock,
 }: {
   displayPrice: number;
   isLoggedIn: boolean;
   isPending: boolean;
+  stockLabel: string;
+  inStock: boolean;
 }) {
   return (
     <div className="border-t hair pt-5">
@@ -268,6 +275,11 @@ function PriceBlock({
           : "참고가격 · 부가세 별도"}
       </p>
       <p className="display text-[34px] leading-none mt-2 tabular-nums">{formatKRW(displayPrice)}</p>
+      {/* 재고·납기 — 홈 검색 결과와 같은 표시 */}
+      <p className="mt-3 flex items-center gap-2 text-[14px] text-ink">
+        {inStock && <span className="h-1.5 w-1.5 bg-edred" aria-hidden />}
+        <span className={inStock ? "font-semibold" : "text-ink/75"}>{stockLabel}</span>
+      </p>
       {isPending && (
         <p className="text-[13px] text-amber-600 mt-2">확인 중입니다 — 확정가는 담당자에게 문의해 주세요.</p>
       )}
