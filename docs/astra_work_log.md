@@ -1,5 +1,11 @@
 # Astra 작업 기록
 
+## 2026-10-21 — (클로드) 매주 기계 점검 스크립트 + Windows 예약 작업
+
+- 대표님 "앞으로 진행 3번 승인". `scripts/weekly_site_check.py`: ① 사양표 숫자 행(배기속도·온도·무게) ↔ public/catalogs PDF(PyMuPDF) ② 블로그 전 글 FAQ 화면 표시·FAQPage 형식·articleBody http ③ 파트번호 고정 2+주별 무작위 8: 재고 문구↔availability, 비회원 담기 버튼 ④ 산업 21페이지 모델 링크 수·링크 200 ⑤ check-public-leaks 라이브 ⑥ 사이트맵 개수 5% 감소·robots 전체 차단. 결과 바탕화면 `스마텍_주간점검`(state.json 포함). 코드·DB 수정 없음.
+- 첫 실행: 사양 11건 의심 → 카탈로그 직접 확인 결과 모두 맞음(GXS 9쪽 450·740 m³/h·640 kg, EXS 치수표 570·650 kg, iXH "Peak Speed" 행) → iXH 행 이름 정규식 보강, 나머지 6건 `scripts/weekly-check-known.json`. 재실행 이상없음(사양 108값, 블로그 68, 파트번호 10, 산업 링크 323).
+- 예약: `SmartechWeeklySiteCheck` 월 10:00, pythonw -X utf8, Hidden, StartWhenAvailable, 30분 제한. Start-ScheduledTask로 실제 실행 확인(LastTaskResult 0, 보고서 갱신). 다음 실행 2026-10-26 10:00. 시험 첫 보고서(확인필요11건)는 삭제.
+
 ## 2026-10-21 — (클로드) 정기 심층 점검 지시서 초안 (docs/audits/site-review-playbook.md)
 
 - 대표님 "좋아". 외부 진단 방법 + 우리가 놓친 "맞는지·서로 같은지" 점검을 8가지 렌즈(사양↔카탈로그 월 2분류 순환, 화면↔JSON-LD, 근거 범위·단위·진공 용어, 고객 4유형 경로, 검색로봇 길, 분류·추천, 공개 정보, 방향성)로 정리. 결과 형식(지난번 대비 고침/그대로/나빠짐), 매주 기계 점검 후보 6개, "이미 결정된 것" 11개(재지적 금지), AI 실행 문장.
