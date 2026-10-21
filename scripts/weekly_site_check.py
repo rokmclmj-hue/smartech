@@ -137,6 +137,8 @@ def check_specs(known):
                     continue
                 if not value_found(v, pool):
                     issues.append(f"사양 불일치 의심: {cat} · {model} · {label} = {v} {unit} (카탈로그 {pdf}에서 같은 행 값 못 찾음)")
+    if checked == 0:
+        issues.append("사양 값을 하나도 대조하지 못함 — lib/product-specs.ts·lib/catalogs.ts 모양이 바뀌었는지 확인")
     return issues, f"사양 값 {checked}개 대조, 대조 불가 {skipped}건(카탈로그 없음·행 이름 못 찾음)"
 
 
@@ -182,7 +184,9 @@ def check_sku(paths):
     issues = []
     skus = [p for p in paths if re.match(r"^/products/[A-Z0-9][^/]*$", p)]
     random.seed(datetime.now().strftime("%Y%W"))
-    sample = ["/products/A65501903", "/products/A73701983"] + random.sample(skus, min(8, len(skus)))
+    fixed = ["/products/A65501903", "/products/A73701983"]
+    rest = [p for p in skus if p not in fixed]
+    sample = fixed + random.sample(rest, min(8, len(rest)))
     for p in sample:
         st, s = fetch(p)
         if st != 200:
@@ -249,7 +253,8 @@ def check_counts(paths, model_links, state):
         "산업→모델 링크": model_links,
     }
     prev = state.get("counts", {})
-    for k, v in counts.items():
+    # 사이트맵을 못 읽은 주는 비교하지 않는다(실패는 main에서 따로 알림)
+    for k, v in (counts.items() if paths else []):
         if prev.get(k) and v < prev[k] * 0.95:
             issues.append(f"{k} 수가 지난번 {prev[k]} → 이번 {v}로 5% 넘게 줄어듦")
     st, robots = fetch("/robots.txt")
@@ -260,7 +265,10 @@ def check_counts(paths, model_links, state):
 
 def main():
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    state = json.loads(STATE_FILE.read_text(encoding="utf-8")) if STATE_FILE.exists() else {}
+    try:
+        state = json.loads(STATE_FILE.read_text(encoding="utf-8")) if STATE_FILE.exists() else {}
+    except (ValueError, OSError):
+        state = {}  # 기록 파일이 깨져도 점검은 계속하고 이번 결과로 새로 쓴다
     known = json.loads(KNOWN_FILE.read_text(encoding="utf-8")) if KNOWN_FILE.exists() else {}
     started = datetime.now()
 
@@ -306,7 +314,9 @@ def main():
         lines += [f"- {i}" for i in iss] or ["- 이상 없음"]
         lines.append("")
     (OUT_DIR / name).write_text("\n".join(lines), encoding="utf-8-sig")
-    state.update({"last_run": started.isoformat(timespec="seconds"), "counts": counts, "last_report": name})
+    state.update({"last_run": started.isoformat(timespec="seconds"), "last_report": name})
+    if paths:  # 사이트맵을 못 읽은 주의 0개를 기준값으로 남기지 않는다
+        state["counts"] = counts
     STATE_FILE.write_text(json.dumps(state, ensure_ascii=False, indent=1), encoding="utf-8")
     print(OUT_DIR / name)
     return 0
