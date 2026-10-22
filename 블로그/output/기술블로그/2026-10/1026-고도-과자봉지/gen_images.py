@@ -54,7 +54,7 @@ DIFF = html("""
 
 ALTITUDE = html("""
 <div id="card"><div class="eyebrow">ISA · 고도별 압력</div>
-<h2>고도가 높을수록 압력이 가파르게 낮아집니다</h2>
+<h2>고도가 높아질수록 압력은 낮아집니다</h2>
 <div class="row"><span class="lab">해수면 (101,325 Pa)</span><div class="track"><div class="bar" style="width:100%"></div></div><span class="val">100%</span></div>
 <div class="row"><span class="lab">약 2,438m (8,000ft)</span><div class="track"><div class="bar" style="width:74%"></div></div><span class="val">약 74%</span></div>
 <div class="row"><span class="lab">약 3,776m (후지산급)</span><div class="track"><div class="bar" style="width:63%"></div></div><span class="val">약 63%</span></div>
