@@ -33,7 +33,7 @@ const deliveryCasesSchema = JSON.stringify({
       "description": c.note,
       "image": `https://www.smartechvacuum.com${c.photo}`,
       ...(c.date ? { "dateCreated": c.date.replace(".", "-") } : {}),
-      "about": { "@type": "Product", "name": c.model, "brand": { "@type": "Brand", "name": "Edwards Vacuum" } },
+      "about": { "@type": "Thing", "name": c.model }, // Product로 두면 offers 없음 경고(코드리뷰 10/24)
       "author": { "@type": "Organization", "name": "스마텍", "url": "https://www.smartechvacuum.com" },
     },
   })),
