@@ -236,7 +236,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
               href={`/products/${modelSlug(model.model)}`}
               className="mt-4 inline-block text-[14px] text-edred hover:underline underline-offset-4"
             >
-              {model.model} 다른 전압·사양과 같은 라인업 모델 보기 →
+              Edwards {model.model} 모델별 가격·재고·다른 전압 보기 →
             </Link>
           </section>
         )}

@@ -381,16 +381,16 @@ export default function ProductPanel({ item, onClose, catalogUrl }: Props) {
               </button>
             )}
           </div>
-          {/* 모델별 사양 화면으로 — 산업 페이지 추천 카드와 같은 연결(2026-10-21 외부 진단 대응) */}
+          {/* 모델 화면으로 — 사진·판매가·재고·사양(2026-10-23 가격 공개 후 이름 변경) */}
           {specData && (
-            <div className="mt-3 flex flex-wrap items-center gap-1.5">
-              <span className="text-[12px] text-dim mr-1">모델별 사양</span>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <span className="text-[13px] font-semibold text-ink mr-1">모델별 가격·재고 보기</span>
               {specData.models.map((m) => (
                 <Link
                   key={m}
                   href={`/products/${modelSlug(m)}`}
                   onClick={onClose}
-                  className="mono text-[12px] border hair px-2 py-1.5 leading-none hover:bg-ink hover:text-paper transition-colors"
+                  className="mono text-[13px] border border-edred text-edred bg-white px-3 py-2 leading-none hover:bg-edred hover:text-paper transition-colors"
                 >
                   {m}
                 </Link>

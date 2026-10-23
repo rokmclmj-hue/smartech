@@ -24,7 +24,7 @@ export const INDUSTRIES: Industry[] = [
     tag: ["반도체"],
     title: "반도체",
     line: "반도체 장비용 진공펌프 판매와 드라이펌프 수리·오버홀",
-    image: "/images/repair/ih1800mk5-c-exterior.jpg",
+    image: "/images/industries/semiconductor.jpeg",
     tagline: "반도체 장비용 진공펌프(iXH·iXL) 판매부터 iH·iQDP 반도체용 드라이펌프 수리·오버홀까지.",
     description:
       "반도체 제조 장비의 로드락·프로세스 챔버, 장비 부품 코팅 공정, 세정 후 성분 분석 장비에는 공정 부산물에 강한 드라이펌프와 고진공 터보펌프 조합이 쓰입니다. 스마텍은 Edwards 코리아 공식 대리점으로 반도체 장비용 진공펌프(iXH·iXL 등) 판매와 펌프 선정 상담, iH·iQDP 등 반도체용 드라이펌프 수리·오버홀을 함께 제공합니다.",
