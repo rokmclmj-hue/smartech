@@ -39,14 +39,17 @@ const deliveryCasesSchema = JSON.stringify({
   })),
 });
 
-// 연도별 묶음(최신 연도 먼저), 날짜 없는 사례는 "현장"으로 맨 뒤
+// 최근 5년(가장 최신 사례 연도 기준)만 연도별로 묶고, 그보다 오래된 사례·날짜 없는 사례는 "이전 사례"로 맨 뒤.
+// 카드 날짜는 실제 촬영일 그대로 둔다(2026-10-24 대표님 결정).
 const GROUPS = (() => {
+  const newest = Math.max(...DELIVERY_CASES.filter((c) => c.date).map((c) => Number(c.date!.slice(0, 4))));
   const map = new Map<string, typeof DELIVERY_CASES>();
   for (const c of DELIVERY_CASES) {
-    const key = c.date ? c.date.slice(0, 4) : "etc";
+    const year = c.date ? Number(c.date.slice(0, 4)) : 0;
+    const key = year > newest - 5 ? String(year) : "etc";
     map.set(key, [...(map.get(key) ?? []), c]);
   }
-  return [...map.entries()].map(([key, items]) => ({ key, label: key === "etc" ? "현장" : `${key}년`, items }));
+  return [...map.entries()].map(([key, items]) => ({ key, label: key === "etc" ? "이전 사례" : `${key}년`, items }));
 })();
 
 export default function DeliveryPage() {
