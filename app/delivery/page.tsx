@@ -99,7 +99,7 @@ export default function DeliveryPage() {
                         </div>
                         <p className="text-[13px] leading-snug break-keep">{c.note}</p>
                       </div>
-                      {(c.models.length > 0 || c.blog) && (
+                      {(c.models.length > 0 || c.category || c.blog) && (
                         <div className="mt-auto pt-3 border-t hair flex flex-col gap-1.5 text-[12px]">
                           {c.models.map((m) => (
                             <Link key={m} href={`/products/${modelSlug(m)}`} className="flex items-center justify-between text-edred hover:underline underline-offset-4">
@@ -107,6 +107,12 @@ export default function DeliveryPage() {
                               <span aria-hidden>→</span>
                             </Link>
                           ))}
+                          {c.category && (
+                            <Link href={`/products?category=${encodeURIComponent(c.category.name)}`} className="flex items-center justify-between text-edred hover:underline underline-offset-4">
+                              <span>{c.category.label} 제품 보기</span>
+                              <span aria-hidden>→</span>
+                            </Link>
+                          )}
                           {c.blog && (
                             <Link href={c.blog} className="flex items-center justify-between text-dim hover:text-ink">
                               <span>관련 글 읽기</span>

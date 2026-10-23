@@ -7,6 +7,7 @@
 export type DeliveryCase = {
   model: string; // 화면 표시용 "Edwards RV3 + EMF10"
   models: string[]; // 모델 화면(/products/edwards-…) 연결용 — lib/product-specs SPEC_DATA의 모델명 그대로
+  category?: { name: string; label: string }; // 모델 화면이 없을 때 종류별 제품 목록(/products?category=…) 연결
   site: string; // 사용처(업종·설비) — 블로그 본문·사진 설명에서 확인된 것만
   client?: string; // 고객 이니셜(공개 글에 이미 쓴 것만)
   date?: string; // "2026.09"
@@ -22,12 +23,13 @@ const CASES: DeliveryCase[] = [
     site: "진공 열처리로",
     client: "T사",
     date: "2026.10",
-    note: "중고 iH1800MK5 드라이펌프를 수리한 뒤 열처리로용으로 납품했습니다.",
+    note: "단종 모델인 iH1800MK5 중고 드라이펌프를 수리한 뒤 열처리로용으로 납품했습니다.",
     photo: "/images/delivery/ih1800mk5.jpg",
   },
   {
     model: "Edwards iXH1220HTX",
     models: [],
+    category: { name: "반도체드라이펌프(iXH)", label: "반도체 드라이펌프(iXH)" },
     site: "반도체 장비",
     client: "R사",
     date: "2026.10",
