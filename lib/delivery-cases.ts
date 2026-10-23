@@ -17,6 +17,24 @@ export type DeliveryCase = {
 
 const CASES: DeliveryCase[] = [
   {
+    model: "Edwards iH1800MK5",
+    models: [],
+    site: "진공 열처리로",
+    client: "T사",
+    date: "2026.10",
+    note: "중고 iH1800MK5 드라이펌프를 수리한 뒤 열처리로용으로 납품했습니다.",
+    photo: "/images/delivery/ih1800mk5.jpg",
+  },
+  {
+    model: "Edwards iXH1220HTX",
+    models: [],
+    site: "반도체 장비",
+    client: "R사",
+    date: "2026.10",
+    note: "반도체 장비에 들어갈 펌프의 납기가 늦어져, 장비가 멈추지 않도록 iXH1220HTX를 백업용으로 먼저 공급했습니다.",
+    photo: "/images/delivery/ixh1220htx.jpg",
+  },
+  {
     model: "Edwards RV3 + EMF10",
     models: ["RV3"],
     site: "분석 장비(GC-MS)",
