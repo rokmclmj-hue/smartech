@@ -93,7 +93,16 @@ export default async function ModelDetail({ category, model, index }: ModelLooku
         <h1 className="display text-[28px] md:text-[36px] leading-[1.15] mt-3">Edwards {model}</h1>
 
         {/* 가격·재고 요약 — 검색해서 들어온 손님이 첫 화면에서 바로 보도록 */}
-        <section className="mt-6 border hair bg-white p-5 md:p-8">
+        {/* 사진 | 가격 — 파트번호 화면과 같은 배치(휴대폰은 사진 위·가격 아래). 사진은 시리즈 대표 사진 */}
+        <section className="mt-6 grid grid-cols-1 md:grid-cols-2 border hair bg-white">
+          <div className="relative aspect-[4/3] md:aspect-auto md:min-h-[320px] border-b md:border-b-0 md:border-r hair bg-white">
+            <img
+              src={photoUrl}
+              alt={`Edwards ${model} (${category})`}
+              className="absolute inset-0 w-full h-full object-contain p-6"
+            />
+          </div>
+          <div className="p-5 md:p-8">
           {summary.allDiscontinued ? (
             <>
               <p className="text-[18px] font-bold">단종 모델입니다 — 대체 모델을 안내해 드립니다</p>
@@ -143,6 +152,7 @@ export default async function ModelDetail({ category, model, index }: ModelLooku
                 로그인하면 더 좋은 조건으로 →
               </Link>
             )}
+          </div>
           </div>
         </section>
 
