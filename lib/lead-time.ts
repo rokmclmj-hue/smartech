@@ -32,7 +32,7 @@ const CATEGORY_LEAD: Record<string, string | null> = {
   "컨트롤러(TIC)": "12주",
   "컨트롤러(ADC)": "8주",
   "헬륨리크디텍터(ELD500)": null,
-  "미스트필터(EMF)": "1주",
+  "미스트필터(EMF)": "1주", // 완제품 기준 — 부속은 specialLead에서 4주·납기 문의
   "진공펌프오일(Ultra19)": "2주",
   "피팅/액세서리": "4주",
   "악세사리": "4주",
@@ -44,6 +44,23 @@ const CATEGORY_LEAD: Record<string, string | null> = {
 };
 
 const PARTS_LEAD = "4주";
+
+// 2026-10-24 대표님 기준
+// - 소형 RV 본체: 기본 사양 4주, 특수 사양(FX·3상)은 12주
+// - 미스트필터: 필터 완제품(EMF3·10·20, MF30)만 1주, 엘리먼트·키트 등 부속은 4주, 판매 이력 없는 씰은 "납기 문의"
+const RV_SPECIAL = /^RV\d+FX\b|\b3ph\b/i;
+const MIST_FILTER_BODY = /^E?MF\d+\b.*\bMist Filter\b/i;
+const MIST_FILTER_UNKNOWN = /^Seal\b/i;
+
+function specialLead(category: string, desc: string): string | null | undefined {
+  const d = desc.trim();
+  if (category === "오일펌프(소형 RV)" && !isPumpPart(d) && RV_SPECIAL.test(d)) return "12주";
+  if (category === "미스트필터(EMF)") {
+    if (MIST_FILTER_BODY.test(d)) return "1주";
+    return MIST_FILTER_UNKNOWN.test(d) ? null : PARTS_LEAD;
+  }
+  return undefined; // 아래 기본 표를 따른다
+}
 
 // 펌프 분류 안의 부품·키트 구분. 키트 단어, 부품 이름, 또는 첫 단어에 숫자가 없는 품명(Rotor E2M18, Side Panel …)
 // 예외: T-Station·EOS는 첫 단어에 숫자가 없어도 본체
@@ -63,6 +80,8 @@ export function isPumpPart(desc: string): boolean {
 // 표시 문구: "통상 4주" | "납기 문의"
 export function leadTimeLabel(category: string | null | undefined, desc: string): string {
   if (!category) return "납기 문의";
+  const special = specialLead(category, desc);
+  if (special !== undefined) return special ? `통상 ${special}` : "납기 문의";
   if (category in PUMP_BODY_LEAD) {
     const lead = isPumpPart(desc) ? PARTS_LEAD : PUMP_BODY_LEAD[category];
     return lead ? `통상 ${lead}` : "납기 문의";
