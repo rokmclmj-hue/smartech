@@ -2,7 +2,7 @@
 // 🔴 사진은 우리 제품만 선명하게, 고객 설비·배경은 알아볼 수 없게 블러한 것만 쓴다(2026-10-23 대표님 지시).
 //    고객사 실명은 코드·파일명·커밋 어디에도 쓰지 않는다(이니셜 "K사"·"Y대" 또는 업종만).
 // date는 사진 촬영일(카메라 정보)·납품 글 날짜로 확인된 월만 적고, 모르면 비워 둔다(지어내지 않음).
-// 새 사례는 배열 맨 앞에 추가한다(최신이 첫 카드). 날짜 없는 사례는 맨 뒤 묶음에 둔다.
+// 화면 순서는 맨 아래에서 날짜순으로 자동 정렬된다. 날짜 없는 사례는 맨 뒤.
 
 export type DeliveryCase = {
   model: string; // 화면 표시용 "Edwards RV3 + EMF10"
@@ -15,7 +15,7 @@ export type DeliveryCase = {
   blog?: string; // 관련 블로그 글
 };
 
-export const DELIVERY_CASES: DeliveryCase[] = [
+const CASES: DeliveryCase[] = [
   {
     model: "Edwards RV3 + EMF10",
     models: ["RV3"],
@@ -134,6 +134,247 @@ export const DELIVERY_CASES: DeliveryCase[] = [
     photo: "/images/delivery/e2m275.jpg",
     blog: "/blog/85",
   },
+  // ↓ 2026-10-23 바탕화면 거래처현장사진 30곳(업종은 대표님 확인, 날짜는 파일 촬영일)
+  {
+    model: "Edwards E2M80 + 터보분자펌프",
+    models: ["E2M80"],
+    site: "진공 단열 배관(극저온)",
+    date: "2021.10",
+    note: "진공 단열 배관 생산 라인의 배기 장치입니다. 2단 오일 로터리 펌프 E2M80에 터보분자펌프를 연결했습니다.",
+    photo: "/images/delivery/e2m80-pipe.jpg",
+  },
+  {
+    model: "Edwards 터보분자펌프 + 컨트롤러",
+    models: [],
+    site: "연구소·대학",
+    date: "2021.12",
+    note: "연구실 실험대에 터보분자펌프와 전용 컨트롤러를 설치했습니다.",
+    photo: "/images/delivery/turbo-lab.jpg",
+  },
+  {
+    model: "Edwards RV + 오일 미스트필터",
+    models: [],
+    site: "분석 장비",
+    date: "2022.01",
+    note: "분석 장비에 연결한 오일 로터리 펌프입니다. 배기구에 오일 미스트필터를 달았습니다.",
+    photo: "/images/delivery/rv-emf-lab.jpg",
+  },
+  {
+    model: "Edwards RV",
+    models: [],
+    site: "제약·바이오",
+    date: "2022.01",
+    note: "동결건조기 배기용 오일 로터리 펌프입니다.",
+    photo: "/images/delivery/rv-freezedryer.jpg",
+  },
+  {
+    model: "Edwards E2M275 + EH 부스터",
+    models: ["E2M275"],
+    site: "코팅",
+    date: "2022.01",
+    note: "코팅 설비 배기용으로 대용량 2단 오일 펌프 E2M275와 루츠 부스터를 한 프레임에 조합했습니다.",
+    photo: "/images/delivery/e2m275-eh.jpg",
+  },
+  {
+    model: "Edwards 부스터 + 오일 펌프 배기 카트",
+    models: [],
+    site: "진공 단열 배관(극저온)",
+    date: "2022.02",
+    note: "진공 단열 배관 작업장에서 쓰는 이동식 배기 카트입니다.",
+    photo: "/images/delivery/pump-cart.jpg",
+  },
+  {
+    model: "Edwards nXDS20i + TIC 펌핑 스테이션",
+    models: ["nXDS20i"],
+    site: "전자·부품",
+    date: "2022.03",
+    note: "드라이 스크롤 펌프 nXDS20i와 터보 펌핑 스테이션을 함께 구성했습니다.",
+    photo: "/images/delivery/nxds20i-tic.jpg",
+  },
+  {
+    model: "Edwards EH 부스터 + nES300S",
+    models: [],
+    site: "코팅",
+    date: "2022.05",
+    note: "코팅 설비용으로 루츠 부스터와 1단 오일 펌프 nES300S를 조합했습니다.",
+    photo: "/images/delivery/eh-nes.jpg",
+  },
+  {
+    model: "Edwards 드라이펌프 2대",
+    models: [],
+    site: "반도체",
+    date: "2022.05",
+    note: "반도체 공장에 드라이펌프 2대를 입고했습니다.",
+    photo: "/images/delivery/dry-2units.jpg",
+  },
+  {
+    model: "Edwards T-Station 85",
+    models: [],
+    site: "연구소·대학",
+    date: "2022.08",
+    note: "터보 펌핑 스테이션 T-Station 85입니다. 출고 전 진공도 5.2×10⁻⁶을 확인했습니다.",
+    photo: "/images/delivery/tstation85.jpg",
+  },
+  {
+    model: "Edwards nXDS",
+    models: [],
+    site: "연구소·대학",
+    date: "2023.03",
+    note: "연구실 실험대 옆에 설치한 드라이 스크롤 펌프입니다.",
+    photo: "/images/delivery/nxds-lab.jpg",
+  },
+  {
+    model: "Edwards 드라이펌프 + 배기 소음기",
+    models: [],
+    site: "코팅",
+    date: "2023.06",
+    note: "코팅 설비 배기 라인에 드라이펌프와 배기 소음기를 설치했습니다.",
+    photo: "/images/delivery/dry-silencer.jpg",
+  },
+  {
+    model: "Edwards nXDS",
+    models: [],
+    site: "연구소·대학",
+    date: "2023.08",
+    note: "전자 실험실 장비 아래에 둔 드라이 스크롤 펌프입니다.",
+    photo: "/images/delivery/nxds-elab.jpg",
+  },
+  {
+    model: "Edwards E2M 소형 오일 펌프",
+    models: [],
+    site: "연구소·대학",
+    date: "2023.09",
+    note: "실험대 위 시험 챔버에 소형 2단 오일 펌프를 연결했습니다.",
+    photo: "/images/delivery/e2m-chamber.jpg",
+  },
+  {
+    model: "Edwards RV + 오일 미스트필터",
+    models: [],
+    site: "분석 장비",
+    date: "2023.10",
+    note: "GC 분석 장비 아래에 설치한 오일 로터리 펌프와 오일 미스트필터입니다.",
+    photo: "/images/delivery/rv-gc.jpg",
+  },
+  {
+    model: "Edwards nEXT 터보분자펌프",
+    models: [],
+    site: "연구소·대학",
+    date: "2023.12",
+    note: "연구실에 납품한 터보분자펌프 nEXT입니다.",
+    photo: "/images/delivery/next-turbo.jpg",
+  },
+  {
+    model: "Edwards ELD500 리크디텍터",
+    models: [],
+    site: "진공 단열 배관(극저온)",
+    date: "2024.01",
+    note: "진공 단열 배관 생산 라인에서 헬륨 리크디텍터로 누설을 검사했습니다.",
+    photo: "/images/delivery/eld500-pipe.jpg",
+  },
+  {
+    model: "Edwards nXDS",
+    models: [],
+    site: "연구소·대학",
+    date: "2024.04",
+    note: "드라이 스크롤 펌프 설치 후 Edwards 게이지로 진공도를 확인했습니다.",
+    photo: "/images/delivery/nxds-gauge-2404.jpg",
+  },
+  {
+    model: "Edwards RV + 오일 미스트필터",
+    models: [],
+    site: "분석 장비",
+    date: "2024.06",
+    note: "분석 장비용 오일 로터리 펌프 설치 후 진공도를 확인했습니다.",
+    photo: "/images/delivery/rv-emf-gauge.jpg",
+  },
+  {
+    model: "Edwards nXDS",
+    models: [],
+    site: "분석 장비",
+    date: "2024.12",
+    note: "분석 장비 실험대 아래에 설치한 드라이 스크롤 펌프입니다.",
+    photo: "/images/delivery/nxds-bench.jpg",
+  },
+  {
+    model: "Edwards 드라이펌프 + 터보분자펌프",
+    models: [],
+    site: "연구소·대학",
+    date: "2025.02",
+    note: "연구실 액체질소 실험 장치의 배기 시스템입니다.",
+    photo: "/images/delivery/turbo-ln2.jpg",
+  },
+  {
+    model: "Edwards E2M80 + EH 부스터",
+    models: ["E2M80"],
+    site: "진공 단열 배관(극저온)",
+    date: "2025.03",
+    note: "진공 단열 배관 배기용 카트입니다. E2M80 위에 루츠 부스터를 올렸습니다.",
+    photo: "/images/delivery/e2m80-eh-cart.jpg",
+  },
+  {
+    model: "Edwards 반도체 드라이펌프 3대",
+    models: [],
+    site: "반도체",
+    date: "2025.04",
+    note: "반도체 공장에 드라이펌프 3대를 입고했습니다.",
+    photo: "/images/delivery/dry-3units.jpg",
+  },
+  {
+    model: "Edwards 부스터 + 드라이펌프",
+    models: [],
+    site: "열처리·금속",
+    date: "2025.08",
+    note: "열처리 설비 배기용으로 부스터와 드라이펌프를 프레임에 조합했습니다.",
+    photo: "/images/delivery/booster-frame.jpg",
+  },
+  {
+    model: "Edwards 터보 펌핑 스테이션",
+    models: [],
+    site: "연구소·대학",
+    date: "2025.09",
+    note: "터보분자펌프와 배기펌프를 한 받침대에 결합한 스테이션입니다.",
+    photo: "/images/delivery/turbo-station.jpg",
+  },
+  {
+    model: "Edwards nXDS",
+    models: [],
+    site: "연구소·대학",
+    date: "2025.09",
+    note: "드라이 스크롤 펌프 설치 후 Edwards 게이지로 진공도를 확인했습니다.",
+    photo: "/images/delivery/nxds-gauge-2509.jpg",
+  },
+  {
+    model: "Edwards nXDS",
+    models: [],
+    site: "제약·바이오",
+    date: "2026.01",
+    note: "드라이 스크롤 펌프 설치 후 진공도를 확인했습니다.",
+    photo: "/images/delivery/nxds-gauge-2601.jpg",
+  },
+  {
+    model: "Edwards XDS35i",
+    models: ["XDS35i"],
+    site: "특수가스",
+    date: "2026.06",
+    note: "특수가스 설비용 드라이 스크롤 펌프 XDS35i를 출고했습니다.",
+    photo: "/images/delivery/xds35i.jpg",
+  },
+  {
+    model: "Edwards 부스터 + 드라이펌프",
+    models: [],
+    site: "열처리·금속",
+    date: "2026.07",
+    note: "대형 진공 챔버 옆에 부스터와 드라이펌프를 설치했습니다.",
+    photo: "/images/delivery/booster-chamber.jpg",
+  },
+  {
+    model: "Edwards RV12",
+    models: ["RV12"],
+    site: "분석 장비",
+    date: "2025.01",
+    note: "분석 실험실의 오일 로터리 펌프 RV12입니다. 진공도 2.8×10⁻³ 수준을 확인했습니다.",
+    photo: "/images/delivery/rv12-lab.jpg",
+  },
   // ↓ 촬영 날짜를 확인할 수 없는 사례 — date 없음
   {
     model: "Edwards iXH",
@@ -184,3 +425,6 @@ export const DELIVERY_CASES: DeliveryCase[] = [
     blog: "/blog/70",
   },
 ];
+
+// 화면 순서: 날짜 최신순, 같은 달은 위 배열 순서, 날짜 없는 사례는 맨 뒤
+export const DELIVERY_CASES: DeliveryCase[] = [...CASES].sort((a, b) => (b.date ?? "").localeCompare(a.date ?? ""));

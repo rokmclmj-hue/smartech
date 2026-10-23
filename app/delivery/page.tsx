@@ -39,6 +39,16 @@ const deliveryCasesSchema = JSON.stringify({
   })),
 });
 
+// 연도별 묶음(최신 연도 먼저), 날짜 없는 사례는 "현장"으로 맨 뒤
+const GROUPS = (() => {
+  const map = new Map<string, typeof DELIVERY_CASES>();
+  for (const c of DELIVERY_CASES) {
+    const key = c.date ? c.date.slice(0, 4) : "etc";
+    map.set(key, [...(map.get(key) ?? []), c]);
+  }
+  return [...map.entries()].map(([key, items]) => ({ key, label: key === "etc" ? "현장" : `${key}년`, items }));
+})();
+
 export default function DeliveryPage() {
   return (
     <>
@@ -59,44 +69,58 @@ export default function DeliveryPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {DELIVERY_CASES.map((c) => (
-              <article key={c.photo} className="border hair bg-white flex flex-col overflow-hidden">
-                <div className="aspect-[4/3] relative bg-[#111] overflow-hidden">
-                  <img src={c.photo} alt={`${c.model} — ${c.site} 납품 현장`} className="w-full h-full object-cover" loading="lazy" />
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent px-4 py-3">
-                    <h2 className="text-paper text-[13px] font-semibold leading-tight">{c.model}</h2>
-                    <div className="text-paper/60 text-[11px] mono">{c.client ? `${c.client} · ` : ""}{c.site}</div>
-                  </div>
-                </div>
-                <div className="p-4 flex-1 flex flex-col gap-3">
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="mono text-[11px] text-edred tracking-widest">DELIVERY</div>
-                      <div className="mono text-[11px] text-dim tracking-widest">{c.date ?? "현장"}</div>
+          {/* 연도 바로가기 — 사례가 많아 연도별로 묶음 */}
+          <nav className="mb-8 flex flex-wrap gap-2" aria-label="연도별 납품 사례">
+            {GROUPS.map((g) => (
+              <a key={g.key} href={`#y-${g.key}`} className="border hair bg-white px-4 py-2 text-[14px] hover:bg-ink hover:text-paper transition-colors">
+                {g.label} <span className="text-dim text-[12px]">{g.items.length}</span>
+              </a>
+            ))}
+          </nav>
+
+          {GROUPS.map((g) => (
+            <section key={g.key} id={`y-${g.key}`} className="mb-12 scroll-mt-24">
+              <h2 className="display text-[24px] mb-4">{g.label} <span className="text-[14px] text-dim font-normal">{g.items.length}건</span></h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                {g.items.map((c) => (
+                  <article key={c.photo} className="border hair bg-white flex flex-col overflow-hidden">
+                    <div className="aspect-[4/3] relative bg-[#111] overflow-hidden">
+                      <img src={c.photo} alt={`${c.model} — ${c.site} 납품 현장`} className="w-full h-full object-cover" loading="lazy" />
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent px-4 py-3">
+                        <h3 className="text-paper text-[13px] font-semibold leading-tight">{c.model}</h3>
+                        <div className="text-paper/60 text-[11px] mono">{c.client ? `${c.client} · ` : ""}{c.site}</div>
+                      </div>
                     </div>
-                    <p className="text-[13px] leading-snug break-keep">{c.note}</p>
-                  </div>
-                  {(c.models.length > 0 || c.blog) && (
-                    <div className="mt-auto pt-3 border-t hair flex flex-col gap-1.5 text-[12px]">
-                      {c.models.map((m) => (
-                        <Link key={m} href={`/products/${modelSlug(m)}`} className="flex items-center justify-between text-edred hover:underline underline-offset-4">
-                          <span>Edwards {m} 가격·재고 보기</span>
-                          <span aria-hidden>→</span>
-                        </Link>
-                      ))}
-                      {c.blog && (
-                        <Link href={c.blog} className="flex items-center justify-between text-dim hover:text-ink">
-                          <span>관련 글 읽기</span>
-                          <span aria-hidden>→</span>
-                        </Link>
+                    <div className="p-4 flex-1 flex flex-col gap-3">
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="mono text-[11px] text-edred tracking-widest">DELIVERY</div>
+                          <div className="mono text-[11px] text-dim tracking-widest">{c.date ?? "현장"}</div>
+                        </div>
+                        <p className="text-[13px] leading-snug break-keep">{c.note}</p>
+                      </div>
+                      {(c.models.length > 0 || c.blog) && (
+                        <div className="mt-auto pt-3 border-t hair flex flex-col gap-1.5 text-[12px]">
+                          {c.models.map((m) => (
+                            <Link key={m} href={`/products/${modelSlug(m)}`} className="flex items-center justify-between text-edred hover:underline underline-offset-4">
+                              <span>Edwards {m} 가격·재고 보기</span>
+                              <span aria-hidden>→</span>
+                            </Link>
+                          ))}
+                          {c.blog && (
+                            <Link href={c.blog} className="flex items-center justify-between text-dim hover:text-ink">
+                              <span>관련 글 읽기</span>
+                              <span aria-hidden>→</span>
+                            </Link>
+                          )}
+                        </div>
                       )}
                     </div>
-                  )}
-                </div>
-              </article>
-            ))}
-          </div>
+                  </article>
+                ))}
+              </div>
+            </section>
+          ))}
 
           <div className="mt-10 pt-8 border-t hair flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-[12px] text-dim">
             <div className="leading-relaxed break-keep">
