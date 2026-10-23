@@ -60,9 +60,9 @@ export default function ProductShowcase() {
               </div>
 
               <div className="absolute inset-x-0 bottom-0 px-3 pt-6 pb-2.5 bg-gradient-to-t from-ink via-ink/85 to-ink/0 text-paper translate-y-full group-hover:translate-y-0 transition-transform duration-[450ms] ease-out">
-                <div className="text-[11px] mono opacity-80 tracking-[0.14em] uppercase">{p.code}</div>
-                <div className="text-[13px] font-medium leading-tight mt-0.5">{p.title}</div>
-                <div className="mt-1.5 text-[11px] text-edred font-medium tracking-[0.06em]">
+                {/* 두 줄: 제품 종류(보통) + 누르는 곳(진하게·화살표) — 2026-10-23 대표님 요청으로 모델명 줄 삭제·흰 글씨 */}
+                <div className="text-[13px] font-medium leading-tight text-paper/80">{p.title}</div>
+                <div className="mt-1 text-[12.5px] font-bold text-paper">
                   {pdf ? "카탈로그 PDF →" : p.model ? `${p.model} 가격·재고 보기 →` : "가격·재고 보기 →"}
                 </div>
               </div>
