@@ -9,7 +9,7 @@ export type DeliveryCase = {
   models: string[]; // 모델 화면(/products/edwards-…) 연결용 — lib/product-specs SPEC_DATA의 모델명 그대로
   category?: { name: string; label: string }; // 모델 화면이 없을 때 종류별 제품 목록(/products?category=…) 연결
   site: string; // 사용처(업종·설비) — 블로그 본문·사진 설명에서 확인된 것만
-  client?: string; // 고객 이니셜(공개 글에 이미 쓴 것만)
+  client?: string; // 고객 이니셜(공개 글에 이미 쓴 것 또는 대표님이 정한 것만)
   date?: string; // "2026.09"
   note: string; // 한 줄 설명
   photo: string;
