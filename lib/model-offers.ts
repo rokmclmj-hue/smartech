@@ -62,7 +62,11 @@ export function summarize(category: string, skus: ModelSku[]): ModelOfferSummary
   const active = skus.filter((s) => !s.isDiscontinued);
   const prices = active.map((s) => s.price).filter((v): v is number => v !== null);
   const publicPrices = active.map((s) => s.publicPrice).filter((v): v is number => v !== null);
-  const lead = active.length ? leadTimeLabel(category, active[0].description) : null;
+  // 옵션마다 납기가 다를 수 있어(RV 기본 4주·FX/3상 12주) 가장 짧은 통상 납기로 요약, 숫자 납기가 없으면 "납기 문의"
+  const weeks = (label: string) => Number(label.match(/(\d+)주/)?.[1] ?? Infinity);
+  const lead = active.length
+    ? active.map((s) => leadTimeLabel(category, s.description)).sort((a, b) => weeks(a) - weeks(b))[0]
+    : null;
   return {
     minPrice: prices.length ? Math.min(...prices) : null,
     maxPrice: prices.length ? Math.max(...prices) : null,
