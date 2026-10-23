@@ -11,6 +11,7 @@ import ModelDetail from "./ModelDetail";
 import { findModelBySlug, findModelForProduct, getModelSpecRows, modelSlug } from "@/lib/product-specs";
 import { getProductPhotoUrl } from "@/lib/product-icons";
 import { leadTimeLabel } from "@/lib/lead-time";
+import { getModelSkus, summarize } from "@/lib/model-offers";
 
 // 검색 결과 제목·설명용 — 카테고리 키("오일펌프(소형 RV)")의 괄호 앞부분을 읽기 쉬운 제품 종류명으로 바꾼다.
 const MODEL_TYPE_LABEL: Record<string, string> = {
@@ -44,14 +45,35 @@ function modelSeoText(category: string, index: number) {
   return { typeLabel, specs: specs.join(", ") };
 }
 
+// 검색 설명문용 가격·재고 문구 — 비회원 판매가만(원가는 계산에만 쓰고 문구에 넣지 않음)
+function offerSeoText(price: number | null, priceSuffix: string, stock: number, lead: string | null) {
+  const parts: string[] = [];
+  if (price !== null) parts.push(`판매가 ${formatKRW(price)}${priceSuffix}(VAT 별도)`);
+  if (stock > 0) parts.push(`재고 ${stock}대 즉시 출고`);
+  else if (lead && lead !== "납기 문의") parts.push(`${lead} 납기`);
+  return parts.length ? ` ${parts.join(" · ")}.` : "";
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ partNo: string }> }): Promise<Metadata> {
   const { partNo: raw } = await params;
   const partNo = decodeURIComponent(raw);
-  const product = await prisma.product.findUnique({ where: { partNo }, select: { description: true } });
+  const product = await prisma.product.findUnique({
+    where: { partNo },
+    select: { description: true, costPrice: true, stock: true, isDiscontinued: true, category: true },
+  });
   if (product) {
+    const publicMultiplier = await getMultiplier("PUBLIC");
+    const offer = product.isDiscontinued
+      ? " 단종 — 대체 모델 안내."
+      : offerSeoText(
+          product.costPrice > 0 ? Math.round(product.costPrice * publicMultiplier) : null,
+          "",
+          product.stock,
+          leadTimeLabel(product.category, product.description),
+        );
     return {
       title: `${product.description} (${partNo}) — 스마텍 | Edwards Vacuum`,
-      description: `Edwards ${product.description} 정품(파트번호 ${partNo}). Edwards 코리아 공식 대리점 스마텍에서 정품 공급·견적, 수원 본사·천안 수리센터에서 수리 상담.`,
+      description: `Edwards ${product.description} 정품(파트번호 ${partNo}).${offer} Edwards 코리아 공식 대리점 스마텍에서 정품 공급·견적, 수원 본사·천안 수리센터에서 수리 상담.`,
       alternates: { canonical: `https://www.smartechvacuum.com/products/${encodeURIComponent(partNo)}` },
     };
   }
@@ -59,9 +81,22 @@ export async function generateMetadata({ params }: { params: Promise<{ partNo: s
   const modelInfo = findModelBySlug(partNo);
   if (modelInfo) {
     const { typeLabel, specs } = modelSeoText(modelInfo.category, modelInfo.index);
+    const publicMultiplier = await getMultiplier("PUBLIC");
+    const summary = summarize(
+      modelInfo.category,
+      await getModelSkus(modelInfo.category, modelInfo.model, publicMultiplier, publicMultiplier),
+    );
+    const offer = summary.allDiscontinued
+      ? " 단종 — 대체 모델 안내."
+      : offerSeoText(
+          summary.publicMinPrice,
+          summary.publicMinPrice !== summary.publicMaxPrice ? "부터" : "",
+          summary.totalStock,
+          summary.leadLabel,
+        );
     return {
       title: `Edwards ${modelInfo.model} ${typeLabel} 사양·가격 — 스마텍`,
-      description: `Edwards ${modelInfo.model} ${typeLabel}${specs ? ` — ${specs}` : " 공식 카탈로그 사양"}. Edwards 코리아 공식 대리점 스마텍에서 정품 견적·수리 상담.`,
+      description: `Edwards ${modelInfo.model} ${typeLabel}${specs ? ` — ${specs}` : " 공식 카탈로그 사양"}.${offer} Edwards 코리아 공식 대리점 스마텍에서 정품 견적·수리 상담.`,
       alternates: { canonical: `https://www.smartechvacuum.com/products/${encodeURIComponent(partNo)}` },
     };
   }

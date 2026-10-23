@@ -37,6 +37,8 @@ const PUBLIC_URLS = [
   "/",
   "/products",
   "/products/A73501983",
+  "/products/edwards-rv5",
+  "/llms-full.txt",
   "/repair",
   "/quote",
   "/blog",

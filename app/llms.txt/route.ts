@@ -22,6 +22,7 @@ export async function GET() {
 
 - [홈](https://www.smartechvacuum.com): Edwards 진공펌프 제품 카탈로그, 온라인 견적 시스템, AI 기술 문의
 - [제품 목록](https://www.smartechvacuum.com/products): Edwards 진공펌프 전 라인업 (RV·E2M·GXS·nXDS·iXH·STP·nEXT·nXRi 시리즈)
+- 모델별 판매가·재고·납기: 모델 페이지 주소는 https://www.smartechvacuum.com/products/edwards-{모델명} 형식입니다(예: [Edwards RV5](https://www.smartechvacuum.com/products/edwards-rv5)). 부가세 별도 판매가, 현재 재고, 재고 없을 때 통상 납기를 공개합니다. 전체 모델 가격 목록은 llms-full.txt의 "모델별 판매가·재고·납기"에 있습니다.
 - [수리 서비스](https://www.smartechvacuum.com/repair): 진공펌프 오버홀·분해수리·예방정비(PM) 서비스. 천안수리센터 직접 수리.
 - [블로그](https://www.smartechvacuum.com/blog): 진공 기술 가이드, 산업별 펌프 선택 기준, 수리 사례, 소모품 관리
 - [산업 응용](https://www.smartechvacuum.com/#industries): 반도체·이차전지·제약·연구소 등 산업별 진공 솔루션
@@ -52,7 +53,8 @@ ${blogLines}
 - Edwards 진공펌프 정품 공급 (딜러·OEM·소비자 등급별 가격)
 - 진공펌프 분해 수리·오버홀 (RV3/5/8/12, E2M, GXS, nXDS 등 전 모델)
 - 예방정비(PM) 서비스: 현장 출장 점검, 오일 교환, 소모품 교체
-- 온라인 견적 시스템: 로그인 후 견적 카트 → PDF 견적서 즉시 발행
+- 가격·재고 공개: 모델·파트번호별 판매가(부가세 별도)와 재고·통상 납기를 홈페이지에 표시
+- 온라인 견적 시스템: 견적 카트에 담아 PDF 견적서 저장·주문 요청(비회원 가능)
 - AI 기술 문의: 24시간 챗봇 상담 (진공펌프 선택·수리·사양 문의)
 
 ## 콘텐츠 정책

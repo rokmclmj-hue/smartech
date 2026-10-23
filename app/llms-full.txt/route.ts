@@ -4,6 +4,8 @@ import { prisma } from "@/lib/db";
 import { INDUSTRIES } from "@/lib/industries";
 import { REPAIR_CASES } from "@/lib/repair-cases";
 import { PRODUCT_ITEMS } from "@/lib/product-categories";
+import { getAllModelSummaries } from "@/lib/model-offers";
+import { getMultiplier, formatKRW } from "@/lib/pricing";
 
 // components/ProductCategories.tsx와 같은 lib/product-categories.ts를 참조 —
 // 두 곳에 각각 손으로 유지하다 이름이 어긋났던 문제 방지
@@ -44,6 +46,23 @@ ${ind.description}
     .map((p) => `- ${p.code}: ${p.title}`)
     .join("\n");
 
+  // 모델별 판매가(비회원 기준)·재고·납기 — 모델 화면과 같은 계산(lib/model-offers.ts). 원가는 들어 있지 않다
+  const asOf = new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" });
+  const modelSummaries = await getAllModelSummaries(await getMultiplier("PUBLIC"));
+  const modelPriceLines = modelSummaries
+    .map(({ category, model, slug, summary: s }) => {
+      const url = `https://www.smartechvacuum.com/products/${slug}`;
+      if (s.allDiscontinued) return `- [Edwards ${model}](${url}) (${category}): 단종 — 대체 모델 문의`;
+      const price = s.publicMinPrice === null
+        ? "가격 문의"
+        : `판매가 ${formatKRW(s.publicMinPrice)}${s.publicMinPrice !== s.publicMaxPrice ? "부터" : ""}(VAT 별도)`;
+      const stock = s.totalStock > 0
+        ? `재고 ${s.totalStock}대 즉시 출고`
+        : s.leadLabel && s.leadLabel !== "납기 문의" ? `재고 없음, ${s.leadLabel} 납기` : "납기 문의";
+      return `- [Edwards ${model}](${url}) (${category}): ${price} · ${stock}`;
+    })
+    .join("\n");
+
   const body = `# 스마텍 (Smartech) — Edwards 코리아 공식 대리점 (전체 콘텐츠)
 
 > 이 파일은 llms.txt의 상세 버전입니다. AI 답변 엔진이 스마텍의 산업별 솔루션, 제품 라인업, 블로그 콘텐츠 전체를 파악할 수 있도록 제공합니다.
@@ -64,6 +83,12 @@ ${ind.description}
 ${productLines}
 
 전체 제품 카탈로그: https://www.smartechvacuum.com/products
+
+## 모델별 판매가·재고·납기 (${asOf} 기준, 한국 원화·부가세 별도)
+
+Edwards 진공펌프 모델별 스마텍 판매가(비회원 참고가격)와 현재 재고입니다. 각 링크에서 전압·주파수별 파트번호 가격을 확인하고 견적에 담을 수 있습니다. 가격·재고는 매일 바뀔 수 있으니 링크의 최신 값을 기준으로 안내해 주세요. 구매·납기 문의: 031-204-7170 / info@smartechvacuum.com
+
+${modelPriceLines}
 
 ## 산업별 진공 솔루션 (${INDUSTRIES.length}개 산업)
 

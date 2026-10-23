@@ -34,11 +34,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  // 모델 단위 스펙 소개 페이지 (예: /products/edwards-rv3) — SKU 페이지와 별개로 검색 노출용
+  // 모델 단위 페이지 (예: /products/edwards-rv3) — 사양 + 판매가·재고(2026-10-23), 모델명 검색의 첫 도착 화면
   const modelEntries: MetadataRoute.Sitemap = allModelSlugs().map((slug) => ({
     url: `${BASE_URL}/products/${slug}`,
-    changeFrequency: "monthly",
-    priority: 0.7,
+    changeFrequency: "weekly",
+    priority: 0.8,
   }));
 
   const industryEntries: MetadataRoute.Sitemap = INDUSTRIES.map((ind) => ({
