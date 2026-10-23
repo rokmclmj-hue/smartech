@@ -14,6 +14,14 @@ export default function Footer() {
           </div>
           <div className="flex flex-col md:items-end gap-2">
             <div className="flex gap-4 flex-wrap md:justify-end">
+              <Link href="/delivery" className="hover:text-paper underline underline-offset-4">
+                납품 사례
+              </Link>
+              <Link href="/repair#repair-cases" className="hover:text-paper underline underline-offset-4">
+                수리 사례
+              </Link>
+            </div>
+            <div className="flex gap-4 flex-wrap md:justify-end">
               <Link href="/privacy" className="hover:text-paper underline underline-offset-4">
                 개인정보처리방침
               </Link>

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import ProductsPageClient from "./ProductsPageClient";
 
 export const metadata: Metadata = {
@@ -48,6 +49,10 @@ export default function ProductsPage() {
             스마텍이 공급하는 <span className="text-edred font-semibold">Edwards</span> 진공펌프·게이지·컨트롤러·액세서리 전 라인업.
             파트번호·모델명으로 검색하고, 로그인 후 우대 가격을 확인하실 수 있습니다.
           </p>
+          <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-[14px]">
+            <Link href="/delivery" className="text-edred hover:underline underline-offset-4">납품 사례 보기 →</Link>
+            <Link href="/repair#repair-cases" className="text-edred hover:underline underline-offset-4">수리 사례 보기 →</Link>
+          </div>
         </div>
       </header>
       <ProductsPageClient />

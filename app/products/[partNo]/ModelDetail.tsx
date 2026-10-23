@@ -4,6 +4,8 @@ import { getMultiplier, formatKRW } from "@/lib/pricing";
 import { getModelSpecRows, getSiblingModels, modelSlug, type ModelLookup } from "@/lib/product-specs";
 import { getModelSkus, summarize } from "@/lib/model-offers";
 import { getProductPhotoUrl } from "@/lib/product-icons";
+import { DELIVERY_CASES } from "@/lib/delivery-cases";
+import { REPAIR_CASES } from "@/lib/repair-cases";
 
 // 가격·재고 기준일 — 한국 날짜 "2026.10.23"
 function todayKst() {
@@ -16,6 +18,9 @@ function todayKst() {
 export default async function ModelDetail({ category, model, index }: ModelLookup) {
   const specRows = getModelSpecRows(category, index);
   const siblings = getSiblingModels(category, index);
+  // 이 모델의 납품·수리 사례 — 납품은 models 목록, 수리는 카드 모델명("Edwards RV5")이 정확히 같은 것만
+  const deliveryCases = DELIVERY_CASES.filter((c) => c.models.includes(model));
+  const repairCases = REPAIR_CASES.filter((c) => c.model === `Edwards ${model}`);
 
   // 파트번호 화면과 같은 등급 기준 — 비회원·승인 대기·거절은 공개 가격, 등급명은 보여 주지 않음
   const session = await auth();
@@ -184,6 +189,36 @@ export default async function ModelDetail({ category, model, index }: ModelLooku
             </table>
           </div>
         </section>
+
+        {(deliveryCases.length > 0 || repairCases.length > 0) && (
+          <section className="mt-10">
+            <div className="mono text-[11px] text-dim tracking-widest mb-2">CASES</div>
+            <h2 className="text-[20px] font-bold tracking-tight">Edwards {model} 납품·수리 사례</h2>
+            <p className="mt-1 text-[13px] text-dim break-keep">
+              스마텍이 실제로 납품·수리한 {model} 사례입니다 —{" "}
+              {[
+                deliveryCases.length > 0 ? `납품 ${deliveryCases.length}건` : null,
+                repairCases.length > 0 ? `수리 ${repairCases.length}건` : null,
+              ].filter(Boolean).join(" · ")}
+            </p>
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {[
+                ...deliveryCases.map((c) => ({ key: c.photo, href: "/delivery", photo: c.photo, label: "납품", title: c.site, date: c.date })),
+                ...repairCases.map((c) => ({ key: c.photo, href: "/repair#repair-cases", photo: c.photo, label: "수리", title: c.symptom, date: c.date })),
+              ].slice(0, 6).map((c) => (
+                <Link key={c.key} href={c.href} className="border hair bg-white flex sm:flex-col hover:border-ink transition-colors">
+                  <div className="w-32 sm:w-full shrink-0 aspect-[4/3] bg-[#111] overflow-hidden">
+                    <img src={c.photo} alt={`Edwards ${model} ${c.label} 사례 — ${c.title}`} className="w-full h-full object-cover" loading="lazy" />
+                  </div>
+                  <div className="p-3 min-w-0">
+                    <div className="mono text-[11px] tracking-widest text-edred">{c.label}{c.date ? ` · ${c.date}` : ""}</div>
+                    <div className="mt-1 text-[13px] leading-snug break-keep">{c.title}</div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         {siblings.length > 0 && (
           <section className="mt-10">

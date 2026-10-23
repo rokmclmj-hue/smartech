@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { prisma } from "@/lib/db";
 import { INDUSTRIES } from "@/lib/industries";
 import { REPAIR_CASES } from "@/lib/repair-cases";
+import { DELIVERY_CASES } from "@/lib/delivery-cases";
 import { PRODUCT_ITEMS } from "@/lib/product-categories";
 import { getAllModelSummaries } from "@/lib/model-offers";
 import { getMultiplier, formatKRW } from "@/lib/pricing";
@@ -18,6 +19,9 @@ export async function GET() {
       : "";
     return `- ${c.date} ${c.model} — 증상: ${c.symptom} / 작업: ${c.work.join(", ")}${result}`;
   }).join("\n");
+  const deliveryLines = DELIVERY_CASES.map((c) =>
+    `- ${c.date ?? "날짜 미상"} ${c.model} — 사용처: ${c.site} / ${c.note}${c.blog ? ` / 관련 글: https://www.smartechvacuum.com${c.blog}` : ""}`,
+  ).join("\n");
   const posts = await prisma.blogPost.findMany({
     where: { status: "PUBLISHED" },
     orderBy: { publishedAt: "desc" },
@@ -93,6 +97,12 @@ ${modelPriceLines}
 ## 산업별 진공 솔루션 (${INDUSTRIES.length}개 산업)
 
 ${industryLines}
+
+## 납품 사례 (${DELIVERY_CASES.length}건, 최신순)
+
+스마텍이 공급·설치한 Edwards 진공펌프 현장 사례입니다. 사진: https://www.smartechvacuum.com/delivery
+
+${deliveryLines}
 
 ## 수리·오버홀 사례 (${REPAIR_CASES.length}건, 최신순)
 

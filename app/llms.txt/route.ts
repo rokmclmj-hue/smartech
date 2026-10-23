@@ -24,6 +24,7 @@ export async function GET() {
 - [제품 목록](https://www.smartechvacuum.com/products): Edwards 진공펌프 전 라인업 (RV·E2M·GXS·nXDS·iXH·STP·nEXT·nXRi 시리즈)
 - 모델별 판매가·재고·납기: 모델 페이지 주소는 https://www.smartechvacuum.com/products/edwards-{모델명} 형식입니다(예: [Edwards RV5](https://www.smartechvacuum.com/products/edwards-rv5)). 부가세 별도 판매가, 현재 재고, 재고 없을 때 통상 납기를 공개합니다. 전체 모델 가격 목록은 llms-full.txt의 "모델별 판매가·재고·납기"에 있습니다.
 - [수리 서비스](https://www.smartechvacuum.com/repair): 진공펌프 오버홀·분해수리·예방정비(PM) 서비스. 천안수리센터 직접 수리.
+- [납품 사례](https://www.smartechvacuum.com/delivery): Edwards 진공펌프 납품·현장 설치 사진과 모델·사용처(반도체·분석 장비·동결건조·진공 오븐·열처리로 등).
 - [블로그](https://www.smartechvacuum.com/blog): 진공 기술 가이드, 산업별 펌프 선택 기준, 수리 사례, 소모품 관리
 - [산업 응용](https://www.smartechvacuum.com/#industries): 반도체·이차전지·제약·연구소 등 산업별 진공 솔루션
 - [회사 소개](https://www.smartechvacuum.com/about): 스마텍 소개, 수원 본사·천안수리센터, Edwards 공인 대리점 인증
