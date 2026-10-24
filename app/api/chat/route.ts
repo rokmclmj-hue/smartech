@@ -4,6 +4,9 @@ import fs from "fs";
 import path from "path";
 import { prisma } from "@/lib/db";
 import { getMultiplier, formatKRW } from "@/lib/pricing";
+import { auth } from "@/lib/auth";
+import { leadTimeLabel } from "@/lib/lead-time";
+import { SPEC_DATA, modelSlug } from "@/lib/product-specs";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -260,7 +263,7 @@ OLED 증착·스퍼터링     → nXDS + 터보펌프 (청정 고진공, 오일�
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ■ 납기 관련
 Q: 에드워드 펌프 납기가 왜 이렇게 오래 걸리나요?
-A: 에드워드 표준 납기는 모델에 따라 8~16주입니다. 중국 세관 수출통제 강화(일부 모델 3~4주 추가), 핵심 부품 글로벌 수급 불안정이 겹치면 20주 이상 걸리는 경우도 있습니다. 설비 가동일 기준 최소 18~20주 전 발주를 권장합니다.
+A: 납기는 제품마다 다르며 [J] 목록·홈페이지 제품 화면의 통상 납기가 기준입니다(예: 소형 RV 기본 사양 통상 4주, FX·3상 특수 사양 12주, 중대형 펌프 8~12주, 반도체용 드라이펌프는 문의). 중국 세관 수출통제 강화(일부 모델 3~4주 추가), 핵심 부품 글로벌 수급 불안정이 겹치면 20주 이상 걸리는 경우도 있습니다. 설비 가동일 기준 최소 18~20주 전 발주를 권장합니다.
 
 Q: 급하게 필요한데 어떻게 하면 되나요?
 A: ① 국내 재고 보유 여부 먼저 확인 ② 배기속도·플랜지·전원 사양이 맞는 대체 모델 검토 ③ 스마텍 선재고 운용 모델 확인. 스마텍은 반복 납품 이력 모델의 재고를 선제 관리하고 있어 일부 모델은 즉시 출고 가능합니다.
@@ -655,26 +658,44 @@ TIC 상태 쿼리(?V902 또는 ?V904) 응답에 포함되는 알람 ID:
 ■ ENDUSER (31개사): 국방과학연구소, 기초과학연구원 외 다수
 `;
 
+// 모델 화면 주소 목록 — 답변 끝에 "가격·재고 보기" 링크로 안내(2026-10-24 대표님 요청)
+const MODEL_PAGE_CONTEXT = Object.values(SPEC_DATA)
+  .flatMap((d) => d.models)
+  .map((m) => `${m}: https://www.smartechvacuum.com/products/${modelSlug(m)}`)
+  .join("\n");
+
 export async function POST(req: NextRequest) {
-  const { messages, userId, tier, company, userName, userEmail } = await req.json();
+  const { messages } = await req.json();
+
+  // 🔴 고객 정보는 브라우저가 보낸 값이 아니라 서버 로그인 정보로만 판단한다(2026-10-24 코드 점검:
+  //    다른 회원 번호를 보내면 그 회원의 견적·발주 이력과 등급 가격이 답변에 섞일 수 있었음)
+  const session = await auth();
+  const sessionUser = session?.user as { id?: string; name?: string; tier?: string; company?: string; email?: string } | undefined;
+  const userId = sessionUser?.id;
+  const tier = sessionUser?.tier;
+  const company = sessionUser?.company;
+  const userName = sessionUser?.name;
+  const userEmail = sessionUser?.email;
 
   // ─── 주요 제품 파트번호 DB 조회 ───────────────────────────────
   const products = await prisma.product.findMany({
     where: { isImportant: true },
-    select: { partNo: true, description: true, category: true, costPrice: true },
+    select: { partNo: true, description: true, category: true, costPrice: true, stock: true, isDiscontinued: true },
     take: 100,
   });
 
-  // ─── tier별 가격 계산 ─────────────────────────────────────────
-  const multiplier = userId ? await getMultiplier(tier ?? "PUBLIC") : null;
+  // ─── 가격 계산 — 제품 화면과 같은 기준(비회원·승인대기·거절은 공개 판매가) ─────
+  // 🔴 원가·배율은 프롬프트에 넣지 않는다(판매가 ÷ 배율 = 원가). 판매가만 넣는다.
+  const pricingTier = !tier || tier === "PUBLIC" || tier === "GUEST" || tier === "PENDING" || tier === "REJECTED" ? "PUBLIC" : tier;
+  const multiplier = await getMultiplier(pricingTier);
 
   const productContext = products
-    .map((p: { partNo: string; description: string; category: string | null; costPrice: number }) => {
-      if (multiplier !== null && p.costPrice > 0) {
-        const price = Math.round(p.costPrice * multiplier / 1000) * 1000;
-        return `[${p.partNo}] ${p.description} (${p.category}) — ${formatKRW(price)}`;
-      }
-      return `[${p.partNo}] ${p.description} (${p.category})`;
+    .map((p: { partNo: string; description: string; category: string | null; costPrice: number; stock: number; isDiscontinued: boolean }) => {
+      const price = p.costPrice > 0 ? `판매가 ${formatKRW(Math.round(p.costPrice * multiplier))}(VAT 별도)` : "가격 문의";
+      const avail = p.isDiscontinued
+        ? "단종"
+        : p.stock > 0 ? `재고 ${p.stock}` : `재고 없음, ${leadTimeLabel(p.category, p.description)}`;
+      return `[${p.partNo}] ${p.description} (${p.category}) — ${price} · ${avail}`;
     })
     .join("\n");
 
@@ -753,16 +774,6 @@ export async function POST(req: NextRequest) {
       `  · 수리 ${r.repairNo} — ${r.pumpModel} (${r.createdAt.toLocaleDateString("ko-KR")}) [${r.status}]`
     );
 
-    const tierLabel: Record<string, string> = {
-      DEALER: "딜러",
-      KEY_DEALER: "키딜러",
-      VIP_DEALER: "VIP딜러",
-      OEM: "OEM",
-      ENDUSER: "최종사용자",
-      ADMIN: "관리자",
-      PENDING: "승인대기",
-    };
-
     userContext = `
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 [고객 정보 — 현재 로그인 중]
@@ -770,7 +781,6 @@ export async function POST(req: NextRequest) {
 회사명: ${company || "미설정"}
 담당자: ${userName || ""}
 이메일: ${userEmail || "미등록"}
-등급: ${tierLabel[tier] ?? tier} (가격 배율: ×${multiplier?.toFixed(2)})
 
 ${quoteLines.length > 0 ? `최근 견적 이력:\n${quoteLines.join("\n")}` : "견적 이력 없음"}
 
@@ -780,21 +790,25 @@ ${repairLines.length > 0 ? `최근 수리 이력:\n${repairLines.join("\n")}` : 
 `;
   }
 
-  // ─── 가격 안내 원칙 ───────────────────────────────────────────
-  const pricingInstruction = userId
-    ? `
-[가격 안내 원칙 — 로그인 고객]
-- 현재 고객 등급: ${tier} (배율 ×${multiplier?.toFixed(2)})
-- 제품 파트번호 목록에 가격이 표시된 제품은 해당 가격을 그대로 안내한다
-- 가격이 없는 제품(costPrice=0 또는 목록 미등재)은 "담당자에게 별도 문의 필요"로 안내한다
-- 납기는 표준 8~16주를 기준으로 안내하되, 급한 경우 재고 확인을 권유한다
+  // ─── 가격·재고·납기 안내 원칙 — 홈페이지 제품 화면과 같은 값만 안내 ─────────
+  const pricingInstruction = `
+[가격·재고·납기 안내 원칙]
+- 가격은 아래 [J] 목록의 판매가(VAT 별도)를 그대로 안내한다. 홈페이지 제품 화면에 공개된 가격과 같다
+- 목록에 없거나 "가격 문의"인 제품은 가격을 추측하지 말고 모델 화면 링크나 견적 문의로 안내한다
+- 재고·납기도 [J] 목록 그대로 안내한다("재고 2" → 바로 출고 가능, "재고 없음, 통상 4주" → 주문 후 통상 4주). 목록에 없으면 "납기는 문의해 주세요"
+- 고객 등급·할인율·배율·원가는 어떤 경우에도 말하지 않는다
+- 로그인 고객에게는 목록 가격이 그 고객의 판매가라고만 안내한다${userId ? `
 - 고객이 "견적서 이메일로 보내줘" 또는 유사 요청 시, 답변 마지막에 정확히 이 형식으로 한 줄 추가한다:
-  [[SEND_EMAIL]]
-`
-    : `
-[가격 안내 원칙 — 비로그인]
-- 가격은 절대 언급하지 않는다
-- 가격 문의 시: "로그인 후 등급별 단가를 바로 확인하실 수 있습니다. 로그인하시거나 견적 문의를 남겨주세요."로 안내한다
+  [[SEND_EMAIL]]` : ""}
+`;
+
+  const formatInstruction = `
+[답변 형식 — 상담창은 글자만 보여 준다]
+- 마크다운을 쓰지 않는다: #·## 제목, | 표 |, **굵게**, ---, > 인용 기호 금지. 기호가 화면에 그대로 찍힌다
+- 짧은 문단과 "· " 목록으로 쓰고, 사양은 "배기속도: 6.1 m³/h"처럼 한 줄씩 쓴다
+- 간단한 질문은 10줄 안팎으로 짧게 답한다
+- 특정 Edwards 모델을 안내했다면 답변 맨 끝에 [M] 목록의 주소로 한 줄을 붙인다. 예: "👉 RV5 가격·재고 보기: https://www.smartechvacuum.com/products/edwards-rv5"
+- [M] 목록에 없는 모델은 주소를 지어내지 않는다
 `;
 
   const systemPrompt = `당신은 스마텍(Smartech)의 수석 진공기술 엔지니어입니다.
@@ -810,6 +824,7 @@ Edwards Vacuum 한국 공식 대리점에서 20년 이상 진공펌프 설계·�
 - 위험하거나 즉각 조치가 필요한 상황은 명확히 경고한다
 
 ${pricingInstruction}
+${formatInstruction}
 
 ${SPEC_CONTEXT}${SIMULATION_CONTEXT}
 ${userContext}
@@ -817,14 +832,26 @@ ${userContext}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 [J] 취급 제품 파트번호 목록 (DB 기준)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-${productContext}`;
+${productContext}
 
-  const stream = await client.messages.stream({
-    model: "claude-sonnet-4-6",
-    max_tokens: 1536,
-    system: systemPrompt,
-    messages,
-  });
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[M] 모델 화면 주소 (가격·재고·납기 확인)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${MODEL_PAGE_CONTEXT}`;
+
+  // Sonnet 5.5(2026-10-24 대표님 결정). 상담은 짧은 대화라 effort low.
+  // output_config·fallbacks는 설치된 SDK(0.39) 타입에 없어 그대로 실어 보낸다.
+  // fallbacks "default": 안전 검사로 답변이 거절되면 서버가 다른 모델로 이어서 답한다(베타 헤더 필요).
+  const stream = await client.messages.stream(
+    {
+      model: "claude-sonnet-5-5",
+      max_tokens: 4096,
+      system: systemPrompt,
+      messages,
+      ...({ output_config: { effort: "low" }, fallbacks: "default" } as object),
+    },
+    { headers: { "anthropic-beta": "server-side-fallback-2026-07-01" } },
+  );
 
   const lastUserMsg = [...messages].reverse().find((m: { role: string }) => m.role === "user");
   const userMessageText: string =
@@ -836,14 +863,23 @@ ${productContext}`;
   const readable = new ReadableStream({
     async start(controller) {
       let fullResponse = "";
-      for await (const chunk of stream) {
-        if (
-          chunk.type === "content_block_delta" &&
-          chunk.delta.type === "text_delta"
-        ) {
-          fullResponse += chunk.delta.text;
-          controller.enqueue(encoder.encode(chunk.delta.text));
+      try {
+        for await (const chunk of stream) {
+          if (
+            chunk.type === "content_block_delta" &&
+            chunk.delta.type === "text_delta"
+          ) {
+            fullResponse += chunk.delta.text;
+            controller.enqueue(encoder.encode(chunk.delta.text));
+          }
         }
+      } catch (e) {
+        console.error("[chat] stream error", e);
+      }
+      // 거절·오류로 글자가 하나도 없으면 빈 말풍선 대신 안내 문구
+      if (!fullResponse.trim()) {
+        fullResponse = "죄송합니다. 지금은 답변을 드리기 어렵습니다. 031-204-7170으로 전화 주시면 바로 안내해 드리겠습니다.";
+        controller.enqueue(encoder.encode(fullResponse));
       }
       controller.close();
 

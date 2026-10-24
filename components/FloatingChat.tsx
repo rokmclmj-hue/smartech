@@ -1,6 +1,7 @@
 "use client";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { sendChatEmail } from "@/lib/chatEmailAction";
 import { trackEvent } from "@/lib/analytics";
 
@@ -33,6 +34,29 @@ const TIER_LABEL: Record<string, string> = {
   PENDING: "회원",
 };
 void TIER_LABEL;
+
+// 답변 속 스마텍 홈페이지 주소만 누를 수 있는 링크로 바꾼다(모델 화면 안내, 2026-10-24).
+// 같은 사이트 안 이동이라 대화 내용은 그대로 남는다. 다른 사이트 주소는 글자 그대로 둔다.
+const SITE_URL = /https:\/\/(?:www\.)?smartechvacuum\.com(\/[^\s)]*)?/g;
+
+function renderWithLinks(text: string, onNavigate: () => void) {
+  const parts: React.ReactNode[] = [];
+  let last = 0;
+  for (const m of text.matchAll(SITE_URL)) {
+    const start = m.index ?? 0;
+    if (start > last) parts.push(text.slice(last, start));
+    const full = m[0].replace(/[.,]+$/, ""); // 문장 끝 마침표는 주소에서 뺀다
+    const path = full.replace(/^https:\/\/(?:www\.)?smartechvacuum\.com/, "") || "/";
+    parts.push(
+      <Link key={start} href={path} onClick={onNavigate} className="text-edred underline underline-offset-2 break-all">
+        smartechvacuum.com{path === "/" ? "" : path}
+      </Link>,
+    );
+    last = start + full.length;
+  }
+  if (last < text.length) parts.push(text.slice(last));
+  return parts;
+}
 
 export default function FloatingChat() {
   const { data: session, status } = useSession();
@@ -239,7 +263,9 @@ export default function FloatingChat() {
                     m.role === "user" ? "bg-ink text-paper" : "bg-[#F1EDE4] text-ink"
                   }`}
                 >
-                  {m.content || <span className="animate-pulse">●</span>}
+                  {m.content
+                    ? m.role === "assistant" ? renderWithLinks(m.content, close) : m.content
+                    : <span className="animate-pulse">●</span>}
                 </div>
               </div>
             ))}
