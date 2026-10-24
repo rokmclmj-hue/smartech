@@ -72,6 +72,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   }, [session, status, tier, router]);
 
+  // 관리자 로그인한 브라우저에 직원 표시 — 이후 홈페이지 방문도 GA4 손님 통계에서 제외 (app/layout.tsx에서 확인)
+  useEffect(() => {
+    if (status !== "authenticated" || tier !== "ADMIN") return;
+    try {
+      localStorage.setItem("smartech_staff", "1");
+    } catch {
+      // 저장 막힌 브라우저(시크릿 창 등)는 이번 화면만 제외
+    }
+    (window as unknown as Record<string, unknown>)["ga-disable-G-KRD96T8LX6"] = true;
+  }, [status, tier]);
+
   if (status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-paper">

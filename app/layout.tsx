@@ -153,9 +153,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="google-site-verification" content="G5av3b974mdW7IhC2e63gvWXd48pPm0iuCWaM_1tUE0" />
         {/* Google Analytics GA4 */}
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-KRD96T8LX6" />
+        {/* 직원 방문 제외: 관리자 화면이거나, 관리자 화면에 들어간 적 있는 브라우저(smartech_staff 표시)는 GA4에 보내지 않음 */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-KRD96T8LX6');`,
+            __html: `(function(){try{var p=location.pathname;if(p==='/admin'||p.indexOf('/admin/')===0||localStorage.getItem('smartech_staff')==='1'){window['ga-disable-G-KRD96T8LX6']=true;}}catch(e){}})();window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-KRD96T8LX6');`,
           }}
         />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
