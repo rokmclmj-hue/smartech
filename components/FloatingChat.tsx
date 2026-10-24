@@ -37,7 +37,8 @@ void TIER_LABEL;
 
 // 답변 속 스마텍 홈페이지 주소만 누를 수 있는 링크로 바꾼다(모델 화면 안내, 2026-10-24).
 // 같은 사이트 안 이동이라 대화 내용은 그대로 남는다. 다른 사이트 주소는 글자 그대로 둔다.
-const SITE_URL = /https:\/\/(?:www\.)?smartechvacuum\.com(\/[^\s)]*)?/g;
+// 주소 글자는 영문·숫자·기호만 — "…/edwards-rv5에서"처럼 한글이 붙어도 주소에 섞이지 않게(코드리뷰 10/24)
+const SITE_URL = /https:\/\/(?:www\.)?smartechvacuum\.com(?:\/[A-Za-z0-9\-._~/?#=&%+]*)?/g;
 
 function renderWithLinks(text: string, onNavigate: () => void) {
   const parts: React.ReactNode[] = [];
@@ -57,6 +58,9 @@ function renderWithLinks(text: string, onNavigate: () => void) {
   if (last < text.length) parts.push(text.slice(last));
   return parts;
 }
+
+const TEASER_KEY = "smtChatTeaserHiddenUntil";
+const TEASER_DELAY_MS = 5000;
 
 export default function FloatingChat() {
   const { data: session, status } = useSession();
@@ -92,6 +96,24 @@ export default function FloatingChat() {
     if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
   }, [messages]);
 
+  // PC(1024px 이상)에서 몇 초 뒤 버튼 위에 작은 상담 카드(인사말 + 입력칸)를 띄운다(2026-10-24 대표님 요청).
+  // 큰 창 자동 열림은 내용을 가려서 쓰지 않는다. 닫으면 7일간 다시 안 띄운다(브라우저 저장, 실패해도 무시).
+  const [showTeaser, setShowTeaser] = useState(false);
+  const [teaserInput, setTeaserInput] = useState("");
+  useEffect(() => {
+    if (isOpen) return; // 카드는 !isOpen일 때만 그려지고, 열 때 dismissTeaser로 꺼진다
+    let hiddenUntil = 0;
+    try { hiddenUntil = Number(localStorage.getItem(TEASER_KEY) ?? 0); } catch {}
+    if (Date.now() < hiddenUntil || !window.matchMedia("(min-width: 1024px)").matches) return;
+    const timer = setTimeout(() => setShowTeaser(true), TEASER_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [isOpen]);
+
+  const dismissTeaser = useCallback(() => {
+    setShowTeaser(false);
+    try { localStorage.setItem(TEASER_KEY, String(Date.now() + 7 * 24 * 60 * 60 * 1000)); } catch {}
+  }, []);
+
   const close = useCallback(() => setIsOpen(false), []);
 
   const open = useCallback(() => {
@@ -107,7 +129,9 @@ export default function FloatingChat() {
     if (!text || loading) return;
     if (!messages.some((m) => m.role === "user")) trackEvent("chat_start");
     const userMsg: Message = { role: "user", content: text };
-    const nextMessages = [...messages, userMsg];
+    // 작은 카드에서 바로 보낸 경우 인사말이 아직 없으니 함께 넣는다
+    const base: Message[] = messages.length === 0 ? [{ role: "assistant", content: buildGreeting(user ?? undefined) }] : messages;
+    const nextMessages = [...base, userMsg];
     setMessages(nextMessages);
     setInput("");
     setLoading(true);
@@ -167,6 +191,15 @@ export default function FloatingChat() {
     }
   }
 
+  function submitTeaser() {
+    const text = teaserInput.trim();
+    if (!text) return;
+    setTeaserInput("");
+    dismissTeaser();
+    setIsOpen(true);
+    send(text);
+  }
+
   async function handleSendEmail() {
     if (!user?.email || sendingEmail) return;
     setSendingEmail(true);
@@ -205,25 +238,56 @@ export default function FloatingChat() {
   return (
     <>
       {/* ── 툴팁 ── */}
-      {showTooltip && !isOpen && (
+      {showTooltip && !isOpen && !showTeaser && (
         <div className="fixed bottom-24 right-6 z-50 pointer-events-none">
           <div className="bg-ink text-paper text-[12px] px-3 py-2 shadow-lg whitespace-nowrap rounded-sm animate-fade-in">
-            견적 문의하기 →
+            모델명만 치면 가격·납기 바로 →
           </div>
           <div className="absolute bottom-[-4px] right-5 w-2 h-2 bg-ink rotate-45" />
         </div>
       )}
 
-      {/* ── 플로팅 버튼 ── */}
+      {/* ── PC 작은 상담 카드 ── */}
+      {showTeaser && !isOpen && (
+        <div className="hidden lg:block fixed bottom-24 right-6 z-50 w-[320px] bg-white border hair shadow-2xl animate-fade-in">
+          <div className="flex items-start justify-between px-4 pt-4">
+            <div>
+              <div className="flex items-center gap-2 mono text-[11px] text-dim">
+                <span className="w-2 h-2 bg-green-400 rounded-full inline-block" />
+                AI 상담 · 스마텍
+              </div>
+              <p className="mt-2 text-[15px] font-semibold text-ink">무엇을 도와드릴까요?</p>
+              <p className="mt-1 text-[12px] text-dim leading-relaxed">모델명을 입력하면 가격·재고·납기를 바로 알려드려요.</p>
+            </div>
+            <button onClick={dismissTeaser} className="text-dim hover:text-ink text-[18px] leading-none px-1" aria-label="상담 카드 닫기">×</button>
+          </div>
+          <form
+            className="flex gap-2 p-4"
+            onSubmit={(e) => { e.preventDefault(); submitTeaser(); }}
+          >
+            <input
+              value={teaserInput}
+              onChange={(e) => setTeaserInput(e.target.value)}
+              placeholder="예: RV5"
+              aria-label="상담 메시지 입력"
+              className="flex-1 min-w-0 bg-[#F8F6F2] px-3 py-2 text-[13px] outline-none focus:ring-1 focus:ring-ink"
+            />
+            <button type="submit" className="bg-edred text-white text-[13px] px-4 hover:bg-edred3 transition-colors">전송</button>
+          </form>
+        </div>
+      )}
+
+      {/* ── 플로팅 버튼 — 휴대폰은 아이콘 아래 "AI상담" 글자(제품 화면 하단 바를 가리지 않게 크기는 그대로) ── */}
       {!isOpen && (
         <button
-          onClick={open}
-          className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-edred text-white rounded-full shadow-lg flex items-center justify-center hover:bg-edred3 transition-colors"
+          onClick={() => { dismissTeaser(); open(); }}
+          className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-edred text-white rounded-full shadow-lg flex flex-col items-center justify-center hover:bg-edred3 transition-colors"
           aria-label="AI 상담 열기"
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg className="w-5 h-5 lg:w-6 lg:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
           </svg>
+          <span className="lg:hidden text-[10px] font-semibold leading-none mt-0.5">AI상담</span>
           <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white" />
         </button>
       )}
