@@ -37,7 +37,8 @@ void TIER_LABEL;
 
 // 답변 속 스마텍 홈페이지 주소만 누를 수 있는 링크로 바꾼다(모델 화면 안내, 2026-10-24).
 // 같은 사이트 안 이동이라 대화 내용은 그대로 남는다. 다른 사이트 주소는 글자 그대로 둔다.
-const SITE_URL = /https:\/\/(?:www\.)?smartechvacuum\.com(\/[^\s)]*)?/g;
+// 주소 글자는 영문·숫자·기호만 — "…/edwards-rv5에서"처럼 한글이 붙어도 주소에 섞이지 않게(코드리뷰 10/24)
+const SITE_URL = /https:\/\/(?:www\.)?smartechvacuum\.com(?:\/[A-Za-z0-9\-._~/?#=&%+]*)?/g;
 
 function renderWithLinks(text: string, onNavigate: () => void) {
   const parts: React.ReactNode[] = [];
