@@ -1,5 +1,12 @@
 # Astra 작업 기록
 
+## 2026-10-24 — (클로드) AI 상담 PC 작은 카드 + 휴대폰 버튼 글자(보호 파일 FloatingChat 승인)
+
+- 대표님 요청: 상담창이 접혀 있어 안 쓰는 것 같다 → 큰 창 자동 열림 대신(내용 가림·휴대폰 전체 화면) PC(1024px 이상)에서 5초 뒤 버튼 위 작은 카드("무엇을 도와드릴까요?" + 입력칸 + 전송 + ×).
+- 카드에서 보내면 큰 상담창이 열리며 인사말+질문이 이어짐. × 또는 상담 버튼을 누르면 7일간 카드 안 뜸(localStorage `smtChatTeaserHiddenUntil`, 실패해도 무시).
+- 휴대폰: 버튼 크기는 그대로(제품 화면 하단 바 pr-24 공간) 아이콘 아래 "AI상담" 글자. 스크롤 안내 문구 "견적 문의하기 →" → "모델명만 치면 가격·납기 바로 →".
+- 검증: Playwright로 PC 홈 카드 표시·카드에서 RV5 전송→답변·링크 2개, 7일 숨김 저장·새로고침 후 미표시, 휴대폰 제품 화면 버튼·하단 바 겹침 없음, eslint 오류 0, build.
+
 ## 2026-10-24 — (클로드) 로컬 코드리뷰 95739b8까지(6커밋) + 반영
 
 - 범위: 5ba162c..95739b8. 코드: app/api/chat/route.ts, components/FloatingChat.tsx, components/PumpSelector.tsx, lib/model-offers.ts, lib/pumpSpeedData.ts.
