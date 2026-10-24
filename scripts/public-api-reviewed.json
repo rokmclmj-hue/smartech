@@ -1,6 +1,6 @@
 {
   "app/api/auth/biz-login-request/route.ts": "f4abf1b2226d07b6",
-  "app/api/chat/route.ts": "4e3e948d51746f86",
+  "app/api/chat/route.ts": "65963111b677f585",
   "app/api/orders/route.ts": "07e4e5e9c54509df",
   "app/api/products/lookup/route.ts": "c5efb10d6e5f01e6",
   "app/api/products/prices/route.ts": "be4b24ad9c73a5fe",

@@ -45,7 +45,7 @@ export type TurboModel = {
 // ─────────────────────────────────────────────────────
 const RV: PumpModel[] = [
   {
-    model:"RV3",  series:"RV", type:"oil_vane", speed50Hz:3.3,  speed60Hz:4.0,  ultimate:2.0e-3, motorKW_50Hz:0.09, inletFlange:"NW16",
+    model:"RV3",  series:"RV", type:"oil_vane", speed50Hz:3.3,  speed60Hz:4.0,  ultimate:2.0e-3, motorKW_50Hz:0.09, inletFlange:"NW25",
     speedCurve: [
       [899.3468,4.0],[484.7995,4.0],[257.4206,4.0],[139.5755,4.0],[75.4083,4.0],[40.7361,4.0],
       [20.9005,4.0],[11.3,4.0],[6.1378,3.96],[3.3577,3.89],[1.7619,3.78],[0.932,3.69],
