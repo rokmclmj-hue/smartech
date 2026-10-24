@@ -28,7 +28,7 @@ const SPEC_CONTEXT = `
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 [A] 오일 로터리 베인 펌프 (Oil Rotary Vane)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-■ RV 시리즈 — 소형 1단, 범용 (Source: Edwards 카탈로그)
+■ RV 시리즈 — 소형 2단, 범용 (Source: Edwards 카탈로그)
 모델   | 배기속도(60Hz) | 얼티밋        | 인렛  | 모터
 RV3    | 4.0 m³/h      | 2×10⁻³ mbar  | NW16  | 90W
 RV5    | 6.2 m³/h      | 2×10⁻³ mbar  | NW25  | 90W
@@ -677,11 +677,18 @@ export async function POST(req: NextRequest) {
   const userName = sessionUser?.name;
   const userEmail = sessionUser?.email;
 
-  // ─── 주요 제품 파트번호 DB 조회 ───────────────────────────────
+  // ─── 상담에 넣을 품목 — 주요 품목 + 재고 있는 품목 + 미스트필터·오일(자주 묻는 소모품, 2026-10-24 대표님 요청) ───
   const products = await prisma.product.findMany({
-    where: { isImportant: true },
+    where: {
+      OR: [
+        { isImportant: true },
+        { stock: { gt: 0 } },
+        { category: { in: ["미스트필터(EMF)", "진공펌프오일(Ultra19)"] } },
+      ],
+    },
     select: { partNo: true, description: true, category: true, costPrice: true, stock: true, isDiscontinued: true },
-    take: 100,
+    orderBy: { partNo: "asc" },
+    take: 200,
   });
 
   // ─── 가격 계산 — 제품 화면과 같은 기준(비회원·승인대기·거절은 공개 판매가) ─────
@@ -695,7 +702,7 @@ export async function POST(req: NextRequest) {
       const avail = p.isDiscontinued
         ? "단종"
         : p.stock > 0 ? `재고 ${p.stock}` : `재고 없음, ${leadTimeLabel(p.category, p.description)}`;
-      return `[${p.partNo}] ${p.description} (${p.category}) — ${price} · ${avail}`;
+      return `[${p.partNo}] ${p.description} (${p.category}) — ${price} · ${avail} · https://www.smartechvacuum.com/products/${encodeURIComponent(p.partNo)}`;
     })
     .join("\n");
 
@@ -808,7 +815,9 @@ ${repairLines.length > 0 ? `최근 수리 이력:\n${repairLines.join("\n")}` : 
 - 짧은 문단과 "· " 목록으로 쓰고, 사양은 "배기속도: 6.1 m³/h"처럼 한 줄씩 쓴다
 - 간단한 질문은 10줄 안팎으로 짧게 답한다
 - 특정 Edwards 모델을 안내했다면 답변 맨 끝에 [M] 목록의 주소로 한 줄을 붙인다. 예: "👉 RV5 가격·재고 보기: https://www.smartechvacuum.com/products/edwards-rv5"
-- [M] 목록에 없는 모델은 주소를 지어내지 않는다
+- 미스트필터(EMF)·오일·부품처럼 [M]에 없는 품목은 [J] 목록 그 품목 줄 끝의 주소를 붙인다. 예: "👉 EMF20 미스트필터 가격·재고 보기: https://www.smartechvacuum.com/products/A46229000"
+- 링크는 답변에서 가장 중요한 품목 1~2개만 붙인다
+- [M]·[J]에 없는 주소는 지어내지 않는다
 `;
 
   const systemPrompt = `당신은 스마텍(Smartech)의 수석 진공기술 엔지니어입니다.
@@ -821,6 +830,7 @@ Edwards Vacuum 한국 공식 대리점에서 20년 이상 진공펌프 설계·�
 - 단순 스펙 나열보다 "왜 그런지", "어떻게 하면 되는지" 실질적 조언을 우선한다
 - 계산이 필요한 경우 공식을 인용하고 직접 계산해서 보여준다
 - 스펙 데이터에 없는 제품은 추측하지 않고 "스마텍 전문가에게 직접 문의해 주세요"로 안내한다
+- 미스트필터·오일 리턴 키트·부품이 어느 펌프에 맞는지(호환)는 자료에 적혀 있지 않으면 추측하지 않는다. "사용 중인 펌프 모델을 알려 주시면 맞는 크기를 확인해 드리겠습니다"로 안내한다
 - 위험하거나 즉각 조치가 필요한 상황은 명확히 경고한다
 
 ${pricingInstruction}

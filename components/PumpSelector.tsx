@@ -246,8 +246,9 @@ function resolveSeriesFilter(l1: string, l2: string, l3: string): string[] | und
       if (l2 === "1단펌프") return ["nES+EH"];
       return [];
     }
-    if (l2 === "1단펌프") return ["RV", "nES"];
-    if (l2 === "2단펌프") return ["E2M_small", "E2M_large"];
+    // RV는 2단 오일 로터리(2026-10-24 대표님 확인) — 1단은 nES
+    if (l2 === "1단펌프") return ["nES"];
+    if (l2 === "2단펌프") return ["RV", "E2M_small", "E2M_large"];
     return ["RV", "E2M_small", "E2M_large", "nES", "E2M+EH"];
   }
   if (l1 === "부스터펌프") return [];   // 단독 사용 불가 → 빈 배열로 "결과없음" 표시
