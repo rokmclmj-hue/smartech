@@ -299,6 +299,18 @@ def create_x_draft(blog_id):
 create_x_draft(result["id"])
 
 
+# ── 네이버 붙여넣기용 작은 썸네일 ──────────────────────
+# thumbnail.png는 홈페이지·숏츠용이라 그대로 두고 절반 크기 사본만 만든다(2026-10-26 대표님 요청).
+# 실패해도 블로그 업로드는 이미 끝났으므로 종료코드를 바꾸지 않는다.
+print("\n=== 네이버 썸네일 (절반 크기) ===", flush=True)
+try:
+    from make_naver_thumb import make_naver_thumb
+    make_naver_thumb(BLOG_FOLDER)
+except Exception as e:
+    print(f"[WARN] 네이버 썸네일 생성 실패: {e} — 블로그 발행은 정상. 수동 실행: "
+          f'python 블로그/make_naver_thumb.py "{topic}"')
+
+
 # ── 유튜브 숏츠 자동 제작·예약 ─────────────────────────
 # 원고 폴더에 shorts.json이 있을 때만 영상을 만들어 유튜브에 비공개+예약(당일 낮 12시)으로 올린다(2026-10-04 대표님 승인).
 # X 대기글과 같은 이유로 여기서 한 번만 호출하고, 실패해도 종료코드를 바꾸지 않는다.
