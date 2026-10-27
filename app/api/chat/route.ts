@@ -724,7 +724,7 @@ export async function POST(req: NextRequest) {
   const repairKits = await prisma.repairKit.findMany({
     where: { isActive: true },
     select: {
-      pumpMaker: true, pumpModel: true, modelGroup: true, basePrice: true,
+      pumpMaker: true, pumpModel: true, basePrice: true,
       parts: { select: { name: true, quantity: true }, orderBy: { sortOrder: "asc" } },
       extraParts: { select: { category: true, name: true, price: true } },
     },
@@ -741,7 +741,7 @@ export async function POST(req: NextRequest) {
         .filter((e) => e.price > 0)
         .map((e) => `${e.category ? `${e.category} ` : ""}${e.name} ${formatKRW(Math.round(e.price * REPAIR_EXTRA_MARGIN))}`)
         .join(", ");
-      return `${k.pumpMaker} ${k.modelGroup || k.pumpModel} — ${price}${parts ? ` · 포함 교체 부품: ${parts}` : ""}${extras ? ` · 추가 수리(필요 시, VAT 별도): ${extras}` : ""}`;
+      return `${k.pumpMaker} ${k.pumpModel} — ${price}${parts ? ` · 포함 교체 부품: ${parts}` : ""}${extras ? ` · 추가 수리(필요 시, VAT 별도): ${extras}` : ""}`;
     })
     .join("\n");
 

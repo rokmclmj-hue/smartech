@@ -1,5 +1,12 @@
 # Astra 작업 기록
 
+## 2026-10-27 — (클로드) 로컬 코드리뷰 7a0e1d9..a2579bd(20커밋) + 반영
+
+- 범위: origin/reviewed(=7a0e1d9 직전)..a2579bd 20커밋 전부. 코드: AI 상담 route.ts(수리 가격·Edwards 문구·게이지), FloatingChat(PC 작은 카드·휴대폰 글자·링크 정규식), GA4 직원 제외(app/layout·admin/layout), /about 6월 보도자료 외부 링크(다른 창 ef5341e), 관리자 블로그 썸네일 안내 문구, make_naver_thumb.py. 나머지는 기록·블로그 산출물.
+- 지적 1건 반영: [R] 수리 가격 줄 이름이 modelGroup(iQDP40/80 묶음)이라 두 모델이 같은 이름 두 줄로 나옴 → pumpModel로(/repair 화면 표기와 같음). 현재 두 가격은 같아 잘못된 답은 없었음.
+- 이상 없음 확인: 수리 고객가 공식이 /api/repair/kits와 같음·원가 미포함, 상담 카드 여는 길 2곳 모두 7일 숨김 처리, 링크 끝 마침표 제거, GA4 제외 스크립트 try/catch, 외부 링크 noopener.
+- 검증: tsc 통과, 로컬 iQDP80 → 2,700,000원, leak-check 로컬 승인.
+
 ## 2026-10-27 — (클로드) AI 상담 구형 게이지 AIM-S·AIM-X 센서 교체 지정(657fb2b, 라이브 확인)
 
 - 대표님 지정: 센서(Body Tube)만 교체 가능한 구형은 AIM-S·AIM-X 두 가지(DB 예: AIM-X-NW25 D14642000). 그 외는 게이지 전체 교체. 🔴 이름이 비슷한 AIM200-S·AIM200-X(D2G00…)는 신형 → 센서 교체 불가로 프롬프트에 명시.
