@@ -7,6 +7,7 @@ import { getMultiplier, formatKRW } from "@/lib/pricing";
 import { auth } from "@/lib/auth";
 import { leadTimeLabel } from "@/lib/lead-time";
 import { SPEC_DATA, modelSlug } from "@/lib/product-specs";
+import { REPAIR_EXTRA_MARGIN, getRepairBaseMargin } from "@/lib/repairPricing";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -306,8 +307,8 @@ A: ① 국내 재고 보유 여부 먼저 확인 ② 배기속도·플랜지·�
 | LED 패턴 | 의미 | 조치 |
 |---|---|---|
 | ON 1초 / OFF 1초 반복 | 팁씰 교체 시기 점검 리마인더 (약 30개월) | 펌프 성능 확인 후 필요 시 팁씰 교체 (키트 A735-01-801) |
-| ON 3초 / OFF 1초 반복 | 베어링 서비스 시기 도달 (약 60개월) | Edwards 서비스 센터에 베어링 교체 의뢰 (키트 A735-01-802) |
-| ON 3초 / OFF 3초 반복 | 컨트롤러 서비스 시기 (약 120개월) | Edwards 문의 |
+| ON 3초 / OFF 1초 반복 | 베어링 서비스 시기 도달 (약 60개월) | 스마텍 천안 공장 수리 접수 — 기본수리에서 팁씰·베어링 직접 교체 (키트 A735-01-802) |
+| ON 3초 / OFF 3초 반복 | 컨트롤러 서비스 시기 (약 120개월) | 스마텍 수리 문의 |
 
 서비스 표시기 리셋 방법: 대기 속도 증가 버튼 + 감소 버튼 동시에 5초 이상 누름
 
@@ -348,7 +349,7 @@ N2 가스 발라스트 어댑터:
 2. 가스 발라스트 열려있는지 확인 → 열렸으면: 발라스트 0(OFF)으로 설정 후 확인
 3. 위 조치 후에도 소음 지속 → 기계적 원인:
    - 스크롤 충돌: 고정 스크롤 제거 → 스크롤 검사·청소
-   - 베어링 손상: Edwards 반환 수리
+   - 베어링 손상: 스마텍 천안 공장 수리(베어링 교체)
    - 오염: 고정 스크롤 제거 → 스크롤 및 플리닝 챔버 청소
 
 ■ nXDS 유지보수 계획 (표 14)
@@ -712,6 +713,32 @@ export async function POST(req: NextRequest) {
     })
     .join("\n");
 
+  // ─── 수리 가격 — /repair 화면(/api/repair/kits 공개 응답)과 같은 고객가만 넣는다(2026-10-27 대표님 요청) ───
+  // 🔴 원가(basePrice·추가항목 price)와 마진은 프롬프트에 넣지 않는다.
+  const repairKits = await prisma.repairKit.findMany({
+    where: { isActive: true },
+    select: {
+      pumpMaker: true, pumpModel: true, modelGroup: true, basePrice: true,
+      parts: { select: { name: true, quantity: true }, orderBy: { sortOrder: "asc" } },
+      extraParts: { select: { category: true, name: true, price: true } },
+    },
+    orderBy: [{ pumpFamily: "asc" }, { pumpModel: "asc" }],
+  });
+
+  const repairContext = repairKits
+    .map((k) => {
+      const price = k.basePrice > 0
+        ? `기본수리 ${formatKRW(Math.round(k.basePrice * getRepairBaseMargin(k.pumpModel)))}(VAT 별도)`
+        : "기본수리 가격 상담";
+      const parts = k.parts.map((p) => `${p.name}${p.quantity ? ` ${p.quantity}` : ""}`).join(", ");
+      const extras = k.extraParts
+        .filter((e) => e.price > 0)
+        .map((e) => `${e.category ? `${e.category} ` : ""}${e.name} ${formatKRW(Math.round(e.price * REPAIR_EXTRA_MARGIN))}`)
+        .join(", ");
+      return `${k.pumpMaker} ${k.modelGroup || k.pumpModel} — ${price}${parts ? ` · 포함 교체 부품: ${parts}` : ""}${extras ? ` · 추가 수리(필요 시, VAT 별도): ${extras}` : ""}`;
+    })
+    .join("\n");
+
   // ─── 로그인 유저 이력 조회 ────────────────────────────────────
   let userContext = "";
   if (userId) {
@@ -810,7 +837,10 @@ ${repairLines.length > 0 ? `최근 수리 이력:\n${repairLines.join("\n")}` : 
 - 목록에 없거나 "가격 문의"인 제품은 가격을 추측하지 말고 모델 화면 링크나 견적 문의로 안내한다
 - 재고·납기도 [J] 목록 그대로 안내한다("재고 2" → 바로 출고 가능, "재고 없음, 통상 4주" → 주문 후 통상 4주). 목록에 없으면 "납기는 문의해 주세요"
 - 고객 등급·할인율·배율·원가는 어떤 경우에도 말하지 않는다
-- 로그인 고객에게는 목록 가격이 그 고객의 판매가라고만 안내한다${userId ? `
+- 로그인 고객에게는 목록 가격이 그 고객의 판매가라고만 안내한다
+- 수리 금액은 아래 [R] 목록의 기본수리 가격(VAT 별도)을 그대로 안내한다. 포함 교체 부품을 함께 말하고, 분해 점검 결과 추가 수리가 필요하면 금액이 달라진다고 덧붙인다. 접수·견적은 https://www.smartechvacuum.com/repair 로 안내한다
+- [R]에 없는 모델이거나 "가격 상담"이면 수리 금액을 추측하지 말고 /repair 접수 또는 전화 문의로 안내한다
+- 스마텍은 홈페이지에 있는 모든 수리를 천안 공장에서 직접 한다(기본수리에서 팁씰·베어링 등 직접 교체). 수리를 Edwards 서비스 센터로 보내라고 안내하지 않는다${userId ? `
 - 고객이 "견적서 이메일로 보내줘" 또는 유사 요청 시, 답변 마지막에 정확히 이 형식으로 한 줄 추가한다:
   [[SEND_EMAIL]]` : ""}
 `;
@@ -849,6 +879,11 @@ ${userContext}
 [J] 취급 제품 파트번호 목록 (DB 기준)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ${productContext}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[R] 수리 가격 (스마텍 천안 공장 직접 수리, /repair 화면과 같은 고객가)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${repairContext}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 [M] 모델 화면 주소 (가격·재고·납기 확인)
