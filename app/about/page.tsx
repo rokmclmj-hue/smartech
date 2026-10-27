@@ -455,6 +455,13 @@ export default function AboutPage() {
                 href: "/blog/83",
               },
               {
+                source: "보도자료 · 뉴스와이어",
+                date: "2026년 6월",
+                title: "진공펌프 선정을 AI가 대신한다… 공정 조건만 입력하면 최적 펌프 자동 추천",
+                desc: "챔버 크기·배관 조건을 입력하면 AI가 펌프를 1차 추천하고 기술진이 검토하는 선정 서비스 출시. 인더스트리투데이·한국인포맥스 등 게재.",
+                href: "https://www.newswire.co.kr/newsRead.php?no=1036701",
+              },
+              {
                 source: "Edwards Korea 뉴스레터",
                 date: "2019년 1월",
                 title: "Distributor Rewards Program — 스마텍 Gold Class 인증",
@@ -477,7 +484,11 @@ export default function AboutPage() {
                   <div className="text-[13px] text-dim leading-relaxed">{item.desc}</div>
                 </div>
                 <div className="col-span-12 md:col-span-1 flex md:justify-end">
-                  {item.href ? (
+                  {item.href?.startsWith("http") ? (
+                    <a href={item.href} target="_blank" rel="noopener noreferrer" className="mono text-[11px] text-edred border border-edred/30 px-2 py-1 self-start hover:bg-edred hover:text-paper transition-colors">
+                      원문 →
+                    </a>
+                  ) : item.href ? (
                     <Link href={item.href} className="mono text-[11px] text-edred border border-edred/30 px-2 py-1 self-start hover:bg-edred hover:text-paper transition-colors">
                       자세히 →
                     </Link>
