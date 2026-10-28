@@ -33,10 +33,29 @@ export async function GET(req: NextRequest) {
     const qSpace  = q.replace(/[-\/]/g, " ");  // 하이픈/슬래시 → 공백
 
     const searchVariants = Array.from(new Set([q, qHyphen, qSpace, qNorm]));
-    where.OR = searchVariants.flatMap((v) => [
+    const phraseOr = searchVariants.flatMap((v) => [
       { partNo:      { contains: v, mode: "insensitive" as const } },
       { description: { contains: v, mode: "insensitive" as const } },
     ]);
+
+    // 여러 단어로 치면 단어마다 따로 찾는다 — "TIC 3H"로 "TIC Instrument Controller 3 Head"를 찾게(2026-10-28 대표님 요청).
+    // 쓸데없는 결과를 막으려고 각 단어는 품명 속 단어의 "시작"과 맞아야 한다("3"이 RS232의 3과는 안 맞음).
+    // 띄어쓰기는 무시해서 "3H"가 "3 Head"와 맞는다. 한 단어 검색은 기존 방식 그대로.
+    const words = q.trim().split(/\s+/).map(normalize).filter(Boolean);
+    if (words.length > 1) {
+      const all = await prisma.product.findMany({ select: { id: true, partNo: true, description: true } });
+      const matchedIds = all
+        .filter((p) => {
+          const tokens = p.description.toLowerCase().split(/[\s,;()+\-\/]+/).filter(Boolean);
+          const starts = tokens.map((_, i) => tokens.slice(i).join(""));
+          const partNo = p.partNo.toLowerCase();
+          return words.every((w) => partNo.startsWith(w) || starts.some((s) => s.startsWith(w)));
+        })
+        .map((p) => p.id);
+      where.OR = [...phraseOr, { id: { in: matchedIds } }];
+    } else {
+      where.OR = phraseOr;
+    }
   }
   if (category) where.category = category;
   if (importantOnly) where.isImportant = true;
