@@ -75,8 +75,9 @@ export async function GET(req: NextRequest) {
 
   const session = await auth();
   const tier = (session?.user as any)?.tier ?? "PUBLIC";
-  const showPrice = tier !== "PENDING" && tier !== "REJECTED";
-  const multiplier = showPrice ? await getMultiplier(tier) : null;
+  // 승인 대기·거절 회원은 비로그인 손님과 같은 공개가 — 가격을 숨기면 견적서가 0원으로 나옴(서울대 문의 10/28)
+  const pricingTier = tier === "PENDING" || tier === "REJECTED" ? "PUBLIC" : tier;
+  const multiplier = await getMultiplier(pricingTier);
 
   // 원가·공급처 등 내부 정보는 관리자에게만 보낸다 (발주서 이력불러오기가 costPrice 사용).
   // 공개 응답에 ...p를 그대로 내보내 비로그인 방문자에게도 원가가 노출되던 문제 수정 — 2026-09-24.
@@ -87,8 +88,8 @@ export async function GET(req: NextRequest) {
   const listMultiplier = isDealer ? await getMultiplier("ENDUSER") : null;
   const result = products.map((p) => {
     const { costPrice, supplierName, department, minStock, orderQty, ...publicFields } = p;
-    const displayPrice = showPrice && multiplier ? Math.round(costPrice * multiplier) : null;
-    const priceStatus = !showPrice ? "pending" : "visible";
+    const displayPrice = Math.round(costPrice * multiplier);
+    const priceStatus = "visible";
     const listPrice = listMultiplier ? Math.round(costPrice * listMultiplier) : undefined;
     return isAdmin
       ? { ...publicFields, costPrice, supplierName, department, minStock, orderQty, displayPrice, priceStatus }

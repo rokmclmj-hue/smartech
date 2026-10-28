@@ -429,7 +429,7 @@ export default function QuotePanel({ open, onClose }: Props) {
                   ? "※ 관리자 계정이라 원가로 표시됩니다. 고객에게는 공개가로 보입니다."
                   : isApprovedMember
                     ? "※ 귀사 적용가로 계산됩니다."
-                    : "※ 공개가 기준으로 요청·저장됩니다."}
+                    : "※ 지금은 공개가 기준입니다. 회원 승인이 끝나면 회원가로 다시 안내해 드립니다."}
               {status === "unauthenticated" && (
                 <>
                   {" "}회원은{" "}
