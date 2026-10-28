@@ -1,5 +1,12 @@
 # Astra 작업 기록
 
+## 2026-10-29 — (클로드) 견적 검색 개선 2단계: 줄임말 짝 4개(bbd9c14, 라이브 확인)
+
+- `app/api/products/route.ts` ALIAS_GROUPS: controller↔cont·contr·controler, instrument↔inst·instrmnt, head↔hd, assembly↔assy. DB 1037개 품명에서 긴 이름·줄임말이 둘 다 있는 것만. 줄임말은 단어 전체가 같을 때만 맞음(cont≠Contact). 한 단어 검색도 줄임말 짝 적용.
+- 제외(각 1회뿐): pmp·vlv·exh·std — 필요하면 한 줄씩 추가.
+- 검증(로컬 vs 라이브 목록 대조): TIC controller 16→18(Instrmnt Cont 3 Hd·Inst Cont 6 head Capman), controller 20→25(PGC201/202 Contr·NXDS Controler 포함), assy 27→36(Assembly 9개), head 12→13. TIC 3H·RV12·nXDS10i·gauge·파트번호는 변화 없음. 추가된 항목 모두 맞는 제품. leak-check 로컬 승인·라이브 통과, Vercel Ready.
+- 다음: 3단계 — 품명이 검색어로 시작하는 제품을 위로(PumpSelector searchRank), "TIC 3"의 터보 세트 아래로.
+
 ## 2026-10-28 — (클로드) 견적 검색 개선 1단계: 여러 단어 검색(114e31a·29c8930, 라이브 확인)
 
 - 대표님 요청: "TIC"을 치면 터보 세트가 위에 나오고, "TIC 3"·"TIC 3H"는 결과 0. 원인 3가지 — ① 검색어 전체가 한 덩어리로 품명에 있어야 함 ② 정렬이 숫자 들어간 모델명만 위로(PumpSelector searchRank) ③ Edwards 줄임말(Instrmnt·Cont·Hd).
