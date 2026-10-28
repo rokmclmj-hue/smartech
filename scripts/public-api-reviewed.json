@@ -4,7 +4,7 @@
   "app/api/orders/route.ts": "07e4e5e9c54509df",
   "app/api/products/lookup/route.ts": "c5efb10d6e5f01e6",
   "app/api/products/prices/route.ts": "be4b24ad9c73a5fe",
-  "app/api/products/route.ts": "5a3a1224acfb04a5",
+  "app/api/products/route.ts": "0770d94c9e863c48",
   "app/api/quote/[id]/detail/route.ts": "ca29121e0c88185b",
   "app/api/quote/[id]/pdf/route.ts": "f3660ed5c9752885",
   "app/api/quote/[id]/route.ts": "f212d6961bbc0749",
