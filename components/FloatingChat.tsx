@@ -60,7 +60,7 @@ function renderWithLinks(text: string, onNavigate: () => void) {
 }
 
 const TEASER_KEY = "smtChatTeaserHiddenUntil";
-const TEASER_DELAY_MS = 5000;
+const TEASER_DELAY_MS = 3000; // 5초 → 3초(2026-10-30 대표님 승인)
 
 export default function FloatingChat() {
   const { data: session, status } = useSession();
