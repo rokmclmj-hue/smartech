@@ -1,0 +1,9 @@
+{
+  "description": "한 대학 연구실의 진공오븐에 쓸 Edwards RV12 1대를 택배로 납품한 사례입니다. 택배로 받은 RV12는 첫 가동 전에 보호 마개와 외관, 모터 전압 표시창, Ultragrade 19 오일 주입, 회전 방향을 확인합니다.",
+  "hashtags": ["#RV12", "#진공오븐", "#스마텍"],
+  "tags": ["RV12", "진공오븐", "오일 로터리 펌프", "Ultragrade 19", "전압 표시창", "납품사례"],
+  "scenes": [
+    {"image": "사진1.png", "caption": ["진공오븐용 RV12를", "택배로 보내 드렸습니다"], "highlight": ["RV12"], "duration": 4.5},
+    {"image": "사진2.png", "caption": ["켜기 전에 뒷면", "전압 표시창부터 확인"], "highlight": ["전압 표시창"], "duration": 4.5}
+  ]
+}
