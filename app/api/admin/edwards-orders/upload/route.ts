@@ -80,8 +80,9 @@ export async function POST(req: NextRequest) {
     supplier: findColumn(headerRow, ["발주업체", "Supplier"]),
   };
 
+  // 발주업체 컬럼은 없어도 진행 가능. PO Number도 본사 파일에서 빠지는 주가 있어(2026-10-26분) 없으면 아래에서 보충
   const missing = Object.entries(idx)
-    .filter(([key, v]) => v === -1 && key !== "supplier") // 발주업체 컬럼은 없어도 진행 가능
+    .filter(([key, v]) => v === -1 && key !== "supplier" && key !== "poNumber")
     .map(([key]) => key);
   if (missing.length > 0) {
     return NextResponse.json(
@@ -113,7 +114,7 @@ export async function POST(req: NextRequest) {
     if (!mad) madMissing++;
 
     parsedRows.push({
-      poNumber: String(row[idx.poNumber] ?? "").trim(),
+      poNumber: idx.poNumber !== -1 ? String(row[idx.poNumber] ?? "").trim() : "",
       documentNo,
       itemLine,
       materialCode: String(row[idx.materialCode] ?? "").trim(),
@@ -127,6 +128,19 @@ export async function POST(req: NextRequest) {
   if (parsedRows.length === 0)
     return NextResponse.json({ error: "유효한 품목이 없습니다" }, { status: 400 });
 
+  const existing = await prisma.edwardsOpenOrder.findMany();
+
+  // PO 번호가 빈 행: 같은 본사 오더(documentNo)로 이미 저장된 PO 번호를 이어 쓰고,
+  // 처음 보는 오더면 "SAP-오더번호"로 묶음 (빈 값으로 덮어써 기존 PO 묶음이 깨지지 않도록)
+  const docToPo = new Map<string, string>();
+  for (const e of existing) if (e.poNumber && !docToPo.has(e.documentNo)) docToPo.set(e.documentNo, e.poNumber);
+  let poFilled = 0;
+  for (const row of parsedRows) {
+    if (row.poNumber) continue;
+    row.poNumber = docToPo.get(row.documentNo) ?? `SAP-${row.documentNo}`;
+    poFilled++;
+  }
+
   // SMT-*-P-* 형식 PO는 기존 발주서 시스템(ManualPurchaseOrder)과 자동 연결
   const smtPoNumbers = [...new Set(parsedRows.map((r) => r.poNumber).filter((p) => PURCHASE_ORDER_NO_PATTERN.test(p)))];
   const linkedOrders = smtPoNumbers.length
@@ -137,7 +151,6 @@ export async function POST(req: NextRequest) {
     : [];
   const poToManualOrderId = new Map(linkedOrders.map((o) => [o.orderNo, o.id]));
 
-  const existing = await prisma.edwardsOpenOrder.findMany();
   // documentNo+itemLine 키별 최신 상태를 계속 갱신하며 진행 — 같은 파일 안에 같은 키가
   // 두 번 나와도(분할선적 등) 두 번째 행이 첫 번째 행의 결과를 보고 판단하도록
   const existingMap = new Map(existing.map((e) => [`${e.documentNo}|${e.itemLine}`, e]));
@@ -239,5 +252,7 @@ export async function POST(req: NextRequest) {
     skippedRows: skipped,
     madMissing,
     skippedDelivered,
+    poColumnMissing: idx.poNumber === -1,
+    poFilled,
   });
 }
