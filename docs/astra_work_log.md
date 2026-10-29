@@ -1,5 +1,12 @@
 # Astra 작업 기록
 
+## 2026-10-29 — (클로드) 견적 검색 개선 3단계: 검색어로 시작하는 제품 위로(4f30410, 배포 성공)
+
+- 원인 추가 발견: PumpSelector 정렬이 isPumpPart(첫 단어에 숫자 없으면 부품)를 먼저 적용해 "TIC …" 본체가 맨 아래로.
+- 수정: searchRank 0 파트번호 → 1 숫자 든 모델명 시작(기존) → 2 숫자 없는 첫 단어가 검색어로 시작 + 부품 단어 없음(TIC 등) → 3 품명 중간 일치(터보 세트) → 4 부품·키트. 여러 단어는 첫 단어로 판단. 부품 단어는 `lib/lead-time.ts` hasPartWord(isPumpPart와 같은 목록, 새로 분리).
+- 검증(라이브 데이터로 옛/새 정렬 비교): TIC → TIC 컨트롤러 10개·터보 세트 8개·Front Panel(SPARE) 끝. TIC 3 → TIC 3 Head 2개가 위, 터보 세트 4개 아래. 순서 변화 없음: RV12·rv·nXDS10i·EMF20·E2M28·T-Station·A655·gauge·nES·iXH·GXS·rotor·EH. nEXT는 띄어 쓴 본체(nEXT 240D…)·NEXT P2 CONTROLLER ASSY가 NEXPT 세트보다 위로. 1차 안(kit/spare만 뒤로)은 "rv"에 Drain Plug·Oil Return Kit가 올라와 부품 단어 전체로 바꿈. tsc 통과, GitHub/Vercel 상태 success.
+- 참고: 같은 시간 블로그 자동 발행 세션이 커밋(c7c3d8f·6be5f92)·작업 기록 수정 중 — 그쪽 변경은 건드리지 않음.
+
 ## 2026-10-29 — (클로드) 견적 검색 개선 2단계: 줄임말 짝 4개(bbd9c14, 라이브 확인)
 
 - `app/api/products/route.ts` ALIAS_GROUPS: controller↔cont·contr·controler, instrument↔inst·instrmnt, head↔hd, assembly↔assy. DB 1037개 품명에서 긴 이름·줄임말이 둘 다 있는 것만. 줄임말은 단어 전체가 같을 때만 맞음(cont≠Contact). 한 단어 검색도 줄임말 짝 적용.
