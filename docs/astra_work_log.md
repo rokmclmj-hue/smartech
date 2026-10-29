@@ -1,5 +1,12 @@
 # Astra 작업 기록
 
+## 2026-10-30 — (클로드) 로컬 코드리뷰 bfc1d95..f410ea5(27커밋) — 지적 0건, reviewed=f410ea5
+
+- 범위: origin/reviewed(bfc1d95)..f410ea5 27커밋 전부. 코드 6파일: app/api/chat/route.ts(현장 Q&A [V]·칸 이름 T/U), app/api/products/route.ts(승인 대기 공개가·여러 단어·줄임말), components/QuotePanel.tsx·PumpSelector.tsx·FloatingChat.tsx, lib/lead-time.ts. 나머지는 기록·블로그 산출물.
+- 확인: 상담 프롬프트 칸 참조([N]·[O]·[U]·[R]·[M]·[J]) 모두 실제 칸과 일치. 승인 대기 주문 요청은 guest-request가 PUBLIC 배율로 서버 재계산·원가 미포함. 여러 단어·줄임말 검색은 기존 한 덩어리 결과에 더하기만 함.
+- 고치지 않은 참고 3건: ① 여러 단어 검색마다 제품 전체(1037개) 조회 — 5,000개 넘으면 재검토 ② PumpSelector 카테고리 선택 후 안쪽 검색(productItems)은 예전 한 덩어리 방식 ③ priceStatus "pending" 화면 분기(ProductsPageClient·ProductPanel)는 이제 안 쓰임.
+- 블로그 세션과 동시 작업 → 리뷰는 읽기만, reviewed 이름표만 이동(master·작업 파일 미변경). 블로그 세션이 남긴 10/29 기록(미커밋)도 이번에 함께 커밋.
+
 ## 2026-10-30 — (클로드) AI 상담 PC 카드 5초 → 3초(02300eb, 라이브 확인) — 보호 파일 대표님 승인
 
 - 대표님 "상담창이 안 펼쳐진다" → 코드·라이브 정상. 원인: 닫거나 버튼을 누르면 그 브라우저에서 7일 숨김(localStorage smtChatTeaserHiddenUntil) + PC(1024px 이상)만. 대표님 시크릿 창에서 정상 표시 확인.
@@ -18,6 +25,13 @@
 - 수정: searchRank 0 파트번호 → 1 숫자 든 모델명 시작(기존) → 2 숫자 없는 첫 단어가 검색어로 시작 + 부품 단어 없음(TIC 등) → 3 품명 중간 일치(터보 세트) → 4 부품·키트. 여러 단어는 첫 단어로 판단. 부품 단어는 `lib/lead-time.ts` hasPartWord(isPumpPart와 같은 목록, 새로 분리).
 - 검증(라이브 데이터로 옛/새 정렬 비교): TIC → TIC 컨트롤러 10개·터보 세트 8개·Front Panel(SPARE) 끝. TIC 3 → TIC 3 Head 2개가 위, 터보 세트 4개 아래. 순서 변화 없음: RV12·rv·nXDS10i·EMF20·E2M28·T-Station·A655·gauge·nES·iXH·GXS·rotor·EH. nEXT는 띄어 쓴 본체(nEXT 240D…)·NEXT P2 CONTROLLER ASSY가 NEXPT 세트보다 위로. 1차 안(kit/spare만 뒤로)은 "rv"에 Drain Plug·Oil Return Kit가 올라와 부품 단어 전체로 바꿈. tsc 통과, GitHub/Vercel 상태 success.
 - 참고: 같은 시간 블로그 자동 발행 세션이 커밋(c7c3d8f·6be5f92)·작업 기록 수정 중 — 그쪽 변경은 건드리지 않음.
+
+## 2026-10-29 — (클로드) 블로그 1029-태양광-오일로터리 자동 발행 확인(id=121)
+
+- 대표님 "홈페이지 블로그 글 업로드하자" → 확인해 보니 10/22 예약 승인분이 09:00 자동 발행 완료. 라이브 /blog/121 200·제목·사진 확인, 타사 이름·"확인하지 못" 0건.
+- 숏츠 PSxEvJbpeK0 10/29 12:00 공개 예약·CC 성공, X 대기글 PENDING. lib/blog-shorts.json·큐·로그 커밋·push(c7c3d8f).
+- 오늘 네이버 수리 글 없음(다음 10/30 금 `1030-W2V40-오일경화-수리` id 116). W44 큐 끝 — 다음은 W45(11/2·11/5) 후보 5개 제시부터.
+- 작업 폴더에 이전 작업의 미커밋 변경(components/PumpSelector.tsx·lib/lead-time.ts) 있음 — 손대지 않음.
 
 ## 2026-10-29 — (클로드) 견적 검색 개선 2단계: 줄임말 짝 4개(bbd9c14, 라이브 확인)
 
