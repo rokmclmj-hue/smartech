@@ -9,7 +9,7 @@ import ProductPanel from "@/components/ProductPanel";
 import type { PanelItem } from "@/components/ProductPanel";
 import { CATALOG_MAP } from "@/lib/catalogs";
 import { trackEvent } from "@/lib/analytics";
-import { leadTimeLabel, isPumpPart } from "@/lib/lead-time";
+import { leadTimeLabel, isPumpPart, hasPartWord } from "@/lib/lead-time";
 
 type SeriesKey = keyof typeof productData;
 type Tab = "search" | "scan" | "selection";
@@ -295,21 +295,27 @@ const TYPING_EXAMPLES = ["RV12", "nXDS10i", "EMF20", "E2M28", "A65401903"];
 // 본체/부품 구분은 통상 납기와 같은 기준(lib/lead-time.ts isPumpPart)을 쓴다.
 const normalizeQuery = (s: string) => s.replace(/[\s\-/]/g, "").toLowerCase();
 
-function searchRank(item: { partNo: string; desc: string }, q: string): number {
+// 품명이 검색어로 시작하는 제품을 위로 — "TIC"을 치면 TIC 컨트롤러가 터보 세트보다 먼저(2026-10-29 대표님 요청).
+// 여러 단어 검색("TIC 3H")은 첫 단어로 판단한다. 숫자 든 모델(RV12 등) 순서는 그대로.
+function searchRank(item: { partNo: string; desc: string }, q: string, qFirst: string): number {
   if (q && item.partNo.toLowerCase().startsWith(q)) return 0;             // 파트번호로 찾은 경우
-  if (isPumpPart(item.desc)) return 3;                                    // 부품·키트
   const firstWord = item.desc.trim().split(/\s+/)[0] ?? "";
-  if (q && /\d/.test(firstWord) && normalizeQuery(firstWord).startsWith(q)) return 1; // 모델 본체(RV3·GXS160/1750F처럼 숫자 포함)
-  return 2;
+  const startsWithQuery = !!qFirst && normalizeQuery(firstWord).startsWith(qFirst);
+  const hasDigit = /\d/.test(firstWord);
+  if (startsWithQuery && !hasDigit && !hasPartWord(item.desc)) return 2;  // TIC 등 숫자 없는 이름(부품 단어가 있으면 제외)
+  if (isPumpPart(item.desc)) return 4;                                    // 부품·키트
+  if (startsWithQuery) return 1;                                          // 모델 본체(RV3·GXS160/1750F처럼 숫자 포함)
+  return 3;                                                               // 품명 중간에 검색어가 있는 것(터보 세트 속 TIC 등)
 }
 
 // 같은 순위 안에서는 모델명(첫 단어) 순 → 같은 모델이면 재고 있는 것 먼저 → 품명 순
 function sortSearchResults<T extends { partNo: string; desc: string; stock: number }>(items: T[], query: string): T[] {
   const q = normalizeQuery(query);
+  const qFirst = normalizeQuery(query.trim().split(/\s+/)[0] ?? "");
   const cmp = (x: string, y: string) => x.localeCompare(y, "en", { numeric: true, sensitivity: "base" });
   const model = (d: string) => d.trim().split(/\s+/)[0] ?? "";
   return [...items].sort((a, b) =>
-    searchRank(a, q) - searchRank(b, q) ||
+    searchRank(a, q, qFirst) - searchRank(b, q, qFirst) ||
     cmp(model(a.desc), model(b.desc)) ||
     b.stock - a.stock ||
     cmp(a.desc, b.desc)

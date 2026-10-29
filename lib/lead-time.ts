@@ -69,10 +69,14 @@ const PART_WORDS = /\b(rotor|stator|bearing|coupling|silencer|valve|vlv|filter|g
 const BODY_PREFIX_NO_DIGIT = /^(t-station|eos)\b/i;
 
 // 검색 결과 정렬(PumpSelector)도 같은 기준을 쓴다 — 본체/부품 판단이 두 곳에서 어긋나지 않게
-export function isPumpPart(desc: string): boolean {
-  // "nEXT300D … with Air Cooler, Vent Valve, TIC Controller" 같은 구성품 목록은 본체 이름 부분만 본다
+// 키트·부품 단어가 들어 있는지만 본다 — "nEXT300D … with Air Cooler, Vent Valve, TIC Controller" 같은 구성품 목록은 본체 이름 부분만
+export function hasPartWord(desc: string): boolean {
   const head = desc.split(/\s+with\s+|;/i)[0];
-  if (KIT_WORDS.test(head) || PART_WORDS.test(head)) return true;
+  return KIT_WORDS.test(head) || PART_WORDS.test(head);
+}
+
+export function isPumpPart(desc: string): boolean {
+  if (hasPartWord(desc)) return true;
   const firstWord = desc.trim().split(/\s+/)[0] ?? "";
   return !/\d/.test(firstWord) && !BODY_PREFIX_NO_DIGIT.test(desc.trim());
 }
