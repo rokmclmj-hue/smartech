@@ -176,8 +176,9 @@ export default function EdwardsOrdersPage() {
       if (!res.ok) { toastError(data.error ?? "업로드 실패"); return; }
       const skippedNote = data.skippedRows > 0 ? `, 인식 실패 ${data.skippedRows}건(확인 필요)` : "";
       const madMissingNote = data.madMissing > 0 ? `, MAD 미정 ${data.madMissing}건` : "";
+      const poNote = data.poColumnMissing ? ` (PO Number 칸 없음 — 기존 PO 번호 유지, 새 오더는 SAP 번호로 표시)` : "";
       success(
-        `업로드 완료 — 신규 ${data.created}건, MAD변경 ${data.madChanged}건, 입고완료 처리 ${data.disappeared}건${madMissingNote}${skippedNote}`
+        `업로드 완료 — 신규 ${data.created}건, MAD변경 ${data.madChanged}건, 입고완료 처리 ${data.disappeared}건${madMissingNote}${skippedNote}${poNote}`
       );
       load(tab);
       loadSupplierSuggestions();
